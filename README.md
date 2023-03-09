@@ -2,9 +2,9 @@
 1. 项目介绍：通过本项目构建的两个组件——hpcopr和now-crypto，实现云超算平台的核心功能。其中 hpcopr 为核心程序，驱动 Terraform 管理云资源，相关的tf模板文件库尚未迁移到本仓库，将于近期完成迁移。now-crypto 为辅助程序，主要作用是文件加密和解密，以确保敏感信息不以明文形式存放。
 2. 构建环境需求：
 
-- Windows：安装 mingw
-- GNU/Linux：安装 gcc
-- macOS：安装 clang
+- Windows：安装最新版 mingw
+- GNU/Linux：安装 gcc，版本一般为8以上
+- macOS：安装 clang，版本一般为13及以上
 
 3. 如何构建：
     从本仓库下载源代码至本地目录，切换至本地目录之后
