@@ -1,5 +1,5 @@
 # hpc-now-service
-1. 项目介绍：通过本项目构建的两个组件——hpcopr和now-crypto，可以实现云超算平台的核心功能。
+1. 项目介绍：通过本项目构建的两个组件——hpcopr和now-crypto，实现云超算平台的核心功能。
 2. 构建环境需求：
 
 - Windows：安装 mingw
@@ -24,4 +24,4 @@
 5. bug提交与技术沟通：
     欢迎随时联系 info@hpc-now.com
     或者加入我们的技术交流群：
-![输入图片说明](WeChat%20Image_20230309232515.jpg)
+![输入图片说明](Group_QR_Code.jpg)
