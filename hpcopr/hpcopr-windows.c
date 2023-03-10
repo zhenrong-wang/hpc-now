@@ -5676,6 +5676,56 @@ int uninstall_services(void){
     return 0;
 }
 
+int get_usage(char* usage_logfile){
+    char cmdline[CMDLINE_LENGTH]="";
+    if(file_exist_or_not(usage_logfile)!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Failed to get the usage record. Either you haven't initialize your first |\n");
+        printf("|          cluster, or there are internal errors. Please contact us for technical   |\n");
+        printf("|          supports via: info@hpc-now.com or other channels. Exit now.              |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return 1;
+    }
+    system("del /f /s /q c:\\hpc-now\\cluster_usage_temp.log > nul 2>&1");
+    sprintf(cmdline,"copy %s c:\\hpc-now\\cluster_usage_temp.log > nul 2>&1",usage_logfile);
+    system(cmdline);
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -DONE- ] The latest usage summary has been printed to the file below:             |\n");
+    printf("|          c:\\hpc-now\\cluster_usage_temp.log                                        |\n");
+    printf("|          You can use either MS Office Excel (*strongly recommended*) or other     |\n");
+    printf("|          plain text editors (for example, notepad) to view the usage details.     |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -DONE- ] Thanks for using HPC-NOW Services!                                       |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    print_tail();
+    return 0;
+}
+
+int get_syslog(char* operation_logfile){
+    char cmdline[CMDLINE_LENGTH]="";
+    if(file_exist_or_not(operation_logfile)!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Failed to get the operation log. There might be internal errors. Please  |\n");
+        printf("|          contact us for technical supports via: info@hpc-now.com                  |\n");
+        printf("|          or other channels. Exit now.                                             |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return 1;
+    }
+    system("del /f /s /q c:\\hpc-now\\cluster_syslog_temp.log > nul 2>&1");
+    sprintf(cmdline,"copy %s c:\\hpc-now\\cluster_syslog_temp.log > nul 2>&1",operation_logfile);
+    system(cmdline);
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -DONE- ] The latet operation log has been printed to the file below:              |\n");
+    printf("|          c:\\hpc-now\\cluster_syslog_temp.log                                       |\n");
+    printf("|          You can use either MS Office Excel (*strongly recommended*) or other     |\n");
+    printf("|          plain text editors (for example, notepad) to view the detailed log.      |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -DONE- ] Thanks for using HPC-NOW Services!                                       |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    print_tail();
+    return 0;
+}
+
 int get_vault_info(char* workdir, char* crypto_keyfile){
     char md5sum[64]="";
     char cmdline[CMDLINE_LENGTH]="";
