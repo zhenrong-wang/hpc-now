@@ -23,7 +23,6 @@ int file_decryption(FILE* orig_file, FILE* target_file, int encrypt_key){
   int real_key=((encrypt_key%1000*17+1301)%100+19)*7%100;
   int origc=' ';
   int newc=' ';
-  int i=0;
   if(orig_file==NULL || target_file==NULL ){
     return 1;
   }
