@@ -5,8 +5,8 @@
 
 int file_encryption(FILE* orig_file, FILE* target_file, int encrypt_key){
   int real_key=((encrypt_key%1000*17+1301)%100+19)*7%100;
-  int origc='\0';
-  int newc='\0';
+  int origc=' ';
+  int newc=' ';
   if(orig_file==NULL || target_file==NULL ){
     return 1;
   }
@@ -21,8 +21,8 @@ int file_encryption(FILE* orig_file, FILE* target_file, int encrypt_key){
 
 int file_decryption(FILE* orig_file, FILE* target_file, int encrypt_key){
   int real_key=((encrypt_key%1000*17+1301)%100+19)*7%100;
-  int origc='\0';
-  int newc='\0';
+  int origc=' ';
+  int newc=' ';
   int i=0;
   if(orig_file==NULL || target_file==NULL ){
     return 1;
