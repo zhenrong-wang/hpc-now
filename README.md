@@ -28,6 +28,6 @@
 您可以用自己构建的 now-crypto 替换掉安装时下载的文件，请注意文件名保持一致即可。此外，在 GNU/Linux 和 macOS 下，注意要赋予可执行权限，示例命令： 
 - sudo chmod +x now-crypto
 ### 5. bug提交与技术沟通：
-    欢迎随时联系 info@hpc-now.com
-    或者加入我们的技术交流群：
+欢迎随时联系 info@hpc-now.com
+或者加入我们的技术交流群：
 ![输入图片说明](Group_QR_Code.jpg)
