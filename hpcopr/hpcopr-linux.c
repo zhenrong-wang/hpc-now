@@ -3769,7 +3769,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.   |\n");
-        printf("|           Nothing changed.                                                        |\n");
+        printf("|          Nothing changed.                                                         |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 1;
     }
@@ -5180,7 +5180,7 @@ int rotate_new_keypair(char* workdir, char* crypto_keyfile){
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.   |\n");
-        printf("|           Nothing changed.                                                        |\n");
+        printf("|          Nothing changed.                                                         |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 1;
     }
@@ -5625,7 +5625,7 @@ int uninstall_services(void){
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.   |\n");
-        printf("|           Nothing changed.                                                        |\n");
+        printf("|          Nothing changed.                                                         |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 1;
     }
