@@ -32,7 +32,7 @@
 
 您可以用自己构建的 now-crypto 替换掉安装时下载的文件，请注意文件名保持一致即可。此外，在 GNU/Linux 和 macOS 下，注意要赋予可执行权限，示例命令： 
 - sudo chmod +x now-crypto
-### 5. 关键目录
+### 5. 关键目录：
 hpcopr 安装部署之后，将会对您的操作系统进行如下修改。具体的修改操作请阅读源代码的 check_and_install_prerequisitions 函数内容。
 
 - 创建一个名为 hpc-now 的操作系统用户，对于 Microsoft Windows，该用户将生成初始密码 nowadmin2023~ ，并且在首次以 hpc-now 用户登录时强制要求修改；对于其他操作系统，无初始密码，您需要按照说明为该用户设置密码
