@@ -26,7 +26,7 @@ Bug report: info@hpc-now.com
 #define URL_AWS_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-aws/"
 #define URL_QCLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-qcloud/"
 #define CRYPTO_KEY_FILE "/usr/.hpc-now/.now_crypto_seed.lock" // This is a global file!
-#define USAGE_LOG_FILE "/usr/.hpc-now/.now-cluster-usage.log" //This is a global file!
+#define USAGE_LOG_FILE "/usr/.hpc-now/.now-cluster-usage.log" // This is a global file!
 #define OPERATION_LOG_FILE "/usr/.hpc-now/.now-cluster-operation.log"
 #define NOW_LIC_DIR "/home/hpc-now/.now-lic"
 #define SSHKEY_DIR "/home/hpc-now/.now-ssh"
@@ -42,7 +42,7 @@ Bug report: info@hpc-now.com
 #define ALI_TF_PLUGIN_VERSION "1.199.0"
 #define QCLOUD_TF_PLUGIN_VERSION "1.79.12"
 #define AWS_TF_PLUGIN_VERSION "4.56.0"
-#define MAXIMUM_ADD_NODE_NUMBER 16
+#define MAXIMUM_ADD_NODE_NUMBER 16 // You can modify this number to adding more than 16 nodes once
 
 
 void print_empty_cluster_info(void){
