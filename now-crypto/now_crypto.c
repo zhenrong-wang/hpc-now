@@ -7,19 +7,12 @@ int file_encryption(FILE* orig_file, FILE* target_file, int encrypt_key){
   int real_key=((encrypt_key%1000*17+1301)%100+19)*7%100;
   int origc='\0';
   int newc='\0';
-  int i=0;
   if(orig_file==NULL || target_file==NULL ){
     return 1;
   }
   origc=fgetc(orig_file);
   while(origc!=EOF){
-    if(i%2!=0){
-      newc=origc+real_key;
-    }
-    else{
-      newc=origc-real_key;
-    }
-    i++;
+    newc=origc+real_key;
     fputc(newc,target_file);
     origc=fgetc(orig_file);
   }
@@ -36,13 +29,7 @@ int file_decryption(FILE* orig_file, FILE* target_file, int encrypt_key){
   }
   origc=fgetc(orig_file);
   while(origc!=EOF){
-    if(i%2!=0){
-      newc=origc-real_key;
-    }
-    else{
-      newc=origc+real_key;
-    }
-    i++;
+    newc=origc-real_key;
     fputc(newc,target_file);
     origc=fgetc(orig_file);
   }
