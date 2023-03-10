@@ -4763,6 +4763,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     delete_decrypted_files(workdir,crypto_keyfile);
+    update_cluster_summary(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","start");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -DONE- ] Congratulations! The master node have been reconfigured.                 |\n");
