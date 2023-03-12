@@ -956,13 +956,13 @@ int get_cpu_num(const char* vm_model){
 int generate_random_passwd(char* password){
     int i,rand_num;
     struct timeval current_time;
-    char ch_table[73]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@^&(){}[]=";
+    char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
     unsigned int seed_num;
     for(i=0;i<PASSWORD_LENGTH;i++){
         gettimeofday(&current_time,NULL);
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);
-        rand_num=rand()%73;
+        rand_num=rand()%72;
         *(password+i)=*(ch_table+rand_num);
         usleep(5000);
     }
