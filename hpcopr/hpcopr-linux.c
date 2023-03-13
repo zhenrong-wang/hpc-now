@@ -159,7 +159,7 @@ void print_header(void){
         *(string_temp+i)=' ';
     }
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d%s|\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,string_temp);
-    printf("|    Version: 0.1.23   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
+    printf("|    Version: 0.1.29   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     
 }
@@ -1801,8 +1801,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     sprintf(filename_temp,"%s/db_passwords.txt",vaultdir);
     if(file_exist_or_not(filename_temp)!=0){
+        reset_string(database_root_passwd);
         generate_random_db_passwd(database_root_passwd);
         usleep(10000);
+        reset_string(database_acct_passwd);
         generate_random_db_passwd(database_acct_passwd);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
@@ -2482,8 +2484,10 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     
     sprintf(filename_temp,"%s/db_passwords.txt",vaultdir);
     if(file_exist_or_not(filename_temp)!=0){
+        reset_string(database_root_passwd);
         generate_random_db_passwd(database_root_passwd);
         usleep(10000);
+        reset_string(database_acct_passwd);
         generate_random_db_passwd(database_acct_passwd);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
@@ -3134,8 +3138,10 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     
     sprintf(filename_temp,"%s/db_passwords.txt",vaultdir);
     if(file_exist_or_not(filename_temp)!=0){
+        reset_string(database_root_passwd);
         generate_random_db_passwd(database_root_passwd);
         usleep(10000);
+        reset_string(database_acct_passwd);
         generate_random_db_passwd(database_acct_passwd);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
