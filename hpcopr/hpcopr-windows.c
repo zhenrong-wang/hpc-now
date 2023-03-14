@@ -5389,7 +5389,6 @@ int check_internet(void){
     return 0;
 }
 
-
 int check_and_install_prerequisitions(char* current_command){
     char cmdline[CMDLINE_LENGTH]="";
     char appdata_dir[128]="";

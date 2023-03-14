@@ -986,7 +986,6 @@ int generate_random_db_passwd(char* password){
     return 0;
 }
 
-
 int generate_random_string(char* random_string){
     int i,rand_num;
     struct timeval current_time;
