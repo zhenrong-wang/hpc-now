@@ -1023,13 +1023,23 @@ int generate_random_string(char* random_string){
 }
 
 int check_pslock(char* workdir){
-    system("tasklist | findstr hpcopr > c:\\programdata\\pscheck.txt 2>&1");
+    char stackdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);
+    if(file_exist_or_not(filename_temp)==0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+/*    system("tasklist | findstr hpcopr > c:\\programdata\\pscheck.txt 2>&1");
     if(find_multi_keys("c:\\programdata\\pscheck.txt","hpcopr","","","","")>1){
         system("del /f /q /s c:\\programdata\\pscheck.txt > nul 2>&1");
         return 1;
     }
     system("del /f /q /s c:\\programdata\\pscheck.txt > nul 2>&1");
-    return 0;
+    return 0;*/
 }
 
 int get_compute_node_num(char* currentstate_file, char* option){

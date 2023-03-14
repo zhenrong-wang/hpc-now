@@ -1010,7 +1010,17 @@ int generate_random_string(char* random_string){
 }
 
 int check_pslock(char* workdir){
-    system("ps -aux | grep -w hpcopr | wc -l > /tmp/.check_pslock.txt");
+    char stackdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
+    if(file_exist_or_not(filename_temp)==0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+/*    system("ps -aux | grep -w hpcopr | wc -l > /tmp/.check_pslock.txt");
     int current_threads=0;
     FILE* file_p=fopen("/tmp/.check_pslock.txt","r");
     if(file_p==0){
@@ -1022,7 +1032,7 @@ int check_pslock(char* workdir){
     if(current_threads>3){
         return 1;
     }
-    return 0;
+    return 0;*/
 }
 
 int get_compute_node_num(char* currentstate_file, char* option){
