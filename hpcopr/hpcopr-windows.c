@@ -31,6 +31,7 @@ Bug report: info@hpc-now.com
 #define NOW_CRYPTO_EXEC "c:\\programdata\\hpc-now\\bin\\now-crypto.exe"
 #define TERRAFORM_EXEC "c:\\programdata\\hpc-now\\bin\\terraform.exe"
 #define PASSWORD_LENGTH 19
+#define PASSWORD_STRING_LENGTH 20
 #define RANDSTR_LENGTH_PLUS 11
 #define AWS_SLEEP_TIME_GLOBAL 180
 #define AWS_SLEEP_TIME_CN 180
@@ -1580,8 +1581,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     int cpu_core_num=0;
     int threads;
     FILE* file_p=NULL;
-    char database_root_passwd[PASSWORD_LENGTH]="";
-    char database_acct_passwd[PASSWORD_LENGTH]="";
+    char database_root_passwd[PASSWORD_STRING_LENGTH]="";
+    char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char md5sum[33]="";
 
     char bucket_id[12]="";
@@ -2295,8 +2296,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char private_key_file[FILENAME_LENGTH]="";
 
     FILE* file_p=NULL;
-    char database_root_passwd[PASSWORD_LENGTH]="";
-    char database_acct_passwd[PASSWORD_LENGTH]="";
+    char database_root_passwd[PASSWORD_STRING_LENGTH]="";
+    char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char md5sum[33]="";
 
     char bucket_id[12]="";
@@ -2953,8 +2954,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char private_key_file[FILENAME_LENGTH]="";
 
     FILE* file_p=NULL;
-    char database_root_passwd[PASSWORD_LENGTH]="";
-    char database_acct_passwd[PASSWORD_LENGTH]="";
+    char database_root_passwd[PASSWORD_STRING_LENGTH]="";
+    char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char md5sum[33]="";
 
     char bucket_id[12]="";
@@ -5394,7 +5395,8 @@ int check_and_install_prerequisitions(char* current_command){
     char appdata_dir[128]="";
     char filename_temp[FILENAME_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
-    char random_string[PASSWORD_LENGTH]="";
+    char random_string[PASSWORD_STRING_LENGTH]="";
+    reset_string(random_string);
     int flag=0;
     FILE* file_p=NULL;
     char* ali_plugin_version=ALI_TF_PLUGIN_VERSION;
