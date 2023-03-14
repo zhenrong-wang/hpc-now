@@ -26,7 +26,7 @@ Bug report: info@hpc-now.com
 #define URL_QCLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-qcloud/"
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
 #define USAGE_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-usage.log" //This is a global file!
-#define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-opration.log"
+#define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
 #define SSHKEY_DIR "C:\\hpc-now\\.ssh"
 #define NOW_CRYPTO_EXEC "c:\\programdata\\hpc-now\\bin\\now-crypto.exe"
 #define TERRAFORM_EXEC "c:\\programdata\\hpc-now\\bin\\terraform.exe"
