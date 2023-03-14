@@ -6033,12 +6033,6 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
 
-    if(strcmp(argv[1],"destroy")==0&&cluster_empty_or_not(pwd)==1){
-        run_flag=cluster_destroy(pwd,crypto_keyfile);
-        write_log(pwd,operation_log,argv[1],run_flag);
-        return run_flag;
-    }
-
     if(strcmp(argv[1],"vault")==0){
         run_flag=get_vault_info(pwd,crypto_keyfile);
         write_log(pwd,operation_log,argv[1],run_flag);
@@ -6077,6 +6071,12 @@ int main(int argc, char* argv[]){
         return 13;
     }
 
+    if(strcmp(argv[1],"destroy")==0&&cluster_empty_or_not(pwd)==1){
+        run_flag=cluster_destroy(pwd,crypto_keyfile);
+        write_log(pwd,operation_log,argv[1],run_flag);
+        return run_flag;
+    }
+    
     if(strcmp(argv[1],"delc")==0){
         if(argc==2){
             printf("+-----------------------------------------------------------------------------------+\n");

@@ -6092,13 +6092,6 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
 
-    if(strcmp(argv[1],"destroy")==0&&cluster_empty_or_not(pwd)==1){
-        run_flag=cluster_destroy(pwd,crypto_keyfile);
-        system_cleanup();
-        write_log(pwd,operation_log,argv[1],run_flag);
-        return run_flag;
-    }
-
     if(strcmp(argv[1],"vault")==0){
         run_flag=get_vault_info(pwd,crypto_keyfile);
         system_cleanup();
@@ -6133,13 +6126,20 @@ int main(int argc, char* argv[]){
     if(cluster_asleep_or_not(pwd)==0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] The current cluster is in the state of hibernation. No modification is   |\n");
-        printf("|          permitted (*EXCEPT* the 'destroy' operation).                            |\n");
+        printf("|          permitted in order to avoid unexpected results.                          |\n");
         printf("|          Please run 'wakeup' command first to modify the cluster. You             |\n");
         printf("|          can run 'wakeup minimal' option to turn the management nodes on, or      |\n");
         printf("|          run 'wakeup all' option to turn the whole cluster on. Exit now.          |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         write_log(pwd,operation_log,argv[1],13);
         return 13;
+    }
+
+    if(strcmp(argv[1],"destroy")==0&&cluster_empty_or_not(pwd)==1){
+        run_flag=cluster_destroy(pwd,crypto_keyfile);
+        system_cleanup();
+        write_log(pwd,operation_log,argv[1],run_flag);
+        return run_flag;
     }
 
     if(strcmp(argv[1],"delc")==0){
