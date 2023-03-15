@@ -17,17 +17,18 @@
 
 ### 3. 如何构建：
 从本仓库下载源代码至本地目录，切换至代码所在的本地目录之后
-- Microsoft Windows用户，请运行：gcc source_code_file.c -Wall
-- GNU/Linux用户，请运行：gcc source_code_file.c -Wall -lm
-- macOS用户，请运行：clang source_code_file.c -Wall
+- Microsoft Windows用户，请运行：gcc hpcopr-windows.c -Wall -o hpcopr.exe
+- GNU/Linux用户，请运行：gcc hpcopr-linux.c -Wall -lm -o hpcopr
+- macOS用户，请运行：clang hpcopr-darwin.c -Wall -o hpcopr
+此外，还需以相似的方式编译 now_crypto.c，并将生成的可执行文件命名为 now-crypto.exe
 
-分别从 hpcopr_OS.c 和 now_crypto.c 构建出两个可执行文件之后，请将基于 hpcopr_windows.c | hpcopr_darwin.c | hpcopr_linux.c 构建形成的可执行文件命名为 hpcopr；将 now_crypto.c 构建形成的可执行文件命名为 now-crypto
+分别从 hpcopr-*OS*.c 和 now_crypto.c 构建出两个可执行文件之后，请将基于 hpcopr-windows.c | hpcopr-darwin.c | hpcopr-linux.c 构建形成的可执行文件命名为 hpcopr；将 now_crypto.c 构建形成的可执行文件命名为 now-crypto.exe
 
 ### 4. 如何使用：
 请参阅部署手册：https://www.hpc-now.com/deploy 。请注意：如果您直接运行 hpcopr 本地安装，将会下载云上已经编译好的 now-crypto 至以下本地目录：
 
 - Windows： C:\programdata\hpc-now\bin\now-crypto.exe
-- GNU/Linux：/usr/.hpc-now/.bin/now-crypto
+- GNU/Linux：/usr/.hpc-now/.bin/now-crypto.exe
 - macOS：/Applications/.hpc-now/.bin/now-crypto.exe
 
 您可以用自己构建的 now-crypto 替换掉安装时下载的文件，请注意文件名保持一致即可。此外，在 GNU/Linux 和 macOS 下，注意要赋予可执行权限，示例命令： 
