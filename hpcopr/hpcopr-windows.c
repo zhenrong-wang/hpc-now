@@ -158,7 +158,7 @@ void print_header(void){
         *(string_temp+i)=' ';
     }
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d%s|\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,string_temp);
-    printf("|    Version: 0.1.37   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
+    printf("|    Version: 0.1.41   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     
 }
@@ -2120,7 +2120,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             if(i%20==0){
                 printf("%d >> ",AWS_SLEEP_TIME_GLOBAL-i);
             }
-            usleep(1000000);
+            sleep(1);
         }
         printf(" DONE \n");
     }
@@ -2129,7 +2129,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             if(i%20==0){
                 printf("%d >> ",AWS_SLEEP_TIME_CN-i);
             }
-            usleep(1000000);
+            sleep(1);
         }
         printf(" DONE \n");
     }
@@ -2802,7 +2802,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         if(i%2==0){
             printf("%d >> ",QCLOUD_SLEEP_TIME-i);
         }
-        usleep(1000000);
+        sleep(1);
     }
     printf("DONE \n");
     file_p=fopen(currentstate,"r");
@@ -3452,7 +3452,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         if(i%10==0){
             printf("%d >> ",ALI_SLEEP_TIME-i);
         }
-        usleep(1000000);
+        sleep(1);
     }
     printf("DONE \n");
     sprintf(filename_temp,"%s\\terraform.tfstate",stackdir);
@@ -4774,7 +4774,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
     graph(workdir,crypto_keyfile);
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
-        usleep(1000000);
+        sleep(1);
     }
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
@@ -4887,7 +4887,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     system(cmdline);
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<GENERAL_SLEEP_TIME;i++){
-            usleep(1000000);
+            sleep(1);
         }
         sprintf(cmdline,"cd %s && echo yes | %s apply >> %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
         system(cmdline);
@@ -5024,7 +5024,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     system(cmdline);
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
-            usleep(1000000);
+            sleep(1);
         }
         sprintf(cmdline,"cd %s && echo yes | %s apply >> %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
         system(cmdline);
