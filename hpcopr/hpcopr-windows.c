@@ -5462,20 +5462,20 @@ int check_and_install_prerequisitions(char* current_command){
         return 127;
     }
 
-    if(folder_exist_or_not("c:\\hpc-now")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] The key directory C:\\hpc-now\\ is missing. The services cannot start.     |\n");
-        printf("|          Please contact us via info@hpc-now.com for support. Exit now.            |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return -127;
-    }
-
     if(check_current_user()!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] You *MUST* create / switch to the user 'hpc-now' to operating a cluster. |\n");
         printf("|          Or you need to switch into a directory with permissions. Exit now.       |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 2;
+    }
+
+    if(folder_exist_or_not("c:\\hpc-now")!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] The key directory C:\\hpc-now\\ is missing. The services cannot start.     |\n");
+        printf("|          Please contact us via info@hpc-now.com for support. Exit now.            |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return -127;
     }
 
     if(folder_exist_or_not("c:\\programdata\\hpc-now")!=0){
