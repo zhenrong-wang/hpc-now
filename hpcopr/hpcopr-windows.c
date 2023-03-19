@@ -998,7 +998,6 @@ int generate_random_db_passwd(char* password){
     return 0;
 }
 
-
 int generate_random_string(char* random_string){
     int i,rand_num;
     struct timeval current_time;
@@ -1729,8 +1728,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(logfile,"%s\\now_cluster.log",logdir);
     global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
     global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
-    sprintf(cmdline,"cd %s && %s init >> %s\\tf_prep.log 2>%s && %s apply >> %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"cd %s && %s init >> %s\\tf_prep.log 2>%s && %s apply >> %s\\tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile,tf_exec,stackdir,logfile);
     system(cmdline);
+    return 0;
     reset_string(cmdline);
     sprintf(cmdline,"del /f /q %s\\region_valid.tf > nul 2>&1",stackdir);
     system(cmdline);
