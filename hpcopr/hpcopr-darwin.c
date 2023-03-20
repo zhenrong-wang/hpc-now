@@ -314,6 +314,8 @@ int wait_for_complete(char* stackdir, char* option){
     char cmdline[CMDLINE_LENGTH]="";
     int i=0;
     int total_minutes=0;
+    sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log >> /dev/null 2>&1");
+    system(cmdline);
     if(strcmp(option,"init")==0){
         sprintf(cmdline,"cat %s/tf_prep.log | grep \"successfully initialized!\" >> /dev/null 2>&1",stackdir);
         total_minutes=1;
