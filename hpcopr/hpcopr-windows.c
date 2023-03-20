@@ -2131,7 +2131,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             }
             sleep(1);
         }
-        printf("[ -DONE- ] Remote execution commands sent.\n);
+        printf("[ -DONE- ] Remote execution commands sent.\n");
     }
     file_p=fopen(currentstate,"r");
     fgetline(file_p,master_address);
