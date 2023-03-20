@@ -1,8 +1,8 @@
 /*
-This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
-The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
-It is distributed under the license: GNU Public License - v2.0
-Bug report: info@hpc-now.com
+* This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+* The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+* It is distributed under the license: GNU Public License - v2.0
+* Bug report: info@hpc-now.com
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,7 +44,7 @@ Bug report: info@hpc-now.com
 #define AWS_TF_PLUGIN_VERSION "4.56.0"
 #define MAXIMUM_ADD_NODE_NUMBER 16 // You can modify this number to adding more than 16 nodes once
 
-
+//If the cluster is empty, print the message below
 void print_empty_cluster_info(void){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] It seems the cluster is empty. You can either:                           |\n");
@@ -56,6 +56,7 @@ void print_empty_cluster_info(void){
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
+//Print out the help message 
 void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] Usage: hpcopr command_name param1 param2                                 |\n");
@@ -163,6 +164,7 @@ void print_header(void){
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
+// Print the tail message
 void print_tail(void){
     printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
     printf("|                                                 | P - erformance  + O - perating  |\n");
