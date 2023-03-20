@@ -314,7 +314,7 @@ int wait_for_complete(char* stackdir, char* option){
     char cmdline[CMDLINE_LENGTH]="";
     int i=0;
     int total_minutes=0;
-    sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log >> /dev/null 2>&1");
+    sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log >> /dev/null 2>&1",stackdir,stackdir);
     system(cmdline);
     if(strcmp(option,"init")==0){
         sprintf(cmdline,"cat %s/tf_prep.log | grep \"successfully initialized!\" >> /dev/null 2>&1",stackdir);
@@ -1743,7 +1743,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
     wait_for_complete(stackdir,"init");
-    sprintf(cmdline,"cd %s && %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"cd %s && %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile,tf_exec);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     reset_string(cmdline);
