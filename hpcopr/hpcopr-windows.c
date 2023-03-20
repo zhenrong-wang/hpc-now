@@ -42,6 +42,7 @@ Bug report: info@hpc-now.com
 #define QCLOUD_TF_PLUGIN_VERSION "1.79.10"
 #define AWS_TF_PLUGIN_VERSION "4.55.0"
 #define MAXIMUM_ADD_NODE_NUMBER 16 // You can modify this number to adding more than 16 nodes once
+#define MAXIMUM_WAIT_TIME 600
 
 
 void print_empty_cluster_info(void){
