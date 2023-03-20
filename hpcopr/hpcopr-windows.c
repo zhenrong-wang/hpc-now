@@ -2805,7 +2805,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sleep(1);
     }
     printf("[ -DONE- ] Remote execution commands sent.\n");
-    fflush(stdout);
 
     file_p=fopen(currentstate,"r");
     fgetline(file_p,master_address);

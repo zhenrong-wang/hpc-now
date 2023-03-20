@@ -160,7 +160,7 @@ void print_header(void){
         *(string_temp+i)=' ';
     }
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d%s|\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,string_temp);
-    printf("|    Version: 0.1.31   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
+    printf("|    Version: 0.1.41   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     
 }
@@ -2101,24 +2101,25 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     find_and_get(filename_temp,"aws_iam_access_key","","",15,"\"secret\":","","",'\"',4,bucket_sk);
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ STEP 2 ] Remote executing now ...                                                  \n");
-    printf("[ -WAIT- ] >> ");
     if(strcmp(region_flag,"global_regions")==0){
         for(i=0;i<AWS_SLEEP_TIME_GLOBAL;i++){
             if(i%20==0){
-                printf("%d >> ",AWS_SLEEP_TIME_GLOBAL-i);
+                printf("[ -WAIT-] %d seconds left ... \r",AWS_SLEEP_TIME_GLOBAL-i);
+                fflush(stdout);
             }
-            usleep(1000000);
+            sleep(1);
         }
-        printf(" DONE \n");
+        printf("[ -DONE- ] Remote execution commands sent.\n");
     }
     else{
         for(i=0;i<AWS_SLEEP_TIME_CN;i++){
             if(i%20==0){
-                printf("%d >> ",AWS_SLEEP_TIME_CN-i);
+                printf("[ -WAIT-] %d seconds left ... \r",AWS_SLEEP_TIME_CN-i);
+                fflush(stdout);
             }
-            usleep(1000000);
+            sleep(1);
         }
-        printf(" DONE \n");
+        printf("[ -DONE- ] Remote execution commands sent.\n");
     }
     file_p=fopen(currentstate,"r");
     fgetline(file_p,master_address);
@@ -2782,14 +2783,14 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     find_and_get(filename_temp,"secret_key","","",1,"secret_key","","",'\"',4,bucket_sk);
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ STEP 2 ] Remote executing now ...                                                  \n");
-    printf("[ -WAIT- ] >> ");
     for(i=0;i<QCLOUD_SLEEP_TIME;i++){
         if(i%2==0){
-            printf("%d >> ",QCLOUD_SLEEP_TIME-i);
+            printf("[ -WAIT- ] %d seconds left ... \r",QCLOUD_SLEEP_TIME-i);
+            fflush(stdout);
         }
-        usleep(1000000);
+        sleep(1);
     }
-    printf("DONE \n");
+    printf("[ -DONE- ] Remote execution commands sent.\n");
     file_p=fopen(currentstate,"r");
     fgetline(file_p,master_address);
     fclose(file_p);
@@ -3428,14 +3429,14 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     getstate(workdir,crypto_keyfile);
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ STEP 2 ] Remote executing now ...                                                  \n");
-    printf("[ -WAIT- ] >> ");
     for(i=0;i<ALI_SLEEP_TIME;i++){
         if(i%10==0){
-            printf("%d >> ",ALI_SLEEP_TIME-i);
+            printf("[ -WAIT- ] %d seconds left ... \r",ALI_SLEEP_TIME-i);
+            fflush(stdout);
         }
-        usleep(1000000);
+        sleep(1);
     }
-    printf("DONE \n");
+    printf("[ -DONE- ] Remote execution commands sent.\n");
     sprintf(filename_temp,"%s/terraform.tfstate",stackdir);
     find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);
     sprintf(filename_temp,"%s/bucket_secrets.txt",stackdir);
