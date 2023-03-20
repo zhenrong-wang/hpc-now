@@ -2067,7 +2067,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     system(cmdline);
     sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
-    sprintf(cmdline,"cat %s/tf_prep.log | grep complete! >> /dev/null 2>&1");
+    sprintf(cmdline,"cat %s/tf_prep.log | grep complete! >> /dev/null 2>&1",stackdir);
     i=0;
     while(system(cmdline)!=0&&i<600){
         printf("[ -WAIT- ] Cluster Operation in progress, this step may needs minutes. %d second(s) passed ... \r",i);
@@ -2088,7 +2088,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
-    sprintf(cmdline,"cat %s/tf_prep.log | grep complete! >> /dev/null 2>&1");
+    sprintf(cmdline,"cat %s/tf_prep.log | grep complete! >> /dev/null 2>&1",stackdir);
     i=0;
     while(system(cmdline)!=0&&i<600){
         printf("[ -WAIT- ] Cluster Operation in progress, this step may needs minutes. %d second(s) passed ... \r",i);
