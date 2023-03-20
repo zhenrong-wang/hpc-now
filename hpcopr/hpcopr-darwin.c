@@ -314,6 +314,7 @@ int wait_for_complete(char* stackdir, char* option){
     char cmdline[CMDLINE_LENGTH]="";
     int i=0;
     int total_minutes=0;
+    char* annimation="\|/-";
     sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log >> /dev/null 2>&1",stackdir,stackdir);
     system(cmdline);
     if(strcmp(option,"init")==0){
@@ -326,7 +327,7 @@ int wait_for_complete(char* stackdir, char* option){
     }
     printf("+-----------------------------------------------------------------------------------+\n");   
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
-        printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ...\r",total_minutes,i);
+        printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... %c\r",total_minutes,i,*(annimation+i%4));
         fflush(stdout);
         i++;
         sleep(1);
