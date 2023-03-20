@@ -323,7 +323,8 @@ int wait_for_complete(char* stackdir, char* option){
     else{
         sprintf(cmdline,"cat %s/tf_prep.log | grep \"complete!\" >> /dev/null 2>&1",stackdir);
         total_minutes=3;
-    }   
+    }
+    printf("+-----------------------------------------------------------------------------------+\n");   
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
         printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ...\r",total_minutes,i);
         fflush(stdout);
