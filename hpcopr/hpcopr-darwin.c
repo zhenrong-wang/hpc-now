@@ -2134,7 +2134,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     if(strcmp(region_flag,"global_regions")==0){
         printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...          |\n",AWS_SLEEP_TIME_GLOBAL);
         for(i=0;i<AWS_SLEEP_TIME_GLOBAL;i++){
-            printf("[ -WAIT- ] %d seconds left ... \r",AWS_SLEEP_TIME_GLOBAL-i);
+            printf("[ -WAIT- ] Still need to wait %d seconds ... \r",AWS_SLEEP_TIME_GLOBAL-i);
             fflush(stdout);
             sleep(1);
         }
@@ -2143,7 +2143,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     else{
         printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...          |\n",AWS_SLEEP_TIME_CN);
         for(i=0;i<AWS_SLEEP_TIME_CN;i++){
-            printf("[ -WAIT- ] %d seconds left ... \r",AWS_SLEEP_TIME_CN-i);
+            printf("[ -WAIT- ] Still need to wait %d seconds ... \r",AWS_SLEEP_TIME_CN-i);
             fflush(stdout);
             sleep(1);
         }
@@ -2812,7 +2812,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...           |\n",QCLOUD_SLEEP_TIME);
     for(i=0;i<QCLOUD_SLEEP_TIME;i++){
-        printf("[ -WAIT- ] %d seconds left ... \r",QCLOUD_SLEEP_TIME-i);
+        printf("[ -WAIT- ] Still need to wait %d seconds ... \r",QCLOUD_SLEEP_TIME-i);
         fflush(stdout);
         sleep(1);
     }
@@ -3456,7 +3456,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...           |\n",ALI_SLEEP_TIME);
     for(i=0;i<ALI_SLEEP_TIME;i++){
-        printf("[ -WAIT- ] %d seconds left ... \r",ALI_SLEEP_TIME-i);
+        printf("[ -WAIT- ] Still need to wait %d seconds ... \r",ALI_SLEEP_TIME-i);
         fflush(stdout);
         sleep(1);
     }
