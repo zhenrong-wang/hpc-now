@@ -2084,7 +2084,14 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
-    sprintf(cmdline,"cd %s && echo yes | %s apply >> %s/tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"cd %s && echo yes | %s apply >> %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
+    i=0;
+    while(system(cmdline)!=0&&system(cmdline)!=1){
+        printf("[ -WAIT- ] Cluster Operation in progress, this step may needs minutes. %d second(s) passed ... \r",i);
+        fflush(stdout);
+        i++;
+        sleep(1);
+    }
     system(cmdline);
     if(file_empty_or_not(logfile)!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
