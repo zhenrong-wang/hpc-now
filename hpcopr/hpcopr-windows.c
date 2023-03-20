@@ -3880,7 +3880,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
     printf("+-----------------------------------------------------------------------------------+\n");
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
-    sprintf(cmdline,"cd %s\\ && echo yes | %s destroy > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s destroy > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
     wait_for_complete(stackdir,"destroy");
     sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
