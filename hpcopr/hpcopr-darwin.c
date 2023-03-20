@@ -2122,7 +2122,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
-    return 0;
     sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,stackdir);
     system(cmdline);
     get_crypto_key(crypto_keyfile,md5sum);
