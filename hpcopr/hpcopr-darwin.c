@@ -6122,6 +6122,7 @@ int main(int argc, char* argv[]){
         printf("|          can run 'wakeup minimal' option to turn the management nodes on, or      |\n");
         printf("|          run 'wakeup all' option to turn the whole cluster on. Exit now.          |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
+        print_tail();
         write_log(pwd,operation_log,argv[1],13);
         return 13;
     }
