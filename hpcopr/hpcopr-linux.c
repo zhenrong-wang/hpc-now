@@ -4009,7 +4009,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 system(cmdline);
             }
             sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
-            system(cmdline);z
+            system(cmdline);
             wait_for_complete(stackdir,"apply");
             sprintf(filename_temp,"%s/log/now_cluster.log",workdir);
             if(file_empty_or_not(filename_temp)!=0){
