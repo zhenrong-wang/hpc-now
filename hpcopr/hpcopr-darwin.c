@@ -326,7 +326,7 @@ int wait_for_complete(char* stackdir, char* option){
         total_minutes=3;
     } 
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
-        printf("+-----------------------------------------------------------------------------------+\r");  
+        printf("|                                                                                   |\n");  
         printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... %c\r",total_minutes,i,*(annimation+i%4));
         fflush(stdout);
         i++;
