@@ -1752,6 +1752,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     reset_string(cmdline);
+    sprintf(cmdline,"rm -rf %s/region_valid.tf >> /dev/null 2>&1",stackdir);
+    system(cmdline);
+    reset_string(cmdline);
     file_p=fopen(conf_file,"r");
     for(i=0;i<3;i++){
         fgets(conf_line_buffer,256,file_p);
