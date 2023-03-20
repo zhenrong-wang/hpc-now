@@ -1728,9 +1728,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(logfile,"%s\\now_cluster.log",logdir);
     global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
     global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
-    sprintf(cmdline,"cd %s && %s init >> %s\\tf_prep.log 2>%s && %s apply >> %s\\tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"cd %s && %s init >> %s\\tf_prep.log 2>%s && %s apply >> %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile,tf_exec,stackdir,logfile);
     system(cmdline);
-    return 0;
     reset_string(cmdline);
     sprintf(cmdline,"del /f /q %s\\region_valid.tf > nul 2>&1",stackdir);
     system(cmdline);
@@ -2114,24 +2113,29 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     find_and_get(filename_temp,"aws_iam_access_key","","",15,"\"secret\":","","",'\"',4,bucket_sk);
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ STEP 2 ] Remote executing now ...                                                  \n");
-    printf("[ -WAIT- ] >> ");
+    printf("[ -WAIT- ] >> \r");
+    fflush(stdout);
     if(strcmp(region_flag,"global_regions")==0){
         for(i=0;i<AWS_SLEEP_TIME_GLOBAL;i++){
             if(i%20==0){
-                printf("%d >> ",AWS_SLEEP_TIME_GLOBAL-i);
+                printf("%d >> \r",AWS_SLEEP_TIME_GLOBAL-i);
+                fflush(stdout);
             }
             sleep(1);
         }
         printf(" DONE \n");
+        fflush(stdout);
     }
     else{
         for(i=0;i<AWS_SLEEP_TIME_CN;i++){
             if(i%20==0){
-                printf("%d >> ",AWS_SLEEP_TIME_CN-i);
+                printf("%d >> \r",AWS_SLEEP_TIME_CN-i);
+                fflush(stdout);
             }
             sleep(1);
         }
         printf(" DONE \n");
+        fflush(stdout);
     }
     file_p=fopen(currentstate,"r");
     fgetline(file_p,master_address);
