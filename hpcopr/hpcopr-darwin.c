@@ -2134,10 +2134,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     if(strcmp(region_flag,"global_regions")==0){
         printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...          |\n",AWS_SLEEP_TIME_GLOBAL);
         for(i=0;i<AWS_SLEEP_TIME_GLOBAL;i++){
-            if(i%20==0){
-                printf("[ -WAIT- ] %d seconds left ... \r",AWS_SLEEP_TIME_GLOBAL-i);
-                fflush(stdout);
-            }
+            printf("[ -WAIT- ] %d seconds left ... \r",AWS_SLEEP_TIME_GLOBAL-i);
+            fflush(stdout);
             sleep(1);
         }
         printf("[ -DONE- ] Remote execution commands sent.\n");
@@ -2145,10 +2143,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     else{
         printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...          |\n",AWS_SLEEP_TIME_CN);
         for(i=0;i<AWS_SLEEP_TIME_CN;i++){
-            if(i%20==0){
-                printf("[ -WAIT- ] %d seconds left ... \r",AWS_SLEEP_TIME_CN-i);
-                fflush(stdout);
-            }
+            printf("[ -WAIT- ] %d seconds left ... \r",AWS_SLEEP_TIME_CN-i);
+            fflush(stdout);
             sleep(1);
         }
         printf("[ -DONE- ] Remote execution commands sent.\n");
@@ -2816,10 +2812,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...           |\n",QCLOUD_SLEEP_TIME);
     for(i=0;i<QCLOUD_SLEEP_TIME;i++){
-        if(i%2==0){
-            printf("[ -WAIT- ] %d seconds left ... \r",QCLOUD_SLEEP_TIME-i);
-            fflush(stdout);
-        }
+        printf("[ -WAIT- ] %d seconds left ... \r",QCLOUD_SLEEP_TIME-i);
+        fflush(stdout);
         sleep(1);
     }
     printf("[ -DONE- ] Remote execution commands sent.\n");
@@ -3462,10 +3456,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...           |\n",ALI_SLEEP_TIME);
     for(i=0;i<ALI_SLEEP_TIME;i++){
-        if(i%10==0){
-            printf("[ -WAIT- ] %d seconds left ... \r",ALI_SLEEP_TIME-i);
-            fflush(stdout);
-        }
+        printf("[ -WAIT- ] %d seconds left ... \r",ALI_SLEEP_TIME-i);
+        fflush(stdout);
         sleep(1);
     }
     printf("[ -DONE- ] Remote execution commands sent.\n");
