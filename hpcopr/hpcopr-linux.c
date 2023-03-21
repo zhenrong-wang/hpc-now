@@ -5533,7 +5533,7 @@ int check_and_install_prerequisitions(char* current_command){
     if(file_exist_or_not("/usr/.hpc-now/.bin/terraform.exe")!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (1/5) ...                     |\r");
         fflush(stdout);
-        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform -o /usr/.hpc-now/.bin/terraform.exe -s");
+        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform -o /usr/.hpc-now/.bin/terraform.exe");
         if(flag!=0){
             printf("+-----------------------------------------------------------------------------------+\n");
             printf("[ FATAL: ] Failed to download or install necessary tools. Please contact            |\n");
@@ -5547,7 +5547,7 @@ int check_and_install_prerequisitions(char* current_command){
     if(file_exist_or_not("/usr/.hpc-now/.bin/now-crypto.exe")!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (2/5) ...                     |\r");
         fflush(stdout);
-        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto -o /usr/.hpc-now/.bin/now-crypto.exe -s");
+        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto -o /usr/.hpc-now/.bin/now-crypto.exe");
         if(flag!=0){
             printf("+-----------------------------------------------------------------------------------+\n");
             printf("[ FATAL: ] Failed to download or install necessary tools. Please contact            |\n");
@@ -5579,7 +5579,7 @@ int check_and_install_prerequisitions(char* current_command){
         if(file_exist_or_not(filename_temp)!=0){
             printf("[ -INFO- ] Downloading and installing necessary tools (3/5) ...                     |\r");
             fflush(stdout);
-            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-alicloud_v%s.tar.xz -o %s -s",ali_plugin_version,filename_temp);
+            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-alicloud_v%s.tar.xz -o %s",ali_plugin_version,filename_temp);
             system(cmdline);
         }
         sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
@@ -5597,7 +5597,7 @@ int check_and_install_prerequisitions(char* current_command){
         if(file_exist_or_not(filename_temp)!=0){
             printf("[ -INFO- ] Downloading and installing necessary tools (4/5) ...                     |\r");
             fflush(stdout);
-            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-tencentcloud_v%s.tar.xz -o %s -s",qcloud_plugin_version,filename_temp);
+            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-tencentcloud_v%s.tar.xz -o %s",qcloud_plugin_version,filename_temp);
             system(cmdline);
         }
         sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
@@ -5615,7 +5615,7 @@ int check_and_install_prerequisitions(char* current_command){
         if(file_exist_or_not(filename_temp)!=0){
             printf("[ -INFO- ] Downloading and installing necessary tools (5/5) ...                     |\r");
             fflush(stdout);
-            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-aws_v%s_x5.tar.xz -o %s -s",aws_plugin_version,filename_temp);
+            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-aws_v%s_x5.tar.xz -o %s",aws_plugin_version,filename_temp);
             system(cmdline);
         }
         sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
