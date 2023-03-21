@@ -5541,6 +5541,7 @@ int check_and_install_prerequisitions(char* current_command){
     printf("+-----------------------------------------------------------------------------------+\n");
     if(file_exist_or_not("c:\\programdata\\hpc-now\\bin\\terraform.exe")!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (1/5) ...                     |\n");
+        printf("           *ONLY* for the first time of running hpcopr.                             |\n\n");
         flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-win64/terraform.exe -o c:\\programdata\\hpc-now\\bin\\terraform.exe");
         if(flag!=0){
             printf("+-----------------------------------------------------------------------------------+\n");
@@ -5553,6 +5554,7 @@ int check_and_install_prerequisitions(char* current_command){
 
     if(file_exist_or_not("c:\\programdata\\hpc-now\\bin\\now-crypto.exe")!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (2/5) ...                     |\n");
+        printf("           *ONLY* for the first time of running hpcopr.                             |\n\n");
         flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto.exe -o c:\\programdata\\hpc-now\\bin\\now-crypto.exe");
         if(flag!=0){
             printf("+-----------------------------------------------------------------------------------+\n");
@@ -5595,6 +5597,7 @@ int check_and_install_prerequisitions(char* current_command){
         sprintf(filename_temp,"%s\\terraform.d\\terraform-provider-alicloud_%s_windows_amd64.zip",appdata_dir,ali_plugin_version);
         if(file_exist_or_not(filename_temp)!=0){
             printf("[ -INFO- ] Downloading and installing necessary tools (3/5) ...                     |\n");
+            printf("           *ONLY* for the first time of running hpcopr.                             |\n\n");
             sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-win64/terraform-provider-alicloud_%s_windows_amd64.zip -o %s",ali_plugin_version,filename_temp);
             system(cmdline);
         }
@@ -5612,6 +5615,7 @@ int check_and_install_prerequisitions(char* current_command){
         sprintf(filename_temp,"%s\\terraform.d\\terraform-provider-tencentcloud_%s_windows_amd64.zip",appdata_dir,qcloud_plugin_version);
         if(file_exist_or_not(filename_temp)!=0){
             printf("[ -INFO- ] Downloading and installing necessary tools (4/5) ...                     |\n");
+            printf("           *ONLY* for the first time of running hpcopr.                             |\n\n");
             sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-win64/terraform-provider-tencentcloud_%s_windows_amd64.zip -o %s",qcloud_plugin_version,filename_temp);
             system(cmdline);
         }
@@ -5629,6 +5633,7 @@ int check_and_install_prerequisitions(char* current_command){
         sprintf(filename_temp,"%s\\terraform.d\\terraform-provider-aws_%s_windows_amd64.zip",appdata_dir,aws_plugin_version);
         if(file_exist_or_not(filename_temp)!=0){
             printf("[ -INFO- ] Downloading and installing necessary tools (5/5) ...                     |\n");
+            printf("           *ONLY* for the first time of running hpcopr.                             |\n\n");
             sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-win64/terraform-provider-aws_%s_windows_amd64.zip -o %s",aws_plugin_version,filename_temp);
             system(cmdline);
         }
