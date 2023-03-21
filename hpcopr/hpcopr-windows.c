@@ -2127,7 +2127,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     if(file_empty_or_not(logfile)!=0){
@@ -2809,7 +2809,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     if(file_empty_or_not(logfile)!=0){
@@ -3463,7 +3463,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     if(file_empty_or_not(logfile)!=0){
@@ -4012,7 +4012,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 sprintf(cmdline,"move %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1", stackdir,i);
                 system(cmdline);
             }
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
             system(cmdline);
             wait_for_complete(stackdir,"apply");
             sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
@@ -4054,7 +4054,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         sprintf(cmdline,"move %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1", stackdir,i);
         system(cmdline);
     }
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
@@ -4142,7 +4142,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         sprintf(string_temp,"comp%d",i+1+current_node_num);
         global_replace(filename_temp,"comp1",string_temp);
     }
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
@@ -4265,7 +4265,7 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                     global_replace(filename_temp,"running","stopped");
                 }
             }
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
             system(cmdline);
             wait_for_complete(stackdir,"apply");
             sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
@@ -4314,7 +4314,7 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             global_replace(filename_temp,"running","stopped");
         }
     }
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
@@ -4449,7 +4449,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                     global_replace(filename_temp,"stopped","running");
                 }
             }
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
             system(cmdline);
             wait_for_complete(stackdir,"apply");
             sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
@@ -4498,7 +4498,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             global_replace(filename_temp,"stopped","running");
         }
     }
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
@@ -4644,7 +4644,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
             printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
             printf("+-----------------------------------------------------------------------------------+\n");
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
             system(cmdline);
             wait_for_complete(stackdir,"apply");
             sprintf(filename_temp2,"%s\\log\\now_cluster.log",workdir);
@@ -4714,7 +4714,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     sprintf(filename_temp2,"%s\\log\\now_cluster.log",workdir);
@@ -4801,7 +4801,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     sprintf(filename_temp2,"%s\\log\\now_cluster.log",workdir);
@@ -4927,14 +4927,14 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
             global_replace(filename_temp,"running","stopped");
         }
     }
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<GENERAL_SLEEP_TIME;i++){
             sleep(1);
         }
-        sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+        sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
         system(cmdline);
         wait_for_complete(stackdir,"apply");
     }
@@ -5066,14 +5066,14 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
         }
     }
 
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
             sleep(1);
         }
-        sprintf(cmdline,"cd %s && echo yes | %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+        sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
         system(cmdline);
         wait_for_complete(stackdir,"apply");
     }
