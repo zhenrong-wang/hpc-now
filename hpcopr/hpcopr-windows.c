@@ -278,23 +278,6 @@ double calc_running_hours(char* prev_date, char* prev_time, char* current_date, 
     return difftime(current,prev)/3600;
 }
 
-int get_crypto_key(char* crypto_key_filename, char* md5sum){
-    char cmdline[CMDLINE_LENGTH]="";
-    FILE* md5_tmp=NULL;
-    char buffer[256]="";
-    sprintf(cmdline,"certutil -hashfile %s md5 > md5.txt.tmp",crypto_key_filename);
-    system(cmdline);
-    md5_tmp=fopen("md5.txt.tmp","r");
-    if(md5_tmp==NULL){
-        return -1;
-    }
-    fgetline(md5_tmp,buffer);
-    fgetline(md5_tmp,md5sum);
-    fclose(md5_tmp);
-    system("del /f /q md5.txt.tmp > nul 2>&1");
-    return 0;
-}
-
 int fgetline(FILE* file_p, char* line_string){
     char ch;
     int i=0;
@@ -321,6 +304,23 @@ int fgetline(FILE* file_p, char* line_string){
     else{
         return 1;
     }
+}
+
+int get_crypto_key(char* crypto_key_filename, char* md5sum){
+    char cmdline[CMDLINE_LENGTH]="";
+    FILE* md5_tmp=NULL;
+    char buffer[256]="";
+    sprintf(cmdline,"certutil -hashfile %s md5 > md5.txt.tmp",crypto_key_filename);
+    system(cmdline);
+    md5_tmp=fopen("md5.txt.tmp","r");
+    if(md5_tmp==NULL){
+        return -1;
+    }
+    fgetline(md5_tmp,buffer);
+    fgetline(md5_tmp,md5sum);
+    fclose(md5_tmp);
+    system("del /f /q md5.txt.tmp > nul 2>&1");
+    return 0;
 }
 
 int wait_for_complete(char* stackdir, char* option){
@@ -5462,6 +5462,7 @@ int check_and_install_prerequisitions(char* current_command){
     char dirname_temp[DIR_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     reset_string(random_string);
+    char md5sum[64]="";
     int flag=0;
     FILE* file_p=NULL;
     char* ali_plugin_version=ALI_TF_PLUGIN_VERSION;
