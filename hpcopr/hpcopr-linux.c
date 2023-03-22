@@ -5526,7 +5526,7 @@ int check_and_install_prerequisitions(char* current_command){
 
     if(check_current_user()!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] You *MUST* create / switch to the user 'hpc-now' to operating a cluster. |\n");
+        printf("[ FATAL: ] You *MUST* switch to the user 'hpc-now' to operate cloud clusters.       |\n");
         printf("|          Or you need to switch into a directory with permissions. Exit now.       |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 2;
@@ -5881,20 +5881,17 @@ int main(int argc, char* argv[]){
     run_flag=check_and_install_prerequisitions(argv[0]);
     if(run_flag==3){
         write_log("NULL",operation_log,"PREREQ_FAILED",-3);
+        print_tail();
         return -3;
     }
     else if(run_flag!=0){
+        print_tail();
         return -3;
     }
 
     if(argc==2&&strcmp(argv[1],"help")==0){
         print_help();
         return 0;
-    }
-
-    if(check_current_user()!=0){
-        write_log("NULL",operation_log,"USER_CHECK_FAILED",-5);
-        return -5;
     }
 
     if(argc==1){
