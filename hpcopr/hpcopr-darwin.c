@@ -5416,6 +5416,7 @@ int check_and_install_prerequisitions(char* current_command){
     char dirname_temp[DIR_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     char md5sum[64]="";
+    int i;
     reset_string(random_string);
     int flag=0;
     FILE* file_p=NULL;
@@ -5550,7 +5551,9 @@ int check_and_install_prerequisitions(char* current_command){
     }
     system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
     printf("+-----------------------------------------------------------------------------------+\n");
-    reset_string(md5sum);
+    for(i=0;i<64;i++){
+        *(md5sum+i)='\0';
+    }
     if(file_exist_or_not("/Applications/.hpc-now/.bin/now_build.exe")==0){
         get_crypto_key("/Applications/.hpc-now/.bin/now_build.exe",md5sum);
     }
