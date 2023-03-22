@@ -5637,7 +5637,7 @@ int check_and_install_prerequisitions(char* current_command){
     }
     if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_QCLOUD_TF)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (4/5) ...                     |\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.                             |\n\n");
+        printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
         sprintf(filename_temp,"/Users/hpc-now/.terraform.d/terraform-provider-tencentcloud_%s_darwin_amd64.zip",qcloud_plugin_version);
         if(file_exist_or_not(filename_temp)==0){
             get_crypto_key(filename_temp,md5sum);
