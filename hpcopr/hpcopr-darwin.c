@@ -30,7 +30,7 @@ Bug report: info@hpc-now.com
 #define NOW_LIC_DIR "/Users/hpc-now/.now-lic"
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
 #define NOW_CRYPTO_EXEC "/Applications/.hpc-now/.bin/now-crypto.exe"
-#define TERRAFORM_EXEC "/Applications/.hpc-now/.bin/now_build.exe"
+#define TERRAFORM_EXEC "/Applications/.hpc-now/.bin/terraform"
 #define PASSWORD_LENGTH 19
 #define PASSWORD_STRING_LENGTH 20
 #define RANDSTR_LENGTH_PLUS 11
@@ -314,7 +314,6 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     }
     fgetline(md5_tmp,md5sum);
 //    fgets(md5sum,128,md5_tmp);
-//    *(md5sum+33)='\0';
     fclose(md5_tmp);
     system("rm -rf /tmp/md5.txt.tmp >> /dev/null 2>&1");
     return 0;
@@ -5418,14 +5417,6 @@ int check_and_install_prerequisitions(char* current_command){
     char dirname_temp[DIR_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     char md5sum[64]="";
-    char* md5_tf_exec=MD5_TF_EXEC;
-    char* md5_now_crypto=MD5_NOW_CRYPTO;
-    char* md5_ali_tf=MD5_ALI_TF;
-    char* md5_ali_tf_zip=MD5_ALI_TF_ZIP;
-    char* md5_qcloud_tf=MD5_QCLOUD_TF;
-    char* md5_qcloud_tf_zip=MD5_QCLOUD_TF_ZIP;
-    char* md5_aws_tf=MD5_AWS_TF;
-    char* md5_aws_tf_zip=MD5_AWS_TF_ZIP;
     reset_string(random_string);
     int flag=0;
     FILE* file_p=NULL;
@@ -5560,14 +5551,13 @@ int check_and_install_prerequisitions(char* current_command){
     }
     system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
     printf("+-----------------------------------------------------------------------------------+\n");
-    if(file_exist_or_not("/Applications/.hpc-now/.bin/now_build.exe")==0){
-        get_crypto_key("/Applications/.hpc-now/.bin/now_build.exe",md5sum);
+    if(file_exist_or_not("/Applications/.hpc-now/.bin/terraform")==0){
+        get_crypto_key("/Applications/.hpc-now/.bin/terraform",md5sum);
     }
-    printf("%s,,,%s\n%d,,,,,\n",md5sum,md5_tf_exec,strcmp(md5sum,md5_tf_exec));
-    if(file_exist_or_not("/Applications/.hpc-now/.bin/now_build.exe")!=0||strcmp(md5sum,MD5_TF_EXEC)!=0){
+    if(file_exist_or_not("/Applications/.hpc-now/.bin/terraform")!=0||strcmp(md5sum,MD5_TF_EXEC)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (1/5) ...                     |\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
-        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-darwin/terraform -o /Applications/.hpc-now/.bin/now_build.exe");
+        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-darwin/terraform -o /Applications/.hpc-now/.bin/terraform");
         if(flag!=0){
             printf("+-----------------------------------------------------------------------------------+\n");
             printf("[ FATAL: ] Failed to download or install necessary tools. Please contact            |\n");
@@ -5576,8 +5566,8 @@ int check_and_install_prerequisitions(char* current_command){
             return 3;
         }
     }
-    return 0;
-    system("chmod +x /Applications/.hpc-now/.bin/now_build.exe");
+    system("chmod +x /Applications/.hpc-now/.bin/terraform");
+
     if(file_exist_or_not("/Applications/.hpc-now/.bin/now-crypto.exe")==0){
         get_crypto_key("/Applications/.hpc-now/.bin/now-crypto.exe",md5sum);
     }
