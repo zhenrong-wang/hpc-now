@@ -1,9 +1,9 @@
 /*
-* This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
-* The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
-* It is distributed under the license: GNU Public License - v2.0
-* Bug report: info@hpc-now.com
-*/
+ * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+ * It is distributed under the license: GNU Public License - v2.0
+ * Bug report: info@hpc-now.com
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -125,6 +125,7 @@ void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
+// Print out the header information
 void print_header(void){
     time_t current_time_long;
     struct tm* time_p=NULL;
@@ -138,7 +139,7 @@ void print_header(void){
     printf("|  Welcome to HPC_NOW Cluster Operator!                                             |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
-    printf("|                                                 | P - erformance  + O - perating  |\n");
+    printf("|              /                                   | P - erformance  + O - perating  |\n");
     printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator!                                    |\n");
@@ -173,6 +174,7 @@ void print_tail(void){
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
+// If the user is not running hpcopr in a working directory, print out this message
 void print_not_in_a_workdir(char* current_dir){
     char temp_string[128]="";
     char temp_string2[128]="";
@@ -191,6 +193,7 @@ void print_not_in_a_workdir(char* current_dir){
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
+// Reset the string characters to '\0'
 void reset_string(char* orig_string){
     int length=strlen(orig_string);
     int i;
@@ -199,6 +202,7 @@ void reset_string(char* orig_string){
     }
 }
 
+// Convert the date string to a date structure
 void datetime_to_num(char* date_string, char* time_string, struct tm* datetime_num){
     int i;
     int year=0,month=0,day=0;
@@ -257,6 +261,7 @@ void datetime_to_num(char* date_string, char* time_string, struct tm* datetime_n
     datetime_num->tm_isdst=-1; // For Linux, this is essential. For Windows (mingw), it is not necessary
 }
 
+// Caculate the running hours
 double calc_running_hours(char* prev_date, char* prev_time, char* current_date, char* current_time){
     time_t prev;
     time_t current;
