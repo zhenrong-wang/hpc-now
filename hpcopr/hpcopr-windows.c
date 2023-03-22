@@ -5925,13 +5925,13 @@ int main(int argc, char* argv[]){
         return -3;
     }
     check_flag=check_and_install_prerequisitions(argv[0]);
-    if(check_flag!=0&&check_flag!=127&&check_flag!=-1){
+    if(check_flag!=0&&check_flag!=127&&check_flag!=-1&&check_flag!=2){
         print_tail();
         system_cleanup();
         write_log("NULL",operation_log,"PREREQ_FAILED",-3);
         return -3;
     }
-    else if(check_flag==127||check_flag==-1){
+    else if(check_flag==127||check_flag==-1||check_flag==2){
         print_tail();
         return 0;
     }
