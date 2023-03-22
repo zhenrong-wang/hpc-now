@@ -5416,7 +5416,14 @@ int check_and_install_prerequisitions(char* current_command){
     char dirname_temp[DIR_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     char md5sum[64]="";
-    int i;
+    char* md5_tf_exec=MD5_TF_EXEC;
+    char* md5_now_crypto=MD5_NOW_CRYPTO;
+    char* md5_ali_tf=MD5_ALI_TF;
+    char* md5_ali_tf_zip=MD5_ALI_TF_ZIP;
+    char* md5_qcloud_tf=MD5_QCLOUD_TF;
+    char* md5_qcloud_tf_zip=MD5_QCLOUD_TF_ZIP;
+    char* md5_aws_tf=MD5_AWS_TF;
+    char* md5_aws_tf_zip=MD5_AWS_TF_ZIP;
     reset_string(random_string);
     int flag=0;
     FILE* file_p=NULL;
@@ -5551,13 +5558,10 @@ int check_and_install_prerequisitions(char* current_command){
     }
     system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
     printf("+-----------------------------------------------------------------------------------+\n");
-    for(i=0;i<64;i++){
-        *(md5sum+i)='\0';
-    }
     if(file_exist_or_not("/Applications/.hpc-now/.bin/now_build.exe")==0){
         get_crypto_key("/Applications/.hpc-now/.bin/now_build.exe",md5sum);
     }
-    printf("%s\n%s\n%d,,,,,\n",md5sum,MD5_TF_EXEC,strcmp(md5sum,MD5_TF_EXEC));
+    printf("%s,,,%s\n%d,,,,,\n",md5sum,md5_tf_exec,strcmp(md5sum,md5_tf_exec));
     if(file_exist_or_not("/Applications/.hpc-now/.bin/now_build.exe")!=0||strcmp(md5sum,MD5_TF_EXEC)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (1/5) ...                     |\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
