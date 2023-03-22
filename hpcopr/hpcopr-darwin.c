@@ -5550,7 +5550,7 @@ int check_and_install_prerequisitions(char* current_command){
     }
     system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
     printf("+-----------------------------------------------------------------------------------+\n");
-
+    reset_string(md5sum);
     if(file_exist_or_not("/Applications/.hpc-now/.bin/now_build.exe")==0){
         get_crypto_key("/Applications/.hpc-now/.bin/now_build.exe",md5sum);
     }
