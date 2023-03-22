@@ -5554,7 +5554,7 @@ int check_and_install_prerequisitions(char* current_command){
     if(file_exist_or_not("/Applications/.hpc-now/.bin/now_build.exe")==0){
         get_crypto_key("/Applications/.hpc-now/.bin/now_build.exe",md5sum);
     }
-    printf("%s\n%s\n",md5sum,MD5_TF_EXEC);
+    printf("%s\n%s\n%d,,,,,\n",md5sum,MD5_TF_EXEC,strcmp(md5sum,MD5_TF_EXEC));
     if(file_exist_or_not("/Applications/.hpc-now/.bin/now_build.exe")!=0||strcmp(md5sum,MD5_TF_EXEC)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (1/5) ...                     |\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
