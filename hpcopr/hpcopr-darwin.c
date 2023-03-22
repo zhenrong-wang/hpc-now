@@ -312,8 +312,9 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     if(md5_tmp==NULL){
         return -1;
     }
-    fgets(md5sum,128,md5_tmp);
-    *(md5sum+33)='\0';
+    fgetline(md5_tmp,md5sum);
+//    fgets(md5sum,128,md5_tmp);
+//    *(md5sum+33)='\0';
     fclose(md5_tmp);
     system("rm -rf /tmp/md5.txt.tmp >> /dev/null 2>&1");
     return 0;
