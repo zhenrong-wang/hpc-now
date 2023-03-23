@@ -173,7 +173,7 @@ int uninstall_services(void){
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Please switch to the root user or users with administration privilege    |\n");
-        printf("|          and run the installer *WITH* 'sudo' to install the HPC-NOW services.     |\n");
+        printf("|          and run the installer *WITH* 'sudo' to uninstall the HPC-NOW services.   |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -234,7 +234,7 @@ int update_services(void){
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Please switch to the root user or users with administration privilege    |\n");
-        printf("|          and run the installer *WITH* 'sudo' to install the HPC-NOW services.     |\n");
+        printf("|          and run the installer *WITH* 'sudo' to update the HPC-NOW services.      |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
