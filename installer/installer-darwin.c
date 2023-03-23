@@ -13,7 +13,7 @@ Bug report: info@hpc-now.com
 #include <signal.h>
 
 #define CMDLINE_LENGTH 2048
-#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_linux_amd64"
+#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
 #define PASSWORD_STRING_LENGTH 20
 #define PASSWORD_LENGTH 19
 
