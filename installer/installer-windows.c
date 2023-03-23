@@ -54,6 +54,14 @@ int check_internet(void){
     return 0;
 }
 
+void reset_string(char* orig_string){
+    int length=strlen(orig_string);
+    int i;
+    for(i=0;i<length;i++){
+        *(orig_string+i)='\0';
+    }
+}
+
 int generate_random_passwd(char* password){
     int i,rand_num;
     struct timeval current_time;
@@ -200,7 +208,7 @@ int install_services(void){
     printf("|              nowadmin2023~                                                        |\n");
     printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:         |\n");
     printf("|          1. Run CMD by typing cmd in the Windows Search box                       |\n");
-    printf("|          2. cd c:\hpc-now                                                         |\n");
+    printf("|          2. cd c:\\hpc-now                                                         |\n");
     printf("|          3. hpcopr help                                                           |\n");
     printf("|          *You will be required to change the password of 'hpc-now'.               |\n");
     printf("|          Enjoy you Cloud HPC journey!                                             |\n");
@@ -273,7 +281,6 @@ int uninstall_services(void){
     printf("|          Please mannually delete the folder C:\\Users\\hpc-now after reboot.        |\n");
     printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    print_tail();
     return 0;
 }
 
