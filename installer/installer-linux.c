@@ -73,7 +73,6 @@ int install_services(void){
     char cmdline[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
-    int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
 
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
@@ -209,7 +208,6 @@ int uninstall_services(void){
     printf("[ -DONE- ] The HPC-NOW cluster services have been deleted from this OS and device.  |\n");
     printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    print_tail();
     return 0;
 }
 
