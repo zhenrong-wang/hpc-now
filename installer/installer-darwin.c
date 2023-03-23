@@ -289,7 +289,7 @@ int update_services(void){
 
 int main(int argc, char* argv[]){
     int run_flag=0;
-
+    printf("%d,,\n",argc);
     if(argc!=2){
         print_help();
         return 1;
