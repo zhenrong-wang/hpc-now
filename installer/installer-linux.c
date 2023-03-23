@@ -7,6 +7,7 @@ Bug report: info@hpc-now.com
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <malloc.h>
 #include <math.h>
 #include <sys/time.h>
 #include <time.h>
@@ -24,14 +25,13 @@ Bug report: info@hpc-now.com
 #define URL_ALICLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-alicloud/"
 #define URL_AWS_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-aws/"
 #define URL_QCLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-qcloud/"
-#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
-#define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock" // This is a global file!
-#define USAGE_LOG_FILE "/Applications/.hpc-now/.now-cluster-usage.log" // This is a global file!
-#define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
-#define NOW_LIC_DIR "/Users/hpc-now/.now-lic"
-#define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
-#define NOW_CRYPTO_EXEC "/Applications/.hpc-now/.bin/now-crypto.exe"
-#define TERRAFORM_EXEC "/Applications/.hpc-now/.bin/terraform"
+#define CRYPTO_KEY_FILE "/usr/.hpc-now/.now_crypto_seed.lock" // This is a global file!
+#define USAGE_LOG_FILE "/usr/.hpc-now/.now-cluster-usage.log" // This is a global file!
+#define OPERATION_LOG_FILE "/usr/.hpc-now/.now-cluster-operation.log"
+#define NOW_LIC_DIR "/home/hpc-now/.now-lic"
+#define SSHKEY_DIR "/home/hpc-now/.now-ssh"
+#define NOW_CRYPTO_EXEC "/usr/.hpc-now/.bin/now-crypto.exe"
+#define TERRAFORM_EXEC "/usr/.hpc-now/.bin/terraform.exe"
 #define PASSWORD_LENGTH 19
 #define PASSWORD_STRING_LENGTH 20
 #define RANDSTR_LENGTH_PLUS 11
@@ -45,14 +45,14 @@ Bug report: info@hpc-now.com
 #define AWS_TF_PLUGIN_VERSION "4.56.0"
 #define MAXIMUM_ADD_NODE_NUMBER 16 // You can modify this number to adding more than 16 nodes once
 #define MAXIMUM_WAIT_TIME 600
-#define MD5_TF_EXEC "821bf13764e8afbc0fb73a73e25aebad"
-#define MD5_NOW_CRYPTO "202082eac600db6f6f429a1ceb047044"
-#define MD5_ALI_TF "327c71c64bf913c0e6d90cd7b1a15d41"
-#define MD5_QCLOUD_TF "cdb4d3b08328f1dbcbb2df294351f399"
-#define MD5_AWS_TF "4086f1c70b04ebc43d5a58d56021fc81"
-#define MD5_ALI_TF_ZIP "0e23e305aa0d6962a87f3013a1607ae9"
-#define MD5_QCLOUD_TF_ZIP "5ea4e09ae46602959e40c09acd21b4e2"
-#define MD5_AWS_TF_ZIP "463fb946564c91965d58d38e085ebc35"
+#define MD5_TF_EXEC "9777407ccfce2be14fe4bec072af4738"
+#define MD5_NOW_CRYPTO "26ae6fb1a741dcb8356b650b0812710c"
+#define MD5_ALI_TF "52a7b48f682a79909fc122b4ec3afc3e"
+#define MD5_QCLOUD_TF "65740525e092fa6abf89386855594217"
+#define MD5_AWS_TF "c200d65e3301456524a40ae32ddf4eae"
+#define MD5_ALI_TF_ZIP "14b6a80e77b5b8a7ef0a16a40df344cc"
+#define MD5_QCLOUD_TF_ZIP "2a08a0092162ba4cf2173be962654b6c"
+#define MD5_AWS_TF_ZIP "c6281e969b9740c69f6c5164e87900f4"
 
 
 void print_empty_cluster_info(void){
@@ -120,7 +120,12 @@ void print_help(void){
     printf("|              : minimal - Turn on the management nodes of the cluster.             |\n");
     printf("|              : all     - Turn on the management and compute nodes of the cluster. |\n");         
     printf("|  destroy     : *DESTROY* the whole cluster - including all the resources & data.  |\n");
-    printf("|                                                                                   |\n");    
+    printf("|                                                                                   |\n");
+    printf("+ IV. INSTALLATION    --------------------------------------------------------------+\n");
+    printf("|                                                                                   |\n");
+    printf("|  uninstall   : *REMOVE* the HPC-NOW services and data. Admin/root privilege is    |\n");
+    printf("|                required for this operation.                                       |\n");
+    printf("|                                                                                   |\n");      
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
     printf("|                                                 | P - erformance  + O - perating  |\n");
@@ -136,13 +141,13 @@ void print_header(void){
     char string_temp[128]="";
     int i;
     int length_temp=19;
-//    printf("\n");
-//    printf("+-----------------------------------------------------------------------------------+\n");
-//    printf("|  Welcome to HPC_NOW Cluster Operator!                                             |\n");
-//    printf("+-----------------------------------------------------------------------------------+\n");
-//    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
-//    printf("|                                                 | P - erformance  + O - perating  |\n");
-//    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
+    printf("\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("|  Welcome to HPC_NOW Cluster Operator!                                             |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
+    printf("|                                                 | P - erformance  + O - perating  |\n");
+    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator!                                    |\n");
     if(time_p->tm_mon+1<10){
@@ -164,8 +169,9 @@ void print_header(void){
         *(string_temp+i)=' ';
     }
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d%s|\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,string_temp);
-    printf("|    Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
+    printf("|    Version: 0.1.53   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
+    
 }
 
 void print_tail(void){
@@ -181,7 +187,7 @@ void print_not_in_a_workdir(char* current_dir){
     int i;
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ FATAL: ] You are not in a working directory, *NO* critical operation is permitted.|\n");
-    printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is a number).|\n");
+    printf("|          A typical working directory: /home/hpc-now/now-cluster-# (# is a number).|\n");
     sprintf(temp_string,"|          Current directory is %s.",current_dir);
     for(i=0;i<85-strlen(temp_string)-1;i++){
         *(temp_string2+i)=' ';
@@ -302,7 +308,7 @@ int fgetline(FILE* file_p, char* line_string){
 int get_crypto_key(char* crypto_key_filename, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
     FILE* md5_tmp=NULL;
-    sprintf(cmdline,"md5 %s | awk '{print $4}' > /tmp/md5.txt.tmp",crypto_key_filename);
+    sprintf(cmdline,"md5sum %s | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
     system(cmdline);
     md5_tmp=fopen("/tmp/md5.txt.tmp","r");
     if(md5_tmp==NULL){
@@ -329,10 +335,10 @@ int wait_for_complete(char* stackdir, char* option){
     else{
         sprintf(cmdline,"cat %s/tf_prep.log | grep \"complete!\" >> /dev/null 2>&1",stackdir);
         total_minutes=3;
-    } 
+    }  
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
-        printf("|...................................................................................|\r");  
-        printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... [(%c)] \r",total_minutes,i,*(annimation+i%4));
+        printf("|...................................................................................|\r"); 
+        printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... [(%c)]\r",total_minutes,i,*(annimation+i%4));
         fflush(stdout);
         i++;
         sleep(1);
@@ -471,7 +477,7 @@ void create_and_get_stackdir(char* workdir, char* stackdir){
     for(j=0;j<strlen(string_temp);j++){
         cluster_num+=(*(string_temp+j)-'0')*pow(10,j);
     }
-    sprintf(stackdir,"/Applications/.hpc-now/.stack/.cluster-%d",cluster_num);
+    sprintf(stackdir,"/usr/.hpc-now/.stack/.cluster-%d",cluster_num);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",stackdir);
     system(cmdline);
 }
@@ -524,7 +530,7 @@ void create_and_get_vaultdir(char* workdir, char* vaultdir){
     for(j=0;j<strlen(string_temp);j++){
         cluster_num+=(*(string_temp+j)-'0')*pow(10,j);
     }
-    sprintf(vaultdir,"/Applications/.hpc-now/.vault/.cluster-%d",cluster_num);
+    sprintf(vaultdir,"/usr/.hpc-now/.vault/.cluster-%d",cluster_num);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",vaultdir);
     system(cmdline);
 }
@@ -1052,7 +1058,7 @@ int check_pslock(char* workdir){
     else{
         return 0;
     }
-/*    system("ps -ax | grep -w hpcopr | wc -l > /tmp/.check_pslock.txt");
+/*    system("ps -aux | grep -w hpcopr | wc -l > /tmp/.check_pslock.txt");
     int current_threads=0;
     FILE* file_p=fopen("/tmp/.check_pslock.txt","r");
     if(file_p==0){
@@ -1554,6 +1560,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
 
     char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
+//    char crypto_keyfile[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char logfile[FILENAME_LENGTH]="";
@@ -2118,7 +2125,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
-    
     if(file_empty_or_not(logfile)!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Cluster initialization encountered problems.                             |\n");
@@ -2150,7 +2156,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     else{
         printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...          |\n",AWS_SLEEP_TIME_CN);
         for(i=0;i<AWS_SLEEP_TIME_CN;i++){
-            printf("[ -WAIT- ] Still need to wait %d seconds ... \r",AWS_SLEEP_TIME_CN-i);
+            printf("[ -WAIT- ]  Still need to wait %d seconds ... \r",AWS_SLEEP_TIME_CN-i);
             fflush(stdout);
             sleep(1);
         }
@@ -2279,6 +2285,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
 
     char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
+//    char crypto_keyfile[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char logfile[FILENAME_LENGTH]="";
@@ -2761,6 +2768,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     reset_string(filename_temp);
     reset_string(string_temp);
+//    return 0;
     
     for(i=0;i<node_num;i++){
         sprintf(cmdline,"/bin/cp %s/hpc_stack.compute %s/hpc_stack_compute%d.tf >> /dev/null 2>&1",stackdir,stackdir,i+1);
@@ -2827,7 +2835,9 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     file_p=fopen(currentstate,"r");
     fgetline(file_p,master_address);
     fclose(file_p);
+
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
+    
     sprintf(cmdline,"curl %scos.conf -s -o %s/cos.conf",url_qcloud_root,stackdir);
     system(cmdline);
     sprintf(filename_temp,"%s/cos.conf",stackdir);
@@ -3591,26 +3601,26 @@ int envcheck(char* pwd){
     fscanf(file_p,"%s",current_dir);
     fclose(file_p);
     system("rm -rf /tmp/.currentdir.tmp");
-    if(strlen(current_dir)>29){
+    if(strlen(current_dir)>28){
         print_not_in_a_workdir(current_dir);
         strcpy(pwd,"");
         return 1;
     }
-    for(i=0;i<27;i++){
+    for(i=0;i<26;i++){
         *(string_temp+i)=*(current_dir+i);
     }
-    if(strcmp(string_temp,"/Users/hpc-now/now-cluster-")!=0){
+    if(strcmp(string_temp,"/home/hpc-now/now-cluster-")!=0){
         print_not_in_a_workdir(current_dir);
         strcpy(pwd,"");
         return 1;
     }
-    if(*(current_dir+27)>'9'||*(current_dir+27)<'1'){
+    if(*(current_dir+26)>'9'||*(current_dir+26)<'1'){
         print_not_in_a_workdir(current_dir);
         strcpy(pwd,"");
         return 1;
     }
-    if(strlen(current_dir)==29){
-        if(*(current_dir+28)>'9'||*(current_dir+28)<'0'){
+    if(strlen(current_dir)==28){
+        if(*(current_dir+27)>'9'||*(current_dir+27)<'0'){
             print_not_in_a_workdir(current_dir);
             strcpy(pwd,"");
             return 1;
@@ -3860,9 +3870,10 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
     printf("+-----------------------------------------------------------------------------------+\n");
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
-    sprintf(cmdline,"cd %s && echo yes | %s destroy > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s/ && echo yes | %s destroy > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
     wait_for_complete(stackdir,"destroy");
+
     if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_A")==0){
         system(cmdline);
     }
@@ -3895,20 +3906,20 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
     fclose(file_p);
     sprintf(unique_cluster_id,"%s-%s",buffer1,buffer2);
 
-    system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-    sprintf(cmdline,"mv %s/*.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+    sprintf(cmdline,"mv %s/*.tf /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    sprintf(cmdline,"mv %s/*.tmp /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"mv %s/*.tmp /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
     system(cmdline);
     sprintf(cmdline,"rm -rf %s/currentstate >> /dev/null 2>&1",stackdir);
     system(cmdline);
     sprintf(cmdline,"rm -rf %s/compute_template >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    sprintf(cmdline,"mv %s/hostfile_latest /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"mv %s/hostfile_latest /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    sprintf(cmdline,"mv %s/_CLUSTER_SUMMARY.txt /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+    sprintf(cmdline,"mv %s/_CLUSTER_SUMMARY.txt /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
     system(cmdline);
-    sprintf(cmdline,"mv %s/UCID_LATEST.txt /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+    sprintf(cmdline,"mv %s/UCID_LATEST.txt /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
     system(cmdline);
     sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
     system(cmdline);
@@ -3997,8 +4008,8 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             printf("%s%s|\n",string_temp,string_temp2);
             decrypt_files(workdir,crypto_keyfile);
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-                sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
+                system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+                sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
                 system(cmdline);
             }
             sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
@@ -4039,8 +4050,8 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     printf("%s%s|\n",string_temp,string_temp2);
     decrypt_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
-        system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-        sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
+        system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+        sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
         system(cmdline);
     }
     sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
@@ -4705,7 +4716,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-   sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
     wait_for_complete(stackdir,"apply");
     sprintf(filename_temp2,"%s/log/now_cluster.log",workdir);
@@ -4922,7 +4933,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     wait_for_complete(stackdir,"apply");
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
-            usleep(1000000);
+            sleep(1);
         }
         sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
         system(cmdline);
@@ -5061,7 +5072,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     wait_for_complete(stackdir,"apply");
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
-            usleep(1000000);
+            sleep(1);
         }
         sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
         system(cmdline);
@@ -5156,12 +5167,11 @@ int create_new_workdir(char* crypto_keyfile){
         system(cmdline);
         return 1;
     }
-
-    system("ls /Users/hpc-now/ | grep now-cluster- > /tmp/.cluster_num.txt.tmp");
+    system("ls /home/hpc-now/ | grep now-cluster- > /tmp/.cluster_num.txt.tmp");
     current_cluster_num=file_empty_or_not("/tmp/.cluster_num.txt.tmp");
     system("rm -rf /tmp/.cluster_num.txt.tmp >> /dev/null 2>&1");
     new_cluster_num=current_cluster_num+1;
-    sprintf(new_workdir,"/Users/hpc-now/now-cluster-%d",new_cluster_num);
+    sprintf(new_workdir,"/home/hpc-now/now-cluster-%d",new_cluster_num);
     create_and_get_vaultdir(new_workdir,vaultdir);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",new_workdir);
     system(cmdline);
@@ -5171,9 +5181,9 @@ int create_new_workdir(char* crypto_keyfile){
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
     system(cmdline);
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] The secrets key pair has been encrypted and  stored locally.             |\n");
+    printf("[ -INFO- ] The secrets key pair has been encrypted and stored locally.              |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -DONE- ] The working directory of your new cluster: /Users/hpc-now/now-cluster-%d.\n",new_cluster_num);
+    printf("[ -DONE- ] The working directory of your new cluster: /home/hpc-now/now-cluster-%d.\n",new_cluster_num);
     printf("|          Please switch to it and run 'hpcopr init' to create a default cluster.   |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -DONE- ] Exit now.                                                                |\n");
@@ -5347,6 +5357,7 @@ int rotate_new_keypair(char* workdir, char* crypto_keyfile){
     return 0;
 }
 
+
 int get_default_conf(char* workdir, char* crypto_keyfile){
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
@@ -5412,8 +5423,8 @@ int check_and_install_prerequisitions(char* current_command){
     char filename_temp[FILENAME_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
-    char md5sum[64]="";
     reset_string(random_string);
+    char md5sum[64]="";
     int flag=0;
     FILE* file_p=NULL;
     char* ali_plugin_version=ALI_TF_PLUGIN_VERSION;
@@ -5422,46 +5433,120 @@ int check_and_install_prerequisitions(char* current_command){
     char* usage_logfile=USAGE_LOG_FILE;
     char* operation_logfile=OPERATION_LOG_FILE;
     char* sshkey_dir=SSHKEY_DIR;
-    int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
     printf("[ -INFO- ] Checking running environment for HPC-NOW services ...                    |\n");
+    if(system("id hpc-now >> /dev/null 2>&1")!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ -WARN- ] There is no 'hpc-now' user in your OS currently.                         |\n");
+        if(system("whoami | grep -w root > /dev/null 2>&1")!=0){
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] Please switch to root user and run the command again (NOT recommended!). |\n");
+            printf("|          Or, switch to a user with the 'sudo' privilege and run this command      |\n");
+            printf("|          with 'sudo' (strongly recommended!).                                     |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] Exit now.                                                                |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            return -1;    
+        }
+        system("rm -rf /home/hpc-now/ >> /dev/null 2>&1");
+        system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+        system("rm -rf /usr/.hpc-now/ >> /dev/null 2>&1");
+        strcpy(cmdline,"useradd hpc-now -m -s /bin/bash >> /dev/null 2>&1");
+        if(system(cmdline)!=0){
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.     |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] Exit now.                                                                |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            return -1;
+        }
+
+        system("mkdir -p /usr/.hpc-now && chmod 777 /usr/.hpc-now");
+        generate_random_passwd(random_string);
+        file_p=fopen("/usr/.hpc-now/.now_crypto_seed.lock","w+");
+        fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
+        fprintf(file_p,"PLEASE DO NOT HANDLE THIS FILE MANNUALLY! OTHERWISE THE SERVICE WILL BE CORRUPTED!\n");
+        fprintf(file_p,"SHANGHAI HPC-NOW TECHNOLOGIES CO., LTD | info@hpc-now.com | https://www.hpc-now.com\n\n");
+        fprintf(file_p,"%s\n",random_string);
+        fclose(file_p);
+        system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+        system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+        
+        system("mkdir -p /home/hpc-now/.bin >> /dev/null 2>&1");
+        if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ >> /dev/null 2>&1")!=0){
+            strcpy(cmdline,"echo \"export PATH=/home/hpc-now/.bin/:$PATH\" >> /home/hpc-now/.bashrc");
+            system(cmdline);
+        }
+        if(file_exist_or_not("/home/hpc-now/.bin/hpcopr")!=0){
+            sprintf(cmdline,"/bin/cp %s /home/hpc-now/.bin/hpcopr >> /dev/null 2>&1",current_command);
+            system(cmdline);
+        }
+        if(folder_exist_or_not(SSHKEY_DIR)!=0){
+            system("mkdir -p /home/hpc-now/.now-ssh/ >> /dev/null 2>&1");
+        }
+
+        if(folder_exist_or_not(NOW_LIC_DIR)!=0){
+            system("mkdir -p /home/hpc-now/.now-lic/ >> /dev/null 2>&1");
+        }
+        system("chown -R hpc-now:hpc-now /home/hpc-now/");
+
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ -INFO- ] The user 'hpc-now' has been created *WITHOUT* an initial password.       |\n");
+        printf("|          You *MUST* run 'sudo passwd hpc-now' command to set a password.          |\n");
+        printf("|          Please ensure the complexity of the new password!                        |\n");
+        printf("|          After setting password, please switch to the user 'hpc-now' and run      |\n");
+        printf("|          the command 'hpcopr help' to get started.                                |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ -INFO- ] Exit now.                                                                |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return 1;
+    }
+
+    if(folder_exist_or_not("/usr/.hpc-now/")!=0){
+        if(system("whoami | grep -w root")!=0){
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] The service is corrupted due to missing critical folders. Please exit    |\n");
+            printf("|          and run 'hpcopr' command again with 'sudo' to repair it. If this error   |\n");
+            printf("|          still occurs, please contact us via info@hpc-now.com for supports.       |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] Exit now.                                                                |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            return 3;
+        }
+        system("mkdir -p /usr/.hpc-now && chmod 777 /usr/.hpc-now");
+        generate_random_passwd(random_string);
+        file_p=fopen("/usr/.hpc-now/.now_crypto_seed.lock","w+");
+        fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
+        fprintf(file_p,"PLEASE DO NOT HANDLE THIS FILE MANNUALLY! OTHERWISE THE SERVICE WILL BE CORRUPTED!\n");
+        fprintf(file_p,"SHANGHAI HPC-NOW TECHNOLOGIES CO., LTD | info@hpc-now.com | https://www.hpc-now.com\n\n");
+        fprintf(file_p,"%s\n",random_string);
+        fclose(file_p);
+        system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+        system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+    }
 
     if(check_current_user()!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] You *MUST* switch to the user 'hpc-now' to operate cloud clusters.       |\n");
-        printf("|          Please run the commands below:                                           |\n");
-        printf("|          su hpc-now   (You will be asked to input password without echo)          |\n");
-        printf("|          cd ~ && ls   (You will see all the current working directories)          |\n");
+        printf("|          Or you need to switch into a directory with permissions. Exit now.       |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 2;
     }
 
-    if(folder_exist_or_not("/Applications/.hpc-now/")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] The service is corrupted due to missing critical folders. Please exit    |\n");
-        printf("|          and run the installer with 'sudo' to repair it. Sample command:          |\n");
-        printf("|          sudo ./YOUR_INSTALLER_PATH                                               |\n");
-        printf("|          If this issue still occurs, please contact us via info@hpc-now.com .     |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return 3;
+    if(folder_exist_or_not("/usr/.hpc-now/.destroyed/")!=0){
+        system("mkdir -p /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1");
     }
-
-    if(folder_exist_or_not("/Applications/.hpc-now/.destroyed/")!=0){
-        system("mkdir -p /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1");
+    if(folder_exist_or_not("/usr/.hpc-now/.bin/")!=0){
+        system("mkdir -p /usr/.hpc-now/.bin/ >> /dev/null 2>&1");
     }
-    if(folder_exist_or_not("/Applications/.hpc-now/.bin/")!=0){
-        system("mkdir -p /Applications/.hpc-now/.bin/ >> /dev/null 2>&1");
+    system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+    printf("+-----------------------------------------------------------------------------------+\n");    
+    if(file_exist_or_not("/usr/.hpc-now/.bin/terraform.exe")==0){
+        get_crypto_key("/usr/.hpc-now/.bin/terraform.exe",md5sum);
     }
-    system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    if(file_exist_or_not("/Applications/.hpc-now/.bin/terraform")==0){
-        get_crypto_key("/Applications/.hpc-now/.bin/terraform",md5sum);
-    }
-    if(file_exist_or_not("/Applications/.hpc-now/.bin/terraform")!=0||strcmp(md5sum,MD5_TF_EXEC)!=0){
+    if(file_exist_or_not("/usr/.hpc-now/.bin/terraform.exe")!=0||strcmp(md5sum,MD5_TF_EXEC)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (1/5) ...                     |\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
-        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-darwin/terraform -o /Applications/.hpc-now/.bin/terraform");
+        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform -o /usr/.hpc-now/.bin/terraform.exe");
         if(flag!=0){
             printf("+-----------------------------------------------------------------------------------+\n");
             printf("[ FATAL: ] Failed to download or install necessary tools. Please contact            |\n");
@@ -5470,15 +5555,15 @@ int check_and_install_prerequisitions(char* current_command){
             return 3;
         }
     }
-    system("chmod +x /Applications/.hpc-now/.bin/terraform");
+    system("chmod +x /usr/.hpc-now/.bin/terraform.exe");
 
-    if(file_exist_or_not("/Applications/.hpc-now/.bin/now-crypto.exe")==0){
-        get_crypto_key("/Applications/.hpc-now/.bin/now-crypto.exe",md5sum);
+    if(file_exist_or_not("/usr/.hpc-now/.bin/now-crypto.exe")==0){
+        get_crypto_key("/usr/.hpc-now/.bin/now-crypto.exe",md5sum);
     }
-    if(file_exist_or_not("/Applications/.hpc-now/.bin/now-crypto.exe")!=0||strcmp(md5sum,MD5_NOW_CRYPTO)!=0){
+    if(file_exist_or_not("/usr/.hpc-now/.bin/now-crypto.exe")!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (2/5) ...                     |\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
-        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-darwin.exe -o /Applications/.hpc-now/.bin/now-crypto.exe");
+        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto -o /usr/.hpc-now/.bin/now-crypto.exe");
         if(flag!=0){
             printf("+-----------------------------------------------------------------------------------+\n");
             printf("[ FATAL: ] Failed to download or install necessary tools. Please contact            |\n");
@@ -5487,19 +5572,19 @@ int check_and_install_prerequisitions(char* current_command){
             return 3;
         }
     }
-    system("chmod +x /Applications/.hpc-now/.bin/now-crypto.exe");
+    system("chmod +x /usr/.hpc-now/.bin/now-crypto.exe");
 
-    if(file_exist_or_not("/Users/hpc-now/.terraformrc")!=0){
-        file_p=fopen("/Users/hpc-now/.terraformrc","w+");
+    if(file_exist_or_not("/home/hpc-now/.terraformrc")!=0){
+        file_p=fopen("/home/hpc-now/.terraformrc","w+");
         fprintf(file_p,"privider_installation {\n");
         fprintf(file_p,"  filesystem_mirror {\n");
-        fprintf(file_p,"    path    = \"/Users/hpc-now/.terraform.d/plugins\"\n");
+        fprintf(file_p,"    path    = \"/home/hpc-now/.terraform.d/plugins\"\n");
         fprintf(file_p,"    include = [\"registry.terraform.io/*/*\"]\n");
         fprintf(file_p,"  }\n}\n");
         fclose(file_p);
     }
 
-    sprintf(dirname_temp,"/Users/hpc-now/.terraform.d/plugins/registry.terraform.io/aliyun/alicloud/%s/darwin_amd64/",ali_plugin_version);
+    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/aliyun/alicloud/%s/linux_amd64/",ali_plugin_version);
     if(folder_exist_or_not(dirname_temp)!=0){
         sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
         system(cmdline);
@@ -5511,19 +5596,19 @@ int check_and_install_prerequisitions(char* current_command){
     if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_ALI_TF)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (3/5) ...                     |\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
-        sprintf(filename_temp,"/Users/hpc-now/.terraform.d/terraform-provider-alicloud_%s_darwin_amd64.zip",ali_plugin_version);
+        sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-alicloud_v%s.tar.xz",ali_plugin_version);
         if(file_exist_or_not(filename_temp)==0){
             get_crypto_key(filename_temp,md5sum);
         }
         if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_ALI_TF_ZIP)!=0){
-            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip -o %s",ali_plugin_version,filename_temp);
+            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-alicloud_v%s.tar.xz -o %s",ali_plugin_version,filename_temp);
             system(cmdline);
         }
-        sprintf(cmdline,"unzip -q %s -d %s >> /dev/null 2>&1",filename_temp,dirname_temp);
+        sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
         system(cmdline);
     }
 
-    sprintf(dirname_temp,"/Users/hpc-now/.terraform.d/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/darwin_amd64/",qcloud_plugin_version);
+    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/linux_amd64/",qcloud_plugin_version);
     if(folder_exist_or_not(dirname_temp)!=0){
         sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
         system(cmdline);
@@ -5535,19 +5620,19 @@ int check_and_install_prerequisitions(char* current_command){
     if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_QCLOUD_TF)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (4/5) ...                     |\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
-        sprintf(filename_temp,"/Users/hpc-now/.terraform.d/terraform-provider-tencentcloud_%s_darwin_amd64.zip",qcloud_plugin_version);
+        sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-tencentcloud_v%s.tar.xz",qcloud_plugin_version);
         if(file_exist_or_not(filename_temp)==0){
             get_crypto_key(filename_temp,md5sum);
         }
         if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_QCLOUD_TF_ZIP)!=0){
-            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip -o %s",qcloud_plugin_version,filename_temp);
+            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-tencentcloud_v%s.tar.xz -o %s",qcloud_plugin_version,filename_temp);
             system(cmdline);
         }
-        sprintf(cmdline,"unzip -q %s -d %s >> /dev/null 2>&1",filename_temp,dirname_temp);
+        sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
         system(cmdline);   
     }
 
-    sprintf(dirname_temp,"/Users/hpc-now/.terraform.d/plugins/registry.terraform.io/hashicorp/aws/%s/darwin_amd64/",aws_plugin_version);
+    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/hashicorp/aws/%s/linux_amd64/",aws_plugin_version);
     if(folder_exist_or_not(dirname_temp)!=0){
         sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
         system(cmdline);
@@ -5559,18 +5644,18 @@ int check_and_install_prerequisitions(char* current_command){
     if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_AWS_TF)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (5/5) ...                     |\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
-        sprintf(filename_temp,"/Users/hpc-now/.terraform.d/terraform-provider-aws_%s_x5_darwin_amd64.zip",aws_plugin_version);
+        sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-aws_v%s_x5.tar.xz",aws_plugin_version);
         if(file_exist_or_not(filename_temp)==0){
             get_crypto_key(filename_temp,md5sum);
         }
         if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_AWS_TF_ZIP)!=0){
-            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-darwin/terraform-provider-aws_%s_darwin_amd64.zip -o %s",aws_plugin_version,filename_temp);
+            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-aws_v%s_x5.tar.xz -o %s",aws_plugin_version,filename_temp);
             system(cmdline);
         }
-        sprintf(cmdline,"unzip -q %s -d %s >> /dev/null 2>&1",filename_temp,dirname_temp);
+        sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
         system(cmdline);   
     }
-    
+
     if(file_exist_or_not(usage_logfile)!=0){
         file_p=fopen(usage_logfile,"w+");
         fprintf(file_p,"UCID,CLOUD_VENDOR,NODE_NAME,vCPU,START_DATE,START_TIME,STOP_DATE,STOP_TIME,RUNNING_HOURS,CPUxHOURS,CPU_MODEL,CLOUD_REGION\n");
@@ -5588,14 +5673,72 @@ int check_and_install_prerequisitions(char* current_command){
         sprintf(cmdline,"echo \"\" > %s",operation_logfile);
         system(cmdline);
     }
+    if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ > /dev/null 2>&1")!=0){
+        strcpy(cmdline,"export PATH=/home/hpc-now/.bin/:$PATH >> /home/hpc-now/.bashrc");
+        system(cmdline);
+    }
 
-    if(system("cat /Users/hpc-now/.bashrc | grep PATH=/Users/hpc-now/.bin/ > /dev/null 2>&1")!=0){
-        strcpy(cmdline,"export PATH=/Users/hpc-now/.bin/:$PATH >> /Users/hpc-now/.bashrc");
+    if(file_exist_or_not("/home/hpc-now/.bin/hpcopr")!=0){
+        sprintf(cmdline,"/bin/cp %s /home/hpc-now/.bin/hpcopr >> /dev/null 2>&1",current_command);
         system(cmdline);
     }
 
     printf("[ -INFO- ] Running environment successfully checked. HPC-NOW services are ready.    |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
+    return 0;
+}
+
+int uninstall_services(void){
+    char doubleconfirm[128]="";
+    if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Please switch to administrator or users with administration privilege    |\n");
+        printf("|          and run this command again to uninstall the HPC-NOW services.            |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Exit now.                                                                |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return -1;    
+    }
+
+    printf("\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("|*                                C A U T I O N !                                  *|\n");
+    printf("|*                                                                                 *|\n");
+    printf("|*   YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM THE ISSUES BELOW:   *|\n");
+    printf("|*                                                                                 *|\n");
+    printf("|*   1. You have *DESTROYED* all the clusters managed by this device.              *|\n");
+    printf("|*      This is * !!! EXTREMELY IMPORTANT !!! *                                    *|\n");
+    printf("|*   2. You have *CHECKED* your cloud service account and all the resources        *|\n");
+    printf("|*      created by the HPC-NOW services on this device have been destructed.       *|\n");
+    printf("|*   3. You have *EXPORTED* the usage log and systemlog to a permenant directory,  *|\n");
+    printf("|*      You can run 'hpcopr syslog' and 'hpcopr usage' to get the logs and save    *|\n");
+    printf("|*      them to a directory such as /home/ANOTHER_USER                             *|\n");
+    printf("|*                                                                                 *|\n");
+    printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          *|\n");
+    printf("|*                                                                                 *|\n");
+    printf("|*                                C A U T I O N !                                  *|\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:         |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ INPUT: ]  ");
+    scanf("%s",doubleconfirm);
+    if(strcmp(doubleconfirm,"y-e-s")!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.   |\n");
+        printf("|          Nothing changed.                                                         |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return 1;
+    }
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -INFO- ] UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...                  |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+    system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
+    system("userdel -f -r hpc-now >> /dev/null 2>&1");
+    printf("[ -DONE- ] The HPC-NOW cluster services have been deleted from this OS and device.  |\n");
+    printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    print_tail();
     return 0;
 }
 
@@ -5609,12 +5752,12 @@ int get_usage(char* usage_logfile){
         printf("+-----------------------------------------------------------------------------------+\n");
         return 1;
     }
-    system("rm -rf /Users/hpc-now/now-cluster-usage-latest.log >> /dev/null 2>&1");
-    sprintf(cmdline,"/bin/cp %s /Users/hpc-now/cluster_usage_temp.log >> /dev/null 2>&1",usage_logfile);
+    system("rm -rf /home/hpc-now/now-cluster-usage-latest.log >> /dev/null 2>&1");
+    sprintf(cmdline,"/bin/cp %s /home/hpc-now/cluster_usage_temp.log >> /dev/null 2>&1",usage_logfile);
     system(cmdline);
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -DONE- ] The latest usage summary has been printed to the file below:             |\n");
-    printf("|          /Users/hpc-now/cluster_usage_temp.log                                    |\n");
+    printf("|          /home/hpc-now/cluster_usage_temp.log                                     |\n");
     printf("|          You can use either any CSV file processing tools (i.e. LibreOffice) or   |\n");
     printf("|          plain text editors (for example, notepad) to view the detailed log.      |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
@@ -5634,12 +5777,12 @@ int get_syslog(char* operation_logfile){
         printf("+-----------------------------------------------------------------------------------+\n");
         return 1;
     }
-    system("rm -rf /Users/hpc-now/now-cluster-operation-latest.log >> /dev/null 2>&1");
-    sprintf(cmdline,"/bin/cp %s /Users/hpc-now/cluster_syslog_temp.log >> /dev/null 2>&1",operation_logfile);
+    system("rm -rf /home/hpc-now/now-cluster-operation-latest.log >> /dev/null 2>&1");
+    sprintf(cmdline,"/bin/cp %s /home/hpc-now/cluster_syslog_temp.log >> /dev/null 2>&1",operation_logfile);
     system(cmdline);
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -DONE- ] The latet operation log has been printed to the file below:              |\n");
-    printf("|          /Users/hpc-now/cluster_syslog_temp.log                                   |\n");
+    printf("|          /home/hpc-now/cluster_syslog_temp.log                                    |\n");
     printf("|          You can use either any CSV file processing tools (i.e. LibreOffice) or   |\n");
     printf("|          plain text editors (for example, notepad) to view the detailed log.      |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
@@ -5721,6 +5864,7 @@ int main(int argc, char* argv[]){
     char string_temp[128]="";
 
     print_header();
+
     if(argc==2&&strcmp(argv[1],"uninstall")==0){
         run_flag=uninstall_services();
         if(run_flag!=0){
@@ -5732,11 +5876,6 @@ int main(int argc, char* argv[]){
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
         return -3;
-    }
-
-    if(argc==2&&strcmp(argv[1],"update")==0){
-        run_flag=update_services();
-        return run_flag;
     }
 
     run_flag=check_and_install_prerequisitions(argv[0]);
@@ -5774,7 +5913,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"new")==0){
-       if(argc==2){
+        if(argc==2){
             printf("+-----------------------------------------------------------------------------------+\n");
             printf("[ -INFO- ] Please specify either 'workdir' or 'keypair' as the second parameter.    |\n");
             printf("|              workdir: creating a new working directory for a new cluster.         |\n");
@@ -6014,7 +6153,7 @@ int main(int argc, char* argv[]){
         write_log(pwd,operation_log,argv[1],run_flag);
         return run_flag;
     }
-    
+
     if(strcmp(argv[1],"delc")==0){
         if(argc==2){
             printf("+-----------------------------------------------------------------------------------+\n");
