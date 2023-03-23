@@ -5406,7 +5406,7 @@ int check_internet(void){
     return 0;
 }
 
-int check_and_install_prerequisitions(char* current_command){
+int check_and_install_prerequisitions(void){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
@@ -5437,8 +5437,8 @@ int check_and_install_prerequisitions(char* current_command){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] The service is corrupted due to missing critical folder. Please exit     |\n");
         printf("|          and run the installer with 'sudo' to reinstall it. Sample command:       |\n");
-        printf("|          sudo ./YOUR_INSTALLER_PATH uninstall                                     |\n");
-        printf("|          sudo ./YOUR_INSTALLER_PATH install                                       |\n");
+        printf("|          sudo YOUR_INSTALLER_FULL_PATH uninstall                                  |\n");
+        printf("|          sudo YOUR_INSTALLER_FULL_PATH install                                    |\n");
         printf("|          If this issue still occurs, please contact us via info@hpc-now.com .     |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
@@ -5724,7 +5724,7 @@ int main(int argc, char* argv[]){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
         return -3;
     }
-    run_flag=check_and_install_prerequisitions(argv[0]);
+    run_flag=check_and_install_prerequisitions();
     if(run_flag==3){
         write_log("NULL",operation_log,"PREREQ_FAILED",-3);
         print_tail();

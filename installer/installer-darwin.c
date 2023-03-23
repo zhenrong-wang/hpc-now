@@ -20,7 +20,7 @@ Bug report: info@hpc-now.com
 void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("| Welcome to HPC-NOW Service Installer! There are 3 options:                        |\n");
-    printf("| Usage: sudo ./THIS_INSTALLER_NAME option                                          |\n");
+    printf("| Usage: sudo THIS_INSTALLER_FULL_PATH option                                       |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|  install          : Install or repair the HPC-NOW Services on your device.        |\n");
     printf("|  update           : Update the hpcopr to the latest version.                      |\n");
@@ -93,7 +93,7 @@ int install_services(void){
         printf("|          If you'd like to reinstall, please uninstall first. Reinstallation       |\n");
         printf("|          is not permitted in order to protect your cloud clusters. In order to    |\n");
         printf("|          uninstall current HPC-NOW services, please run the command:              |\n");
-        printf("|          sudo ./THIS_INSTALLER_NAME uninstall (Double confirm is needed)          |\n");
+        printf("|          sudo THIS_INSTALLER_FULL_PATH uninstall (Double confirm is needed)       |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
