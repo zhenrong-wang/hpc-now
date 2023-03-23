@@ -25,6 +25,7 @@ Bug report: info@hpc-now.com
 #define QCLOUD_TF_PLUGIN_VERSION "1.79.12"
 #define AWS_TF_PLUGIN_VERSION "4.56.0"
 #define PASSWORD_STRING_LENGTH 20
+#define PASSWORD_LENGTH 19
 
 void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
@@ -57,6 +58,22 @@ int check_internet(void){
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 1;
+    }
+    return 0;
+}
+
+int generate_random_passwd(char* password){
+    int i,rand_num;
+    struct timeval current_time;
+    char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
+    unsigned int seed_num;
+    for(i=0;i<PASSWORD_LENGTH;i++){
+        gettimeofday(&current_time,NULL);
+        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+        srand(seed_num);
+        rand_num=rand()%72;
+        *(password+i)=*(ch_table+rand_num);
+        usleep(5000);
     }
     return 0;
 }
