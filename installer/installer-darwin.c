@@ -35,12 +35,11 @@ void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
-int check_internet(void){
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-    printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
-    
+int check_internet(void){    
     if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
+        printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service |\n");
         printf("|          or check your internet connectivity and retry later.                     |\n");
@@ -289,7 +288,6 @@ int update_services(void){
 
 int main(int argc, char* argv[]){
     int run_flag=0;
-    printf("%d,,\n",argc);
     if(argc!=2){
         print_help();
         return 1;
