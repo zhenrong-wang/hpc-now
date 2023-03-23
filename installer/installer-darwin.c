@@ -84,14 +84,7 @@ int install_services(void){
     char dirname_temp[DIR_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     char md5sum[64]="";
-    int flag=0;
     FILE* file_p=NULL;
-    char* ali_plugin_version=ALI_TF_PLUGIN_VERSION;
-    char* qcloud_plugin_version=QCLOUD_TF_PLUGIN_VERSION;
-    char* aws_plugin_version=AWS_TF_PLUGIN_VERSION;
-    char* usage_logfile=USAGE_LOG_FILE;
-    char* operation_logfile=OPERATION_LOG_FILE;
-    char* sshkey_dir=SSHKEY_DIR;
     int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
 
     printf("+-----------------------------------------------------------------------------------+\n");
