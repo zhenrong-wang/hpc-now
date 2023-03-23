@@ -24,6 +24,7 @@ Bug report: info@hpc-now.com
 #define URL_ALICLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-alicloud/"
 #define URL_AWS_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-aws/"
 #define URL_QCLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-qcloud/"
+#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
 #define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock" // This is a global file!
 #define USAGE_LOG_FILE "/Applications/.hpc-now/.now-cluster-usage.log" // This is a global file!
 #define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
@@ -5704,7 +5705,7 @@ int uninstall_services(void){
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Please switch to administrator or users with administration privilege    |\n");
-        printf("|          and run this command again to uninstall the HPC-NOW services.            |\n");
+        printf("|          and run the installer to uninstall the HPC-NOW services.                 |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -5757,10 +5758,11 @@ int uninstall_services(void){
 
 int update_services(void){
     char doubleconfirm[128]="";
+    char cmdline[CMDLINE_LENGTH]="";
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Please switch to administrator or users with administration privilege    |\n");
-        printf("|          and run this command again to uninstall the HPC-NOW services.            |\n");
+        printf("|          and run the installer to update the HPC-NOW services.                    |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -5769,21 +5771,7 @@ int update_services(void){
 
     printf("\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|*                                C A U T I O N !                                  *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*   YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM THE ISSUES BELOW:   *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*   1. You have *DESTROYED* all the clusters managed by this device.              *|\n");
-    printf("|*      This is * !!! EXTREMELY IMPORTANT !!! *                                    *|\n");
-    printf("|*   2. You have *CHECKED* your cloud service account and all the resources        *|\n");
-    printf("|*      created by the HPC-NOW services on this device have been destructed.       *|\n");
-    printf("|*   3. You have *EXPORTED* the usage log and systemlog to a permenant directory,  *|\n");
-    printf("|*      You can run 'hpcopr syslog' and 'hpcopr usage' to get the logs and save    *|\n");
-    printf("|*      them to a directory such as /Users/ANOTHER_USER                            *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*                                C A U T I O N !                                  *|\n");
+    printf("|* YOU ARE UPDATING THE HPC-NOW SERVICES TO THE LATEST VERSION.                    *|\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:         |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
@@ -5797,18 +5785,25 @@ int update_services(void){
         return 1;
     }
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...                  |\n");
+    printf("[ -INFO- ] UPDATING THE SERVICES AND REMOVING THE DATA NOW ...                      |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
-    system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
-    system("dscl . -delete /Groups/hpc-now >> /dev/null 2>&1");
-    system("rm -rf /Users/hpc-now >> /dev/null 2>&1");
-    printf("[ -DONE- ] The HPC-NOW cluster services have been deleted from this OS and device.  |\n");
-    printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    print_tail();
-    return 0;
+    sprintf(cmdline,"curl %s -o /Users/hpc-now/.bin/hpcopr && chmod +x /Users/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
+    if(system(cmdline)==0){
+        printf("[ -DONE- ] The HPC-NOW cluster services have been deleted from this OS and device.  |\n");
+        printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        print_tail();
+        return 0;
+    }
+    else{
+        printf("[ FATAL: ] Failed to update the HPC-NOW services. Please check and make sure:       |\n");
+        printf("|          1. The HPC-NOW Services have been installed previously.                  |\n");
+        printf("|          2. Your device is connected to the internet.                             |\n");
+        printf("|          3. Currently there is no 'hpcopr' thread(s) running.                     |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        print_tail();
+        return 1;
+    }
 }
 
 int get_usage(char* usage_logfile){
@@ -5944,6 +5939,11 @@ int main(int argc, char* argv[]){
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
         return -3;
+    }
+
+    if(argc==2&&strcmp(argv[1],"update")==0){
+        run_flag=update_services();
+        return run_flag;
     }
 
     run_flag=check_and_install_prerequisitions(argv[0]);
