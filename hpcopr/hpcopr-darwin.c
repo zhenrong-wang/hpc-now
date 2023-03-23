@@ -5435,9 +5435,10 @@ int check_and_install_prerequisitions(char* current_command){
 
     if(folder_exist_or_not("/Applications/.hpc-now/")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] The service is corrupted due to missing critical folders. Please exit    |\n");
-        printf("|          and run the installer with 'sudo' to repair it. Sample command:          |\n");
-        printf("|          sudo ./YOUR_INSTALLER_PATH                                               |\n");
+        printf("[ FATAL: ] The service is corrupted due to missing critical folder. Please exit     |\n");
+        printf("|          and run the installer with 'sudo' to reinstall it. Sample command:       |\n");
+        printf("|          sudo ./YOUR_INSTALLER_PATH uninstall                                     |\n");
+        printf("|          sudo ./YOUR_INSTALLER_PATH install                                       |\n");
         printf("|          If this issue still occurs, please contact us via info@hpc-now.com .     |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
