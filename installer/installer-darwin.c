@@ -80,7 +80,7 @@ int install_services(void){
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Please switch to administrator or users with administration privilege    |\n");
-        printf("|          and run the installer to uninstall the HPC-NOW services.                 |\n");
+        printf("|          and run the installer to install the HPC-NOW services.                   |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -313,7 +313,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"install")==0){
-        run_flag=update_services();
+        run_flag=install_services();
         return run_flag;
     }
 
