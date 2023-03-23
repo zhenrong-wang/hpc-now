@@ -204,13 +204,12 @@ int install_services(void){
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!                  |\n");
-    printf("|          The user 'hpc-now' has been created with initial the password:           |\n");
-    printf("|              nowadmin2023~                                                        |\n");
+    printf("|          The user 'hpc-now' has been created with initial password: nowadmin2023~ |\n");
     printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:         |\n");
     printf("|          1. Run CMD by typing cmd in the Windows Search box                       |\n");
-    printf("|          2. cd c:\\hpc-now                                                         |\n");
-    printf("|          3. hpcopr help                                                           |\n");
-    printf("|          *You will be required to change the password of 'hpc-now'.               |\n");
+    printf("|          2. cd c:\\hpc-now ( Change directory to the running directory )           |\n");
+    printf("|          3. hpcopr help    ( Some core components will be downloaded )            |\n");
+    printf("|          * You will be required to change the password of 'hpc-now'.              |\n");
     printf("|          Enjoy you Cloud HPC journey!                                             |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] Exit now.                                                                |\n");
