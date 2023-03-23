@@ -254,7 +254,7 @@ int update_services(void){
         return 1;
     }
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] UPDATING THE SERVICES AND REMOVING THE DATA NOW ...                      |\n");
+    printf("[ -INFO- ] UPDATING THE SERVICES NOW ...                                            |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr && chmod +x /home/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /home/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
     if(system(cmdline)==0){

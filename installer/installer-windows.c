@@ -331,7 +331,7 @@ int update_services(void){
         return 1;
     }
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] UPDATING THE SERVICES AND REMOVING THE DATA NOW ...                      |\n");
+    printf("[ -INFO- ] UPDATING THE SERVICES NOW ...                                            |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
     sprintf(cmdline,"curl -s %s -o c:\\hpc-now\\hpcopr.exe",URL_HPCOPR_LATEST);
