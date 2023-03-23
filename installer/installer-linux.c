@@ -137,6 +137,7 @@ int install_services(void){
     }
     printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
     sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr && chmod +x /home/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
+    system(cmdline);
     system("mkdir -p /home/hpc-now/.now-ssh/ >> /dev/null 2>&1");
     system("mkdir -p /home/hpc-now/.now-lic/ >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /home/hpc-now/");
