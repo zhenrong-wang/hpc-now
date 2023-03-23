@@ -7,52 +7,23 @@ Bug report: info@hpc-now.com
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
 #include <signal.h>
 
 #define CMDLINE_LENGTH 2048
-#define CLUSTER_ID_LENGTH_MAX 24
-#define CLUSTER_ID_LENGTH_MIN 8
 #define DIR_LENGTH 256
 #define FILENAME_LENGTH 512
-#define LINE_LENGTH 4096 //It has to be very long, because tfstate file may contain very long line
-#define AKSK_LENGTH 128
-#define CONF_STRING_LENTH 64
-#define URL_ALICLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-alicloud/"
-#define URL_AWS_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-aws/"
-#define URL_QCLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-qcloud/"
-#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
 #define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock" // This is a global file!
 #define USAGE_LOG_FILE "/Applications/.hpc-now/.now-cluster-usage.log" // This is a global file!
 #define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
 #define NOW_LIC_DIR "/Users/hpc-now/.now-lic"
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
-#define NOW_CRYPTO_EXEC "/Applications/.hpc-now/.bin/now-crypto.exe"
-#define TERRAFORM_EXEC "/Applications/.hpc-now/.bin/terraform"
-#define PASSWORD_LENGTH 19
-#define PASSWORD_STRING_LENGTH 20
-#define RANDSTR_LENGTH_PLUS 11
-#define AWS_SLEEP_TIME_GLOBAL 180
-#define AWS_SLEEP_TIME_CN 180
-#define ALI_SLEEP_TIME 60
-#define QCLOUD_SLEEP_TIME 20
-#define GENERAL_SLEEP_TIME 15
 #define ALI_TF_PLUGIN_VERSION "1.199.0"
 #define QCLOUD_TF_PLUGIN_VERSION "1.79.12"
 #define AWS_TF_PLUGIN_VERSION "4.56.0"
-#define MAXIMUM_ADD_NODE_NUMBER 16 // You can modify this number to adding more than 16 nodes once
-#define MAXIMUM_WAIT_TIME 600
-#define MD5_TF_EXEC "821bf13764e8afbc0fb73a73e25aebad"
-#define MD5_NOW_CRYPTO "202082eac600db6f6f429a1ceb047044"
-#define MD5_ALI_TF "327c71c64bf913c0e6d90cd7b1a15d41"
-#define MD5_QCLOUD_TF "cdb4d3b08328f1dbcbb2df294351f399"
-#define MD5_AWS_TF "4086f1c70b04ebc43d5a58d56021fc81"
-#define MD5_ALI_TF_ZIP "0e23e305aa0d6962a87f3013a1607ae9"
-#define MD5_QCLOUD_TF_ZIP "5ea4e09ae46602959e40c09acd21b4e2"
-#define MD5_AWS_TF_ZIP "463fb946564c91965d58d38e085ebc35"
+#define PASSWORD_STRING_LENGTH 20
 
 void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
@@ -95,7 +66,6 @@ int install_services(void){
     char dirname_temp[DIR_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     char md5sum[64]="";
-    reset_string(random_string);
     int flag=0;
     FILE* file_p=NULL;
     char* ali_plugin_version=ALI_TF_PLUGIN_VERSION;
@@ -317,11 +287,8 @@ int update_services(void){
 
 int main(int argc, char* argv[]){
     int run_flag=0;
-    char* usage_log=USAGE_LOG_FILE;
-    char* operation_log=OPERATION_LOG_FILE;
-    char string_temp[128]="";
 
-    if(argc==1){
+    if(argc!=2){
         print_help();
         return 1;
     }
