@@ -30,7 +30,7 @@ void print_help(void){
     printf("|  uninstall        : Remove the HPC-NOW services and all relevant data.            |\n");
     printf("|  help             : Show this information.                                        |\n");      
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
+    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
     printf("|                                                 | P - erformance  + O - perating  |\n");
@@ -42,7 +42,7 @@ int check_internet(void){
     if(system("ping -n 2 www.baidu.com > nul 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-        printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
+        printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service |\n");
         printf("|          or check your internet connectivity and retry later.                     |\n");
@@ -129,7 +129,7 @@ int install_services(void){
     
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-    printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
+    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
 
     system("whoami /groups | find \"S-1-16-12288\" > c:\\programdata\\check.txt.tmp 2>&1");
     if(file_empty_or_not("c:\\programdata\\check.txt.tmp")==0){
@@ -221,7 +221,7 @@ int uninstall_services(void){
     char doubleconfirm[128]="";
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-    printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
+    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
 
     system("whoami /groups | find \"S-1-16-12288\" > c:\\programdata\\check.txt.tmp 2>&1");
     if(file_empty_or_not("c:\\programdata\\check.txt.tmp")==0){
@@ -289,7 +289,7 @@ int update_services(void){
 
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-    printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
+    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
 
     system("whoami /groups | find \"S-1-16-12288\" > c:\\programdata\\check.txt.tmp 2>&1");
     if(file_empty_or_not("c:\\programdata\\check.txt.tmp")==0){

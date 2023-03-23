@@ -27,7 +27,7 @@ void print_help(void){
     printf("|  uninstall        : Remove the HPC-NOW services and all relevant data.            |\n");
     printf("|  help             : Show this information.                                        |\n");      
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
+    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
     printf("|                                                 | P - erformance  + O - perating  |\n");
@@ -39,7 +39,7 @@ int check_internet(void){
     if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-        printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
+        printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service |\n");
         printf("|          or check your internet connectivity and retry later.                     |\n");
@@ -75,7 +75,7 @@ int install_services(void){
 
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-    printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
+    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
 
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -166,7 +166,7 @@ int uninstall_services(void){
 
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-    printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
+    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
 
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -226,7 +226,7 @@ int update_services(void){
 
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-    printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
+    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
 
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -263,7 +263,7 @@ int update_services(void){
         return 1;
     }
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] UPDATING THE SERVICES AND REMOVING THE DATA NOW ...                      |\n");
+    printf("[ -INFO- ] UPDATING THE SERVICES NOW ...                                            |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr && chmod +x /Users/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
     if(system(cmdline)==0){
