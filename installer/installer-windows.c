@@ -16,7 +16,7 @@ Bug report: info@hpc-now.com
 
 #define CMDLINE_LENGTH 2048
 #define LINE_LENGTH 1024 //It has to be very long, because tfstate file may contain very long line
-#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_windows_amd64"
+#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_windows_amd64.exe"
 #define PASSWORD_STRING_LENGTH 20
 #define PASSWORD_LENGTH 19
 
