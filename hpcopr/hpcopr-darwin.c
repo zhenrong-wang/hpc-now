@@ -5422,7 +5422,6 @@ int check_and_install_prerequisitions(char* current_command){
     char* usage_logfile=USAGE_LOG_FILE;
     char* operation_logfile=OPERATION_LOG_FILE;
     char* sshkey_dir=SSHKEY_DIR;
-    int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
     printf("[ -INFO- ] Checking running environment for HPC-NOW services ...                    |\n");
 
     if(check_current_user()!=0){
