@@ -5808,7 +5808,7 @@ int main(int argc, char* argv[]){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
         return -3;
     }
-    check_flag=check_and_install_prerequisitions(argv[0]);
+    check_flag=check_and_install_prerequisitions();
     if(check_flag!=0&&check_flag!=127&&check_flag!=-1&&check_flag!=2){
         print_tail();
         system_cleanup();
