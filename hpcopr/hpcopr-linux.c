@@ -143,7 +143,7 @@ void print_header(void){
 //    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
 //    printf("|                                                 | P - erformance  + O - perating  |\n");
 //    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
-//    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
     printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator!                                    |\n");
     if(time_p->tm_mon+1<10){
         length_temp--;
