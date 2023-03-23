@@ -248,7 +248,6 @@ int update_services(void){
         return 1;
     }
 
-    printf("\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|* YOU ARE UPDATING THE HPC-NOW SERVICES TO THE LATEST VERSION.                    *|\n");
     printf("+-----------------------------------------------------------------------------------+\n");
