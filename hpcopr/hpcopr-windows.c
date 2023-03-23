@@ -5636,7 +5636,7 @@ int check_and_install_prerequisitions(void){
         fprintf(file_p,"%s\n",random_string);
         fclose(file_p);
     }
-    system("attrib +h +s +r c:\\programdata\\hpc-now\\now_crypto_seed.lock");
+    system("attrib +h +s +r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
     if(folder_exist_or_not(SSHKEY_DIR)!=0){
         system("mkdir c:\\hpc-now\\.ssh\\ > nul 2>&1");
     }
