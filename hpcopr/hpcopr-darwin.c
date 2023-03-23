@@ -5444,7 +5444,7 @@ int check_and_install_prerequisitions(char* current_command){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
-        return 3;
+        return 2;
     }
 
     if(folder_exist_or_not("/Applications/.hpc-now/.destroyed/")!=0){
@@ -5721,24 +5721,10 @@ int main(int argc, char* argv[]){
     char string_temp[128]="";
 
     print_header();
-    if(argc==2&&strcmp(argv[1],"uninstall")==0){
-        run_flag=uninstall_services();
-        if(run_flag!=0){
-            print_tail();
-        }
-        return run_flag;
-    }
-
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
         return -3;
     }
-
-    if(argc==2&&strcmp(argv[1],"update")==0){
-        run_flag=update_services();
-        return run_flag;
-    }
-
     run_flag=check_and_install_prerequisitions(argv[0]);
     if(run_flag==3){
         write_log("NULL",operation_log,"PREREQ_FAILED",-3);
@@ -5788,7 +5774,7 @@ int main(int argc, char* argv[]){
         if(strcmp(argv[2],"workdir")==0){
             run_flag=create_new_workdir(crypto_keyfile);
             write_log("NULL",operation_log,"new workdir",run_flag);
-            return 0;
+            return run_flag;
         }
         else if(strcmp(argv[2],"keypair")==0){
             if(envcheck(pwd)!=0){
