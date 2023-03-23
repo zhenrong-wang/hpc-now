@@ -39,7 +39,7 @@ void print_help(void){
 }
 
 int check_internet(void){    
-    if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
+    if(system("ping -n 2 www.baidu.com > nul 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
         printf("| Version: 0.1.59   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
