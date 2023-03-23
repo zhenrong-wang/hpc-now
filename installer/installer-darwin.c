@@ -141,7 +141,7 @@ int install_services(void){
     strcpy(cmdline,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
     system(cmdline);
     printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
-    sprintf(cmdline,"curl %s -o /Users/hpc-now/.bin/hpcopr && chmod +x /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
+    sprintf(cmdline,"curl %s -o /Users/hpc-now/.bin/hpcopr >> /dev/null && chmod +x /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
     system(cmdline);
     printf("[ -INFO- ] Creating other key running directories now ...                           |\n");
     system("mkdir -p /Users/hpc-now/.now-ssh/ >> /dev/null 2>&1");
@@ -267,7 +267,7 @@ int update_services(void){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] UPDATING THE SERVICES AND REMOVING THE DATA NOW ...                      |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    sprintf(cmdline,"curl %s -o /Users/hpc-now/.bin/hpcopr && chmod +x /Users/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
+    sprintf(cmdline,"curl %s -o /Users/hpc-now/.bin/hpcopr >> /dev/null && chmod +x /Users/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
     if(system(cmdline)==0){
         printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.    |\n");
         printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
