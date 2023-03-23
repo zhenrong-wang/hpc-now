@@ -87,7 +87,7 @@ int install_services(void){
         return -1;    
     }
 
-    if(system("whoami | grep -w hpc-now >> /dev/null 2>&1")==0){
+    if(system("id hpc-now >> /dev/null 2>&1")==0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed. |\n");
         printf("|          If you'd like to reinstall, please uninstall first. Reinstallation       |\n");
