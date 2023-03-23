@@ -138,10 +138,8 @@ int install_services(void){
     system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/.bin >> /dev/null 2>&1");
     printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...                       |\n");
-    if(system("cat /Users/hpc-now/.bashrc | grep PATH=/Users/hpc-now/.bin/ >> /dev/null 2>&1")!=0){
-        strcpy(cmdline,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
-        system(cmdline);
-    }
+    strcpy(cmdline,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
+    system(cmdline);
     printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
     sprintf(cmdline,"curl %s -o /Users/hpc-now/.bin/hpcopr && chmod +x /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
     system(cmdline);
