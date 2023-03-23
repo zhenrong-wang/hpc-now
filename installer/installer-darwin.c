@@ -178,7 +178,6 @@ int uninstall_services(void){
         return -1;    
     }
 
-    printf("\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|*                                C A U T I O N !                                  *|\n");
     printf("|*                                                                                 *|\n");
