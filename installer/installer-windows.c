@@ -130,7 +130,7 @@ int install_services(void){
         printf("[ FATAL: ] Please switch to Administrator or users with administration privilege:   |\n");
         printf("|          1. Run a CMD window with Administrator role                              |\n");
         printf("|          2. Type the full path of this installer with an option, for example      |\n");
-        printf("|             C:\Users\ABC\installer_windows_amd64.exe install                      |\n");
+        printf("|             C:\\Users\\ABC\\installer_windows_amd64.exe install                      |\n");
         printf("|          to run this installer properly.                                          |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
@@ -147,7 +147,7 @@ int install_services(void){
         printf("|          uninstall current HPC-NOW services, please run the command:              |\n");
         printf("|          1. Run a CMD window with Administrator role                              |\n");
         printf("|          2. Type the full path of this installer with an option, for example      |\n");
-        printf("|             C:\Users\ABC\installer_windows_amd64.exe uninstall                    |\n");
+        printf("|             C:\\Users\\ABC\\installer_windows_amd64.exe uninstall                    |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -223,7 +223,7 @@ int uninstall_services(void){
         printf("[ FATAL: ] Please switch to administrator or users with administration privilege:   |\n");
         printf("|          1. Run a CMD window with Administrator role                              |\n");
         printf("|          2. Type the full path of this installer with an option, for example      |\n");
-        printf("|             C:\Users\ABC\installer_windows_amd64.exe uninstall                    |\n");
+        printf("|             C:\\Users\\ABC\\installer_windows_amd64.exe uninstall                    |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -292,7 +292,7 @@ int update_services(void){
         printf("[ FATAL: ] Please switch to administrator or users with administration privilege:   |\n");
         printf("|          1. Run a CMD window with Administrator role                              |\n");
         printf("|          2. Type the full path of this installer with an option, for example      |\n");
-        printf("|             C:\Users\ABC\installer_windows_amd64.exe uninstall                    |\n");
+        printf("|             C:\\Users\\ABC\\installer_windows_amd64.exe uninstall                    |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
