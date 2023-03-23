@@ -121,11 +121,6 @@ void print_help(void){
     printf("|              : all     - Turn on the management and compute nodes of the cluster. |\n");         
     printf("|  destroy     : *DESTROY* the whole cluster - including all the resources & data.  |\n");
     printf("|                                                                                   |\n");
-    printf("+ IV. INSTALLATION    --------------------------------------------------------------+\n");
-    printf("|                                                                                   |\n");
-    printf("|  uninstall   : *REMOVE* the HPC-NOW services and data. Admin/root privilege is    |\n");
-    printf("|                required for this operation.                                       |\n");
-    printf("|                                                                                   |\n");      
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
     printf("|                                                 | P - erformance  + O - perating  |\n");
@@ -141,13 +136,13 @@ void print_header(void){
     char string_temp[128]="";
     int i;
     int length_temp=19;
-    printf("\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|  Welcome to HPC_NOW Cluster Operator!                                             |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
-    printf("|                                                 | P - erformance  + O - perating  |\n");
-    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
+//    printf("\n");
+//    printf("+-----------------------------------------------------------------------------------+\n");
+//    printf("|  Welcome to HPC_NOW Cluster Operator!                                             |\n");
+//    printf("+-----------------------------------------------------------------------------------+\n");
+//    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
+//    printf("|                                                 | P - erformance  + O - perating  |\n");
+//    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator!                                    |\n");
     if(time_p->tm_mon+1<10){
@@ -169,7 +164,7 @@ void print_header(void){
         *(string_temp+i)=' ';
     }
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d%s|\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,string_temp);
-    printf("|    Version: 0.1.53   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
+    printf("|    Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     
 }
@@ -5418,7 +5413,7 @@ int check_internet(void){
     return 0;
 }
 
-int check_and_install_prerequisitions(char* current_command){
+int check_and_install_prerequisitions(void){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
@@ -5434,100 +5429,26 @@ int check_and_install_prerequisitions(char* current_command){
     char* operation_logfile=OPERATION_LOG_FILE;
     char* sshkey_dir=SSHKEY_DIR;
     printf("[ -INFO- ] Checking running environment for HPC-NOW services ...                    |\n");
-    if(system("id hpc-now >> /dev/null 2>&1")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ -WARN- ] There is no 'hpc-now' user in your OS currently.                         |\n");
-        if(system("whoami | grep -w root > /dev/null 2>&1")!=0){
-            printf("+-----------------------------------------------------------------------------------+\n");
-            printf("[ FATAL: ] Please switch to root user and run the command again (NOT recommended!). |\n");
-            printf("|          Or, switch to a user with the 'sudo' privilege and run this command      |\n");
-            printf("|          with 'sudo' (strongly recommended!).                                     |\n");
-            printf("+-----------------------------------------------------------------------------------+\n");
-            printf("[ FATAL: ] Exit now.                                                                |\n");
-            printf("+-----------------------------------------------------------------------------------+\n");
-            return -1;    
-        }
-        system("rm -rf /home/hpc-now/ >> /dev/null 2>&1");
-        system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-        system("rm -rf /usr/.hpc-now/ >> /dev/null 2>&1");
-        strcpy(cmdline,"useradd hpc-now -m -s /bin/bash >> /dev/null 2>&1");
-        if(system(cmdline)!=0){
-            printf("+-----------------------------------------------------------------------------------+\n");
-            printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.     |\n");
-            printf("+-----------------------------------------------------------------------------------+\n");
-            printf("[ FATAL: ] Exit now.                                                                |\n");
-            printf("+-----------------------------------------------------------------------------------+\n");
-            return -1;
-        }
-
-        system("mkdir -p /usr/.hpc-now && chmod 777 /usr/.hpc-now");
-        generate_random_passwd(random_string);
-        file_p=fopen("/usr/.hpc-now/.now_crypto_seed.lock","w+");
-        fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
-        fprintf(file_p,"PLEASE DO NOT HANDLE THIS FILE MANNUALLY! OTHERWISE THE SERVICE WILL BE CORRUPTED!\n");
-        fprintf(file_p,"SHANGHAI HPC-NOW TECHNOLOGIES CO., LTD | info@hpc-now.com | https://www.hpc-now.com\n\n");
-        fprintf(file_p,"%s\n",random_string);
-        fclose(file_p);
-        system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-        system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-        
-        system("mkdir -p /home/hpc-now/.bin >> /dev/null 2>&1");
-        if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ >> /dev/null 2>&1")!=0){
-            strcpy(cmdline,"echo \"export PATH=/home/hpc-now/.bin/:$PATH\" >> /home/hpc-now/.bashrc");
-            system(cmdline);
-        }
-        if(file_exist_or_not("/home/hpc-now/.bin/hpcopr")!=0){
-            sprintf(cmdline,"/bin/cp %s /home/hpc-now/.bin/hpcopr >> /dev/null 2>&1",current_command);
-            system(cmdline);
-        }
-        if(folder_exist_or_not(SSHKEY_DIR)!=0){
-            system("mkdir -p /home/hpc-now/.now-ssh/ >> /dev/null 2>&1");
-        }
-
-        if(folder_exist_or_not(NOW_LIC_DIR)!=0){
-            system("mkdir -p /home/hpc-now/.now-lic/ >> /dev/null 2>&1");
-        }
-        system("chown -R hpc-now:hpc-now /home/hpc-now/");
-
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ -INFO- ] The user 'hpc-now' has been created *WITHOUT* an initial password.       |\n");
-        printf("|          You *MUST* run 'sudo passwd hpc-now' command to set a password.          |\n");
-        printf("|          Please ensure the complexity of the new password!                        |\n");
-        printf("|          After setting password, please switch to the user 'hpc-now' and run      |\n");
-        printf("|          the command 'hpcopr help' to get started.                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ -INFO- ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return 1;
-    }
-
-    if(folder_exist_or_not("/usr/.hpc-now/")!=0){
-        if(system("whoami | grep -w root")!=0){
-            printf("+-----------------------------------------------------------------------------------+\n");
-            printf("[ FATAL: ] The service is corrupted due to missing critical folders. Please exit    |\n");
-            printf("|          and run 'hpcopr' command again with 'sudo' to repair it. If this error   |\n");
-            printf("|          still occurs, please contact us via info@hpc-now.com for supports.       |\n");
-            printf("+-----------------------------------------------------------------------------------+\n");
-            printf("[ FATAL: ] Exit now.                                                                |\n");
-            printf("+-----------------------------------------------------------------------------------+\n");
-            return 3;
-        }
-        system("mkdir -p /usr/.hpc-now && chmod 777 /usr/.hpc-now");
-        generate_random_passwd(random_string);
-        file_p=fopen("/usr/.hpc-now/.now_crypto_seed.lock","w+");
-        fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
-        fprintf(file_p,"PLEASE DO NOT HANDLE THIS FILE MANNUALLY! OTHERWISE THE SERVICE WILL BE CORRUPTED!\n");
-        fprintf(file_p,"SHANGHAI HPC-NOW TECHNOLOGIES CO., LTD | info@hpc-now.com | https://www.hpc-now.com\n\n");
-        fprintf(file_p,"%s\n",random_string);
-        fclose(file_p);
-        system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-        system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    }
-
+    
     if(check_current_user()!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] You *MUST* switch to the user 'hpc-now' to operate cloud clusters.       |\n");
-        printf("|          Or you need to switch into a directory with permissions. Exit now.       |\n");
+        printf("|          Please run the commands below:                                           |\n");
+        printf("|          su hpc-now   (You will be asked to input password without echo)          |\n");
+        printf("|          cd ~ && ls   (You will see all the current working directories)          |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return 2;
+    }
+    
+    if(folder_exist_or_not("/usr/.hpc-now/")!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] The service is corrupted due to missing critical folder. Please exit     |\n");
+        printf("|          and run the installer with 'sudo' to reinstall it. Sample command:       |\n");
+        printf("|          sudo YOUR_INSTALLER_FULL_PATH uninstall                                     |\n");
+        printf("|          sudo YOUR_INSTALLER_FULL_PATH install                                       |\n");
+        printf("|          If this issue still occurs, please contact us via info@hpc-now.com .     |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 2;
     }
@@ -5678,67 +5599,8 @@ int check_and_install_prerequisitions(char* current_command){
         system(cmdline);
     }
 
-    if(file_exist_or_not("/home/hpc-now/.bin/hpcopr")!=0){
-        sprintf(cmdline,"/bin/cp %s /home/hpc-now/.bin/hpcopr >> /dev/null 2>&1",current_command);
-        system(cmdline);
-    }
-
     printf("[ -INFO- ] Running environment successfully checked. HPC-NOW services are ready.    |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    return 0;
-}
-
-int uninstall_services(void){
-    char doubleconfirm[128]="";
-    if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Please switch to administrator or users with administration privilege    |\n");
-        printf("|          and run this command again to uninstall the HPC-NOW services.            |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return -1;    
-    }
-
-    printf("\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|*                                C A U T I O N !                                  *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*   YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM THE ISSUES BELOW:   *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*   1. You have *DESTROYED* all the clusters managed by this device.              *|\n");
-    printf("|*      This is * !!! EXTREMELY IMPORTANT !!! *                                    *|\n");
-    printf("|*   2. You have *CHECKED* your cloud service account and all the resources        *|\n");
-    printf("|*      created by the HPC-NOW services on this device have been destructed.       *|\n");
-    printf("|*   3. You have *EXPORTED* the usage log and systemlog to a permenant directory,  *|\n");
-    printf("|*      You can run 'hpcopr syslog' and 'hpcopr usage' to get the logs and save    *|\n");
-    printf("|*      them to a directory such as /home/ANOTHER_USER                             *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*                                C A U T I O N !                                  *|\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:         |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ INPUT: ]  ");
-    scanf("%s",doubleconfirm);
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.   |\n");
-        printf("|          Nothing changed.                                                         |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return 1;
-    }
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...                  |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
-    system("userdel -f -r hpc-now >> /dev/null 2>&1");
-    printf("[ -DONE- ] The HPC-NOW cluster services have been deleted from this OS and device.  |\n");
-    printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    print_tail();
     return 0;
 }
 
@@ -5865,20 +5727,12 @@ int main(int argc, char* argv[]){
 
     print_header();
 
-    if(argc==2&&strcmp(argv[1],"uninstall")==0){
-        run_flag=uninstall_services();
-        if(run_flag!=0){
-            print_tail();
-        }
-        return run_flag;
-    }
-
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
         return -3;
     }
 
-    run_flag=check_and_install_prerequisitions(argv[0]);
+    run_flag=check_and_install_prerequisitions();
     if(run_flag==3){
         write_log("NULL",operation_log,"PREREQ_FAILED",-3);
         print_tail();
@@ -5900,7 +5754,7 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    if(strcmp(argv[1],"new")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"help")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"conf")!=0&&strcmp(argv[1],"uninstall")!=0){
+    if(strcmp(argv[1],"new")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"help")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"conf")!=0){
         print_help();
         write_log("NULL",operation_log,argv[1],1);
         return 1;
