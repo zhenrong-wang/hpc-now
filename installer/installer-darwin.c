@@ -18,6 +18,7 @@ Bug report: info@hpc-now.com
 #define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock" // This is a global file!
 #define USAGE_LOG_FILE "/Applications/.hpc-now/.now-cluster-usage.log" // This is a global file!
 #define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
+#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_linux_amd64"
 #define NOW_LIC_DIR "/Users/hpc-now/.now-lic"
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
 #define ALI_TF_PLUGIN_VERSION "1.199.0"
@@ -141,13 +142,7 @@ int install_services(void){
     system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/.bin >> /dev/null 2>&1");
     printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...                       |\n");
-    if(file_exist_or_not("/Users/hpc-now/.bashrc")==0){
-        if(system("cat /Users/hpc-now/.bashrc | grep PATH=/Users/hpc-now/.bin/ >> /dev/null 2>&1")!=0){
-            strcpy(cmdline,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
-            system(cmdline);
-        }
-    }
-    else{
+    if(system("cat /Users/hpc-now/.bashrc | grep PATH=/Users/hpc-now/.bin/ >> /dev/null 2>&1")!=0){
         strcpy(cmdline,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
         system(cmdline);
     }
@@ -248,6 +243,16 @@ int update_services(void){
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return -1;    
+    }
+
+    if(system("id hpc-now >> /dev/null 2>&1")!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been    |\n");
+        printf("|          installed. Please install it first in order to update.                   |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Exit now.                                                                |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return 1;
     }
 
     printf("\n");
