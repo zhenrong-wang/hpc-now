@@ -13,17 +13,7 @@ Bug report: info@hpc-now.com
 #include <signal.h>
 
 #define CMDLINE_LENGTH 2048
-#define DIR_LENGTH 256
-#define FILENAME_LENGTH 512
-#define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock" // This is a global file!
-#define USAGE_LOG_FILE "/Applications/.hpc-now/.now-cluster-usage.log" // This is a global file!
-#define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
 #define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_linux_amd64"
-#define NOW_LIC_DIR "/Users/hpc-now/.now-lic"
-#define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
-#define ALI_TF_PLUGIN_VERSION "1.199.0"
-#define QCLOUD_TF_PLUGIN_VERSION "1.79.12"
-#define AWS_TF_PLUGIN_VERSION "4.56.0"
 #define PASSWORD_STRING_LENGTH 20
 #define PASSWORD_LENGTH 19
 
@@ -80,10 +70,7 @@ int generate_random_passwd(char* password){
 
 int install_services(void){
     char cmdline[CMDLINE_LENGTH]="";
-    char filename_temp[FILENAME_LENGTH]="";
-    char dirname_temp[DIR_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
-    char md5sum[64]="";
     FILE* file_p=NULL;
     int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
 
