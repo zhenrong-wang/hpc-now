@@ -128,30 +128,67 @@ int install_services(void){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Please switch to Administrator or users with administration privilege:   |\n");
         printf("|          1. Run a CMD window with Administrator role                              |\n");
-        printf("|          2. Type the full path of this installer plus the option                  |\n");
+        printf("|          2. Type the full path of this installer with an option, for example      |\n");
+        printf("|             C:\Users\ABC\installer_windows_amd64.exe update                       |\n");
         printf("|          to run this installer properly.                                          |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Exit now.                                                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return -1;    
     }
+    system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
+
+    if(system("net user hpc-now > nul 2>&1")==0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed. |\n");
+        printf("|          If you'd like to reinstall, please uninstall first. Reinstallation       |\n");
+        printf("|          is not permitted in order to protect your cloud clusters. In order to    |\n");
+        printf("|          uninstall current HPC-NOW services, please run the command:              |\n");
+        printf("|          1. Run a CMD window with Administrator role                              |\n");
+        printf("|          2. Type the full path of this installer with an option, for example      |\n");
+        printf("|             C:\Users\ABC\installer_windows_amd64.exe uninstall                    |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Exit now.                                                                |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return 1;
+    }
+
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -INFO- ] Checking and cleaning up current environment ...                         |\n");
+    system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
+    system("attrib -h -s -r c:\\hpc-now > nul 2>&1");
+    system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+    system("rd /s /q c:\\hpc-now > nul 2>&1");
+    system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
+    printf("[ -INFO- ] Adding the specific user 'hpc-now' to your OS ...                        |\n");   
+    strcpy(cmdline,"net user hpc-now nowadmin2023~ /add /logonpasswordchg:yes > nul 2>&1");
+    if(system(cmdline)!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.     |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Exit now.                                                                |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return -1;
+    }
+
+    printf("[ -INFO- ] Creating and configuring the running directory ...                       |\n");
+    
+    system("mkdir c:\\hpc-now > nul 2>&1");
+    system("mkdir c:\\programdata\\hpc-now\\ > nul 2>&1");
+    system("attrib +h +s +r c:\\programdata\\hpc-now > nul 2>&1");
+    system("mkdir c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1");
+    system("mkdir c:\\programdata\\hpc-now\\bin\\ > nul 2>&1");
+
+    generate_random_passwd(random_string);
+    file_p=fopen("c:\\programdata\\hpc-now\\now_crypto_seed.lock","w+");
+    fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
+    fprintf(file_p,"PLEASE DO NOT HANDLE THIS FILE MANNUALLY! OTHERWISE THE SERVICE WILL BE CORRUPTED!\n");
+    fprintf(file_p,"SHANGHAI HPC-NOW TECHNOLOGIES CO., LTD | info@hpc-now.com | https://www.hpc-now.com\n\n");
+    fprintf(file_p,"%s\n",random_string);
+    fclose(file_p);
 
 
-        system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
-        strcpy(cmdline,"net user hpc-now nowadmin2023~ /add /logonpasswordchg:yes > nul 2>&1");
-        if(system(cmdline)!=0){
-            printf("+-----------------------------------------------------------------------------------+\n");
-            printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.     |\n");
-            printf("+-----------------------------------------------------------------------------------+\n");
-            printf("[ FATAL: ] Exit now.                                                                |\n");
-            printf("+-----------------------------------------------------------------------------------+\n");
-            return -1;
-        }
-        system("mkdir c:\\hpc-now > nul 2>&1");
-        if(file_exist_or_not("C:\\hpc-now\\hpcopr.exe")!=0){
-            sprintf(cmdline,"copy %s c:\\hpc-now\\hpcopr.exe > nul 2>&1",current_command);
-            system(cmdline);
-        }
+    
         system("icacls c:\\hpc-now /grant hpc-now:(OI)(CI)F /t > nul 2>&1");
         system("icacls c:\\hpc-now /deny hpc-now:(DE) /t > nul 2>&1");
         system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
@@ -167,7 +204,10 @@ int install_services(void){
         return 127;
     }
 
-
+    if(file_exist_or_not("C:\\hpc-now\\hpcopr.exe")!=0){
+            sprintf(cmdline,"copy %s c:\\hpc-now\\hpcopr.exe > nul 2>&1",current_command);
+            system(cmdline);
+        }
 
     if(folder_exist_or_not("c:\\hpc-now")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -178,47 +218,7 @@ int install_services(void){
     }
 
 
-
-
-
-
-
-
-    if(system("id hpc-now >> /dev/null 2>&1")==0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed. |\n");
-        printf("|          If you'd like to reinstall, please uninstall first. Reinstallation       |\n");
-        printf("|          is not permitted in order to protect your cloud clusters. In order to    |\n");
-        printf("|          uninstall current HPC-NOW services, please run the command:              |\n");
-        printf("|          sudo THIS_INSTALLER_FULL_PATH uninstall (Double confirm is needed)       |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return 1;
-    }
-
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] Checking and cleaning up current environment ...                         |\n");
-    system("rm -rf /Users/hpc-now/ >> /dev/null 2>&1");
-    system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
-    printf("[ -INFO- ] Adding the specific user 'hpc-now' to your OS ...                        |\n");
-    flag1=system("dscl . -create /Users/hpc-now >> /dev/null 2>&1");
-    flag2=system("dscl . -create /Users/hpc-now UserShell /bin/bash >> /dev/null 2>&1");
-    flag3=system("dscl . -create /Users/hpc-now RealName hpc-now >> /dev/null 2>&1");
-    flag4=system("dscl . -create /Users/hpc-now UniqueID 1988 >> /dev/null 2>&1");
-    flag5=system("dscl . -create /Groups/hpc-now PrimaryGroupID 1988 >> /dev/null 2>&1");
-    flag5=system("dscl . -create /Users/hpc-now PrimaryGroupID 1988 >> /dev/null 2>&1");
-    flag6=system("dscl . -create /Users/hpc-now NFSHomeDirectory /Users/hpc-now >> /dev/null 2>&1");
-
-    if(flag1!=0||flag2!=0||flag3!=0||flag4!=0||flag5!=0||flag6!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.     |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return -1;
-    }
+ 
     
     printf("[ -INFO- ] Creating and configuring the running directory ...                       |\n");
     system("mkdir -p /Applications/.hpc-now >> /dev/null 2>&1 && chmod 777 /Applications/.hpc-now >> /dev/null 2>&1");
