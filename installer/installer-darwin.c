@@ -66,11 +66,17 @@ int generate_random_passwd(char* password){
         srand(seed_num);
         rand_num=rand()%72; //Get the random character from the string
         *(password+i)=*(ch_table+rand_num);
-        usleep(5000);
+        usleep(5000); // Must sleep in order to make the timeval different enough
     }
     return 0;
 }
 
+// Install HPC-NOW Services
+// If everything goes well, return 0; otherwise return non-zero value
+// 1. Check and add the dedicated user 'hpc-now'
+// 2. Create necessary directories, including /Applications/.hpc-now 
+// 3. Create the crypto key file for further encryption and decryption
+// 4. Manage the folder permissions
 int install_services(void){
     char cmdline[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
@@ -165,6 +171,7 @@ int install_services(void){
     return 0;
 }
 
+// Forcely uninstall the HPC-NOW services
 int uninstall_services(void){
     char doubleconfirm[128]="";
 
@@ -182,6 +189,7 @@ int uninstall_services(void){
         return -1;    
     }
 
+    // Double confirmation is needed.
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|*                                C A U T I O N !                                  *|\n");
     printf("|*                                                                                 *|\n");
