@@ -80,7 +80,7 @@
 
 如前所述，**hpcopr** 是您操作和管理 Cloud HPC 集群的核心界面。 **hpcopr** 目前以命令行的形式提供多种功能。您可以运行 `hpcopr help` 命令查看详细的帮助信息，主要如下：
 
-` **hpcopr command_name PARAM1 PARAM2** `
+`hpcopr command_name PARAM1 PARAM2`
 
  **_初始化类：_** 
 -  **hpcopr new PARAM**  – PARAM 为必选参数，且只能为 workdir 或者 keypair。当 PARAM 为 workdir 时，将创建一个新的工作目录，并加密保存云服务密钥对，后续可进入该目录创建您的集群；当 PARAM 为 keypair 时，需要首先 cd 到一个工作目录，并将轮换该目录对应的云账户密钥对
