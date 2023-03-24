@@ -4,6 +4,7 @@ The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-
 It is distributed under the license: GNU Public License - v2.0
 Bug report: info@hpc-now.com
 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,6 +18,7 @@ Bug report: info@hpc-now.com
 #define PASSWORD_STRING_LENGTH 20
 #define PASSWORD_LENGTH 19
 
+// Print out help info for this installer
 void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("| Welcome to HPC-NOW Service Installer! There are 3 options:                        |\n");
@@ -35,6 +37,7 @@ void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
+// check the internet connectivity by pinging Baidu's url. If connected, return 0; otherwise, return 1
 int check_internet(void){    
     if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -51,16 +54,17 @@ int check_internet(void){
     return 0;
 }
 
+// Generate a randome string, length = 19.
 int generate_random_passwd(char* password){
     int i,rand_num;
     struct timeval current_time;
     char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
     unsigned int seed_num;
     for(i=0;i<PASSWORD_LENGTH;i++){
-        gettimeofday(&current_time,NULL);
-        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+        gettimeofday(&current_time,NULL); //Get the precise time
+        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec); //Calculate the random seed
         srand(seed_num);
-        rand_num=rand()%72;
+        rand_num=rand()%72; //Get the random character from the string
         *(password+i)=*(ch_table+rand_num);
         usleep(5000);
     }
