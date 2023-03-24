@@ -1,3 +1,10 @@
+/*
+This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+It is distributed under the license: GNU Public License - v2.0
+Bug report: info@hpc-now.com
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,7 +35,7 @@ int main(int argc,char *argv[])
   char confirm[3];
   int param_number=argc-1;
   
-  printf("\nHign Performance Computing - start NOW!\n\nHPC-NOW Cluster Manager\n\nShanghai HPC-NOW Technologies Co., Ltd\nAll rights reserved (2022)\ninfo@hpc-now.com\n\n");
+  printf("\nHign Performance Computing - start NOW!\n\nHPC-NOW Cluster Manager\n\nShanghai HPC-NOW Technologies Co., Ltd\ninfo@hpc-now.com\n\n");
   
   char rand_num_string[7]="";
   srand((unsigned)time(NULL));
