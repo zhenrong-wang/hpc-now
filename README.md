@@ -56,7 +56,7 @@
 
 ### 5. 如何使用
 
-请参阅[部署手册](http://www.hpc-now.com/deploy)。请注意：如果您直接运行 installer 进行本地安装，将会下载云上已经编译好的 hpcopr 和 now-crypto 至以下本地目录：
+请参阅[技术文档](https://www.hpc-now.com/docs/all)。请注意：如果您直接运行 installer 进行本地安装，将会下载云上已经编译好的 hpcopr 和 now-crypto 至以下本地目录：
 
 - **Windows** ： C:\programdata\hpc-now\bin\now-crypto.exe 和 C:\hpc-now\hpcopr.exe
 -  **GNU/Linu** x：/usr/.hpc-now/.bin/now-crypto.exe 和 /home/hpc-now/.bin/hpcopr
