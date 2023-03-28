@@ -1,0 +1,535 @@
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+  }
+}
+provider "aws" {
+  access_key = "BLANK_ACCESS_KEY_ID"
+  secret_key = "BLANK_SECRET_KEY"
+  region = "DEFAULT_REGION_ID"
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "NODE_NUM" {
+  type = number
+  default = DEFAULT_NODE_NUM
+}
+
+variable "HPC_USER_NUM" {
+  type = number
+  default = DEFAULT_USER_NUM
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+
+variable "cluster_init_scripts" {
+  type = string
+  default = "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/cluster_initv6.sh"
+}
+
+variable "db_init_scripts" {
+  type = string
+  default = "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/cluster_db_init.sh"
+}
+
+variable "master_init_parameters" {
+  type = string
+  default = "DEFAULT_MASTERINI"
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "compute_init_parameters" {
+  type = string
+  default = "skip skip"
+}  
+
+variable "master_passwd" {
+  type = string
+  default = "DEFAULT_MASTER_PASSWD"
+}
+
+variable "compute_passwd" {
+  type = string
+  default = "DEFAULT_COMPUTE_PASSWD"
+}
+
+variable "database_root_passwd" {
+  type = string
+  default = "DEFAULT_DB_ROOT_PASSWD"
+}
+
+variable "database_acct_passwd" {
+  type = string
+  default = "DEFAULT_DB_ACCT_PASSWD"
+}
+
+// cn-northwest-1 & cn-north-1
+variable "centos7cn" {
+  type = list(string)
+  default = ["ami-0a82540eb34dc198a", "ami-0fa5d1b0525c24789"]
+}
+
+variable "centoss9cn" {
+  type = list(string)
+  default = ["ami-04f6760c1e4636a33", "ami-057d5a9efe364bef0"]
+}
+
+// us-east-1 & us-east-2
+variable "centos7global" {
+  type = list(string)
+  default = ["ami-02c073b6f8c9e1803", "ami-0e5fa27acebc2bd70"]
+}
+
+//not validated
+variable "centoss9global" {
+  type = list(string)
+  default = ["ami-0b3af296cf8dc9094", "ami-0e72a99409d46ccd8"]
+}
+
+#define some data
+
+data "aws_ec2_instance_types" "i128c256g" {
+  filter {
+    name   = "instance-type"
+    values = ["c6i.32xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "i96c192g" {
+  filter {
+    name   = "instance-type"
+    values = ["c6i.24xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "i72c144g" {
+  filter {
+    name = "instance-type"
+    values = ["c5.18xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "i64c128g" {
+  filter {
+    name   = "instance-type"
+    values = ["c6i.16xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "i48c96g" {
+  filter {
+    name   = "instance-type"
+    values = ["c6i.12xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "i36c72g" {
+  filter {
+    name = "instance-type"
+    values = ["c5.9xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "i32c64g" {
+  filter {
+    name   = "instance-type"
+    values = ["c6i.8xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "i16c32g" {
+  filter {
+    name   = "instance-type"
+    values = ["c6i.4xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "i8c16g" {
+  filter {
+    name   = "instance-type"
+    values = ["c6i.2xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "i4c8g" {
+  filter {
+    name   = "instance-type"
+    values = ["c6i.xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "i2c4g" {
+  filter {
+    name   = "instance-type"
+    values = ["c6i.large"]
+  }
+}
+
+data "aws_ec2_instance_types" "a96c192g" {
+  filter {
+    name = "instance-type"
+    values = ["c5a.24xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "a64c128g" {
+  filter {
+    name   = "instance-type"
+    values = ["c5a.16xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "a32c64g" {
+  filter {
+    name = "instance-type"
+    values = ["c5a.8xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "a16c32g" {
+  filter {
+    name = "instance-type"
+    values = ["c5a.4xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "a8c16g" {
+  filter {
+    name = "instance-type"
+    values = ["c5a.2xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "a4c8g" {
+  filter {
+    name = "instance-type"
+    values = ["c5a.xlarge"]
+  }
+}
+
+data "aws_ec2_instance_types" "a2c4g" {
+  filter {
+    name = "instance-type"
+    values = ["c5a.large"]
+  }
+}
+
+data "aws_ec2_instance_types" "t2c4g" {
+  filter {
+    name = "instance-type"
+    values = ["t2.medium"]
+  }
+}
+
+# Still need CentOS Stream 8 & 9
+
+resource "aws_resourcegroups_group" "resource_group" {
+  name = "RG_NAME"
+  resource_query {
+    query = <<JSON
+{
+  "ResourceTypeFilters": [
+    "AWS::EC2::Instance",
+    "AWS::EFS::FileSystem",
+    "AWS::S3::Bucket"
+  ],
+  "TagFilters": [
+    {
+      "Key": "Project",
+      "Values": ["RG_NAME"]
+    }
+  ]
+}
+JSON
+  }
+}
+
+#create vpc
+resource "aws_vpc" "hpc_stack" {
+  cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "DEFAULT_VPC_NAME"
+  }
+}
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.hpc_stack.id
+}
+
+resource "aws_route_table" "vpc_main_rt" {
+  vpc_id = aws_vpc.hpc_stack.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id=aws_internet_gateway.igw.id
+  }
+}
+
+resource "aws_main_route_table_association" "main_rt_as" {
+  vpc_id = aws_vpc.hpc_stack.id
+  route_table_id = aws_route_table.vpc_main_rt.id
+}
+
+resource "aws_subnet" "hpc_stack_subnet" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  vpc_id = aws_vpc.hpc_stack.id
+  cidr_block = "10.0.0.0/24"
+  tags = {
+    Name = "DEFAULT_SUBNET_NAME"
+  }
+}
+
+resource "aws_subnet" "hpc_stack_pub_subnet" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  vpc_id = aws_vpc.hpc_stack.id
+  cidr_block = "10.0.255.240/28"
+  map_public_ip_on_launch = "true"
+  tags = {
+    Name = "DEFAULT_PUB_SUBNET_NAME"
+  }
+}
+
+resource "aws_route_table" "subnet_rt" {
+  vpc_id = aws_vpc.hpc_stack.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    network_interface_id = aws_instance.natgw.primary_network_interface_id
+  }
+}
+
+resource "aws_route_table_association" "subnet_as" {
+  subnet_id = aws_subnet.hpc_stack_subnet.id
+  route_table_id = aws_route_table.subnet_rt.id
+}
+
+resource "aws_route_table" "pub_subnet_rt" {
+  vpc_id = aws_vpc.hpc_stack.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id=aws_internet_gateway.igw.id
+  }
+}
+
+resource "aws_route_table_association" "pub_subnet_as" {
+  subnet_id = aws_subnet.hpc_stack_pub_subnet.id
+  route_table_id = aws_route_table.pub_subnet_rt.id
+}
+
+resource "aws_security_group" "natgw_transparent" {
+  name = "SECURITY_GROUP_NATGW"
+  vpc_id = aws_vpc.hpc_stack.id
+  
+  ingress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    security_groups = []
+    self = true
+  }
+  
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    security_groups = []
+    self = true
+  }
+}
+
+resource "aws_security_group" "group" {
+  name = "SECURITY_GROUP_PUBLIC"
+  vpc_id = aws_vpc.hpc_stack.id
+  
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  
+  ingress {
+    from_port = 3389
+    to_port = 3389
+    protocol = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  
+  ingress {
+    from_port = 6817
+    to_port = 6819
+    protocol = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  
+  ingress {
+    from_port = -1
+    to_port = -1
+    protocol = "ICMP"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  ingress {
+    from_port = 1
+    to_port = 65535
+    protocol = "TCP"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+  
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+}
+
+resource "aws_security_group" "group_intra" {
+  name = "SECURITY_GROUP_INTRA"
+  vpc_id = aws_vpc.hpc_stack.id
+  ingress{
+    from_port = 1
+    to_port = 65535
+    protocol = "TCP"
+    cidr_blocks = [aws_vpc.hpc_stack.cidr_block]
+  }
+
+  ingress {
+    from_port = -1
+    to_port = -1
+    protocol = "ICMP"
+    cidr_blocks = [aws_vpc.hpc_stack.cidr_block]
+  }
+    
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  } 
+}
+
+resource "aws_security_group" "mysql_intra" {
+  name = "SECURITY_GROUP_MYSQL"
+  vpc_id = aws_vpc.hpc_stack.id
+  
+  ingress {
+    from_port = 3306
+    to_port = 3306
+    protocol = "TCP"
+    cidr_blocks = [aws_vpc.hpc_stack.cidr_block]
+  }
+  
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  } 
+}
+
+resource "aws_security_group" "efs_security_group" {
+  name = "NAS_ACCESS_GROUP"
+  vpc_id = aws_vpc.hpc_stack.id
+  ingress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    security_groups = [aws_security_group.group.id, aws_security_group.group_intra.id]
+  }
+    
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+}
+
+resource "aws_efs_file_system" "hpc_apps" {
+  tags = {
+    Name = "hpc_apps"
+    Project = "RG_NAME"
+  }
+}
+
+resource "aws_efs_mount_target" "hpc_apps_mount_target" {
+  file_system_id = aws_efs_file_system.hpc_apps.id
+  subnet_id = aws_subnet.hpc_stack_subnet.id
+  security_groups = [aws_security_group.efs_security_group.id]
+}
+
+resource "aws_efs_file_system" "hpc_data" {
+  tags = {
+    Name = "hpc_data"
+    Project = "RG_NAME"
+  }
+}
+
+resource "aws_efs_mount_target" "hpc_data_mount_target" {
+  file_system_id = aws_efs_file_system.hpc_data.id
+  subnet_id = aws_subnet.hpc_stack_subnet.id
+  security_groups = [aws_security_group.efs_security_group.id]
+}
+
+#CREATE a bucket for data storage
+resource "aws_s3_bucket" "hpc_data_storage" {
+  bucket = "BUCKET_ID"
+  tags = {
+    Project = "RG_NAME"
+  }
+}
+
+resource "aws_s3_bucket_acl" "hpcdatastor_acl" {
+  bucket = aws_s3_bucket.hpc_data_storage.id
+  acl = "private"
+}
+
+#create an iam user with the policy to only access the bucket, nothing else
+resource "aws_iam_user" "hpc_bucket_user" {
+  name = "BUCKET_USER_ID"
+  force_destroy = true
+}
+
+resource "aws_iam_access_key" "hpc_bucket_user_key" {
+  user = aws_iam_user.hpc_bucket_user.name
+}
+
+resource "aws_iam_user_policy" "hpc_bucket_access_policy" {
+  name = "BUCKET_ACCESS_POLICY"
+  user = aws_iam_user.hpc_bucket_user.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:ReplicateObject",
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:DeleteObject"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "${aws_s3_bucket.hpc_data_storage.arn}/*",
+          "${aws_s3_bucket.hpc_data_storage.arn}"
+        ]
+      },
+    ]
+  })
+}

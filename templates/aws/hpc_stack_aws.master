@@ -1,0 +1,55 @@
+#create master and compute nodes
+resource "aws_instance" "master" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  subnet_id = aws_subnet.hpc_stack_pub_subnet.id
+#  associate_public_ip_address = "true"
+  vpc_security_group_ids = [aws_security_group.group.id]
+  ami = "${var.OS_IMAGE}"
+  instance_type = data.aws_ec2_instance_types.MASTER_INST.instance_types.0
+  root_block_device {
+    volume_size = 60
+  }
+  tags = {
+    Name = "master-RG_NAME"
+    Project = "RG_NAME"
+  }
+  user_data = <<EOF
+#!/bin/bash
+touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+userdel -f ec2-user
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config
+echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
+rm -rf ~/.ssh/id_rsa.pub
+rm -rf ~/.ssh/id_rsa
+rm -rf ~/.ssh/authorized_keys
+rm -rf ~/.ssh/known_hosts
+ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa -q
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+echo -e "\nPUBLIC_KEY" >> ~/.ssh/authorized_keys
+systemctl restart sshd
+echo -e "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
+mkdir /hpc_apps && mkdir /hpc_data
+yum -y install nfs-utils
+mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${aws_efs_mount_target.hpc_apps_mount_target.ip_address}:/ /hpc_apps
+mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${aws_efs_mount_target.hpc_data_mount_target.ip_address}:/ /hpc_data
+echo -e "${aws_efs_mount_target.hpc_apps_mount_target.ip_address}:/ /hpc_apps nfs vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
+echo -e "${aws_efs_mount_target.hpc_data_mount_target.ip_address}:/ /hpc_data nfs vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
+master_private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
+if [ ! -f /root/hostfile ]; then
+  echo -e "$master_private_ip\tmaster" > /root/hostfile
+fi
+echo -e "export HPC_USER_NUM=${var.HPC_USER_NUM}" >> /etc/profile
+echo -e "${aws_instance.database.private_ip}\tmariadb" > /root/mariadb_private_ip.txt
+echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
+echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
+echo -e "${var.master_passwd}" > /root/master_passwd.txt && echo -e "${var.compute_passwd}" > /root/compute_passwd.txt
+yum -y install sshpass readhat-lsb
+curl nohup ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.master_init_parameters} > /var/log/cluster_init_master_raw.log 2>&1
+EOF
+}
+
+resource "aws_ec2_instance_state" "m_state" {
+  instance_id = aws_instance.master.id
+  state = "running"
+}
