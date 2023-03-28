@@ -1,0 +1,424 @@
+terraform {
+  required_providers {
+    alicloud = {
+      source = "aliyun/alicloud"
+    }
+  }
+}
+provider "alicloud" {
+  access_key = "BLANK_ACCESS_KEY_ID"
+  secret_key = "BLANK_SECRET_KEY"
+  region = "DEFAULT_REGION_ID"
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "NODE_NUM" {
+  type = number
+  default = DEFAULT_NODE_NUM
+}
+
+variable "HPC_USER_NUM" {
+  type = number
+  default = DEFAULT_USER_NUM
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+
+variable "cluster_init_scripts" {
+  type = string
+  default = "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/cluster_initv6.sh"
+}
+
+variable "db_init_scripts" {
+  type = string
+  default = "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/cluster_db_init.sh"
+}
+
+
+variable "master_init_parameters" {
+  type = string
+  default = "DEFAULT_MASTERINI"
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "compute_init_parameters" {
+  type = string
+  default = "skip skip"
+}  
+
+variable "master_passwd" {
+  type = string
+  default = "DEFAULT_MASTER_PASSWD"
+}
+
+variable "compute_passwd" {
+  type = string
+  default = "DEFAULT_COMPUTE_PASSWD"
+}
+
+variable "database_root_passwd" {
+  type = string
+  default = "DEFAULT_DB_ROOT_PASSWD"
+}
+
+variable "database_acct_passwd" {
+  type = string
+  default = "DEFAULT_DB_ACCT_PASSWD"
+}
+
+#define some data
+
+data "alicloud_instance_types" "i128c256g" {
+  cpu_core_count = 128
+  memory_size = 256
+  instance_type_family = "ecs.c7"
+}
+
+data "alicloud_instance_types" "a128c256g" {
+  cpu_core_count = 128
+  memory_size = 256
+  instance_type_family = "ecs.c7a"
+}
+
+data "alicloud_instance_types" "i64c128g" {
+  cpu_core_count = 64
+  memory_size = 128
+  instance_type_family = "ecs.c7"
+}
+
+data "alicloud_instance_types" "a64c128g" {
+  cpu_core_count = 64
+  memory_size = 128
+  instance_type_family = "ecs.c7a"
+}
+
+data "alicloud_instance_types" "i32c64g" {
+  cpu_core_count = 32
+  memory_size = 64
+  instance_type_family = "ecs.c7"
+}
+
+data "alicloud_instance_types" "a32c64g" {
+  cpu_core_count = 32
+  memory_size = 64
+  instance_type_family = "ecs.c7a"
+}
+
+data "alicloud_instance_types" "i16c32g" {
+  cpu_core_count = 16
+  memory_size = 32
+  instance_type_family = "ecs.c7"
+}
+
+data "alicloud_instance_types" "a16c32g" {
+  cpu_core_count = 16
+  memory_size = 32
+  instance_type_family = "ecs.c7a"
+}
+
+data "alicloud_instance_types" "i8c16g" {
+  cpu_core_count = 8
+  memory_size = 16
+  instance_type_family = "ecs.c7"
+}
+
+data "alicloud_instance_types" "a8c16g" {
+  cpu_core_count = 8
+  memory_size = 16
+  instance_type_family = "ecs.c7a"
+}
+
+data "alicloud_instance_types" "i4c8g" {
+  cpu_core_count = 4
+  memory_size = 8
+  instance_type_family = "ecs.c7"
+}
+
+data "alicloud_instance_types" "a4c8g" {
+  cpu_core_count = 4
+  memory_size = 8
+  instance_type_family = "ecs.c7a"
+}
+
+data "alicloud_instance_types" "i2c4g" {
+  cpu_core_count = 2
+  memory_size = 4
+  instance_type_family = "ecs.c7"
+}
+
+data "alicloud_instance_types" "a2c4g" {
+  cpu_core_count = 2
+  memory_size = 4
+  instance_type_family = "ecs.c7a"
+}
+
+data "alicloud_images" "centos7" {
+  owners = "system"
+  name_regex = "^centos_7_9_x"
+}
+
+data "alicloud_images" "centoss9" {
+  owners = "system"
+  name_regex = "^centos_stream_9"
+}
+
+resource "alicloud_resource_manager_resource_group" "resource_group" {
+  resource_group_name = "RG_NAME"
+  display_name = "RG_DISPLAY_NAME"
+}
+
+#create vpc and vswitch
+resource "alicloud_vpc" "hpc_stack" {
+  vpc_name   = "DEFAULT_VPC_NAME"
+  cidr_block = "10.0.0.0/8"
+  resource_group_id = "${alicloud_resource_manager_resource_group.resource_group.id}"
+}
+
+resource "alicloud_vswitch" "vsw" {
+  vpc_id = alicloud_vpc.hpc_stack.id
+  cidr_block = "10.0.0.0/16"
+  zone_id = "DEFAULT_ZONE_ID"
+}
+
+resource "alicloud_vswitch" "public_vsw" {
+  vpc_id = alicloud_vpc.hpc_stack.id
+  cidr_block = "10.255.255.240/28"
+  zone_id = "DEFAULT_ZONE_ID"
+}
+
+resource "alicloud_route_table" "vsw_rt" {
+  vpc_id = alicloud_vpc.hpc_stack.id
+  route_table_name = "vsw_rt_name"
+}
+
+resource "alicloud_route_entry" "vsw_rt_entry" {
+  route_table_id = alicloud_route_table.vsw_rt.id
+  destination_cidrblock = "0.0.0.0/0"
+  nexthop_type = "Instance"
+  nexthop_id = alicloud_instance.natgw.id
+}
+
+resource "alicloud_route_table_attachment" "rt_attach" {
+  vswitch_id = alicloud_vswitch.vsw.id
+  route_table_id = alicloud_route_table.vsw_rt.id
+}
+
+resource "alicloud_security_group" "natgw_transparent" {
+  name = "natgw_transparent"
+  vpc_id = alicloud_vpc.hpc_stack.id
+  resource_group_id = "${alicloud_resource_manager_resource_group.resource_group.id}"
+}
+
+resource "alicloud_security_group_rule" "natgw_policy_ingress1" {
+  type = "ingress"
+  ip_protocol = "tcp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "1/65535"
+  cidr_ip = "0.0.0.0/0"
+  security_group_id = alicloud_security_group.natgw_transparent.id
+}
+
+resource "alicloud_security_group_rule" "natgw_policy_ingress2" {
+  type = "ingress"
+  ip_protocol = "udp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "1/65535"
+  cidr_ip = "0.0.0.0/0"
+  security_group_id = alicloud_security_group.natgw_transparent.id
+}
+
+resource "alicloud_security_group_rule" "natgw_policy_ingress3" {
+  type = "ingress"
+  ip_protocol = "icmp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "-1/-1"
+  cidr_ip = "0.0.0.0/0"
+  security_group_id = alicloud_security_group.natgw_transparent.id
+}
+
+resource "alicloud_security_group" "group" {
+  name = "SECURITY_GROUP_PUBLIC"
+  vpc_id = alicloud_vpc.hpc_stack.id
+  resource_group_id = "${alicloud_resource_manager_resource_group.resource_group.id}"
+}
+
+resource "alicloud_security_group_rule" "allow_ssh" {
+  type = "ingress"
+  ip_protocol = "tcp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "22/22"
+  cidr_ip = "0.0.0.0/0"
+  security_group_id = alicloud_security_group.group.id
+}
+
+resource "alicloud_security_group_rule" "allow_rdp" {
+  type = "ingress"
+  ip_protocol = "tcp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "3389/3389"
+  cidr_ip = "0.0.0.0/0"
+  security_group_id = alicloud_security_group.group.id
+}
+
+resource "alicloud_security_group_rule" "allow_slurm" {
+  type = "ingress"
+  ip_protocol = "tcp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "6817/6819"
+  cidr_ip = "10.0.0.0/8"
+  security_group_id = alicloud_security_group.group.id
+}
+
+resource "alicloud_security_group_rule" "allow_ping" {
+  type = "ingress"
+  ip_protocol = "icmp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "-1/-1"
+  cidr_ip = "0.0.0.0/0"
+  security_group_id = alicloud_security_group.group.id
+}
+
+resource "alicloud_security_group" "group_intra" {
+  name = "SECURITY_GROUP_INTRA"
+  vpc_id = alicloud_vpc.hpc_stack.id
+  resource_group_id = "${alicloud_resource_manager_resource_group.resource_group.id}"
+}
+
+resource "alicloud_security_group_rule" "allow_all_intra" {
+  type = "ingress"
+  ip_protocol = "tcp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "1/65535"
+#  source_security_group_id = alicloud_security_group.group.id
+  cidr_ip = "10.0.0.0/16"
+  security_group_id = alicloud_security_group.group_intra.id
+}
+
+resource "alicloud_security_group_rule" "allow_ping_intra" {
+  type = "ingress"
+  ip_protocol = "icmp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "-1/-1"
+  cidr_ip = "10.0.0.0/8"
+  security_group_id = alicloud_security_group.group_intra.id
+}
+
+resource "alicloud_security_group" "mysql_intra" {
+  name = "SECURITY_GROUP_MYSQL"
+  vpc_id = alicloud_vpc.hpc_stack.id
+  resource_group_id = "${alicloud_resource_manager_resource_group.resource_group.id}"
+}
+
+resource "alicloud_security_group_rule" "allow_mysql" {
+  type = "ingress"
+  ip_protocol = "tcp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "3306/3306"
+#  source_security_group_id = alicloud_security_group.group.id
+  cidr_ip = "10.0.0.0/8"
+  security_group_id = alicloud_security_group.mysql_intra.id
+}
+
+#create NFSs
+resource "alicloud_nas_file_system" "hpc_apps" {
+  file_system_type = "standard"
+  protocol_type = "NFS"
+  storage_type = "Performance"
+  vpc_id = alicloud_vpc.hpc_stack.id
+  vswitch_id = alicloud_vswitch.vsw.id
+  zone_id = "DEFAULT_NAS_ZONE"
+}
+
+resource "alicloud_nas_file_system" "hpc_data" {
+  file_system_type = "standard"
+  protocol_type = "NFS"
+  storage_type = "Performance"
+  vpc_id = alicloud_vpc.hpc_stack.id
+  vswitch_id = alicloud_vswitch.vsw.id
+  zone_id = "DEFAULT_NAS_ZONE"
+}
+
+resource "alicloud_nas_access_group" "nag" {
+  access_group_name = "NAS_ACCESS_GROUP_"
+  access_group_type = "Vpc"
+  file_system_type = "standard"
+  description = "${alicloud_vswitch.vsw.id}${alicloud_vswitch.public_vsw.id}${alicloud_route_table_attachment.rt_attach.id}"
+}
+
+resource "alicloud_nas_access_rule" "nar" {
+  access_group_name = alicloud_nas_access_group.nag.access_group_name
+  source_cidr_ip = "0.0.0.0/0"
+  rw_access_type = "RDWR"
+  user_access_type = "no_squash"
+  priority = 1
+}
+
+resource "alicloud_nas_mount_target" "hpc_apps_mount" {
+  file_system_id = alicloud_nas_file_system.hpc_apps.id
+  access_group_name = alicloud_nas_access_group.nag.access_group_name
+  vswitch_id = alicloud_vswitch.vsw.id
+}
+
+resource "alicloud_nas_mount_target" "hpc_data_mount" {
+  file_system_id = alicloud_nas_file_system.hpc_data.id
+  access_group_name = alicloud_nas_access_group.nag.access_group_name
+  vswitch_id = alicloud_vswitch.vsw.id
+}
+
+#CREATE a bucket for data storage
+resource "alicloud_oss_bucket" "hpc_data_storage" {
+  bucket = "BUCKET_ID"
+  acl = "private"
+}
+
+#create an ram user with the policy to only access the bucket, nothing else
+resource "alicloud_ram_user" "hpc_user" {
+  name = "BUCKET_USER_ID"
+  force = true
+}
+
+resource "alicloud_ram_access_key" "hpc_user_key" {
+  user_name = alicloud_ram_user.hpc_user.name
+  secret_file = "bucket_secrets.txt"
+}
+
+resource "alicloud_ram_policy" "hpc_bucket_access_policy" {
+  policy_name = "BUCKET_ACCESS_POLICY"
+  policy_document = <<EOF
+  {
+    "Statement": [
+      {
+        "Action": [
+          "oss:ListObjects",
+          "oss:GetObject",
+          "oss:PutObject",
+          "oss:DeleteObject"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "acs:oss:*:*:BUCKET_ID",
+          "acs:oss:*:*:BUCKET_ID/*"
+        ]
+      }
+    ],
+      "Version": "1"
+  }
+  EOF
+  force = true
+}
+
+resource "alicloud_ram_user_policy_attachment" "bucket_access_attach" {
+  policy_name = alicloud_ram_policy.hpc_bucket_access_policy.name
+  policy_type = alicloud_ram_policy.hpc_bucket_access_policy.type
+  user_name = alicloud_ram_user.hpc_user.name
+}

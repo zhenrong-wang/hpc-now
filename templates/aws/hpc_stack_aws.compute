@@ -1,0 +1,40 @@
+resource "aws_instance" "COMPUTE_NODE_N" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  ami = "${var.OS_IMAGE}"
+  instance_type = data.aws_ec2_instance_types.COMPUTE_INST.instance_types.0
+  subnet_id = aws_subnet.hpc_stack_subnet.id
+  vpc_security_group_ids = [aws_security_group.group_intra.id]
+  cpu_core_count = CPU_CORE_NUM
+  cpu_threads_per_core = THREADS_PER_CORE
+  root_block_device {
+    volume_size = 40
+  }
+  tags = {
+    Name = "COMPUTE_NODE_N-RG_NAME"
+    Project = "RG_NAME"
+  }
+  user_data = <<EOF
+#!/bin/bash
+touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+userdel -f ec2-user
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config
+echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
+systemctl restart sshd
+echo -e "${var.compute_passwd}" | passwd root --stdin >> /dev/null 2>&1
+mkdir /hpc_apps && mkdir /hpc_data
+yum -y install nfs-utils
+mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${aws_efs_mount_target.hpc_apps_mount_target.ip_address}:/ /hpc_apps
+mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${aws_efs_mount_target.hpc_data_mount_target.ip_address}:/ /hpc_data
+echo -e "${aws_efs_mount_target.hpc_apps_mount_target.ip_address}:/ /hpc_apps nfs vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
+echo -e "${aws_efs_mount_target.hpc_data_mount_target.ip_address}:/ /hpc_data nfs vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
+rm -rf /root/.ssh 
+echo -e "${aws_instance.master.private_ip}" > /root/master_ip.txt
+nohup curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.compute_init_parameters} > /var/log/cluster_COMPUTE_NODE_N_init_raw.log 2>&1 &
+EOF
+}
+
+resource "aws_ec2_instance_state" "NUMBER_state" {
+  instance_id = aws_instance.COMPUTE_NODE_N.id
+  state = "running"
+}

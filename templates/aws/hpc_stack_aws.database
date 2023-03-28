@@ -1,0 +1,38 @@
+#CREATE_DATABASE_NODE
+resource "aws_instance" "database" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  subnet_id = aws_subnet.hpc_stack_subnet.id
+  vpc_security_group_ids = [aws_security_group.group_intra.id]
+  ami = "${var.DB_OS_IMAGE}"
+  instance_type = data.aws_ec2_instance_types.t2c4g.instance_types.0
+  root_block_device {
+    volume_size = 20
+  }
+  tags = {
+    Name = "database-RG_NAME"
+    Project = "RG_NAME"
+  }
+  user_data = <<EOF
+#!/bin/bash
+echo "${aws_instance.natgw.private_ip}" >> /dev/null
+echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
+echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config
+echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
+systemctl restart sshd
+systemctl enable sshd
+echo "${var.database_root_passwd}" | passwd root --stdin >> /dev/null 2>&1
+for i in $(seq 1 120)
+do
+  echo -e "[-WAIT---]" >> /tmp/cluster_db_init.log
+  sleep 1
+done
+curl ${var.db_init_scripts} | bash
+EOF
+}
+
+resource "aws_ec2_instance_state" "db_state" {
+  instance_id = aws_instance.database.id
+  state = "running"
+}

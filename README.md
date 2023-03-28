@@ -56,7 +56,7 @@
 
 ### 5. 如何使用
 
-请参阅[部署手册](http://www.hpc-now.com/deploy)。请注意：如果您直接运行 installer 进行本地安装，将会下载云上已经编译好的 hpcopr 和 now-crypto 至以下本地目录：
+请参阅[技术文档](https://www.hpc-now.com/docs/all)。请注意：如果您直接运行 installer 进行本地安装，将会下载云上已经编译好的 hpcopr 和 now-crypto 至以下本地目录：
 
 - **Windows** ： C:\programdata\hpc-now\bin\now-crypto.exe 和 C:\hpc-now\hpcopr.exe
 -  **GNU/Linu** x：/usr/.hpc-now/.bin/now-crypto.exe 和 /home/hpc-now/.bin/hpcopr
@@ -80,21 +80,21 @@
 
 如前所述，**hpcopr** 是您操作和管理 Cloud HPC 集群的核心界面。 **hpcopr** 目前以命令行的形式提供多种功能。您可以运行 `hpcopr help` 命令查看详细的帮助信息，主要如下：
 
-` **hpcopr command_name PARAM1 PARAM2** `
+`hpcopr command_name PARAM1 PARAM2`
 
- **_初始化类：_** 
+ **_初始化：_** 
 -  **hpcopr new PARAM**  – PARAM 为必选参数，且只能为 workdir 或者 keypair。当 PARAM 为 workdir 时，将创建一个新的工作目录，并加密保存云服务密钥对，后续可进入该目录创建您的集群；当 PARAM 为 keypair 时，需要首先 cd 到一个工作目录，并将轮换该目录对应的云账户密钥对
 -  **hpcopr init PARAM**  – 初始化一个集群。其中，PARAM为可选项，用于指定集群的ID。如不指定，将使用默认的ID：hpcnow 。示例命令：hpcopr init my-first-cluster
 -  **hpcopr conf**  – 生成默认的集群配置文件，位于工作目录的 conf 文件夹内，您可进行修改之后再运行 hpcopr init 命令创建自定义配置的集群
 
- **_一般管理类：_** 
+ **_一般管理：_** 
 -  **hpcopr help**  – 在当前窗口显示完整的帮助信息
 -  **hpcopr usage**  – 查看最新的集群用量表，该命令将导出一份 CSV 格式的文本文件，您可以使用相关软件查看
 -  **hpcopr syslog**  – 查看集群管理相关日志，包括扩容、缩容、销毁、创建等，包括操作时间、操作内容、是否成功等
 -  **hpcopr vault**  – 将以加密方式存储的集群敏感信息以明文形式显示在当前窗口。包括集群登录 IP 地址、登录密码、网盘登录密码等
 -  **hpcopr graph**  – 查看当前集群的拓扑和配置。通过 graph，您可以直观的看到该集群的节点配置、节点地址、运行状况等
 
- **_集群操作类：_** 
+ **_集群操作：_** 
 -  **hpcopr delc PARAM**  – 删除计算节点。您既可以指定 PARAM 为 all，用于删除所有计算节点；也可以指定 PARAM 为一个正整数，用于删除指定数量的计算节点。示例命令： hpcopr delc 1 或 hpcopr delc all
 -  **hpcopr addc NUM**  – 增加计算节点，其中 NUM 为您指定要添加的节点数目。示例命令：hpcopr addc 3
 -  **hpcopr shutdownc PARAM**  – 关闭计算节点。与 hpcopr delc 类似，您可以指定 PARAM 为 all 或者要关闭的计算节点数量
