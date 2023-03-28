@@ -1,0 +1,459 @@
+terraform {
+  required_providers {
+    tencentcloud = {
+      source = "tencentcloudstack/tencentcloud"
+    }
+  }
+}
+provider "tencentcloud" {
+  secret_id = "BLANK_ACCESS_KEY_ID"
+  secret_key = "BLANK_SECRET_KEY"
+  region = "DEFAULT_REGION_ID"
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "NODE_NUM" {
+  type = number
+  default = DEFAULT_NODE_NUM
+}
+
+variable "HPC_USER_NUM" {
+  type = number
+  default = DEFAULT_USER_NUM
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+
+variable "cluster_init_scripts" {
+  type = string
+  default = "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/cluster_initv6.sh"
+}
+
+variable "db_init_scripts" {
+  type = string
+  default = "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/cluster_db_init.sh"
+}
+
+variable "master_init_parameters" {
+  type = string
+  default = "DEFAULT_MASTERINI"
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "compute_init_parameters" {
+  type = string
+  default = "skip skip"
+}  
+
+variable "master_passwd" {
+  type = string
+  default = "DEFAULT_MASTER_PASSWD"
+}
+
+variable "compute_passwd" {
+  type = string
+  default = "DEFAULT_COMPUTE_PASSWD"
+}
+
+variable "database_root_passwd" {
+  type = string
+  default = "DEFAULT_DB_ROOT_PASSWD"
+}
+
+variable "database_acct_passwd" {
+  type = string
+  default = "DEFAULT_DB_ACCT_PASSWD"
+}
+
+#define some data
+data "tencentcloud_instance_types" "a64c128g" {
+  filter {
+    name   = "instance-family"
+    values = ["SA3"]
+  }
+  cpu_core_count = 64
+  memory_size = 128
+}
+
+data "tencentcloud_instance_types" "a128c256g" {
+  filter {
+    name = "instance-family"
+    values = ["SA3"]
+  }
+  cpu_core_count = 128
+  memory_size = 256
+}
+
+data "tencentcloud_instance_types" "a160c320g" {
+  filter {
+    name = "instance-family"
+    values = ["SA3"]
+  }  
+  cpu_core_count = 160
+  memory_size = 320
+}
+
+data "tencentcloud_instance_types" "a232c432g" {
+  filter {
+    name = "instance-family"
+    values = ["SA3"]
+  }  
+  cpu_core_count = 232
+  memory_size = 432
+}
+
+data "tencentcloud_instance_types" "a16c32g" {
+  filter {
+    name = "instance-family"
+    values = ["SA3"]
+  }
+  cpu_core_count = 16
+  memory_size = 32
+}
+
+data "tencentcloud_instance_types" "a32c64g" {
+  filter {
+    name = "instance-family"
+    values = ["SA3"]
+  }
+  cpu_core_count = 32
+  memory_size = 64
+}
+
+data "tencentcloud_instance_types" "a8c16g" {
+  filter {
+    name = "instance-family"
+    values = ["SA3"]
+  }
+  cpu_core_count = 8
+  memory_size = 16
+}
+
+data "tencentcloud_instance_types" "a4c8g" {
+  filter {
+    name = "instance-family"
+    values = ["SA3"]
+  }
+  cpu_core_count = 4
+  memory_size = 8
+}
+
+data "tencentcloud_instance_types" "a2c4g" {
+  filter {
+    name = "instance-family"
+    values = ["SA3"]
+  }
+  cpu_core_count = 2
+  memory_size = 4
+}
+
+data "tencentcloud_images" "centos7" {
+  image_type = ["PUBLIC_IMAGE"]
+  image_name_regex = "^CentOS 7.9 64"
+}
+
+data "tencentcloud_images" "centoss9" {
+  image_type = ["PUBLIC_IMAGE"]
+  image_name_regex = "^CentOS Stream 9 64"
+}
+
+data "tencentcloud_user_info" "current_user" {}
+
+#create vpc
+resource "tencentcloud_vpc" "hpc_stack" {
+  name = "DEFAULT_VPC_NAME"
+  cidr_block = "10.0.0.0/12"
+}
+
+resource "tencentcloud_subnet" "hpc_stack_subnet" {
+  name = "DEFAULT_SUBNET_NAME"
+  availability_zone = "DEFAULT_ZONE_ID"
+  vpc_id = tencentcloud_vpc.hpc_stack.id
+  cidr_block = "10.0.0.0/20"
+  route_table_id = tencentcloud_route_table.subnet_rt.id
+}
+
+resource "tencentcloud_subnet" "hpc_stack_pub_subnet" {
+  name = "DEFAULT_PUB_SUBNET_NAME"
+  availability_zone = "DEFAULT_ZONE_ID"
+  vpc_id = tencentcloud_vpc.hpc_stack.id
+  cidr_block = "10.15.255.0/28"
+}
+
+resource "tencentcloud_route_table" "subnet_rt" {
+  vpc_id = tencentcloud_vpc.hpc_stack.id
+  name = "subnet_rt"
+}
+
+/* tencent_route_table_entry still have a bug. Use the deprecated route_entry instead
+resource "tencentcloud_route_table_entry" "natgw_instance" {
+  route_table_id = tencentcloud_route_table.subnet_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  next_type = "CVM"
+  next_hub = tencentcloud_instance.natgw.private_ip
+}*/
+
+/* This is deprecated! */
+resource "tencentcloud_route_entry" "natgw_instance" {
+  vpc_id=tencentcloud_vpc.hpc_stack.id
+  route_table_id = tencentcloud_route_table.subnet_rt.id
+  cidr_block = "0.0.0.0/0"
+  next_type = "instance"
+  next_hub = tencentcloud_instance.natgw.private_ip
+}
+
+resource "tencentcloud_security_group" "natgw_transparent" {
+  name = "natgw_transparent"
+}
+
+resource "tencentcloud_security_group_rule" "natgw_policy_egress1" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "TCP"
+  port_range = "1-65535"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.natgw_transparent.id
+}
+
+resource "tencentcloud_security_group_rule" "natgw_policy_egress2" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "UDP"
+  port_range = "1-65535"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.natgw_transparent.id
+}
+
+resource "tencentcloud_security_group_rule" "natgw_policy_egress3" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "ICMP"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.natgw_transparent.id
+}
+
+resource "tencentcloud_security_group_rule" "natgw_policy_ingress1" {
+  type = "ingress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "TCP"
+  port_range = "1-65535"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.natgw_transparent.id
+}
+
+resource "tencentcloud_security_group_rule" "natgw_policy_ingress2" {
+  type = "ingress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "UDP"
+  port_range = "1-65535"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.natgw_transparent.id
+}
+
+resource "tencentcloud_security_group_rule" "natgw_policy_ingress3" {
+  type = "ingress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "ICMP"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.natgw_transparent.id
+}
+
+resource "tencentcloud_security_group" "group" {
+  name = "SECURITY_GROUP_PUBLIC"
+}
+
+resource "tencentcloud_security_group_rule" "group_policy" {
+  type = "ingress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "TCP"
+  port_range = "22,3389,6817,6818,6819"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.group.id
+}
+
+resource "tencentcloud_security_group_rule" "group_policy_egress1" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "TCP"
+  port_range = "1-65535"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.group.id
+}
+
+resource "tencentcloud_security_group_rule" "group_policy_egress2" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "UDP"
+  port_range = "1-65535"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.group.id
+}
+
+resource "tencentcloud_security_group_rule" "group_policy_egress3" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "ICMP"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.group.id
+}
+
+resource "tencentcloud_security_group_rule" "allow_ping" {
+  type = "ingress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "ICMP"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.group.id
+}
+
+resource "tencentcloud_security_group" "group_intra" {
+  name = "SECURITY_GROUP_INTRA"
+}
+
+resource "tencentcloud_security_group_rule" "group_policy_intra" {
+  type = "ingress"
+  cidr_ip = "10.0.0.0/20"
+  ip_protocol = "TCP"
+  port_range = "1-65535"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.group_intra.id
+}
+
+resource "tencentcloud_security_group_rule" "group_policy_intra_egress1" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "TCP"
+  port_range = "1-65535"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.group_intra.id
+}
+
+resource "tencentcloud_security_group_rule" "group_policy_intra_egress2" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "UDP"
+  port_range = "1-65535"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.group_intra.id
+}
+
+resource "tencentcloud_security_group_rule" "group_policy_intra_egress3" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "ICMP"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.group_intra.id
+}
+
+resource "tencentcloud_security_group_rule" "allow_ping_intra" {
+  type = "ingress"
+  cidr_ip = "10.0.0.0/12"
+  ip_protocol = "ICMP"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.group_intra.id
+}
+
+resource "tencentcloud_security_group" "mysql_intra" {
+  name = "SECURITY_GROUP_MYSQL"
+}
+
+resource "tencentcloud_security_group_rule" "allow_mysql" {
+  type = "ingress"
+  cidr_ip = "10.0.0.0/12"
+  ip_protocol = "TCP"
+  port_range = "3306"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.mysql_intra.id
+}
+
+resource "tencentcloud_security_group_rule" "mysql_egress1" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "TCP"
+  port_range = "1-65535"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.mysql_intra.id
+}
+
+resource "tencentcloud_security_group_rule" "mysql_egress2" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "UDP"
+  port_range = "1-65535"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.mysql_intra.id
+}
+
+resource "tencentcloud_security_group_rule" "mysql_egress3" {
+  type = "egress"
+  cidr_ip = "0.0.0.0/0"
+  ip_protocol = "ICMP"
+  policy = "ACCEPT"
+  security_group_id = tencentcloud_security_group.mysql_intra.id
+}
+
+resource "tencentcloud_cfs_access_group" "cfs_intra" {
+  name = "NAS_ACCESS_GROUP_"
+}
+
+resource "tencentcloud_cfs_access_rule" "cfs_intra_rule" {
+  access_group_id = tencentcloud_cfs_access_group.cfs_intra.id
+  auth_client_ip  = "10.0.0.0/12"
+  priority        = 1
+  rw_permission   = "RW"
+  user_permission = "no_root_squash"
+}
+
+resource "tencentcloud_cfs_file_system" "hpc_apps" {
+  name              = "hpc_apps-CFSID"
+  availability_zone = "DEFAULT_NAS_ZONE"
+  access_group_id   = tencentcloud_cfs_access_group.cfs_intra.id
+  protocol          = "NFS"
+  vpc_id            = tencentcloud_vpc.hpc_stack.id
+  subnet_id         = tencentcloud_subnet.hpc_stack_subnet.id
+}
+
+resource "tencentcloud_cfs_file_system" "hpc_data" {
+  name              = "hpc_data-CFSID"
+  availability_zone = "DEFAULT_NAS_ZONE"
+  access_group_id   = tencentcloud_cfs_access_group.cfs_intra.id
+  protocol          = "NFS"
+  vpc_id            = tencentcloud_vpc.hpc_stack.id
+  subnet_id         = tencentcloud_subnet.hpc_stack_subnet.id
+}
+
+#CREATE a bucket for data storage
+resource "tencentcloud_cos_bucket" "hpc_data_storage" {
+  bucket = "BUCKET_ID-${data.tencentcloud_user_info.current_user.app_id}"
+  acl = "private"
+}
+
+#create an cam user with the policy to only access the bucket, nothing else
+resource "tencentcloud_cam_user" "hpc_user" {
+  name = "BUCKET_USER_ID"
+  force_delete = true
+}
+
+resource "tencentcloud_cam_policy" "hpc_bucket_access_policy" {
+  name = "BUCKET_ACCESS_POLICY"
+  document = <<EOF
+  {
+    "version": "2.0",
+    "statement": [
+        {
+            "action": [
+                "cos:*"
+            ],
+            "effect": "allow",
+            "resource": [
+                "qcs::cos::uid/${data.tencentcloud_user_info.current_user.app_id}:prefix//${data.tencentcloud_user_info.current_user.app_id}/BUCKET_ID/*"
+            ]
+        }
+    ]
+  }
+  EOF
+}
+
+resource "tencentcloud_cam_user_policy_attachment" "bucket_access_attach" {
+  user_name = tencentcloud_cam_user.hpc_user.name
+  policy_id = tencentcloud_cam_policy.hpc_bucket_access_policy.id
+}
