@@ -1,0 +1,50 @@
+#create master and compute nodes
+#IMPORTANT: Make sure the NODE_CORE refers to the same data with the one in Compute1!
+resource "alicloud_instance" "master" {
+  #cn-hangzhou
+  availability_zone = "DEFAULT_ZONE_ID"
+  security_groups = alicloud_security_group.group.*.id
+  instance_type = "${data.alicloud_instance_types.MASTER_INST.instance_types.0.id}"
+  system_disk_category = "cloud_essd"
+  system_disk_size = 60
+  image_id = "${data.alicloud_images.OS_IMAGE.images.0.id}"
+  #  image_id = "centos_7_8_x64_20G_alibase_20211130.vhd"
+  #  image_id = "ubuntu_18_04_64_20G_alibase_20190624.vhd"
+  instance_name = "master-RG_DISPLAY_NAME"
+  vswitch_id = alicloud_vswitch.vsw.id
+  internet_charge_type = "PayByTraffic"
+  internet_max_bandwidth_out = MASTER_BANDWIDTH
+  resource_group_id = "${alicloud_resource_manager_resource_group.resource_group.id}"
+  password = "${var.master_passwd}"
+  status = "Running" 
+  user_data = <<EOF
+#!/bin/bash
+touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+rm -rf ~/.ssh/id_rsa.pub
+rm -rf ~/.ssh/id_rsa
+rm -rf ~/.ssh/authorized_keys
+rm -rf ~/.ssh/known_hosts
+ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa -q
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+echo -e "\nPUBLIC_KEY" >> ~/.ssh/authorized_keys
+systemctl restart sshd
+systemctl start atd && systemctl enable atd
+sudo mkdir /hpc_apps && sudo mkdir /hpc_data
+sudo yum -y install nfs-utils
+sudo mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${alicloud_nas_mount_target.hpc_apps_mount.mount_target_domain}:/ /hpc_apps
+sudo mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${alicloud_nas_mount_target.hpc_data_mount.mount_target_domain}:/ /hpc_data
+echo -e "${alicloud_nas_mount_target.hpc_apps_mount.mount_target_domain}:/ /hpc_apps nfs vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
+echo -e "${alicloud_nas_mount_target.hpc_data_mount.mount_target_domain}:/ /hpc_data nfs vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
+yum -y install sshpass redhat-lsb
+master_private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
+if [ ! -f /root/hostfile ]; then
+  echo -e "$master_private_ip\tmaster" > /root/hostfile
+fi
+echo -e "export HPC_USER_NUM=${var.HPC_USER_NUM}" >> /etc/profile
+echo -e "${alicloud_instance.database.private_ip}\tmariadb" > /root/mariadb_private_ip.txt
+echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
+echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
+echo -e "${var.master_passwd}" > /root/master_passwd.txt && echo -e "${var.compute_passwd}" > /root/compute_passwd.txt
+curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.master_init_parameters} > /var/log/cluster_init_master_raw.log 2>&1
+EOF
+}

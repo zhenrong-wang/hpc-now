@@ -1,0 +1,5 @@
+cn-hangzhou-f
+cn-beijing-h
+cn-shanghai-l
+cn-shenzhen-d
+cn-chengdu-a

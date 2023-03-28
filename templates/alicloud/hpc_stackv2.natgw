@@ -1,0 +1,34 @@
+#CREATE_DATABASE_NODE
+resource "alicloud_instance" "natgw" {
+  #cn-hangzhou
+  availability_zone = "DEFAULT_ZONE_ID"
+  security_groups = alicloud_security_group.natgw_transparent.*.id
+  instance_type = "${data.alicloud_instance_types.a2c4g.instance_types.0.id}"
+  system_disk_category = "cloud_essd"
+  system_disk_size = 60
+  image_id = "centos_7_9_x64_20G_alibase_20220524.vhd"
+  instance_name = "natgw-RG_DISPLAY_NAME"
+  vswitch_id = alicloud_vswitch.public_vsw.id
+  internet_charge_type = "PayByTraffic"
+  internet_max_bandwidth_out = MASTER_BANDWIDTH
+  resource_group_id = "${alicloud_resource_manager_resource_group.resource_group.id}"
+  status = "Running"
+  user_data = <<EOF
+#!/bin/bash
+yum -y install iptables-services
+private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
+cat /etc/sysctl.conf | grep net.ipv4.ip_forward
+if [ $? -ne 0 ]; then
+	echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
+else
+	sed -i '/net.ipv4.ip_forward/d' /etc/sysctl.conf
+	echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
+fi
+sysctl -p /etc/sysctl.conf
+iptables -t nat -A POSTROUTING -o eth0 -s 10.0.0.0/16 -j SNAT --to $private_ip
+service iptables save
+systemctl start iptables
+systemctl enable iptables
+echo "${alicloud_nas_mount_target.hpc_apps_mount.id}${alicloud_nas_mount_target.hpc_data_mount.id}" >> /dev/null
+EOF
+}
