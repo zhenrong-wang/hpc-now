@@ -4593,6 +4593,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             printf("[ -INFO- ] The specified configuration is the same as previous configuration.       |\n");
             printf("|          Nothing changed. Exit now.                                               |\n");
             printf("+-----------------------------------------------------------------------------------+\n");
+            delete_decrypted_files(workdir,crypto_keyfile);
             return 1;
         }
         else if(strcmp(cloud_flag,"CLOUD_C")==0){
@@ -4601,6 +4602,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 printf("[ -INFO- ] The specified configuration is the same as previous configuration.       |\n");
                 printf("|          Nothing changed. Exit now.                                               |\n");
                 printf("+-----------------------------------------------------------------------------------+\n");
+                delete_decrypted_files(workdir,crypto_keyfile);
                 return 1;
             }
             else if(strcmp(htflag,"hton")!=0&&strcmp(htflag,"htoff")!=0){
@@ -4608,6 +4610,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 printf("[ -INFO- ] The specified configuration is the same as previous configuration.       |\n");
                 printf("|          Nothing changed. Exit now.                                               |\n");
                 printf("+-----------------------------------------------------------------------------------+\n");
+                delete_decrypted_files(workdir,crypto_keyfile);
                 return 1;
             }
             else if(strcmp(htflag,"hton")==0&&find_multi_keys(filename_temp,"cpu_threads_per_core = 2","","","","")>0){
@@ -4615,6 +4618,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 printf("[ -INFO- ] The specified configuration is the same as previous configuration.       |\n");
                 printf("|          Nothing changed. Exit now.                                               |\n");
                 printf("+-----------------------------------------------------------------------------------+\n");
+                delete_decrypted_files(workdir,crypto_keyfile);
                 return 1;
             }
             else if(strcmp(htflag,"htoff")==0&&find_multi_keys(filename_temp,"cpu_threads_per_core = 1","","","","")>0){
@@ -4622,6 +4626,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 printf("[ -INFO- ] The specified configuration is the same as previous configuration.       |\n");
                 printf("|          Nothing changed. Exit now.                                               |\n");
                 printf("+-----------------------------------------------------------------------------------+\n");
+                delete_decrypted_files(workdir,crypto_keyfile);
                 return 1;
             }
             if(find_multi_keys(filename_temp,"cpu_threads_per_core = 2","","","","")>0){
@@ -4791,6 +4796,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         printf("[ -INFO- ] The specified configuration is the same as previous configuration.       |\n");
         printf("|          Nothing changed. Exit now.                                               |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
+        delete_decrypted_files(workdir,crypto_keyfile);
         return 1;
     }
 
