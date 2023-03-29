@@ -1540,7 +1540,7 @@ int wait_for_complete(char* workdir, char* option){
     int i=0;
     int total_minutes=0;
     char* annimation="\\|/-";
-    sprintf(cmdline,"type %s\\tf_prep.log >> %s\\f_prep_archive.log > nul 2>&1",stackdir,stackdir);
+    sprintf(cmdline,"type %s\\tf_prep.log >> %s\\tf_prep_archive.log 2>nul",stackdir,stackdir);
     system(cmdline);
     if(strcmp(option,"init")==0){
         sprintf(cmdline,"type %s\\tf_prep.log | findstr successfully | findstr initialized! > nul 2>&1",stackdir);
