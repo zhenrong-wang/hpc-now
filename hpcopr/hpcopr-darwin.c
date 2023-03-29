@@ -180,7 +180,7 @@ void print_not_in_a_workdir(char* current_dir){
     int i;
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ FATAL: ] You are not in a working directory, *NO* critical operation is permitted.|\n");
-    printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is a number).|\n");
+    printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is number). |\n");
     sprintf(temp_string,"|          Current directory is %s.",current_dir);
     for(i=0;i<85-strlen(temp_string)-1;i++){
         *(temp_string2+i)=' ';
