@@ -164,7 +164,7 @@ void print_header(void){
         *(string_temp+i)=' ';
     }
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d%s|\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,string_temp);
-    printf("|    Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
+    printf("|    Version: 0.1.67   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     
 }
@@ -4574,7 +4574,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
 
     decrypt_files(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
-    if(find_multi_keys(filename_temp,new_config,"","","","")==0||find_multi_keys(filename_temp,new_config,"","","","")<0){
+    sprintf(string_temp,"\"%s\"",new_config);
+    if(find_multi_keys(filename_temp,string_temp,"","","","")==0||find_multi_keys(filename_temp,string_temp,"","","","")<0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Invalid compute configuration.  Exit now.                                |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -4771,7 +4772,8 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
 
     decrypt_files(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
-    if(find_multi_keys(filename_temp,new_config,"","","","")==0||find_multi_keys(filename_temp,new_config,"","","","")<0){
+    sprintf(string_temp,"\"%s\"",new_config);
+    if(find_multi_keys(filename_temp,string_temp,"","","","")==0||find_multi_keys(filename_temp,string_temp,"","","","")<0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Invalid master node configuration.  Exit now.                            |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
