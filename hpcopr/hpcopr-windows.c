@@ -318,43 +318,6 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     return 0;
 }
 
-int wait_for_complete(char* workdir, char* option){
-    char cmdline[CMDLINE_LENGTH]="";
-    char stackdir[DIR_LENGTH]="";
-    char errorlog[FILENAME_LENGTH]="";
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(errorlog,"%s\\log\\now_cluster.log",workdir);
-    int i=0;
-    int total_minutes=0;
-    char* annimation="\\|/-";
-    sprintf(cmdline,"type %s\\tf_prep.log >> %s\\f_prep_archive.log > nul 2>&1",stackdir,stackdir);
-    system(cmdline);
-    if(strcmp(option,"init")==0){
-        sprintf(cmdline,"type %s\\tf_prep.log | findstr successfully | findstr initialized! > nul 2>&1",stackdir);
-        total_minutes=1;
-    }
-    else{
-        sprintf(cmdline,"type %s\\tf_prep.log | findstr complete! > nul 2>&1",stackdir);
-        total_minutes=3;
-    }  
-    while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
-        printf("|...................................................................................|\r"); 
-        printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... [(%c)]\r",total_minutes,i,*(annimation+i%4));
-        fflush(stdout);
-        i++;
-        sleep(1);
-        if(file_empty_or_not(errorlog)>0){
-            return 127;
-        }
-    }
-    if(i==MAXIMUM_WAIT_TIME){
-        return 1;
-    }
-    else{
-        return 0;
-    }
-}
-
 int contain_or_not(const char* line, const char* findkey){
     int length_line=strlen(line);
     int length_findkey=strlen(findkey);
@@ -1566,6 +1529,43 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
         system(cmdline);
     }
     return 0;
+}
+
+int wait_for_complete(char* workdir, char* option){
+    char cmdline[CMDLINE_LENGTH]="";
+    char stackdir[DIR_LENGTH]="";
+    char errorlog[FILENAME_LENGTH]="";
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(errorlog,"%s\\log\\now_cluster.log",workdir);
+    int i=0;
+    int total_minutes=0;
+    char* annimation="\\|/-";
+    sprintf(cmdline,"type %s\\tf_prep.log >> %s\\f_prep_archive.log > nul 2>&1",stackdir,stackdir);
+    system(cmdline);
+    if(strcmp(option,"init")==0){
+        sprintf(cmdline,"type %s\\tf_prep.log | findstr successfully | findstr initialized! > nul 2>&1",stackdir);
+        total_minutes=1;
+    }
+    else{
+        sprintf(cmdline,"type %s\\tf_prep.log | findstr complete! > nul 2>&1",stackdir);
+        total_minutes=3;
+    }  
+    while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
+        printf("|...................................................................................|\r"); 
+        printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... [(%c)]\r",total_minutes,i,*(annimation+i%4));
+        fflush(stdout);
+        i++;
+        sleep(1);
+        if(file_empty_or_not(errorlog)>0){
+            return 127;
+        }
+    }
+    if(i==MAXIMUM_WAIT_TIME){
+        return 1;
+    }
+    else{
+        return 0;
+    }
 }
 
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile){
@@ -4766,6 +4766,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
+    char string_temp[64]="";
     char prev_config[16]="";
     char buffer1[64]="";
     char buffer2[64]="";
