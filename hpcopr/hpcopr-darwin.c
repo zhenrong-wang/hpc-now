@@ -1550,7 +1550,6 @@ int wait_for_complete(char* workdir, char* option){
         if(file_empty_or_not(errorlog)>0){
             return 127;
         }
-
     }
     if(i==MAXIMUM_WAIT_TIME){
         return 1;
@@ -5765,8 +5764,9 @@ int main(int argc, char* argv[]){
     char string_temp[128]="";
     int i=0;
     print_header();
-
-    signal(SIGINT,SIG_IGN);
+    for(i=0;i<10000;i++){
+        signal(SIGINT,SIG_IGN);
+    }
     
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
