@@ -5761,7 +5761,7 @@ int main(int argc, char* argv[]){
     char string_temp[128]="";
     int i;
     print_header();
-    for(i=0;i<10;i++){
+    for(i=0;i<256;i++){
         signal(SIGINT,SIG_IGN);
     }
     
