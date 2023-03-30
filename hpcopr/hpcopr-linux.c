@@ -164,7 +164,7 @@ void print_header(void){
         *(string_temp+i)=' ';
     }
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d%s|\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,string_temp);
-    printf("|    Version: 0.1.73   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
+    printf("|    Version: 0.1.79   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     
 }
@@ -5768,6 +5768,7 @@ int main(int argc, char* argv[]){
     char string_temp[128]="";
 
     print_header();
+    signal(SIGINT,SIG_IGN);
 
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
