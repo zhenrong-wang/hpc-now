@@ -1661,7 +1661,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i,j;
-    
+    signal(SIGINT,SIG_IGN);
     if(folder_exist_or_not(workdir)==1){
         return -1;
     }
