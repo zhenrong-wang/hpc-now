@@ -53,13 +53,6 @@ Bug report: info@hpc-now.com
 #define MD5_QCLOUD_TF_ZIP "5ea4e09ae46602959e40c09acd21b4e2"
 #define MD5_AWS_TF_ZIP "463fb946564c91965d58d38e085ebc35"
 
-void sig_handler(int sig_num){
-    signal(SIGINT,sig_handler);
-    printf("[ -WARN- ] To protect this process, Ctrl+C has been disabled. You can input :fq!~ to \n");
-    printf("           forcely quit. Force quit is NOT grace at all. It may damage your cluster! \n");
-    fflush(stdout);
-}
-
 void print_empty_cluster_info(void){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] It seems the cluster is empty. You can either:                           |\n");
@@ -5769,7 +5762,7 @@ int main(int argc, char* argv[]){
     int i;
     print_header();
     for(i=0;i<10;i++){
-        signal(SIGINT,sig_handler);
+        signal(SIGINT,SIG_IGN);
     }
     
     if(check_internet()!=0){
