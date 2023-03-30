@@ -5784,9 +5784,7 @@ int main(int argc, char* argv[]){
     char string_temp[128]="";
 
     print_header();
-    signal(SIGINT,sig_handler);
-    while(force_quit()==1){
-
+    signal(SIGINT,SIG_IGN);
     
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
@@ -6182,5 +6180,4 @@ int main(int argc, char* argv[]){
         }
     }
     return 0;
-    }
 }
