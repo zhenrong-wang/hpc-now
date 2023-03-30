@@ -1641,6 +1641,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i,j;
+    int region_valid_flag=0;
     
     if(folder_exist_or_not(workdir)==1){
         return -1;
@@ -1683,6 +1684,22 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         system(cmdline);
         reset_string(cmdline);
     }
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ STEP 1 ] Creating input files now...                                              |\n");
+    sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
+    system(cmdline);
+
+    sprintf(cmdline,"curl %sregion_valid.tf -o %s/region_valid.tf -s",url_aws_root,stackdir);
+    if(system(cmdline)!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.                          |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return 2;
+    }
+
+
+    
+
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -1692,10 +1709,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         system(cmdline);
         reset_string(cmdline);
     }
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ STEP 1 ] Creating input files now...                                              |\n");
-    sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
-    system(cmdline);
+   
     reset_string(cmdline);
 
     sprintf(cmdline,"curl %shpc_stack_aws.base -o %s/hpc_stack.base -s",url_aws_root,stackdir);
@@ -1738,13 +1752,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return 2;
     }
     reset_string(cmdline);
-    sprintf(cmdline,"curl %sregion_valid.tf -o %s/region_valid.tf -s",url_aws_root,stackdir);
-    if(system(cmdline)!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.                          |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return 2;
-    }
+    
 
     sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",url_aws_root,stackdir);
     if(system(cmdline)!=0){
@@ -1913,7 +1921,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         strcpy(cluster_id,cluster_id_temp);
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ -WARN- ] The CLUSTER_ID specified by the command and conf file is too short.      |\n");
-                printf("                  Extend to %s.\n", cluster_id);
+        printf("           Extend to %s.\n", cluster_id);
     }
     else{
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -5768,7 +5776,6 @@ int main(int argc, char* argv[]){
     char string_temp[128]="";
 
     print_header();
-    signal(SIGINT,SIG_IGN);
 
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
