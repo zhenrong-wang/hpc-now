@@ -1524,6 +1524,7 @@ int wait_for_complete(char* workdir, char* option){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char errorlog[FILENAME_LENGTH]="";
+    signal(SIGINT,SIG_IGN);
     create_and_get_stackdir(workdir,stackdir);
     sprintf(errorlog,"%s/log/now_cluster.log",workdir);
     int i=0;
@@ -1539,6 +1540,7 @@ int wait_for_complete(char* workdir, char* option){
     }
 
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
+        signal(SIGINT,SIG_IGN);
         printf("|...................................................................................|\r");  
         printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... [(%c)] \r",total_minutes,i,*(annimation+i%4));
         fflush(stdout);
@@ -1758,11 +1760,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
     global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
     archive_log(stackdir);
-    sprintf(cmdline,"trap \"echo Ctrl+C is disabled to protect the operation process\" SIGINT && cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
     wait_for_complete(workdir,"init");
     archive_log(stackdir);
-    sprintf(cmdline,"trap \"echo Ctrl+C is disabled to protect the operation process\" SIGINT && cd %s && %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"cd %s && %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
     wait_for_complete(workdir,"apply");
     reset_string(cmdline);
@@ -2115,7 +2117,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(cmdline,"rm -rf %s/hpc_stack.compute >> /dev/null 2>&1",stackdir);
     system(cmdline);
     archive_log(stackdir);
-    sprintf(cmdline,"trap \"echo Ctrl+C is disabled to protect the operation process\" SIGINT && cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
     wait_for_complete(workdir,"init");
     if(file_empty_or_not(logfile)!=0){
@@ -2129,7 +2131,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return -1;
     }
     archive_log(stackdir);
-    sprintf(cmdline,"trap \"echo Ctrl+C is disabled to protect the operation process\" SIGINT && cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
     wait_for_complete(workdir,"apply");
     
