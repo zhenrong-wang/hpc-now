@@ -1526,7 +1526,7 @@ int wait_for_complete(char* workdir, char* option){
     char errorlog[FILENAME_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     sprintf(errorlog,"%s/log/now_cluster.log",workdir);
-    int i=0,j=0;
+    int i=0;
     int total_minutes=0;
     char* annimation="\\|/-";
     if(strcmp(option,"init")==0){
@@ -1537,9 +1537,7 @@ int wait_for_complete(char* workdir, char* option){
         sprintf(cmdline,"cat %s/tf_prep.log | grep \"complete!\" >> /dev/null 2>&1",stackdir);
         total_minutes=3;
     }
-    for(j=0;j<100;j++){
-        signal(SIGINT,SIG_IGN);
-    }
+
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
         printf("|...................................................................................|\r");  
         printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... [(%c)] \r",total_minutes,i,*(annimation+i%4));
@@ -2119,6 +2117,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     archive_log(stackdir);
     sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
+    for(i=0;i<100;i++){
+        signal(SIGINT,SIG_IGN);
+    }
     wait_for_complete(workdir,"init");
     if(file_empty_or_not(logfile)!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -2133,6 +2134,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     archive_log(stackdir);
     sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
+    for(i=0;i<100;i++){
+        signal(SIGINT,SIG_IGN);
+    }
     wait_for_complete(workdir,"apply");
     
     if(file_empty_or_not(logfile)!=0){
