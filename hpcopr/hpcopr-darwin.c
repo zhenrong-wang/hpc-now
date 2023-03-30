@@ -1524,7 +1524,6 @@ int wait_for_complete(char* workdir, char* option){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char errorlog[FILENAME_LENGTH]="";
-    signal(SIGINT,SIG_IGN);
     create_and_get_stackdir(workdir,stackdir);
     sprintf(errorlog,"%s/log/now_cluster.log",workdir);
     int i=0;
@@ -1540,7 +1539,6 @@ int wait_for_complete(char* workdir, char* option){
     }
 
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
-        signal(SIGINT,SIG_IGN);
         fflush(stdin);
         printf("|...................................................................................|\r");  
         printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... [(%c)] \r",total_minutes,i,*(annimation+i%4));
@@ -5764,9 +5762,6 @@ int main(int argc, char* argv[]){
     char string_temp[128]="";
     int i=0;
     print_header();
-    for(i=0;i<10000;i++){
-        signal(SIGINT,SIG_IGN);
-    }
     
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
