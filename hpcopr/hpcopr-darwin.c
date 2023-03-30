@@ -5768,7 +5768,9 @@ int main(int argc, char* argv[]){
     int i=0;
     print_header();
 
-    signal(SIGINT,sig_handler);
+    for(i=0;i<100;i++){
+        signal(SIGINT,SIG_IGN);
+    }
     
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
