@@ -55,7 +55,7 @@ Bug report: info@hpc-now.com
 
 void sig_handler(int sig_num){
     signal(SIGINT,sig_handler);
-    printf("[ -WARN- ] To protect this process, Ctrl+C has been disabled. You can input :fq!! to \n");
+    printf("[ -WARN- ] To protect this process, Ctrl+C has been disabled. You can input :fq!~ to \n");
     printf("           forcely quit. Force quit is NOT grace at all. It may damage your cluster! \n");
     fflush(stdout);
 }
@@ -1560,8 +1560,7 @@ int wait_for_complete(char* workdir, char* option){
         sprintf(cmdline,"cat %s/tf_prep.log | grep \"complete!\" >> /dev/null 2>&1",stackdir);
         total_minutes=3;
     }
-    signal(SIGINT,sig_handler); 
-    while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME&&force_quit()==1){
+    while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
         printf("|...................................................................................|\r");  
         printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... [(%c)] \r",total_minutes,i,*(annimation+i%4));
         fflush(stdout);
@@ -5939,7 +5938,8 @@ int main(int argc, char* argv[]){
             return 0;
         }
     }
-
+    
+    signal(SIGINT,sig_handler);
     if(strcmp(argv[1],"init")==0){
         if(argc==2){
             if(strcmp(cloud_flag,"CLOUD_C")==0){
