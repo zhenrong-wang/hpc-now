@@ -5784,6 +5784,7 @@ int main(int argc, char* argv[]){
     char string_temp[128]="";
 
     print_header();
+    signal(SIGINT,sig_handler);
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
         return -3;
@@ -5938,7 +5939,6 @@ int main(int argc, char* argv[]){
         }
     }
     
-    signal(SIGINT,sig_handler);
     if(strcmp(argv[1],"init")==0){
         if(argc==2){
             if(strcmp(cloud_flag,"CLOUD_C")==0){
