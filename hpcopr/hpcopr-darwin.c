@@ -5765,10 +5765,14 @@ int main(int argc, char* argv[]){
     char* usage_log=USAGE_LOG_FILE;
     char* operation_log=OPERATION_LOG_FILE;
     char string_temp[128]="";
-    int i;
+    int i=0;
     print_header();
 
     signal(SIGINT,sig_handler);
+    while(i<10){
+        sleep(1);
+        i++;
+    }
     
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
