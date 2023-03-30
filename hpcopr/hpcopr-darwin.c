@@ -163,7 +163,7 @@ void print_header(void){
         *(string_temp+i)=' ';
     }
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d%s|\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,string_temp);
-    printf("|    Version: 0.1.67   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
+    printf("|    Version: 0.1.71   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
@@ -180,7 +180,7 @@ void print_not_in_a_workdir(char* current_dir){
     int i;
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ FATAL: ] You are not in a working directory, *NO* critical operation is permitted.|\n");
-    printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is a number).|\n");
+    printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is number). |\n");
     sprintf(temp_string,"|          Current directory is %s.",current_dir);
     for(i=0;i<85-strlen(temp_string)-1;i++){
         *(temp_string2+i)=' ';
@@ -1524,7 +1524,7 @@ int wait_for_complete(char* workdir, char* option){
     int i=0;
     int total_minutes=0;
     char* annimation="\\|/-";
-    sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log >> /dev/null 2>&1",stackdir,stackdir);
+    sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log 2>/dev/null",stackdir,stackdir);
     system(cmdline);
     if(strcmp(option,"init")==0){
         sprintf(cmdline,"cat %s/tf_prep.log | grep \"successfully initialized!\" >> /dev/null 2>&1",stackdir);
