@@ -53,6 +53,28 @@ Bug report: info@hpc-now.com
 #define MD5_QCLOUD_TF_ZIP "5ea4e09ae46602959e40c09acd21b4e2"
 #define MD5_AWS_TF_ZIP "463fb946564c91965d58d38e085ebc35"
 
+void sig_handler(int sig_num){
+    signal(SIGINT,sig_handler);
+    printf("[ -WARN- ] To protect this process, Ctrl+C has been disabled. You can input :fq!! to \n");
+    printf("           forcely quit. Force quit is NOT grace at all. It may damage your cluster! \n");
+    fflush(stdout);
+}
+
+int force_quit(void){
+    char* quit_command=":fq!~";
+    char input[256]="";
+    fflush(stdin);
+    scanf("%s",input);
+    if(strcmp(quit_command,input)==0){
+        printf("[ -WARN- ] Force quit is NOT grace at all. Your cluster may have been damaged! \n");
+        return 0;
+    }
+    else{
+        printf("[ -WARN- ] To protect this process, Ctrl+C has been disabled. You can input :fq!~ to \n");
+        printf("           forcely quit. Force quit is NOT grace at all. It may damage your cluster! \n");
+        return 1;
+    }
+}
 
 void print_empty_cluster_info(void){
     printf("+-----------------------------------------------------------------------------------+\n");
@@ -1537,8 +1559,9 @@ int wait_for_complete(char* workdir, char* option){
     else{
         sprintf(cmdline,"cat %s/tf_prep.log | grep \"complete!\" >> /dev/null 2>&1",stackdir);
         total_minutes=3;
-    } 
-    while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
+    }
+    signal(SIGINT,sig_handler); 
+    while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME&&force_quit()==1){
         printf("|...................................................................................|\r");  
         printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... [(%c)] \r",total_minutes,i,*(annimation+i%4));
         fflush(stdout);
@@ -1547,6 +1570,7 @@ int wait_for_complete(char* workdir, char* option){
         if(file_empty_or_not(errorlog)>0){
             return 127;
         }
+
     }
     if(i==MAXIMUM_WAIT_TIME){
         return 1;
