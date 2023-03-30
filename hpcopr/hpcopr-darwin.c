@@ -5748,6 +5748,12 @@ int write_log(char* workdir, char* operation_logfile, char* operation, int runfl
     return 0;
 }
 
+void sig_handler(int sig_num){
+    signal(SIGINT, sig_handler);
+    printf("\n Cannot be terminated using Ctrl+C \n");
+    fflush(stdout);
+}
+
 int main(int argc, char* argv[]){
     char* crypto_keyfile=CRYPTO_KEY_FILE;
     char buffer1[64];
@@ -5761,9 +5767,8 @@ int main(int argc, char* argv[]){
     char string_temp[128]="";
     int i;
     print_header();
-    for(i=0;i<256;i++){
-        signal(SIGINT,SIG_IGN);
-    }
+
+    signal(SIGINT,sig_handler);
     
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
