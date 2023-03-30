@@ -1661,7 +1661,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i,j;
-    signal(SIGINT,SIG_IGN);
     if(folder_exist_or_not(workdir)==1){
         return -1;
     }
@@ -5939,7 +5938,7 @@ int main(int argc, char* argv[]){
         }
     }
     
-    signal(SIGINT,SIG_IGN);
+    signal(SIGINT,sig_handler);
     if(strcmp(argv[1],"init")==0){
         if(argc==2){
             if(strcmp(cloud_flag,"CLOUD_C")==0){
