@@ -60,22 +60,6 @@ void sig_handler(int sig_num){
     fflush(stdout);
 }
 
-int force_quit(void){
-    char* quit_command=":fq!~";
-    char input[256]="";
-    fflush(stdin);
-    scanf("%s",input);
-    if(strcmp(quit_command,input)==0){
-        printf("[ -WARN- ] Force quit is NOT grace at all. Your cluster may have been damaged! \n");
-        return 0;
-    }
-    else{
-        printf("[ -WARN- ] To protect this process, Ctrl+C has been disabled. You can input :fq!~ to \n");
-        printf("           forcely quit. Force quit is NOT grace at all. It may damage your cluster! \n");
-        return 1;
-    }
-}
-
 void print_empty_cluster_info(void){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] It seems the cluster is empty. You can either:                           |\n");
@@ -5782,9 +5766,11 @@ int main(int argc, char* argv[]){
     char* usage_log=USAGE_LOG_FILE;
     char* operation_log=OPERATION_LOG_FILE;
     char string_temp[128]="";
-
+    int i;
     print_header();
-    signal(SIGINT,SIG_IGN);
+    for(i=0;i<10;i++){
+        signal(SIGINT,sig_handler);
+    }
     
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
