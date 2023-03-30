@@ -1697,8 +1697,38 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return 2;
     }
 
-
-    
+    sprintf(secret_file,"%s/.secrets.txt",vaultdir);
+    get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
+    sprintf(region_valid,"%s/region_valid.tf",stackdir);
+    sprintf(logfile,"%s/now_cluster.log",logdir);
+    global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
+    global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
+    archive_log(stackdir);
+    sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
+    system(cmdline);
+    wait_for_complete(workdir,"init");
+    archive_log(stackdir);
+    sprintf(cmdline,"cd %s && %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
+    system(cmdline);
+    wait_for_complete(workdir,"apply");
+    if(file_empty_or_not(logfile)!=0){
+        global_replace(region_valid,"cn-northwest-1","us-east-1");
+        system(cmdline);
+        wait_for_complete(workdir,"apply");
+        if(file_empty_or_not(logfile)!=0){
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] The keypair is invalid. Please use 'hpcopr new keypair' to update with a |\n");
+            printf("|          valid keypair. Exit now.                                                 |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            sprintf(cmdline,"rm -rf %s/region_valid.tf >> /dev/null 2>&1",stackdir);
+            system(cmdline);
+            return -1;
+        }
+        region_valid_flag=1;
+    }
+    sprintf(cmdline,"rm -rf %s/region_valid.tf >> /dev/null 2>&1",stackdir);
+    system(cmdline);
+    reset_string(cmdline);      
 
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
@@ -1708,9 +1738,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_aws_root,conf_file);
         system(cmdline);
         reset_string(cmdline);
+        if(region_valid_flag==1){
+            global_replace(conf_file,"cn-northwest-1","us-east-1");
+        }
     }
-   
-    reset_string(cmdline);
 
     sprintf(cmdline,"curl %shpc_stack_aws.base -o %s/hpc_stack.base -s",url_aws_root,stackdir);
     if(system(cmdline)!=0){
@@ -1752,8 +1783,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return 2;
     }
     reset_string(cmdline);
-    
-
     sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",url_aws_root,stackdir);
     if(system(cmdline)!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -1761,25 +1790,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("+-----------------------------------------------------------------------------------+\n");
         return 2;
     }
-    reset_string(cmdline);
-    sprintf(secret_file,"%s/.secrets.txt",vaultdir);
-    get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
-    sprintf(region_valid,"%s/region_valid.tf",stackdir);
-    sprintf(logfile,"%s/now_cluster.log",logdir);
-    global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
-    global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"init");
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-    reset_string(cmdline);
-    sprintf(cmdline,"rm -rf %s/region_valid.tf >> /dev/null 2>&1",stackdir);
-    system(cmdline);
-    reset_string(cmdline);
+    
     file_p=fopen(conf_file,"r");
     for(i=0;i<3;i++){
         fgets(conf_line_buffer,256,file_p);
@@ -1844,24 +1855,56 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return -1;
     }
     if(strcmp(region_id,"cn-northwest-1")==0){
+        if(region_valid_flag==1){
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.       |\n");
+            printf("|          Please run 'hpcopr new keypair' command to update with a valid keypair.  |\n");
+            printf("|          Exit now.                                                                |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            return -1;
+        }
         strcpy(region_flag,"cn_regions");
         sprintf(os_image,"%scn.0",os_image_raw);
         strcpy(db_os_image,"centos7cn.0");
         strcpy(nat_os_image,"centos7cn.0");
     }
     else if(strcmp(region_id,"cn-north-1")==0){
+        if(region_valid_flag==1){
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.       |\n");
+            printf("|          Please run 'hpcopr new keypair' command to update with a valid keypair.  |\n");
+            printf("|          Exit now.                                                                |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            return -1;
+        }
         strcpy(region_flag,"cn_regions");
         sprintf(os_image,"%scn.1",os_image_raw);
         strcpy(db_os_image,"centos7cn.1");
         strcpy(nat_os_image,"centos7cn.1");
     }
     else if(strcmp(region_id,"us-east-1")==0){
+        if(region_valid_flag==0){
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.      |\n");
+            printf("|          Please run 'hpcopr new keypair' command to update with a valid keypair.  |\n");
+            printf("|          Exit now.                                                                |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            return -1;
+        }
         strcpy(region_flag,"global_regions");
         sprintf(os_image,"%sglobal.0",os_image_raw);
         strcpy(db_os_image,"centos7global.0");
         strcpy(nat_os_image,"centos7global.0");
     }
     else if(strcmp(region_id,"us-east-2")==0){
+        if(region_valid_flag==0){
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.      |\n");
+            printf("|          Please run 'hpcopr new keypair' command to update with a valid keypair.  |\n");
+            printf("|          Exit now.                                                                |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            return -1;
+        }
         strcpy(region_flag,"global_regions");
         sprintf(os_image,"%sglobal.1",os_image_raw);
         strcpy(db_os_image,"centos7global.1");
