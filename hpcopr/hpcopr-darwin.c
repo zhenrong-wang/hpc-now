@@ -1526,7 +1526,7 @@ int wait_for_complete(char* workdir, char* option){
     char errorlog[FILENAME_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     sprintf(errorlog,"%s/log/now_cluster.log",workdir);
-    int i=0;
+    int i=0,j=0;
     int total_minutes=0;
     char* annimation="\\|/-";
     if(strcmp(option,"init")==0){
@@ -1536,6 +1536,9 @@ int wait_for_complete(char* workdir, char* option){
     else{
         sprintf(cmdline,"cat %s/tf_prep.log | grep \"complete!\" >> /dev/null 2>&1",stackdir);
         total_minutes=3;
+    }
+    for(j=0;j<100;j++){
+        signal(SIGINT,SIG_IGN);
     }
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
         printf("|...................................................................................|\r");  
