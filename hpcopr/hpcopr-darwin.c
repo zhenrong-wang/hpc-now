@@ -1758,11 +1758,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
     global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
     archive_log(stackdir);
-    sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"trap \"echo Ctrl+C is disabled to protect the operation process\" SIGINT && cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
     wait_for_complete(workdir,"init");
     archive_log(stackdir);
-    sprintf(cmdline,"cd %s && %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"trap \"echo Ctrl+C is disabled to protect the operation process\" SIGINT && cd %s && %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
     wait_for_complete(workdir,"apply");
     reset_string(cmdline);
@@ -2115,11 +2115,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(cmdline,"rm -rf %s/hpc_stack.compute >> /dev/null 2>&1",stackdir);
     system(cmdline);
     archive_log(stackdir);
-    sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"trap \"echo Ctrl+C is disabled to protect the operation process\" SIGINT && cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
-    for(i=0;i<100;i++){
-        signal(SIGINT,SIG_IGN);
-    }
     wait_for_complete(workdir,"init");
     if(file_empty_or_not(logfile)!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -2132,11 +2129,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return -1;
     }
     archive_log(stackdir);
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
+    sprintf(cmdline,"trap \"echo Ctrl+C is disabled to protect the operation process\" SIGINT && cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
     system(cmdline);
-    for(i=0;i<100;i++){
-        signal(SIGINT,SIG_IGN);
-    }
     wait_for_complete(workdir,"apply");
     
     if(file_empty_or_not(logfile)!=0){
@@ -5753,12 +5747,6 @@ int write_log(char* workdir, char* operation_logfile, char* operation, int runfl
     fprintf(file_p,"%d-%d-%d,%d:%d:%d,%s,%s,%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,workdir,operation,runflag);
     fclose(file_p);
     return 0;
-}
-
-void sig_handler(int sig_num){
-    signal(SIGINT, sig_handler);
-    printf("\n Cannot be terminated using Ctrl+C \n");
-    fflush(stdout);
 }
 
 int main(int argc, char* argv[]){
