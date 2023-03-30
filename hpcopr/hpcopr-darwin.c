@@ -5939,7 +5939,7 @@ int main(int argc, char* argv[]){
         }
     }
     
-    signal(SIGINT,sig_handler);
+    signal(SIGINT,SIG_IGN);
     if(strcmp(argv[1],"init")==0){
         if(argc==2){
             if(strcmp(cloud_flag,"CLOUD_C")==0){
