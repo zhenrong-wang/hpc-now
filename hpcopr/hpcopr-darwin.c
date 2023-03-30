@@ -5769,10 +5769,6 @@ int main(int argc, char* argv[]){
     print_header();
 
     signal(SIGINT,sig_handler);
-    while(i<10){
-        sleep(1);
-        i++;
-    }
     
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
