@@ -61,10 +61,8 @@ int check_internet(void){
 int check_current_user(void){
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Please switch to the root user or users with administration privilege    |\n");
-        printf("|          and run the installer *WITH* 'sudo' to install the HPC-NOW services.     |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
+        printf("[ FATAL: ] Please either switch to users with admin privilege and run the installer |\n");
+        printf("|          with 'sudo', or switch to the root user. Exit now.                       |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return -1;    
     }
@@ -304,6 +302,7 @@ int main(int argc, char* argv[]){
     int run_flag=0;
     print_header();
     if(check_current_user()!=0){
+        print_help();
         print_tail();
         return -1;
     }
