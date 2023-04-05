@@ -15,13 +15,28 @@ Bug report: info@hpc-now.com
 
 #define CMDLINE_LENGTH 2048
 #define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
+#define URL_LICENSE_FSF "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html"
 #define PASSWORD_STRING_LENGTH 20
 #define PASSWORD_LENGTH 19
+
+void print_header(void){
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("| Welcome to the HPC-NOW Service Installer!     Version: 0.1.67                     |\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd                         |\n");
+    printf("| This is free software; see the source for copying conditions.  There is NO        |\n");
+    printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.       |\n");
+}
+
+void print_tail(void){
+    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
+    printf("|                                                 | P - erformance  + O - perating  |\n");
+    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+}
 
 // Print out help info for this installer
 void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Welcome to HPC-NOW Service Installer! There are 3 options:                        |\n");
     printf("| Usage: sudo THIS_INSTALLER_FULL_PATH option                                       |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|  install          : Install or repair the HPC-NOW Services on your device.        |\n");
@@ -29,27 +44,47 @@ void print_help(void){
     printf("|  uninstall        : Remove the HPC-NOW services and all relevant data.            |\n");
     printf("|  help             : Show this information.                                        |\n");      
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
-    printf("|                                                 | P - erformance  + O - perating  |\n");
-    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
 }
 
 // check the internet connectivity by pinging Baidu's url. If connected, return 0; otherwise, return 1
 int check_internet(void){    
     if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
-        printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-        printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service |\n");
-        printf("|          or check your internet connectivity and retry later.                     |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
+        printf("|          or check your internet connectivity and retry later. Exit now.           |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 1;
+    }
+    return 0;
+}
+
+int license_confirmation(void){
+    char cmdline[CMDLINE_LENGTH]="";
+    char confirmation[64]="";
+    sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -INFO- ] Please read the following important information before continuing.       |\n");
+    printf("|          You can press 'Enter' to continue reading, or press 'q' to quit reading. |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    if(system(cmdline)!=0){
+        printf("[ FATAL: ] Currently the installer failed to download or print out the license.     |\n");
+        printf("|          Please double check your internet connectivity and retry. If this issue  |\n");
+        printf("|          still occurs, please report to us via info@hpc-now.com . Exit now.       |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return 1;
+    }
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -INFO- ] If you accept the terms and conditions above, please input 'accept',     |\n");
+    printf("|          If you do not accept, this installation will exit immediately.           |\n");
+    printf("[ INPUT: ] Please input ( case-sensative ): ");
+    fflush(stdin);
+    scanf("%s",confirmation);
+    if(strcmp(confirmation,"accept")!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ -INFO- ] This installation process is terminated because you didn't accept the    |\n");
+        printf("|          terms and conditions in the license. Exit now.                           |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return -1;
     }
     return 0;
 }
@@ -82,10 +117,6 @@ int install_services(void){
     char random_string[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
     int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
-
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
 
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -174,11 +205,6 @@ int install_services(void){
 // Forcely uninstall the HPC-NOW services
 int uninstall_services(void){
     char doubleconfirm[128]="";
-
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
-
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Please switch to the root user or users with administration privilege    |\n");
@@ -236,10 +262,6 @@ int update_services(void){
     char doubleconfirm[128]="";
     char cmdline[CMDLINE_LENGTH]="";
 
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Welcome to HPC-NOW Service Installer!                                             |\n");
-    printf("| Version: 0.1.61   * This software is licensed under GPLv2, with NO WARRANTY! *    |\n");
-
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Please switch to the root user or users with administration privilege    |\n");
@@ -296,17 +318,28 @@ int update_services(void){
 
 int main(int argc, char* argv[]){
     int run_flag=0;
+    print_header();
+    run_flag=license_confirmation();
+    
+    if(run_flag!=0){
+        print_tail();
+        return run_flag;
+    }
+
     if(argc!=2){
         print_help();
+        print_tail();
         return 1;
     }
     
     if(strcmp(argv[1],"uninstall")!=0&&strcmp(argv[1],"update")!=0&&strcmp(argv[1],"install")!=0){
         print_help();
+        print_tail();
         return 1;
     }
 
     if(check_internet()!=0){
+        print_tail();
         return -3;
     }
 
@@ -327,6 +360,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"help")==0){
         print_help();
+        print_tail();
         return 0;
     }
     return 0;
