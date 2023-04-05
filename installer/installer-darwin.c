@@ -63,7 +63,7 @@ int check_current_user(void){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Please either switch to users with admin privilege and run the installer |\n");
         printf("|          with 'sudo', or switch to the root user. Exit now.                       |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        print_help();
         return -1;    
     }
     return 0;
@@ -302,7 +302,6 @@ int main(int argc, char* argv[]){
     int run_flag=0;
     print_header();
     if(check_current_user()!=0){
-        print_help();
         print_tail();
         return -1;
     }
