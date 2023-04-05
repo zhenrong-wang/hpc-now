@@ -15,7 +15,7 @@ Bug report: info@hpc-now.com
 
 #define CMDLINE_LENGTH 2048
 #define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
-#define URL_LICENSE_FSF "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html"
+#define URL_LICENSE_FSF "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
 #define PASSWORD_STRING_LENGTH 20
 #define PASSWORD_LENGTH 19
 
