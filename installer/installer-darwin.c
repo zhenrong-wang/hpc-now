@@ -87,7 +87,7 @@ int license_confirmation(void){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] If you accept the terms and conditions above, please input 'accept',     |\n");
     printf("|          If you do not accept, this installation will exit immediately.           |\n");
-    printf("[ INPUT: ] Please input ( case-sensative ): ");
+    printf("[ INPUT: ] Please input ( case-sensitive ): ");
     fflush(stdin);
     scanf("%s",confirmation);
     if(strcmp(confirmation,"accept")!=0){
@@ -128,8 +128,6 @@ int install_services(void){
     char random_string[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
     int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
-
-
 
     if(system("id hpc-now >> /dev/null 2>&1")==0){
         printf("+-----------------------------------------------------------------------------------+\n");

@@ -76,7 +76,7 @@ int license_confirmation(void){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] If you accept the terms and conditions above, please input 'accept',     |\n");
     printf("|          If you do not accept, this installation will exit immediately.           |\n");
-    printf("[ INPUT: ] Please input ( case-sensative ): ");
+    printf("[ INPUT: ] Please input ( case-sensitive ): ");
     fflush(stdin);
     scanf("%s",confirmation);
     if(strcmp(confirmation,"accept")!=0){
