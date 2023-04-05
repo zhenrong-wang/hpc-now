@@ -38,7 +38,7 @@ void print_tail(void){
 
 void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Usage: 1. Open a Command Prompt Window with the Administration role               |\n");
+    printf("| Usage: 1. Open a Command Prompt Window *with* the Administrator role              |\n");
     printf("|        2. Type the command: THIS_INSTALLER_FULL_PATH option                       |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|  install          : Install or repair the HPC-NOW Services on your device.        |\n");
