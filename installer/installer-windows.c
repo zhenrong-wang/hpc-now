@@ -38,8 +38,7 @@ void print_tail(void){
 
 void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Usage: 1. Open a Command Prompt Window *with* the Administrator role              |\n");
-    printf("|        2. Type the command: THIS_INSTALLER_FULL_PATH option                       |\n");
+    printf("| Usage: THIS_INSTALLER_FULL_PATH option                                            |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|  install          : Install or repair the HPC-NOW Services on your device.        |\n");
     printf("|  update           : Update the hpcopr to the latest version.                      |\n");
@@ -164,13 +163,12 @@ int check_current_user(void){
         system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Please switch to Administrator or users with administration privilege:   |\n");
-        printf("|          1. Run a CMD window with Administrator role                              |\n");
+        printf("|          1. Run a CMD window with the Administrator role                          |\n");
         printf("|          2. Type the full path of this installer with an option, for example      |\n");
         printf("|             C:\\Users\\ABC\\installer_windows_amd64.exe install                      |\n");
-        printf("|          to run this installer properly.                                          |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("|          to run this installer properly. Exit now.                                |\n");
+        print_help();
+        system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
         return -1;    
     }
     system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
@@ -181,7 +179,6 @@ int install_services(void){
     char cmdline[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
-
     if(system("net user hpc-now > nul 2>&1")==0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed. |\n");
@@ -196,7 +193,6 @@ int install_services(void){
         printf("+-----------------------------------------------------------------------------------+\n");
         return 1;
     }
-
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] Checking and cleaning up current environment ...                         |\n");
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
@@ -215,7 +211,6 @@ int install_services(void){
         printf("+-----------------------------------------------------------------------------------+\n");
         return -1;
     }
-
     printf("[ -INFO- ] Creating and configuring the running directory ...                       |\n");
     system("mkdir c:\\hpc-now > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\ > nul 2>&1");
@@ -254,7 +249,6 @@ int install_services(void){
 
 int uninstall_services(void){
     char doubleconfirm[128]="";
-
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|*                                C A U T I O N !                                  *|\n");
     printf("|*                                                                                 *|\n");
@@ -359,7 +353,7 @@ int main(int argc, char* argv[]){
         print_tail();
         return -1;
     }
-    
+
     if(check_internet()!=0){
         print_tail();
         return -3;
