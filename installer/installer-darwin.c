@@ -319,11 +319,21 @@ int update_services(void){
 int main(int argc, char* argv[]){
     int run_flag=0;
     print_header();
+    if(check_internet()!=0){
+        print_tail();
+        return -3;
+    }
 
     if(argc!=2){
         print_help();
         print_tail();
         return 1;
+    }
+
+    if(argc==2&&strcmp(argv[1],"help")==0){
+        print_help();
+        print_tail();
+        return 0;
     }
 
     run_flag=license_confirmation();
@@ -336,11 +346,6 @@ int main(int argc, char* argv[]){
         print_help();
         print_tail();
         return 1;
-    }
-
-    if(check_internet()!=0){
-        print_tail();
-        return -3;
     }
 
     if(strcmp(argv[1],"uninstall")==0){
@@ -356,12 +361,6 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"install")==0){
         run_flag=install_services();
         return run_flag;
-    }
-
-    if(strcmp(argv[1],"help")==0){
-        print_help();
-        print_tail();
-        return 0;
     }
     return 0;
 }
