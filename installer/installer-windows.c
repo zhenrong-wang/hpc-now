@@ -158,11 +158,7 @@ int file_empty_or_not(char* filename){
     }
 }
 
-int install_services(void){
-    char cmdline[CMDLINE_LENGTH]="";
-    char random_string[PASSWORD_STRING_LENGTH]="";
-    FILE* file_p=NULL;
-
+int check_current_user(void){
     system("whoami /groups | find \"S-1-16-12288\" > c:\\programdata\\check.txt.tmp 2>&1");
     if(file_empty_or_not("c:\\programdata\\check.txt.tmp")==0){
         system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
@@ -178,6 +174,13 @@ int install_services(void){
         return -1;    
     }
     system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
+    return 0;
+}
+
+int install_services(void){
+    char cmdline[CMDLINE_LENGTH]="";
+    char random_string[PASSWORD_STRING_LENGTH]="";
+    FILE* file_p=NULL;
 
     if(system("net user hpc-now > nul 2>&1")==0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -251,20 +254,6 @@ int install_services(void){
 
 int uninstall_services(void){
     char doubleconfirm[128]="";
-    system("whoami /groups | find \"S-1-16-12288\" > c:\\programdata\\check.txt.tmp 2>&1");
-    if(file_empty_or_not("c:\\programdata\\check.txt.tmp")==0){
-        system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Please switch to administrator or users with administration privilege:   |\n");
-        printf("|          1. Run a CMD window with Administrator role                              |\n");
-        printf("|          2. Type the full path of this installer with an option, for example      |\n");
-        printf("|             C:\\Users\\ABC\\installer_windows_amd64.exe uninstall                    |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return -1;    
-    }
-    system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
 
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|*                                C A U T I O N !                                  *|\n");
@@ -314,20 +303,6 @@ int uninstall_services(void){
 int update_services(void){
     char doubleconfirm[128]="";
     char cmdline[CMDLINE_LENGTH]="";
-    system("whoami /groups | find \"S-1-16-12288\" > c:\\programdata\\check.txt.tmp 2>&1");
-    if(file_empty_or_not("c:\\programdata\\check.txt.tmp")==0){
-        system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Please switch to administrator or users with administration privilege:   |\n");
-        printf("|          1. Run a CMD window with Administrator role                              |\n");
-        printf("|          2. Type the full path of this installer with an option, for example      |\n");
-        printf("|             C:\\Users\\ABC\\installer_windows_amd64.exe uninstall                    |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return -1;    
-    }
-    system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
 
     if(system("net user hpc-now > nul 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -379,6 +354,12 @@ int update_services(void){
 int main(int argc, char* argv[]){
     int run_flag=0;
     print_header();
+
+    if(check_current_user()!=0){
+        print_tail();
+        return -1;
+    }
+    
     if(check_internet()!=0){
         print_tail();
         return -3;

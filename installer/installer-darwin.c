@@ -60,6 +60,12 @@ int check_internet(void){
 
 int check_current_user(void){
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Please switch to the root user or users with administration privilege    |\n");
+        printf("|          and run the installer *WITH* 'sudo' to install the HPC-NOW services.     |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Exit now.                                                                |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
         return -1;    
     }
     return 0;
@@ -204,16 +210,6 @@ int install_services(void){
 // Forcely uninstall the HPC-NOW services
 int uninstall_services(void){
     char doubleconfirm[128]="";
-    if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Please switch to the root user or users with administration privilege    |\n");
-        printf("|          and run the installer *WITH* 'sudo' to uninstall the HPC-NOW services.   |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return -1;    
-    }
-
     // Double confirmation is needed.
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("|*                                C A U T I O N !                                  *|\n");
@@ -260,17 +256,6 @@ int uninstall_services(void){
 int update_services(void){
     char doubleconfirm[128]="";
     char cmdline[CMDLINE_LENGTH]="";
-
-    if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Please switch to the root user or users with administration privilege    |\n");
-        printf("|          and run the installer *WITH* 'sudo' to update the HPC-NOW services.      |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return -1;    
-    }
-
     if(system("id hpc-now >> /dev/null 2>&1")!=0){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been    |\n");
@@ -318,13 +303,10 @@ int update_services(void){
 int main(int argc, char* argv[]){
     int run_flag=0;
     print_header();
-
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Please switch to the root user or users with administration privilege    |\n");
-        printf("|          and run the installer *WITH* 'sudo' to install the HPC-NOW services.     |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+    if(check_current_user()!=0){
+        print_tail();
+        return -1;
+    }
     
     if(check_internet()!=0){
         print_tail();
