@@ -350,16 +350,19 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"uninstall")==0){
         run_flag=uninstall_services();
+        print_tail();
         return run_flag;
     }
 
     if(strcmp(argv[1],"update")==0){
         run_flag=update_services();
+        print_tail();
         return run_flag;
     }
 
     if(strcmp(argv[1],"install")==0){
         run_flag=install_services();
+        print_tail();
         return run_flag;
     }
     return 0;
