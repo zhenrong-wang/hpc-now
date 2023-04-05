@@ -330,22 +330,22 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
-    if(argc==2&&strcmp(argv[1],"help")==0){
+    if(strcmp(argv[1],"help")==0){
         print_help();
         print_tail();
         return 0;
-    }
-
-    run_flag=license_confirmation();
-    if(run_flag!=0){
-        print_tail();
-        return run_flag;
     }
     
     if(strcmp(argv[1],"uninstall")!=0&&strcmp(argv[1],"update")!=0&&strcmp(argv[1],"install")!=0){
         print_help();
         print_tail();
         return 1;
+    }
+
+    run_flag=license_confirmation();
+    if(run_flag!=0){
+        print_tail();
+        return run_flag;
     }
 
     if(strcmp(argv[1],"uninstall")==0){
