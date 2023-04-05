@@ -15,7 +15,7 @@ Bug report: info@hpc-now.com
 
 #define CMDLINE_LENGTH 2048
 #define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
-#define URL_LICENSE_FSF "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/dev/LICENSE"
 #define PASSWORD_STRING_LENGTH 20
 #define PASSWORD_LENGTH 19
 
@@ -61,7 +61,7 @@ int check_internet(void){
 int license_confirmation(void){
     char cmdline[CMDLINE_LENGTH]="";
     char confirmation[64]="";
-    sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
+    sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] Please read the following important information before continuing.       |\n");
     printf("|          You can press 'Enter' to continue reading, or press 'q' to quit reading. |\n");
