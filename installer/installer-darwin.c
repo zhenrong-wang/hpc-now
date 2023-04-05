@@ -58,6 +58,13 @@ int check_internet(void){
     return 0;
 }
 
+int check_current_user(void){
+    if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
+        return -1;    
+    }
+    return 0;
+}
+
 int license_confirmation(void){
     char cmdline[CMDLINE_LENGTH]="";
     char confirmation[64]="";
@@ -118,15 +125,7 @@ int install_services(void){
     FILE* file_p=NULL;
     int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
 
-    if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Please switch to the root user or users with administration privilege    |\n");
-        printf("|          and run the installer *WITH* 'sudo' to install the HPC-NOW services.     |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        return -1;    
-    }
+
 
     if(system("id hpc-now >> /dev/null 2>&1")==0){
         printf("+-----------------------------------------------------------------------------------+\n");
@@ -319,6 +318,14 @@ int update_services(void){
 int main(int argc, char* argv[]){
     int run_flag=0;
     print_header();
+
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Please switch to the root user or users with administration privilege    |\n");
+        printf("|          and run the installer *WITH* 'sudo' to install the HPC-NOW services.     |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Exit now.                                                                |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+    
     if(check_internet()!=0){
         print_tail();
         return -3;
