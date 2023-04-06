@@ -2118,7 +2118,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf("[ -INFO- ] Building you cluster now, this may take seconds ...                      |\n");
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
 
     generate_sshkey(sshkey_folder,pubkey);
 
@@ -2805,7 +2804,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf("[ -INFO- ] Building you cluster now, this may take seconds ...                      |\n");
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
 
     generate_sshkey(sshkey_folder,pubkey);
 
@@ -3465,8 +3463,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     printf("[ -INFO- ] Building you cluster now, this may take seconds ...                      |\n");
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-
     generate_sshkey(sshkey_folder,pubkey);
 
     sprintf(filename_temp,"%s\\hpc_stack.base",stackdir);
@@ -3975,7 +3971,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
     archive_log(stackdir);
@@ -4755,7 +4751,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             printf("[ -INFO- ] The cluster operation is in progress ...                                 |\n");
             printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
             printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
-            printf("+-----------------------------------------------------------------------------------+\n");
+
             archive_log(stackdir);
             sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
             system(cmdline);
@@ -4826,7 +4822,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     printf("[ -INFO- ] The cluster operation is in progress ...                                 |\n");
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+
     archive_log(stackdir);
     sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
@@ -4917,7 +4913,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     printf("[ -INFO- ] The cluster operation is in progress ...                                 |\n");
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+
     archive_log(stackdir);
     sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
     system(cmdline);
