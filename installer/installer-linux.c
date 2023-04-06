@@ -302,6 +302,9 @@ int update_services(int loc_flag, char* location){
     if(system(cmdline)==0){
         sprintf(cmdline,"chmod +x /home/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /home/hpc-now/.bin/hpcopr");
         system(cmdline);
+        system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
+        sprintf(cmdline,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
+        system(cmdline);
         printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.    |\n");
         printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
         printf("+-----------------------------------------------------------------------------------+\n");

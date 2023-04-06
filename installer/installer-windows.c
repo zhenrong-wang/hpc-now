@@ -377,6 +377,9 @@ int update_services(int loc_flag, char* location){
         printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.    |\n");
         printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
+        system("mkdir c:\\hpc-now\\LICENSES > nul 2>&1");
+        sprintf(cmdline,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
+        system(cmdline);
         system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
         return 0;
     }
