@@ -268,8 +268,7 @@ int install_services(int loc_flag, char* location){
         printf("+-----------------------------------------------------------------------------------+\n");
         printf("[ FATAL: ] Failed to get the hpcopr executable. This installation process is        |\n");
         printf("|          terminated. If you specified the location of hpcopr executable, please   |\n");
-        printf("|          make sure the location is correct. Exit now.                             |\n");
-        printf("|          Please uninstall first and then install again.                           |\n");
+        printf("|          make sure the location is correct. Rolling back and exit now.            |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
         system("attrib -h -s -r c:\\hpc-now > nul 2>&1");
@@ -384,7 +383,7 @@ int update_services(int loc_flag, char* location){
     else{
         printf("[ FATAL: ] Failed to update the HPC-NOW services. Please check and make sure:       |\n");
         printf("|          1. The HPC-NOW Services have been installed previously.                  |\n");
-        printf("|          2. Please make sure the specified location (if specified) is correct.    |\n");
+        printf("|          2. The specified location (if specified) is correct.                     |\n");
         printf("|          3. Your device is connected to the internet.                             |\n");
         printf("|          4. Currently there is no 'hpcopr' thread(s) running.                     |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
