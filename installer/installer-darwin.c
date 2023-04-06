@@ -127,7 +127,7 @@ int generate_random_passwd(char* password){
 // 2. Create necessary directories, including /Applications/.hpc-now 
 // 3. Create the crypto key file for further encryption and decryption
 // 4. Manage the folder permissions
-int install_services(int loc_flag){
+int install_services(int loc_flag, char* location){
     char cmdline[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
@@ -187,8 +187,30 @@ int install_services(int loc_flag){
     strcpy(cmdline,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
     system(cmdline);
     printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
-    sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr && chmod +x /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
-    system(cmdline);
+    if(loc_flag==-1){
+        sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
+    }
+    else if(loc_flag==1){
+        sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",location);
+    }
+    else{
+        sprintf(cmdline,"/bin/cp -r %s /Users/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
+    }
+
+    if(system(cmdline)==0){
+        sprintf(cmdline,"chmod +x /Users/hpc-now/.bin/hpcopr");
+        system(cmdline);
+    }
+    else{
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Failed to get the hpcopr executable. This installation process is        |\n");
+        printf("|          terminated. If you specified the location of hpcopr executable, please   |\n");
+        printf("|          make sure the location is correct. Exit now.                             |\n");
+        printf("|          Please uninstall first and then install again.                           |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return -1;
+    }
+    
     printf("[ -INFO- ] Creating other key running directories now ...                           |\n");
     system("mkdir -p /Users/hpc-now/.now-ssh/ >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/.now-lic/ >> /dev/null 2>&1");
@@ -253,7 +275,7 @@ int uninstall_services(void){
     return 0;
 }
 
-int update_services(int loc_flag){
+int update_services(int loc_flag, char* location){
     char doubleconfirm[128]="";
     char cmdline[CMDLINE_LENGTH]="";
     if(system("id hpc-now >> /dev/null 2>&1")!=0){
@@ -396,13 +418,13 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"update")==0){
-        run_flag=update_services(loc_flag);
+        run_flag=update_services(loc_flag,advanced_option_tail);
         print_tail();
         return run_flag;
     }
 
     if(strcmp(argv[1],"install")==0){
-        run_flag=install_services(loc_flag);
+        run_flag=install_services(loc_flag,advanced_option_tail);
         print_tail();
         return run_flag;
     }
