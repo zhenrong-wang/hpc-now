@@ -37,12 +37,16 @@ void print_tail(void){
 // Print out help info for this installer
 void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Usage: sudo THIS_INSTALLER_FULL_PATH option                                       |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|  install          : Install or repair the HPC-NOW Services on your device.        |\n");
-    printf("|  update           : Update the hpcopr to the latest version.                      |\n");
-    printf("|  uninstall        : Remove the HPC-NOW services and all relevant data.            |\n");
-    printf("|  help             : Show this information.                                        |\n");      
+    printf("| Usage: sudo THIS_INSTALLER_FULL_PATH general_option advanced_option               |\n");
+    printf("| general_option:                                                                   |\n");
+    printf("|        install          : Install or repair the HPC-NOW Services on your device.  |\n");
+    printf("|        update           : Update the hpcopr to the latest version.                |\n");
+    printf("|        uninstall        : Remove the HPC-NOW services and all relevant data.      |\n");
+    printf("|        help             : Show this information.                                  |\n");
+    printf("| advanced_option (for developers, optional):                                       |\n");
+    printf("|        hpcopr_loc=LOC   : Provide your own location of hpcopr, both URL and local |\n");
+    printf("|                           *absolute* path are accepted. You should guarantee that |\n");
+    printf("|                           the location points to a valid hpcopr executable.       |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
@@ -298,6 +302,12 @@ int update_services(void){
 
 int main(int argc, char* argv[]){
     int run_flag=0;
+    int i;
+    int length;
+    char advanced_option_head[12]="";
+    char advanced_option_tail[256]="";
+    int loc_flag=-1;
+
     print_header();
     if(check_current_user()!=0){
         print_tail();
@@ -308,8 +318,8 @@ int main(int argc, char* argv[]){
         print_tail();
         return -3;
     }
-
-    if(argc!=2){
+    
+    if(argc!=2&&argc!=3){
         print_help();
         print_tail();
         return 1;
@@ -325,6 +335,52 @@ int main(int argc, char* argv[]){
         print_help();
         print_tail();
         return 1;
+    }
+
+    if(argc==3){
+        length=strlen(argv[2]);
+        if(length<13){
+            print_help();
+            print_tail();
+            return 1;
+        }
+
+        for(i=0;i<11;i++){
+            advanced_option_head[i]=*(argv[2]+i);
+        }
+        advanced_option_head[11]='\0';
+        for(i=0;i<length-11;i++){
+            advanced_option_tail[i]=*(argv[2]+i+11)
+        }
+        advanced_option_tail[length-11]='\0';
+
+        if(strcmp(advanced_option_head,"hpcopr_loc=")!=0){
+            print_help();
+            print_tail();
+            return 1;
+        }
+
+        if(advanced_option_tail[0]=='/'){
+            loc_flag=0;
+        }
+
+        else{
+            if(advanced_option_tail[0]=='h'&&advanced_option_tail[1]=='t'&&advanced_option_tail[2]=='t'&&advanced_option_tail[3]=='p'){
+                loc_flag=1;
+            }
+        }
+
+        if(loc_flag==-1){
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] The specified hpcopr location is invalid. Please refer to the formats:   |\n");
+            printf("|            URL   : must start with http or https                                  |\n");
+            printf("|            Local : must be an absolute path starting with '/'                     |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] Exit now.                                                                |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            print_tail();
+            return 1;
+        }
     }
 
     run_flag=license_confirmation();
