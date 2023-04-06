@@ -191,8 +191,10 @@ int install_services(int loc_flag, char* location){
         printf("[ FATAL: ] Failed to get the hpcopr executable. This installation process is        |\n");
         printf("|          terminated. If you specified the location of hpcopr executable, please   |\n");
         printf("|          make sure the location is correct. Exit now.                             |\n");
-        printf("|          Please uninstall first and then install again.                           |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
+        system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+        system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
+        system("userdel -f -r hpc-now >> /dev/null 2>&1");
         return -1;
     }
     system("mkdir -p /home/hpc-now/.now-ssh/ >> /dev/null 2>&1");

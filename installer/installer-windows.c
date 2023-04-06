@@ -271,6 +271,12 @@ int install_services(int loc_flag, char* location){
         printf("|          make sure the location is correct. Exit now.                             |\n");
         printf("|          Please uninstall first and then install again.                           |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
+        system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
+        system("attrib -h -s -r c:\\hpc-now > nul 2>&1");
+        system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+        system("rd /s /q c:\\hpc-now > nul 2>&1");
+        system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
+        system("net user hpc-now /delete > nul 2>&1");
         return -1;
     }
 }
