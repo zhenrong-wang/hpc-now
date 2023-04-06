@@ -27,6 +27,8 @@ Bug report: info@hpc-now.com
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
 #define USAGE_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-usage.log" //This is a global file!
 #define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
+#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/dev/LICENSE"
+#define URL_LICENSE_FSF "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
 #define SSHKEY_DIR "C:\\hpc-now\\.ssh"
 #define NOW_CRYPTO_EXEC "c:\\programdata\\hpc-now\\bin\\now-crypto.exe"
 #define TERRAFORM_EXEC "c:\\programdata\\hpc-now\\bin\\terraform.exe"
@@ -70,7 +72,6 @@ void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("| Commands:                                                                         |\n");
     printf("+ I  . Initialization --------------------------------------------------------------+\n");
-    printf("|                                                                                   |\n");
     printf("|  new         : Create a new working directory or rotating a new keypair:          |\n");
     printf("|        workdir   - Create a new working directory to initialize a new cluster     |\n");
     printf("|                    using the 'init' command later.                                |\n");
@@ -81,17 +82,13 @@ void print_help(void){
     printf("|                    Example: hpcopr init hpcnow-demo                               |\n");
     printf("|  conf        : Get the default configuration file to edit and build a customized  |\n");
     printf("|                HPC cluster later (using the 'init' command).                      |\n");
-    printf("|                                                                                   |\n");
     printf("+ II . Management     --------------------------------------------------------------+\n");
-    printf("|                                                                                   |\n");
     printf("|  help        : Show this page and the information here.                           |\n");
     printf("|  usage       : Get the usage history of all your cluster(s).                      |\n");
     printf("|  syslog      : Get the detailed operation log of your cluster management.         |\n");
     printf("|  vault       : Check the sensitive information of your clusters.                  |\n");
     printf("|  graph       : Display the cluster map including all the nodes and status.        |\n");
-    printf("|                                                                                   |\n");
     printf("+ III. Operation      --------------------------------------------------------------+\n");
-    printf("|                                                                                   |\n");
     printf("|  delc        : Delete specified compute nodes:                                    |\n");
     printf("|        all       - Delete *ALL* the compute nodes, you can run 'hpcopr addc' to   |\n"); 
     printf("|                    add compute nodes later.                                       |\n");
@@ -118,11 +115,11 @@ void print_help(void){
     printf("|              : minimal - Turn on the management nodes of the cluster.             |\n");
     printf("|              : all     - Turn on the management and compute nodes of the cluster. |\n");         
     printf("|  destroy     : *DESTROY* the whole cluster - including all the resources & data.  |\n");
-    printf("|                                                                                   |\n");  
+    printf("+ IV . Other          --------------------------------------------------------------+\n");
+    printf("|  about       : Display the version and other info.                                |\n");
+    printf("|  license     : Read the terms and conditions of the GNU Public License - 2.0      |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
-    printf("|                                                 | P - erformance  + O - perating  |\n");
-    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd                         |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
@@ -134,15 +131,8 @@ void print_header(void){
     char string_temp[128]="";
     int i;
     int length_temp=19;
-//    printf("\n");
-//    printf("+-----------------------------------------------------------------------------------+\n");
-//    printf("|  Welcome to HPC_NOW Cluster Operator!                                             |\n");
-//    printf("+-----------------------------------------------------------------------------------+\n");
-//    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
-//    printf("|                                                 | P - erformance  + O - perating  |\n");
-//    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator!                                    |\n");
+    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator!                  Version: 0.1.83   |\n");
     if(time_p->tm_mon+1<10){
         length_temp--;
     }
@@ -162,16 +152,47 @@ void print_header(void){
         *(string_temp+i)=' ';
     }
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d%s|\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,string_temp);
-    printf("|    Version: 0.1.79   * This software is licensed under GPLv2, with NO WARRANTY! * |\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd      LICENSE: GPL-2.0   |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
     
 }
 
 void print_tail(void){
-    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
-    printf("|                                                 | P - erformance  + O - perating  |\n");
-    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd                         |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
+}
+
+void print_about(void){
+    printf("| This is free software; see the source for copying conditions.  There is NO        |\n");
+    printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.       |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("| This project is powered by many excellent free and open-source projects:          |\n");
+    printf("|   1. GNU/Linux: maybe the most widely used software on this planet.               |\n");
+    printf("|   2. Terraform: a powerful platform for cloud resource orchestration.             |\n");
+    printf("|   3. GNOME    : a simple and easy to use desktop environment for GNU/Linux.       |\n");
+    printf("|   4. XRDP     : an open source Remote Desktop Program.                            |\n");
+    printf("|   5. SLURM    : an open source cluster management and job scheduling system.      |\n");
+    printf("|   6. MUNGE    : an authentication service for creating and validating credentials.|\n");
+    printf("|      ......                                                                       |\n");
+    printf("| Therefore, we also made this software public under the GPL-2.0 license.           |\n");
+    printf("| Please check the source code here: https://gitee.com/zhenrong-wang/hpc-now/       |\n");
+    printf("| If you encounter any issues about this software, please feel free to contact us   |\n");
+    printf("| via info@hpc-now.com or other channels.                                           |\n");
+    printf("| Let's build this open source cloud HPC platform together!                         |\n");
+    printf("+-----------------------------------------------------------------------------------+\n");
+    print_tail();
+}
+
+void read_license(void){
+    char cmdline[CMDLINE_LENGTH]="";
+    sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
+    if(system(cmdline)!=0){
+        sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
+        if(system(cmdline)!=0){
+            sprintf(cmdline,"type c:\\hpc-now\\LICENSES\\GPL-2 | more");
+            system(cmdline);
+        }
+    }
 }
 
 void print_not_in_a_workdir(char* current_dir){
@@ -5899,15 +5920,15 @@ int main(int argc, char* argv[]){
     print_header();
 
     if(check_internet()!=0){
-        system_cleanup();
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
+        system_cleanup();
         return -3;
     }
     check_flag=check_and_install_prerequisitions();
     if(check_flag!=0&&check_flag!=127&&check_flag!=-1&&check_flag!=2){
         print_tail();
-        system_cleanup();
         write_log("NULL",operation_log,"PREREQ_FAILED",-3);
+        system_cleanup();
         return -3;
     }
     else if(check_flag==127||check_flag==-1||check_flag==2){
@@ -5917,22 +5938,36 @@ int main(int argc, char* argv[]){
 
     if(argc==1){
         print_help();
-        system_cleanup();
         write_log("NULL",operation_log,"NONE",0);
+        system_cleanup();
         return 0;
     }
 
-    if(strcmp(argv[1],"new")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"help")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"conf")!=0&&strcmp(argv[1],"reconfm")!=0){
+    if(strcmp(argv[1],"new")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"help")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"conf")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"about")!=0&&strcmp(argv[1],"license")!=0){
         print_help();
-        system_cleanup();
         write_log("NULL",operation_log,argv[1],1);
+        system_cleanup();
         return 1;
     }
 
     if(strcmp(argv[1],"help")==0){
         print_help();
-        system_cleanup();
         write_log("NULL",operation_log,argv[1],0);
+        system_cleanup();
+        return 0;
+    }
+
+    if(strcmp(argv[1],"about")==0){
+        print_about();
+        write_log("NULL",operation_log,argv[1],0);
+        system_cleanup();
+        return 0;
+    }
+
+    if(strcmp(argv[1],"license")==0){
+        read_license();
+        write_log("NULL",operation_log,argv[1],0);
+        system_cleanup();
         return 0;
     }
 
