@@ -127,7 +127,7 @@ int generate_random_passwd(char* password){
 // 2. Create necessary directories, including /Applications/.hpc-now 
 // 3. Create the crypto key file for further encryption and decryption
 // 4. Manage the folder permissions
-int install_services(void){
+int install_services(int loc_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
@@ -253,7 +253,7 @@ int uninstall_services(void){
     return 0;
 }
 
-int update_services(void){
+int update_services(int loc_flag){
     char doubleconfirm[128]="";
     char cmdline[CMDLINE_LENGTH]="";
     if(system("id hpc-now >> /dev/null 2>&1")!=0){
@@ -396,13 +396,13 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"update")==0){
-        run_flag=update_services();
+        run_flag=update_services(loc_flag);
         print_tail();
         return run_flag;
     }
 
     if(strcmp(argv[1],"install")==0){
-        run_flag=install_services();
+        run_flag=install_services(loc_flag);
         print_tail();
         return run_flag;
     }
