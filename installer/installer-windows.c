@@ -461,7 +461,7 @@ int main(int argc, char* argv[]){
             printf("+-----------------------------------------------------------------------------------+\n");
             printf("[ FATAL: ] The specified hpcopr location is invalid. Please refer to the formats:   |\n");
             printf("|            URL   : must start with http or https                                  |\n");
-            printf("|            Local : must be an absolute path. Example: Z:\hpcopr.exe               |\n");
+            printf("|            Local : must be an absolute path. Example: Z:\\hpcopr.exe               |\n");
             printf("+-----------------------------------------------------------------------------------+\n");
             printf("[ FATAL: ] Exit now.                                                                |\n");
             printf("+-----------------------------------------------------------------------------------+\n");
