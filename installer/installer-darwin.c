@@ -386,7 +386,7 @@ int main(int argc, char* argv[]){
         }
         advanced_option_head[11]='\0';
         for(i=0;i<length-11;i++){
-            advanced_option_tail[i]=*(argv[2]+i+11)
+            advanced_option_tail[i]=*(argv[2]+i+11);
         }
         advanced_option_tail[length-11]='\0';
 
