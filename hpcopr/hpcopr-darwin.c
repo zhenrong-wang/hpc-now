@@ -188,7 +188,7 @@ void read_license(void){
     if(system(cmdline)!=0){
         sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
         if(system(cmdline)!=0){
-            sprintf(cmdline,"cat /Users/hpc-now/LICENSES/GPL-2 | more");
+            sprintf(cmdline,"more /Users/hpc-now/LICENSES/GPL-2");
             system(cmdline);
         }
     }
