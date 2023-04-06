@@ -181,21 +181,23 @@ int install_services(int loc_flag, char* location){
     system("chown -R root:root /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/.bin >> /dev/null 2>&1");
-    printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...                       |\n");
-    strcpy(cmdline,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
-    system(cmdline);
-    printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
     if(loc_flag==-1){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
         sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
     }
     else if(loc_flag==1){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
         sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",location);
     }
     else{
+        printf("[ -INFO- ] Copying the main program 'hpcopr' now ...                                |\n");
         sprintf(cmdline,"/bin/cp -r %s /Users/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
     }
 
     if(system(cmdline)==0){
+        printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...                       |\n");
+        strcpy(cmdline,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
+        system(cmdline);
         sprintf(cmdline,"chmod +x /Users/hpc-now/.bin/hpcopr");
         system(cmdline);
     }

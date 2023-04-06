@@ -22,28 +22,30 @@ Bug report: info@hpc-now.com
 
 void print_header(void){
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Welcome to the HPC-NOW Service Installer!     Version: 0.1.71                     |\n");
+    printf("| Welcome to the HPC-NOW Service Installer!     Version: 0.1.73                     |\n");
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd                         |\n");
     printf("| This is free software; see the source for copying conditions.  There is NO        |\n");
     printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.       |\n");
 }
 
 void print_tail(void){
-    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
-    printf("|                                                 | P - erformance  + O - perating  |\n");
-    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd                         |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
 // Print out help info for this installer
 void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Usage: sudo THIS_INSTALLER_FULL_PATH option                                       |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|  install          : Install or repair the HPC-NOW Services on your device.        |\n");
-    printf("|  update           : Update the hpcopr to the latest version.                      |\n");
-    printf("|  uninstall        : Remove the HPC-NOW services and all relevant data.            |\n");
-    printf("|  help             : Show this information.                                        |\n");      
+    printf("| Usage: sudo THIS_INSTALLER_FULL_PATH general_option advanced_option               |\n");
+    printf("| general_option:                                                                   |\n");
+    printf("|        install          : Install or repair the HPC-NOW Services on your device.  |\n");
+    printf("|        update           : Update the hpcopr to the latest version.                |\n");
+    printf("|        uninstall        : Remove the HPC-NOW services and all relevant data.      |\n");
+    printf("|        help             : Show this information.                                  |\n");
+    printf("| advanced_option (for developers, optional):                                       |\n");
+    printf("|        hpcopr_loc=LOC   : Provide your own location of hpcopr, both URL and local |\n");
+    printf("|                           *absolute* path are accepted. You should guarantee that |\n");
+    printf("|                           the location points to a valid hpcopr executable.       |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
@@ -116,7 +118,7 @@ int generate_random_passwd(char* password){
     return 0;
 }
 
-int install_services(void){
+int install_services(int loc_flag, char* location){
     char cmdline[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
@@ -161,18 +163,42 @@ int install_services(void){
     fprintf(file_p,"%s\n",random_string);
     fclose(file_p);
     system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...                       |\n");    
+    system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");   
     system("mkdir -p /home/hpc-now/.bin >> /dev/null 2>&1");
-    if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ >> /dev/null 2>&1")!=0){
-        strcpy(cmdline,"echo \"export PATH=/home/hpc-now/.bin/:$PATH\" >> /home/hpc-now/.bashrc");
+    if(loc_flag==-1){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
+        sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
+    }
+    else if(loc_flag==1){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
+        sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",location);
+    }
+    else{
+        printf("[ -INFO- ] Copying the main program 'hpcopr' now ...                                |\n");
+        sprintf(cmdline,"/bin/cp -r %s /home/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
+    }
+    if(system(cmdline)==0){
+        printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...                       |\n"); 
+        if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ >> /dev/null 2>&1")!=0){
+            strcpy(cmdline,"echo \"export PATH=/home/hpc-now/.bin/:$PATH\" >> /home/hpc-now/.bashrc");
+            system(cmdline);
+        }
+        sprintf(cmdline,"chmod +x /home/hpc-now/.bin/hpcopr");
         system(cmdline);
     }
-    printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
-    sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr && chmod +x /home/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
-    system(cmdline);
+    else{
+        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Failed to get the hpcopr executable. This installation process is        |\n");
+        printf("|          terminated. If you specified the location of hpcopr executable, please   |\n");
+        printf("|          make sure the location is correct. Exit now.                             |\n");
+        printf("|          Please uninstall first and then install again.                           |\n");
+        printf("+-----------------------------------------------------------------------------------+\n");
+        return -1;
+    }
     system("mkdir -p /home/hpc-now/.now-ssh/ >> /dev/null 2>&1");
     system("mkdir -p /home/hpc-now/.now-lic/ >> /dev/null 2>&1");
+    sprintf(cmdline,"curl -s %s -o /home/hpc-now/.now-lic/LICENSE",URL_LICENSE);
+    system(cmdline);
     system("chown -R hpc-now:hpc-now /home/hpc-now/");
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!                  |\n");
@@ -230,7 +256,7 @@ int uninstall_services(void){
     return 0;
 }
 
-int update_services(void){
+int update_services(int loc_flag, char* location){
     char doubleconfirm[128]="";
     char cmdline[CMDLINE_LENGTH]="";
     if(system("id hpc-now >> /dev/null 2>&1")!=0){
@@ -260,18 +286,32 @@ int update_services(void){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] UPDATING THE SERVICES NOW ...                                            |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr && chmod +x /home/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /home/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
+    
+    if(loc_flag==-1){
+        sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
+    }
+    else if(loc_flag==1){
+        sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",location);
+    }
+    else{
+        sprintf(cmdline,"/bin/cp -r %s /home/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
+    }
+
     if(system(cmdline)==0){
+        sprintf(cmdline,"chmod +x /home/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /home/hpc-now/.bin/hpcopr");
+        system(cmdline);
         printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.    |\n");
         printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 0;
     }
+    
     else{
         printf("[ FATAL: ] Failed to update the HPC-NOW services. Please check and make sure:       |\n");
         printf("|          1. The HPC-NOW Services have been installed previously.                  |\n");
-        printf("|          2. Your device is connected to the internet.                             |\n");
-        printf("|          3. Currently there is no 'hpcopr' thread(s) running.                     |\n");
+        printf("|          2. Please make sure the specified location (if specified) is correct.    |\n");
+        printf("|          3. Your device is connected to the internet.                             |\n");
+        printf("|          4. Currently there is no 'hpcopr' thread(s) running.                     |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 1;
     }
@@ -279,6 +319,12 @@ int update_services(void){
 
 int main(int argc, char* argv[]){
     int run_flag=0;
+    int i;
+    int length;
+    char advanced_option_head[12]="";
+    char advanced_option_tail[256]="";
+    int loc_flag=-1;
+
     print_header();
     if(check_current_user()!=0){
         print_tail();
@@ -290,7 +336,7 @@ int main(int argc, char* argv[]){
         return -3;
     }
 
-    if(argc!=2){
+    if(argc!=2&&argc!=3){
         print_help();
         print_tail();
         return 1;
@@ -308,6 +354,52 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
+    if(argc==3){
+        length=strlen(argv[2]);
+        if(length<13){
+            print_help();
+            print_tail();
+            return 1;
+        }
+
+        for(i=0;i<11;i++){
+            advanced_option_head[i]=*(argv[2]+i);
+        }
+        advanced_option_head[11]='\0';
+        for(i=0;i<length-11;i++){
+            advanced_option_tail[i]=*(argv[2]+i+11);
+        }
+        advanced_option_tail[length-11]='\0';
+
+        if(strcmp(advanced_option_head,"hpcopr_loc=")!=0){
+            print_help();
+            print_tail();
+            return 1;
+        }
+
+        if(advanced_option_tail[0]=='/'){
+            loc_flag=0;
+        }
+
+        else{
+            if(advanced_option_tail[0]=='h'&&advanced_option_tail[1]=='t'&&advanced_option_tail[2]=='t'&&advanced_option_tail[3]=='p'){
+                loc_flag=1;
+            }
+        }
+
+        if(loc_flag==-1){
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] The specified hpcopr location is invalid. Please refer to the formats:   |\n");
+            printf("|            URL   : must start with http or https                                  |\n");
+            printf("|            Local : must be an absolute path starting with '/'                     |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            printf("[ FATAL: ] Exit now.                                                                |\n");
+            printf("+-----------------------------------------------------------------------------------+\n");
+            print_tail();
+            return 1;
+        }
+    }
+
     run_flag=license_confirmation();
     if(run_flag!=0){
         print_tail();
@@ -321,13 +413,13 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"update")==0){
-        run_flag=update_services();
+        run_flag=update_services(loc_flag,advanced_option_tail);
         print_tail();
         return run_flag;
     }
 
     if(strcmp(argv[1],"install")==0){
-        run_flag=install_services();
+        run_flag=install_services(loc_flag,advanced_option_tail);
         print_tail();
         return run_flag;
     }

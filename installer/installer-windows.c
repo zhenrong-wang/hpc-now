@@ -23,27 +23,29 @@ Bug report: info@hpc-now.com
 
 void print_header(void){
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Welcome to the HPC-NOW Service Installer!     Version: 0.1.71                     |\n");
+    printf("| Welcome to the HPC-NOW Service Installer!     Version: 0.1.73                     |\n");
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd                         |\n");
     printf("| This is free software; see the source for copying conditions.  There is NO        |\n");
     printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.       |\n");
 }
 
 void print_tail(void){
-    printf("|  HPC NOW, start now ... to infinity!            | H - igh         | N - o         |\n");
-    printf("|                                                 | P - erformance  + O - perating  |\n");
-    printf("|  https://www.hpc-now.com   |  info@hpc-now.com  | C - omputing    | W - orkload   |\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd                         |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
 void print_help(void){
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Usage: THIS_INSTALLER_FULL_PATH option                                            |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|  install          : Install or repair the HPC-NOW Services on your device.        |\n");
-    printf("|  update           : Update the hpcopr to the latest version.                      |\n");
-    printf("|  uninstall        : Remove the HPC-NOW services and all relevant data.            |\n");
-    printf("|  help             : Show this information.                                        |\n");      
+    printf("| Usage: sudo THIS_INSTALLER_FULL_PATH general_option advanced_option               |\n");
+    printf("| general_option:                                                                   |\n");
+    printf("|        install          : Install or repair the HPC-NOW Services on your device.  |\n");
+    printf("|        update           : Update the hpcopr to the latest version.                |\n");
+    printf("|        uninstall        : Remove the HPC-NOW services and all relevant data.      |\n");
+    printf("|        help             : Show this information.                                  |\n");
+    printf("| advanced_option (for developers, optional):                                       |\n");
+    printf("|        hpcopr_loc=LOC   : Provide your own location of hpcopr, both URL and local |\n");
+    printf("|                           *absolute* path are accepted. You should guarantee that |\n");
+    printf("|                           the location points to a valid hpcopr executable.       |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
 }
 
