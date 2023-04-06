@@ -5781,7 +5781,6 @@ int check_and_install_prerequisitions(void){
     system(cmdline);
 
     printf("[ -INFO- ] Running environment successfully checked. HPC-NOW services are ready.    |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
     return 0;
 }
 
