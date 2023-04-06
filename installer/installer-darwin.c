@@ -21,7 +21,7 @@ Bug report: info@hpc-now.com
 
 void print_header(void){
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Welcome to the HPC-NOW Service Installer!     Version: 0.1.73                     |\n");
+    printf("| Welcome to the HPC-NOW Service Installer!     Version: 0.1.79                     |\n");
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd                         |\n");
     printf("| This is free software; see the source for copying conditions.  There is NO        |\n");
     printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.       |\n");
@@ -213,9 +213,10 @@ int install_services(int loc_flag, char* location){
     
     printf("[ -INFO- ] Creating other key running directories now ...                           |\n");
     system("mkdir -p /Users/hpc-now/.now-ssh/ >> /dev/null 2>&1");
-    system("mkdir -p /Users/hpc-now/.now-lic/ >> /dev/null 2>&1");
+    system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
+    sprintf(cmdline,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
+    system(cmdline);
     system("chown -R hpc-now:hpc-now /Users/hpc-now/ >> /dev/null 2>&1");
-
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!                  |\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.       |\n");
