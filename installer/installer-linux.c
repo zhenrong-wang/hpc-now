@@ -22,7 +22,7 @@ Bug report: info@hpc-now.com
 
 void print_header(void){
     printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Welcome to the HPC-NOW Service Installer!     Version: 0.1.79                     |\n");
+    printf("| Welcome to the HPC-NOW Service Installer!     Version: 0.1.83                     |\n");
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd                         |\n");
     printf("| This is free software; see the source for copying conditions.  There is NO        |\n");
     printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.       |\n");
@@ -44,7 +44,7 @@ void print_help(void){
     printf("|        help             : Show this information.                                  |\n");
     printf("| advanced_option (for developers, optional):                                       |\n");
     printf("|        hpcopr_loc=LOC   : Provide your own location of hpcopr, both URL and local |\n");
-    printf("|                           *absolute* path are accepted. You should guarantee that |\n");
+    printf("|                           filesystem path are accepted. You should guarantee that |\n");
     printf("|                           the location points to a valid hpcopr executable.       |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
 }
@@ -382,26 +382,11 @@ int main(int argc, char* argv[]){
             return 1;
         }
 
-        if(advanced_option_tail[0]=='/'){
-            loc_flag=0;
+        if(advanced_option_tail[0]=='h'&&advanced_option_tail[1]=='t'&&advanced_option_tail[2]=='t'&&advanced_option_tail[3]=='p'){
+            loc_flag=1;
         }
-
         else{
-            if(advanced_option_tail[0]=='h'&&advanced_option_tail[1]=='t'&&advanced_option_tail[2]=='t'&&advanced_option_tail[3]=='p'){
-                loc_flag=1;
-            }
-        }
-
-        if(loc_flag==-1){
-            printf("+-----------------------------------------------------------------------------------+\n");
-            printf("[ FATAL: ] The specified hpcopr location is invalid. Please refer to the formats:   |\n");
-            printf("|            URL   : must start with http or https                                  |\n");
-            printf("|            Local : must be an absolute path starting with '/'                     |\n");
-            printf("+-----------------------------------------------------------------------------------+\n");
-            printf("[ FATAL: ] Exit now.                                                                |\n");
-            printf("+-----------------------------------------------------------------------------------+\n");
-            print_tail();
-            return 1;
+            loc_flag=0;
         }
     }
 
