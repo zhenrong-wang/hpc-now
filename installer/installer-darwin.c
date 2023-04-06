@@ -305,18 +305,32 @@ int update_services(int loc_flag, char* location){
     printf("+-----------------------------------------------------------------------------------+\n");
     printf("[ -INFO- ] UPDATING THE SERVICES NOW ...                                            |\n");
     printf("+-----------------------------------------------------------------------------------+\n");
-    sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr && chmod +x /Users/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
+
+    if(loc_flag==-1){
+        sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
+    }
+    else if(loc_flag==1){
+        sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",location);
+    }
+    else{
+        sprintf(cmdline,"/bin/cp -r %s /Users/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
+    }
+
     if(system(cmdline)==0){
+        sprintf(cmdline,"chmod +x /Users/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /Users/hpc-now/.bin/hpcopr");
+        system(cmdline);
         printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.    |\n");
         printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 0;
     }
+    
     else{
         printf("[ FATAL: ] Failed to update the HPC-NOW services. Please check and make sure:       |\n");
         printf("|          1. The HPC-NOW Services have been installed previously.                  |\n");
-        printf("|          2. Your device is connected to the internet.                             |\n");
-        printf("|          3. Currently there is no 'hpcopr' thread(s) running.                     |\n");
+        printf("|          2. Please make sure the specified location (if specified) is correct.    |\n");
+        printf("|          3. Your device is connected to the internet.                             |\n");
+        printf("|          4. Currently there is no 'hpcopr' thread(s) running.                     |\n");
         printf("+-----------------------------------------------------------------------------------+\n");
         return 1;
     }
