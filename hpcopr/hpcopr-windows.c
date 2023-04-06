@@ -193,6 +193,7 @@ void read_license(void){
             system(cmdline);
         }
     }
+    print_tail();
 }
 
 void print_not_in_a_workdir(char* current_dir){
