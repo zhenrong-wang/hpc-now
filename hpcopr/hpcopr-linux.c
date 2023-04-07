@@ -123,23 +123,7 @@ void print_header(void){
     struct tm* time_p=NULL;
     time(&current_time_long);
     time_p=localtime(&current_time_long);
-    int length_temp=19;
     printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.89\n");
-    if(time_p->tm_mon+1<10){
-        length_temp--;
-    }
-    if(time_p->tm_mday<10){
-        length_temp--;
-    }
-    if(time_p->tm_hour<10){
-        length_temp--;
-    }
-    if(time_p->tm_min<10){
-        length_temp--;
-    }
-    if(time_p->tm_sec<10){
-        length_temp--;
-    }
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n");
 }
