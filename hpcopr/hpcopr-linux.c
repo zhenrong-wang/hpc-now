@@ -166,15 +166,11 @@ void read_license(void){
 
 void print_not_in_a_workdir(char* current_dir){
     char temp_string[128]="";
-    char temp_string2[128]="";
     int i;
     printf("[ FATAL: ] You are not in a working directory, *NO* critical operation is permitted.\n");
     printf("|          A typical working directory: /home/hpc-now/now-cluster-# (# is a number).\n");
     sprintf(temp_string,"|          Current directory is %s.",current_dir);
-    for(i=0;i<85-strlen(temp_string)-1;i++){
-        *(temp_string2+i)=' ';
-    }
-    printf("%s%s\n",temp_string,temp_string2);
+    printf("%s\n",temp_string);
     printf("|          Please use the 'cd' command to go to a working directory first.\n");
     printf("[ FATAL: ] Exit now.\n");
 }
@@ -1572,11 +1568,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char cluster_id_temp[16]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-
     char conf_print_string_temp1[256]="";
-    char conf_print_string_temp2[256]="";
-    char conf_print_string_temp3[512]="";
-
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
     char region_flag[16]="";
@@ -1933,85 +1925,21 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     fclose(file_p);
     printf("[ STEP 2 ] Cluster Configuration:\n");
     sprintf(conf_print_string_temp1,"|          Cluster ID:            %s",cluster_id);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Region:                %s",region_id);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Avalability Zone:      %s",zone_id);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Number of Nodes:       %d",node_num);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-    
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Number of Users:       %d",hpc_user_num);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Master Node Instance:  %s",master_inst);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Compute Node Instance: %s",compute_inst);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          OS Image:              %s",os_image_raw);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     printf("[ -INFO- ] Building you cluster now, this may take seconds ...\n");
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
@@ -2294,9 +2222,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char unique_cluster_id[96]="";
     char string_temp[128]="";
     char conf_print_string_temp1[256]="";
-    char conf_print_string_temp2[256]="";
-    char conf_print_string_temp3[512]="";
-
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
     char os_image[32]="";
@@ -2571,91 +2496,25 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     fclose(file_p);
     printf("[ STEP 2 ] Cluster Configuration:\n");
     sprintf(conf_print_string_temp1,"|          Cluster ID:            %s",cluster_id);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Region:                %s",region_id);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Avalability Zone:      %s",zone_id);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Number of Nodes:       %d",node_num);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-    
+    printf("%s\n",conf_print_string_temp1);    
     sprintf(conf_print_string_temp1,"|          Number of Users:       %d",hpc_user_num);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Master Node Instance:  %s",master_inst);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Compute Node Instance: %s",compute_inst);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          OS Image:              %s",os_image);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     printf("[ -INFO- ] Building you cluster now, this may take seconds ...\n");
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-
     generate_sshkey(sshkey_folder,pubkey);
-
     sprintf(filename_temp,"%s/hpc_stack.base",stackdir);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
     global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
@@ -2877,7 +2736,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-
     char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -2885,15 +2743,12 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char logfile[FILENAME_LENGTH]="";
     char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-
     char* url_alicloud_root=URL_ALICLOUD_ROOT;
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
-
     char conf_line_buffer[256]="";
     char conf_param_buffer1[32]="";
     char conf_param_buffer2[32]="";
@@ -2902,11 +2757,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char cluster_id_temp[16]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-
     char conf_print_string_temp1[256]="";
-    char conf_print_string_temp2[256]="";
-    char conf_print_string_temp3[512]="";
-
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
     char os_image[32]="";
@@ -2921,7 +2772,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     int master_bandwidth=0;
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
-
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
     char private_key_file[FILENAME_LENGTH]="";
@@ -2929,19 +2779,16 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char md5sum[33]="";
-
     char bucket_id[12]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
     char master_address[32]="";
-
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
     char current_time[12]="";
     char master_cpu_vendor[8]="";
     char compute_cpu_vendor[8]="";
-
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i,j;
@@ -3183,91 +3030,25 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     fclose(file_p);
     printf("[ STEP 2 ] Cluster Configuration:\n");
     sprintf(conf_print_string_temp1,"|          Cluster ID:            %s",cluster_id);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Region:                %s",region_id);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Avalability Zone:      %s",zone_id);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Number of Nodes:       %d",node_num);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-    
+    printf("%s\n",conf_print_string_temp1);    
     sprintf(conf_print_string_temp1,"|          Number of Users:       %d",hpc_user_num);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Master Node Instance:  %s",master_inst);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Compute Node Instance: %s",compute_inst);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          OS Image:              %s",os_image);
-    for(i=0;i<85-strlen(conf_print_string_temp1)-1;i++){
-        *(conf_print_string_temp2+i)=' ';
-    }
-    sprintf(conf_print_string_temp3,"%s%s|",conf_print_string_temp1,conf_print_string_temp2);
-    printf("%s\n",conf_print_string_temp3);
-    reset_string(conf_print_string_temp1);
-    reset_string(conf_print_string_temp2);
-    reset_string(conf_print_string_temp3);
-
+    printf("%s\n",conf_print_string_temp1);
     printf("[ -INFO- ] Building you cluster now, this may take seconds ...\n");
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-
     generate_sshkey(sshkey_folder,pubkey);
-
     sprintf(filename_temp,"%s/hpc_stack.base",stackdir);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
     global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
@@ -3819,7 +3600,6 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
 
 int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     char string_temp[128]="";
-    char string_temp2[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -3874,10 +3654,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         }
         else{
             sprintf(string_temp,"[ -INFO- ] You specified to delete %d from %d compute node(s).",del_num,compute_node_num);
-            for(i=0;i<85-strlen(string_temp)-1;i++){
-                *(string_temp2+i)=' ';
-            }
-                printf("%s%s\n",string_temp,string_temp2);
+            printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
                 system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
@@ -3911,10 +3688,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         }
     }
     sprintf(string_temp,"[ -INFO- ] You specified to delete *ALL* the %d compute node(s).",compute_node_num);
-    for(i=0;i<85-strlen(string_temp)-1;i++){
-        *(string_temp2+i)=' ';
-    }
-    printf("%s%s\n",string_temp,string_temp2);
+    printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
         system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
@@ -3949,7 +3723,6 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
 
 int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_string){
     char string_temp[128]="";
-    char string_temp2[128]="";
     char filename_temp[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -3979,10 +3752,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         return -1;
     }
     sprintf(string_temp,"[ -INFO- ] You specified to add %d compute node(s).",add_number);
-    for(i=0;i<85-strlen(string_temp)-1;i++){
-        *(string_temp2+i)=' ';
-    }
-    printf("%s%s\n",string_temp,string_temp2);
+    printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     printf("[ -INFO- ] The cluster operation is in progress ...\n");
     create_and_get_stackdir(workdir,stackdir);
@@ -4025,7 +3795,6 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
 
 int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     char string_temp[128]="";
-    char string_temp2[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -4088,10 +3857,7 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         }
         else{
             sprintf(string_temp,"[ -INFO- ] You planned to shutdown %d from %d compute node(s).",down_num,compute_node_num);
-            for(i=0;i<85-strlen(string_temp)-1;i++){
-                *(string_temp2+i)=' ';
-            }
-            printf("%s%s\n",string_temp,string_temp2);
+            printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
             for(i=compute_node_num-down_num+1;i<compute_node_num+1;i++){
                 sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
@@ -4132,10 +3898,7 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         }
     }
     sprintf(string_temp,"[ -INFO- ] You planned to shutdown *ALL* the %d compute node(s).",compute_node_num);
-    for(i=0;i<85-strlen(string_temp)-1;i++){
-        *(string_temp2+i)=' ';
-    }
-    printf("%s%s\n",string_temp,string_temp2);
+    printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
         sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
@@ -4178,7 +3941,6 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
 
 int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     char string_temp[128]="";
-    char string_temp2[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -4228,19 +3990,19 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     if(strcmp(param,"all")!=0){
         for(i=0;i<strlen(param);i++){
             if(*(param+i)<'0'||*(param+i)>'9'){
-                        printf("[ FATAL: ] Please specify either 'all' or a positive number. Exit now.\n");
-                        return -1;
+                printf("[ FATAL: ] Please specify either 'all' or a positive number. Exit now.\n");
+                return -1;
             }
             on_num+=(*(param+i)-'0')*pow(10,strlen(param)-1-i);
         }
         if(on_num==0){
-                printf("[ FATAL: ] Please specify either 'all' or a positive number. Exit now.\n");
-                return 1;
+            printf("[ FATAL: ] Please specify either 'all' or a positive number. Exit now.\n");
+            return 1;
         }
         if(on_num+compute_node_num_on>compute_node_num){
-                printf("[ -INFO- ] You specified a number larger than the number of currently down nodes.\n");
+            printf("[ -INFO- ] You specified a number larger than the number of currently down nodes.\n");
             printf("           Do you mean turning on *ALL* the compute nodes?\n");
-                printf("[ INPUT: ] Only 'y-e-s' is accepted to confirm:  ");
+            printf("[ INPUT: ] Only 'y-e-s' is accepted to confirm:  ");
             reset_string(string_temp);
             scanf("%s",string_temp);
             if(strcmp(string_temp,"y-e-s")!=0){
@@ -4250,10 +4012,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         }
         else{
             sprintf(string_temp,"[ -INFO- ] You planned to turn on %d compute node(s).",on_num);
-            for(i=0;i<85-strlen(string_temp)-1;i++){
-                *(string_temp2+i)=' ';
-            }
-            printf("%s%s\n",string_temp,string_temp2);
+            printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
             for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
                 sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
@@ -4294,10 +4053,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         }
     }
     sprintf(string_temp,"[ -INFO- ] You planned to turn on *ALL* the %d compute node(s).",compute_node_num);
-    for(i=0;i<85-strlen(string_temp)-1;i++){
-        *(string_temp2+i)=' ';
-    }
-    printf("%s%s\n",string_temp,string_temp2);
+    printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     for(i=compute_node_num_on+1;i<compute_node_num+1;i++){
         sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
@@ -4622,7 +4378,6 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
 
 int cluster_sleep(char* workdir, char* crypto_keyfile){
     char string_temp[128]="";
-    char string_temp2[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -4661,10 +4416,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     getstate(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(filename_temp,"all");
     sprintf(string_temp,"[ -INFO- ] You planned to shutdown *ALL* the nodes of the current cluster.");
-    for(i=0;i<85-strlen(string_temp)-1;i++){
-        *(string_temp2+i)=' ';
-    }
-    printf("%s%s\n",string_temp,string_temp2);
+    printf("%s\n",string_temp);
     sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         global_replace(filename_temp,"Running","Stopped");

@@ -1565,8 +1565,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char string_temp[128]="";
 
     char conf_print_string_temp1[256]="";
-    char conf_print_string_temp2[256]="";
-    char conf_print_string_temp3[512]="";
 
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
@@ -1922,28 +1920,20 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf("[ STEP 2 ] Cluster Configuration:\n");
     sprintf(conf_print_string_temp1,"|          Cluster ID:            %s",cluster_id);
     printf("%s\n",conf_print_string_temp1);
-    reset_string(conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Region:                %s",region_id);
     printf("%s\n",conf_print_string_temp1);
-    reset_string(conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Avalability Zone:      %s",zone_id);
     printf("%s\n",conf_print_string_temp1);
-    reset_string(conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Number of Nodes:       %d",node_num);
     printf("%s\n",conf_print_string_temp1);
-    reset_string(conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Number of Users:       %d",hpc_user_num);
     printf("%s\n",conf_print_string_temp1);
-    reset_string(conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Master Node Instance:  %s",master_inst);
     printf("%s\n",conf_print_string_temp1);
-    reset_string(conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          Compute Node Instance: %s",compute_inst);
     printf("%s\n",conf_print_string_temp1);
-    reset_string(conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          OS Image:              %s",os_image_raw);
     printf("%s\n",conf_print_string_temp1);
-    reset_string(conf_print_string_temp1);
     printf("[ -INFO- ] Building you cluster now, this may take seconds ...\n");
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
@@ -2192,19 +2182,15 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-
     char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char logfile[FILENAME_LENGTH]="";
     char secret_file[FILENAME_LENGTH]="";
-
     char filename_temp[FILENAME_LENGTH]="";
-
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-
     char* url_qcloud_root=URL_QCLOUD_ROOT;
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
@@ -2219,9 +2205,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char unique_cluster_id[96]="";
     char string_temp[128]="";
     char conf_print_string_temp1[256]="";
-    char conf_print_string_temp2[256]="";
-    char conf_print_string_temp3[512]="";
-
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
     char os_image[32]="";
@@ -2731,7 +2714,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-
     char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -2739,15 +2721,12 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char logfile[FILENAME_LENGTH]="";
     char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-
     char* url_alicloud_root=URL_ALICLOUD_ROOT;
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
-
     char conf_line_buffer[256]="";
     char conf_param_buffer1[32]="";
     char conf_param_buffer2[32]="";
@@ -2756,11 +2735,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char cluster_id_temp[16]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-
     char conf_print_string_temp1[256]="";
-    char conf_print_string_temp2[256]="";
-    char conf_print_string_temp3[512]="";
-
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
     char os_image[32]="";
@@ -2775,7 +2750,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     int master_bandwidth=0;
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
-
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
     char private_key_file[FILENAME_LENGTH]="";
@@ -2783,19 +2757,16 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char md5sum[33]="";
-
     char bucket_id[12]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
     char master_address[32]="";
-
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
     char current_time[12]="";
     char master_cpu_vendor[8]="";
     char compute_cpu_vendor[8]="";
-
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i,j;
@@ -2978,7 +2949,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         reset_string(compute_passwd);
         generate_random_passwd(compute_passwd);
     }
-
     if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MAX){
         for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
             *(cluster_id_temp+i)=*(cluster_id_input+i);
@@ -3027,7 +2997,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         fclose(file_p);
     }
     reset_string(filename_temp);
-
     sprintf(filename_temp,"%s/root_passwords.txt",vaultdir);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
@@ -3049,13 +3018,10 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          OS Image:              %s",os_image);
     printf("%s\n",conf_print_string_temp1);
-
     printf("[ -INFO- ] Building you cluster now, this may take seconds ...\n");
     printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-
     generate_sshkey(sshkey_folder,pubkey);
-
     sprintf(filename_temp,"%s/hpc_stack.base",stackdir);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
     global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
