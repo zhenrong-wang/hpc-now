@@ -115,7 +115,8 @@ void print_help(void){
     printf("+ IV . Other:\n");
     printf("|  about       : Display the version and other info.\n");
     printf("|  license     : Read the terms and conditions of the GNU Public License - 2.0\n");
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd\n");
+    printf("|\n");
+    printf("> visit: https://www.hpc-now.com  > mailto: info@hpc-now.com\n");
 }
 
 void print_header(void){
@@ -129,7 +130,8 @@ void print_header(void){
 }
 
 void print_tail(void){
-    printf("| visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
+    printf("|\n");
+    printf("> visit: https://www.hpc-now.com  > mailto: info@hpc-now.com\n");
 }
 
 void print_about(void){
