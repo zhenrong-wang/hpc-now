@@ -113,7 +113,7 @@ void print_help(void){
     printf("+ IV . Other:\n");
     printf("|  about       : Display the version and other info.\n");
     printf("|  license     : Read the terms and conditions of the GNU Public License - 2.0\n");
-    printf("|\n");
+    printf(">\n");
     printf("> visit: https://www.hpc-now.com  > mailto: info@hpc-now.com\n");
 }
 
@@ -129,7 +129,7 @@ void print_header(void){
 }
 
 void print_tail(void){
-    printf("|\n");
+    printf(">\n");
     printf("> visit: https://www.hpc-now.com  > mailto: info@hpc-now.com\n");
 }
 
@@ -1463,7 +1463,6 @@ int graph(char* workdir, char* crypto_keyfile){
         }
         printf("%s\n",compute_string);
     }
-    printf("| HPC-NOW Cluster Graph and Status\n");
     fclose(file_p);
     fclose(file_p_2);
     return 0;
