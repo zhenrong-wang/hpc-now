@@ -145,7 +145,7 @@ void print_header(void){
 }
 
 void print_tail(void){
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd\n");
+    printf("| visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
 }
 
 void print_about(void){
