@@ -56,20 +56,15 @@ Bug report: info@hpc-now.com
 #define MD5_AWS_TF_ZIP "463fb946564c91965d58d38e085ebc35"
 
 void print_empty_cluster_info(void){
-    
     printf("[ -INFO- ] It seems the cluster is empty. You can either:\n");
     printf("|          a) Run 'hpcopr init' to generate a *default* cluster directly. OR\n");
     printf("|          b) Run 'hpcopr conf' to get and modify the configuration file and then\n");
     printf("|             Run 'hpcopr init' to generate a *customized* cluster.\n");
-    
     printf("[ FATAL: ] Exit now.\n");
-    
 }
 
 void print_help(void){
-    
     printf("[ -INFO- ] Usage: hpcopr command_name param1 param2\n");
-    
     printf("| Commands:\n");
     printf("+ I  . Initialization:\n");
     printf("|  new         : Create a new working directory or rotating a new keypair:\n");
@@ -90,18 +85,18 @@ void print_help(void){
     printf("|  graph       : Display the cluster map including all the nodes and status.\n");
     printf("+ III. Operation:\n");
     printf("|  delc        : Delete specified compute nodes:\n");
-    printf("|        all       - Delete *ALL* the compute nodes, you can run 'hpcopr addc' to\n"); 
+    printf("|        all       - Delete *ALL* the compute nodes, you can run 'hpcopr addc' to\n");
     printf("|                    add compute nodes later.\n");
-    printf("|        NUM       - Delete the last NUM of the compute nodes. NUM should be less\n"); 
+    printf("|        NUM       - Delete the last NUM of the compute nodes. NUM should be less\n");
     printf("|                    than the current quantity of compute nodes.\n");
     printf("|  addc  NUM   : Add compute nodes to current cluster. You can specify how many to\n");
     printf("|                be added.\n");
     printf("|  shutdownc all|NUM\n");
-    printf("|              : Shutdown specified compute nodes. Similar to the command 'delc',\n"); 
+    printf("|              : Shutdown specified compute nodes. Similar to the command 'delc',\n");
     printf("|                you can specify to shut down all or part of the compute nodes by\n");
     printf("|                the parameter 'all' or 'NUM'.\n");
     printf("|  turnonc   all|NUM\n");
-    printf("|              : Turn on specified compute nodes. Similar to the command 'delc',\n"); 
+    printf("|              : Turn on specified compute nodes. Similar to the command 'delc',\n");
     printf("|                you can specify to turn on all or part of the compute nodes by\n");
     printf("|                the parameter 'all' or 'NUM'.\n");
     printf("|  reconfc     : Reconfigure the compute nodes to a target instance type. i.e.\n");
@@ -113,14 +108,12 @@ void print_help(void){
     printf("|  sleep       : Turn off all the nodes (management and compute) of the cluster.\n"); 
     printf("|  wakeup    all|minimal\n");
     printf("|              : minimal - Turn on the management nodes of the cluster.\n");
-    printf("|              : all     - Turn on the management and compute nodes of the cluster.\n");         
+    printf("|              : all     - Turn on the management and compute nodes of the cluster.\n");
     printf("|  destroy     : *DESTROY* the whole cluster - including all the resources & data.\n");
     printf("+ IV . Other:\n");
     printf("|  about       : Display the version and other info.\n");
     printf("|  license     : Read the terms and conditions of the GNU Public License - 2.0\n");
-    
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd\n");
-    
 }
 
 void print_header(void){
@@ -131,7 +124,6 @@ void print_header(void){
     char string_temp[128]="";
     int i;
     int length_temp=19;
-    
     printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.89\n");
     if(time_p->tm_mon+1<10){
         length_temp--;
@@ -153,18 +145,15 @@ void print_header(void){
     }
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d%s\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,string_temp);
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n");
-    
 }
 
 void print_tail(void){
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd\n");
-    
 }
 
 void print_about(void){
     printf("| This is free software; see the source for copying conditions.  There is NO\n");
-    printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
-    
+    printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
     printf("| This project is powered by many excellent free and open-source projects:\n");
     printf("|   1. GNU/Linux: maybe the most widely used software on this planet.\n");
     printf("|   2. Terraform: a powerful platform for cloud resource orchestration.\n");
@@ -177,8 +166,7 @@ void print_about(void){
     printf("| Please check the source code here: https://gitee.com/zhenrong-wang/hpc-now/\n");
     printf("| If you encounter any issues about this software, please feel free to contact us\n");
     printf("| via info@hpc-now.com or other channels.\n");
-    printf("| Let's build this open source cloud HPC platform together!\n");
-    
+    printf("| Let's build this open source cloud HPC platform together!\n\n");
     print_tail();
 }
 
@@ -192,7 +180,6 @@ void read_license(void){
             system(cmdline);
         }
     }
-    
     print_tail();
 }
 
@@ -200,7 +187,6 @@ void print_not_in_a_workdir(char* current_dir){
     char temp_string[128]="";
     char temp_string2[128]="";
     int i;
-    
     printf("[ FATAL: ] You are not in a working directory, *NO* critical operation is permitted.\n");
     printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is number).\n");
     sprintf(temp_string,"|          Current directory is %s.",current_dir);
@@ -209,9 +195,7 @@ void print_not_in_a_workdir(char* current_dir){
     }
     printf("%s%s\n",temp_string,temp_string2);
     printf("|          Please use the 'cd' command to go to a working directory first.\n");
-    
     printf("[ FATAL: ] Exit now.\n");
-    
 }
 
 void reset_string(char* orig_string){
