@@ -164,7 +164,6 @@ void read_license(void){
 
 void print_not_in_a_workdir(char* current_dir){
     char temp_string[128]="";
-    int i;
     printf("[ FATAL: ] You are not in a working directory, *NO* critical operation is permitted.\n");
     printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is number).\n");
     sprintf(temp_string,"|          Current directory is %s.",current_dir);
