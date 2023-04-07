@@ -147,7 +147,7 @@ void print_about(void){
     printf("| Please check the source code here: https://gitee.com/zhenrong-wang/hpc-now/\n");
     printf("| If you encounter any issues about this software, please feel free to contact us\n");
     printf("| via info@hpc-now.com or other channels.\n");
-    printf("| Let's build this open source cloud HPC platform together!\n\n");
+    printf("| Let's build this open source cloud HPC platform together!\n");
     print_tail();
 }
 
