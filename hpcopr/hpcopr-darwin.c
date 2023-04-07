@@ -4322,7 +4322,9 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
     graph(workdir,crypto_keyfile);
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
-        usleep(1000000);
+        printf("[ -WAIT- ] Still need to wait %d seconds for remote execution ... \r",GENERAL_SLEEP_TIME-i);
+        fflush(stdout);
+        sleep(1);
     }
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
