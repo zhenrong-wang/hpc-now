@@ -15,46 +15,41 @@ Bug report: info@hpc-now.com
 
 #define CMDLINE_LENGTH 2048
 #define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
-#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/dev/LICENSE"
+#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/development/LICENSE"
 #define PASSWORD_STRING_LENGTH 20
 #define PASSWORD_LENGTH 19
 
 void print_header(void){
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Welcome to the HPC-NOW Service Installer!     Version: 0.1.83                     |\n");
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd                         |\n");
-    printf("| This is free software; see the source for copying conditions.  There is NO        |\n");
-    printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.       |\n");
+    printf("| Welcome to the HPC-NOW Service Installer! Version: 0.1.89\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd\n");
+    printf("| This is free software; see the source for copying conditions.  There is NO\n");
+    printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
 }
 
 void print_tail(void){
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd                         |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("\n");
+    printf("<> visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
 }
 
 // Print out help info for this installer
 void print_help(void){
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("| Usage: sudo THIS_INSTALLER_FULL_PATH general_option advanced_option               |\n");
-    printf("| general_option:                                                                   |\n");
-    printf("|        install          : Install or repair the HPC-NOW Services on your device.  |\n");
-    printf("|        update           : Update the hpcopr to the latest version.                |\n");
-    printf("|        uninstall        : Remove the HPC-NOW services and all relevant data.      |\n");
-    printf("|        help             : Show this information.                                  |\n");
-    printf("| advanced_option (for developers, optional):                                       |\n");
-    printf("|        hpcopr_loc=LOC   : Provide your own location of hpcopr, both URL and local |\n");
-    printf("|                           filesystem path are accepted. You should guarantee that |\n");
-    printf("|                           the location points to a valid hpcopr executable.       |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("| Usage: sudo THIS_INSTALLER_FULL_PATH general_option advanced_option\n");
+    printf("| general_option:\n");
+    printf("|        install          : Install or repair the HPC-NOW Services on your device.\n");
+    printf("|        update           : Update the hpcopr to the latest or your own version.\n");
+    printf("|        uninstall        : Remove the HPC-NOW services and all relevant data.\n");
+    printf("|        help             : Show this information.\n");
+    printf("| advanced_option (for developers, optional):\n");
+    printf("|        hpcopr_loc=LOC   : Provide your own location of hpcopr, both URL and local\n");
+    printf("|                           filesystem path are accepted. You should guarantee that\n");
+    printf("|                           the location points to a valid hpcopr executable.\n");
 }
 
 // check the internet connectivity by pinging Baidu's url. If connected, return 0; otherwise, return 1
 int check_internet(void){    
     if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service |\n");
-        printf("|          or check your internet connectivity and retry later. Exit now.           |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
+        printf("|          or check your internet connectivity and retry later. Exit now.\n");
         return 1;
     }
     return 0;
@@ -62,9 +57,8 @@ int check_internet(void){
 
 int check_current_user(void){
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Please either switch to users with admin privilege and run the installer |\n");
-        printf("|          with 'sudo', or switch to the root user. Exit now.                       |\n");
+        printf("[ FATAL: ] Please either switch to users with admin privilege and run the installer\n");
+        printf("|          with 'sudo', or switch to the root user. Exit now.\n");
         print_help();
         return -1;    
     }
@@ -75,28 +69,22 @@ int license_confirmation(void){
     char cmdline[CMDLINE_LENGTH]="";
     char confirmation[64]="";
     sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] Please read the following important information before continuing.       |\n");
-    printf("|          You can press 'Enter' to continue reading, or press 'q' to quit reading. |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -INFO- ] Please read the following important information before continuing.\n");
+    printf("|          You can press 'Enter' to continue reading, or press 'q' to quit reading.\n");
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Currently the installer failed to download or print out the license.     |\n");
-        printf("|          Please double check your internet connectivity and retry. If this issue  |\n");
-        printf("|          still occurs, please report to us via info@hpc-now.com . Exit now.       |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Currently the installer failed to download or print out the license.\n");
+        printf("|          Please double check your internet connectivity and retry. If this issue\n");
+        printf("|          still occurs, please report to us via info@hpc-now.com . Exit now.\n");
         return 1;
     }
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] If you accept the terms and conditions above, please input 'accept',     |\n");
-    printf("|          If you do not accept, this installation will exit immediately.           |\n");
+    printf("[ -INFO- ] If you accept the terms and conditions above, please input 'accept',\n");
+    printf("|          If you do not accept, this installation will exit immediately.\n");
     printf("[ INPUT: ] Please input ( case-sensitive ): ");
     fflush(stdin);
     scanf("%s",confirmation);
     if(strcmp(confirmation,"accept")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ -INFO- ] This installation process is terminated because you didn't accept the    |\n");
-        printf("|          terms and conditions in the license. Exit now.                           |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ -INFO- ] This installation process is terminated because you didn't accept the\n");
+        printf("|          terms and conditions in the license. Exit now.\n");
         return -1;
     }
     return 0;
@@ -132,24 +120,20 @@ int install_services(int loc_flag, char* location){
     int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
 
     if(system("id hpc-now >> /dev/null 2>&1")==0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed. |\n");
-        printf("|          If you'd like to reinstall, please uninstall first. Reinstallation       |\n");
-        printf("|          is not permitted in order to protect your cloud clusters. In order to    |\n");
-        printf("|          uninstall current HPC-NOW services, please run the command:              |\n");
-        printf("|          sudo THIS_INSTALLER_FULL_PATH uninstall (Double confirm is needed)       |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
+        printf("|          If you'd like to reinstall, please uninstall first. Reinstallation\n");
+        printf("|          is not permitted in order to protect your cloud clusters. In order to\n");
+        printf("|          uninstall current HPC-NOW services, please run the command:\n");
+        printf("|          sudo THIS_INSTALLER_FULL_PATH uninstall (Double confirm is needed)\n");
+        printf("[ FATAL: ] Exit now.\n");
         return 1;
     }
 
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] Checking and cleaning up current environment ...                         |\n");
+    printf("[ -INFO- ] Checking and cleaning up current environment ...\n");
     system("rm -rf /Users/hpc-now/ >> /dev/null 2>&1");
     system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
-    printf("[ -INFO- ] Adding the specific user 'hpc-now' to your OS ...                        |\n");
+    printf("[ -INFO- ] Adding the specific user 'hpc-now' to your OS ...\n");
     flag1=system("dscl . -create /Users/hpc-now >> /dev/null 2>&1");
     flag2=system("dscl . -create /Users/hpc-now UserShell /bin/bash >> /dev/null 2>&1");
     flag3=system("dscl . -create /Users/hpc-now RealName hpc-now >> /dev/null 2>&1");
@@ -159,18 +143,15 @@ int install_services(int loc_flag, char* location){
     flag6=system("dscl . -create /Users/hpc-now NFSHomeDirectory /Users/hpc-now >> /dev/null 2>&1");
 
     if(flag1!=0||flag2!=0||flag3!=0||flag4!=0||flag5!=0||flag6!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.     |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.\n");
+        printf("[ FATAL: ] Exit now.\n");
         return -1;
     }
     
-    printf("[ -INFO- ] Creating and configuring the running directory ...                       |\n");
+    printf("[ -INFO- ] Creating and configuring the running directory ...\n");
     system("mkdir -p /Applications/.hpc-now >> /dev/null 2>&1 && chmod 777 /Applications/.hpc-now >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now >> /dev/null 2>&1");
-    printf("[ -INFO- ] Creating a random file for encryption/decryption ...                     |\n");
+    printf("[ -INFO- ] Creating a random file for encryption/decryption ...\n");
     generate_random_passwd(random_string);
     file_p=fopen("/Applications/.hpc-now/.now_crypto_seed.lock","w+");
     fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
@@ -182,31 +163,29 @@ int install_services(int loc_flag, char* location){
     system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/.bin >> /dev/null 2>&1");
     if(loc_flag==-1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...\n");
         sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
     }
     else if(loc_flag==1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...                            |\n");
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...\n");
         sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",location);
     }
     else{
-        printf("[ -INFO- ] Copying the main program 'hpcopr' now ...                                |\n");
+        printf("[ -INFO- ] Copying the main program 'hpcopr' now ...\n");
         sprintf(cmdline,"/bin/cp -r %s /Users/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
     }
 
     if(system(cmdline)==0){
-        printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...                       |\n");
+        printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...\n");
         strcpy(cmdline,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
         system(cmdline);
         sprintf(cmdline,"chmod +x /Users/hpc-now/.bin/hpcopr");
         system(cmdline);
     }
     else{
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Failed to get the hpcopr executable. This installation process is        |\n");
-        printf("|          terminated. If you specified the location of hpcopr executable, please   |\n");
-        printf("|          make sure the location is correct. Rolling back and exit now.            |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Failed to get the hpcopr executable. This installation process is\n");
+        printf("|          terminated. If you specified the location of hpcopr executable, please\n");
+        printf("|          make sure the location is correct. Rolling back and exit now.\n");
         system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
         system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
         system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
@@ -215,22 +194,19 @@ int install_services(int loc_flag, char* location){
         return -1;
     }
     
-    printf("[ -INFO- ] Creating other key running directories now ...                           |\n");
+    printf("[ -INFO- ] Creating other key running directories now ...\n");
     system("mkdir -p /Users/hpc-now/.now-ssh/ >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
     sprintf(cmdline,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
     system(cmdline);
     system("chown -R hpc-now:hpc-now /Users/hpc-now/ >> /dev/null 2>&1");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!                  |\n");
-    printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.       |\n");
-    printf("|          You *MUST* run 'sudo dscl . -passwd /Users/hpc-now PASSWORD' command     |\n");
-    printf("|          to set a password. Please ensure the complexity of the new password!     |\n");
-    printf("|          After setting password, please switch to the user 'hpc-now' and run      |\n");
-    printf("|          the command 'hpcopr help' to get started. Enjoy you Cloud HPC journey!   |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] Exit now.                                                                |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
+    printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
+    printf("|          You *MUST* run 'sudo dscl . -passwd /Users/hpc-now PASSWORD' command\n");
+    printf("|          to set a password. Please ensure the complexity of the new password!\n");
+    printf("|          After setting password, please switch to the user 'hpc-now' and run\n");
+    printf("|          the command 'hpcopr help' to get started. Enjoy you Cloud HPC journey!\n");
+    printf("[ -INFO- ] Exit now.\n");
     return 0;
 }
 
@@ -238,45 +214,37 @@ int install_services(int loc_flag, char* location){
 int uninstall_services(void){
     char doubleconfirm[128]="";
     // Double confirmation is needed.
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|*                                C A U T I O N !                                  *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*   YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM THE ISSUES BELOW:   *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*   1. You have *DESTROYED* all the clusters managed by this device.              *|\n");
-    printf("|*      This is * !!! EXTREMELY IMPORTANT !!! *                                    *|\n");
-    printf("|*   2. You have *CHECKED* your cloud service account and all the resources        *|\n");
-    printf("|*      created by the HPC-NOW services on this device have been destructed.       *|\n");
-    printf("|*   3. You have *EXPORTED* the usage log and systemlog to a permenant directory,  *|\n");
-    printf("|*      You can run 'hpcopr syslog' and 'hpcopr usage' to get the logs and save    *|\n");
-    printf("|*      them to a directory such as /Users/ANOTHER_USER                            *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          *|\n");
-    printf("|*                                                                                 *|\n");
-    printf("|*                                C A U T I O N !                                  *|\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:         |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("|*                                C A U T I O N !                                  *\n");
+    printf("|*                                                                                 *\n");
+    printf("|*   YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM THE ISSUES BELOW:   *\n");
+    printf("|*                                                                                 *\n");
+    printf("|*   1. You have *DESTROYED* all the clusters managed by this device.              *\n");
+    printf("|*      This is * !!! EXTREMELY IMPORTANT !!! *                                    *\n");
+    printf("|*   2. You have *CHECKED* your cloud service account and all the resources        *\n");
+    printf("|*      created by the HPC-NOW services on this device have been destructed.       *\n");
+    printf("|*   3. You have *EXPORTED* the usage log and systemlog to a permenant directory,  *\n");
+    printf("|*      You can run 'hpcopr syslog' and 'hpcopr usage' to get the logs and save    *\n");
+    printf("|*      them to a directory such as /Users/ANOTHER_USER                            *\n");
+    printf("|*                                                                                 *\n");
+    printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          *\n");
+    printf("|*                                                                                 *\n");
+    printf("|*                                C A U T I O N !                                  *\n");
+    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     printf("[ INPUT: ]  ");
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.   |\n");
-        printf("|          Nothing changed.                                                         |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+        printf("|          Nothing changed.\n");
         return 1;
     }
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...                  |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -INFO- ] UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
     system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
     system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
     system("dscl . -delete /Groups/hpc-now >> /dev/null 2>&1");
     system("rm -rf /Users/hpc-now >> /dev/null 2>&1");
-    printf("[ -DONE- ] The HPC-NOW cluster services have been deleted from this OS and device.  |\n");
-    printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -DONE- ] The HPC-NOW cluster services have been deleted from this OS and device.\n");
+    printf("|          Thanks a lot for using HPC-NOW services!\n");
     return 0;
 }
 
@@ -284,32 +252,22 @@ int update_services(int loc_flag, char* location){
     char doubleconfirm[128]="";
     char cmdline[CMDLINE_LENGTH]="";
     if(system("id hpc-now >> /dev/null 2>&1")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been    |\n");
-        printf("|          installed. Please install it first in order to update.                   |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ FATAL: ] Exit now.                                                                |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
+        printf("|          installed. Please install it first in order to update.\n");
+        printf("[ FATAL: ] Exit now.\n");
         return 1;
     }
 
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|* YOU ARE UPDATING THE HPC-NOW SERVICES TO THE LATEST VERSION.                    *|\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:         |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("|* YOU ARE UPDATING THE HPC-NOW SERVICES. *\n");
+    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     printf("[ INPUT: ]  ");
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("+-----------------------------------------------------------------------------------+\n");
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.   |\n");
-        printf("|          Nothing changed.                                                         |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+        printf("|          Nothing changed.\n");
         return 1;
     }
-    printf("+-----------------------------------------------------------------------------------+\n");
-    printf("[ -INFO- ] UPDATING THE SERVICES NOW ...                                            |\n");
-    printf("+-----------------------------------------------------------------------------------+\n");
+    printf("[ -INFO- ] UPDATING THE SERVICES NOW ...\n");
 
     if(loc_flag==-1){
         sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
@@ -327,18 +285,16 @@ int update_services(int loc_flag, char* location){
         system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
         sprintf(cmdline,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
         system(cmdline);
-        printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.    |\n");
-        printf("|          Thanks a lot for using HPC-NOW services!                                 |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.\n");
+        printf("|          Thanks a lot for using HPC-NOW services!\n");
         return 0;
     }
     else{
-        printf("[ FATAL: ] Failed to update the HPC-NOW services. Please check and make sure:       |\n");
-        printf("|          1. The HPC-NOW Services have been installed previously.                  |\n");
-        printf("|          2. The specified location (if specified) is correct.                     |\n");
-        printf("|          3. Your device is connected to the internet.                             |\n");
-        printf("|          4. Currently there is no 'hpcopr' thread(s) running.                     |\n");
-        printf("+-----------------------------------------------------------------------------------+\n");
+        printf("[ FATAL: ] Failed to update the HPC-NOW services. Please check and make sure:\n");
+        printf("|          1. The HPC-NOW Services have been installed previously.\n");
+        printf("|          2. The specified location (if specified) is correct.\n");
+        printf("|          3. Your device is connected to the internet.\n");
+        printf("|          4. Currently there is no 'hpcopr' thread(s) running.\n");
         return 1;
     }
 }
