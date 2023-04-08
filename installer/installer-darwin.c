@@ -36,7 +36,7 @@ void print_help(void){
     printf("| Usage: sudo THIS_INSTALLER_FULL_PATH general_option advanced_option\n");
     printf("| general_option:\n");
     printf("|        install          : Install or repair the HPC-NOW Services on your device.\n");
-    printf("|        update           : Update the hpcopr to the latest version.\n");
+    printf("|        update           : Update the hpcopr to the latest or your own version.\n");
     printf("|        uninstall        : Remove the HPC-NOW services and all relevant data.\n");
     printf("|        help             : Show this information.\n");
     printf("| advanced_option (for developers, optional):\n");
@@ -258,7 +258,7 @@ int update_services(int loc_flag, char* location){
         return 1;
     }
 
-    printf("|* YOU ARE UPDATING THE HPC-NOW SERVICES TO THE LATEST VERSION.                    *\n");
+    printf("|* YOU ARE UPDATING THE HPC-NOW SERVICES. *\n");
     printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     printf("[ INPUT: ]  ");
     scanf("%s",doubleconfirm);
