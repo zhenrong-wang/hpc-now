@@ -2049,7 +2049,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     if(file_empty_or_not(logfile)!=0){
         printf("[ FATAL: ] Cluster initialization encountered problems.\n");
         printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Exit now.\n");
+        printf("[ FATAL: ] Rolling back and exit now ...\n");
+        archive_log(stackdir);
+        sprintf(cmdline,"cd %s\\ && echo yes | start /b %s destroy > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+        system(cmdline);
+        wait_for_complete(workdir,"destroy");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
@@ -2608,7 +2612,11 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     if(file_empty_or_not(logfile)!=0){
         printf("[ FATAL: ] Cluster initialization encountered problems.\n");
         printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Exit now.\n");
+        printf("[ FATAL: ] Rolling back and exit now ...\n");
+        archive_log(stackdir);
+        sprintf(cmdline,"cd %s\\ && echo yes | start /b %s destroy > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+        system(cmdline);
+        wait_for_complete(workdir,"destroy");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
@@ -3138,7 +3146,11 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     if(file_empty_or_not(logfile)!=0){
         printf("[ FATAL: ] Cluster initialization encountered problems.\n");
         printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Exit now.\n");
+        printf("[ FATAL: ] Rolling back and exit now ...\n");
+        archive_log(stackdir);
+        sprintf(cmdline,"cd %s\\ && echo yes | start /b %s destroy > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+        system(cmdline);
+        wait_for_complete(workdir,"destroy");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
