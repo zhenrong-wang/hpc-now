@@ -4648,7 +4648,7 @@ int create_new_workdir(char* crypto_keyfile){
         fprintf(file_p,"%s\n%s\nCLOUD_C",access_key,secret_key);
         fclose(file_p);
     }
-    else if(ak_length==21&&sk_length==41){
+    else if(ak_length==33&&sk_length==33){
         fprintf(file_p,"%s\n%s\nCLOUD_D",access_key,secret_key);
         fclose(file_p)
     }
@@ -4790,14 +4790,14 @@ int rotate_new_keypair(char* workdir, char* crypto_keyfile){
         fprintf(file_p,"%s\n%s\nCLOUD_C",access_key,secret_key);
         fclose(file_p);
     }
-    else if(ak_length==21&&sk_length==41){
+    else if(ak_length==33&&sk_length==33){
         strcpy(cloud_flag,"CLOUD_D");
         if(strcmp(cloud_flag_prev,cloud_flag)!=0){
             fclose(file_p);
             printf("[ FATAL: ] The new keypair comes from a different Cloud Service Vendor.\n");
             printf("|          Switching cloud vendors for a working directory is not permitted.\n");
-            printf("|          Current Vendor: Huaweicloud (HPC-NOW code: CLOUD_D).\n");
-            printf("|          Please rotate a keypair from a Huaweicloud account.\n");
+            printf("|          Current Vendor: Baidu Cloud (HPC-NOW code: CLOUD_D).\n");
+            printf("|          Please rotate a keypair from a Baidu Cloud account.\n");
             printf("[ FATAL: ] Exit now.\n");
             return 1;
         }
