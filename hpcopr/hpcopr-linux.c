@@ -22,6 +22,7 @@ Bug report: info@hpc-now.com
 #define LINE_LENGTH 4096 //It has to be very long, because tfstate file may contain very long line
 #define AKSK_LENGTH 128
 #define CONF_STRING_LENTH 64
+#define URL_REPO_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/"
 #define URL_ALICLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-alicloud/"
 #define URL_AWS_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-aws/"
 #define URL_QCLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-qcloud/"
@@ -124,7 +125,7 @@ void print_header(void){
     struct tm* time_p=NULL;
     time(&current_time_long);
     time_p=localtime(&current_time_long);
-    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.89\n");
+    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.91\n");
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
 }
@@ -4963,8 +4964,9 @@ int check_and_install_prerequisitions(void){
     }
     if(file_exist_or_not("/usr/.hpc-now/.bin/terraform.exe")!=0||strcmp(md5sum,MD5_TF_EXEC)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (1/5) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
-        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform -o /usr/.hpc-now/.bin/terraform.exe");
+        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
+        sprintf(cmdline,"curl %sterraform/terraform -o /usr/.hpc-now/.bin/terraform.exe",URL_REPO_ROOT)
+        flag=system(cmdline);
         if(flag!=0){
             printf("[ FATAL: ] Failed to download or install necessary tools. Please contact\n");
             printf("|          info@hpc-now.com for support. Exit now.\n");
@@ -4978,8 +4980,9 @@ int check_and_install_prerequisitions(void){
     }
     if(file_exist_or_not("/usr/.hpc-now/.bin/now-crypto.exe")!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (2/5) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
-        flag=system("curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto -o /usr/.hpc-now/.bin/now-crypto.exe");
+        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
+        sprintf(cmdline,"curl %sutils/now-crypto -o /usr/.hpc-now/.bin/now-crypto.exe",URL_REPO_ROOT)
+        flag=system(cmdline);
         if(flag!=0){
             printf("[ FATAL: ] Failed to download or install necessary tools. Please contact\n");
             printf("|          info@hpc-now.com for support. Exit now.\n");
@@ -5009,13 +5012,13 @@ int check_and_install_prerequisitions(void){
     }
     if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_ALI_TF)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (3/5) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
+        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
         sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-alicloud_v%s.tar.xz",ali_plugin_version);
         if(file_exist_or_not(filename_temp)==0){
             get_crypto_key(filename_temp,md5sum);
         }
         if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_ALI_TF_ZIP)!=0){
-            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-alicloud_v%s.tar.xz -o %s",ali_plugin_version,filename_temp);
+            sprintf(cmdline,"curl %sterraform/terraform-provider-alicloud_v%s.tar.xz -o %s",URL_REPO_ROOT,ali_plugin_version,filename_temp);
             system(cmdline);
         }
         sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
@@ -5033,13 +5036,13 @@ int check_and_install_prerequisitions(void){
     }
     if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_QCLOUD_TF)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (4/5) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
+        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
         sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-tencentcloud_v%s.tar.xz",qcloud_plugin_version);
         if(file_exist_or_not(filename_temp)==0){
             get_crypto_key(filename_temp,md5sum);
         }
         if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_QCLOUD_TF_ZIP)!=0){
-            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-tencentcloud_v%s.tar.xz -o %s",qcloud_plugin_version,filename_temp);
+            sprintf(cmdline,"curl %sterraform/terraform-provider-tencentcloud_v%s.tar.xz -o %s",URL_REPO_ROOT,qcloud_plugin_version,filename_temp);
             system(cmdline);
         }
         sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
@@ -5057,13 +5060,13 @@ int check_and_install_prerequisitions(void){
     }
     if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_AWS_TF)!=0){
         printf("[ -INFO- ] Downloading and installing necessary tools (5/5) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.                     |\n\n");
+        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
         sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-aws_v%s_x5.tar.xz",aws_plugin_version);
         if(file_exist_or_not(filename_temp)==0){
             get_crypto_key(filename_temp,md5sum);
         }
         if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_AWS_TF_ZIP)!=0){
-            sprintf(cmdline,"curl https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform/terraform-provider-aws_v%s_x5.tar.xz -o %s",aws_plugin_version,filename_temp);
+            sprintf(cmdline,"curl %sterraform/terraform-provider-aws_v%s_x5.tar.xz -o %s",URL_REPO_ROOT,aws_plugin_version,filename_temp);
             system(cmdline);
         }
         sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
