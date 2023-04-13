@@ -1187,7 +1187,7 @@ int check_and_install_prerequisitions(void){
         }
     }
     system("chmod +x /Applications/.hpc-now/.bin/now-crypto.exe");
-
+    
     if(file_exist_or_not("/Users/hpc-now/.terraformrc")!=0){
         file_p=fopen("/Users/hpc-now/.terraformrc","w+");
         fprintf(file_p,"privider_installation {\n");
