@@ -58,11 +58,13 @@ Bug report: info@hpc-now.com
 #define DEFAULT_URL_ALICLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-alicloud/"
 #define DEFAULT_URL_AWS_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-aws/"
 #define DEFAULT_URL_QCLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-qcloud/"
+#define DEFAULT_URL_SHELL_SCRIPTS "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/"
 
 char URL_REPO_ROOT[LOCATION_LENGTH]="";
 char URL_ALICLOUD_ROOT[LOCATION_LENGTH]="";
 char URL_AWS_ROOT[LOCATION_LENGTH]="";
 char URL_QCLOUD_ROOT[LOCATION_LENGTH]="";
+char URL_SHELL_SCRIPTS[LOCATION_LENGTH]="";
 int REPO_LOC_FLAG=0;
 int TEMPLATE_LOC_FLAG_ALI=0;
 int TEMPLATE_LOC_FLAG_AWS=0;
