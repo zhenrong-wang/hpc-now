@@ -140,7 +140,7 @@ void print_header(void){
     struct tm* time_p=NULL;
     time(&current_time_long);
     time_p=localtime(&current_time_long);
-    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.91.0001\n");
+    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.91.0002\n");
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
 }
@@ -2138,7 +2138,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
 
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
-        printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default\n");
+        printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default \n");
         printf("|          configuration file to initialize this cluster.\n");
         if(TEMPLATE_LOC_FLAG_AWS==1){
             sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1",URL_AWS_ROOT,conf_file);
@@ -2784,7 +2784,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
-        printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default\n");
+        printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default \n");
         printf("|          configuration file to initialize this cluster.\n");
         if(TEMPLATE_LOC_FLAG_QCLOUD==1){
             sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1", URL_QCLOUD_ROOT,conf_file);
@@ -3358,7 +3358,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
-        printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default\n");
+        printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default \n");
         printf("|          configuration file to initialize this cluster.\n");
         if(TEMPLATE_LOC_FLAG_ALI==1){
             sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1",URL_ALICLOUD_ROOT,conf_file);
