@@ -28,7 +28,7 @@ Bug report: info@hpc-now.com
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
 #define USAGE_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-usage.log" //This is a global file!
 #define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
-#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/dev/LICENSE"
+#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"
 #define URL_LICENSE_FSF "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
 #define SSHKEY_DIR "C:\\hpc-now\\.ssh"
 #define NOW_CRYPTO_EXEC "c:\\programdata\\hpc-now\\bin\\now-crypto.exe"
@@ -3478,7 +3478,7 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
 }
 
 int cluster_destroy(char* workdir, char* crypto_keyfile){
-    char doubleconfirm[LINE_LENGTH]="";
+    char doubleconfirm[32]="";
     char cloud_flag[16]="";
     char buffer1[64]="";
     char buffer2[64]="";
@@ -3504,6 +3504,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
     printf("|*                                C A U T I O N !                                  *\n");
     printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     printf("[ INPUT: ]  ");
+    fflush(stdin);
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
@@ -4788,6 +4789,7 @@ int rotate_new_keypair(char* workdir, char* crypto_keyfile){
     printf("|*                                C A U T I O N !                                  *\n");
     printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     printf("[ INPUT: ]  ");
+    fflush(stdin);
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
