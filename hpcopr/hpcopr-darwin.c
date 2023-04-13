@@ -1174,7 +1174,7 @@ int check_and_install_prerequisitions(void){
         printf("[ -INFO- ] Downloading/Copying and installing necessary tools (2/5) ...\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
         if(REPO_LOC_FLAG==1){
-            sprintf(cmdline,"/bin/cp %s/utils/now-crypto-darwin.exe /Applications/.hpc-now/.bin/now-crypto.exe",URL_REPO_ROOT)
+            sprintf(cmdline,"/bin/cp %s/utils/now-crypto-darwin.exe /Applications/.hpc-now/.bin/now-crypto.exe",URL_REPO_ROOT);
         }
         else{
             sprintf(cmdline,"curl %sutils/now-crypto-darwin.exe -o /Applications/.hpc-now/.bin/now-crypto.exe",URL_REPO_ROOT);
