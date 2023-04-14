@@ -2371,8 +2371,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     reset_string(conf_line_buffer);
     if(master_bandwidth>50){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value 50, reset to 50.\n",node_num);
-        node_num=50;
+        printf("[ -WARN- ] The master node bandwidth %d exceeds the maximum value 50, reset to 50.\n",node_num);
+        master_bandwidth=50;
     }
     fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,compute_inst);
     fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,os_image);
@@ -2896,8 +2896,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     reset_string(conf_line_buffer);
     if(master_bandwidth>50){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value 50, reset to 50.\n",node_num);
-        node_num=50;
+        printf("[ -WARN- ] The master node bandwidth %d exceeds the maximum value 50, reset to 50.\n",node_num);
+        master_bandwidth=50;
     }
     fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,compute_inst);
     fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,os_image);

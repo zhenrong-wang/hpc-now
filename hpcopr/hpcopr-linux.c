@@ -2706,13 +2706,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     return 0;
 }
 
-
 int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile){
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-
     char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
 //    char crypto_keyfile[FILENAME_LENGTH]="";
@@ -2720,17 +2718,13 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char conf_file[FILENAME_LENGTH]="";
     char logfile[FILENAME_LENGTH]="";
     char secret_file[FILENAME_LENGTH]="";
-
     char filename_temp[FILENAME_LENGTH]="";
-
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-
-    char* url_qcloud_root=URL_QCLOUD_ROOT;
+//    char* url_qcloud_root=URL_QCLOUD_ROOT;
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
-
     char conf_line_buffer[256]="";
     char conf_param_buffer1[32]="";
     char conf_param_buffer2[32]="";
@@ -2754,21 +2748,17 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     int master_bandwidth=0;
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
-
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
     char private_key_file[FILENAME_LENGTH]="";
-
     FILE* file_p=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char md5sum[33]="";
-
     char bucket_id[12]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
     char master_address[32]="";
-
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
@@ -2817,44 +2807,86 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading the default configure\n");
         printf("|          file to initialize this cluster.\n");
-        sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_qcloud_root,conf_file);
-        system(cmdline);
+        if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1", URL_QCLOUD_ROOT,conf_file);
+        }
+        else{
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", URL_QCLOUD_ROOT,conf_file);
+        }
+        if(system(cmdline)!=0){
+            printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+            return 2;
+        }
     }
     printf("[ STEP 1 ] Creating input files now...\n");
     sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
     system(cmdline);
-
-    sprintf(cmdline,"curl %shpc_stack_qcloud.base -o %s/hpc_stack.base -s",url_qcloud_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.base %s/hpc_stack.base >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_qcloud.base -o %s/hpc_stack.base -s",URL_QCLOUD_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    sprintf(cmdline,"curl %shpc_stack_qcloud.master -o %s/hpc_stack.master -s",url_qcloud_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.master %s/hpc_stack.master >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_qcloud.master -o %s/hpc_stack.master -s",URL_QCLOUD_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    sprintf(cmdline,"curl %shpc_stack_qcloud.compute -o %s/hpc_stack.compute -s",url_qcloud_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.compute %s/hpc_stack.compute >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_qcloud.compute -o %s/hpc_stack.compute -s",URL_QCLOUD_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    sprintf(cmdline,"curl %shpc_stack_qcloud.database -o %s/hpc_stack.database -s",url_qcloud_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.database %s/hpc_stack.database >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_qcloud.database -o %s/hpc_stack.database -s",URL_QCLOUD_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    sprintf(cmdline,"curl %shpc_stack_qcloud.natgw -o %s/hpc_stack.natgw -s",url_qcloud_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.natgw %s/hpc_stack.natgw >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_qcloud.natgw -o %s/hpc_stack.natgw -s",URL_QCLOUD_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    sprintf(cmdline,"curl %sNAS_Zones_QCloud.txt -o %s/NAS_Zones_QCloud.txt -s",url_qcloud_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+        sprintf(cmdline,"/bin/cp %s/NAS_Zones_QCloud.txt %s/NAS_Zones_QCloud.txt >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %sNAS_Zones_QCloud.txt -o %s/NAS_Zones_QCloud.txt -s",URL_QCLOUD_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",url_qcloud_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+        sprintf(cmdline,"/bin/cp %s/reconf.list %s/reconf.list >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",URL_QCLOUD_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
@@ -2903,8 +2935,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     reset_string(conf_line_buffer);
     if(master_bandwidth>50){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value 50, reset to 50.\n",node_num);
-        node_num=50;
+        printf("[ -WARN- ] The master node bandwidth exceeds the maximum value 50, reset to 50.\n",node_num);
+        master_bandwidth=50;
     }
     fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,compute_inst);
     fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,os_image);
@@ -3151,24 +3183,31 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     fclose(file_p);
 
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
-    
-    sprintf(cmdline,"curl %scos.conf -s -o %s/cos.conf",url_qcloud_root,stackdir);
-    system(cmdline);
-    sprintf(filename_temp,"%s/cos.conf",stackdir);
-    global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
-    global_replace(filename_temp,"BLANK_SECRET_KEY",bucket_sk);
-    global_replace(filename_temp,"DEFAULT_REGION",region_id);
-    global_replace(filename_temp,"BLANK_BUCKET_NAME",bucket_id);
-    sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.cos.conf >> /dev/null 2>&1",private_key_file,filename_temp,master_address);
-    system(cmdline);
-    sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.cos.conf\" >> /dev/null 2>&1",private_key_file,master_address);
-    system(cmdline);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
-    system(cmdline);
+    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+        sprintf(cmdline,"/bin/cp %s/cos.conf %s/cos.conf >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %scos.conf -s -o %s/cos.conf",URL_QCLOUD_ROOT,stackdir);
+    }
+    if(system(cmdline)!=0){
+        printf("[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n");
+    }
+    else{
+        sprintf(filename_temp,"%s/cos.conf",stackdir);
+        global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
+        global_replace(filename_temp,"BLANK_SECRET_KEY",bucket_sk);
+        global_replace(filename_temp,"DEFAULT_REGION",region_id);
+        global_replace(filename_temp,"BLANK_BUCKET_NAME",bucket_id);
+        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.cos.conf >> /dev/null 2>&1",private_key_file,filename_temp,master_address);
+        system(cmdline);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.cos.conf\" >> /dev/null 2>&1",private_key_file,master_address);
+        system(cmdline);
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+        system(cmdline);
+    }
 
     sprintf(filename_temp,"%s/_CLUSTER_SUMMARY.txt.tmp",vaultdir);
     file_p=fopen(filename_temp,"w+");
-
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: cos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
@@ -3469,8 +3508,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     reset_string(conf_line_buffer);
     if(master_bandwidth>50){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value 50, reset to 50.\n",node_num);
-        node_num=50;
+        printf("[ -WARN- ] The master node bandwidth %d exceeds the maximum value 50, reset to 50.\n",node_num);
+        master_bandwidth=50;
     }
     fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,compute_inst);
     fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,os_image);
