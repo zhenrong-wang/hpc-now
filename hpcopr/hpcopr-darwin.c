@@ -125,9 +125,9 @@ void print_help(void){
     printf("|              : minimal - Turn on the management nodes of the cluster.\n");
     printf("|              : all     - Turn on the management and compute nodes of the cluster.\n");
     printf("|  destroy     : *DESTROY* the whole cluster - including all the resources & data.\n");
-    printf("+ IV . Advanced - ONLY for developers:\n");
-    printf("|  configloc   : Configure the locations for the terraform binaries, providers and \n");
-    printf("|                IaC templates.\n");
+    printf("+ IV . Advanced - For developers:\n");
+    printf("|  configloc   : Configure the locations for the terraform binaries, providers, IaC\n");
+    printf("|                templates and shell scripts.\n");
     printf("|  showloc     : Show the current configured locations.\n");
     printf("|  resetloc    : Reset to the default locations.\n");
     printf("+ V  . Other:\n");
@@ -142,7 +142,7 @@ void print_header(void){
     struct tm* time_p=NULL;
     time(&current_time_long);
     time_p=localtime(&current_time_long);
-    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.91.0003\n");
+    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.91.0004\n");
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
 }
@@ -186,7 +186,7 @@ void read_license(void){
 void print_not_in_a_workdir(char* current_dir){
     char temp_string[128]="";
     printf("[ FATAL: ] You are not in a working directory, *NO* critical operation is permitted.\n");
-    printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is number).\n");
+    printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is a number).\n");
     sprintf(temp_string,"|          Current directory is %s.",current_dir);
     printf("%s\n",temp_string);
     printf("|          Please use the 'cd' command to go to a working directory first.\n");
@@ -929,6 +929,7 @@ int reset_locations(void){
     fprintf(file_p,"ALICLOUD_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_ALICLOUD_ROOT);
     fprintf(file_p,"AWS_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_AWS_ROOT);
     fprintf(file_p,"TENCENTCLOUD_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_QCLOUD_ROOT);
+    fprintf(file_p,"SHELL_SCRIPTS_LOC %s\n",DEFAULT_URL_SHELL_SCRIPTS);
     fclose(file_p);
     return 0;
 }
@@ -941,7 +942,7 @@ int get_locations(void){
     int line_location_conf_file=0;
     int i;
     line_location_conf_file=file_empty_or_not(LOCATION_CONF_FILE);
-    if(file_exist_or_not(LOCATION_CONF_FILE)==0&&line_location_conf_file==5){
+    if(file_exist_or_not(LOCATION_CONF_FILE)==0&&line_location_conf_file==6){
         file_p=fopen(LOCATION_CONF_FILE,"r");
         fgetline(file_p,title_string);
         for(i=0;i<4;i++){
@@ -970,6 +971,9 @@ int get_locations(void){
                     TEMPLATE_LOC_FLAG_QCLOUD=1;
                 }
             }
+            else if(strcmp(header_string,"SHELL_SCRIPTS_LOC")==0){
+                strcpy(URL_SHELL_SCRIPTS,loc_string);
+            }
         }
         fclose(file_p);
         return 0;
@@ -990,7 +994,7 @@ int show_locations(void){
     }
     fgetline(file_p,loc_string);
     printf("\n");
-    for(i=0;i<4;i++){
+    for(i=0;i<5;i++){
         fgetline(file_p,loc_string);
         printf("%s\n",loc_string);
     }
@@ -1030,7 +1034,7 @@ int configure_locations(void){
         printf("|          Nothing changed.\n");
         return 1;
     }
-    printf("[ LOC 1: ] Please input the root location of the terraform binaries and providers. \n");
+    printf("[ LOC1/5 ] Please input the root location of the terraform binaries and providers. \n");
     printf("|          You can input 'defaut' to use default location: ");
     fflush(stdin);
     scanf("%s",loc_string);
@@ -1043,7 +1047,7 @@ int configure_locations(void){
             strcpy(URL_REPO_ROOT,loc_string);
         }
     }
-    printf("[ LOC 2: ] Please input the root location of the terraform templates for AliCloud. \n");
+    printf("[ LOC2/5 ] Please input the root location of the terraform templates for AliCloud. \n");
     printf("|          You can input 'defaut' to use default location: ");
     fflush(stdin);
     scanf("%s",loc_string);
@@ -1056,7 +1060,7 @@ int configure_locations(void){
             strcpy(URL_ALICLOUD_ROOT,loc_string);
         }
     }
-    printf("[ LOC 3: ] Please input the root location of the terraform templates for AWS.\n");
+    printf("[ LOC3/5 ] Please input the root location of the terraform templates for AWS.\n");
     printf("|          You can input 'defaut' to use default location: ");
     fflush(stdin);
     scanf("%s",loc_string);
@@ -1069,19 +1073,36 @@ int configure_locations(void){
             strcpy(URL_AWS_ROOT,loc_string);
         }
     }
-    printf("[ LOC 4: ] Please input the root location of the terraform templates for TencentCloud.\n");
+    printf("[ LOC4/5 ] Please input the root location of the terraform templates for TencentCloud.\n");
     printf("|          You can input 'defaut' to use default location: ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
-            printf("[ FATAL: ] Invalid format. Will not modify this location.\n");
+            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
         }
         else{
             strcpy(URL_QCLOUD_ROOT,loc_string);
         }
     }
+    printf("[ LOC5/5 ] Please input the root location of the online shell scripts.\n");
+    printf("|          You can input 'defaut' to use default location: ");
+    fflush(stdin);
+    scanf("%s",loc_string);
+    if(strcmp(loc_string,"default")!=0){
+        format_flag=valid_loc_format_or_not(loc_string);
+        if(format_flag==-1){
+            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
+        }
+        else if(format_flag==1){
+            printf("[ -WARN- ] The location must be an URL. Will not modify.\n");
+        }
+        else{
+            strcpy(URL_SHELL_SCRIPTS,loc_string);
+        }
+    }
+
     printf("[ -INFO- ] Updating the location configuration file now ... \n");
     file_p=fopen(LOCATION_CONF_FILE,"w+");
     if(file_p==NULL){
@@ -1112,6 +1133,12 @@ int configure_locations(void){
     }
     else{
         fprintf(file_p,"TENCENTCLOUD_TERRAFORM_TEMPLATES_LOC %s\n",URL_QCLOUD_ROOT);
+    }
+    if(strlen(URL_SHELL_SCRIPTS)==0){
+        fprintf(file_p,"SHELL_SCRIPTS_LOC %s\n",DEFAULT_URL_SHELL_SCRIPTS);
+    }
+    else{
+        fprintf(file_p,"SHELL_SCRIPTS_LOC %s\n",URL_SHELL_SCRIPTS);
     }
     fclose(file_p);
     printf("[ -DONE- ] Locations are modified and saved. The latest locations:\n");
@@ -2455,6 +2482,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
 
     sprintf(filename_temp,"%s/hpc_stack.master",stackdir);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -3072,6 +3100,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
 
     sprintf(filename_temp,"%s/hpc_stack.master",stackdir);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -3638,6 +3667,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
 
     sprintf(filename_temp,"%s/hpc_stack.master",stackdir);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
