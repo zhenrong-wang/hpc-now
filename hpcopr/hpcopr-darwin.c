@@ -1167,7 +1167,7 @@ int check_and_install_prerequisitions(void){
     if(get_locations()!=0){
         printf("[ -INFO- ] Reset the location configuration to the default.\n");
         if(reset_locations()!=0){
-            printf("[ FATAL: ] Failed to set the locations for terraform binaries and templates. Exit now.\n");
+            printf("[ FATAL: ] Failed to set the locations for binaries and templates. Exit now.\n");
             return 2;
         }
     }
@@ -5610,6 +5610,7 @@ int main(int argc, char* argv[]){
         printf("|          Please run the commands below:\n");
         printf("|          su hpc-now   (You will be asked to input password without echo)\n");
         printf("|          cd ~ && ls   (You will see all the current working directories)\n");
+        printf("[ FATAL: ] Exit now.\n");
         print_tail();
         return -3;
     }
@@ -5635,30 +5636,30 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    if(argc==2&&strcmp(argv[1],"license")==0){
+    if(strcmp(argv[1],"license")==0){
         read_license();
         print_tail();
         return 0;
     }
 
-    if(argc==2&&strcmp(argv[1],"help")==0){
+    if(strcmp(argv[1],"help")==0){
         print_help();
         return 0;
     }
 
-    if(argc==2&&strcmp(argv[1],"about")==0){
+    if(strcmp(argv[1],"about")==0){
         print_about();
         return 0;
     }
 
     system("mkdir -p /Applications/.hpc-now/.etc/ >> /dev/null 2>&1");
-    if(argc==2&&strcmp(argv[1],"configloc")==0){
+    if(strcmp(argv[1],"configloc")==0){
         run_flag=configure_locations();
         print_tail();
         return run_flag;
     }
 
-    if(argc==2&&strcmp(argv[1],"resetloc")==0){
+    if(strcmp(argv[1],"resetloc")==0){
         run_flag=reset_locations();
         printf("[ -INFO- ] The locations have been reset to the default ones.\n");
         show_locations();
@@ -5666,7 +5667,7 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
 
-    if(argc==2&&strcmp(argv[1],"showloc")==0){
+    if(strcmp(argv[1],"showloc")==0){
         run_flag=show_locations();
         print_tail();
         return run_flag;
@@ -5802,26 +5803,6 @@ int main(int argc, char* argv[]){
             else if(strcmp(cloud_flag,"CLOUD_A")==0){
                 run_flag=alicloud_cluster_init("",pwd,crypto_keyfile);
                 write_log(pwd,operation_log,argv[1],run_flag);
-                return run_flag;
-            }
-        }
-        else if(argc==3){
-            if(strcmp(cloud_flag,"CLOUD_C")==0){
-                run_flag=aws_cluster_init(argv[2],pwd,crypto_keyfile);
-                sprintf(string_temp,"%s %s",argv[1],argv[2]);
-                write_log(pwd,operation_log,string_temp,run_flag);
-                return run_flag;
-            }
-            else if(strcmp(cloud_flag,"CLOUD_B")==0){
-                run_flag=qcloud_cluster_init(argv[2],pwd,crypto_keyfile);
-                sprintf(string_temp,"%s %s",argv[1],argv[2]);
-                write_log(pwd,operation_log,string_temp,run_flag);
-                return run_flag;
-            }
-            else if(strcmp(cloud_flag,"CLOUD_A")==0){
-                run_flag=alicloud_cluster_init(argv[2],pwd,crypto_keyfile);
-                sprintf(string_temp,"%s %s",argv[1],argv[2]);
-                write_log(pwd,operation_log,string_temp,run_flag);
                 return run_flag;
             }
         }
