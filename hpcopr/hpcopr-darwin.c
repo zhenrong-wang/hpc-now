@@ -158,7 +158,7 @@ void print_about(void){
     printf("| This project is powered by many excellent free and open-source projects:\n");
     printf("|   1. GNU/Linux: maybe the most widely used software on this planet.\n");
     printf("|   2. Terraform: a powerful platform for cloud resource orchestration.\n");
-    printf("|   3. GNOME    : a simple and easy to use desktop environment for GNU/Linux.\n");
+    printf("|   3. GNOME    : a popular and user-friendly desktop environment for GNU/Linux.\n");
     printf("|   4. XRDP     : an open source Remote Desktop Program.\n");
     printf("|   5. SLURM    : an open source cluster management and job scheduling system.\n");
     printf("|   6. MUNGE    : an authentication service for creating and validating credentials.\n");
