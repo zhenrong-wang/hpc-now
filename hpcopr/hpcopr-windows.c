@@ -902,7 +902,6 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     }
     fscanf(decrypted_file,"%s\n%s\n%s",ak,sk,cloud_flag);
     fclose(decrypted_file);
-    reset_string(cmdline);
     sprintf(cmdline,"del /f /q %s > nul 2>&1", decrypted_file_name);
     system(cmdline);
     return 0;
@@ -1638,22 +1637,18 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir %s",stackdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(vaultdir)==1){
         sprintf(cmdline,"mkdir %s",vaultdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(logdir)==1){
         sprintf(cmdline,"mkdir %s",logdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(confdir)==1){
         sprintf(cmdline,"mkdir %s",confdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     printf("[ STEP 1 ] Creating input files now...\n");
     sprintf(cmdline,"del /f /q %s\\hpc_stack* > nul 2>&1",stackdir);
@@ -1694,7 +1689,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     } 
     sprintf(cmdline,"del /f /q %s\\region_valid.tf > nul 2>&1",stackdir);
     system(cmdline);
-    reset_string(cmdline);
     
     sprintf(conf_file,"%s\\tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
@@ -1702,7 +1696,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("|          file to initialize this cluster.\n");
         sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_aws_root,conf_file);
         system(cmdline);
-        reset_string(cmdline);
         if(region_valid_flag==1){
             global_replace(conf_file,"cn-northwest-1","us-east-1");
         }
@@ -1713,33 +1706,26 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_aws.master -o %s\\hpc_stack.master -s",url_aws_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_aws.compute -o %s\\hpc_stack.compute -s",url_aws_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_aws.database -o %s\\hpc_stack.database -s",url_aws_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_aws.natgw -o %s\\hpc_stack.natgw -s",url_aws_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
-
-
     sprintf(cmdline,"curl %sreconf.list -o %s\\reconf.list -s",url_aws_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
@@ -1982,6 +1968,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
 
     sprintf(filename_temp,"%s\\hpc_stack.master",stackdir);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -2279,22 +2266,18 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir %s",stackdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(vaultdir)==1){
         sprintf(cmdline,"mkdir %s",vaultdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(logdir)==1){
         sprintf(cmdline,"mkdir %s",logdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(confdir)==1){
         sprintf(cmdline,"mkdir %s",confdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     sprintf(conf_file,"%s\\tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
@@ -2302,43 +2285,36 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("|          file to initialize this cluster.\n");
         sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_qcloud_root,conf_file);
         system(cmdline);
-        reset_string(cmdline);
     }
     printf("[ STEP 1 ] Creating input files now...\n");
     sprintf(cmdline,"del /f /q %s\\hpc_stack* > nul 2>&1",stackdir);
     system(cmdline);
-    reset_string(cmdline);
 
     sprintf(cmdline,"curl %shpc_stack_qcloud.base -o %s\\hpc_stack.base -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_qcloud.master -o %s\\hpc_stack.master -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_qcloud.compute -o %s\\hpc_stack.compute -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_qcloud.database -o %s\\hpc_stack.database -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_qcloud.natgw -o %s\\hpc_stack.natgw -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %sNAS_Zones_QCloud.txt -o %s\\NAS_Zones_QCloud.txt -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
@@ -2351,7 +2327,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         return 2;
     }
 
-    reset_string(cmdline);
     sprintf(secret_file,"%s\\.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     
@@ -2547,6 +2522,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
 
     sprintf(filename_temp,"%s\\hpc_stack.master",stackdir);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -2817,22 +2793,18 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir %s",stackdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(vaultdir)==1){
         sprintf(cmdline,"mkdir %s",vaultdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(logdir)==1){
         sprintf(cmdline,"mkdir %s",logdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(confdir)==1){
         sprintf(cmdline,"mkdir %s",confdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     sprintf(conf_file,"%s\\tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
@@ -2840,43 +2812,36 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("|          file to initialize this cluster.\n");
         sprintf(cmdline,"curl %stf_prep.conf -s -o %s",url_alicloud_root,conf_file);
         system(cmdline);
-        reset_string(cmdline);
     }
     printf("[ STEP 1 ] Creating input files now...\n");
     sprintf(cmdline,"del /f /q %s\\hpc_stack* > nul 2>&1",stackdir);
     system(cmdline);
-    reset_string(cmdline);
 
     sprintf(cmdline,"curl %shpc_stackv2.base -o %s\\hpc_stack.base -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stackv2.master -o %s\\hpc_stack.master -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stackv2.compute -o %s\\hpc_stack.compute -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stackv2.database -o %s\\hpc_stack.database -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stackv2.natgw -o %s\\hpc_stack.natgw -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %sNAS_Zones_ALI.txt -o %s\\NAS_Zones_ALI.txt -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
@@ -2887,7 +2852,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(secret_file,"%s\\.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     
@@ -3082,6 +3046,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
 
     sprintf(filename_temp,"%s\\hpc_stack.master",stackdir);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);

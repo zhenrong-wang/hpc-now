@@ -19,22 +19,20 @@ Bug report: info@hpc-now.com
 #define CLUSTER_ID_LENGTH_MIN 8
 #define DIR_LENGTH 256
 #define FILENAME_LENGTH 512
+#define LOCATION_LENGTH 512
 #define LINE_LENGTH 4096 //It has to be very long, because tfstate file may contain very long line
 #define AKSK_LENGTH 128
 #define CONF_STRING_LENTH 64
-#define URL_REPO_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/"
-#define URL_ALICLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-alicloud/"
-#define URL_AWS_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-aws/"
-#define URL_QCLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-qcloud/"
+#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"
+#define URL_LICENSE_FSF "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
 #define CRYPTO_KEY_FILE "/usr/.hpc-now/.now_crypto_seed.lock" // This is a global file!
 #define USAGE_LOG_FILE "/usr/.hpc-now/.now-cluster-usage.log" // This is a global file!
 #define OPERATION_LOG_FILE "/usr/.hpc-now/.now-cluster-operation.log"
-#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"
-#define URL_LICENSE_FSF "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
 #define NOW_LIC_DIR "/home/hpc-now/LICENSES"
 #define SSHKEY_DIR "/home/hpc-now/.now-ssh"
 #define NOW_CRYPTO_EXEC "/usr/.hpc-now/.bin/now-crypto.exe"
 #define TERRAFORM_EXEC "/usr/.hpc-now/.bin/terraform.exe"
+#define LOCATION_CONF_FILE "/usr/.hpc-now/.etc/locations.conf"
 #define PASSWORD_LENGTH 19
 #define PASSWORD_STRING_LENGTH 20
 #define RANDSTR_LENGTH_PLUS 11
@@ -57,6 +55,21 @@ Bug report: info@hpc-now.com
 #define MD5_QCLOUD_TF_ZIP "2a08a0092162ba4cf2173be962654b6c"
 #define MD5_AWS_TF_ZIP "c6281e969b9740c69f6c5164e87900f4"
 
+#define DEFAULT_URL_REPO_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/"
+#define DEFAULT_URL_ALICLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-alicloud/"
+#define DEFAULT_URL_AWS_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-aws/"
+#define DEFAULT_URL_QCLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-qcloud/"
+#define DEFAULT_URL_SHELL_SCRIPTS "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/"
+
+char URL_REPO_ROOT[LOCATION_LENGTH]="";
+char URL_ALICLOUD_ROOT[LOCATION_LENGTH]="";
+char URL_AWS_ROOT[LOCATION_LENGTH]="";
+char URL_QCLOUD_ROOT[LOCATION_LENGTH]="";
+char URL_SHELL_SCRIPTS[LOCATION_LENGTH]="";
+int REPO_LOC_FLAG=0;
+int TEMPLATE_LOC_FLAG_ALI=0;
+int TEMPLATE_LOC_FLAG_AWS=0;
+int TEMPLATE_LOC_FLAG_QCLOUD=0;
 
 void print_empty_cluster_info(void){
     printf("[ -INFO- ] It seems the cluster is empty. You can either:\n");
@@ -88,18 +101,18 @@ void print_help(void){
     printf("|  graph       : Display the cluster map including all the nodes and status.\n");
     printf("+ III. Operation:\n");
     printf("|  delc        : Delete specified compute nodes:\n");
-    printf("|        all       - Delete *ALL* the compute nodes, you can run 'hpcopr addc' to\n"); 
+    printf("|        all       - Delete *ALL* the compute nodes, you can run 'hpcopr addc' to\n");
     printf("|                    add compute nodes later.\n");
-    printf("|        NUM       - Delete the last NUM of the compute nodes. NUM should be less\n"); 
+    printf("|        NUM       - Delete the last NUM of the compute nodes. NUM should be less\n");
     printf("|                    than the current quantity of compute nodes.\n");
     printf("|  addc  NUM   : Add compute nodes to current cluster. You can specify how many to\n");
     printf("|                be added.\n");
     printf("|  shutdownc all|NUM\n");
-    printf("|              : Shutdown specified compute nodes. Similar to the command 'delc',\n"); 
+    printf("|              : Shutdown specified compute nodes. Similar to the command 'delc',\n");
     printf("|                you can specify to shut down all or part of the compute nodes by\n");
     printf("|                the parameter 'all' or 'NUM'.\n");
     printf("|  turnonc   all|NUM\n");
-    printf("|              : Turn on specified compute nodes. Similar to the command 'delc',\n"); 
+    printf("|              : Turn on specified compute nodes. Similar to the command 'delc',\n");
     printf("|                you can specify to turn on all or part of the compute nodes by\n");
     printf("|                the parameter 'all' or 'NUM'.\n");
     printf("|  reconfc     : Reconfigure the compute nodes to a target instance type. i.e.\n");
@@ -111,9 +124,14 @@ void print_help(void){
     printf("|  sleep       : Turn off all the nodes (management and compute) of the cluster.\n"); 
     printf("|  wakeup    all|minimal\n");
     printf("|              : minimal - Turn on the management nodes of the cluster.\n");
-    printf("|              : all     - Turn on the management and compute nodes of the cluster.\n");         
+    printf("|              : all     - Turn on the management and compute nodes of the cluster.\n");
     printf("|  destroy     : *DESTROY* the whole cluster - including all the resources & data.\n");
-    printf("+ IV . Other:\n");
+    printf("+ IV . Advanced - For developers:\n");
+    printf("|  configloc   : Configure the locations for the terraform binaries, providers, IaC\n");
+    printf("|                templates and shell scripts.\n");
+    printf("|  showloc     : Show the current configured locations.\n");
+    printf("|  resetloc    : Reset to the default locations.\n");
+    printf("+ V  . Other:\n");
     printf("|  about       : Display the version and other info.\n");
     printf("|  license     : Read the terms and conditions of the GNU Public License - 2.0\n");
     printf("\n");
@@ -125,7 +143,7 @@ void print_header(void){
     struct tm* time_p=NULL;
     time(&current_time_long);
     time_p=localtime(&current_time_long);
-    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.91\n");
+    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.91.0001\n");
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
 }
@@ -141,7 +159,7 @@ void print_about(void){
     printf("| This project is powered by many excellent free and open-source projects:\n");
     printf("|   1. GNU/Linux: maybe the most widely used software on this planet.\n");
     printf("|   2. Terraform: a powerful platform for cloud resource orchestration.\n");
-    printf("|   3. GNOME    : a simple and easy to use desktop environment for GNU/Linux.\n");
+    printf("|   3. GNOME    : a popular and user-friendly desktop environment for GNU/Linux.\n");
     printf("|   4. XRDP     : an open source Remote Desktop Program.\n");
     printf("|   5. SLURM    : an open source cluster management and job scheduling system.\n");
     printf("|   6. MUNGE    : an authentication service for creating and validating credentials.\n");
@@ -863,6 +881,483 @@ int file_empty_or_not(char* filename){
     }
 }
 
+int folder_exist_or_not(char* foldername){
+    char filename[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    sprintf(filename,"%s/testfile.txt",foldername);
+    FILE* test_file=fopen(filename,"w+");
+    if(test_file==NULL){
+        return 1;
+    }
+    else{
+        fclose(test_file);
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename);
+        system(cmdline);
+        return 0;
+    }
+}
+
+int valid_loc_format_or_not(char* loc_string){
+    int length;
+    length=strlen(loc_string);
+    if(length<3){
+        return -1;
+    }
+    if(length<8){
+        if(*(loc_string+0)!='/'){
+            return -1;
+        }
+    }
+    if(*(loc_string+0)!='/'){
+        if(*(loc_string+0)=='h'&&*(loc_string+1)=='t'&&*(loc_string+2)=='t'&&*(loc_string+3)=='p'&&*(loc_string+4)==':'&&*(loc_string+5)=='/'&&*(loc_string+6)=='/'&&*(loc_string+length-1)=='/'){
+            return 0;
+        }
+        if(*(loc_string+0)=='h'&&*(loc_string+1)=='t'&&*(loc_string+2)=='t'&&*(loc_string+3)=='p'&&*(loc_string+4)=='s'&&*(loc_string+5)==':'&&*(loc_string+6)=='/'&&*(loc_string+7)=='/'&&*(loc_string+length-1)=='/'){
+            return 0;
+        }
+        return -1;
+    }
+    return 1;
+}
+
+int reset_locations(void){
+    FILE* file_p=NULL;
+    file_p=fopen(LOCATION_CONF_FILE,"w+");
+    if(file_p==NULL){
+        return -1;
+    }
+    fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");
+    fprintf(file_p,"TERRAFORM_BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_REPO_ROOT);
+    fprintf(file_p,"ALICLOUD_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_ALICLOUD_ROOT);
+    fprintf(file_p,"AWS_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_AWS_ROOT);
+    fprintf(file_p,"TENCENTCLOUD_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_QCLOUD_ROOT);
+    fprintf(file_p,"SHELL_SCRIPTS_LOC %s\n",DEFAULT_URL_SHELL_SCRIPTS);
+    fclose(file_p);
+    return 0;
+}
+
+int get_locations(void){
+    char header_string[64]="";
+    char loc_string[LOCATION_LENGTH]="";
+    char title_string[256]="";
+    FILE* file_p=NULL;
+    int line_location_conf_file=0;
+    int i;
+    line_location_conf_file=file_empty_or_not(LOCATION_CONF_FILE);
+    if(file_exist_or_not(LOCATION_CONF_FILE)==0&&line_location_conf_file==6){
+        file_p=fopen(LOCATION_CONF_FILE,"r");
+        fgetline(file_p,title_string);
+        for(i=0;i<4;i++){
+            fscanf(file_p,"%s%s",header_string,loc_string);
+            if(strcmp(header_string,"TERRAFORM_BINARY_AND_PROVIDERS_LOC_ROOT")==0){
+                strcpy(URL_REPO_ROOT,loc_string);
+                if(loc_string[0]=='/'){
+                    REPO_LOC_FLAG=1;
+                }
+            }
+            else if(strcmp(header_string,"ALICLOUD_TERRAFORM_TEMPLATES_LOC")==0){
+                strcpy(URL_ALICLOUD_ROOT,loc_string);
+                if(loc_string[0]=='/'){
+                    TEMPLATE_LOC_FLAG_ALI=1;
+                }
+            }
+            else if(strcmp(header_string,"AWS_TERRAFORM_TEMPLATES_LOC")==0){
+                strcpy(URL_AWS_ROOT,loc_string);
+                if(loc_string[0]=='/'){
+                    TEMPLATE_LOC_FLAG_AWS=1;
+                }
+            }
+            else if(strcmp(header_string,"TENCENTCLOUD_TERRAFORM_TEMPLATES_LOC")==0){
+                strcpy(URL_QCLOUD_ROOT,loc_string);
+                if(loc_string[0]=='/'){
+                    TEMPLATE_LOC_FLAG_QCLOUD=1;
+                }
+            }
+            else if(strcmp(header_string,"SHELL_SCRIPTS_LOC")==0){
+                strcpy(URL_SHELL_SCRIPTS,loc_string);
+            }
+        }
+        fclose(file_p);
+        return 0;
+    }
+    else{
+        return -1;
+    }
+}
+
+int show_locations(void){
+    FILE* file_p=NULL;
+    file_p=fopen(LOCATION_CONF_FILE,"r");
+    char loc_string[LOCATION_LENGTH]="";
+    int i;
+    if(file_p==NULL){
+        printf("[ FATAL: ] Failed to open the location configuration file. Exit now.\n");
+        return -1;
+    }
+    fgetline(file_p,loc_string);
+    printf("\n");
+    for(i=0;i<5;i++){
+        fgetline(file_p,loc_string);
+        printf("%s\n",loc_string);
+    }
+    return 0;
+}
+
+int configure_locations(void){
+    char doubleconfirm[32]="";
+    char loc_string[LOCATION_LENGTH]="";
+    int format_flag=0;
+    FILE* file_p=NULL;
+    printf("\n");
+    printf("|*                                C A U T I O N !                                  *\n");
+    printf("|*                                                                                 *\n");
+    printf("|*   YOU ARE MODIFYING THE LOCATIONS OF COMPONENTS FOR THE HPC-NOW SERVICES!       *\n");
+    printf("|*   YOUR NEED TO MAKE SURE:                                                       *\n");
+    printf("|*   1. The locations - either URLs or local filesystem paths are valid.           *\n");
+    printf("|*        URLs       : *MUST* start with 'http://' or 'https://' and end with '/'  *\n");
+    printf("|*        Local Paths: *MUST* be absolute paths and start with '/'                 *\n");
+    printf("|*   2. The structures of the location are valid. Please refer to the docs and     *\n");
+    printf("|*      confirm your structure in advance.                                         *\n");
+    printf("|*                                                                                 *\n");
+    printf("|*                                C A U T I O N !                                  *\n");
+    printf("|*                                                                                 *\n");
+    printf("|*   THE HPCOPR WILL ONLY CHECK THE FORMAT OF YOUR INPUTS, WILL *NOT* CHECK        *\n");
+    printf("|*   WHETHER LOCATIONS ARE VALID OR NOT. IT'S YOUR JOB TO GUARANTEE THE VALIDITY!  *\n");
+    printf("|*   INVALID LOCATIONS MAY DAMAGE THE HPC-NOW SERVICES! YOU MAY NEED TO RESET TO   *\n");
+    printf("|*   THE DEFAULT LOCATIONS IF YOUR LOCATIONS FAIL TO WORK PROPERLY!                *\n");
+    printf("|*                                                                                 *\n");
+    printf("|*                                C A U T I O N !                                  *\n");
+    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
+    fflush(stdin);
+    printf("[ INPUT: ]  ");
+    scanf("%s",doubleconfirm);
+    if(strcmp(doubleconfirm,"y-e-s")!=0){
+        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+        printf("|          Nothing changed.\n");
+        return 1;
+    }
+    printf("[ LOC1/5 ] Please input the root location of the terraform binaries and providers. \n");
+    printf("|          You can input 'defaut' to use default location: ");
+    fflush(stdin);
+    scanf("%s",loc_string);
+    if(strcmp(loc_string,"default")!=0){
+        format_flag=valid_loc_format_or_not(loc_string);
+        if(format_flag==-1){
+            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
+        }
+        else{
+            strcpy(URL_REPO_ROOT,loc_string);
+        }
+    }
+    printf("[ LOC2/5 ] Please input the root location of the terraform templates for AliCloud. \n");
+    printf("|          You can input 'defaut' to use default location: ");
+    fflush(stdin);
+    scanf("%s",loc_string);
+    if(strcmp(loc_string,"default")!=0){
+        format_flag=valid_loc_format_or_not(loc_string);
+        if(format_flag==-1){
+            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
+        }
+        else{
+            strcpy(URL_ALICLOUD_ROOT,loc_string);
+        }
+    }
+    printf("[ LOC3/5 ] Please input the root location of the terraform templates for AWS.\n");
+    printf("|          You can input 'defaut' to use default location: ");
+    fflush(stdin);
+    scanf("%s",loc_string);
+    if(strcmp(loc_string,"default")!=0){
+        format_flag=valid_loc_format_or_not(loc_string);
+        if(format_flag==-1){
+            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
+        }
+        else{
+            strcpy(URL_AWS_ROOT,loc_string);
+        }
+    }
+    printf("[ LOC4/5 ] Please input the root location of the terraform templates for TencentCloud.\n");
+    printf("|          You can input 'defaut' to use default location: ");
+    fflush(stdin);
+    scanf("%s",loc_string);
+    if(strcmp(loc_string,"default")!=0){
+        format_flag=valid_loc_format_or_not(loc_string);
+        if(format_flag==-1){
+            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
+        }
+        else{
+            strcpy(URL_QCLOUD_ROOT,loc_string);
+        }
+    }
+    printf("[ LOC5/5 ] Please input the root location of the online shell scripts.\n");
+    printf("|          You can input 'defaut' to use default location: ");
+    fflush(stdin);
+    scanf("%s",loc_string);
+    if(strcmp(loc_string,"default")!=0){
+        format_flag=valid_loc_format_or_not(loc_string);
+        if(format_flag==-1){
+            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
+        }
+        else if(format_flag==1){
+            printf("[ -WARN- ] The location must be an URL. Will not modify.\n");
+        }
+        else{
+            strcpy(URL_SHELL_SCRIPTS,loc_string);
+        }
+    }
+
+    printf("[ -INFO- ] Updating the location configuration file now ... \n");
+    file_p=fopen(LOCATION_CONF_FILE,"w+");
+    if(file_p==NULL){
+        printf("[ FATAL: ] Failed to create or modify the target file. Exit now.\n");
+        return -1;
+    }
+    fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");
+    if(strlen(URL_REPO_ROOT)==0){
+        fprintf(file_p,"TERRAFORM_BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_REPO_ROOT);
+    }
+    else{
+        fprintf(file_p,"TERRAFORM_BINARY_AND_PROVIDERS_LOC_ROOT %s\n",URL_REPO_ROOT);
+    }
+    if(strlen(URL_ALICLOUD_ROOT)==0){
+        fprintf(file_p,"ALICLOUD_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_ALICLOUD_ROOT);
+    }
+    else{
+        fprintf(file_p,"ALICLOUD_TERRAFORM_TEMPLATES_LOC %s\n",URL_ALICLOUD_ROOT);
+    }
+    if(strlen(URL_AWS_ROOT)==0){
+        fprintf(file_p,"AWS_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_AWS_ROOT);
+    }
+    else{
+        fprintf(file_p,"AWS_TERRAFORM_TEMPLATES_LOC %s\n",URL_AWS_ROOT);
+    }
+    if(strlen(URL_QCLOUD_ROOT)==0){
+        fprintf(file_p,"TENCENTCLOUD_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_QCLOUD_ROOT);
+    }
+    else{
+        fprintf(file_p,"TENCENTCLOUD_TERRAFORM_TEMPLATES_LOC %s\n",URL_QCLOUD_ROOT);
+    }
+    if(strlen(URL_SHELL_SCRIPTS)==0){
+        fprintf(file_p,"SHELL_SCRIPTS_LOC %s\n",DEFAULT_URL_SHELL_SCRIPTS);
+    }
+    else{
+        fprintf(file_p,"SHELL_SCRIPTS_LOC %s\n",URL_SHELL_SCRIPTS);
+    }
+    fclose(file_p);
+    printf("[ -DONE- ] Locations are modified and saved. The latest locations:\n");
+    show_locations();
+    return 0;
+}
+
+int check_and_install_prerequisitions(void){
+    char cmdline[CMDLINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char dirname_temp[DIR_LENGTH]="";
+    char random_string[PASSWORD_STRING_LENGTH]="";
+    reset_string(random_string);
+    char md5sum[64]="";
+    int flag=0;
+    FILE* file_p=NULL;
+    char* ali_plugin_version=ALI_TF_PLUGIN_VERSION;
+    char* qcloud_plugin_version=QCLOUD_TF_PLUGIN_VERSION;
+    char* aws_plugin_version=AWS_TF_PLUGIN_VERSION;
+    char* usage_logfile=USAGE_LOG_FILE;
+    char* operation_logfile=OPERATION_LOG_FILE;
+    char* sshkey_dir=SSHKEY_DIR;
+    printf("[ -INFO- ] Checking running environment for HPC-NOW services ...\n");
+
+    system("rm -rf /home/hpc-now/.ssh/known_hosts >> /dev/null 2>&1");
+    if(get_locations()!=0){
+        printf("[ -INFO- ] Reset the location configuration to the default.\n");
+        if(reset_locations()!=0){
+            printf("[ FATAL: ] Failed to set the locations for terraform binaries and templates. Exit now.\n");
+            return 2;
+        }
+    }
+
+    system("mkdir -p /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1");
+    system("mkdir -p /usr/.hpc-now/.bin/ >> /dev/null 2>&1");
+    system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+    if(file_exist_or_not("/usr/.hpc-now/.bin/terraform.exe")==0){
+        get_crypto_key("/usr/.hpc-now/.bin/terraform.exe",md5sum);
+    }
+    if(file_exist_or_not("/usr/.hpc-now/.bin/terraform.exe")!=0||strcmp(md5sum,MD5_TF_EXEC)!=0){
+        printf("[ -INFO- ] Downloading/Copying and installing necessary tools (1/5) ...\n");
+        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
+        if(REPO_LOC_FLAG==1){
+            sprintf(cmdline,"/bin/cp %s/terraform/terraform /usr/.hpc-now/.bin/terraform.exe",URL_REPO_ROOT)；
+        }
+        else{
+            sprintf(cmdline,"curl %sterraform/terraform -o /usr/.hpc-now/.bin/terraform.exe",URL_REPO_ROOT);
+        }
+        flag=system(cmdline);
+        if(flag!=0){
+            printf("[ FATAL: ] Failed to download/copy necessary tools. Please contact\n");
+            printf("|          info@hpc-now.com for support. Exit now.\n");
+            return 3;
+        }
+    }
+    system("chmod +x /usr/.hpc-now/.bin/terraform.exe");
+
+    if(file_exist_or_not("/usr/.hpc-now/.bin/now-crypto.exe")==0){
+        get_crypto_key("/usr/.hpc-now/.bin/now-crypto.exe",md5sum);
+    }
+    if(file_exist_or_not("/usr/.hpc-now/.bin/now-crypto.exe")!=0||strcmp(md5sum,MD5_NOW_CRYPTO)!=0){
+        printf("[ -INFO- ] Downloading/Copying and installing necessary tools (2/5) ...\n");
+        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
+        if(REPO_LOC_FLAG==1){
+            sprintf(cmdline,"/bin/cp %s/utils/now-crypto /usr/.hpc-now/.bin/now-crypto.exe",URL_REPO_ROOT);
+        }
+        else{
+            sprintf(cmdline,"curl %sutils/now-crypto -o /usr/.hpc-now/.bin/now-crypto.exe",URL_REPO_ROOT);
+        }
+        flag=system(cmdline);
+        if(flag!=0){
+            printf("[ FATAL: ] Failed to download/copy necessary tools. Please contact\n");
+            printf("|          info@hpc-now.com for support. Exit now.\n");
+            return 3;
+        }
+    }
+    system("chmod +x /usr/.hpc-now/.bin/now-crypto.exe");
+
+    if(file_exist_or_not("/home/hpc-now/.terraformrc")!=0){
+        file_p=fopen("/home/hpc-now/.terraformrc","w+");
+        fprintf(file_p,"privider_installation {\n");
+        fprintf(file_p,"  filesystem_mirror {\n");
+        fprintf(file_p,"    path    = \"/home/hpc-now/.terraform.d/plugins\"\n");
+        fprintf(file_p,"    include = [\"registry.terraform.io/*/*\"]\n");
+        fprintf(file_p,"  }\n}\n");
+        fclose(file_p);
+    }
+
+    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/aliyun/alicloud/%s/linux_amd64/",ali_plugin_version);
+    if(folder_exist_or_not(dirname_temp)!=0){
+        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
+        system(cmdline);
+    }
+    sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
+    if(file_exist_or_not(filename_temp)==0){
+        get_crypto_key(filename_temp,md5sum);
+    }
+    if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_ALI_TF)!=0){
+        printf("[ -INFO- ] Downloading/Copying and installing necessary tools (3/5) ...\n");
+        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
+        sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-alicloud_v%s.tar.xz",ali_plugin_version);
+        if(file_exist_or_not(filename_temp)==0){
+            get_crypto_key(filename_temp,md5sum);
+        }
+        if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_ALI_TF_ZIP)!=0){
+            if(REPO_LOC_FLAG==1){
+                sprintf(cmdline,"/bin/cp %s/terraform/terraform-provider-alicloud_v%s.tar.xz %s",URL_REPO_ROOT,ali_plugin_version,filename_temp);
+            }
+            else{
+                sprintf(cmdline,"curl %sterraform/terraform-provider-alicloud_v%s.tar.xz -o %s",URL_REPO_ROOT,ali_plugin_version,filename_temp);
+            }
+            flag=system(cmdline);
+            if(flag!=0){
+                printf("[ FATAL: ] Failed to download/copy necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now.\n");
+                return 3;
+            }
+        }
+        sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
+        system(cmdline);
+    }
+
+    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/linux_amd64/",qcloud_plugin_version);
+    if(folder_exist_or_not(dirname_temp)!=0){
+        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
+        system(cmdline);
+    }
+    sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
+    if(file_exist_or_not(filename_temp)==0){
+        get_crypto_key(filename_temp,md5sum);
+    }
+    if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_QCLOUD_TF)!=0){
+        printf("[ -INFO- ] Downloading/Copying and installing necessary tools (4/5) ...\n");
+        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
+        sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-tencentcloud_v%s.tar.xz",qcloud_plugin_version);
+        if(file_exist_or_not(filename_temp)==0){
+            get_crypto_key(filename_temp,md5sum);
+        }
+        if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_QCLOUD_TF_ZIP)!=0){
+            if(REPO_LOC_FLAG==1){
+                sprintf(cmdline,"/bin/cp %s/terraform/terraform-provider-tencentcloud_v%s.tar.xz %s",URL_REPO_ROOT,qcloud_plugin_version,filename_temp);
+            }
+            else{
+                sprintf(cmdline,"curl %sterraform/terraform-provider-tencentcloud_v%s.tar.xz -o %s",URL_REPO_ROOT,qcloud_plugin_version,filename_temp);
+            }  
+            flag=system(cmdline);
+            if(flag!=0){
+                printf("[ FATAL: ] Failed to download/copy necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now.\n");
+                return 3;
+            }
+        }
+        sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
+        system(cmdline);   
+    }
+
+    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/hashicorp/aws/%s/linux_amd64/",aws_plugin_version);
+    if(folder_exist_or_not(dirname_temp)!=0){
+        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
+        system(cmdline);
+    }
+    sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
+    if(file_exist_or_not(filename_temp)==0){
+        get_crypto_key(filename_temp,md5sum);
+    }
+    if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_AWS_TF)!=0){
+        printf("[ -INFO- ] Downloading/Copying and installing necessary tools (5/5) ...\n");
+        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
+        sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-aws_v%s_x5.tar.xz",aws_plugin_version);
+        if(file_exist_or_not(filename_temp)==0){
+            get_crypto_key(filename_temp,md5sum);
+        }
+        if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_AWS_TF_ZIP)!=0){
+            if(REPO_LOC_FLAG==1){
+                sprintf(cmdline,"/bin/cp %s/terraform/terraform-provider-aws_v%s_x5.tar.xz %s",URL_REPO_ROOT,aws_plugin_version,filename_temp);
+            }
+            else{
+                sprintf(cmdline,"curl %sterraform/terraform-provider-aws_v%s_x5.tar.xz -o %s",URL_REPO_ROOT,aws_plugin_version,filename_temp);
+            }
+            flag=system(cmdline);
+            if(flag!=0){
+                printf("[ FATAL: ] Failed to download/copy necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now.\n");
+                return 3;
+            }
+        }
+        sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
+        system(cmdline);   
+    }
+
+    if(file_exist_or_not(usage_logfile)!=0){
+        file_p=fopen(usage_logfile,"w+");
+        fprintf(file_p,"UCID,CLOUD_VENDOR,NODE_NAME,vCPU,START_DATE,START_TIME,STOP_DATE,STOP_TIME,RUNNING_HOURS,CPUxHOURS,CPU_MODEL,CLOUD_REGION\n");
+        fclose(file_p);
+    }
+    
+    sprintf(filename_temp,"%s/known_hosts",sshkey_dir);
+    if(file_exist_or_not(filename_temp)==0){
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+        system(cmdline);
+    }
+
+// create the syslog file.
+    if(file_exist_or_not(operation_logfile)!=0){
+        sprintf(cmdline,"echo \"\" > %s",operation_logfile);
+        system(cmdline);
+    }
+    if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ > /dev/null 2>&1")!=0){
+        strcpy(cmdline,"export PATH=/home/hpc-now/.bin/:$PATH >> /home/hpc-now/.bashrc");
+        system(cmdline);
+    }
+
+    printf("[ -INFO- ] Running environment successfully checked. HPC-NOW services are ready.\n");
+    return 0;
+}
+
+
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag){
     if(file_exist_or_not(secret_file)!=0){
         return 1;
@@ -888,26 +1383,9 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     }
     fscanf(decrypted_file,"%s\n%s\n%s",ak,sk,cloud_flag);
     fclose(decrypted_file);
-    reset_string(cmdline);
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1", decrypted_file_name);
     system(cmdline);
     return 0;
-}
-
-int folder_exist_or_not(char* foldername){
-    char filename[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    sprintf(filename,"%s/testfile.txt",foldername);
-    FILE* test_file=fopen(filename,"w+");
-    if(test_file==NULL){
-        return 1;
-    }
-    else{
-        fclose(test_file);
-        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename);
-        system(cmdline);
-        return 0;
-    }
 }
 
 int get_cpu_num(const char* vm_model){
@@ -1538,7 +2016,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-
     char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
 //    char crypto_keyfile[FILENAME_LENGTH]="";
@@ -1547,17 +2024,13 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char logfile[FILENAME_LENGTH]="";
     char secret_file[FILENAME_LENGTH]="";
     char region_valid[FILENAME_LENGTH]="";
-
     char filename_temp[FILENAME_LENGTH]="";
-
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-
-    char* url_aws_root=URL_AWS_ROOT;
+//    char* url_aws_root=URL_AWS_ROOT;
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
-
     char conf_line_buffer[256]="";
     char conf_param_buffer1[32]="";
     char conf_param_buffer2[32]="";
@@ -1584,11 +2057,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char os_image_raw[32]="";
     char htflag[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
-
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
     char private_key_file[FILENAME_LENGTH]="";
-
     int number_of_vcpu=0;
     int cpu_core_num=0;
     int threads;
@@ -1596,19 +2067,16 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char md5sum[33]="";
-
     char bucket_id[12]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
     char master_address[32]="";
-
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
     char current_time[12]="";
     char master_cpu_vendor[8]="";
     char compute_cpu_vendor[8]="";
-
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i,j;
@@ -1634,30 +2102,30 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir -p %s",stackdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(vaultdir)==1){
         sprintf(cmdline,"mkdir -p %s",vaultdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(logdir)==1){
         sprintf(cmdline,"mkdir -p %s",logdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(confdir)==1){
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     printf("[ STEP 1 ] Creating input files now...\n");
     sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
     system(cmdline);
-
-    sprintf(cmdline,"curl %sregion_valid.tf -o %s/region_valid.tf -s",url_aws_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_AWS==1){
+        sprintf(cmdline,"/bin/cp %s/region_valid.tf %s/region_valid.tf >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %sregion_valid.tf -o %s/region_valid.tf -s",URL_AWS_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
 
@@ -1690,53 +2158,84 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     sprintf(cmdline,"rm -rf %s/region_valid.tf >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    reset_string(cmdline);      
 
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading the default configure\n");
         printf("|          file to initialize this cluster.\n");
-        sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_aws_root,conf_file);
-        system(cmdline);
-        reset_string(cmdline);
+        if(TEMPLATE_LOC_FLAG_AWS==1){
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1", URL_AWS_ROOT,conf_file);
+        }
+        else{
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", URL_AWS_ROOT,conf_file);
+        }
+        if(system(cmdline)!=0){
+            printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+            return 2;
+        }
         if(region_valid_flag==1){
             global_replace(conf_file,"cn-northwest-1","us-east-1");
         }
     }
-
-    sprintf(cmdline,"curl %shpc_stack_aws.base -o %s/hpc_stack.base -s",url_aws_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_AWS==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.base %s/hpc_stack.base >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_aws.base -o %s/hpc_stack.base -s",URL_AWS_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
-    sprintf(cmdline,"curl %shpc_stack_aws.master -o %s/hpc_stack.master -s",url_aws_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_AWS==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.master %s/hpc_stack.master >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_aws.master -o %s/hpc_stack.master -s",URL_AWS_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
-    sprintf(cmdline,"curl %shpc_stack_aws.compute -o %s/hpc_stack.compute -s",url_aws_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_AWS==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.compute %s/hpc_stack.compute >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_aws.compute -o %s/hpc_stack.compute -s",URL_AWS_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
-    sprintf(cmdline,"curl %shpc_stack_aws.database -o %s/hpc_stack.database -s",url_aws_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_AWS==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.database %s/hpc_stack.database >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_aws.database -o %s/hpc_stack.database -s",URL_AWS_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
-    sprintf(cmdline,"curl %shpc_stack_aws.natgw -o %s/hpc_stack.natgw -s",url_aws_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_AWS==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.natgw %s/hpc_stack.natgw >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_aws.natgw -o %s/hpc_stack.natgw -s",URL_AWS_ROOT,stackdir);
+    }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
-    sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",url_aws_root,stackdir);
+    if(TEMPLATE_LOC_FLAG_AWS==1){
+        sprintf(cmdline,"/bin/cp %s/reconf.list %s/reconf.list >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    }
+    else{
+        sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",URL_AWS_ROOT,stackdir);
+    }
+    
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
     
@@ -1978,6 +2477,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
 
     sprintf(filename_temp,"%s/hpc_stack.master",stackdir);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -2086,22 +2586,38 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
 
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
     if(strcmp(region_flag,"cn_regions")==0){
-        sprintf(cmdline,"curl %ss3cfg.txt -s -o %s/s3cfg.txt",url_aws_root,stackdir);
-        system(cmdline);
-        sprintf(filename_temp,"%s/s3cfg.txt",stackdir);
-        sprintf(string_temp,"s3.%s.amazonaws.com.cn",region_id);
-        global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
-        global_replace(filename_temp,"BLANK_SECRET_KEY_ID",bucket_sk);
-        global_replace(filename_temp,"DEFAULT_REGION",region_id);
-        global_replace(filename_temp,"DEFAULT_ENDPOINT",string_temp);
-        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.s3cfg >> /dev/null 2>&1",private_key_file,filename_temp,master_address);        
-        system(cmdline);
-        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
-        system(cmdline);
+        if(TEMPLATE_LOC_FLAG_AWS==1){
+            sprintf(cmdline,"/bin/cp %s/s3cfg.txt %s/s3cfg.txt >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+        }
+        else{
+            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s/s3cfg.txt",URL_AWS_ROOT,stackdir);
+        }
+        if(system(cmdline)!=0){
+            printf("[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n");
+        }
+        else{
+            sprintf(filename_temp,"%s/s3cfg.txt",stackdir);
+            sprintf(string_temp,"s3.%s.amazonaws.com.cn",region_id);
+            global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
+            global_replace(filename_temp,"BLANK_SECRET_KEY_ID",bucket_sk);
+            global_replace(filename_temp,"DEFAULT_REGION",region_id);
+            global_replace(filename_temp,"DEFAULT_ENDPOINT",string_temp);
+            sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.s3cfg >> /dev/null 2>&1",private_key_file,filename_temp,master_address);        
+            system(cmdline);
+            sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+            system(cmdline);
+        }
     }
     else{
-        sprintf(cmdline,"curl %ss3cfg.txt -s -o %s/s3cfg.txt",url_aws_root,stackdir);
-        system(cmdline);
+        if(TEMPLATE_LOC_FLAG_AWS==1){
+            sprintf(cmdline,"/bin/cp %s/s3cfg.txt %s/s3cfg.txt >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+        }
+        else{
+            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s/s3cfg.txt",URL_AWS_ROOT,stackdir);
+        }
+        if(system(cmdline)!=0){
+            printf("[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n");
+        }
         sprintf(filename_temp,"%s/s3cfg.txt",stackdir);
         strcpy(string_temp,"s3.amazonaws.com");
         global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
@@ -2275,7 +2791,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sprintf(compute_template,"%s/compute_template",stackdir);
 
     if(file_exist_or_not(currentstate)==0||file_exist_or_not(compute_template)==0){
-        printf("[ FATAL: ] It seems the cluster is already in place. Please destroy and retry.\n");
+        printf("[ FATAL: ] It seems the cluster is already in place. If you do want to rebuild the\n");
+        printf("|          cluster, please run 'destroy' command and retry 'init' command.\n");
         printf("[ FATAL: ] Exit now.\n");
         return 1;
     }
@@ -2283,22 +2800,18 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir -p %s",stackdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(vaultdir)==1){
         sprintf(cmdline,"mkdir -p %s",vaultdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(logdir)==1){
         sprintf(cmdline,"mkdir -p %s",logdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(confdir)==1){
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
@@ -2306,55 +2819,46 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("|          file to initialize this cluster.\n");
         sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_qcloud_root,conf_file);
         system(cmdline);
-        reset_string(cmdline);
     }
     printf("[ STEP 1 ] Creating input files now...\n");
     sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    reset_string(cmdline);
 
     sprintf(cmdline,"curl %shpc_stack_qcloud.base -o %s/hpc_stack.base -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_qcloud.master -o %s/hpc_stack.master -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_qcloud.compute -o %s/hpc_stack.compute -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_qcloud.database -o %s/hpc_stack.database -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stack_qcloud.natgw -o %s/hpc_stack.natgw -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %sNAS_Zones_QCloud.txt -o %s/NAS_Zones_QCloud.txt -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
     sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",url_qcloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-
-    reset_string(cmdline);
     sprintf(secret_file,"%s/.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     
@@ -2550,6 +3054,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
 
     sprintf(filename_temp,"%s/hpc_stack.master",stackdir);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -2751,7 +3256,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char filename_temp[FILENAME_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-    char* url_alicloud_root=URL_ALICLOUD_ROOT;
+//    char* url_alicloud_root=URL_ALICLOUD_ROOT;
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
@@ -2810,8 +3315,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(compute_template,"%s/compute_template",stackdir);
 
     if(file_exist_or_not(currentstate)==0||file_exist_or_not(compute_template)==0){
-        printf("[ FATAL: ] It seems the cluster is already in place.\n");
-        printf("|          Please empty your stack folder and retry.\n");
+        printf("[ FATAL: ] It seems the cluster is already in place. If you do want to rebuild the\n");
+        printf("|          cluster, please run 'destroy' command and retry 'init' command.\n");
         printf("[ FATAL: ] Exit now.\n");
         return 1;
     }
@@ -2819,78 +3324,74 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir -p %s",stackdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(vaultdir)==1){
         sprintf(cmdline,"mkdir -p %s",vaultdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(logdir)==1){
         sprintf(cmdline,"mkdir -p %s",logdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(confdir)==1){
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading the default configure\n");
         printf("|          file to initialize this cluster.\n");
-        sprintf(cmdline,"curl %stf_prep.conf -s -o %s",url_alicloud_root,conf_file);
-        system(cmdline);
-        reset_string(cmdline);
+        if(TEMPLATE_LOC_FLAG_ALI==1){
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1",url_alicloud_root,conf_file);
+        }
+        else{
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s",url_alicloud_root,conf_file);
+        }
+        if(system(cmdline)!=0){
+            printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+            return 2;
+        }
     }
     printf("[ STEP 1 ] Creating input files now...\n");
     sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    reset_string(cmdline);
 
     sprintf(cmdline,"curl %shpc_stackv2.base -o %s/hpc_stack.base -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stackv2.master -o %s/hpc_stack.master -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stackv2.compute -o %s/hpc_stack.compute -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stackv2.database -o %s/hpc_stack.database -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %shpc_stackv2.natgw -o %s/hpc_stack.natgw -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(cmdline,"curl %sNAS_Zones_ALI.txt -o %s/NAS_Zones_ALI.txt -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
 
     sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",url_alicloud_root,stackdir);
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download necessary file(s). Exit now.\n");
+        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(secret_file,"%s/.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     
@@ -3085,6 +3586,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
 
     sprintf(filename_temp,"%s/hpc_stack.master",stackdir);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -4869,9 +5371,9 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
     char buffer1[64]="";
     char buffer2[64]="";
     char cloud_flag[32]="";
-    char* aws_url_root=URL_AWS_ROOT;
-    char* qcloud_url_root=URL_QCLOUD_ROOT;
-    char* ali_url_root=URL_ALICLOUD_ROOT;
+//   char* aws_url_root=URL_AWS_ROOT;
+//    char* qcloud_url_root=URL_QCLOUD_ROOT;
+//    char* ali_url_root=URL_ALICLOUD_ROOT;
     char confdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -4890,18 +5392,39 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
         system(cmdline);
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
-        sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",ali_url_root,confdir);
-        system(cmdline);
+        if(TEMPLATE_LOC_FLAG_ALI==1){
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",URL_ALICLOUD_ROOT,confdir);
+        }
+        else{
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",URL_ALICLOUD_ROOT,confdir);
+        }
+        if(system(cmdline)!=0){
+            return 1;
+        }
         return 0;
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",qcloud_url_root,confdir);
-        system(cmdline);
+        if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",URL_QCLOUD_ROOT,confdir);
+        }
+        else{
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",URL_QCLOUD_ROOT,confdir);
+        }
+        if(system(cmdline)!=0){
+            return 1;
+        }
         return 0;
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",aws_url_root,confdir);
-        system(cmdline);
+        if(TEMPLATE_LOC_FLAG_AWS==1){
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",URL_AWS_ROOT,confdir);
+        }
+        else{
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",URL_AWS_ROOT,confdir);
+        }
+        if(system(cmdline)!=0){
+            return 1;
+        }
         return 0;
     }
     else{
@@ -4916,188 +5439,6 @@ int check_internet(void){
         printf("[ FATAL: ] Exit now.\n");
         return 1;
     }
-    return 0;
-}
-
-int check_and_install_prerequisitions(void){
-    char cmdline[CMDLINE_LENGTH]="";
-    char filename_temp[FILENAME_LENGTH]="";
-    char dirname_temp[DIR_LENGTH]="";
-    char random_string[PASSWORD_STRING_LENGTH]="";
-    reset_string(random_string);
-    char md5sum[64]="";
-    int flag=0;
-    FILE* file_p=NULL;
-    char* ali_plugin_version=ALI_TF_PLUGIN_VERSION;
-    char* qcloud_plugin_version=QCLOUD_TF_PLUGIN_VERSION;
-    char* aws_plugin_version=AWS_TF_PLUGIN_VERSION;
-    char* usage_logfile=USAGE_LOG_FILE;
-    char* operation_logfile=OPERATION_LOG_FILE;
-    char* sshkey_dir=SSHKEY_DIR;
-    printf("[ -INFO- ] Checking running environment for HPC-NOW services ...\n");
-    
-    if(check_current_user()!=0){
-        printf("[ FATAL: ] You *MUST* switch to the user 'hpc-now' to operate cloud clusters.\n");
-        printf("|          Please run the commands below:\n");
-        printf("|          su hpc-now   (You will be asked to input password without echo)\n");
-        printf("|          cd ~ && ls   (You will see all the current working directories)\n");
-        return 2;
-    }
-    
-    if(folder_exist_or_not("/usr/.hpc-now/")!=0){
-        printf("[ FATAL: ] The service is corrupted due to missing critical folder. Please exit\n");
-        printf("|          and run the installer with 'sudo' to reinstall it. Sample command:\n");
-        printf("|          sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
-        printf("|          sudo YOUR_INSTALLER_FULL_PATH install\n");
-        printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 2;
-    }
-
-    if(folder_exist_or_not("/usr/.hpc-now/.destroyed/")!=0){
-        system("mkdir -p /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1");
-    }
-    if(folder_exist_or_not("/usr/.hpc-now/.bin/")!=0){
-        system("mkdir -p /usr/.hpc-now/.bin/ >> /dev/null 2>&1");
-    }
-    system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-        if(file_exist_or_not("/usr/.hpc-now/.bin/terraform.exe")==0){
-        get_crypto_key("/usr/.hpc-now/.bin/terraform.exe",md5sum);
-    }
-    if(file_exist_or_not("/usr/.hpc-now/.bin/terraform.exe")!=0||strcmp(md5sum,MD5_TF_EXEC)!=0){
-        printf("[ -INFO- ] Downloading and installing necessary tools (1/5) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
-        sprintf(cmdline,"curl %sterraform/terraform -o /usr/.hpc-now/.bin/terraform.exe",URL_REPO_ROOT)
-        flag=system(cmdline);
-        if(flag!=0){
-            printf("[ FATAL: ] Failed to download or install necessary tools. Please contact\n");
-            printf("|          info@hpc-now.com for support. Exit now.\n");
-            return 3;
-        }
-    }
-    system("chmod +x /usr/.hpc-now/.bin/terraform.exe");
-
-    if(file_exist_or_not("/usr/.hpc-now/.bin/now-crypto.exe")==0){
-        get_crypto_key("/usr/.hpc-now/.bin/now-crypto.exe",md5sum);
-    }
-    if(file_exist_or_not("/usr/.hpc-now/.bin/now-crypto.exe")!=0){
-        printf("[ -INFO- ] Downloading and installing necessary tools (2/5) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
-        sprintf(cmdline,"curl %sutils/now-crypto -o /usr/.hpc-now/.bin/now-crypto.exe",URL_REPO_ROOT)
-        flag=system(cmdline);
-        if(flag!=0){
-            printf("[ FATAL: ] Failed to download or install necessary tools. Please contact\n");
-            printf("|          info@hpc-now.com for support. Exit now.\n");
-            return 3;
-        }
-    }
-    system("chmod +x /usr/.hpc-now/.bin/now-crypto.exe");
-
-    if(file_exist_or_not("/home/hpc-now/.terraformrc")!=0){
-        file_p=fopen("/home/hpc-now/.terraformrc","w+");
-        fprintf(file_p,"privider_installation {\n");
-        fprintf(file_p,"  filesystem_mirror {\n");
-        fprintf(file_p,"    path    = \"/home/hpc-now/.terraform.d/plugins\"\n");
-        fprintf(file_p,"    include = [\"registry.terraform.io/*/*\"]\n");
-        fprintf(file_p,"  }\n}\n");
-        fclose(file_p);
-    }
-
-    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/aliyun/alicloud/%s/linux_amd64/",ali_plugin_version);
-    if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
-        system(cmdline);
-    }
-    sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
-    if(file_exist_or_not(filename_temp)==0){
-        get_crypto_key(filename_temp,md5sum);
-    }
-    if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_ALI_TF)!=0){
-        printf("[ -INFO- ] Downloading and installing necessary tools (3/5) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
-        sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-alicloud_v%s.tar.xz",ali_plugin_version);
-        if(file_exist_or_not(filename_temp)==0){
-            get_crypto_key(filename_temp,md5sum);
-        }
-        if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_ALI_TF_ZIP)!=0){
-            sprintf(cmdline,"curl %sterraform/terraform-provider-alicloud_v%s.tar.xz -o %s",URL_REPO_ROOT,ali_plugin_version,filename_temp);
-            system(cmdline);
-        }
-        sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
-        system(cmdline);
-    }
-
-    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/linux_amd64/",qcloud_plugin_version);
-    if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
-        system(cmdline);
-    }
-    sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
-    if(file_exist_or_not(filename_temp)==0){
-        get_crypto_key(filename_temp,md5sum);
-    }
-    if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_QCLOUD_TF)!=0){
-        printf("[ -INFO- ] Downloading and installing necessary tools (4/5) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
-        sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-tencentcloud_v%s.tar.xz",qcloud_plugin_version);
-        if(file_exist_or_not(filename_temp)==0){
-            get_crypto_key(filename_temp,md5sum);
-        }
-        if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_QCLOUD_TF_ZIP)!=0){
-            sprintf(cmdline,"curl %sterraform/terraform-provider-tencentcloud_v%s.tar.xz -o %s",URL_REPO_ROOT,qcloud_plugin_version,filename_temp);
-            system(cmdline);
-        }
-        sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
-        system(cmdline);   
-    }
-
-    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/hashicorp/aws/%s/linux_amd64/",aws_plugin_version);
-    if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
-        system(cmdline);
-    }
-    sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
-    if(file_exist_or_not(filename_temp)==0){
-        get_crypto_key(filename_temp,md5sum);
-    }
-    if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_AWS_TF)!=0){
-        printf("[ -INFO- ] Downloading and installing necessary tools (5/5) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
-        sprintf(filename_temp,"/home/hpc-now/.terraform.d/terraform-provider-aws_v%s_x5.tar.xz",aws_plugin_version);
-        if(file_exist_or_not(filename_temp)==0){
-            get_crypto_key(filename_temp,md5sum);
-        }
-        if(file_exist_or_not(filename_temp)!=0||strcmp(md5sum,MD5_AWS_TF_ZIP)!=0){
-            sprintf(cmdline,"curl %sterraform/terraform-provider-aws_v%s_x5.tar.xz -o %s",URL_REPO_ROOT,aws_plugin_version,filename_temp);
-            system(cmdline);
-        }
-        sprintf(cmdline,"tar xf %s -C %s >> /dev/null 2>&1",filename_temp,dirname_temp);
-        system(cmdline);   
-    }
-
-    if(file_exist_or_not(usage_logfile)!=0){
-        file_p=fopen(usage_logfile,"w+");
-        fprintf(file_p,"UCID,CLOUD_VENDOR,NODE_NAME,vCPU,START_DATE,START_TIME,STOP_DATE,STOP_TIME,RUNNING_HOURS,CPUxHOURS,CPU_MODEL,CLOUD_REGION\n");
-        fclose(file_p);
-    }
-    
-    sprintf(filename_temp,"%s/known_hosts",sshkey_dir);
-    if(file_exist_or_not(filename_temp)==0){
-        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
-        system(cmdline);
-    }
-
-// create the syslog file.
-    if(file_exist_or_not(operation_logfile)!=0){
-        sprintf(cmdline,"echo \"\" > %s",operation_logfile);
-        system(cmdline);
-    }
-    if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ > /dev/null 2>&1")!=0){
-        strcpy(cmdline,"export PATH=/home/hpc-now/.bin/:$PATH >> /home/hpc-now/.bashrc");
-        system(cmdline);
-    }
-
-    printf("[ -INFO- ] Running environment successfully checked. HPC-NOW services are ready.\n");
     return 0;
 }
 
@@ -5209,12 +5550,76 @@ int main(int argc, char* argv[]){
     char* usage_log=USAGE_LOG_FILE;
     char* operation_log=OPERATION_LOG_FILE;
     char string_temp[128]="";
-
     print_header();
+     
+    if(check_current_user()!=0){
+        printf("[ FATAL: ] You *MUST* switch to the user 'hpc-now' to operate cloud clusters.\n");
+        printf("|          Please run the commands below:\n");
+        printf("|          su hpc-now   (You will be asked to input password without echo)\n");
+        printf("|          cd ~ && ls   (You will see all the current working directories)\n");
+        return -3;
+    }
+
+    if(folder_exist_or_not("/usr/.hpc-now/")!=0){
+        printf("[ FATAL: ] The service is corrupted due to missing critical folder. Please exit\n");
+        printf("|          and run the installer with 'sudo' to reinstall it. Sample command:\n");
+        printf("|          sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
+        printf("|          sudo YOUR_INSTALLER_FULL_PATH install\n");
+        printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
+        printf("[ FATAL: ] Exit now.\n");
+        return -3;
+    }
 
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
         return -3;
+    }
+
+    if(argc==1){
+        print_help();
+        return 0;
+    }
+
+    if(argc==2&&strcmp(argv[1],"license")==0){
+        read_license();
+        print_tail();
+        return 0;
+    }
+
+    if(argc==2&&strcmp(argv[1],"help")==0){
+        print_help();
+        return 0;
+    }
+
+    if(argc==2&&strcmp(argv[1],"about")==0){
+        print_about();
+        return 0;
+    }
+
+    system("mkdir -p /usr/.hpc-now/.etc/ >> /dev/null 2>&1");
+    if(argc==2&&strcmp(argv[1],"configloc")==0){
+        run_flag=configure_locations();
+        print_tail();
+        return run_flag;
+    }
+
+    if(argc==2&&strcmp(argv[1],"resetloc")==0){
+        run_flag=reset_locations();
+        printf("[ -INFO- ] The locations have been reset to the default ones.\n");
+        show_locations();
+        print_tail();
+        return run_flag;
+    }
+
+    if(argc==2&&strcmp(argv[1],"showloc")==0){
+        run_flag=show_locations();
+        print_tail();
+        return run_flag;
+    }
+
+    if(strcmp(argv[1],"new")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"conf")!=0){
+        print_help();
+        return 1;
     }
 
     run_flag=check_and_install_prerequisitions();
@@ -5226,41 +5631,6 @@ int main(int argc, char* argv[]){
     else if(run_flag!=0){
         print_tail();
         return -3;
-    }
-
-    if(argc==2&&strcmp(argv[1],"help")==0){
-        print_help();
-        return 0;
-    }
-
-    if(argc==1){
-        print_help();
-        write_log("NULL",operation_log,"NONE",0);
-        return 0;
-    }
-
-    if(strcmp(argv[1],"new")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"help")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"conf")!=0&&strcmp(argv[1],"about")!=0&&strcmp(argv[1],"license")!=0){
-        print_help();
-        write_log("NULL",operation_log,argv[1],1);
-        return 1;
-    }
-
-    if(strcmp(argv[1],"help")==0){
-        print_help();
-        write_log("NULL",operation_log,argv[1],0);
-        return 0;
-    }
-
-    if(strcmp(argv[1],"about")==0){
-        print_about();
-        write_log("NULL",operation_log,argv[1],0);
-        return 0;
-    }
-
-    if(strcmp(argv[1],"license")==0){
-        read_license();
-        write_log("NULL",operation_log,argv[1],0);
-        return 0;
     }
 
     if(strcmp(argv[1],"new")==0){

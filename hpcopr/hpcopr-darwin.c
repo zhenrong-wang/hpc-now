@@ -1378,7 +1378,6 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     }
     fscanf(decrypted_file,"%s\n%s\n%s",ak,sk,cloud_flag);
     fclose(decrypted_file);
-    reset_string(cmdline);
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1", decrypted_file_name);
     system(cmdline);
     return 0;
@@ -2105,22 +2104,18 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir -p %s",stackdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(vaultdir)==1){
         sprintf(cmdline,"mkdir -p %s",vaultdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(logdir)==1){
         sprintf(cmdline,"mkdir -p %s",logdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(confdir)==1){
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(TEMPLATE_LOC_FLAG_AWS==1){
         sprintf(cmdline,"/bin/cp %s/region_valid.tf %s/region_valid.tf >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
@@ -2164,7 +2159,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     sprintf(cmdline,"rm -rf %s/region_valid.tf >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    reset_string(cmdline);
 
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
@@ -2797,22 +2791,18 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir -p %s",stackdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(vaultdir)==1){
         sprintf(cmdline,"mkdir -p %s",vaultdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(logdir)==1){
         sprintf(cmdline,"mkdir -p %s",logdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(confdir)==1){
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
@@ -2903,8 +2893,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-
-    reset_string(cmdline);
     sprintf(secret_file,"%s/.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     sprintf(logfile,"%s/now_cluster.log",logdir);
@@ -3372,22 +3360,18 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir -p %s",stackdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(vaultdir)==1){
         sprintf(cmdline,"mkdir -p %s",vaultdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(logdir)==1){
         sprintf(cmdline,"mkdir -p %s",logdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     if(folder_exist_or_not(confdir)==1){
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
-        reset_string(cmdline);
     }
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
@@ -3477,7 +3461,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    reset_string(cmdline);
     sprintf(secret_file,"%s/.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     sprintf(logfile,"%s/now_cluster.log",logdir);
@@ -5621,11 +5604,6 @@ int main(int argc, char* argv[]){
     char* operation_log=OPERATION_LOG_FILE;
     char string_temp[128]="";
     print_header();
-    
-    if(check_internet()!=0){
-        write_log("NULL",operation_log,"INTERNET_FAILED",-3);
-        return -3;
-    }
 
     if(check_current_user()!=0){
         printf("[ FATAL: ] You *MUST* switch to the user 'hpc-now' to operate cloud clusters.\n");
@@ -5644,6 +5622,11 @@ int main(int argc, char* argv[]){
         printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
         printf("[ FATAL: ] Exit now.\n");
         print_tail();
+        return -3;
+    }
+
+    if(check_internet()!=0){
+        write_log("NULL",operation_log,"INTERNET_FAILED",-3);
         return -3;
     }
 
