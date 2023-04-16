@@ -19,7 +19,7 @@
 #include "..\\src\\usage_and_logs.c"
 
 #else
-#incldue "../include/now_macros.h"
+#include "../include/now_macros.h"
 #include "../src/global_vars.c"
 #include "../src/cluster_general_funcs.c"
 #include "../src/cluster_init.c"
