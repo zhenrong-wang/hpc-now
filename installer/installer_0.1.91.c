@@ -14,6 +14,7 @@
 
 #ifdef _WIN32
 #include <malloc.h>
+#define LINE_LENGTH 1024
 #elif __linux__
 #include <malloc.h>
 #include <sys/time.h>
@@ -67,6 +68,27 @@ int check_internet(void){
     return 0;
 }
 
+// Generate a randome string, length = 19.
+int generate_random_passwd(char* password){
+    int i,rand_num;
+    struct timeval current_time;
+    char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
+    unsigned int seed_num;
+    for(i=0;i<PASSWORD_LENGTH;i++){
+#ifdef _WIN32
+        mingw_gettimeofday(&current_time,NULL);
+#else
+        gettimeofday(&current_time,NULL); //Get the precise time
+#endif
+        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec); //Calculate the random seed
+        srand(seed_num);
+        rand_num=rand()%72; //Get the random character from the string
+        *(password+i)=*(ch_table+rand_num);
+        usleep(5000); // Must sleep in order to make the timeval different enough
+    }
+    return 0;
+}
+
 #ifdef _WIN32
 void reset_string(char* orig_string){
     int length=strlen(orig_string);
@@ -74,22 +96,6 @@ void reset_string(char* orig_string){
     for(i=0;i<length;i++){
         *(orig_string+i)='\0';
     }
-}
-
-int generate_random_passwd(char* password){
-    int i,rand_num;
-    struct timeval current_time;
-    char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
-    unsigned int seed_num;
-    for(i=0;i<PASSWORD_LENGTH;i++){
-        mingw_gettimeofday(&current_time,NULL);
-        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
-        srand(seed_num);
-        rand_num=rand()%72;
-        *(password+i)=*(ch_table+rand_num);
-        usleep(5000);
-    }
-    return 0;
 }
 
 int fgetline(FILE* file_p, char* line_string){
@@ -184,27 +190,6 @@ int license_confirmation(void){
         printf("[ -INFO- ] This installation process is terminated because you didn't accept the\n");
         printf("|          terms and conditions in the license. Exit now.\n");
         return -1;
-    }
-    return 0;
-}
-
-// Generate a randome string, length = 19.
-int generate_random_passwd(char* password){
-    int i,rand_num;
-    struct timeval current_time;
-    char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
-    unsigned int seed_num;
-    for(i=0;i<PASSWORD_LENGTH;i++){
-#ifdef _WIN32
-        mingw_gettimeofday(&current_time,NULL);
-#else
-        gettimeofday(&current_time,NULL); //Get the precise time
-#endif
-        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec); //Calculate the random seed
-        srand(seed_num);
-        rand_num=rand()%72; //Get the random character from the string
-        *(password+i)=*(ch_table+rand_num);
-        usleep(5000); // Must sleep in order to make the timeval different enough
     }
     return 0;
 }
@@ -661,7 +646,7 @@ int valid_loc_format_or_not(char* loc_string){
     if(*(loc_string+0)=='h'&&*(loc_string+1)=='t'&&*(loc_string+2)=='t'&&*(loc_string+3)=='p'&&*(loc_string+4)==':'&&*(loc_string+5)=='/'&&*(loc_string+6)=='/'){
         return 0;
     }
-    if(*(loc_string+0)=='h'&&*(loc_string+1)=='t'&&*(loc_string+2)=='t'&&*(loc_string+3)=='p'&&*(loc_string+4)=='s'&&*(loc_string+5)==':'&&*(loc_string+6)=='/'&&*(loc_string+7)=='/){
+    if(*(loc_string+0)=='h'&&*(loc_string+1)=='t'&&*(loc_string+2)=='t'&&*(loc_string+3)=='p'&&*(loc_string+4)=='s'&&*(loc_string+5)==':'&&*(loc_string+6)=='/'&&*(loc_string+7)=='/'){
         return 0;
     }
     if(*(loc_string+0)<'A'||*(loc_string+0)>'z'){
@@ -758,7 +743,7 @@ int main(int argc, char* argv[]){
         loc_flag=valid_loc_format_or_not(advanced_option_tail);
         if(loc_flag==-1){
             printf("[ -WARN- ] The location specified in the command has invalid format.\n");
-            printf("           Will use the default location to download.\n")
+            printf("           Will use the default location to download.\n");
         }
     }
 
