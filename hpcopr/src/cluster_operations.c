@@ -430,7 +430,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
     system(cmdline);
     sprintf(cmdline,"move %s\\conf\\tf_prep.conf %s\\conf\\tf_prep.conf.destroyed > nul 2>&1",workdir,workdir);
     system(cmdline);
-#else
+#elif __APPLE__
     system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
     sprintf(cmdline,"mv %s/*.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
     system(cmdline);
@@ -445,6 +445,24 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
     sprintf(cmdline,"mv %s/_CLUSTER_SUMMARY.txt /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
     system(cmdline);
     sprintf(cmdline,"mv %s/UCID_LATEST.txt /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+    system(cmdline);
+    sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
+    system(cmdline);
+#elif __linux__
+    system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+    sprintf(cmdline,"mv %s/*.tf /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    system(cmdline);
+    sprintf(cmdline,"mv %s/*.tmp /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    system(cmdline);
+    sprintf(cmdline,"rm -rf %s/currentstate >> /dev/null 2>&1",stackdir);
+    system(cmdline);
+    sprintf(cmdline,"rm -rf %s/compute_template >> /dev/null 2>&1",stackdir);
+    system(cmdline);
+    sprintf(cmdline,"mv %s/hostfile_latest /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    system(cmdline);
+    sprintf(cmdline,"mv %s/_CLUSTER_SUMMARY.txt /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+    system(cmdline);
+    sprintf(cmdline,"mv %s/UCID_LATEST.txt /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
     system(cmdline);
     sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
     system(cmdline);
