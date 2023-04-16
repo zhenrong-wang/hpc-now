@@ -2493,7 +2493,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         system(cmdline);
         sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.ossutilconfig\" >> /dev/null 2>&1",private_key_file,master_address);
         system(cmdline);
-        printf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
 #endif
         system(cmdline);
     }
