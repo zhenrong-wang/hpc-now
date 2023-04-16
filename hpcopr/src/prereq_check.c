@@ -71,7 +71,6 @@ int check_and_install_prerequisitions(void){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
-    char random_string[PASSWORD_STRING_LENGTH]="";
     char md5sum[64]="";
     int flag=0;
     FILE* file_p=NULL;
@@ -82,6 +81,7 @@ int check_and_install_prerequisitions(void){
     char* operation_logfile=OPERATION_LOG_FILE;
     char* sshkey_dir=SSHKEY_DIR;
 #ifdef _WIN32
+    char random_string[PASSWORD_STRING_LENGTH]="";
     char appdata_dir[128]="";
 #endif
 
