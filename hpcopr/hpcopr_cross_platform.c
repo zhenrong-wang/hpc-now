@@ -33,6 +33,7 @@
 #define MD5_ALI_TF_ZIP "d65783aa8504c517ae9c79aa8ca8ea9b"
 #define MD5_QCLOUD_TF_ZIP "9dcad88abf9e06d5e6cd615e9c569be6"
 #define MD5_AWS_TF_ZIP "c064dfa26dcd4f37940e1aef36b4e5b0"
+#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-windows.exe"
 
 #elif __linux__
 #include <malloc.h>
@@ -56,6 +57,7 @@
 #define MD5_ALI_TF_ZIP "14b6a80e77b5b8a7ef0a16a40df344cc"
 #define MD5_QCLOUD_TF_ZIP "2a08a0092162ba4cf2173be962654b6c"
 #define MD5_AWS_TF_ZIP "c6281e969b9740c69f6c5164e87900f4"
+#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-windows.exe"
 
 #elif __APPLE__
 #include <sys/time.h>
@@ -78,6 +80,8 @@
 #define MD5_ALI_TF_ZIP "0e23e305aa0d6962a87f3013a1607ae9"
 #define MD5_QCLOUD_TF_ZIP "5ea4e09ae46602959e40c09acd21b4e2"
 #define MD5_AWS_TF_ZIP "463fb946564c91965d58d38e085ebc35"
+#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-darwin.exe"
+
 #endif
 
 #define CMDLINE_LENGTH 2048
@@ -114,10 +118,12 @@ char URL_ALICLOUD_ROOT[LOCATION_LENGTH]="";
 char URL_AWS_ROOT[LOCATION_LENGTH]="";
 char URL_QCLOUD_ROOT[LOCATION_LENGTH]="";
 char URL_SHELL_SCRIPTS[LOCATION_LENGTH]="";
+char URL_NOW_CRYPTO[LOCATION_LENGTH]="";
 int REPO_LOC_FLAG=0;
 int TEMPLATE_LOC_FLAG_ALI=0;
 int TEMPLATE_LOC_FLAG_AWS=0;
 int TEMPLATE_LOC_FLAG_QCLOUD=0;
+int NOW_CRYPTO_LOC_FLAG=0;
 
 void print_empty_cluster_info(void){
     printf("[ -INFO- ] It seems the cluster is empty. You can either:\n");
@@ -191,7 +197,7 @@ void print_header(void){
     struct tm* time_p=NULL;
     time(&current_time_long);
     time_p=localtime(&current_time_long);
-    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.91.0005\n");
+    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.91.0008\n");
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
 }
@@ -1096,6 +1102,7 @@ int reset_locations(void){
     fprintf(file_p,"AWS_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_AWS_ROOT);
     fprintf(file_p,"TENCENTCLOUD_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_QCLOUD_ROOT);
     fprintf(file_p,"SHELL_SCRIPTS_LOC %s\n",DEFAULT_URL_SHELL_SCRIPTS);
+    fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",DEFAULT_URL_NOW_CRYPTO);
     fclose(file_p);
     return 0;
 }
@@ -1108,10 +1115,10 @@ int get_locations(void){
     int line_location_conf_file=0;
     int i;
     line_location_conf_file=file_empty_or_not(LOCATION_CONF_FILE);
-    if(file_exist_or_not(LOCATION_CONF_FILE)==0&&line_location_conf_file==6){
+    if(file_exist_or_not(LOCATION_CONF_FILE)==0&&line_location_conf_file==7){
         file_p=fopen(LOCATION_CONF_FILE,"r");
         fgetline(file_p,title_string);
-        for(i=0;i<4;i++){
+        for(i=0;i<6;i++){
             fscanf(file_p,"%s%s",header_string,loc_string);
             if(strcmp(header_string,"TERRAFORM_BINARY_AND_PROVIDERS_LOC_ROOT")==0){
                 strcpy(URL_REPO_ROOT,loc_string);
@@ -1164,6 +1171,18 @@ int get_locations(void){
             else if(strcmp(header_string,"SHELL_SCRIPTS_LOC")==0){
                 strcpy(URL_SHELL_SCRIPTS,loc_string);
             }
+            else if(strcmp(header_string,"NOW_CRYPTO_BINARY_LOC")==0){
+                strcpy(URL_NOW_CRYPTO,loc_string);
+#ifdef _WIN32
+                if(loc_string[1]==':'){
+                    NOW_CRYPTO_LOC_FLAG=1;
+                }
+#else
+                if(loc_string[0]=='/'){
+                    NOW_CRYPTO_LOC_FLAG=1;
+                }
+#endif
+            }
         }
         fclose(file_p);
         return 0;
@@ -1184,7 +1203,7 @@ int show_locations(void){
     }
     fgetline(file_p,loc_string);
     printf("\n");
-    for(i=0;i<5;i++){
+    for(i=0;i<6;i++){
         fgetline(file_p,loc_string);
         printf("%s\n",loc_string);
     }
@@ -1224,7 +1243,7 @@ int configure_locations(void){
         printf("|          Nothing changed.\n");
         return 1;
     }
-    printf("[ LOC1/5 ] Please input the root location of the terraform binaries and providers. \n");
+    printf("[ LOC1/6 ] Please input the root location of the terraform binaries and providers. \n");
     printf("|          You can input 'defaut' to use default location: ");
     fflush(stdin);
     scanf("%s",loc_string);
@@ -1237,7 +1256,7 @@ int configure_locations(void){
             strcpy(URL_REPO_ROOT,loc_string);
         }
     }
-    printf("[ LOC2/5 ] Please input the root location of the terraform templates for AliCloud. \n");
+    printf("[ LOC2/6 ] Please input the root location of the terraform templates for AliCloud. \n");
     printf("|          You can input 'defaut' to use default location: ");
     fflush(stdin);
     scanf("%s",loc_string);
@@ -1250,7 +1269,7 @@ int configure_locations(void){
             strcpy(URL_ALICLOUD_ROOT,loc_string);
         }
     }
-    printf("[ LOC3/5 ] Please input the root location of the terraform templates for AWS.\n");
+    printf("[ LOC3/6 ] Please input the root location of the terraform templates for AWS.\n");
     printf("|          You can input 'defaut' to use default location: ");
     fflush(stdin);
     scanf("%s",loc_string);
@@ -1263,7 +1282,7 @@ int configure_locations(void){
             strcpy(URL_AWS_ROOT,loc_string);
         }
     }
-    printf("[ LOC4/5 ] Please input the root location of the terraform templates for TencentCloud.\n");
+    printf("[ LOC4/6 ] Please input the root location of the terraform templates for TencentCloud.\n");
     printf("|          You can input 'defaut' to use default location: ");
     fflush(stdin);
     scanf("%s",loc_string);
@@ -1276,7 +1295,7 @@ int configure_locations(void){
             strcpy(URL_QCLOUD_ROOT,loc_string);
         }
     }
-    printf("[ LOC5/5 ] Please input the root location of the online shell scripts.\n");
+    printf("[ LOC5/6 ] Please input the root location of the online shell scripts.\n");
     printf("|          You can input 'defaut' to use default location: ");
     fflush(stdin);
     scanf("%s",loc_string);
@@ -1290,6 +1309,20 @@ int configure_locations(void){
         }
         else{
             strcpy(URL_SHELL_SCRIPTS,loc_string);
+        }
+    }
+
+    printf("[ LOC6/6 ] Please input the root location of the now-crypto binary.\n");
+    printf("|          You can input 'defaut' to use default location: ");
+    fflush(stdin);
+    scanf("%s",loc_string);
+    if(strcmp(loc_string,"default")!=0){
+        format_flag=valid_loc_format_or_not(loc_string);
+        if(format_flag==-1){
+            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
+        }
+        else{
+            strcpy(URL_NOW_CRYPTO,loc_string);
         }
     }
 
@@ -1329,6 +1362,12 @@ int configure_locations(void){
     }
     else{
         fprintf(file_p,"SHELL_SCRIPTS_LOC %s\n",URL_SHELL_SCRIPTS);
+    }
+    if(strlen(URL_NOW_CRYPTO)==0){
+        fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",DEFAULT_URL_NOW_CRYPTO);
+    }
+    else{
+        fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",URL_NOW_CRYPTO);
     }
     fclose(file_p);
     printf("[ -DONE- ] Locations are modified and saved. The latest locations:\n");

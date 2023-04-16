@@ -31,7 +31,7 @@
 #define PASSWORD_LENGTH 19
 
 void print_header(void){
-    printf("| Welcome to the HPC-NOW Service Installer! Version: 0.1.91.0001\n");
+    printf("| Welcome to the HPC-NOW Service Installer! Version: 0.1.91.0002\n");
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd\n");
     printf("| This is free software; see the source for copying conditions.  There is NO\n");
     printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
@@ -253,15 +253,15 @@ int install_services(int loc_flag, char* location){
     system("attrib +h +s +r c:\\programdata\\hpc-now > nul 2>&1");
 
     if(loc_flag==-1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...\n");
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
         sprintf(cmdline,"curl -s %s -o C:\\hpc-now\\hpcopr.exe",URL_HPCOPR_LATEST);
     }
-    else if(loc_flag==1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...\n");
+    else if(loc_flag==0){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL ...\n");
         sprintf(cmdline,"curl -s %s -o C:\\hpc-now\\hpcopr.exe",location);
     }
     else{
-        printf("[ -INFO- ] Copying the main program 'hpcopr' now ...\n");
+        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
         sprintf(cmdline,"copy %s C:\\hpc-now\\hpcopr.exe > nul 2>&1 ",location);
     }
     
@@ -340,15 +340,15 @@ int install_services(int loc_flag, char* location){
     system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/.bin >> /dev/null 2>&1");
     if(loc_flag==-1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...\n");
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
         sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
     }
-    else if(loc_flag==1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...\n");
+    else if(loc_flag==0){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL ...\n");
         sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",location);
     }
     else{
-        printf("[ -INFO- ] Copying the main program 'hpcopr' now ...\n");
+        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
         sprintf(cmdline,"/bin/cp -r %s /Users/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
     }
 
@@ -371,7 +371,7 @@ int install_services(int loc_flag, char* location){
         return -1;
     }
     
-    printf("[ -INFO- ] Creating other key running directories now ...\n");
+    printf("[ -INFO- ] Creating other key running directories ...\n");
     system("mkdir -p /Users/hpc-now/.now-ssh/ >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
     sprintf(cmdline,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
@@ -421,15 +421,15 @@ int install_services(int loc_flag, char* location){
     system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");   
     system("mkdir -p /home/hpc-now/.bin >> /dev/null 2>&1");
     if(loc_flag==-1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...\n");
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
         sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
     }
-    else if(loc_flag==1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...\n");
+    else if(loc_flag==0){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL ...\n");
         sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",location);
     }
     else{
-        printf("[ -INFO- ] Copying the main program 'hpcopr' now ...\n");
+        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
         sprintf(cmdline,"/bin/cp -r %s /home/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
     }
     if(system(cmdline)==0){
@@ -548,17 +548,18 @@ int update_services(int loc_flag, char* location){
     printf("[ -INFO- ] UPDATING THE SERVICES NOW ...\n");
 
 #ifdef _WIN32
+    system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
     if(loc_flag==-1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...\n");
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
         sprintf(cmdline,"curl -s %s -o C:\\hpc-now\\hpcopr.exe",URL_HPCOPR_LATEST);
     }
-    else if(loc_flag==1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' now ...\n");
+    else if(loc_flag==0){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL ...\n");
         sprintf(cmdline,"curl -s %s -o C:\\hpc-now\\hpcopr.exe",location);
     }
     else{
-        printf("[ -INFO- ] Copying the main program 'hpcopr' now ...\n");
-        sprintf(cmdline,"copy %s C:\\hpc-now\\hpcopr.exe > nul 2>&1 ",location);
+        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
+        sprintf(cmdline,"copy /y %s C:\\hpc-now\\hpcopr.exe > nul 2>&1 ",location);
     }
     if(system(cmdline)==0){
         printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.\n");
@@ -571,12 +572,15 @@ int update_services(int loc_flag, char* location){
     }
 #elif __APPLE__
     if(loc_flag==-1){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
         sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
     }
-    else if(loc_flag==1){
+    else if(loc_flag==0){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL...\n");
         sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",location);
     }
     else{
+        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
         sprintf(cmdline,"/bin/cp -r %s /Users/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
     }
     if(system(cmdline)==0){
@@ -591,12 +595,15 @@ int update_services(int loc_flag, char* location){
     }
 #elif __linux__
     if(loc_flag==-1){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
         sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
     }
-    else if(loc_flag==1){
+    else if(loc_flag==0){
+        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL...\n");
         sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",location);
     }
     else{
+        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
         sprintf(cmdline,"/bin/cp -r %s /home/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
     }
     if(system(cmdline)==0){
