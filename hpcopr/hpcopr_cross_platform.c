@@ -12,6 +12,8 @@
 #include <unistd.h>
 #include <signal.h>
 
+#define VERSION_CODE "0.1.91.0010"
+
 #ifdef _WIN32
 #include <malloc.h>
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
@@ -197,7 +199,7 @@ void print_header(void){
     struct tm* time_p=NULL;
     time(&current_time_long);
     time_p=localtime(&current_time_long);
-    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: 0.1.91.0008\n");
+    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: %s\n",VERSION_CODE);
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
 }
@@ -233,11 +235,11 @@ void read_license(void){
         sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
         if(system(cmdline)!=0){
 #ifdef __APPLE__
-                sprintf(cmdline,"more /Users/hpc-now/LICENSES/GPL-2");
+            sprintf(cmdline,"more /Users/hpc-now/LICENSES/GPL-2");
 #elif _WIN32
-                sprintf(cmdline,"more c:\\hpc-now\\LICENSES\\GPL-2");
+            sprintf(cmdline,"more c:\\hpc-now\\LICENSES\\GPL-2");
 #elif __linux__
-                sprintf(cmdline,"more /home/hpc-now/LICENSES/GPL-2");
+            sprintf(cmdline,"more /home/hpc-now/LICENSES/GPL-2");
 #endif
             system(cmdline);
         }
@@ -248,9 +250,9 @@ void print_not_in_a_workdir(char* current_dir){
     char temp_string[128]="";
     printf("[ FATAL: ] You are not in a working directory, *NO* critical operation is permitted.\n");
 #ifdef _WIN32
-        printf("|          A typical working directory: C:\\hpc-now\\now-cluster-# (# is a number).\n");
+    printf("|          A typical working directory: C:\\hpc-now\\now-cluster-# (# is a number).\n");
 #else
-        printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is a number).\n");
+    printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is a number).\n");
 #endif
     sprintf(temp_string,"|          Current directory is %s.",current_dir);
     printf("%s\n",temp_string);
@@ -368,34 +370,34 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
     FILE* md5_tmp=NULL;
 #ifdef _WIN32
-        char buffer[256]="";
+    char buffer[256]="";
 #endif
 #ifdef __APPLE__
-        sprintf(cmdline,"md5 %s | awk '{print $4}' > /tmp/md5.txt.tmp",crypto_key_filename);
+    sprintf(cmdline,"md5 %s | awk '{print $4}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif __linux__
-        sprintf(cmdline,"md5sum %s | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
+    sprintf(cmdline,"md5sum %s | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif _WIN32
-        sprintf(cmdline,"certutil -hashfile %s md5 > md5.txt.tmp",crypto_key_filename);
+    sprintf(cmdline,"certutil -hashfile %s md5 > md5.txt.tmp",crypto_key_filename);
 #endif
     system(cmdline);
 #ifdef _WIN32
-        md5_tmp=fopen("md5.txt.tmp","r");
+    md5_tmp=fopen("md5.txt.tmp","r");
 #else
-        md5_tmp=fopen("/tmp/md5.txt.tmp","r");
+    md5_tmp=fopen("/tmp/md5.txt.tmp","r");
 #endif
     if(md5_tmp==NULL){
         return -1;
     }
 #ifdef _WIN32
-        fgetline(md5_tmp,buffer);
+    fgetline(md5_tmp,buffer);
 #endif
     fgetline(md5_tmp,md5sum);
 //    fgets(md5sum,128,md5_tmp);
     fclose(md5_tmp);
 #ifdef _WIN32
-        system("del /f /q md5.txt.tmp > nul 2>&1");
+    system("del /f /q md5.txt.tmp > nul 2>&1");
 #else
-        system("rm -rf /tmp/md5.txt.tmp >> /dev/null 2>&1");
+    system("rm -rf /tmp/md5.txt.tmp >> /dev/null 2>&1");
 #endif
     return 0;
 }
@@ -501,9 +503,9 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     fclose(file_p);
     fclose(file_p_tmp);
 #ifdef _WIN32
-        sprintf(cmdline,"move /y %s %s > nul 2>&1",filename_temp,filename);
+    sprintf(cmdline,"move /y %s %s > nul 2>&1",filename_temp,filename);
 #else
-        sprintf(cmdline,"mv %s %s >> /dev/null 2>&1",filename_temp,filename);
+    sprintf(cmdline,"mv %s %s >> /dev/null 2>&1",filename_temp,filename);
 #endif
     system(cmdline);
     return 0;
@@ -531,19 +533,19 @@ void create_and_get_stackdir(char* workdir, char* stackdir){
         cluster_num+=(*(string_temp+j)-'0')*pow(10,j);
     }
 #ifdef _WIN32
-        sprintf(stackdir,"c:\\programdata\\hpc-now\\stack\\cluster-%d",cluster_num);
-        sprintf(cmdline,"mkdir %s > nul 2>&1",stackdir);
-        system(cmdline);
-        sprintf(cmdline,"attrib +h +s +r %s",stackdir);
-        system(cmdline);
+    sprintf(stackdir,"c:\\programdata\\hpc-now\\stack\\cluster-%d",cluster_num);
+    sprintf(cmdline,"mkdir %s > nul 2>&1",stackdir);
+    system(cmdline);
+    sprintf(cmdline,"attrib +h +s +r %s",stackdir);
+    system(cmdline);
 #elif __linux__
-        sprintf(stackdir,"/usr/.hpc-now/.stack/.cluster-%d",cluster_num);
-        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",stackdir);
-        system(cmdline);
+    sprintf(stackdir,"/usr/.hpc-now/.stack/.cluster-%d",cluster_num);
+    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",stackdir);
+    system(cmdline);
 #elif __APPLE__
-        sprintf(stackdir,"/Applications/.hpc-now/.stack/.cluster-%d",cluster_num);
-        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",stackdir);
-        system(cmdline);
+    sprintf(stackdir,"/Applications/.hpc-now/.stack/.cluster-%d",cluster_num);
+    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",stackdir);
+    system(cmdline);
 #endif
 }
 
@@ -561,9 +563,9 @@ int remote_copy(char* workdir, char* sshkey_dir, char* option){
     FILE* file_p=NULL;
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
-        sprintf(currentstate,"%s\\currentstate",stackdir);
+    sprintf(currentstate,"%s\\currentstate",stackdir);
 #else
-        sprintf(currentstate,"%s/currentstate",stackdir);
+    sprintf(currentstate,"%s/currentstate",stackdir);
 #endif
     file_p=fopen(currentstate,"r");
     if(file_p==NULL){
@@ -572,13 +574,13 @@ int remote_copy(char* workdir, char* sshkey_dir, char* option){
     fgetline(file_p,remote_address);
     fclose(file_p);
 #ifdef _WIN32
-        sprintf(private_key,"%s\\now-cluster-login",sshkey_dir);
-        sprintf(hostfile,"%s\\hostfile_latest",stackdir);
-        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/hostfile > nul 2>&1",private_key,hostfile,remote_address);
+    sprintf(private_key,"%s\\now-cluster-login",sshkey_dir);
+    sprintf(hostfile,"%s\\hostfile_latest",stackdir);
+    sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/hostfile > nul 2>&1",private_key,hostfile,remote_address);
 #else
-        sprintf(private_key,"%s/now-cluster-login",sshkey_dir);
-        sprintf(hostfile,"%s/hostfile_latest",stackdir);
-        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/hostfile >> /dev/null 2>&1",private_key,hostfile,remote_address);
+    sprintf(private_key,"%s/now-cluster-login",sshkey_dir);
+    sprintf(hostfile,"%s/hostfile_latest",stackdir);
+    sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/hostfile >> /dev/null 2>&1",private_key,hostfile,remote_address);
 #endif
     system(cmdline);
     return 0;
@@ -606,19 +608,19 @@ void create_and_get_vaultdir(char* workdir, char* vaultdir){
         cluster_num+=(*(string_temp+j)-'0')*pow(10,j);
     }
 #ifdef _WIN32
-        sprintf(vaultdir,"c:\\programdata\\hpc-now\\vault\\cluster-%d",cluster_num);
-        sprintf(cmdline,"mkdir %s > nul 2>&1",vaultdir);
-        system(cmdline);
-        sprintf(cmdline,"attrib +h +s +r %s",vaultdir);
-        system(cmdline);
+    sprintf(vaultdir,"c:\\programdata\\hpc-now\\vault\\cluster-%d",cluster_num);
+    sprintf(cmdline,"mkdir %s > nul 2>&1",vaultdir);
+    system(cmdline);
+    sprintf(cmdline,"attrib +h +s +r %s",vaultdir);
+    system(cmdline);
 #elif __APPLE__
-        sprintf(vaultdir,"/Applications/.hpc-now/.vault/.cluster-%d",cluster_num);
-        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",vaultdir);
-        system(cmdline);
+    sprintf(vaultdir,"/Applications/.hpc-now/.vault/.cluster-%d",cluster_num);
+    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",vaultdir);
+    system(cmdline);
 #elif __linux__
-        sprintf(vaultdir,"/usr/.hpc-now/.vault/.cluster-%d",cluster_num);
-        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",vaultdir);
-        system(cmdline);
+    sprintf(vaultdir,"/usr/.hpc-now/.vault/.cluster-%d",cluster_num);
+    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",vaultdir);
+    system(cmdline);
 #endif
 }
 
@@ -745,9 +747,9 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     fclose(file_p);
     fclose(file_temp_p);
 #ifdef _WIN32
-        sprintf(cmdline,"del /f /q %s > nul 2>&1 && move /y %s %s > nul 2>&1",filename,filename_temp,filename);
+    sprintf(cmdline,"del /f /q %s > nul 2>&1 && move /y %s %s > nul 2>&1",filename,filename_temp,filename);
 #else
-        sprintf(cmdline,"rm -rf %s >> /dev/null && mv %s %s >> /dev/null 2>&1",filename,filename_temp,filename);
+    sprintf(cmdline,"rm -rf %s >> /dev/null && mv %s %s >> /dev/null 2>&1",filename,filename_temp,filename);
 #endif
     system(cmdline);
     return replace_count;
@@ -1010,9 +1012,9 @@ int folder_exist_or_not(char* foldername){
     char filename[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-        sprintf(filename,"%s\\testfile.txt",foldername);
+    sprintf(filename,"%s\\testfile.txt",foldername);
 #else
-        sprintf(filename,"%s/testfile.txt",foldername);
+    sprintf(filename,"%s/testfile.txt",foldername);
 #endif
     FILE* test_file=fopen(filename,"w+");
     if(test_file==NULL){
@@ -1021,10 +1023,10 @@ int folder_exist_or_not(char* foldername){
     else{
         fclose(test_file);
 #ifdef _WIN32
-            sprintf(cmdline,"del /q /f %s > nul 2>&1",filename);
+        sprintf(cmdline,"del /q /f %s > nul 2>&1",filename);
 #else
-            sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename);
-    #endif
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename);
+#endif
         system(cmdline);
         return 0;
     }
@@ -1382,10 +1384,10 @@ int generate_random_passwd(char* password){
     unsigned int seed_num;
     for(i=0;i<PASSWORD_LENGTH;i++){
 #ifdef _WIN32
-            mingw_gettimeofday(&current_time,NULL);
+        mingw_gettimeofday(&current_time,NULL);
 #else
-            gettimeofday(&current_time,NULL);
-    #endif
+        gettimeofday(&current_time,NULL);
+#endif
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);
         rand_num=rand()%72;
@@ -1402,10 +1404,10 @@ int generate_random_db_passwd(char* password){
     unsigned int seed_num;
     for(i=0;i<PASSWORD_LENGTH;i++){
 #ifdef _WIN32
-            mingw_gettimeofday(&current_time,NULL);
+        mingw_gettimeofday(&current_time,NULL);
 #else
-            gettimeofday(&current_time,NULL);
-    #endif
+        gettimeofday(&current_time,NULL);
+#endif
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);
         rand_num=rand()%62;
@@ -1421,9 +1423,9 @@ int generate_random_string(char* random_string){
     char ch_table[36]="abcdefghijklmnopqrstuvwxyz0123456789";
     unsigned int seed_num;
 #ifdef _WIN32
-        mingw_gettimeofday(&current_time,NULL);
+    mingw_gettimeofday(&current_time,NULL);
 #else
-        gettimeofday(&current_time,NULL);
+    gettimeofday(&current_time,NULL);
 #endif
     seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
     srand(seed_num);
@@ -1432,10 +1434,10 @@ int generate_random_string(char* random_string){
     usleep(5000);
     for(i=1;i<RANDSTR_LENGTH_PLUS-1;i++){
 #ifdef _WIN32
-            mingw_gettimeofday(&current_time,NULL);
+        mingw_gettimeofday(&current_time,NULL);
 #else
-            gettimeofday(&current_time,NULL);
-    #endif
+        gettimeofday(&current_time,NULL);
+#endif
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);
         rand_num=rand()%36;
@@ -1461,7 +1463,7 @@ int check_and_install_prerequisitions(void){
     char* operation_logfile=OPERATION_LOG_FILE;
     char* sshkey_dir=SSHKEY_DIR;
 #ifdef _WIN32
-        char appdata_dir[128]="";
+    char appdata_dir[128]="";
 #endif
 
     printf("[ -INFO- ] Checking running environment for HPC-NOW services ...\n");
@@ -2066,9 +2068,9 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     fscanf(decrypted_file,"%s\n%s\n%s",ak,sk,cloud_flag);
     fclose(decrypted_file);
 #ifdef _WIN32
-        sprintf(cmdline,"del /f /q %s > nul 2>&1", decrypted_file_name);
+    sprintf(cmdline,"del /f /q %s > nul 2>&1", decrypted_file_name);
 #else
-        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1", decrypted_file_name);
+    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1", decrypted_file_name);
 #endif
     system(cmdline);
     return 0;
@@ -2107,9 +2109,9 @@ int check_pslock(char* workdir){
     char filename_temp[FILENAME_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);
+    sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);
 #else
-        sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
+    sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
         return 1;
@@ -2162,103 +2164,103 @@ int decrypt_files(char* workdir, char* crypto_key_filename){
     int i;
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_base.tf.tmp",stackdir);
+    sprintf(filename_temp,"%s\\hpc_stack_base.tf.tmp",stackdir);
 #else
-        sprintf(filename_temp,"%s/hpc_stack_base.tf.tmp",stackdir);
+    sprintf(filename_temp,"%s/hpc_stack_base.tf.tmp",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
         get_crypto_key(crypto_key_filename,md5sum);
 #ifdef _WIN32
-            sprintf(cmdline,"%s decrypt %s\\hpc_stack_base.tf.tmp %s\\hpc_stack_base.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        sprintf(cmdline,"%s decrypt %s\\hpc_stack_base.tf.tmp %s\\hpc_stack_base.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
 #else
-            sprintf(cmdline,"%s decrypt %s/hpc_stack_base.tf.tmp %s/hpc_stack_base.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
-    #endif
+        sprintf(cmdline,"%s decrypt %s/hpc_stack_base.tf.tmp %s/hpc_stack_base.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
+#endif
         system(cmdline);
     }
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\terraform.tfstate.tmp",stackdir);
+    sprintf(filename_temp,"%s\\terraform.tfstate.tmp",stackdir);
 #else
-        sprintf(filename_temp,"%s/terraform.tfstate.tmp",stackdir);
+    sprintf(filename_temp,"%s/terraform.tfstate.tmp",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
         get_crypto_key(crypto_key_filename,md5sum);
 #ifdef _WIN32
-            sprintf(cmdline,"%s decrypt %s\\terraform.tfstate.tmp %s\\terraform.tfstate %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        sprintf(cmdline,"%s decrypt %s\\terraform.tfstate.tmp %s\\terraform.tfstate %s",now_crypto_exec,stackdir,stackdir,md5sum);
 #else
-            sprintf(cmdline,"%s decrypt %s/terraform.tfstate.tmp %s/terraform.tfstate %s",now_crypto_exec,stackdir,stackdir,md5sum);
-    #endif
+        sprintf(cmdline,"%s decrypt %s/terraform.tfstate.tmp %s/terraform.tfstate %s",now_crypto_exec,stackdir,stackdir,md5sum);
+#endif
         system(cmdline);
     }
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\terraform.tfstate.backup.tmp",stackdir);
+    sprintf(filename_temp,"%s\\terraform.tfstate.backup.tmp",stackdir);
 #else
-        sprintf(filename_temp,"%s/terraform.tfstate.backup.tmp",stackdir);
+    sprintf(filename_temp,"%s/terraform.tfstate.backup.tmp",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
         get_crypto_key(crypto_key_filename,md5sum);
 #ifdef _WIN32
-            sprintf(cmdline,"%s decrypt %s\\terraform.tfstate.backup.tmp %s\\terraform.tfstate.backup %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        sprintf(cmdline,"%s decrypt %s\\terraform.tfstate.backup.tmp %s\\terraform.tfstate.backup %s",now_crypto_exec,stackdir,stackdir,md5sum);
 #else
-            sprintf(cmdline,"%s decrypt %s/terraform.tfstate.backup.tmp %s/terraform.tfstate.backup %s",now_crypto_exec,stackdir,stackdir,md5sum);
-    #endif
+        sprintf(cmdline,"%s decrypt %s/terraform.tfstate.backup.tmp %s/terraform.tfstate.backup %s",now_crypto_exec,stackdir,stackdir,md5sum);
+#endif
         system(cmdline);
     }
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_master.tf.tmp",stackdir);
+    sprintf(filename_temp,"%s\\hpc_stack_master.tf.tmp",stackdir);
 #else
-        sprintf(filename_temp,"%s/hpc_stack_master.tf.tmp",stackdir);
+    sprintf(filename_temp,"%s/hpc_stack_master.tf.tmp",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
 #ifdef _WIN32
-            sprintf(cmdline,"%s decrypt %s\\hpc_stack_master.tf.tmp %s\\hpc_stack_master.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        sprintf(cmdline,"%s decrypt %s\\hpc_stack_master.tf.tmp %s\\hpc_stack_master.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
 #else
-            sprintf(cmdline,"%s decrypt %s/hpc_stack_master.tf.tmp %s/hpc_stack_master.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
-    #endif
+        sprintf(cmdline,"%s decrypt %s/hpc_stack_master.tf.tmp %s/hpc_stack_master.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
+#endif
         system(cmdline);
     }
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_database.tf.tmp",stackdir);
+    sprintf(filename_temp,"%s\\hpc_stack_database.tf.tmp",stackdir);
 #else
-        sprintf(filename_temp,"%s/hpc_stack_database.tf.tmp",stackdir);
+    sprintf(filename_temp,"%s/hpc_stack_database.tf.tmp",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
 #ifdef _WIN32
-            sprintf(cmdline,"%s decrypt %s\\hpc_stack_database.tf.tmp %s\\hpc_stack_database.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        sprintf(cmdline,"%s decrypt %s\\hpc_stack_database.tf.tmp %s\\hpc_stack_database.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
 #else
-            sprintf(cmdline,"%s decrypt %s/hpc_stack_database.tf.tmp %s/hpc_stack_database.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
-    #endif
+        sprintf(cmdline,"%s decrypt %s/hpc_stack_database.tf.tmp %s/hpc_stack_database.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
+#endif
         system(cmdline);
     }
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_natgw.tf.tmp",stackdir);
+    sprintf(filename_temp,"%s\\hpc_stack_natgw.tf.tmp",stackdir);
 #else
-        sprintf(filename_temp,"%s/hpc_stack_natgw.tf.tmp",stackdir);
+    sprintf(filename_temp,"%s/hpc_stack_natgw.tf.tmp",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
 #ifdef _WIN32
-            sprintf(cmdline,"%s decrypt %s\\hpc_stack_natgw.tf.tmp %s\\hpc_stack_natgw.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        sprintf(cmdline,"%s decrypt %s\\hpc_stack_natgw.tf.tmp %s\\hpc_stack_natgw.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
 #else
-            sprintf(cmdline,"%s decrypt %s/hpc_stack_natgw.tf.tmp %s/hpc_stack_natgw.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
-    #endif
+        sprintf(cmdline,"%s decrypt %s/hpc_stack_natgw.tf.tmp %s/hpc_stack_natgw.tf %s",now_crypto_exec,stackdir,stackdir,md5sum);
+#endif
         system(cmdline);
     }
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\currentstate",stackdir);
+    sprintf(filename_temp,"%s\\currentstate",stackdir);
 #else
-        sprintf(filename_temp,"%s/currentstate",stackdir);
+    sprintf(filename_temp,"%s/currentstate",stackdir);
 #endif
     compute_node_num=get_compute_node_num(filename_temp,"all");
     for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
-            sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf.tmp",stackdir,i);
+        sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf.tmp",stackdir,i);
 #else
-            sprintf(filename_temp,"%s/hpc_stack_compute%d.tf.tmp",stackdir,i);
-    #endif
+        sprintf(filename_temp,"%s/hpc_stack_compute%d.tf.tmp",stackdir,i);
+#endif
         if(file_exist_or_not(filename_temp)==0){
 #ifdef _WIN32
-                sprintf(cmdline,"%s decrypt %s\\hpc_stack_compute%d.tf.tmp %s\\hpc_stack_compute%d.tf %s",now_crypto_exec,stackdir,i,stackdir,i,md5sum);
+            sprintf(cmdline,"%s decrypt %s\\hpc_stack_compute%d.tf.tmp %s\\hpc_stack_compute%d.tf %s",now_crypto_exec,stackdir,i,stackdir,i,md5sum);
 #else
-                sprintf(cmdline,"%s decrypt %s/hpc_stack_compute%d.tf.tmp %s/hpc_stack_compute%d.tf %s",now_crypto_exec,stackdir,i,stackdir,i,md5sum);
+            sprintf(cmdline,"%s decrypt %s/hpc_stack_compute%d.tf.tmp %s/hpc_stack_compute%d.tf %s",now_crypto_exec,stackdir,i,stackdir,i,md5sum);
 #endif
             system(cmdline);
         }
@@ -2278,143 +2280,143 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     get_crypto_key(crypto_key_filename,md5sum);
 
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);
+    sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);
 #else
-        sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
+    sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
 #ifdef _WIN32
-            sprintf(cmdline,"%s encrypt %s\\hpc_stack_base.tf %s\\hpc_stack_base.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"del /f /q %s",filename_temp);
-            system(cmdline);
+        sprintf(cmdline,"%s encrypt %s\\hpc_stack_base.tf %s\\hpc_stack_base.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"del /f /q %s",filename_temp);
+        system(cmdline);
 #else
-            sprintf(cmdline,"%s encrypt %s/hpc_stack_base.tf %s/hpc_stack_base.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"rm -rf %s",filename_temp);
-            system(cmdline);
-    #endif
+        sprintf(cmdline,"%s encrypt %s/hpc_stack_base.tf %s/hpc_stack_base.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"rm -rf %s",filename_temp);
+        system(cmdline);
+#endif
     }
 
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\terraform.tfstate",stackdir);
+    sprintf(filename_temp,"%s\\terraform.tfstate",stackdir);
 #else
-        sprintf(filename_temp,"%s/terraform.tfstate",stackdir);
+    sprintf(filename_temp,"%s/terraform.tfstate",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
 #ifdef _WIN32
-            sprintf(cmdline,"%s encrypt %s\\terraform.tfstate %s\\terraform.tfstate.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"del /f /q %s",filename_temp);
-            system(cmdline);
+        sprintf(cmdline,"%s encrypt %s\\terraform.tfstate %s\\terraform.tfstate.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"del /f /q %s",filename_temp);
+        system(cmdline);
 #else
-            sprintf(cmdline,"%s encrypt %s/terraform.tfstate %s/terraform.tfstate.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"rm -rf %s",filename_temp);
-            system(cmdline);
-    #endif
+        sprintf(cmdline,"%s encrypt %s/terraform.tfstate %s/terraform.tfstate.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"rm -rf %s",filename_temp);
+        system(cmdline);
+#endif
     }
 
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\terraform.tfstate.backup",stackdir);
+    sprintf(filename_temp,"%s\\terraform.tfstate.backup",stackdir);
 #else
-        sprintf(filename_temp,"%s/terraform.tfstate.backup",stackdir);
+    sprintf(filename_temp,"%s/terraform.tfstate.backup",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
 #ifdef _WIN32
-            sprintf(cmdline,"%s encrypt %s\\terraform.tfstate.backup %s\\terraform.tfstate.backup.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"del /f /q %s",filename_temp);
-            system(cmdline);
+        sprintf(cmdline,"%s encrypt %s\\terraform.tfstate.backup %s\\terraform.tfstate.backup.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"del /f /q %s",filename_temp);
+        system(cmdline);
 #else
-            sprintf(cmdline,"%s encrypt %s/terraform.tfstate.backup %s/terraform.tfstate.backup.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"rm -rf %s",filename_temp);
-            system(cmdline);
-    #endif
+        sprintf(cmdline,"%s encrypt %s/terraform.tfstate.backup %s/terraform.tfstate.backup.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"rm -rf %s",filename_temp);
+        system(cmdline);
+#endif
     }
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_master.tf",stackdir);
+    sprintf(filename_temp,"%s\\hpc_stack_master.tf",stackdir);
 #else
-        sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
+    sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
 #ifdef _WIN32
-            sprintf(cmdline,"%s encrypt %s\\hpc_stack_master.tf %s\\hpc_stack_master.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"del /f /q %s",filename_temp);
-            system(cmdline);
+        sprintf(cmdline,"%s encrypt %s\\hpc_stack_master.tf %s\\hpc_stack_master.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"del /f /q %s",filename_temp);
+        system(cmdline);
 #else
-            sprintf(cmdline,"%s encrypt %s/hpc_stack_master.tf %s/hpc_stack_master.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"rm -rf %s",filename_temp);
-            system(cmdline);
-    #endif
-    }
-
-#ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_database.tf",stackdir);
-#else
-        sprintf(filename_temp,"%s/hpc_stack_database.tf",stackdir);
+        sprintf(cmdline,"%s encrypt %s/hpc_stack_master.tf %s/hpc_stack_master.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"rm -rf %s",filename_temp);
+        system(cmdline);
 #endif
-    if(file_exist_or_not(filename_temp)==0){
-#ifdef _WIN32
-            sprintf(cmdline,"%s encrypt %s\\hpc_stack_database.tf %s\\hpc_stack_database.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"del /f /q %s",filename_temp);
-            system(cmdline);
-#else
-            sprintf(cmdline,"%s encrypt %s/hpc_stack_database.tf %s/hpc_stack_database.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"rm -rf %s",filename_temp);
-            system(cmdline);
-    #endif
     }
 
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_natgw.tf",stackdir);
+    sprintf(filename_temp,"%s\\hpc_stack_database.tf",stackdir);
 #else
-        sprintf(filename_temp,"%s/hpc_stack_natgw.tf",stackdir);
+    sprintf(filename_temp,"%s/hpc_stack_database.tf",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
 #ifdef _WIN32
-            sprintf(cmdline,"%s encrypt %s\\hpc_stack_natgw.tf %s\\hpc_stack_natgw.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"del /f /q %s",filename_temp);
-            system(cmdline);
+        sprintf(cmdline,"%s encrypt %s\\hpc_stack_database.tf %s\\hpc_stack_database.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"del /f /q %s",filename_temp);
+        system(cmdline);
 #else
-            sprintf(cmdline,"%s encrypt %s/hpc_stack_natgw.tf %s/hpc_stack_natgw.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
-            system(cmdline);
-            sprintf(cmdline,"rm -rf %s",filename_temp);
-            system(cmdline);
-    #endif
+        sprintf(cmdline,"%s encrypt %s/hpc_stack_database.tf %s/hpc_stack_database.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"rm -rf %s",filename_temp);
+        system(cmdline);
+#endif
+    }
+
+#ifdef _WIN32
+    sprintf(filename_temp,"%s\\hpc_stack_natgw.tf",stackdir);
+#else
+    sprintf(filename_temp,"%s/hpc_stack_natgw.tf",stackdir);
+#endif
+    if(file_exist_or_not(filename_temp)==0){
+#ifdef _WIN32
+        sprintf(cmdline,"%s encrypt %s\\hpc_stack_natgw.tf %s\\hpc_stack_natgw.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"del /f /q %s",filename_temp);
+        system(cmdline);
+#else
+        sprintf(cmdline,"%s encrypt %s/hpc_stack_natgw.tf %s/hpc_stack_natgw.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
+        system(cmdline);
+        sprintf(cmdline,"rm -rf %s",filename_temp);
+        system(cmdline);
+#endif
     }
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\currentstate",stackdir);
+    sprintf(filename_temp,"%s\\currentstate",stackdir);
 #else
-        sprintf(filename_temp,"%s/currentstate",stackdir);
+    sprintf(filename_temp,"%s/currentstate",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
         compute_node_num=get_compute_node_num(filename_temp,"all");
     }
     for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
-            sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-            if(file_exist_or_not(filename_temp)==0){
-                sprintf(cmdline,"%s encrypt %s\\hpc_stack_compute%d.tf %s\\hpc_stack_compute%d.tf.tmp %s",now_crypto_exec,stackdir,i,stackdir,i,md5sum);
-                system(cmdline);
-                sprintf(cmdline,"del /f /q %s",filename_temp);
-                system(cmdline);
-            }
+        sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
+        if(file_exist_or_not(filename_temp)==0){
+            sprintf(cmdline,"%s encrypt %s\\hpc_stack_compute%d.tf %s\\hpc_stack_compute%d.tf.tmp %s",now_crypto_exec,stackdir,i,stackdir,i,md5sum);
+            system(cmdline);
+            sprintf(cmdline,"del /f /q %s",filename_temp);
+            system(cmdline);
+        }
 #else
-            sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-            if(file_exist_or_not(filename_temp)==0){
-                sprintf(cmdline,"%s encrypt %s/hpc_stack_compute%d.tf %s/hpc_stack_compute%d.tf.tmp %s",now_crypto_exec,stackdir,i,stackdir,i,md5sum);
-                system(cmdline);
-                sprintf(cmdline,"rm -rf %s",filename_temp);
-                system(cmdline);
-            }
-    #endif
+        sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
+        if(file_exist_or_not(filename_temp)==0){
+            sprintf(cmdline,"%s encrypt %s/hpc_stack_compute%d.tf %s/hpc_stack_compute%d.tf.tmp %s",now_crypto_exec,stackdir,i,stackdir,i,md5sum);
+            system(cmdline);
+            sprintf(cmdline,"rm -rf %s",filename_temp);
+            system(cmdline);
+        }
+#endif
     }
     return 0;
 }
@@ -2440,9 +2442,9 @@ int getstate(char* workdir, char* crypto_filename){
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
 #ifdef _WIN32
-        sprintf(filename_tfstate,"%s\\terraform.tfstate",stackdir);
+    sprintf(filename_tfstate,"%s\\terraform.tfstate",stackdir);
 #else
-        sprintf(filename_tfstate,"%s/terraform.tfstate",stackdir);
+    sprintf(filename_tfstate,"%s/terraform.tfstate",stackdir);
 #endif
     file_p_tfstate=fopen(filename_tfstate,"r");
     if(file_p_tfstate==NULL){
@@ -2612,7 +2614,7 @@ int generate_sshkey(char* sshkey_folder, char* pubkey){
             sprintf(cmdline,"ssh-keygen -t rsa -N \"\" -f %s/now-cluster-login -q",sshkey_folder);
             system(cmdline);
             sprintf(filename_temp,"%s/now-cluster-login.pub",sshkey_folder);
-    #endif
+#endif
         file_p=fopen(filename_temp,"r");
         fgetline(file_p,pubkey);
         fclose(file_p);
@@ -2637,9 +2639,9 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     create_and_get_stackdir(workdir,stackdir);
 
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\currentstate",stackdir);
+    sprintf(filename_temp,"%s\\currentstate",stackdir);
 #else
-        sprintf(filename_temp,"%s/currentstate",stackdir);
+    sprintf(filename_temp,"%s/currentstate",stackdir);
 #endif
     file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
@@ -2649,9 +2651,9 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     fclose(file_p);
     
 #ifdef _WIN32
-        sprintf(private_key,"%s\\now-cluster-login",sshkey_folder);
+    sprintf(private_key,"%s\\now-cluster-login",sshkey_folder);
 #else
-        sprintf(private_key,"%s/now-cluster-login",sshkey_folder);
+    sprintf(private_key,"%s/now-cluster-login",sshkey_folder);
 #endif
 
     if(strcmp(exec_type,"clear")==0){
@@ -2695,18 +2697,18 @@ int graph(char* workdir, char* crypto_keyfile){
     int i,node_num=0;
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
-        sprintf(currentstate,"%s\\currentstate",stackdir);
+    sprintf(currentstate,"%s\\currentstate",stackdir);
 #else
-        sprintf(currentstate,"%s/currentstate",stackdir);
+    sprintf(currentstate,"%s/currentstate",stackdir);
 #endif
     FILE* file_p=fopen(currentstate,"r");
     if(file_p==NULL){
         return 1;
     }
 #ifdef _WIN32
-        sprintf(compute_template,"%s\\compute_template",stackdir);
+    sprintf(compute_template,"%s\\compute_template",stackdir);
 #else
-        sprintf(compute_template,"%s/compute_template",stackdir);
+    sprintf(compute_template,"%s/compute_template",stackdir);
 #endif
     FILE* file_p_2=fopen(compute_template,"r");
     if(file_p_2==NULL){
@@ -2761,23 +2763,23 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
     create_and_get_vaultdir(workdir,vaultdir);
 
 #ifdef _WIN32
-        sprintf(cmdline,"%s decrypt %s\\_CLUSTER_SUMMARY.txt %s\\_CLUSTER_SUMMARY.txt.tmp %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
+    sprintf(cmdline,"%s decrypt %s\\_CLUSTER_SUMMARY.txt %s\\_CLUSTER_SUMMARY.txt.tmp %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
 #else
-        sprintf(cmdline,"%s decrypt %s/_CLUSTER_SUMMARY.txt %s/_CLUSTER_SUMMARY.txt.tmp %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
+    sprintf(cmdline,"%s decrypt %s/_CLUSTER_SUMMARY.txt %s/_CLUSTER_SUMMARY.txt.tmp %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
 #endif
     system(cmdline);
 
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\_CLUSTER_SUMMARY.txt.tmp",vaultdir);
+    sprintf(filename_temp,"%s\\_CLUSTER_SUMMARY.txt.tmp",vaultdir);
 #else
-        sprintf(filename_temp,"%s/_CLUSTER_SUMMARY.txt.tmp",vaultdir);
+    sprintf(filename_temp,"%s/_CLUSTER_SUMMARY.txt.tmp",vaultdir);
 #endif
     find_and_get(filename_temp,"Master","Node","IP:",1,"Master","Node","IP:",' ',4,master_address_prev);
 
 #ifdef _WIN32
-        sprintf(filename_temp,"%s\\currentstate",stackdir);
+    sprintf(filename_temp,"%s\\currentstate",stackdir);
 #else
-        sprintf(filename_temp,"%s/currentstate",stackdir);
+    sprintf(filename_temp,"%s/currentstate",stackdir);
 #endif
     file_p=fopen(filename_temp,"r");
     fgetline(file_p,master_address);
@@ -2819,9 +2821,9 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
 void archive_log(char* stackdir){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-        sprintf(cmdline,"type %s\\tf_prep.log >> %s\\tf_prep_archive.log 2>nul",stackdir,stackdir);
+    sprintf(cmdline,"type %s\\tf_prep.log >> %s\\tf_prep_archive.log 2>nul",stackdir,stackdir);
 #else
-        sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log 2>/dev/null",stackdir,stackdir);
+    sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log 2>/dev/null",stackdir,stackdir);
 #endif
     system(cmdline);
 }
@@ -2832,27 +2834,27 @@ int wait_for_complete(char* workdir, char* option){
     char errorlog[FILENAME_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
-        sprintf(errorlog,"%s\\log\\now_cluster.log",workdir);
+    sprintf(errorlog,"%s\\log\\now_cluster.log",workdir);
 #else
-        sprintf(errorlog,"%s/log/now_cluster.log",workdir);
+    sprintf(errorlog,"%s/log/now_cluster.log",workdir);
 #endif
     int i=0;
     int total_minutes=0;
     char* annimation="\\|/-";
     if(strcmp(option,"init")==0){
 #ifdef _WIN32
-            sprintf(cmdline,"type %s\\tf_prep.log | findstr successfully | findstr initialized! > nul 2>&1",stackdir);
+        sprintf(cmdline,"type %s\\tf_prep.log | findstr successfully | findstr initialized! > nul 2>&1",stackdir);
 #else
-            sprintf(cmdline,"cat %s/tf_prep.log | grep \"successfully initialized!\" >> /dev/null 2>&1",stackdir);
-    #endif
+        sprintf(cmdline,"cat %s/tf_prep.log | grep \"successfully initialized!\" >> /dev/null 2>&1",stackdir);
+#endif
         total_minutes=1;
     }
     else{
 #ifdef _WIN32
-            sprintf(cmdline,"type %s\\tf_prep.log | findstr complete! > nul 2>&1",stackdir);
+        sprintf(cmdline,"type %s\\tf_prep.log | findstr complete! > nul 2>&1",stackdir);
 #else
-            sprintf(cmdline,"cat %s/tf_prep.log | grep \"complete!\" >> /dev/null 2>&1",stackdir);
-    #endif
+        sprintf(cmdline,"cat %s/tf_prep.log | grep \"complete!\" >> /dev/null 2>&1",stackdir);
+#endif
         total_minutes=3;
     }
 
@@ -2949,15 +2951,15 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
 #ifdef _WIN32
-        sprintf(logdir,"%s\\log\\",workdir);
-        sprintf(confdir,"%s\\conf\\",workdir);
-        sprintf(currentstate,"%s\\currentstate",stackdir);
-        sprintf(compute_template,"%s\\compute_template",stackdir);
+    sprintf(logdir,"%s\\log\\",workdir);
+    sprintf(confdir,"%s\\conf\\",workdir);
+    sprintf(currentstate,"%s\\currentstate",stackdir);
+    sprintf(compute_template,"%s\\compute_template",stackdir);
 #else
-        sprintf(logdir,"%s/log/",workdir);
-        sprintf(confdir,"%s/conf/",workdir);
-        sprintf(currentstate,"%s/currentstate",stackdir);
-        sprintf(compute_template,"%s/compute_template",stackdir);
+    sprintf(logdir,"%s/log/",workdir);
+    sprintf(confdir,"%s/conf/",workdir);
+    sprintf(currentstate,"%s/currentstate",stackdir);
+    sprintf(compute_template,"%s/compute_template",stackdir);
 #endif
 
     if(file_exist_or_not(currentstate)==0||file_exist_or_not(compute_template)==0){
@@ -2988,14 +2990,14 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"copy /y %s\\region_valid.tf %s\\region_valid.tf > nul 2>&1",URL_AWS_ROOT,stackdir);
 #else
         sprintf(cmdline,"/bin/cp %s/region_valid.tf %s/region_valid.tf >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
-    #endif
+#endif
     }
     else{
 #ifdef _WIN32
         sprintf(cmdline,"curl %sregion_valid.tf -o %s\\region_valid.tf -s",URL_AWS_ROOT,stackdir);
 #else
         sprintf(cmdline,"curl %sregion_valid.tf -o %s/region_valid.tf -s",URL_AWS_ROOT,stackdir);
-    #endif
+#endif
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -3589,7 +3591,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"cd %s\\ && echo yes | start /b %s destroy > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
 #else
         sprintf(cmdline,"cd %s && echo yes | %s destroy > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-    #endif
+#endif
         system(cmdline);
         wait_for_complete(workdir,"destroy");
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -5323,7 +5325,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(filename_temp,"%s\\ossutilconfig",stackdir);
 #else
         sprintf(filename_temp,"%s/ossutilconfig",stackdir);
-    #endif
+#endif
         global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
         global_replace(filename_temp,"BLANK_SECRET_KEY",bucket_sk);
         global_replace(filename_temp,"DEFAULT_REGION",region_id);
@@ -5335,7 +5337,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
 #else
         printf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
-    #endif
+#endif
         system(cmdline);
     }
 
