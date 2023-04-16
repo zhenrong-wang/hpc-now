@@ -15,15 +15,17 @@
 #ifdef _WIN32
 #include <malloc.h>
 #define LINE_LENGTH 1024
+#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_windows_amd64.exe"
 #elif __linux__
 #include <malloc.h>
 #include <sys/time.h>
+#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_linux_amd64"
 #elif __APPLE__
 #include <sys/time.h>
+#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
 #endif
 
 #define CMDLINE_LENGTH 2048
-#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"
 #define PASSWORD_STRING_LENGTH 20
 #define PASSWORD_LENGTH 19
@@ -624,24 +626,8 @@ int update_services(int loc_flag, char* location){
 int valid_loc_format_or_not(char* loc_string){
     int length;
     length=strlen(loc_string);
-    if(length<3){
+    if(length==0){
         return -1;
-    }
-#ifdef _WIN32
-    if(length<8){
-        if(*(loc_string+0)<'A'||*(loc_string+0)>'z'){
-            return -1;
-        }
-        if(*(loc_string+0)>'Z'&&*(loc_string+0)<'a'){
-            return -1;
-        }
-        if(*(loc_string+1)!=':'){
-            return -1;
-        }
-        if(*(loc_string+2)!='\\'){
-            return -1;
-        }
-        return 1;
     }
     if(*(loc_string+0)=='h'&&*(loc_string+1)=='t'&&*(loc_string+2)=='t'&&*(loc_string+3)=='p'&&*(loc_string+4)==':'&&*(loc_string+5)=='/'&&*(loc_string+6)=='/'){
         return 0;
@@ -649,36 +635,7 @@ int valid_loc_format_or_not(char* loc_string){
     if(*(loc_string+0)=='h'&&*(loc_string+1)=='t'&&*(loc_string+2)=='t'&&*(loc_string+3)=='p'&&*(loc_string+4)=='s'&&*(loc_string+5)==':'&&*(loc_string+6)=='/'&&*(loc_string+7)=='/'){
         return 0;
     }
-    if(*(loc_string+0)<'A'||*(loc_string+0)>'z'){
-        return -1;
-    }
-    if(*(loc_string+0)>'Z'&&*(loc_string+0)<'a'){
-        return -1;
-    }
-    if(*(loc_string+1)!=':'){
-        return -1;
-    }
-    if(*(loc_string+2)!='\\'){
-        return -1;
-    }
     return 1;
-#else
-    if(length<8){
-        if(*(loc_string+0)!='/'){
-            return -1;
-        }
-    }
-    if(*(loc_string+0)!='/'){
-        if(*(loc_string+0)=='h'&&*(loc_string+1)=='t'&&*(loc_string+2)=='t'&&*(loc_string+3)=='p'&&*(loc_string+4)==':'&&*(loc_string+5)=='/'&&*(loc_string+6)=='/'){
-            return 0;
-        }
-        if(*(loc_string+0)=='h'&&*(loc_string+1)=='t'&&*(loc_string+2)=='t'&&*(loc_string+3)=='p'&&*(loc_string+4)=='s'&&*(loc_string+5)==':'&&*(loc_string+6)=='/'&&*(loc_string+7)=='/'){
-            return 0;
-        }
-        return -1;
-    }
-    return 1;
-#endif
 }
 
 int main(int argc, char* argv[]){

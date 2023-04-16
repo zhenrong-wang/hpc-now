@@ -4621,7 +4621,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char filename_temp[FILENAME_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-//    char* url_alicloud_root=URL_ALICLOUD_ROOT;
+//    char* URL_ALICLOUD_ROOT=URL_ALICLOUD_ROOT;
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
@@ -4735,70 +4735,70 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(cmdline,"del /f /q %s\\hpc_stack* > nul 2>&1",stackdir);
     system(cmdline);
     if(TEMPLATE_LOC_FLAG_ALI==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stackv2.base %s\\hpc_stack.base > nul 2>&1",url_alicloud_root,stackdir);
+        sprintf(cmdline,"copy /y %s\\hpc_stackv2.base %s\\hpc_stack.base > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.base -o %s\\hpc_stack.base -s",url_alicloud_root,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.base -o %s\\hpc_stack.base -s",URL_ALICLOUD_ROOT,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
     if(TEMPLATE_LOC_FLAG_ALI==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stackv2.master %s\\hpc_stack.master > nul 2>&1",url_alicloud_root,stackdir);
+        sprintf(cmdline,"copy /y %s\\hpc_stackv2.master %s\\hpc_stack.master > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.master -o %s\\hpc_stack.master -s",url_alicloud_root,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.master -o %s\\hpc_stack.master -s",URL_ALICLOUD_ROOT,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
     if(TEMPLATE_LOC_FLAG_ALI==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stackv2.compute %s\\hpc_stack.compute > nul 2>&1",url_alicloud_root,stackdir);
+        sprintf(cmdline,"copy /y %s\\hpc_stackv2.compute %s\\hpc_stack.compute > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.compute -o %s\\hpc_stack.compute -s",url_alicloud_root,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.compute -o %s\\hpc_stack.compute -s",URL_ALICLOUD_ROOT,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
     if(TEMPLATE_LOC_FLAG_ALI==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stackv2.database %s\\hpc_stack.database > nul 2>&1",url_alicloud_root,stackdir);
+        sprintf(cmdline,"copy /y %s\\hpc_stackv2.database %s\\hpc_stack.database > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.database -o %s\\hpc_stack.database -s",url_alicloud_root,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.database -o %s\\hpc_stack.database -s",URL_ALICLOUD_ROOT,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
     if(TEMPLATE_LOC_FLAG_ALI==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stackv2.natgw %s\\hpc_stack.natgw > nul 2>&1",url_alicloud_root,stackdir);
+        sprintf(cmdline,"copy /y %s\\hpc_stackv2.natgw %s\\hpc_stack.natgw > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.natgw -o %s\\hpc_stack.natgw -s",url_alicloud_root,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.natgw -o %s\\hpc_stack.natgw -s",URL_ALICLOUD_ROOT,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
     if(TEMPLATE_LOC_FLAG_ALI==1){
-        sprintf(cmdline,"copy /y %s\\NAS_Zones_ALI.txt %s\\NAS_Zones_ALI.txt > nul 2>&1",url_alicloud_root,stackdir);
+        sprintf(cmdline,"copy /y %s\\NAS_Zones_ALI.txt %s\\NAS_Zones_ALI.txt > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sNAS_Zones_ALI.txt -o %s\\NAS_Zones_ALI.txt -s",url_alicloud_root,stackdir);
+        sprintf(cmdline,"curl %sNAS_Zones_ALI.txt -o %s\\NAS_Zones_ALI.txt -s",URL_ALICLOUD_ROOT,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
     if(TEMPLATE_LOC_FLAG_ALI==1){
-        sprintf(cmdline,"copy /y %s\\reconf.list %s\\reconf.list > nul 2>&1",url_alicloud_root,stackdir);
+        sprintf(cmdline,"copy /y %s\\reconf.list %s\\reconf.list > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sreconf.list -o %s\\reconf.list -s",url_alicloud_root,stackdir);
+        sprintf(cmdline,"curl %sreconf.list -o %s\\reconf.list -s",URL_ALICLOUD_ROOT,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -5262,10 +5262,10 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
 #ifdef _WIN32
     sprintf(private_key_file,"%s\\now-cluster-login",sshkey_folder);
     if(TEMPLATE_LOC_FLAG_ALI==1){
-        sprintf(cmdline,"copy /y %s\\.ossutilconfig %s\\ossutilconfig > nul 2>&1",url_alicloud_root,stackdir);
+        sprintf(cmdline,"copy /y %s\\.ossutilconfig %s\\ossutilconfig > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %s.ossutilconfig -s -o %s\\ossutilconfig",url_alicloud_root,stackdir);
+        sprintf(cmdline,"curl %s.ossutilconfig -s -o %s\\ossutilconfig",URL_ALICLOUD_ROOT,stackdir);
     }
 #else
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
@@ -5721,8 +5721,6 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
     char md5sum[33]="";
     char master_address[32]="";
     char bucket_address[32]="";
-    char unique_cluster_id[256]="";
-    FILE* file_p=NULL;
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     int i;
