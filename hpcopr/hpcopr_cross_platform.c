@@ -3634,8 +3634,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     file_p=fopen(currentstate,"r");
     fgetline(file_p,master_address);
     fclose(file_p);
-
+#ifdef _WIN32
+    sprintf(private_key_file,"%s\\now-cluster-login",sshkey_folder);
+#else
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
+#endif
     if(strcmp(region_flag,"cn_regions")==0){
         if(TEMPLATE_LOC_FLAG_AWS==1){
 #ifdef _WIN32
