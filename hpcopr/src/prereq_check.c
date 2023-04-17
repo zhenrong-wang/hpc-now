@@ -16,6 +16,123 @@
 #include "../include/now_functions.h" 
 #endif
 
+int envcheck(char* pwd){
+    char current_dir[DIR_LENGTH]="";
+    char string_temp[DIR_LENGTH]="";
+    int i;
+    FILE* file_p=NULL;
+#ifdef _WIN32
+    if(system("echo \%cd\% > .currentdir.tmp")!=0){
+#else
+    if(system("pwd > /tmp/.currentdir.tmp")!=0){
+#endif
+        strcpy(pwd,"");
+        return 1;
+    }
+
+#ifdef _WIN32
+    file_p=fopen(".currentdir.tmp","r");
+#else
+    file_p=fopen("/tmp/.currentdir.tmp","r");
+#endif
+    if(file_p==NULL){
+        strcpy(pwd,"");
+        return 1;
+    }
+    fscanf(file_p,"%s",current_dir);
+    fclose(file_p);
+#ifdef _WIN32
+    system("del /f /q .currentdir.tmp");
+    if(strlen(current_dir)>25){
+        print_not_in_a_workdir(current_dir);
+        strcpy(pwd,"");
+        return 1;
+    }
+    for(i=0;i<23;i++){
+        *(string_temp+i)=*(current_dir+i);
+    }
+    if(strcmp(string_temp,"C:\\hpc-now\\now-cluster-")!=0&&strcmp(string_temp,"c:\\hpc-now\\now-cluster-")!=0){
+        print_not_in_a_workdir(current_dir);
+        strcpy(pwd,"");
+        return 1;
+    }
+    if(*(current_dir+23)>'9'||*(current_dir+23)<'1'){
+        print_not_in_a_workdir(current_dir);
+        strcpy(pwd,"");
+        return 1;
+    }
+    if(strlen(current_dir)==25){
+        if(*(current_dir+24)>'9'||*(current_dir+24)<'0'){
+            print_not_in_a_workdir(current_dir);
+            strcpy(pwd,"");
+            return 1;
+        }
+        strcpy(pwd,current_dir);
+        return 0;
+    }
+#elif __APPLE__
+    system("rm -rf /tmp/.currentdir.tmp");
+    if(strlen(current_dir)>29){
+        print_not_in_a_workdir(current_dir);
+        strcpy(pwd,"");
+        return 1;
+    }
+    for(i=0;i<27;i++){
+        *(string_temp+i)=*(current_dir+i);
+    }
+    if(strcmp(string_temp,"/Users/hpc-now/now-cluster-")!=0){
+        print_not_in_a_workdir(current_dir);
+        strcpy(pwd,"");
+        return 1;
+    }
+    if(*(current_dir+27)>'9'||*(current_dir+27)<'1'){
+        print_not_in_a_workdir(current_dir);
+        strcpy(pwd,"");
+        return 1;
+    }
+    if(strlen(current_dir)==29){
+        if(*(current_dir+28)>'9'||*(current_dir+28)<'0'){
+            print_not_in_a_workdir(current_dir);
+            strcpy(pwd,"");
+            return 1;
+        }
+        strcpy(pwd,current_dir);
+        return 0;
+    }
+#elif __linux__
+    system("rm -rf /tmp/.currentdir.tmp");
+    if(strlen(current_dir)>28){
+        print_not_in_a_workdir(current_dir);
+        strcpy(pwd,"");
+        return 1;
+    }
+    for(i=0;i<26;i++){
+        *(string_temp+i)=*(current_dir+i);
+    }
+    if(strcmp(string_temp,"/home/hpc-now/now-cluster-")!=0){
+        print_not_in_a_workdir(current_dir);
+        strcpy(pwd,"");
+        return 1;
+    }
+    if(*(current_dir+26)>'9'||*(current_dir+26)<'1'){
+        print_not_in_a_workdir(current_dir);
+        strcpy(pwd,"");
+        return 1;
+    }
+    if(strlen(current_dir)==28){
+        if(*(current_dir+27)>'9'||*(current_dir+27)<'0'){
+            print_not_in_a_workdir(current_dir);
+            strcpy(pwd,"");
+            return 1;
+        }
+        strcpy(pwd,current_dir);
+        return 0;
+    }
+#endif
+    strcpy(pwd,current_dir);
+    return 0;
+}
+
 int check_internet(void){
 #ifdef _WIN32
     if(system("ping -n 2 www.baidu.com > nul 2>&1")!=0){
