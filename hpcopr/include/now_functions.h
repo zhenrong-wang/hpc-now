@@ -74,7 +74,7 @@ int cluster_asleep_or_not(char* workdir);
 
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
 
-int cluster_destroy(char* workdir, char* crypto_keyfile);
+int cluster_destroy(char* workdir, char* crypto_keyfile,int forceflag);
 int delete_compute_node(char* workdir, char* crypto_keyfile, char* param);
 int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_string);
 int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param);

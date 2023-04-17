@@ -88,6 +88,7 @@ int main(int argc, char* argv[]){
 
     if(check_internet()!=0){
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
+        system_cleanup();
         return -3;
     }
 
@@ -122,6 +123,7 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"configloc")==0){
         run_flag=configure_locations();
         print_tail();
+        system_cleanup();
         return run_flag;
     }
 
@@ -130,12 +132,14 @@ int main(int argc, char* argv[]){
         printf("[ -INFO- ] The locations have been reset to the default ones.\n");
         show_locations();
         print_tail();
+        system_cleanup();
         return run_flag;
     }
 
     if(strcmp(argv[1],"showloc")==0){
         run_flag=show_locations();
         print_tail();
+        system_cleanup();
         return run_flag;
     }
 
@@ -148,6 +152,7 @@ int main(int argc, char* argv[]){
     if(run_flag==3){
         write_log("NULL",operation_log,"PREREQ_FAILED",-3);
         print_tail();
+        system_cleanup();
         return -3;
     }
     else if(run_flag!=0){
@@ -162,26 +167,31 @@ int main(int argc, char* argv[]){
             printf("|              keypair: Rotating a new keypair for an existing cluster.\n");
             printf("[ -INFO- ] Exit now.\n");
             print_tail();
+            system_cleanup();
             return -1;
         }
         if(strcmp(argv[2],"workdir")==0){
             run_flag=create_new_workdir(crypto_keyfile);
             write_log("NULL",operation_log,"new workdir",run_flag);
+            system_cleanup();
             return run_flag;
         }
         else if(strcmp(argv[2],"keypair")==0){
             if(envcheck(pwd)!=0){
                 write_log(pwd,operation_log,"new keypair",3);
+                system_cleanup();
                 return -1;
             }
             run_flag=rotate_new_keypair(pwd,crypto_keyfile);
             if(run_flag!=0){
                 write_log(pwd,operation_log,"new keypair",-1);
+                system_cleanup();
                 print_tail();
                 return -1;
             }
             write_log(pwd,operation_log,"new keypair",0);
             print_tail();
+            system_cleanup();
             return 0;
         }
         else{
@@ -197,17 +207,20 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"usage")==0){
         run_flag=get_usage(usage_log);
         write_log("NULL",operation_log,argv[1],run_flag);
+        system_cleanup();
         return run_flag;
     }
 
     if(strcmp(argv[1],"syslog")==0){
         run_flag=get_syslog(operation_log);
         write_log("NULL",operation_log,argv[1],run_flag);
+        system_cleanup();
         return run_flag;
     }
 
     if(envcheck(pwd)!=0){
         write_log(pwd,operation_log,"NONE",3);
+        system_cleanup();
         return 3;
     }
     create_and_get_vaultdir(pwd,vaultdir);
@@ -218,6 +231,7 @@ int main(int argc, char* argv[]){
         printf("|          Exit now.\n");
         print_tail();
         write_log(pwd,operation_log,"KEY_CHECK_FAILED",5);
+        system_cleanup();
         return 5;
     }
 
@@ -226,6 +240,7 @@ int main(int argc, char* argv[]){
         printf("|          of that process. Currently no extra operation is permitted. Exit now.\n");
         print_tail();
         write_log(pwd,operation_log,"PROCESS_LOCKED",7);
+        system_cleanup();
         return 7;
     }
 
@@ -237,12 +252,14 @@ int main(int argc, char* argv[]){
             printf("|          the 'destroy' command first and retry. Exit now.\n");
             print_tail();
             write_log(pwd,operation_log,"CLUSTER_NOT_EMPTY",23);
+            system_cleanup();
             return 23;
         }
         else if(get_default_conf(pwd,crypto_keyfile)==1){
             printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.\n");
             print_tail();
             write_log(pwd,operation_log,"INTERNAL_ERROR",31);
+            system_cleanup();
             return 31;
         }
         else{
@@ -251,6 +268,7 @@ int main(int argc, char* argv[]){
             printf("|          HPC cluster. Exit now.\n");
             print_tail();
             write_log(pwd,operation_log,argv[1],0);
+            system_cleanup();
             return 0;
         }
     }
@@ -259,16 +277,19 @@ int main(int argc, char* argv[]){
             if(strcmp(cloud_flag,"CLOUD_C")==0){
                 run_flag=aws_cluster_init("",pwd,crypto_keyfile);
                 write_log(pwd,operation_log,argv[1],run_flag);
+                system_cleanup();
                 return run_flag;
             }
             else if(strcmp(cloud_flag,"CLOUD_B")==0){
                 run_flag=qcloud_cluster_init("",pwd,crypto_keyfile);
                 write_log(pwd,operation_log,argv[1],run_flag);
+                system_cleanup();
                 return run_flag;
             }
             else if(strcmp(cloud_flag,"CLOUD_A")==0){
                 run_flag=alicloud_cluster_init("",pwd,crypto_keyfile);
                 write_log(pwd,operation_log,argv[1],run_flag);
+                system_cleanup();
                 return run_flag;
             }
         }
@@ -277,21 +298,25 @@ int main(int argc, char* argv[]){
                 run_flag=aws_cluster_init(argv[2],pwd,crypto_keyfile);
                 sprintf(string_temp,"%s %s",argv[1],argv[2]);
                 write_log(pwd,operation_log,string_temp,run_flag);
+                system_cleanup();
                 return run_flag;
             }
             else if(strcmp(cloud_flag,"CLOUD_B")==0){
                 run_flag=qcloud_cluster_init(argv[2],pwd,crypto_keyfile);
                 sprintf(string_temp,"%s %s",argv[1],argv[2]);
                 write_log(pwd,operation_log,string_temp,run_flag);
+                system_cleanup();
                 return run_flag;
             }
             else if(strcmp(cloud_flag,"CLOUD_A")==0){
                 run_flag=alicloud_cluster_init(argv[2],pwd,crypto_keyfile);
                 sprintf(string_temp,"%s %s",argv[1],argv[2]);
                 write_log(pwd,operation_log,string_temp,run_flag);
+                system_cleanup();
                 return run_flag;
             }
         }
+        system_cleanup();
         return 0;
     }
 
@@ -300,6 +325,7 @@ int main(int argc, char* argv[]){
         print_tail();
         delete_decrypted_files(pwd,crypto_keyfile);
         write_log(pwd,operation_log,"EMPTY_CLUSTER",11);
+        system_cleanup();
         return 11;
     }
 
@@ -312,18 +338,21 @@ int main(int argc, char* argv[]){
         print_tail();
         delete_decrypted_files(pwd,crypto_keyfile);
         write_log(pwd,operation_log,argv[1],run_flag);
+        system_cleanup();
         return run_flag;
     }
 
     if(strcmp(argv[1],"vault")==0){
         run_flag=get_vault_info(pwd,crypto_keyfile);
         write_log(pwd,operation_log,argv[1],run_flag);
+        system_cleanup();
         return run_flag;
     }
 
     if(strcmp(argv[1],"sleep")==0){
         run_flag=cluster_sleep(pwd,crypto_keyfile);
         write_log(pwd,operation_log,argv[1],run_flag);
+        system_cleanup();
         return run_flag;
     }
 
@@ -332,14 +361,23 @@ int main(int argc, char* argv[]){
             run_flag=cluster_wakeup(pwd,crypto_keyfile,"minimal");
             sprintf(string_temp,"%s default",argv[1]);
             write_log(pwd,operation_log,string_temp,run_flag);
+            system_cleanup();
             return run_flag;
         }
         else{
             run_flag=cluster_wakeup(pwd,crypto_keyfile,argv[2]);
             sprintf(string_temp,"%s %s",argv[1],argv[2]);
             write_log(pwd,operation_log,string_temp,run_flag);
+            system_cleanup();
             return run_flag;
         }
+    }
+
+    if(argc==3&&strcmp(argv[1],"destroy")==0&&strcmp(argv[1],"force")==0){
+        run_flag=cluster_destroy(pwd,crypto_keyfile,0);
+        write_log(pwd,operation_log,argv[1],run_flag);
+        system_cleanup();
+        return run_flag;
     }
 
     if(cluster_asleep_or_not(pwd)==0){
@@ -349,12 +387,14 @@ int main(int argc, char* argv[]){
         printf("|          run 'wakeup all' option to turn the whole cluster on. Exit now.\n");
         print_tail();
         write_log(pwd,operation_log,argv[1],13);
+        system_cleanup();
         return 13;
     }
 
     if(strcmp(argv[1],"destroy")==0&&cluster_empty_or_not(pwd)==1){
-        run_flag=cluster_destroy(pwd,crypto_keyfile);
+        run_flag=cluster_destroy(pwd,crypto_keyfile,1);
         write_log(pwd,operation_log,argv[1],run_flag);
+        system_cleanup();
         return run_flag;
     }
     if(strcmp(argv[1],"delc")==0){
@@ -362,10 +402,12 @@ int main(int argc, char* argv[]){
             printf("[ FATAL: ] You need to specify a number or 'all' as the second parameter.\n");
             printf("|          Exit now.\n");
             write_log(pwd,operation_log,argv[1],17);
+            system_cleanup();
             return 17;
         }
         run_flag=delete_compute_node(pwd,crypto_keyfile,argv[2]);
         write_log(pwd,operation_log,argv[1],run_flag);
+        system_cleanup();
         return run_flag;
     }
 
@@ -374,10 +416,12 @@ int main(int argc, char* argv[]){
             printf("[ FATAL: ] You need to specify a number (range: 1-%d) as the second parameter.\n",MAXIMUM_ADD_NODE_NUMBER);
             printf("|          Exit now.\n");
             write_log(pwd,operation_log,argv[1],17);
+            system_cleanup();
             return 17;
         }
         run_flag=add_compute_node(pwd,crypto_keyfile,argv[2]);
         write_log(pwd,operation_log,argv[1],run_flag);
+        system_cleanup();
         return run_flag;
     }
 
@@ -386,10 +430,12 @@ int main(int argc, char* argv[]){
             printf("[ FATAL: ] You need to specify either 'all' or a number as the second parameter.\n");
             printf("|          Exit now.\n");
             write_log(pwd,operation_log,argv[1],17);
+            system_cleanup();
             return 17;
         }
         run_flag=shudown_compute_nodes(pwd,crypto_keyfile,argv[2]);
         write_log(pwd,operation_log,argv[1],run_flag);
+        system_cleanup();
         return run_flag;
     }
 
@@ -398,10 +444,12 @@ int main(int argc, char* argv[]){
             printf("[ FATAL: ] You need to specify either 'all' or a number as the second parameter.\n");
             printf("|          Exit now.\n");
             write_log(pwd,operation_log,argv[1],17);
+            system_cleanup();
             return 17;
         }
         run_flag=turn_on_compute_nodes(pwd,crypto_keyfile,argv[2]);
         write_log(pwd,operation_log,argv[1],run_flag);
+        system_cleanup();
         return run_flag;
     }
 
@@ -414,22 +462,26 @@ int main(int argc, char* argv[]){
                 print_tail();
                 system_cleanup();
                 write_log(pwd,operation_log,argv[1],-1);
+                system_cleanup();
                 return -1;
             }
             print_tail();
             write_log(pwd,operation_log,argv[1],17);
+            system_cleanup();
             return 17;
         }
         else if(argc==3){
             run_flag=reconfigure_compute_node(pwd,crypto_keyfile,argv[2],"");
             sprintf(string_temp,"%s %s",argv[1],argv[2]);
             write_log(pwd,operation_log,string_temp,run_flag);
+            system_cleanup();
             return run_flag;
         }
         else{
             run_flag=reconfigure_compute_node(pwd,crypto_keyfile,argv[2],argv[3]);
             sprintf(string_temp,"%s %s %s",argv[1],argv[2],argv[3]);
             write_log(pwd,operation_log,string_temp,run_flag);
+            system_cleanup();
             return run_flag;
         }
     }
@@ -443,18 +495,22 @@ int main(int argc, char* argv[]){
                 print_tail();
                 system_cleanup();
                 write_log(pwd,operation_log,argv[1],-1);
+                system_cleanup();
                 return -1;
             }
             print_tail();
             write_log(pwd,operation_log,argv[1],17);
+            system_cleanup();
             return 17;
         }
         else{
             run_flag=reconfigure_master_node(pwd,crypto_keyfile,argv[2]);
             sprintf(string_temp,"%s %s",argv[1],argv[2]);
             write_log(pwd,operation_log,string_temp,run_flag);
+            system_cleanup();
             return run_flag;
         }
     }
+    system_cleanup();
     return 0;
 }
