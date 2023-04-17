@@ -536,9 +536,13 @@ int update_services(int loc_flag, char* location){
         printf("[ FATAL: ] Exit now.\n");
         return 1;
     }
-
-    printf("|* YOU ARE UPDATING THE HPC-NOW SERVICES. *\n");
-    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
+    printf("|*                                C A U T I O N !                                  *\n");
+    printf("|*                                                                                 *\n");
+    printf("|*     YOU ARE UPDATING THE HPC-NOW SERVICES. THE CURRENT hpcopr BINARY WILL BE    *\n");
+    printf("|*     REPLACED. IF YOU UPDATE WITH THE hpcopr_loc= PARAMETER, PLEASE MAKE SURE    *\n");
+    printf("|*     THAT THE LOCATION POINTS TO A VALID hpcopr EXECUTABLE.                      *\n");
+    printf("|*                                                                                 *\n");
+    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     printf("[ INPUT: ]  ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
