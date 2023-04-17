@@ -91,13 +91,13 @@ int check_and_install_prerequisitions(void){
         printf("[ -INFO- ] Location configuration not found. If you are a developer, we recommend you\n");
         printf("|          to exit and run the command 'hpcopr configloc' to provide your locations\n");
         printf("|          If you are a user without self-defined locations, you can continue with\n");
-        printf("|          the default ones. For more information, please check the documentations.\n")
+        printf("|          the default ones. For more information, please check the documentations.\n");
         printf("[ -INFO- ] Would you like to use the default locations? Only 'y-e-s' is accepted as\n");
         printf("|          a confirmation. \n");
         printf("[ INPUT: ] ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
-        if(strcmp(string_temp,"y-e-s")!=0){
+        if(strcmp(doubleconfirm,"y-e-s")!=0){
             printf("[ -INFO- ] You chose to deny this operation. Exit now.\n");
             return 2;
         }

@@ -1787,7 +1787,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
 
     char URL_AWS_ROOT[LOCATION_LENGTH_EXTENDED]="";
     char URL_ALICLOUD_ROOT[LOCATION_LENGTH_EXTENDED]="";
-    char URL_AWS_ROOT[LOCATION_LENGTH_EXTENDED]="";
+    char URL_QCLOUD_ROOT[LOCATION_LENGTH_EXTENDED]="";
     char confdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
