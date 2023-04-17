@@ -44,8 +44,10 @@ int create_new_workdir(char* crypto_keyfile){
     }
     printf("[ -INFO- ] Please input your secrets key pair:\n");
     printf("[ INPUT: ] Access key ID :");
+    fflush(stdin);
     scanf("%s",access_key);
     printf("[ INPUT: ] Access secrets:");
+    fflush(stdin);
     scanf("%s",secret_key);
     ak_length=strlen(access_key);
     sk_length=strlen(secret_key);
@@ -537,7 +539,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             printf("[ -INFO- ] You specified a number larger than the quantity of compute nodes.\n");
             printf("           Do you mean deleting *ALL* the compute nodes?\n");
             printf("[ INPUT: ] Only 'y-e-s' is accepted to confirm:  ");
-            reset_string(string_temp);
+            fflush(stdin);
             scanf("%s",string_temp);
             if(strcmp(string_temp,"y-e-s")!=0){
                 printf("[ -INFO- ] You chose to deny this operation. Exit now.\n");
@@ -796,7 +798,7 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             printf("[ -INFO- ] You specified a number larger than the quantity of compute nodes.\n");
             printf("           Do you mean shutting down *ALL* the compute nodes?\n");
             printf("[ INPUT: ] Only 'y-e-s' is accepted to confirm:  ");
-            reset_string(string_temp);
+            fflush(stdin);
             scanf("%s",string_temp);
             if(strcmp(string_temp,"y-e-s")!=0){
                 printf("[ -INFO- ] You chose to deny this operation. Exit now.\n");
@@ -983,7 +985,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             printf("[ -INFO- ] You specified a number larger than the number of currently down nodes.\n");
             printf("           Do you mean turning on *ALL* the compute nodes?\n");
             printf("[ INPUT: ] Only 'y-e-s' is accepted to confirm:  ");
-            reset_string(string_temp);
+            fflush(stdin);
             scanf("%s",string_temp);
             if(strcmp(string_temp,"y-e-s")!=0){
                 printf("[ -INFO- ] You chose to deny this operation. Exit now.\n");
