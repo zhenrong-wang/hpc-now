@@ -27,12 +27,12 @@ variable "HPC_USER_NUM" {
 
 variable "cluster_init_scripts" {
   type = string
-  default = "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/cluster_initv6.sh"
+  default = "BLANK_URL_SHELL_SCRIPTScluster_initv6.sh"
 }
 
 variable "db_init_scripts" {
   type = string
-  default = "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/cluster_db_init.sh"
+  default = "BLANK_URL_SHELL_SCRIPTScluster_db_init.sh"
 }
 
 variable "master_init_parameters" {
@@ -466,6 +466,7 @@ resource "aws_efs_file_system" "hpc_apps" {
     Name = "hpc_apps"
     Project = "RG_NAME"
   }
+  availability_zone_name = "DEFAULT_ZONE_ID"
 }
 
 resource "aws_efs_mount_target" "hpc_apps_mount_target" {
@@ -479,6 +480,7 @@ resource "aws_efs_file_system" "hpc_data" {
     Name = "hpc_data"
     Project = "RG_NAME"
   }
+  availability_zone_name = "DEFAULT_ZONE_ID"
 }
 
 resource "aws_efs_mount_target" "hpc_data_mount_target" {
