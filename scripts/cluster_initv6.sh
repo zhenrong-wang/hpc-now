@@ -11,9 +11,9 @@
 
 # Define URL prefixes for the 'wget' command
 
-URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_UTILS=${URL_ROOT}utils/
-URL_PKGS=${URL_ROOT}packages/
+URL_REPO_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
+URL_UTILS=${URL_REPO_ROOT}utils/
+URL_PKGS=${URL_REPO_ROOT}packages/
 
 logfile='/root/cluster_init.log'
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
