@@ -13,4 +13,4 @@ clang ./now-crypto/now-crypto.c -Wall -o ./bin/now-crypto-darwin.exe
 clang ./installer/installer.c -Wall -lm -o ./bin/installer_darwin
 
 chmod +x ./bin/*
-echo -e "[ -DONE- ] All the binaries have been built to the folder './bin' ."
+echo -e "[ -DONE- ] Please check the console output for building results."

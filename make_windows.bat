@@ -10,4 +10,4 @@ gcc .\hpcopr\main\hpcopr_main.c -Wall -lm -o .\bin\hpcopr_windows.exe
 gcc .\now-crypto\now-crypto.c -Wall -lm -o .\bin\now-crypto-windows.exe
 gcc .\installer\installer.c -Wall -lm -o .\bin\installer_windows.exe
 
-echo -e "[ -DONE- ] All the binaries have been built to the folder 'bin' ."
+echo "[ -DONE- ] Please check the console output for building results."

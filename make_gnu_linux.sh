@@ -13,4 +13,4 @@ gcc ./now-crypto/now-crypto.c -Wall -lm -o ./bin/now-crypto-linux.exe
 gcc ./installer/installer.c -Wall -lm -o ./bin/installer_linux
 gcc ./hpcmgr/hpcmgr.c -Wall -lm -o ./bin/hpcmgr
 chmod +x ./bin/*
-echo -e "[ -DONE- ] All the binaries have been built to the folder './bin' ."
+echo -e "[ -DONE- ] Please check the console output for building results."
