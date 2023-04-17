@@ -98,8 +98,22 @@ int check_and_install_prerequisitions(void){
         fflush(stdin);
         scanf("%s",doubleconfirm);
         if(strcmp(doubleconfirm,"y-e-s")!=0){
-            printf("[ -INFO- ] You chose to deny this operation. Exit now.\n");
-            return 2;
+            printf("[ -INFO- ] You chose to deny this operation. Would you like to specify the locations\n");
+            printf("|          immediately? Only 'y-e-s' is accepted as a confirmation. You can also run\n");
+            printf("|          the command 'hpcopr configloc' later to update the locations.\n");
+            printf("[ INPUT: ] ");
+            fflush(stdin);
+            scanf("%s",doubleconfirm);
+            if(strcmp(doubleconfirm,"y-e-s")!=0){
+                printf("[ -INFO- ] You chose to deny this operation. Exit now.\n");
+                return 2;
+            }
+            else{
+                if(configure_locations()!=0){
+                    printf("[ FATAL: ] Failed to set the locations. Exit now.\n");
+                    return 2;
+                }
+            }
         }
         if(reset_locations()!=0){
             printf("[ FATAL: ] Failed to set the locations for binaries and templates. Exit now.\n");
