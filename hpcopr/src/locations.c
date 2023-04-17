@@ -16,6 +16,13 @@
 #include "../include/now_functions.h" 
 #endif
 
+#ifndef LOCATION_CONF_TOTAL_LINES
+#define LOCATION_CONF_TOTAL_LINES 5
+#endif
+#ifndef LOCATION_LINES
+#define LOCATION_LINES 4
+#endif
+
 int valid_loc_format_or_not(char* loc_string){
     int length;
     length=strlen(loc_string);
@@ -83,11 +90,9 @@ int reset_locations(void){
         return -1;
     }
     fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");
-    fprintf(file_p,"TERRAFORM_BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_REPO_ROOT);
-    fprintf(file_p,"ALICLOUD_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_ALICLOUD_ROOT);
-    fprintf(file_p,"AWS_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_AWS_ROOT);
-    fprintf(file_p,"TENCENTCLOUD_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_QCLOUD_ROOT);
-    fprintf(file_p,"SHELL_SCRIPTS_LOC %s\n",DEFAULT_URL_SHELL_SCRIPTS);
+    fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_REPO_ROOT);
+    fprintf(file_p,"CLOUD_IAC_TEMPLATES_LOC_ROOT %s\n",DEFAULT_URL_CODE_ROOT);
+    fprintf(file_p,"ONLINE_SHELL_SCRIPTS_LOC_ROOT %s\n",DEFAULT_URL_SHELL_SCRIPTS);
     fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",DEFAULT_URL_NOW_CRYPTO);
     fclose(file_p);
     return 0;
@@ -100,13 +105,16 @@ int get_locations(void){
     FILE* file_p=NULL;
     int line_location_conf_file=0;
     int i;
+    if(file_exist_or_not(LOCATION_CONF_FILE)!=0){
+        return -1;
+    }
     line_location_conf_file=file_empty_or_not(LOCATION_CONF_FILE);
-    if(file_exist_or_not(LOCATION_CONF_FILE)==0&&line_location_conf_file==7){
+    if(file_exist_or_not(LOCATION_CONF_FILE)==0&&line_location_conf_file==LOCATION_CONF_TOTAL_LINES){
         file_p=fopen(LOCATION_CONF_FILE,"r");
         fgetline(file_p,title_string);
-        for(i=0;i<6;i++){
+        for(i=0;i<LOCATION_LINES;i++){
             fscanf(file_p,"%s%s",header_string,loc_string);
-            if(strcmp(header_string,"TERRAFORM_BINARY_AND_PROVIDERS_LOC_ROOT")==0){
+            if(strcmp(header_string,"BINARY_AND_PROVIDERS_LOC_ROOT")==0){
                 strcpy(URL_REPO_ROOT,loc_string);
 #ifdef _WIN32
                 if(loc_string[1]==':'){
@@ -118,43 +126,19 @@ int get_locations(void){
                 }
 #endif
             }
-            else if(strcmp(header_string,"ALICLOUD_TERRAFORM_TEMPLATES_LOC")==0){
-                strcpy(URL_ALICLOUD_ROOT,loc_string);
+            else if(strcmp(header_string,"CLOUD_IAC_TEMPLATES_LOC_ROOT")==0){
+                strcpy(URL_CODE_ROOT,loc_string);
 #ifdef _WIN32
                 if(loc_string[1]==':'){
-                    TEMPLATE_LOC_FLAG_ALI=1;
+                    CODE_LOC_FLAG=1;
                 }
 #else
                 if(loc_string[0]=='/'){
-                    TEMPLATE_LOC_FLAG_ALI=1;
+                    CODE_LOC_FLAG=1;
                 }
 #endif
             }
-            else if(strcmp(header_string,"AWS_TERRAFORM_TEMPLATES_LOC")==0){
-                strcpy(URL_AWS_ROOT,loc_string);
-#ifdef _WIN32
-                if(loc_string[1]==':'){
-                    TEMPLATE_LOC_FLAG_AWS=1;
-                }
-#else
-                if(loc_string[0]=='/'){
-                    TEMPLATE_LOC_FLAG_AWS=1;
-                }
-#endif
-            }
-            else if(strcmp(header_string,"TENCENTCLOUD_TERRAFORM_TEMPLATES_LOC")==0){
-                strcpy(URL_QCLOUD_ROOT,loc_string);
-#ifdef _WIN32
-                if(loc_string[1]==':'){
-                    TEMPLATE_LOC_FLAG_QCLOUD=1;
-                }
-#else
-                if(loc_string[0]=='/'){
-                    TEMPLATE_LOC_FLAG_QCLOUD=1;
-                }
-#endif
-            }
-            else if(strcmp(header_string,"SHELL_SCRIPTS_LOC")==0){
+            else if(strcmp(header_string,"ONLINE_SHELL_SCRIPTS_LOC_ROOT")==0){
                 strcpy(URL_SHELL_SCRIPTS,loc_string);
             }
             else if(strcmp(header_string,"NOW_CRYPTO_BINARY_LOC")==0){
@@ -174,13 +158,14 @@ int get_locations(void){
         return 0;
     }
     else{
-        return -1;
+        return 1;
     }
 }
 
 int show_locations(void){
     FILE* file_p=NULL;
     file_p=fopen(LOCATION_CONF_FILE,"r");
+    char header[64]="";
     char loc_string[LOCATION_LENGTH]="";
     int i;
     if(file_p==NULL){
@@ -189,9 +174,9 @@ int show_locations(void){
     }
     fgetline(file_p,loc_string);
     printf("\n");
-    for(i=0;i<6;i++){
-        fgetline(file_p,loc_string);
-        printf("%s\n",loc_string);
+    for(i=0;i<LOCATION_LINES;i++){
+        fscanf(file_p,"%s%s",header,loc_string);
+        printf("%s -> %s\n",header,loc_string);
     }
     return 0;
 }
@@ -207,8 +192,11 @@ int configure_locations(void){
     printf("|*   YOU ARE MODIFYING THE LOCATIONS OF COMPONENTS FOR THE HPC-NOW SERVICES!       *\n");
     printf("|*   YOUR NEED TO MAKE SURE:                                                       *\n");
     printf("|*   1. The locations - either URLs or local filesystem paths are valid.           *\n");
-    printf("|*        URLs       : *MUST* start with 'http://' or 'https://' and end with '/'  *\n");
-    printf("|*        Local Paths: *MUST* be absolute paths and start with '/'                 *\n");
+    printf("|*        URLs       : *MUST* start with 'http://' or 'https://' , root locations  *\n");
+    printf("|*                     *MUST* end with '/'                                         *\n");
+    printf("|*        Local Paths: *MUST* be absolute paths. For GNU/Linux and macOS, the      *\n");
+    printf("|                       locations must start with '/'; for Microsoft Windows, the  *\n");
+    printf("|                       locations must start with DRIVE_LETTER:\\                   *\n");              
     printf("|*   2. The structures of the location are valid. Please refer to the docs and     *\n");
     printf("|*      confirm your structure in advance.                                         *\n");
     printf("|*                                                                                 *\n");
@@ -229,8 +217,10 @@ int configure_locations(void){
         printf("|          Nothing changed.\n");
         return 1;
     }
-    printf("[ LOC1/6 ] Please input the root location of the terraform binaries and providers. \n");
-    printf("|          You can input 'defaut' to use default location: ");
+    printf("[ LOC1/4 ] Please specify the root location of the terraform binary and providers. \n");
+    printf("|          You can input 'defaut' to use default location below: \n");
+    printf("|          -> %s \n",DEFAULT_URL_REPO_ROOT);
+    printf("[ INPUT: ]  \n");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
@@ -242,8 +232,9 @@ int configure_locations(void){
             strcpy(URL_REPO_ROOT,loc_string);
         }
     }
-    printf("[ LOC2/6 ] Please input the root location of the terraform templates for AliCloud. \n");
-    printf("|          You can input 'defaut' to use default location: ");
+    printf("[ LOC2/4 ] Please specify the root location of the terraform templates. \n");
+    printf("|          You can input 'defaut' to use default location below: \n");
+    printf("|          -> %s \n",DEFAULT_URL_CODE_ROOT);
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
@@ -252,37 +243,12 @@ int configure_locations(void){
             printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
         }
         else{
-            strcpy(URL_ALICLOUD_ROOT,loc_string);
+            strcpy(URL_CODE_ROOT,loc_string);
         }
     }
-    printf("[ LOC3/6 ] Please input the root location of the terraform templates for AWS.\n");
-    printf("|          You can input 'defaut' to use default location: ");
-    fflush(stdin);
-    scanf("%s",loc_string);
-    if(strcmp(loc_string,"default")!=0){
-        format_flag=valid_loc_format_or_not(loc_string);
-        if(format_flag==-1){
-            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
-        }
-        else{
-            strcpy(URL_AWS_ROOT,loc_string);
-        }
-    }
-    printf("[ LOC4/6 ] Please input the root location of the terraform templates for TencentCloud.\n");
-    printf("|          You can input 'defaut' to use default location: ");
-    fflush(stdin);
-    scanf("%s",loc_string);
-    if(strcmp(loc_string,"default")!=0){
-        format_flag=valid_loc_format_or_not(loc_string);
-        if(format_flag==-1){
-            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
-        }
-        else{
-            strcpy(URL_QCLOUD_ROOT,loc_string);
-        }
-    }
-    printf("[ LOC5/6 ] Please input the root location of the online shell scripts.\n");
-    printf("|          You can input 'defaut' to use default location: ");
+    printf("[ LOC3/4 ] Please specify the root location of the *online* shell scripts.\n");
+    printf("|          You can input 'defaut' to use default location below: \n");
+    printf("|          -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
@@ -291,15 +257,16 @@ int configure_locations(void){
             printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
         }
         else if(format_flag==1){
-            printf("[ -WARN- ] The location must be an URL. Will not modify.\n");
+            printf("[ -WARN- ] This location must be a public URL. Will not modify.\n");
         }
         else{
             strcpy(URL_SHELL_SCRIPTS,loc_string);
         }
     }
 
-    printf("[ LOC6/6 ] Please input the root location of the now-crypto binary.\n");
-    printf("|          You can input 'defaut' to use default location: ");
+    printf("[ LOC4/4 ] Please input the root location of the now-crypto binary.\n");
+    printf("|          You can input 'defaut' to use default location below: \n");
+    printf("|          -> %s \n",DEFAULT_URL_NOW_CRYPTO);
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
@@ -320,34 +287,22 @@ int configure_locations(void){
     }
     fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");
     if(strlen(URL_REPO_ROOT)==0){
-        fprintf(file_p,"TERRAFORM_BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_REPO_ROOT);
+        fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_REPO_ROOT);
     }
     else{
-        fprintf(file_p,"TERRAFORM_BINARY_AND_PROVIDERS_LOC_ROOT %s\n",URL_REPO_ROOT);
+        fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",URL_REPO_ROOT);
     }
-    if(strlen(URL_ALICLOUD_ROOT)==0){
-        fprintf(file_p,"ALICLOUD_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_ALICLOUD_ROOT);
-    }
-    else{
-        fprintf(file_p,"ALICLOUD_TERRAFORM_TEMPLATES_LOC %s\n",URL_ALICLOUD_ROOT);
-    }
-    if(strlen(URL_AWS_ROOT)==0){
-        fprintf(file_p,"AWS_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_AWS_ROOT);
+    if(strlen(URL_CODE_ROOT)==0){
+        fprintf(file_p,"CLOUD_IAC_TEMPLATES_LOC_ROOT %s\n",DEFAULT_URL_CODE_ROOT);
     }
     else{
-        fprintf(file_p,"AWS_TERRAFORM_TEMPLATES_LOC %s\n",URL_AWS_ROOT);
-    }
-    if(strlen(URL_QCLOUD_ROOT)==0){
-        fprintf(file_p,"TENCENTCLOUD_TERRAFORM_TEMPLATES_LOC %s\n",DEFAULT_URL_QCLOUD_ROOT);
-    }
-    else{
-        fprintf(file_p,"TENCENTCLOUD_TERRAFORM_TEMPLATES_LOC %s\n",URL_QCLOUD_ROOT);
+        fprintf(file_p,"CLOUD_IAC_TEMPLATES_LOC_ROOT %s\n",URL_CODE_ROOT);
     }
     if(strlen(URL_SHELL_SCRIPTS)==0){
-        fprintf(file_p,"SHELL_SCRIPTS_LOC %s\n",DEFAULT_URL_SHELL_SCRIPTS);
+        fprintf(file_p,"ONLINE_SHELL_SCRIPTS_LOC_ROOT %s\n",DEFAULT_URL_SHELL_SCRIPTS);
     }
     else{
-        fprintf(file_p,"SHELL_SCRIPTS_LOC %s\n",URL_SHELL_SCRIPTS);
+        fprintf(file_p,"ONLINE_SHELL_SCRIPTS_LOC_ROOT %s\n",URL_SHELL_SCRIPTS);
     }
     if(strlen(URL_NOW_CRYPTO)==0){
         fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",DEFAULT_URL_NOW_CRYPTO);

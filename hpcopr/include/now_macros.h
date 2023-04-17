@@ -96,6 +96,7 @@
 #define DIR_LENGTH 256
 #define FILENAME_LENGTH 512
 #define LOCATION_LENGTH 512
+#define LOCATION_LENGTH_EXTENDED 768
 #define LINE_LENGTH 4096 //It has to be very long, because tfstate file may contain very long line
 #define AKSK_LENGTH 128
 #define CONF_STRING_LENTH 64
@@ -112,9 +113,7 @@
 #define MAXIMUM_ADD_NODE_NUMBER 16 // You can modify this number to adding more than 16 nodes once
 #define MAXIMUM_WAIT_TIME 600
 #define DEFAULT_URL_REPO_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/"
-#define DEFAULT_URL_ALICLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-alicloud/"
-#define DEFAULT_URL_AWS_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-aws/"
-#define DEFAULT_URL_QCLOUD_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/tf-templates-qcloud/"
+#define DEFAULT_URL_CODE_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/"
 #define DEFAULT_URL_SHELL_SCRIPTS "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/"
 
 #endif

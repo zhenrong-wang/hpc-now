@@ -1,0 +1,7 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "now_macros.h": "c",
+        "now_functions.h": "c"
+    }
+}

@@ -80,14 +80,34 @@ int check_and_install_prerequisitions(void){
     char* usage_logfile=USAGE_LOG_FILE;
     char* operation_logfile=OPERATION_LOG_FILE;
     char* sshkey_dir=SSHKEY_DIR;
+    char doubleconfirm[64]="";
 #ifdef _WIN32
     char random_string[PASSWORD_STRING_LENGTH]="";
     char appdata_dir[128]="";
 #endif
 
     printf("[ -INFO- ] Checking running environment for HPC-NOW services ...\n");
-    if(get_locations()!=0){
-        printf("[ -INFO- ] Reset the location configuration to the default.\n");
+    if(get_locations()==-1){
+        printf("[ -INFO- ] Location configuration not found. If you are a developer, we recommend you\n");
+        printf("|          to exit and run the command 'hpcopr configloc' to provide your locations\n");
+        printf("|          If you are a user without self-defined locations, you can continue with\n");
+        printf("|          the default ones. For more information, please check the documentations.\n")
+        printf("[ -INFO- ] Would you like to use the default locations? Only 'y-e-s' is accepted as\n");
+        printf("|          a confirmation. \n");
+        printf("[ INPUT: ] ");
+        fflush(stdin);
+        scanf("%s",doubleconfirm);
+        if(strcmp(string_temp,"y-e-s")!=0){
+            printf("[ -INFO- ] You chose to deny this operation. Exit now.\n");
+            return 2;
+        }
+        if(reset_locations()!=0){
+            printf("[ FATAL: ] Failed to set the locations for binaries and templates. Exit now.\n");
+            return 2;
+        }
+    }
+    else if(get_locations()==1){
+        printf("[ -INFO- ] Location configuration format not correct. Reset to the default locations.\n");
         if(reset_locations()!=0){
             printf("[ FATAL: ] Failed to set the locations for binaries and templates. Exit now.\n");
             return 2;
@@ -126,11 +146,11 @@ int check_and_install_prerequisitions(void){
     if(file_exist_or_not("c:\\programdata\\hpc-now\\bin\\now-crypto.exe")!=0||strcmp(md5sum,MD5_NOW_CRYPTO)!=0){
         printf("[ -INFO- ] Downloading/Copying and installing necessary tools (2/5) ...\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
-        if(REPO_LOC_FLAG==1){
-            sprintf(cmdline,"copy /y %s\\utils\\now-crypto.exe c:\\programdata\\hpc-now\\bin\\now-crypto.exe",URL_REPO_ROOT);
+        if(NOW_CRYPTO_LOC_FLAG==1){
+            sprintf(cmdline,"copy /y %s c:\\programdata\\hpc-now\\bin\\now-crypto.exe",URL_NOW_CRYPTO);
         }
         else{
-            sprintf(cmdline,"curl %sutils/now-crypto.exe -o c:\\programdata\\hpc-now\\bin\\now-crypto.exe",URL_REPO_ROOT);
+            sprintf(cmdline,"curl %s -o c:\\programdata\\hpc-now\\bin\\now-crypto.exe",URL_NOW_CRYPTO);
         }
         flag=system(cmdline);
         if(flag!=0){
@@ -329,11 +349,11 @@ int check_and_install_prerequisitions(void){
     if(file_exist_or_not("/usr/.hpc-now/.bin/now-crypto.exe")!=0||strcmp(md5sum,MD5_NOW_CRYPTO)!=0){
         printf("[ -INFO- ] Downloading/Copying and installing necessary tools (2/5) ...\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
-        if(REPO_LOC_FLAG==1){
-            sprintf(cmdline,"/bin/cp %s/utils/now-crypto /usr/.hpc-now/.bin/now-crypto.exe",URL_REPO_ROOT);
+        if(NOW_CRYPTO_LOC_FLAG==1){
+            sprintf(cmdline,"/bin/cp %s /usr/.hpc-now/.bin/now-crypto.exe",URL_NOW_CRYPTO);
         }
         else{
-            sprintf(cmdline,"curl %sutils/now-crypto -o /usr/.hpc-now/.bin/now-crypto.exe",URL_REPO_ROOT);
+            sprintf(cmdline,"curl %s -o /usr/.hpc-now/.bin/now-crypto.exe",URL_NOW_CRYPTO);
         }
         flag=system(cmdline);
         if(flag!=0){
@@ -511,11 +531,11 @@ int check_and_install_prerequisitions(void){
     if(file_exist_or_not("/Applications/.hpc-now/.bin/now-crypto.exe")!=0||strcmp(md5sum,MD5_NOW_CRYPTO)!=0){
         printf("[ -INFO- ] Downloading/Copying and installing necessary tools (2/5) ...\n");
         printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
-        if(REPO_LOC_FLAG==1){
-            sprintf(cmdline,"/bin/cp %s/utils/now-crypto-darwin.exe /Applications/.hpc-now/.bin/now-crypto.exe",URL_REPO_ROOT);
+        if(NOW_CRYPTO_LOC_FLAG==1){
+            sprintf(cmdline,"/bin/cp %s /Applications/.hpc-now/.bin/now-crypto.exe",URL_NOW_CRYPTO);
         }
         else{
-            sprintf(cmdline,"curl %sutils/now-crypto-darwin.exe -o /Applications/.hpc-now/.bin/now-crypto.exe",URL_REPO_ROOT);
+            sprintf(cmdline,"curl %s -o /Applications/.hpc-now/.bin/now-crypto.exe",URL_NOW_CRYPTO);
         }
         flag=system(cmdline);
         if(flag!=0){

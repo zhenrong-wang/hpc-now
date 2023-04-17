@@ -31,7 +31,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char filename_temp[FILENAME_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-//    char* url_aws_root=URL_AWS_ROOT;
+    char URL_AWS_ROOT[LOCATION_LENGTH_EXTENDED]="";
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
@@ -125,7 +125,19 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+
+    if(CODE_LOC_FLAG==1){
+#ifdef _WIN32
+        sprintf(URL_AWS_ROOT,"%s\\tf-templates-aws\\",URL_CODE_ROOT);
+#else
+        sprintf(URL_AWS_ROOT,"%s/tf-templates-aws/",URL_CODE_ROOT);
+#endif
+    }
+    else{
+        sprintf(URL_AWS_ROOT,"%stf-templates-aws/",URL_CODE_ROOT);
+    }
+
+    if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
         sprintf(cmdline,"copy /y %s\\region_valid.tf %s\\region_valid.tf > nul 2>&1",URL_AWS_ROOT,stackdir);
 #else
@@ -206,7 +218,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading the default configure\n");
         printf("|          file to initialize this cluster.\n");
-        if(TEMPLATE_LOC_FLAG_AWS==1){
+        if(CODE_LOC_FLAG==1){
             sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1", URL_AWS_ROOT,conf_file);
         }
         else{
@@ -220,7 +232,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             global_replace(conf_file,"cn-northwest-1","us-east-1");
         }
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy %s\\hpc_stack_aws.base %s\\hpc_stack.base > nul 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -230,7 +242,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stack_aws.master %s\\hpc_stack.master > nul 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -240,7 +252,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stack_aws.compute %s\\hpc_stack.compute > nul 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -250,7 +262,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stack_aws.database %s\\hpc_stack.database > nul 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -260,7 +272,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stack_aws.natgw %s\\hpc_stack.natgw > nul 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -270,7 +282,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\reconf.list %s\\reconf.list > nul 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -285,7 +297,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default \n");
         printf("|          configuration file to initialize this cluster.\n");
-        if(TEMPLATE_LOC_FLAG_AWS==1){
+        if(CODE_LOC_FLAG==1){
             sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1",URL_AWS_ROOT,conf_file);
         }
         else{
@@ -299,7 +311,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             global_replace(conf_file,"cn-northwest-1","us-east-1");
         }
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.base %s/hpc_stack.base >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -309,7 +321,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.master %s/hpc_stack.master >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -319,7 +331,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.compute %s/hpc_stack.compute >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -329,7 +341,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.database %s/hpc_stack.database >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -340,7 +352,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.natgw %s/hpc_stack.natgw >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -350,7 +362,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_AWS==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/reconf.list %s/reconf.list >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
     }
     else{
@@ -780,7 +792,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
 #endif
     if(strcmp(region_flag,"cn_regions")==0){
-        if(TEMPLATE_LOC_FLAG_AWS==1){
+        if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
             sprintf(cmdline,"copy /y %s\\s3cfg.txt %s\\s3cfg.txt > nul 2>&1",URL_AWS_ROOT,stackdir);
 #else
@@ -821,7 +833,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         }
     }
     else{
-        if(TEMPLATE_LOC_FLAG_AWS==1){
+        if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
             sprintf(cmdline,"copy /y %s\\s3cfg.txt %s\\s3cfg.txt > nul 2>&1",URL_AWS_ROOT,stackdir);
 #else
@@ -991,7 +1003,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char filename_temp[FILENAME_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-//    char* url_qcloud_root=URL_QCLOUD_ROOT;
+    char URL_QCLOUD_ROOT[LOCATION_LENGTH_EXTENDED];
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
@@ -1085,12 +1097,24 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
     }
+
+    if(CODE_LOC_FLAG==1){
+#ifdef _WIN32
+        sprintf(URL_QCLOUD_ROOT,"%s\\tf-templates-qcloud\\",URL_CODE_ROOT);
+#else
+        sprintf(URL_QCLOUD_ROOT,"%s/tf-templates-qcloud/",URL_CODE_ROOT);
+#endif
+    }
+    else{
+        sprintf(URL_QCLOUD_ROOT,"%stf-templates-qcloud/",URL_CODE_ROOT);
+    }
+
 #ifdef _WIN32
     sprintf(conf_file,"%s\\tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading the default configure\n");
         printf("|          file to initialize this cluster.\n");
-        if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+        if(CODE_LOC_FLAG==1){
             sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1", URL_QCLOUD_ROOT,conf_file);
         }
         else{
@@ -1104,7 +1128,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf("[ STEP 1 ] Creating input files now...\n");
     sprintf(cmdline,"del /f /q %s\\hpc_stack* > nul 2>&1",stackdir);
     system(cmdline);
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.base %s\\hpc_stack.base > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1114,7 +1138,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.master %s\\hpc_stack.master > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1124,7 +1148,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.compute %s\\hpc_stack.compute > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1134,7 +1158,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.database %s\\hpc_stack.database > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1144,7 +1168,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy %s\\hpc_stack_qcloud.natgw %s\\hpc_stack.natgw > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1154,7 +1178,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\NAS_Zones_QCloud.txt %s\\NAS_Zones_QCloud.txt > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1164,7 +1188,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\reconf.list %s\\reconf.list > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1183,7 +1207,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default \n");
         printf("|          configuration file to initialize this cluster.\n");
-        if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+        if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
             sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1", URL_QCLOUD_ROOT,conf_file);
 #else
@@ -1201,7 +1225,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf("[ STEP 1 ] Creating input files now...\n");
     sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.base %s/hpc_stack.base >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1211,7 +1235,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.master %s/hpc_stack.master >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1221,7 +1245,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.compute %s/hpc_stack.compute >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1231,7 +1255,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.database %s/hpc_stack.database >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1241,7 +1265,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.natgw %s/hpc_stack.natgw >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1251,7 +1275,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/NAS_Zones_QCloud.txt %s/NAS_Zones_QCloud.txt >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1261,7 +1285,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/reconf.list %s/reconf.list >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1651,7 +1675,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     fclose(file_p);
 #ifdef _WIN32
     sprintf(private_key_file,"%s\\now-cluster-login",sshkey_folder);
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\cos.conf %s\\cos.conf > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1663,7 +1687,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sprintf(filename_temp,"%s\\cos.conf",stackdir);
 #else
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
-    if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/cos.conf %s/cos.conf >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
     }
     else{
@@ -1815,7 +1839,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char filename_temp[FILENAME_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-//    char* URL_ALICLOUD_ROOT=URL_ALICLOUD_ROOT;
+    char URL_ALICLOUD_ROOT[LOCATION_LENGTH_EXTENDED]="";
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
@@ -1901,6 +1925,18 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
     }
+
+    if(CODE_LOC_FLAG==1){
+#ifdef _WIN32
+        sprintf(URL_ALICLOUD_ROOT,"%s\\tf-templates-alicloud\\",URL_CODE_ROOT);
+#else
+        sprintf(URL_ALICLOUD_ROOT,"%s/tf-templates-alicloud/",URL_CODE_ROOT);
+#endif
+    }
+    else{
+        sprintf(URL_ALICLOUD_ROOT,"%stf-templates-alicloud/",URL_CODE_ROOT);
+    }
+
 #ifdef _WIN32
     sprintf(conf_file,"%s\\tf_prep.conf",confdir);
 #else
@@ -1909,7 +1945,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default \n");
         printf("|          configuration file to initialize this cluster.\n");
-        if(TEMPLATE_LOC_FLAG_ALI==1){
+        if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
             sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1",URL_ALICLOUD_ROOT,conf_file);         
 #else
@@ -1928,7 +1964,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
 #ifdef _WIN32
     sprintf(cmdline,"del /f /q %s\\hpc_stack* > nul 2>&1",stackdir);
     system(cmdline);
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stackv2.base %s\\hpc_stack.base > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -1938,7 +1974,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stackv2.master %s\\hpc_stack.master > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -1948,7 +1984,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stackv2.compute %s\\hpc_stack.compute > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -1958,7 +1994,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stackv2.database %s\\hpc_stack.database > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -1968,7 +2004,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\hpc_stackv2.natgw %s\\hpc_stack.natgw > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -1978,7 +2014,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\NAS_Zones_ALI.txt %s\\NAS_Zones_ALI.txt > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -1988,7 +2024,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\reconf.list %s\\reconf.list > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -2004,7 +2040,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
 #else
     sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stackv2.base %s/hpc_stack.base >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -2014,7 +2050,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stackv2.master %s/hpc_stack.master >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -2024,7 +2060,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stackv2.compute %s/hpc_stack.compute >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -2034,7 +2070,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stackv2.database %s/hpc_stack.database >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -2044,7 +2080,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/hpc_stackv2.natgw %s/hpc_stack.natgw >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -2054,7 +2090,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/NAS_Zones_ALI.txt %s/NAS_Zones_ALI.txt >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -2064,7 +2100,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/reconf.list %s/reconf.list >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -2455,7 +2491,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     fclose(file_p);
 #ifdef _WIN32
     sprintf(private_key_file,"%s\\now-cluster-login",sshkey_folder);
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"copy /y %s\\.ossutilconfig %s\\ossutilconfig > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
@@ -2463,7 +2499,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
 #else
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
-    if(TEMPLATE_LOC_FLAG_ALI==1){
+    if(CODE_LOC_FLAG==1){
         sprintf(cmdline,"/bin/cp %s/.ossutilconfig %s/ossutilconfig >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
     }
     else{
