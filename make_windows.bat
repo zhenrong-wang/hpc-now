@@ -4,7 +4,7 @@
 % Bug report: info@hpc-now.com %
 
 echo "[ START: ] Building the binaries now ..."
-mkdir -p .\bin
+mkdir .\bin
 del /s /q /f .\bin\*
 gcc .\hpcopr\main\hpcopr_main.c -Wall -lm -o .\bin\hpcopr_windows.exe
 gcc .\now-crypto\now-crypto.c -Wall -lm -o .\bin\now-crypto-windows.exe
