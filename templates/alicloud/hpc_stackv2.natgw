@@ -7,6 +7,7 @@ resource "alicloud_instance" "natgw" {
   system_disk_category = "cloud_essd"
   system_disk_size = 60
   image_id = "centos_7_9_x64_20G_alibase_20220524.vhd"
+  stopped_mode = "StopCharging"
   instance_name = "natgw-RG_DISPLAY_NAME"
   vswitch_id = alicloud_vswitch.public_vsw.id
   internet_charge_type = "PayByTraffic"
