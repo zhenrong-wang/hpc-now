@@ -26,12 +26,12 @@ variable "HPC_USER_NUM" {
 
 variable "cluster_init_scripts" {
   type = string
-  default = "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/cluster_initv6.sh"
+  default = "BLANK_URL_SHELL_SCRIPTScluster_initv6.sh"
 }
 
 variable "db_init_scripts" {
   type = string
-  default = "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/cluster_db_init.sh"
+  default = "BLANK_URL_SHELL_SCRIPTScluster_db_init.sh"
 }
 
 variable "master_init_parameters" {

@@ -1,14 +1,22 @@
 /*
-This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
-The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
-It is distributed under the license: GNU Public License - v2.0
-Bug report: info@hpc-now.com
+* This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+*The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+* It is distributed under the license: GNU Public License - v2.0
+* Bug report: info@hpc-now.com
+*/
+
+/* 
+* This code is only for GNU/Linux distributions to build the HPC Manager toolset. It 
+* is not necessary to consider cross-platform, because the HPC Manager will only run
+* on the Master nodes of the clusters.
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#define HPCMGR_SHELL_DOWNLOAD "wget -q https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/hpcmgr.sh -O /tmp/.thread-"
 
 int main(int argc,char *argv[]) 
 {
@@ -23,7 +31,7 @@ int main(int argc,char *argv[])
   char* param2=argv[2];
   char* param3=argv[3];
   char* param4=argv[4];
-  char* cmd_dl="wget -q https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/hpcmgr.sh -O /tmp/.thread-";
+  char* cmd_dl=HPCMGR_SHELL_DOWNLOAD;
   char* cmd_chmod="chmod +x /tmp/.thread-";
   char* cmd_base="/tmp/.thread-";
   char* cmd_dele="rm -rf /tmp/.thread-";
@@ -32,25 +40,22 @@ int main(int argc,char *argv[])
   char cmd_run[64];
   char final_cmd_run[64]="";
   char final_cmd_dele[64];
-  char confirm[3];
+  char confirm[64];
   int param_number=argc-1;
   
-  printf("\nHign Performance Computing - start NOW!\n\nHPC-NOW Cluster Manager\n\nShanghai HPC-NOW Technologies Co., Ltd\ninfo@hpc-now.com\n\n");
+  printf("\nHign Performance Computing - start NOW!\n\nHPC-NOW Cluster Manager\n\nShanghai HPC-NOW Technologies Co., Ltd\nLICENSE: GPL-2.0\ninfo@hpc-now.com\n\n");
   
   char rand_num_string[7]="";
   srand((unsigned)time(NULL));
-  int rand_num = rand();
-  if(rand_num > 1000000){
+  int rand_num=rand();
+  if(rand_num>1000000){
     rand_num=rand_num%1000000;
   }
   sprintf(rand_num_string,"%d",rand_num);
-  
   sprintf(final_cmd_dl,"%s%s",cmd_dl,rand_num_string);
   sprintf(final_cmd_chmod,"%s%s",cmd_chmod,rand_num_string);
   sprintf(cmd_run,"%s%s",cmd_base,rand_num_string);
   sprintf(final_cmd_dele,"%s%s",cmd_dele,rand_num_string);
-
-//  printf("%s\n%s\n%s\n%s\n",final_cmd_dl,final_cmd_chmod,cmd_run,final_cmd_dele);
   
   for(i=0;i<3;i++){
     *(confirm+i)=' ';
@@ -120,9 +125,10 @@ int main(int argc,char *argv[])
   
   if(param1_length!=0&&param2_length!=0&&param3_length!=0&&param4_length!=0){
     if(strcmp(param1,"users")==0&&strcmp(param2,"delete")==0&&strcmp(param4,"os")==0){
-      printf("WARNING: You are deleting User%s from the cluster and the Operating System! Please input 'yes' to confirm: ", param3);
+      printf("WARNING: You are deleting User%s from the cluster and the Operating System! Please input 'y-e-s' to confirm: ", param3);
+      fflush(stdin);
       scanf("%s",confirm);
-      if(strcmp(confirm,"yes")==0){
+      if(strcmp(confirm,"y-e-s")==0){
         printf("Operation confirmed.\n");
       }
       else{
@@ -131,7 +137,6 @@ int main(int argc,char *argv[])
       }
     }
   }
-//  printf("%s\n%s\n%s\n%s\n",final_cmd_dl,final_cmd_chmod,final_cmd_run,final_cmd_dele);
   system_run_flag=system(final_cmd_dl);
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 1.\n");
