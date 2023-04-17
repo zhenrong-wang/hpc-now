@@ -3,7 +3,7 @@
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
  * It is distributed under the license: GNU Public License - v2.0
  * Bug report: info@hpc-now.com
-*/
+ */
 
 #ifndef NOW_GLOBAL_VARS_H
 #define NOW_GLOBAL_VARS_H
@@ -26,11 +26,11 @@ extern char URL_REPO_ROOT[LOCATION_LENGTH];
 /*
  * URL_CODE_ROOT: the root location of the Terraform IaC codes.
  * The structure of this location should be:
- * URL_CODE_ROOT --- tf-templates-alicloud
- *                |- tf-templates-qcloud
- *                |- tf-templates-aws
+ * URL_CODE_ROOT
+ *            ├─tf-templates-alicloud
+ *            ├─tf-templates-aws
+ *            └─tf-templates-qcloud
  */
-
 extern char URL_CODE_ROOT[LOCATION_LENGTH];
 
 /* URL_SHELL_SCRIPTS must be a public online address! */

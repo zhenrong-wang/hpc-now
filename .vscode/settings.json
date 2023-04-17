@@ -3,6 +3,8 @@
     "files.associations": {
         "now_macros.h": "c",
         "now_functions.h": "c",
-        "malloc.h": "c"
+        "malloc.h": "c",
+        "now_global_vars.h": "c",
+        "stdlib.h": "c"
     }
 }
