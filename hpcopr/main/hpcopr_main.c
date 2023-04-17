@@ -373,7 +373,7 @@ int main(int argc, char* argv[]){
         }
     }
 
-    if(argc==3&&strcmp(argv[1],"destroy")==0&&strcmp(argv[1],"force")==0){
+    if(argc==3&&strcmp(argv[1],"destroy")==0&&strcmp(argv[2],"force")==0){
         run_flag=cluster_destroy(pwd,crypto_keyfile,0);
         write_log(pwd,operation_log,argv[1],run_flag);
         system_cleanup();
