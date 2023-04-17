@@ -48,26 +48,26 @@
 
 请从本项目的 dev 分支下载源代码至本地目录（ 例如 /home/ABC/hpc-now-dev/ ），使用 'cd' 命令切换至代码所在的本地目录之后：
 
--  **Microsoft Windows用户** ，请运行：`gcc hpcopr-windows.c -Wall -o hpcopr.exe`
--  **GNU/Linux用户** ，请运行：`gcc hpcopr-linux.c -Wall -lm -o hpcopr`
--  **macOS用户** ，请运行：`clang hpcopr-darwin.c -Wall -o hpcopr`
+-  **Microsoft Windows用户** ，请运行：`gcc hpcopr-main.c -Wall -o hpcopr.exe`
+-  **GNU/Linux用户** ，请运行：`gcc hpcopr-main.c -Wall -lm -o hpcopr`
+-  **macOS用户** ，请运行：`clang hpcopr-main.c -Wall -o hpcopr`
 
 此外，还需以相似的方式编译 now-crypto.c 和 installer-OS-VERSION.c，并将生成的可执行文件命名为  **now-crypto.exe**  和  **installer_OS_VERSION.exe** 。
 
 ### 5. 如何使用
 
-请参阅[技术文档](https://www.hpc-now.com/docs/all)。请注意：如果您直接运行 installer 进行本地安装，将会下载云上已经编译好的 hpcopr 和 now-crypto 至以下本地目录：
+请参阅[技术文档](https://www.hpc-now.com/docs/all)。请注意：如果您直接运行 installer 进行本地安装，将会下载云上已经编译好的 hpcopr 下载至以下本地目录：
 
-- **Windows** ： C:\programdata\hpc-now\bin\now-crypto.exe 和 C:\hpc-now\hpcopr.exe
--  **GNU/Linu** x：/usr/.hpc-now/.bin/now-crypto.exe 和 /home/hpc-now/.bin/hpcopr
--  **macOS** ：/Applications/.hpc-now/.bin/now-crypto.exe 和 /Users/hpc-now/.bin/hpcopr
+- **Windows** ： C:\hpc-now\hpcopr.exe
+-  **GNU/Linu** /home/hpc-now/.bin/hpcopr
+-  **macOS** ：/Users/hpc-now/.bin/hpcopr
 
 您可以用自己构建的  **hpcopr**  和  **now-crypto**  替换掉安装时下载的文件，请注意文件名保持一致即可。此外，在 GNU/Linux 和 macOS 下，注意要赋予可执行权限，示例命令： 
 - `sudo chmod +x now-crypto`
 
 ### 6. 关键目录
 
- **hpcopr** 安装部署之后，将会对您的操作系统进行如下修改。具体的修改操作请阅读 installer 源代码的 `int install_services(void)` 函数内容。
+ **hpcopr** 安装部署之时，将会对您的操作系统进行如下修改。具体的修改操作请阅读 installer 源代码的 `int install_services(void)` 函数内容。
 
 - 创建一个 **名为 hpc-now 的操作系统用户** ，对于 Microsoft Windows，该用户将生成初始密码 nowadmin2023~ ，并且在首次以 hpc-now 用户登录时强制要求修改；对于其他操作系统，无初始密码，您需要按照说明为该用户设置密码
 -  **创建工作目录** ，对于 Microsoft Windows，将创建 C:\hpc-now 目录作为关键工作目录，创建 C:\programdata\hpc-now 作为关键数据目录；对于 GNU/Linux，关键工作目录位于 hpc-now 的家目录下，即：/home/hpc-now，关键数据目录位于 /usr/.hpc-now ；对于 macOS，关键工作目录位于 hpc-now 的家目录下，即：/Users/hpc-now，关键数据目录位于 /Applications/.hpc-now 。
@@ -104,6 +104,15 @@
 -  **hpcopr sleep**  – 关闭整个集群，包括所有的管理节点和计算节点
 -  **hpcopr wakeup PARAM**  – 唤醒集群，您可以指定 PARAM 为 all 或者 minimal。当 PARAM 为 all 时，集群内所有节点都会打开；当 PARAM 为 minimal 时，仅打开管理节点
 -  **hpcopr destroy**  –  销毁当前的集群，包括所有节点和数据。请务必在确认销毁前妥善保存好您的关键数据 
+
+**_高级选项：_**
+- **hpcopr configloc**  - 指定 HPC-NOW 服务所依赖的远程或本地位置
+- **hpcopr resetloc**   - 将远程或本地位置重置为默认
+- **hpcopr showloc**    - 显示当前的远程或本地位置
+
+**_其他：_**
+- **hpcopr about**      - 关于 HPC-NOW
+- **hpcopr license**    - 阅读 GNU Public License - v2.0
 
 ### 8. Bug与技术沟通
 

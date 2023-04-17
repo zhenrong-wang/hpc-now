@@ -112,8 +112,15 @@ int create_new_workdir(char* crypto_keyfile){
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
 #endif
     system(cmdline);
-    printf("[ -INFO- ] The secrets key pair has been encrypted and  stored locally.\n");
+    printf("[ -INFO- ] The secrets key pair has been encrypted and stored locally.\n");
+
+#ifdef _WIN32
+    printf("[ -DONE- ] The working directory of your new cluster: c:\\hpc-now\\now-cluster-%d.\n",new_cluster_num);
+#elif __APPLE__
     printf("[ -DONE- ] The working directory of your new cluster: /Users/hpc-now/now-cluster-%d.\n",new_cluster_num);
+#elif __linux__
+    printf("[ -DONE- ] The working directory of your new cluster: /home/hpc-now/now-cluster-%d.\n",new_cluster_num);
+#endif
     printf("|          Please switch to it and run 'hpcopr init' to create a default cluster.\n");
     printf("[ -DONE- ] Exit now.\n");
     print_tail();

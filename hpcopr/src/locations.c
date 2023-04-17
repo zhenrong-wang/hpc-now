@@ -220,7 +220,7 @@ int configure_locations(void){
     printf("[ LOC1/4 ] Please specify the root location of the terraform binary and providers. \n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_REPO_ROOT);
-    printf("[ INPUT: ]  \n");
+    printf("[ INPUT: ]  ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
@@ -235,6 +235,7 @@ int configure_locations(void){
     printf("[ LOC2/4 ] Please specify the root location of the terraform templates. \n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_CODE_ROOT);
+    printf("[ INPUT: ]  ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
@@ -249,6 +250,7 @@ int configure_locations(void){
     printf("[ LOC3/4 ] Please specify the root location of the *online* shell scripts.\n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
+    printf("[ INPUT: ]  ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
@@ -267,6 +269,7 @@ int configure_locations(void){
     printf("[ LOC4/4 ] Please input the root location of the now-crypto binary.\n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_NOW_CRYPTO);
+    printf("[ INPUT: ]  ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
