@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define VERSION_CODE "0.1.91.0016"
+#define VERSION_CODE "0.1.91.0018"
 
 #ifdef _WIN32
 #include <malloc.h>
