@@ -1784,14 +1784,32 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
     char buffer1[64]="";
     char buffer2[64]="";
     char cloud_flag[32]="";
-//    char* aws_url_root=URL_AWS_ROOT;
-//    char* qcloud_url_root=URL_QCLOUD_ROOT;
-//   char* ali_url_root=URL_ALICLOUD_ROOT;
+
+    char URL_AWS_ROOT[LOCATION_LENGTH_EXTENDED]="";
+    char URL_ALICLOUD_ROOT[LOCATION_LENGTH_EXTENDED]="";
+    char URL_AWS_ROOT[LOCATION_LENGTH_EXTENDED]="";
     char confdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     create_and_get_vaultdir(workdir,vaultdir);
+
+    if(CODE_LOC_FLAG==1){
+#ifdef _WIN32
+        sprintf(URL_AWS_ROOT,"%s\\tf-templates-aws\\",URL_CODE_ROOT);
+        sprintf(URL_QCLOUD_ROOT,"%s\\tf-templates-qcloud\\",URL_CODE_ROOT);
+        sprintf(URL_ALICLOUD_ROOT,"%s\\tf-templates-alicloud\\",URL_CODE_ROOT);
+#else
+        sprintf(URL_AWS_ROOT,"%s/tf-templates-aws/",URL_CODE_ROOT);
+        sprintf(URL_QCLOUD_ROOT,"%s/tf-templates-qcloud/",URL_CODE_ROOT);
+        sprintf(URL_ALICLOUD_ROOT,"%s/tf-templates-alicloud/",URL_CODE_ROOT);
+#endif
+    }
+    else{
+        sprintf(URL_AWS_ROOT,"%stf-templates-aws/",URL_CODE_ROOT);
+        sprintf(URL_QCLOUD_ROOT,"%stf-templates-qcloud/",URL_CODE_ROOT);
+        sprintf(URL_ALICLOUD_ROOT,"%stf-templates-alicloud/",URL_CODE_ROOT);
+    }
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
     get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
@@ -1820,7 +1838,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
     }
 #endif
     if(strcmp(cloud_flag,"CLOUD_A")==0){
-        if(TEMPLATE_LOC_FLAG_ALI==1){
+        if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
             sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf > nul 2>&1",URL_ALICLOUD_ROOT,confdir);
 #else
@@ -1840,7 +1858,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
         return 0;
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        if(TEMPLATE_LOC_FLAG_QCLOUD==1){
+        if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
             sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf >nul 2>&1",URL_QCLOUD_ROOT,confdir);
 #else
@@ -1860,7 +1878,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
         return 0;
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        if(TEMPLATE_LOC_FLAG_AWS==1){
+        if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
             sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf > nul 2>&1",URL_AWS_ROOT,confdir);
 #else
