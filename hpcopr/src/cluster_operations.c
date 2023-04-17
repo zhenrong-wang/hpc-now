@@ -283,7 +283,7 @@ int rotate_new_keypair(char* workdir, char* crypto_keyfile){
     return 0;
 }
 
-int cluster_destroy(char* workdir, char* crypto_keyfile){
+int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     char doubleconfirm[32]="";
     char cloud_flag[16]="";
     char buffer1[64]="";
@@ -346,7 +346,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
 #endif
     system(cmdline);
-    if(strcmp(cloud_flag,"CLOUD_C")==0){
+    if(strcmp(cloud_flag,"CLOUD_C")==0&&force_flag==1){
 #ifdef _WIN32
         sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/bin/s3cmd del -rf s3://%s\" > nul 2>&1",sshkey_folder,master_address,bucket_address);
 #else
@@ -354,7 +354,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
 #endif
         system(cmdline);
     }
-    else if(strcmp(cloud_flag,"CLOUD_A")==0){
+    else if(strcmp(cloud_flag,"CLOUD_A")==0&&force_flag==1){
 #ifdef _WIN32
         sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/bin/ossutil64 rm -rf oss://%s\" > nul 2>&1",sshkey_folder,master_address,bucket_address);
 #else
@@ -362,7 +362,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile){
 #endif
         system(cmdline);
     }
-    else if(strcmp(cloud_flag,"CLOUD_B")==0){
+    else if(strcmp(cloud_flag,"CLOUD_B")==0&&force_flag==1){
 #ifdef _WIN32
         sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/local/bin/coscmd delete -rf /\" > nul 2>&1",sshkey_folder,master_address);
 #else
