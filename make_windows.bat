@@ -3,8 +3,8 @@
 if "%~1"=="" (
 	echo [ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command.
 	echo ^|          build  - ^(re^)build the binaries
-      echo ^|          delete - delete the previous binaries
-      echo ^|          clear  - remove the 'bin' folder
+    echo ^|          delete - delete the previous binaries
+    echo ^|          clear  - remove the 'bin' folder
 	echo [ -DONE- ] Exit now.
 	exit /b 1
 ) else if "%~1"=="build" (
@@ -27,8 +27,8 @@ if "%~1"=="" (
 ) else (
 	echo [ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command.
 	echo ^|          build  - ^(re^)build the binaries
-      echo ^|          delete - delete the previous binaries
-      echo ^|          clear  - remove the 'bin' folder
+    echo ^|          delete - delete the previous binaries
+    echo ^|          clear  - remove the 'bin' folder
 	echo [ -DONE- ] Exit now.
 	exit /b 1
 )
