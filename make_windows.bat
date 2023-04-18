@@ -9,6 +9,7 @@ if "%~1"=="" (
 	exit /b 1
 ) else if "%~1"=="build" (
 	echo [ START: ] Building the binaries now ...
+    echo [ -INFO- ] Please build hpcmgr with GNU/Linux, not Windows.
 	mkdir .\bin > nul 2>&1
 	echo [ -INFO- ] Deleting previously built binaries ^(if exist^)...
 	del /s /q /f .\bin\*
