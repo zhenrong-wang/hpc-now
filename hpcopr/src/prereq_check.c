@@ -206,13 +206,6 @@ int check_and_install_prerequisitions(void){
     printf("[ -INFO- ] Checking running environment for HPC-NOW services ...\n");
     if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
         printf("[ -INFO- ] No registry file found. Create a blank cluster registry now.\n");
-#ifdef _WIN32
-        system("mkdir -p c:\\programdata\\hpc-now\\etc\\ > nul 2>&1");
-#elif __APPLE__
-        system("mkdir -p /Applications/.hpc-now/.etc/ >> /dev/null 2>&1");
-#elif __linux__
-        system("mkdir -p /usr/.hpc-now/.etc/ >> /dev/null 2>&1");
-#endif
         file_p=fopen(ALL_CLUSTER_REGISTRY,"w+");
         if(file_p==NULL){
             printf("[ FATAL: ] Failed to open/write to the cluster registry. Exit now.\n");

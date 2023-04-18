@@ -44,6 +44,12 @@ int switch_to_cluster(char* target_cluster_name){
         printf("[ FATAL: ] Failed to create the current cluster indicator. Exit now.");
         return -1;
     }
+    if(cluster_name_check(target_cluster_name)!=-1){
+        printf("[ FATAL: ] The specified cluster name is not in the registry.\n");
+        printf("|          You can run the 'hpcopr ls-clusters to view the currently available clusters.\n");
+        printf("[ FATAL: ] Exit now.\n");
+        return 1;
+    }
     fprintf(file_p,"%s",target_cluster_name);
     fclose(file_p);
     return 0;
@@ -56,7 +62,7 @@ int add_to_cluster_registry(char* new_cluster_name){
         printf("[ FATAL: ] Failed to open/write to the cluster registry. Exit now.");
         return -1;
     }
-    fprintf(file_p,"CLUSTER NAME: %s\n",real_cluster_name);
+    fprintf(file_p,"CLUSTER NAME: %s\n",new_cluster_name);
     fclose(file_p);
     return 0;
 }
@@ -80,7 +86,7 @@ int list_all_cluster_names(void){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
         return -1;
     }
-    printf("[ -INFO- ] Current cluster names:\n")
+    printf("[ -INFO- ] Current cluster list:\n");
     while(fgetline(file_p,registry_line)==0){
         if(strlen(registry_line)!=0){
             printf("           %s\n",registry_line);
@@ -120,7 +126,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     fclose(file_p);
     if(cluster_name_check(target_cluster_name)==0||cluster_name_check(target_cluster_name)==1){
-        printf("[ FATAL: ] The specified cluster name %s is not in the registry. All current cluster names:\n",target_cluster_name);
+        printf("[ FATAL: ] The specified cluster name %s is not in the registry. Current cluster list:\n",target_cluster_name);
         list_all_cluster_names();
         return 1;
     }
@@ -132,12 +138,12 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
 }
 
-int show_current_cluster(void){
+int show_current_cluster(char* cluster_workdir){
     FILE* file_p=NULL;
     char current_cluster_name[CLUSTER_NAME_LENGTH_MAX]="";
     if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
-        printf("[ -INFO- ] You are not operating any clusters. All current cluster names:\n");
-        list_all_cluster_names();
+        printf("[ -INFO- ] You are not operating any clusters. Please run the 'hpcopr ls-clusters' command\n");
+        printf("|          to view the cluster list and 'hpcopr switch' command to switch to one.\n");
         return 1;
     }
     else{
@@ -145,13 +151,15 @@ int show_current_cluster(void){
         fscanf(file_p,"%s",current_cluster_name);
         printf("[ -INFO- ] Current cluster: %s\n",current_cluster_name);
         fclose(file_p);
+        get_workdir(cluster_workdir,current_cluster_name);
         return 0;
     }
 }
+
 int exit_current_cluster(void){
-    FILE* file_p=NULL;
     char cmdline[CMDLINE_LENGTH]="";
-    if(show_current_cluster()==1){
+    char temp_workdir[DIR_LENGTH]="";
+    if(show_current_cluster(temp_workdir)==1){
         return 1;
     }
     else{
@@ -161,10 +169,11 @@ int exit_current_cluster(void){
         sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",CURRENT_CLUSTER_INDICATOR);
 #endif
         system(cmdline);
-        printf("[ -INFO- ] Exit the current cluster.\n")
+        printf("[ -INFO- ] Exit the current cluster.\n");
         return 0;
     }
 }
+
 int remove_cluster(char* target_cluster_name){
     char cluster_workdir[DIR_LENGTH]="";
     char doubleconfirm[64]="";
@@ -258,10 +267,10 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     fclose(file_p);
     cluster_name_length=strlen(cluster_name);
     if(cluster_name_length>CLUSTER_NAME_LENGTH_MAX){
-        printf("[ -WARN- ] The specified cluster name exceeds the maximum length %d. Will cut the length to %d.\n",CLUSTER_NAME_LENGTH_MAX);
-        cluster_name_length==CLUSTER_NAME_LENGTH_MAX;
+        printf("[ -WARN- ] The specified cluster name exceeds the maximum length %d. Will cut the length.\n",CLUSTER_NAME_LENGTH_MAX);
+        cluster_name_length=CLUSTER_NAME_LENGTH_MAX;
         for(i=0;i<CLUSTER_NAME_LENGTH_MAX;i++){
-            *(real_cluster_name+i)==*(cluster_name+i);
+            *(real_cluster_name+i)=*(cluster_name+i);
         }
         *(real_cluster_name+CLUSTER_NAME_LENGTH_MAX)='\0';
     }
@@ -298,7 +307,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             printf("[ FATAL: ] The cluster name %s already exists.\n",real_cluster_name);
             printf("|          Please check and retry. Exit now.\n");
             return 1;
-        printf("[ -INFO- ] Using the input cluster name %s.\n",real_cluster_name);
+            printf("[ -INFO- ] Using the input cluster name %s.\n",real_cluster_name);
+        }
     }
     if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
 #ifdef _WIN32
@@ -349,7 +359,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s\\.secrets.txt %s",now_crypto_exec,filename_temp,vaultdir,md5sum);
+    sprintf(cmdline,"%s encrypt %s %s\\.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,md5sum);
     system(cmdline);
     sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
 #else
@@ -358,7 +368,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s/.secrets.txt %s",now_crypto_exec,filename_temp,vaultdir,md5sum);
+    sprintf(cmdline,"%s encrypt %s %s/.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,md5sum);
     system(cmdline);
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
 #endif

@@ -37,8 +37,8 @@ int main(int argc, char* argv[]){
     char buffer1[64];
     char cloud_flag[16];
     int run_flag=0;
-    char pwd[DIR_LENGTH]="";
-    char vaultdir[DIR_LENGTH];
+    char workdir[DIR_LENGTH]="";
+    char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char* usage_log=USAGE_LOG_FILE;
     char* operation_log=OPERATION_LOG_FILE;
@@ -143,6 +143,24 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
 
+    if(show_current_cluster(workdir)==1){
+        run_flag=list_all_cluster_names();
+        print_tail();
+        return run_flag;
+    }
+
+    if(strcmp(argv[1],"ls-clusters")==0){
+        return list_all_cluster_names();
+    }
+
+    if(strcmp(argv[1],"switch")==0&&argc==3){
+        return switch_to_cluster(argv[2]);
+    }
+
+    if(strcmp(argv[1],"new-cluster")==0){
+        return create_new_cluster(crypto_keyfile,"","","");
+    }
+    /*
     if(strcmp(argv[1],"new")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"conf")!=0){
         print_help();
         return 1;
@@ -512,5 +530,5 @@ int main(int argc, char* argv[]){
         }
     }
     system_cleanup();
-    return 0;
+    return 0;*/
 }

@@ -37,11 +37,11 @@ int add_to_cluster_registry(char* new_cluster_name);
 int delete_from_cluster_registry(char* deleted_cluster_name);
 int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk);
 int list_all_cluster_names(void);
-int glance_clusters(char* target_cluster_name);
+int glance_clusters(char* target_cluster_name, char* crypto_keyfile);
 int switch_to_cluster(char* target_cluster_name);
-void show_current_cluster(void);
-void exit_current_cluster(void);
-int remove_cluster(char* cluster_name, int force_flag);
+int show_current_cluster(char* cluster_workdir);
+int exit_current_cluster(void);
+int remove_cluster(char* target_cluster_name);
 
 void create_and_get_stackdir(char* workdir, char* stackdir);
 void create_and_get_vaultdir(char* workdir, char* vaultdir);
