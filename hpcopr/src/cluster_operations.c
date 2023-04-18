@@ -16,6 +16,21 @@
 #include "../include/now_functions.h" 
 #endif
 
+int create_cluster_registry(void){
+    FILE* file_p=NULL;
+    if(file_exist_or_not(ALL_CLUSTER_REGISTRY)==0){
+        return 0;
+    }
+    file_p=fopen(ALL_CLUSTER_REGISTRY,"w+");
+    if(file_p==NULL){
+        return 1;
+    }
+    else{
+        fclose(file_p);
+        return 0;
+    }
+}
+
 int cluster_name_check(char* real_cluster_name){
     int i;
     char real_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
