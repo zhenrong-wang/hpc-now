@@ -33,5 +33,5 @@ if "%~1"=="" (
 	echo [ -DONE- ] Exit now.
 	exit /b 1
 )
-echo "[ -DONE- ] Please check the console output for building results."
+echo [ -DONE- ] Please check the console output for building results.
 exit /b 1
