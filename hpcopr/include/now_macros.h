@@ -25,9 +25,12 @@
 #define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
 #define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
 #define SSHKEY_DIR "C:\\hpc-now\\.ssh"
+#define HPC_NOW_ROOT_DIR "c:\\programdata\\hpc-now\\"
 #define NOW_CRYPTO_EXEC "c:\\programdata\\hpc-now\\bin\\now-crypto.exe"
 #define TERRAFORM_EXEC "c:\\programdata\\hpc-now\\bin\\terraform.exe"
 #define LOCATION_CONF_FILE "c:\\programdata\\hpc-now\\etc\\locations.conf"
+#define ALL_CLUSTER_REGISTRY "c:\\programdata\\hpc-now\\etc\\all_clusters.dat"
+#define CURRENT_CLUSTER_INDICATOR "c:\\programdata\\hpc-now\\etc\\current_cluster.dat"
 #define ALI_TF_PLUGIN_VERSION "1.198.0"
 #define QCLOUD_TF_PLUGIN_VERSION "1.79.10"
 #define AWS_TF_PLUGIN_VERSION "4.55.0"
@@ -49,9 +52,12 @@
 #define OPERATION_LOG_FILE "/usr/.hpc-now/.now-cluster-operation.log"
 #define NOW_LIC_DIR "/home/hpc-now/LICENSES"
 #define SSHKEY_DIR "/home/hpc-now/.now-ssh"
+#define HPC_NOW_ROOT_DIR "/usr/.hpc-now/"
 #define NOW_CRYPTO_EXEC "/usr/.hpc-now/.bin/now-crypto.exe"
 #define TERRAFORM_EXEC "/usr/.hpc-now/.bin/terraform.exe"
 #define LOCATION_CONF_FILE "/usr/.hpc-now/.etc/locations.conf"
+#define ALL_CLUSTER_REGISTRY "/usr/.hpc-now/.etc/.all_clusters.dat"
+#define CURRENT_CLUSTER_INDICATOR "/usr/.hpc-now/.etc/current_cluster.dat"
 #define ALI_TF_PLUGIN_VERSION "1.199.0"
 #define QCLOUD_TF_PLUGIN_VERSION "1.79.12"
 #define AWS_TF_PLUGIN_VERSION "4.56.0"
@@ -72,9 +78,12 @@
 #define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
 #define NOW_LIC_DIR "/Users/hpc-now/LICENSES"
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
+#define HPC_NOW_ROOT_DIR "/Applications/.hpc-now/"
 #define NOW_CRYPTO_EXEC "/Applications/.hpc-now/.bin/now-crypto.exe"
 #define TERRAFORM_EXEC "/Applications/.hpc-now/.bin/terraform"
 #define LOCATION_CONF_FILE "/Applications/.hpc-now/.etc/locations.conf"
+#define ALL_CLUSTER_REGISTRY "/Applications/.hpc-now/.etc/.all_clusters.dat"
+#define CURRENT_CLUSTER_INDICATOR "/Applications/.hpc-now/.etc/current_cluster.dat"
 #define ALI_TF_PLUGIN_VERSION "1.199.0"
 #define QCLOUD_TF_PLUGIN_VERSION "1.79.12"
 #define AWS_TF_PLUGIN_VERSION "4.56.0"
@@ -93,11 +102,13 @@
 #define CMDLINE_LENGTH 2048
 #define CLUSTER_ID_LENGTH_MAX 24
 #define CLUSTER_ID_LENGTH_MIN 8
+#define CLUSTER_NAME_LENGTH_MAX 32
 #define DIR_LENGTH 256
 #define FILENAME_LENGTH 512
 #define LOCATION_LENGTH 512
 #define LOCATION_LENGTH_EXTENDED 768
 #define LINE_LENGTH 4096 //It has to be very long, because tfstate file may contain very long line
+#define LINE_LENGTH_SHORT 128
 #define AKSK_LENGTH 128
 #define CONF_STRING_LENTH 64
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"

@@ -31,6 +31,18 @@ int get_seq_string(char* line, char split_ch, int string_seq, char* get_string);
 int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char* get_string);
 
 int get_crypto_key(char* crypto_key_filename, char* md5sum);
+
+int cluster_name_check(char* real_cluster_name);
+int add_to_cluster_registry(char* new_cluster_name);
+int delete_from_cluster_registry(char* deleted_cluster_name);
+int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk);
+int list_all_cluster_names(void);
+int glance_clusters(char* target_cluster_name);
+int switch_to_cluster(char* target_cluster_name);
+void show_current_cluster(void);
+void exit_current_cluster(void);
+int remove_cluster(char* cluster_name, int force_flag);
+
 void create_and_get_stackdir(char* workdir, char* stackdir);
 void create_and_get_vaultdir(char* workdir, char* vaultdir);
 int remote_copy(char* workdir, char* sshkey_dir, char* option);
