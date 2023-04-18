@@ -5,13 +5,6 @@
 
 #!/bin/bash
 
-# This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
-# The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
-# It is distributed under the license: GNU Public License - v2.0
-# Bug report: info@hpc-now.com
-
-#!/bin/bash
-
 if [ ! -n "$1" ]; then
 	echo -e "[ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command."
 	echo -e "|          build  - (re)build the binaries"
