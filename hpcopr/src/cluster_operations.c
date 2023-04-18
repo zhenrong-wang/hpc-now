@@ -142,7 +142,7 @@ int show_current_cluster(char* cluster_workdir){
     FILE* file_p=NULL;
     char current_cluster_name[CLUSTER_NAME_LENGTH_MAX]="";
     if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
-        printf("[ -INFO- ] You are not operating any clusters. Please run the 'hpcopr ls-clusters' command\n");
+        printf("[ -INFO- ] You are not operating any clusters. Please run the 'hpcopr ls-clusters'\n");
         printf("|          to view the cluster list and 'hpcopr switch' command to switch to one.\n");
         return 1;
     }

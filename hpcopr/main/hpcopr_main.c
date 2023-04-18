@@ -43,6 +43,7 @@ int main(int argc, char* argv[]){
     char* usage_log=USAGE_LOG_FILE;
     char* operation_log=OPERATION_LOG_FILE;
     char string_temp[128]="";
+    FILE* file_p=NULL;
     print_header();
 
     if(check_current_user()!=0){
@@ -120,6 +121,10 @@ int main(int argc, char* argv[]){
 #elif __linux__
     system("mkdir -p /usr/.hpc-now/.etc/ >> /dev/null 2>&1");
 #endif
+    if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
+        file_p=fopen(ALL_CLUSTER_REGISTRY,"w+");
+        fclose(file_p);
+    }
     if(strcmp(argv[1],"configloc")==0){
         run_flag=configure_locations();
         print_tail();
