@@ -131,7 +131,7 @@ int list_all_cluster_names(void){
         return -1;
     }
     printf("[ -INFO- ] Current cluster list:\n");
-    while(fgetline(file_p,registry_line)!=-1){
+    while(fgetline(file_p,registry_line)!=1){
         if(strlen(registry_line)!=0){
             if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
                 printf("|          %s\n",registry_line);
@@ -141,6 +141,17 @@ int list_all_cluster_names(void){
                 if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,temp_cluster_name,"","","","")>0){
                     printf("| CUR ---> %s\n",registry_line);
                 }
+            }
+        }
+    }
+    if(strlen(registry_line)!=0){
+        if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
+            printf("|          %s\n",registry_line);
+        }
+        else{
+            get_seq_string(registry_line,' ',3,temp_cluster_name);
+            if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,temp_cluster_name,"","","","")>0){
+                printf("| CUR ---> %s\n",registry_line);
             }
         }
     }
