@@ -389,11 +389,9 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     sprintf(cmdline,"%s encrypt %s %s\\.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,md5sum);
     system(cmdline);
     sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
-#elif __linux
-    sprintf(new_workdir,"%s/workdir/%s/",HPC_NOW_ROOT_DIR,real_cluster_name);
+#elif __linux__
+    sprintf(new_workdir,"%s/workdir/%s",HPC_NOW_ROOT_DIR,real_cluster_name);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",new_workdir);
-    system(cmdline);
-    sprintf(cmdline,"mkdir -p /home/hpc-now/%s > nul 2>&1",real_cluster_name);
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
@@ -401,10 +399,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     system(cmdline);
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
 #elif __APPLE__
-    sprintf(new_workdir,"%s/workdir/%s/",HPC_NOW_ROOT_DIR,real_cluster_name);
+    sprintf(new_workdir,"%s/workdir/%s",HPC_NOW_ROOT_DIR,real_cluster_name);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",new_workdir);
-    system(cmdline);
-    sprintf(cmdline,"mkdir -p /Users/hpc-now/%s > nul 2>&1",real_cluster_name);
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
