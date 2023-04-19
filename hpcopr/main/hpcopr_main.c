@@ -202,7 +202,6 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"switch")==0){
         if(argc==2){
             printf("[ FATAL: ] You need to specify which cluster to switch to.\n");
-            printf("[ -INFO- ] Current cluster list:\n");
             run_flag=list_all_cluster_names();
             print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
@@ -218,7 +217,6 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"glance")==0){
         if(argc<3){
             printf("[ FATAL: ] You need to specify whether to view all the clusters or a specific cluster.\n");
-            printf("[ -INFO- ] Current cluster list:\n");
             run_flag=list_all_cluster_names();
             print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
@@ -243,7 +241,6 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"remove")==0){
         if(argc==2){
             printf("[ FATAL: ] You need to specify which cluster to be removed.\n");
-            printf("[ -INFO- ] Current cluster list:\n");
             run_flag=list_all_cluster_names();
             print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
