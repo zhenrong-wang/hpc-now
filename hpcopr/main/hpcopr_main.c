@@ -356,16 +356,21 @@ int main(int argc, char* argv[]){
         if(run_flag==-1){
             printf("[ FATAL: ] No configuration file found. Please run the command 'hpcopr get-conf' first.\n");
             printf("|          Exit now.\n");
+            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],-1);
+            system_cleanup();
             return -1;
         }
         else if(run_flag==1){
             printf("[ FATAL: ] Failed to start the default text editor. Please make sure your OS works well.\n");
             printf("|          Exit now.\n");
+            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],-1);
+            system_cleanup();
             return 1;
         }
         else{
+            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],0);
             system_cleanup();
             return 0;
