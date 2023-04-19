@@ -37,6 +37,7 @@ int main(int argc, char* argv[]){
     char buffer1[64];
     char cloud_flag[16];
     int run_flag=0;
+    int current_cluster_flag=0;
     char workdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -166,8 +167,8 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return -3;
     }
-    
-    show_current_cluster(workdir,current_cluster_name);
+
+    current_cluster_flag=show_current_cluster(workdir,current_cluster_name);
     if(strcmp(argv[1],"new-cluster")==0){
         if(argc==2){
             run_flag=create_new_cluster(crypto_keyfile,"","","");
@@ -271,7 +272,7 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
 
-    if(show_current_cluster(workdir,current_cluster_name)==1){
+    if(current_cluster_flag==1){
         run_flag=list_all_cluster_names();
         print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
