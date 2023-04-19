@@ -6,15 +6,15 @@
 #!/bin/bash
 
 if [ ! -n "$1" ]; then
-	echo -e "[ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command."
-	echo -e "|          build  - (re)build the binaries"
-    echo -e "|          delete - delete the previous binaries"
-    echo -e "|          clear  - remove the 'bin' folder"
-	echo -e "[ -DONE- ] Exit now."
+	echo "[ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command."
+	echo "|          build  - (re)build the binaries"
+    echo "|          delete - delete the previous binaries"
+    echo "|          clear  - remove the 'bin' folder"
+	echo "[ -DONE- ] Exit now."
     exit 1
 elif [ "$1" = "build" ]; then
-    echo -e "[ START: ] Building the binaries now (including hpcmgr) ..."
-    echo -e "[ -INFO- ] Please build hpcmgr with GNU/Linux, not macOS."
+    echo "[ START: ] Building the binaries now (including hpcmgr) ..."
+    echo "[ -INFO- ] Please build hpcmgr with GNU/Linux, not macOS."
     mkdir -p ./bin
     rm -rf ./bin/*
     clang ./hpcopr/main/hpcopr_main.c -Wall -o ./bin/hpcopr_darwin
@@ -22,17 +22,17 @@ elif [ "$1" = "build" ]; then
     clang ./installer/installer.c -Wall -o ./bin/installer_darwin
     chmod +x ./bin/*
 elif [ "$1" = "delete" ]; then
-    echo -e "[ START: ] Deleting the binaries now ..."
+    echo "[ START: ] Deleting the binaries now ..."
     rm -rf ./bin/*
 elif [ "$1" = "clear" ]; then
-    echo -e "[ START: ] Removing the bin folder now ..."
+    echo "[ START: ] Removing the bin folder now ..."
     rm -rf ./bin
 else
-    echo -e "[ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command."
-	echo -e "|          build  - (re)build the binaries"
-    echo -e "|          delete - delete the previous binaries"
-    echo -e "|          clear  - remove the 'bin' folder"
-	echo -e "[ -DONE- ] Exit now."
+    echo "[ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command."
+	echo "|          build  - (re)build the binaries"
+    echo "|          delete - delete the previous binaries"
+    echo "|          clear  - remove the 'bin' folder"
+	echo "[ -DONE- ] Exit now."
     exit 1
 fi
-echo -e "[ -DONE- ] Please check the console output for building results."
+echo "[ -DONE- ] Please check the console output for building results."
