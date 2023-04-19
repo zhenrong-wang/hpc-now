@@ -169,7 +169,7 @@ int main(int argc, char* argv[]){
         return -3;
     }
 
-    current_cluster_flag=show_current_cluster(workdir,current_cluster_name);
+    current_cluster_flag=show_current_cluster(workdir,current_cluster_name,1);
     if(strcmp(argv[1],"new-cluster")==0){
         if(argc==2){
             run_flag=create_new_cluster(crypto_keyfile,"","","");

@@ -60,6 +60,8 @@ int cluster_name_check(char* real_cluster_name){
 
 int switch_to_cluster(char* target_cluster_name){
     char* current_cluster=CURRENT_CLUSTER_INDICATOR;
+    char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char temp_workdir[DIR_LENGTH]="";
     FILE* file_p=fopen(current_cluster,"w+");
     if(file_p==NULL){
         printf("[ FATAL: ] Failed to create the current cluster indicator. Exit now.");
@@ -67,8 +69,15 @@ int switch_to_cluster(char* target_cluster_name){
     }
     if(cluster_name_check(target_cluster_name)!=-1){
         printf("[ FATAL: ] The specified cluster name is not in the registry.\n");
-        printf("|          You can run the 'hpcopr ls-clusters to view the currently available clusters.\n");
+        printf("|          You can run the 'hpcopr ls-clusters' to view cluster list.\n");
         printf("[ FATAL: ] Exit now.\n");
+        fclose(file_p);
+        return 1;
+    }
+    show_current_cluster(temp_workdir,temp_cluster_name,0);
+    if(strcmp(temp_cluster_name,target_cluster_name)==0){
+        printf("[ -INFO- ] You are operating the cluster %s now. No need to switch.\n",target_cluster_name);
+        fclose(file_p);
         return 1;
     }
     fprintf(file_p,"%s",target_cluster_name);
@@ -198,16 +207,20 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
 }
 
-int show_current_cluster(char* cluster_workdir, char* current_cluster_name){
+int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag){
     FILE* file_p=NULL;
     if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)==0){
-        printf("[ -INFO- ] Currently you are not operating any cluster.\n");
+        if(silent_flag!=0){
+            printf("[ -INFO- ] Currently you are not operating any cluster.\n");
+        }
         return 1;
     }
     else{
         file_p=fopen(CURRENT_CLUSTER_INDICATOR,"r");
         fscanf(file_p,"%s",current_cluster_name);
-        printf("[ -INFO- ] Current cluster: %s\n",current_cluster_name);
+        if(silent_flag!=0){
+            printf("[ -INFO- ] Current cluster: %s\n",current_cluster_name);
+        }
         fclose(file_p);
         get_workdir(cluster_workdir,current_cluster_name);
         return 0;
@@ -231,7 +244,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     if(cluster_name_check(target_cluster_name)==0||cluster_name_check(target_cluster_name)==1){
-        printf("[ FATAL: ] The specified cluster name %s is not in the registry. All current cluster names:\n",target_cluster_name);
+        printf("[ FATAL: ] The specified cluster name %s is not in the registry. Current cluster list:\n",target_cluster_name);
         list_all_cluster_names();
         return 1;
     }
