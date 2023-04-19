@@ -73,6 +73,7 @@ int switch_to_cluster(char* target_cluster_name){
     }
     fprintf(file_p,"%s",target_cluster_name);
     fclose(file_p);
+    printf("[ -INFO- ] Successfully switched to the cluster %s.\n",target_cluster_name);
     return 0;
 }
 
