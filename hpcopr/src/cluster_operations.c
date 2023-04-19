@@ -2313,8 +2313,8 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
             return 1;
         }
     }
-    prntf("[ -INFO- ] Would you like to edit the configuration file now? Input 'y-e-s' to confirm:\n");
-    prntf("[ INPUT: ] ");
+    printf("[ -INFO- ] Would you like to edit the configuration file now? Input 'y-e-s' to confirm:\n");
+    printf("[ INPUT: ] ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
