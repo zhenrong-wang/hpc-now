@@ -12,6 +12,8 @@
 #include <unistd.h>
 #include <signal.h>
 
+#define VERSION_CODE "0.2.1.0001"
+
 #ifdef _WIN32
 #include <malloc.h>
 #define LINE_LENGTH 1024
@@ -31,7 +33,7 @@
 #define PASSWORD_LENGTH 19
 
 void print_header(void){
-    printf("| Welcome to the HPC-NOW Service Installer! Version: 0.1.91.0002\n");
+    printf("| Welcome to the HPC-NOW Service Installer! Version: %s\n",VERSION_CODE);
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd\n");
     printf("| This is free software; see the source for copying conditions.  There is NO\n");
     printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
