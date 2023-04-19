@@ -2313,6 +2313,9 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
             return 1;
         }
     }
+    else{
+        return 1;
+    }
     printf("[ -INFO- ] Would you like to edit the configuration file now? Input 'y-e-s' to confirm:\n");
     printf("[ INPUT: ] ");
     fflush(stdin);
@@ -2329,9 +2332,6 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
     sprintf(cmdline,"vi %s/tf_prep.conf",confdir);
 #endif
     return 0;
-    else{
-        return 1;
-    }
 }
 
 int edit_configuration_file(char* workdir){
