@@ -2380,6 +2380,9 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
 }
 
 int edit_configuration_file(char* workdir){
+    if(cluster_empty_or_not(workdir)!=0){
+        return -1;
+    }
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
@@ -2396,11 +2399,7 @@ int edit_configuration_file(char* workdir){
 #else
         sprintf(cmdline,"vi %s",filename_temp);
 #endif
-        if(system(cmdline)==0){
-            return 0;
-        }
-        else{
-            return 1;
-        }
+        system(cmdline);
+        return 0;
     }
 }
