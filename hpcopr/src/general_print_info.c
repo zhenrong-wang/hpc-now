@@ -54,12 +54,13 @@ void print_help(void){
     printf("|  resetloc    : Reset to the default locations.\n");
     printf("+ III. Cluster Initialization: \n");
     printf("| * You need to switch to a cluster first. *\n");
-    printf("|  new-keypair : Rotate a new keypair for an existing cluster. The new keypair\n");
+    printf("|  new-keypair : *Rotate* a new keypair for an existing cluster. The new keypair\n");
     printf("|                should be valid and comes from the same cloud vendor.\n");
-    printf("|  init        : Initialize a new cluster. If the configuration file is absent,\n");
-    printf("|                the command will generate a default configuration file.\n");
     printf("|  get-conf    : Get the default configuration file to edit and build a customized\n");
     printf("|                HPC cluster later (using the 'init' command).\n");
+    printf("|  edit-conf   : Edit and save the default configuration file *before* init.\n");
+    printf("|  init        : Initialize a new cluster. If the configuration file is absent,\n");
+    printf("|                the command will generate a default configuration file.\n");
     printf("+ IV . Cluster Management:\n");
     printf("| * You need to switch to a cluster first.\n");
     printf("|  vault       : Check the sensitive information of the current cluster.\n");

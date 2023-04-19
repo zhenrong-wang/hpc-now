@@ -341,15 +341,37 @@ int main(int argc, char* argv[]){
             return 31;
         }
         else{
-            printf("[ -INFO- ] The default configuration file has been downloaded to the 'conf' folder.\n");
-            printf("|          You can edit it, and then run the 'init' command to build a customized\n");
-            printf("|          HPC cluster. Exit now.\n");
+            printf("[ -INFO- ] The default configuration file has been downloaded to the local place.\n");
+            printf("|          Please edit it, and then run the 'init' command to build a customized\n");
+            printf("|          HPC cluster. \n");
             print_tail();
             write_log(current_cluster_name,operation_log,argv[1],0);
             system_cleanup();
             return 0;
         }
     }
+
+    if(strcmp(argv[1],"edit-conf")==0){
+        run_flag=edit_configuration_file(workdir);
+        if(run_flag==-1){
+            printf("[ FATAL: ] No configuration file found. Please run the command 'hpcopr get-conf' first.\n");
+            printf("|          Exit now.\n");
+            write_log(current_cluster_name,operation_log,argv[1],-1);
+            return -1;
+        }
+        else if(run_flag==1){
+            printf("[ FATAL: ] Failed to start the default text editor. Please make sure your OS works well.\n");
+            printf("|          Exit now.\n");
+            write_log(current_cluster_name,operation_log,argv[1],-1);
+            return 1;
+        }
+        else{
+            write_log(current_cluster_name,operation_log,argv[1],0);
+            system_cleanup();
+            return 0;
+        }
+    }
+
     if(strcmp(argv[1],"init")==0){
         printf("[ -INFO- ] You are initializing a cluster with name %s on Cloud %s.\n",current_cluster_name,cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_C")==0){

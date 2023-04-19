@@ -99,6 +99,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option);
 int create_new_workdir(char* crypto_keyfile);
 int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile);
 int get_default_conf(char* workdir, char* crypto_keyfile);
+int edit_configuration_file(char* workdir)
 
 int get_usage(char* usage_logfile);
 int get_syslog(char* operation_logfile);

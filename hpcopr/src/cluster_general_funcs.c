@@ -54,7 +54,7 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
 
 void create_and_get_stackdir(char* workdir, char* stackdir){
     char cmdline[CMDLINE_LENGTH]="";
-    char string_temp[4]="";
+/*    char string_temp[4]="";
     int i;
     int j=0;
     int cluster_num=0;
@@ -72,13 +72,18 @@ void create_and_get_stackdir(char* workdir, char* stackdir){
     }
     for(j=0;j<strlen(string_temp);j++){
         cluster_num+=(*(string_temp+j)-'0')*pow(10,j);
-    }
+    }*/
 #ifdef _WIN32
-    sprintf(stackdir,"c:\\programdata\\hpc-now\\stack\\cluster-%d",cluster_num);
+    sprintf(stackdir,"%s\\stack",workdir);
     sprintf(cmdline,"mkdir %s > nul 2>&1",stackdir);
     system(cmdline);
     sprintf(cmdline,"attrib +h +s +r %s",stackdir);
     system(cmdline);
+#else
+    sprintf(stackdir,"%s/.stack",workdir);
+    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",stackdir);
+    system(cmdline);
+/*
 #elif __linux__
     sprintf(stackdir,"/usr/.hpc-now/.stack/.cluster-%d",cluster_num);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",stackdir);
@@ -86,7 +91,7 @@ void create_and_get_stackdir(char* workdir, char* stackdir){
 #elif __APPLE__
     sprintf(stackdir,"/Applications/.hpc-now/.stack/.cluster-%d",cluster_num);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",stackdir);
-    system(cmdline);
+    system(cmdline);*/
 #endif
 }
 
@@ -128,7 +133,7 @@ int remote_copy(char* workdir, char* sshkey_dir, char* option){
 
 void create_and_get_vaultdir(char* workdir, char* vaultdir){
     char cmdline[CMDLINE_LENGTH]="";
-    char string_temp[4]="";
+/*    char string_temp[4]="";
     int i;
     int j=0;
     int cluster_num=0;
@@ -146,13 +151,19 @@ void create_and_get_vaultdir(char* workdir, char* vaultdir){
     }
     for(j=0;j<strlen(string_temp);j++){
         cluster_num+=(*(string_temp+j)-'0')*pow(10,j);
-    }
+    }*/
 #ifdef _WIN32
-    sprintf(vaultdir,"c:\\programdata\\hpc-now\\vault\\cluster-%d",cluster_num);
-    sprintf(cmdline,"mkdir -p %s > nul 2>&1",vaultdir);
+//    sprintf(vaultdir,"c:\\programdata\\hpc-now\\vault\\cluster-%d",cluster_num);
+    sprintf(vaultdir,"%s\\vault",workdir);
+    sprintf(cmdline,"mkdir %s > nul 2>&1",vaultdir);
     system(cmdline);
     sprintf(cmdline,"attrib +h +s +r %s",vaultdir);
     system(cmdline);
+#else
+    sprintf(vaultdir,"%s/vault",workdir);
+    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",vaultdir);
+    system(cmdline);
+/*
 #elif __APPLE__
     sprintf(vaultdir,"/Applications/.hpc-now/.vault/.cluster-%d",cluster_num);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",vaultdir);
@@ -160,7 +171,7 @@ void create_and_get_vaultdir(char* workdir, char* vaultdir){
 #elif __linux__
     sprintf(vaultdir,"/usr/.hpc-now/.vault/.cluster-%d",cluster_num);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",vaultdir);
-    system(cmdline);
+    system(cmdline);*/
 #endif
 }
 

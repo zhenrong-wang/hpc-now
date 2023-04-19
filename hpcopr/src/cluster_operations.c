@@ -377,14 +377,29 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     sprintf(new_workdir,"%s\\workdir\\%s\\",HPC_NOW_ROOT_DIR,real_cluster_name);
     sprintf(cmdline,"mkdir %s > nul 2>&1",new_workdir);
     system(cmdline);
+    sprintf(cmdline,"mkdir c:\\hpc-now\\%s > nul 2>&1",real_cluster_name);
+    system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
     sprintf(cmdline,"%s encrypt %s %s\\.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,md5sum);
     system(cmdline);
     sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
-#else
+#elif __linux
     sprintf(new_workdir,"%s/workdir/%s/",HPC_NOW_ROOT_DIR,real_cluster_name);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",new_workdir);
+    system(cmdline);
+    sprintf(cmdline,"mkdir -p /home/hpc-now/%s > nul 2>&1",real_cluster_name);
+    system(cmdline);
+    create_and_get_vaultdir(new_workdir,new_vaultdir);
+    get_crypto_key(crypto_keyfile,md5sum);
+    sprintf(cmdline,"%s encrypt %s %s/.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,md5sum);
+    system(cmdline);
+    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+#elif __APPLE__
+    sprintf(new_workdir,"%s/workdir/%s/",HPC_NOW_ROOT_DIR,real_cluster_name);
+    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",new_workdir);
+    system(cmdline);
+    sprintf(cmdline,"mkdir -p /Users/hpc-now/%s > nul 2>&1",real_cluster_name);
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
@@ -2187,6 +2202,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
     char buffer1[64]="";
     char buffer2[64]="";
     char cloud_flag[32]="";
+    char doubleconfirm[64]="";
 
     char URL_AWS_ROOT[LOCATION_LENGTH_EXTENDED]="";
     char URL_ALICLOUD_ROOT[LOCATION_LENGTH_EXTENDED]="";
@@ -2258,7 +2274,6 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
         if(system(cmdline)!=0){
             return 1;
         }
-        return 0;
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         if(CODE_LOC_FLAG==1){
@@ -2278,7 +2293,6 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
         if(system(cmdline)!=0){
             return 1;
         }
-        return 0;
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(CODE_LOC_FLAG==1){
@@ -2298,9 +2312,50 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
         if(system(cmdline)!=0){
             return 1;
         }
+    }
+    prntf("[ -INFO- ] Would you like to edit the configuration file now? Input 'y-e-s' to confirm:\n");
+    prntf("[ INPUT: ] ");
+    fflush(stdin);
+    scanf("%s",doubleconfirm);
+    if(strcmp(doubleconfirm,"y-e-s")!=0){
+        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+        printf("|          You can still switch to this cluster and run 'hpcopr edit-conf' to \n");
+        printf("|          modify and save the default configuration file later. Exit now.\n");
         return 0;
     }
+#ifdef _WIN32
+    sprintf(cmdline,"notepad %s\\tf_prep.conf",confdir);
+#else
+    sprintf(cmdline,"vi %s/tf_prep.conf",confdir);
+#endif
+    return 0;
     else{
         return 1;
+    }
+}
+
+int edit_configuration_file(char* workdir){
+    char filename_temp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+#ifdef _WIN32
+    sprintf(filename_temp,"%s\\conf\\tf_prep.conf",workdir);
+#else
+    sprintf(filename_temp,"%s/conf/tf_prep.conf",workdir);
+#endif
+    if(file_exist_or_not(filename_temp)!=0){
+        return -1;
+    }
+    else{
+#ifdef _WIN32
+        sprintf(cmdline,"notepad %s",filename_temp);
+#else
+        sprintf(cmdline,"vi %s",filename_temp);
+#endif
+        if(system(cmdline)==0){
+            return 0;
+        }
+        else{
+            return 1;
+        }
     }
 }
