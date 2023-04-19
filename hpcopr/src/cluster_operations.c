@@ -162,8 +162,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name){
     FILE* file_p=NULL;
     if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)==0){
-        printf("[ -INFO- ] You are not operating any clusters. Please run the 'hpcopr ls-clusters'\n");
-        printf("|          to view the cluster list and 'hpcopr switch' command to switch to one.\n");
+        printf("[ -INFO- ] Currently you are not operating any cluster.\n");
         return 1;
     }
     else{
