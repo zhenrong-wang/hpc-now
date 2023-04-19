@@ -93,7 +93,7 @@ void print_help(void){
     printf("|              : minimal - Turn on the management nodes of the cluster.\n");
     printf("|              : all     - Turn on the management and compute nodes of the cluster.\n");
     printf("|  destroy     : *DESTROY* the whole cluster - including all the resources & data.\n");
-    printf("+ VII. Others:\n");
+    printf("+ VI . Others:\n");
     printf("|  about       : Display the version and other info.\n");
     printf("|  license     : Read the terms and conditions of the GNU Public License - 2.0\n");
     printf("\n");
