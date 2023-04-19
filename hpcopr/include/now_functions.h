@@ -39,7 +39,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
 int list_all_cluster_names(void);
 int glance_clusters(char* target_cluster_name, char* crypto_keyfile);
 int switch_to_cluster(char* target_cluster_name);
-int show_current_cluster(char* cluster_workdir);
+int show_current_cluster(char* cluster_workdir,char* current_cluster_name);
 int exit_current_cluster(void);
 int remove_cluster(char* target_cluster_name, char* crypto_keyfile);
 
