@@ -234,6 +234,12 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"exit-current")==0){
+        if(current_cluster_flag!=0){
+            print_tail();
+            write_log("NULL",operation_log,argv[1],current_cluster_flag);
+            system_cleanup();
+            return current_cluster_flag;
+        }
         run_flag=exit_current_cluster();
         print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
