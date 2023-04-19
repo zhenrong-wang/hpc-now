@@ -417,7 +417,6 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     printf("|             create a customized cluster.\n");
     printf("|          You can also switch to this cluster name and operate this cluster later.\n");
     printf("[ -DONE- ] Exit now.\n");
-    print_tail();
     return 0;
 }
 
