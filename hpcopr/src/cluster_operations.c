@@ -35,7 +35,10 @@ int cluster_name_check(char* real_cluster_name){
     int i;
     char real_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
     for(i=0;i<strlen(real_cluster_name);i++){
-        if(*(real_cluster_name+i)=='-'){
+        if(*(real_cluster_name+i)=='-'||*(real_cluster_name+i)=='0'||*(real_cluster_name+i)=='9'){
+            continue;
+        }
+        if(*(real_cluster_name+i)>'0'&&*(real_cluster_name+i)<'9'){
             continue;
         }
         if(*(real_cluster_name+i)<'A'||*(real_cluster_name+i)>'z'){
@@ -303,7 +306,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     }
     if(cluster_name_length!=0){
         if(cluster_name_check(real_cluster_name)==1){
-            printf("[ FATAL: ] The cluster name only accepts English letters 'A-Z', 'a-z' and '-'.\n");
+            printf("[ FATAL: ] The cluster name only accepts English letters 'A-Z', 'a-z', '0-9' and '-'.\n");
             printf("|          The specified name %s contains illegal characters.\n",real_cluster_name);
             printf("|          Please check and retry. Exit now.\n");
             return 1;
@@ -316,12 +319,12 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         printf("[ -INFO- ] Using the specified cluster name %s.\n",real_cluster_name);
     }
     else{
-        printf("[ -INFO- ] Please input the cluster name (A-Z | a-z | - , maximum length %d):\n",CLUSTER_ID_LENGTH_MAX);
+        printf("[ -INFO- ] Please input the cluster name (A-Z | a-z | 0-9 | - , maximum length %d):\n",CLUSTER_ID_LENGTH_MAX);
         printf("[ INPUT: ] ");
         fflush(stdin);
         scanf("%s",real_cluster_name);
         if(cluster_name_check(real_cluster_name)==1){
-            printf("[ FATAL: ] The cluster name only accepts English letters 'A-Z', 'a-z' and '-'.\n");
+            printf("[ FATAL: ] The cluster name only accepts English letters 'A-Z', 'a-z', '0-9' and '-'.\n");
             printf("|          The inputs %s contains illegal characters.\n",real_cluster_name);
             printf("|          Please check and retry. Exit now.\n");
             return 1;
