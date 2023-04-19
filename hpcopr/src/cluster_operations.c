@@ -62,23 +62,23 @@ int switch_to_cluster(char* target_cluster_name){
     char* current_cluster=CURRENT_CLUSTER_INDICATOR;
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_workdir[DIR_LENGTH]="";
-    FILE* file_p=fopen(current_cluster,"w+");
-    if(file_p==NULL){
-        printf("[ FATAL: ] Failed to create the current cluster indicator. Exit now.");
-        return -1;
-    }
+    FILE* file_p=NULL;
     if(cluster_name_check(target_cluster_name)!=-1){
         printf("[ FATAL: ] The specified cluster name is not in the registry.\n");
         printf("|          You can run the 'hpcopr ls-clusters' to view cluster list.\n");
         printf("[ FATAL: ] Exit now.\n");
-        fclose(file_p);
         return 1;
     }
-    show_current_cluster(temp_workdir,temp_cluster_name,0);
-    if(strcmp(temp_cluster_name,target_cluster_name)==0){
-        printf("[ -INFO- ] You are operating the cluster %s now. No need to switch.\n",target_cluster_name);
-        fclose(file_p);
-        return 1;
+    if(show_current_cluster(temp_workdir,temp_cluster_name,0)==0){
+        if(strcmp(temp_cluster_name,target_cluster_name)==0){
+            printf("[ -INFO- ] You are operating the cluster %s now. No need to switch.\n",target_cluster_name);
+            return 1;
+        }
+    }
+    file_p=fopen(current_cluster,"w+");
+    if(file_==NULL){
+        printf("[ FATAL: ] Failed to create current cluster indicator. Exit now.\n");
+        return -1;
     }
     fprintf(file_p,"%s",target_cluster_name);
     fclose(file_p);
