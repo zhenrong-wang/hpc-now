@@ -394,15 +394,17 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"edit-conf")==0){
         run_flag=edit_configuration_file(workdir);
         if(run_flag==-1){
-            printf("[ FATAL: ] No configuration file found. Please run the command 'hpcopr get-conf' first.\n");
-            printf("|          Exit now.\n");
+            printf("[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
+            printf("|          downloading default configuration file is not permitted. If you do want\n");
+            printf("|          to reconfigure the cluster from the default configuration, please run\n");
+            printf("|          the 'destroy' command first and retry. Exit now.\n");
             print_tail();
-            write_log(current_cluster_name,operation_log,argv[1],-1);
+            write_log(current_cluster_name,operation_log,"CLUSTER_NOT_EMPTY",-1);
             system_cleanup();
             return -1;
         }
         else if(run_flag==1){
-            printf("[ FATAL: ] Failed to start the default text editor. Please make sure your OS works well.\n");
+            printf("[ FATAL: ] No configuration file found. Please run the command 'hpcopr get-conf' first.\n");
             printf("|          Exit now.\n");
             print_tail();
             write_log(current_cluster_name,operation_log,argv[1],-1);
