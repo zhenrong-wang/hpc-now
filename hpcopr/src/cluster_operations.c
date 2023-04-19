@@ -94,7 +94,7 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     int replace_flag;
     sprintf(deleted_cluster_name_with_prefix,"CLUSTER NAME: %s",deleted_cluster_name);
     replace_flag=global_replace(cluster_registry,deleted_cluster_name_with_prefix,"");
-    if(replace_flag<1){
+    if(replace_flag!=0){
         printf("[ FATAL: ] Failed to delete the cluster %s from the registry.\n",deleted_cluster_name);
     }
     return replace_flag;
