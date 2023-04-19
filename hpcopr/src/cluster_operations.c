@@ -136,6 +136,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         printf("[ -INFO- ] You specified to glance *all* the clusters:\n");
         while(fgetline(file_p,registry_line)==0){
+            printf("%s,,,,,\n",registry_line);
             if(strlen(registry_line)!=0){
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
