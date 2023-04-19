@@ -53,13 +53,12 @@ int main(int argc, char* argv[]){
 #ifdef _WIN32
         printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:\n");
         printf("|          1. Run CMD by typing cmd in the Windows Search box\n");
-        printf("|          2. cd c:\\hpc-now\n");
-        printf("|          3. run the 'hpcopr' command to operate your cloud clusters.\n");
+        printf("|          2. hpcopr ls-clusters   (You will see all the clusters)");
         printf("[ FATAL: ] Exit now.\n");
 #else
         printf("|          Please run the commands below:\n");
         printf("|          1. su hpc-now   (You will be asked to input password without echo)\n");
-        printf("|          2. cd ~ && ls   (You will see all the current working directories)\n");
+        printf("|          2. hpcopr ls-clusters   (You will see all the clusters)\n");
         printf("[ FATAL: ] Exit now.\n");
 #endif
         print_tail();

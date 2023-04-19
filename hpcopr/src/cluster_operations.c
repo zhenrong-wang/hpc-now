@@ -140,7 +140,7 @@ int list_all_cluster_names(void){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
         return -1;
     }
-    printf("[ -INFO- ] Current cluster list:\n");
+    printf("[ -INFO- ] Cluster list:\n");
     while(fgetline(file_p,registry_line)!=1){
         if(strlen(registry_line)!=0){
             if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
@@ -195,7 +195,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     fclose(file_p);
     if(cluster_name_check(target_cluster_name)==0||cluster_name_check(target_cluster_name)==1){
-        printf("[ FATAL: ] The specified cluster name %s is not in the registry. Current cluster list:\n",target_cluster_name);
+        printf("[ FATAL: ] The specified cluster name %s is not in the registry. Cluster list:\n",target_cluster_name);
         list_all_cluster_names();
         return 1;
     }
@@ -244,7 +244,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     if(cluster_name_check(target_cluster_name)==0||cluster_name_check(target_cluster_name)==1){
-        printf("[ FATAL: ] The specified cluster name %s is not in the registry. Current cluster list:\n",target_cluster_name);
+        printf("[ FATAL: ] The specified cluster name %s is not in the registry. Cluster list:\n",target_cluster_name);
         list_all_cluster_names();
         return 1;
     }
