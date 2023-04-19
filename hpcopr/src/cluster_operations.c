@@ -76,7 +76,7 @@ int switch_to_cluster(char* target_cluster_name){
         }
     }
     file_p=fopen(current_cluster,"w+");
-    if(file_==NULL){
+    if(file_p==NULL){
         printf("[ FATAL: ] Failed to create current cluster indicator. Exit now.\n");
         return -1;
     }
