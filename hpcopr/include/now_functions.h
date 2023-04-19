@@ -60,7 +60,6 @@ int generate_random_passwd(char* password);
 int generate_random_db_passwd(char* password);
 int generate_random_string(char* random_string);
 
-int envcheck(char* pwd);
 int check_internet(void);
 int check_current_user(void);
 int check_and_install_prerequisitions(void);
@@ -96,7 +95,6 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
 int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_config);
 int cluster_sleep(char* workdir, char* crypto_keyfile);
 int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option);
-int create_new_workdir(char* crypto_keyfile);
 int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile);
 int get_default_conf(char* workdir, char* crypto_keyfile);
 int edit_configuration_file(char* workdir);
