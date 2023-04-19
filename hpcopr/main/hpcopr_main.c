@@ -420,7 +420,6 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"init")==0){
-        printf("[ -INFO- ] You are initializing a cluster with name %s on Cloud %s.\n",current_cluster_name,cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_C")==0){
             run_flag=aws_cluster_init("",workdir,crypto_keyfile);
             write_log(current_cluster_name,operation_log,argv[1],run_flag);
