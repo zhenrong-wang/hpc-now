@@ -153,10 +153,9 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
 }
 
-int show_current_cluster(char* cluster_workdir){
+int show_current_cluster(char* cluster_workdir, char* current_cluster_name){
     FILE* file_p=NULL;
-    char current_cluster_name[CLUSTER_NAME_LENGTH_MAX]="";
-    if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
+    if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)==0){
         printf("[ -INFO- ] You are not operating any clusters. Please run the 'hpcopr ls-clusters'\n");
         printf("|          to view the cluster list and 'hpcopr switch' command to switch to one.\n");
         return 1;
@@ -189,7 +188,7 @@ int exit_current_cluster(void){
     }
 }
 
-int remove_cluster(char* target_cluster_name){
+int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     char cluster_workdir[DIR_LENGTH]="";
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -201,7 +200,7 @@ int remove_cluster(char* target_cluster_name){
     get_workdir(cluster_workdir,target_cluster_name);
     if(cluster_empty_or_not(cluster_workdir)!=0){
         printf("[ -WARN- ] The specified cluster is *NOT* empty!\n");
-        glance_clusters(target_cluster_name,CRYPTO_KEY_FILE);
+        glance_clusters(target_cluster_name,crypto_keyfile);
         printf("[ -WARN- ] Would you like to remove it anyway? This operation is *NOT* recoverable!\n");
         printf("[ INPUT: ] Only 'y-e-s' is accepted to continuie: ");
         fflush(stdin);
@@ -212,7 +211,7 @@ int remove_cluster(char* target_cluster_name){
             fflush(stdin);
             scanf("%s",doubleconfirm);
             if(strcmp(doubleconfirm,target_cluster_name)==0){
-                cluster_destroy(cluster_workdir,CRYPTO_KEY_FILE,0);
+                cluster_destroy(cluster_workdir,crypto_keyfile,0);
                 delete_from_cluster_registry(target_cluster_name);
                 return 0;
             }
@@ -251,7 +250,7 @@ int remove_cluster(char* target_cluster_name){
 
 int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk){
     char cmdline[CMDLINE_LENGTH]="";
-    char real_cluster_name[CLUSTER_NAME_LENGTH_MAX+1]="";
+    char real_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char filename_temp[FILENAME_LENGTH]="";
     int i;
     int cluster_name_length=0;
@@ -281,13 +280,18 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     }
     fclose(file_p);
     cluster_name_length=strlen(cluster_name);
-    if(cluster_name_length>CLUSTER_NAME_LENGTH_MAX){
-        printf("[ -WARN- ] The specified cluster name exceeds the maximum length %d. Will cut the length.\n",CLUSTER_NAME_LENGTH_MAX);
-        cluster_name_length=CLUSTER_NAME_LENGTH_MAX;
-        for(i=0;i<CLUSTER_NAME_LENGTH_MAX;i++){
+    if(cluster_name_length>CLUSTER_ID_LENGTH_MAX){
+        printf("[ -WARN- ] The specified cluster name exceeds the maximum length %d. Will cut the length.\n",CLUSTER_ID_LENGTH_MAX);
+        cluster_name_length=CLUSTER_ID_LENGTH_MAX;
+        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
             *(real_cluster_name+i)=*(cluster_name+i);
         }
-        *(real_cluster_name+CLUSTER_NAME_LENGTH_MAX)='\0';
+        *(real_cluster_name+CLUSTER_ID_LENGTH_MAX)='\0';
+    }
+    else if(cluster_name_length<8){
+        printf("[ -WARN- ] The specified cluster name is too short (<%d), will add '-hpcnow' as a suffix.\n",CLUSTER_ID_LENGTH_MIN);
+        sprintf(real_cluster_name,"%s-hpcnow",cluster_name);
+        cluster_name_length=strlen(real_cluster_name);
     }
     else{
         strcpy(real_cluster_name,cluster_name);
@@ -308,7 +312,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         printf("[ -INFO- ] Using the specified cluster name %s.\n",real_cluster_name);
     }
     else{
-        printf("[ -INFO- ] Please input the cluster name (A-Z | a-z, maximum length %d):\n",CLUSTER_NAME_LENGTH_MAX);
+        printf("[ -INFO- ] Please input the cluster name (A-Z | a-z, maximum length %d):\n",CLUSTER_ID_LENGTH_MAX);
         printf("[ INPUT: ] ");
         fflush(stdin);
         scanf("%s",real_cluster_name);
@@ -392,7 +396,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     switch_to_cluster(real_cluster_name);
     printf("[ -INFO- ] The secrets key pair has been encrypted and stored locally. You can either:\n");
     printf("|          1. run 'hpcopr init' to create a default cluster. OR\n");
-    printf("|          2. run 'hpcopr conf' to get the default cluster configuration, and run 'hpcopr init' to\n");
+    printf("|          2. run 'hpcopr get-conf' to get the default cluster configuration, and run 'hpcopr init' to\n");
     printf("|             create a customized cluster.\n");
     printf("|          You can also switch to this cluster name and operate this cluster later.\n");
     printf("[ -DONE- ] Exit now.\n");
@@ -513,7 +517,7 @@ int create_new_workdir(char* crypto_keyfile){
     return 0;
 }
 
-int rotate_new_keypair(char* workdir, char* crypto_keyfile){
+int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
@@ -560,7 +564,6 @@ int rotate_new_keypair(char* workdir, char* crypto_keyfile){
         printf("|          info@hpc-now.com for troubleshooting. Exit now.\n");
         return -1;
     }
-
     printf("\n");
     printf("|*                                C A U T I O N !                                  *\n");
     printf("|*                                                                                 *\n");
@@ -585,14 +588,21 @@ int rotate_new_keypair(char* workdir, char* crypto_keyfile){
     }
 
     get_ak_sk(filename_temp2,crypto_keyfile,access_key_prev,secret_key_prev,cloud_flag_prev);
-    printf("[ -INFO- ] Please input your new secrets key pair:\n");
-    printf("[ INPUT: ] Access key ID :");
-    scanf("%s",access_key);
-    printf("[ INPUT: ] Access secrets:");
-    scanf("%s",secret_key);
+    if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
+        printf("[ -INFO- ] Please input your new secrets key pair:\n");
+        printf("[ INPUT: ] Access key ID :");
+        fflush(stdin);
+        scanf("%s",access_key);
+        printf("[ INPUT: ] Access secrets:");
+        fflush(stdin);
+        scanf("%s",secret_key);
+    }
+    else{
+        strcpy(access_key,cloud_ak);
+        strcpy(secret_key,cloud_sk);
+    }
     ak_length=strlen(access_key);
     sk_length=strlen(secret_key);
-
     if(ak_length==24&&sk_length==30){
         strcpy(cloud_flag,"CLOUD_A");
         if(strcmp(cloud_flag_prev,cloud_flag)!=0){
@@ -642,7 +652,6 @@ int rotate_new_keypair(char* workdir, char* crypto_keyfile){
         system(cmdline);
         return 1;
     }
-
     get_crypto_key(crypto_keyfile,md5sum);
 #ifdef _WIN32
     sprintf(cmdline,"%s encrypt %s %s\\.secrets.txt %s",now_crypto_exec,filename_temp,vaultdir,md5sum);

@@ -514,7 +514,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
             *(cluster_id+i)=*(cluster_id_input+i);
         }
-        printf("[ -WARN- ] The CLUSTER_ID '%s' specified by the command is too long (length>12).\n",cluster_id_input);
+        printf("[ -WARN- ] The CLUSTER_ID '%s' specified by the command is too long (length>%d).\n",cluster_id_input,CLUSTER_ID_LENGTH_MAX);
         printf("|          Cut it to %s\n",cluster_id);
     }
     else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
@@ -1400,7 +1400,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
             *(cluster_id+i)=*(cluster_id_input+i);
         }
-        printf("[ -WARN- ] The CLUSTER_ID '%s' specified by the command is too long (length>12).\n",cluster_id_input);
+        printf("[ -WARN- ] The CLUSTER_ID '%s' specified by the command is too long (length>%d).\n",cluster_id_input,CLUSTER_ID_LENGTH_MAX);
         printf("|          Cut it to %s\n",cluster_id);
     }
     else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
@@ -2214,7 +2214,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
             *(cluster_id+i)=*(cluster_id_input+i);
         }
-        printf("[ -WARN- ] The CLUSTER_ID '%s' specified by the command is too long (length>12).\n",cluster_id_input);
+        printf("[ -WARN- ] The CLUSTER_ID '%s' specified by the command is too long (length>%d).\n",cluster_id_input,CLUSTER_ID_LENGTH_MAX);
         printf("|          Cut it to %s\n",cluster_id);
     }
     else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
