@@ -45,6 +45,7 @@ int main(int argc, char* argv[]){
     char* operation_log=OPERATION_LOG_FILE;
     char string_temp[128]="";
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX]="";
+    char doubleconfirm[64]="";
     print_header();
 
     if(check_current_user()!=0){
@@ -279,7 +280,20 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
+    else{
+        printf("[ -INFO- ] You are operating the cluster %s now, which may affect all the jobs running\n",current_cluster_name);
+        printf("|          on this cluster. Please input 'y-e-s' to continue.\n");
+        printf("[ INPUT: ] ");
+        fflush(stdin);
+        scanf("%s",doubleconfirm);
+        if(strcmp(doubleconfirm,"y-e-s")!=0){
+            printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+            printf("|          Nothing changed. Exit now.\n");
+            print_tail();
+            return 0;
+        }
+    }
+    
     if(strcmp(argv[1],"new-keypair")==0){
         if(argc==2||argc==3){
             run_flag=rotate_new_keypair(workdir,"","",crypto_keyfile);

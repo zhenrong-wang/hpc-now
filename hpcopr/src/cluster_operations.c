@@ -91,13 +91,34 @@ int add_to_cluster_registry(char* new_cluster_name){
 int delete_from_cluster_registry(char* deleted_cluster_name){
     char* cluster_registry=ALL_CLUSTER_REGISTRY;
     char deleted_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char temp_line[LINE_LENGTH_SHORT]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    FILE* file_p=NULL;
+    FILE* file_p_tmp=NULL;
     int replace_flag;
     sprintf(deleted_cluster_name_with_prefix,"CLUSTER NAME: %s",deleted_cluster_name);
     replace_flag=global_replace(cluster_registry,deleted_cluster_name_with_prefix,"");
     if(replace_flag!=0){
         printf("[ FATAL: ] Failed to delete the cluster %s from the registry.\n",deleted_cluster_name);
     }
-    return replace_flag;
+    sprintf(filename_temp,"%s.tmp",cluster_registry);
+    file_p=fopen(cluster_registry,"r");
+    file_p_tmp=fopen(filename_temp,"w+");
+    while(fgetline(file_p,temp_line)==0){
+        if(strlen(temp_line)!=0){
+            fprintf(file_p_tmp,"%s\n");
+        }
+    }
+    fprintf(file_p,"%s\n",temp_line);
+    fclose(file_p);
+    fclose(file_p_tmp);
+#ifdef _WIN32
+    sprintf(cmdline,"move /y %s %s > nul 2>&1",filename_temp,cluster_registry);
+#else
+    sprintf(cmdline,"mv %s %s > /dev/null 2>&1",filename_temp,cluster_registry);
+#endif
+    return system(cmdline);
 }
 
 int list_all_cluster_names(void){
@@ -140,8 +161,10 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             if(strlen(registry_line)!=0){
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
-                printf("%s,,,,%s\n",temp_cluster_name,temp_cluster_workdir);
+                decrypt_files(temp_cluster_workdir,crypto_keyfile);
+                printf("[ -NAME- ] %s\n",temp_cluster_name);
                 graph(temp_cluster_workdir,crypto_keyfile);
+                delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }
         }
         fclose(file_p);
