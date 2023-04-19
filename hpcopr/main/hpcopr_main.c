@@ -285,20 +285,39 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-    else{
-        printf("[ -INFO- ] You are operating the cluster %s now, which may affect all\n",current_cluster_name);
-        printf("|          the jobs running on this cluster. Please input 'y-e-s' to continue.\n");
-        printf("[ INPUT: ] ");
-        fflush(stdin);
-        scanf("%s",doubleconfirm);
-        if(strcmp(doubleconfirm,"y-e-s")!=0){
-            printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
-            printf("|          Nothing changed. Exit now.\n");
-            print_tail();
-            return 0;
+
+    if(strcmp(argv[1],"graph")==0){
+        decrypt_files(workdir,crypto_keyfile);
+        run_flag=graph(workdir,crypto_keyfile);
+        if(run_flag!=0){
+            print_empty_cluster_info();
         }
+        print_tail();
+        delete_decrypted_files(workdir,crypto_keyfile);
+        write_log(current_cluster_name,operation_log,argv[1],run_flag);
+        system_cleanup();
+        return run_flag;
     }
 
+    if(strcmp(argv[1],"vault")==0){
+        run_flag=get_vault_info(workdir,crypto_keyfile);
+        write_log(current_cluster_name,operation_log,argv[1],run_flag);
+        system_cleanup();
+        return run_flag;
+    }
+
+    printf("[ -INFO- ] You are operating the cluster %s now, which may affect all\n",current_cluster_name);
+    printf("|          the jobs running on this cluster. Please input 'y-e-s' to continue.\n");
+    printf("[ INPUT: ] ");
+    fflush(stdin);
+    scanf("%s",doubleconfirm);
+    if(strcmp(doubleconfirm,"y-e-s")!=0){
+        printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+        printf("|          Nothing changed. Exit now.\n");
+        print_tail();
+        return 0;
+    }
+    
     if(strcmp(argv[1],"new-keypair")==0){
         if(argc==2||argc==3){
             run_flag=rotate_new_keypair(workdir,"","",crypto_keyfile);
@@ -429,26 +448,6 @@ int main(int argc, char* argv[]){
         write_log(current_cluster_name,operation_log,"EMPTY_CLUSTER",11);
         system_cleanup();
         return 11;
-    }
-
-    if(strcmp(argv[1],"graph")==0){
-        decrypt_files(workdir,crypto_keyfile);
-        run_flag=graph(workdir,crypto_keyfile);
-        if(run_flag!=0){
-            print_empty_cluster_info();
-        }
-        print_tail();
-        delete_decrypted_files(workdir,crypto_keyfile);
-        write_log(current_cluster_name,operation_log,argv[1],run_flag);
-        system_cleanup();
-        return run_flag;
-    }
-
-    if(strcmp(argv[1],"vault")==0){
-        run_flag=get_vault_info(workdir,crypto_keyfile);
-        write_log(current_cluster_name,operation_log,argv[1],run_flag);
-        system_cleanup();
-        return run_flag;
     }
 
     if(strcmp(argv[1],"sleep")==0){
