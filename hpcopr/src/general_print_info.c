@@ -30,10 +30,10 @@ void print_help(void){
     printf("+ I  . Multi-Cluster Management:\n");
     printf("| * You DO NOT need to switch to a cluster first.\n");
     printf("|  new-cluster : Create a new cluster, you can specify the cluster name, extra\n");
-    printf("|                *optional* parameters are accepted:\n")
-    printf("|                PARAM1 - cluster name (A-Z | a-z, %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
-    printf("|                PARAM2 - cloud access key id\n");
-    printf("|                PARAM3 - cloud access secret id\n");
+    printf("|                *optional* parameters are accepted:\n");
+    printf("|                  PARAM1 - cluster name (A-Z | a-z, %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
+    printf("|                  PARAM2 - cloud access key id\n");
+    printf("|                  PARAM3 - cloud access secret id\n");
     printf("|  ls-clusters : List all the current clusters.\n");
     printf("|  switch      : TARGET_CLUSTER_NAME\n");
     printf("|                Switch to a cluster in the registry to operate.\n");

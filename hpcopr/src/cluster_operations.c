@@ -173,7 +173,8 @@ int show_current_cluster(char* cluster_workdir, char* current_cluster_name){
 int exit_current_cluster(void){
     char cmdline[CMDLINE_LENGTH]="";
     char temp_workdir[DIR_LENGTH]="";
-    if(show_current_cluster(temp_workdir)==1){
+    char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    if(show_current_cluster(temp_workdir,temp_cluster_name)==1){
         return 1;
     }
     else{

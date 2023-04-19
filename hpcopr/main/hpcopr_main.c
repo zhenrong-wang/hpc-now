@@ -283,7 +283,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"new-keypair")==0){
         if(argc==2||argc==3){
-            run_flag=rotate_new_keypair(workdir,crypto_keyfile);
+            run_flag=rotate_new_keypair(workdir,"","",crypto_keyfile);
         }
         else{
             run_flag=rotate_new_keypair(workdir,argv[2],argv[3],crypto_keyfile);
