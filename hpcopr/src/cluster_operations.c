@@ -420,7 +420,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     return 0;
 }
 
-int create_new_workdir(char* crypto_keyfile){
+/*int create_new_workdir(char* crypto_keyfile){
     char cmdline[CMDLINE_LENGTH]="";
     int current_cluster_num=0;
     char new_workdir[DIR_LENGTH]="";
@@ -531,7 +531,7 @@ int create_new_workdir(char* crypto_keyfile){
     printf("[ -DONE- ] Exit now.\n");
     print_tail();
     return 0;
-}
+}*/
 
 int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile){
     char cmdline[CMDLINE_LENGTH]="";

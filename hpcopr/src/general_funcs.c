@@ -541,6 +541,9 @@ int file_empty_or_not(char* filename){
             line_num++;
         }
         fclose(file_p);
+        if(strlen(temp_line)>0){
+            line_num++;
+        }
         return line_num;
     }
 }
