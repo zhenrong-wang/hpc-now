@@ -41,7 +41,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile);
 int switch_to_cluster(char* target_cluster_name);
 int show_current_cluster(char* cluster_workdir);
 int exit_current_cluster(void);
-int remove_cluster(char* target_cluster_name);
+int remove_cluster(char* target_cluster_name, char* crypto_keyfile);
 
 void create_and_get_stackdir(char* workdir, char* stackdir);
 void create_and_get_vaultdir(char* workdir, char* vaultdir);
@@ -97,7 +97,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
 int cluster_sleep(char* workdir, char* crypto_keyfile);
 int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option);
 int create_new_workdir(char* crypto_keyfile);
-int rotate_new_keypair(char* workdir, char* crypto_keyfile);
+int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile);
 int get_default_conf(char* workdir, char* crypto_keyfile);
 
 int get_usage(char* usage_logfile);

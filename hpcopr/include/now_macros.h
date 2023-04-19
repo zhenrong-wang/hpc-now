@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define VERSION_CODE "0.1.91.0018"
+#define VERSION_CODE "0.2.1.0001"
 
 #ifdef _WIN32
 #include <malloc.h>
@@ -102,7 +102,7 @@
 #define CMDLINE_LENGTH 2048
 #define CLUSTER_ID_LENGTH_MAX 24
 #define CLUSTER_ID_LENGTH_MIN 8
-#define CLUSTER_NAME_LENGTH_MAX 32
+#define CLUSTER_ID_LENGTH_MAX_PLUS 25
 #define DIR_LENGTH 256
 #define FILENAME_LENGTH 512
 #define LOCATION_LENGTH 512
