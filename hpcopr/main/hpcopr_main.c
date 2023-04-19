@@ -281,8 +281,8 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     else{
-        printf("[ -INFO- ] You are operating the cluster %s now, which may affect all the jobs running\n",current_cluster_name);
-        printf("|          on this cluster. Please input 'y-e-s' to continue.\n");
+        printf("[ -INFO- ] You are operating the cluster %s now, which may affect all\n",current_cluster_name);
+        printf("|          the jobs running on this cluster. Please input 'y-e-s' to continue.\n");
         printf("[ INPUT: ] ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
@@ -293,7 +293,7 @@ int main(int argc, char* argv[]){
             return 0;
         }
     }
-    
+
     if(strcmp(argv[1],"new-keypair")==0){
         if(argc==2||argc==3){
             run_flag=rotate_new_keypair(workdir,"","",crypto_keyfile);

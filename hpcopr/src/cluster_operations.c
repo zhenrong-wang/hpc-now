@@ -131,8 +131,7 @@ int list_all_cluster_names(void){
         return -1;
     }
     printf("[ -INFO- ] Current cluster list:\n");
-    do{
-        getline_flag=fgetline(file_p,registry_line);
+    while(fgetline(file_p,registry_line)!=-1){
         if(strlen(registry_line)!=0){
             if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
                 printf("|          %s\n",registry_line);
@@ -144,7 +143,7 @@ int list_all_cluster_names(void){
                 }
             }
         }
-    }while(getline_flag==0);
+    }
     return 0;
 }
 
