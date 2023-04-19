@@ -215,21 +215,14 @@ int show_current_cluster(char* cluster_workdir, char* current_cluster_name){
 
 int exit_current_cluster(void){
     char cmdline[CMDLINE_LENGTH]="";
-    char temp_workdir[DIR_LENGTH]="";
-    char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    if(show_current_cluster(temp_workdir,temp_cluster_name)==1){
-        return 1;
-    }
-    else{
 #ifdef _WIN32
-        sprintf(cmdline,"del /f /q %s > nul 2>&1",CURRENT_CLUSTER_INDICATOR);
+    sprintf(cmdline,"del /f /q %s > nul 2>&1",CURRENT_CLUSTER_INDICATOR);
 #else
-        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",CURRENT_CLUSTER_INDICATOR);
+    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",CURRENT_CLUSTER_INDICATOR);
 #endif
-        system(cmdline);
-        printf("[ -INFO- ] Exit the current cluster.\n");
-        return 0;
-    }
+    printf("[ -INFO- ] Exit the current cluster.\n");
+    return system(cmdline);
+    
 }
 
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
