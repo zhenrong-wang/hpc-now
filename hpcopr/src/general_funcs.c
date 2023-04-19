@@ -37,14 +37,14 @@ int fgetline(FILE* file_p, char* line_string){
             *(line_string+i)=ch;
             i++;
         }
-        else if(ch=='\n'){
+/*        else if(ch=='\n'){
             return 0;
         }
-        else if(ch==EOF){
+        else if(ch==EOF&&i==0){
             return 1;
-        }
+        }*/
     }while(ch!=EOF&&ch!='\n');
-    if(ch==EOF){
+    if(ch==EOF&&i==0){
         return 1;
     }
     else{
