@@ -107,7 +107,7 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     file_p_tmp=fopen(filename_temp,"w+");
     while(fgetline(file_p,temp_line)==0){
         if(strlen(temp_line)!=0){
-            fprintf(file_p_tmp,"%s\n");
+            fprintf(file_p_tmp,"%s\n",temp_line);
         }
     }
     fprintf(file_p,"%s\n",temp_line);
@@ -125,14 +125,14 @@ int list_all_cluster_names(void){
     FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
     char registry_line[LINE_LENGTH_SHORT]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    int readline_flag=0;
+    int getline_flag=0;
     if(file_p==NULL){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
         return -1;
     }
     printf("[ -INFO- ] Current cluster list:\n");
     do{
-        readline_flag=fgetline(file_p,registry_line);
+        getline_flag=fgetline(file_p,registry_line);
         if(strlen(registry_line)!=0){
             if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
                 printf("|          %s\n",registry_line);
@@ -144,7 +144,7 @@ int list_all_cluster_names(void){
                 }
             }
         }
-    }while(readline==0);
+    }while(getline_flag==0);
     return 0;
 }
 
