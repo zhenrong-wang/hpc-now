@@ -166,7 +166,8 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return -3;
     }
-
+    
+    show_current_cluster(workdir,current_cluster_name);
     if(strcmp(argv[1],"new-cluster")==0){
         if(argc==2){
             run_flag=create_new_cluster(crypto_keyfile,"","","");
