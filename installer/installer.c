@@ -217,7 +217,7 @@ int check_current_user(void){
         printf("|          1. Run a CMD window with the Administrator role\n");
         printf("|          2. Type the full path of this installer with an option, for example\n");
         printf("|             C:\\Users\\ABC\\installer_windows_amd64.exe install\n");
-        printf("|          to run this installer properly. Exit now.\n");
+        printf("|          to run this installer properly. Exit now.\n\n");
         print_help();
         system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
         return -1;    
@@ -226,7 +226,7 @@ int check_current_user(void){
 #else
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("[ FATAL: ] Please either switch to users with admin privilege and run the installer\n");
-        printf("|          with 'sudo', or switch to the root user. Exit now.\n");
+        printf("|          with 'sudo', or switch to the root user. Exit now.\n\n");
         print_help();
         return -1;    
     }
