@@ -1055,6 +1055,7 @@ int cluster_asleep_or_not(char* workdir){
 }
 
 int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log){
+    char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     archive_log(stackdir);

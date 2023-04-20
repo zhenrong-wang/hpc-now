@@ -37,7 +37,7 @@ int file_validity_check(char* filename, int repair_flag, char* target_md5){
     }
     else{
         if(repair_flag==1){
-            get_crypto_key(tf_exec,md5sum);
+            get_crypto_key(filename,md5sum);
             if(strcmp(md5sum,target_md5)!=0){
                 return 1;
             }
@@ -233,7 +233,8 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
 #ifndef _WIN32
-        system("chmod +x %s",tf_exec);
+        sprintf(cmdline,"chmod +x %s",tf_exec);
+        system(cmdline);
 #endif
     if(repair_flag==1){
         printf("|        v The Terraform executable has been repaired.\n");
@@ -265,7 +266,8 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
 #ifndef _WIN32
-        system("chmod +x %s",crypto_exec);
+        sprintf(cmdline,"chmod +x %s",crypto_exec);
+        system(cmdline);
 #endif
     if(repair_flag==1){
         printf("|        v The now-crypto executable has been repaired.\n");
@@ -310,7 +312,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #endif
     if(repair_flag==1){
         printf("|        v The terraformrc file has been repaired.\n");
-        printf("|        . Checking and repairing the Terraform Providers ... \n")
+        printf("|        . Checking and repairing the Terraform Providers ... \n");
     }
 
 #ifdef _WIN32
@@ -525,7 +527,7 @@ int check_and_install_prerequisitions(int repair_flag){
 
     if(repair_flag==1){
         printf("|        v The Terraform Providers have been repaired.\n");
-        printf("|        . Checking and repairing the key folders and environment variables ... \n")
+        printf("|        . Checking and repairing the key folders and environment variables ... \n");
     }
 
 #ifdef _WIN32
@@ -570,7 +572,7 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf("|        v Environment variables have been repaired.\n");
         printf("|        v SSH files have been repaired. \n");
-        printf("[ -INFO- ] Running environment successfully check and repaired.\n")
+        printf("[ -INFO- ] Running environment successfully check and repaired.\n");
     }
     else{
         printf("[ -INFO- ] Running environment successfully checked. HPC-NOW services are ready.\n");
