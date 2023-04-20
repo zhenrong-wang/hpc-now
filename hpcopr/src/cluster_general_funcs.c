@@ -980,7 +980,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     fclose(file_p_2);
     FILE* file_p_3=fopen(cloud_flag_file,"r");
     if(file_p_3==NULL){
-        fclose(file_p_1);
+        fclose(file_p);
         fclose(file_p_2);
         return 1;
     }
@@ -997,7 +997,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     sprintf(master_tf,"%s/hpc_stack_master.tf",stackdir);
     find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
     if(graph_level==0){
-        sprintf(head_string,"| master(%s,%s,%s)<->|",cloud_flag,master_address,master_status,master_config);
+        sprintf(head_string,"| master(%s,%s,%s)<->|",master_address,master_status,master_config);
         sprintf(string_temp,"| %s",cloud_flag);
         for(i=strlen(cloud_flag);i<strlen(head_string)-1;i++){
             *(string_temp+i)=' ';
