@@ -195,7 +195,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     fclose(file_p);
     if(cluster_name_check(target_cluster_name)==0||cluster_name_check(target_cluster_name)==1){
-        printf("[ FATAL: ] The specified cluster name %s is not in the registry. Cluster list:\n",target_cluster_name);
+        printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",target_cluster_name);
         list_all_cluster_names();
         return 1;
     }
@@ -246,7 +246,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     if(cluster_name_check(target_cluster_name)==0||cluster_name_check(target_cluster_name)==1){
-        printf("[ FATAL: ] The specified cluster name %s is not in the registry. Cluster list:\n",target_cluster_name);
+        printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",target_cluster_name);
         list_all_cluster_names();
         return 1;
     }
