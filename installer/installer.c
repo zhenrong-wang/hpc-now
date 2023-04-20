@@ -759,7 +759,6 @@ int main(int argc, char* argv[]){
     char advanced_option_tail[512]="";
     print_header();
     if(check_current_user()!=0){
-        print_tail();
         return -1;
     }
     if(check_internet()!=0){
