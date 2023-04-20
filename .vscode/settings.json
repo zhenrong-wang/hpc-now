@@ -5,6 +5,7 @@
         "now_functions.h": "c",
         "malloc.h": "c",
         "now_global_vars.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "stdio.h": "c"
     }
 }

@@ -805,7 +805,6 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     printf("|          You can run 'init' command to rebuild it.\n");
     printf("|          However, *ALL* the data has been erased permenantly.\n");
     printf("[ -DONE- ] Thanks for using the NOW Cluster service!\n");
-    print_tail();
     return 0;
 }
 
@@ -904,7 +903,6 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
             }
             printf("[ -DONE- ] Congratulations! The specified compute nodes have been deleted.\n");
-            print_tail();
             return 0;
         }
     }
@@ -938,7 +936,6 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
     printf("[ -DONE- ] Congratulations! The specified compute nodes have been deleted.\n");
-    print_tail();
     return 0;
 }
 
@@ -1013,7 +1010,6 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
     }
     printf("[ -DONE- ] Congratulations! The specified compute nodes have been added.\n");
-    print_tail();
     return 0;
 }
 
@@ -1124,7 +1120,6 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
             }
             printf("[ -DONE- ] Congratulations! The specified compute nodes have been deleted.\n");
-            print_tail();
             return 0;
         }
     }
@@ -1161,7 +1156,6 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
     printf("[ -DONE- ] Congratulations! The specified compute nodes have been shut down.\n");
-    print_tail();
     return 0;
 }
 
@@ -1281,7 +1275,6 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
             }
             printf("[ -DONE- ] Congratulations! The specified compute nodes have been turned on.\n");
-            print_tail();
             return 0;
         }
     }
@@ -1318,7 +1311,6 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
     }
     printf("[ -DONE- ] Congratulations! The specified compute nodes have been turned on.\n");
-    print_tail();
     return 0;
 }
 
@@ -1475,7 +1467,6 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 update_usage_summary(workdir,crypto_keyfile,node_name_temp,"start");
             }
             printf("[ -DONE- ] Congratulations! The compute nodes have been reconfigured.\n");
-            print_tail();
             return 0;
         }
     }
@@ -1550,7 +1541,6 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         update_usage_summary(workdir,crypto_keyfile,node_name_temp,"start");
     }
     printf("[ -DONE- ] Congratulations! The compute nodes have been reconfigured.\n");
-    print_tail();
     return 0;
 }
 
@@ -1628,7 +1618,6 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     update_cluster_summary(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","start");
     printf("[ -DONE- ] Congratulations! The master node has been reconfigured.\n");
-    print_tail();
     return 0;
 }
 
@@ -1676,7 +1665,6 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
         printf("[ -INFO- ] Currently the cluster is in the state of hibernation. No node is running.\n");
         printf("|          If you'd like to make it ready for running, please run 'wakeup' command.\n");
         printf("|          Exit now.\n");
-        print_tail();
         return 1;
     }
 
@@ -1769,7 +1757,6 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
 
     update_cluster_summary(workdir,crypto_keyfile);
     printf("[ -DONE- ] Congratulations! All the nodes of the current cluster have been shutdown.\n");
-    print_tail();
     return 0;
 }
 
@@ -1912,7 +1899,6 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     }
     update_cluster_summary(workdir,crypto_keyfile);
     printf("[ -DONE- ] Congratulations! The cluster is in the state of running.\n");
-    print_tail();
     return 0;
 }
 

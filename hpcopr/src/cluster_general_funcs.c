@@ -1069,7 +1069,6 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     if(file_empty_or_not(error_log)!=0){
         printf("[ FATAL: ] Failed to modify/destroy the cluster. Please check the logfile for details.\n");
         printf("|          Exit now.\n");
-        print_tail();
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
