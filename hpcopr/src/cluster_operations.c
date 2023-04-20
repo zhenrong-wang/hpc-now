@@ -140,7 +140,7 @@ int list_all_cluster_names(void){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
         return -1;
     }
-    printf("[ -INFO- ] Cluster list:\n\n");
+    printf("[ -INFO- ] Cluster list:\n");
     while(fgetline(file_p,registry_line)!=1){
         if(strlen(registry_line)!=0){
             if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
