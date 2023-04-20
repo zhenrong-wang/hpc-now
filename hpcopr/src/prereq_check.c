@@ -105,7 +105,6 @@ int check_and_install_prerequisitions(int repair_flag){
     char* tf_exec=TERRAFORM_EXEC;
     char* crypto_exec=NOW_CRYPTO_EXEC;
 #ifdef _WIN32
-    char random_string[PASSWORD_STRING_LENGTH]="";
     char appdata_dir[128]="";
 #endif
     if(file_exist_or_not(usage_logfile)!=0){
