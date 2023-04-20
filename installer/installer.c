@@ -77,7 +77,7 @@ void print_help(void){
     printf("|        update           : Update the hpcopr to the latest or your own version.\n");
     printf("|        uninstall        : Remove the HPC-NOW services and all relevant data.\n");
     printf("|        help             : Show this information.\n");
-    printf("|      * You MUST specify one of the general options above.\n");
+    printf("|       * You MUST specify one of the general options above.\n");
     printf("| advanced_option (for developers, optional):\n");
     printf("|        skip_lic=y|n     : Whether to skip reading the license terms.\n");
     printf("|                             y - agree and skip reading the terms.\n");
