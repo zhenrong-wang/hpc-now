@@ -33,23 +33,22 @@ int create_cluster_registry(void){
 
 int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
     int i, name_flag;
-    char random_cluster_name[CLUSTER_ID_LENGTH_MIN]="";
     char real_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
     if(strlen(cluster_name)==0){
         generate_random_string(cluster_name_output);
         name_flag=-1;
     }
-    for(i=0;i<strlen(real_cluster_name);i++){
-        if(*(real_cluster_name+i)=='-'||*(real_cluster_name+i)=='0'||*(real_cluster_name+i)=='9'){
+    for(i=0;i<strlen(cluster_name);i++){
+        if(*(cluster_name+i)=='-'||*(cluster_name+i)=='0'||*(cluster_name+i)=='9'){
             continue;
         }
-        if(*(real_cluster_name+i)>'0'&&*(real_cluster_name+i)<'9'){
+        if(*(cluster_name+i)>'0'&&*(cluster_name+i)<'9'){
             continue;
         }
-        if(*(real_cluster_name+i)<'A'||*(real_cluster_name+i)>'z'){
+        if(*(cluster_name+i)<'A'||*(cluster_name+i)>'z'){
             return 127;
         }
-        else if(*(real_cluster_name+i)>'Z'&&*(real_cluster_name+i)<'a'){
+        else if(*(cluster_name+i)>'Z'&&*(cluster_name+i)<'a'){
             return 127;
         }
     }
@@ -80,7 +79,7 @@ int switch_to_cluster(char* target_cluster_name){
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_workdir[DIR_LENGTH]="";
     FILE* file_p=NULL;
-    if(cluster_name_check(target_cluster_name)!=-1){
+    if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
         printf("[ FATAL: ] The specified cluster name is not in the registry.\n");
         printf("|          You can run the 'hpcopr ls-clusters' to view cluster list.\n");
         printf("[ FATAL: ] Exit now.\n");
@@ -211,7 +210,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         return 0;
     }
     fclose(file_p);
-    if(cluster_name_check(target_cluster_name)==0||cluster_name_check(target_cluster_name)==1){
+    if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
         printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",target_cluster_name);
         list_all_cluster_names();
         return 1;
@@ -260,9 +259,10 @@ int exit_current_cluster(void){
 
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     char cluster_workdir[DIR_LENGTH]="";
+    char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
-    if(cluster_name_check(target_cluster_name)==0||cluster_name_check(target_cluster_name)==1){
+    if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
         printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",target_cluster_name);
         list_all_cluster_names();
         return 1;
