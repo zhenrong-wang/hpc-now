@@ -274,6 +274,7 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
                     continue;
                 }
                 line_replace(single_line,new_single_line,orig_string,new_string);
+                printf("\n\n%s,,,,,%s\n\n",single_line,new_single_line);
                 fprintf(file_temp_p,"%s%c",new_single_line,'\n');
                 reset_string(new_single_line);
             }
