@@ -74,7 +74,7 @@ int decrypt_files(char* workdir, char* crypto_key_filename);
 int delete_decrypted_files(char* workdir, char* crypto_key_filename);
 int getstate(char* workdir, char* crypto_filename);
 int generate_sshkey(char* sshkey_folder, char* pubkey);
-int graph(char* workdir, char* crypto_keyfile);
+int graph(char* workdir, char* crypto_keyfile, int graph_level);
 int update_cluster_summary(char* workdir, char* crypto_keyfile);
 void archive_log(char* stackdir);
 int wait_for_complete(char* workdir, char* option);

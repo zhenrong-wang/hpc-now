@@ -186,7 +186,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
                 printf("[ -NAME- ] %s\n",temp_cluster_name);
-                graph(temp_cluster_workdir,crypto_keyfile);
+                graph(temp_cluster_workdir,crypto_keyfile,1);
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }
         }
@@ -202,7 +202,9 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     else{
         printf("[ -INFO- ] You specified to glance the cluster %s:\n",target_cluster_name);
         get_workdir(temp_cluster_workdir,target_cluster_name);
-        graph(temp_cluster_workdir,crypto_keyfile);
+        decrypt_files(temp_cluster_workdir,crypto_keyfile);
+        graph(temp_cluster_workdir,crypto_keyfile,1);
+        delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
     }
 }
@@ -893,7 +895,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 return -1;
             }
             printf("[ -INFO- ] After the cluster operation:\n");
-            graph(workdir,crypto_keyfile);
+            graph(workdir,crypto_keyfile,0);
             remote_copy(workdir,sshkey_dir,"hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
@@ -926,7 +928,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n");
-    graph(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
@@ -1000,7 +1002,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n");
-    graph(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
@@ -1110,7 +1112,7 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 return -1;
             }
             printf("[ -INFO- ] After the cluster operation:\n");
-            graph(workdir,crypto_keyfile);
+            graph(workdir,crypto_keyfile,0);
             remote_copy(workdir,sshkey_dir,"hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
@@ -1146,7 +1148,7 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n");
-    graph(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
@@ -1265,7 +1267,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 return -1;
             }
             printf("[ -INFO- ] After the cluster operation:\n");
-            graph(workdir,crypto_keyfile);
+            graph(workdir,crypto_keyfile,0);
             remote_copy(workdir,sshkey_dir,"hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
@@ -1301,7 +1303,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n");
-    graph(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
@@ -1457,7 +1459,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,stackdir);
 #endif
             system(cmdline);
-            graph(workdir,crypto_keyfile);
+            graph(workdir,crypto_keyfile,0);
             remote_copy(workdir,sshkey_dir,"hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
@@ -1531,7 +1533,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     sprintf(cmdline,"/bin/cp -r %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,stackdir);
 #endif
     system(cmdline);
-    graph(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
@@ -1605,7 +1607,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     }
     printf("[ -INFO- ] After the cluster operation:\n");
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
-    graph(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds for remote execution ... \r",GENERAL_SLEEP_TIME-i);
         fflush(stdout);
@@ -1744,7 +1746,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
         }
     }
     printf("[ -INFO- ] After the cluster operation:\n");
-    graph(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
     delete_decrypted_files(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
     update_usage_summary(workdir,crypto_keyfile,"database","stop");
@@ -1886,7 +1888,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
         }
     }
     printf("[ -INFO- ] After the cluster operation:\n");
-    graph(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
     delete_decrypted_files(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","start");
     update_usage_summary(workdir,crypto_keyfile,"database","start");

@@ -917,7 +917,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
     printf("[ -INFO- ] After the initialization:\n");
-    graph(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
     printf("[ -DONE- ] Congratulations! The cluster is initializing now. This step may take at\n");
     printf("|          least 7 minutes. You can log into the master node now.\n"); 
     printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
@@ -1754,7 +1754,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
     printf("[ -INFO- ] After the initialization:\n");
-    graph(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
     printf("[ -DONE- ] Congratulations! The cluster is initializing now. This step may take at\n");
     printf("|          least 7 minutes. You can log into the master node now.\n"); 
     printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
@@ -2573,7 +2573,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
     printf("[ -INFO- ] After the initialization:\n");
-    graph(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
     printf("[ -DONE- ] Congratulations! The cluster is initializing now. This step may take at\n");
     printf("|          least 7 minutes. You can log into the master node now.\n"); 
     printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
