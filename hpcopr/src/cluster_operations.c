@@ -2044,6 +2044,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
 #else
     sprintf(filename_temp,"%s/tf_prep.conf",confdir);
 #endif
+    find_and_replace(filename_temp,"CLUSTER_ID","","","","","hpcnow",temp_cluster_name);
     printf("[ -INFO- ] Default configuration file has been downloaded.\n");
     printf("[ -INFO- ] Would you like to edit the configuration file now? Input 'y-e-s' to confirm:\n");
     printf("[ INPUT: ] ");
