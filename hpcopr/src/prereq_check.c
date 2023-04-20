@@ -91,7 +91,6 @@ int check_and_install_prerequisitions(int repair_flag){
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp_zip[FILENAME_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
-    char md5sum[64]="";
     int flag=0;
     int file_check_flag=0;
     int force_repair_flag;
