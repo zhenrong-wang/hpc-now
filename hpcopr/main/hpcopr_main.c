@@ -390,7 +390,8 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"get-conf")==0){
-        if(get_default_conf(workdir,crypto_keyfile)==-1){
+        run_flag=get_default_conf(workdir,crypto_keyfile);
+        if(run_flag==-1){
             printf("[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
             printf("|          downloading default configuration file is not permitted. If you do want\n");
             printf("|          to reconfigure the cluster from the default configuration, please run\n");
@@ -400,7 +401,7 @@ int main(int argc, char* argv[]){
             system_cleanup();
             return 23;
         }
-        else if(get_default_conf(workdir,crypto_keyfile)==1){
+        else if(run_flag==1){
             printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.\n");
             print_tail();
             write_log(current_cluster_name,operation_log,"INTERNAL_ERROR",31);

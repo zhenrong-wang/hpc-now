@@ -460,8 +460,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     switch_to_cluster(real_cluster_name);
     printf("[ -INFO- ] The secrets key pair has been encrypted and stored locally. You can either:\n");
     printf("|          1. run 'hpcopr init' to create a default cluster. OR\n");
-    printf("|          2. run 'hpcopr get-conf' to get the default cluster configuration, and run 'hpcopr init' to\n");
-    printf("|             create a customized cluster.\n");
+    printf("|          2. run 'hpcopr get-conf' to get the default cluster configuration, and run\n");
+    printf("|              'hpcopr init' to create a customized cluster.\n");
     printf("|          You can also switch to this cluster name and operate this cluster later.\n");
     printf("[ -DONE- ] Exit now.\n");
     return 0;
@@ -2040,6 +2040,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
 #else
     sprintf(cmdline,"vi %s/tf_prep.conf",confdir);
 #endif
+    system(cmdline);
     return 0;
 }
 
