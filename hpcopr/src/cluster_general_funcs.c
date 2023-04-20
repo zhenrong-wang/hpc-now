@@ -1053,3 +1053,24 @@ int cluster_asleep_or_not(char* workdir){
         return 1;
     }
 }
+
+int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log){
+    char stackdir[DIR_LENGTH]="";
+    create_and_get_stackdir(workdir,stackdir);
+    archive_log(stackdir);
+#ifdef _WIN32
+    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s %s > %s\\tf_prep.log 2>%s",stackdir,tf_exec,execution_name,stackdir,error_log);
+#else
+    sprintf(cmdline,"cd %s && echo yes | %s %s > %s/tf_prep.log 2>%s &",stackdir,tf_exec,execution_name,stackdir,error_log);
+#endif
+    system(cmdline);
+    wait_for_complete(workdir,execution_name);
+    if(file_empty_or_not(error_log)!=0){
+        printf("[ FATAL: ] Failed to modify/destroy the cluster. Please check the logfile for details.\n");
+        printf("|          Exit now.\n");
+        print_tail();
+        delete_decrypted_files(workdir,crypto_keyfile);
+        return -1;
+    }
+    return 0;
+}

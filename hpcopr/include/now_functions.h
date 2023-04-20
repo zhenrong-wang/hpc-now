@@ -9,6 +9,7 @@
 #define NOW_FUNCTIONS_H
 
 void print_empty_cluster_info(void);
+void print_operation_in_progress(void);
 void print_help(void);
 void print_header(void);
 void print_tail(void);
@@ -47,6 +48,7 @@ void create_and_get_stackdir(char* workdir, char* stackdir);
 void create_and_get_vaultdir(char* workdir, char* vaultdir);
 int remote_copy(char* workdir, char* sshkey_dir, char* option);
 int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes);
+int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log);
 
 int file_exist_or_not(char* filename);
 int file_empty_or_not(char* filename);
@@ -62,7 +64,8 @@ int generate_random_string(char* random_string);
 
 int check_internet(void);
 int check_current_user(void);
-int check_and_install_prerequisitions(void);
+int file_validity_check(char* filename, int repair_flag, char* target_md5);
+int check_and_install_prerequisitions(int repair_flag);
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag);
 int get_cpu_num(const char* vm_model);
 int check_pslock(char* workdir);

@@ -644,6 +644,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
     char* sshkey_folder=SSHKEY_DIR;
+    char* error_log=OPERATION_ERROR_LOG;
     char md5sum[33]="";
     char master_address[32]="";
     char bucket_address[32]="";
@@ -720,35 +721,16 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
 #endif
         system(cmdline);
     }
-    printf("[ -INFO- ] Destroying the resources, this step may take minutes ...\n");
-    printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    print_operation_in_progress();
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
-    archive_log(stackdir);
-#ifdef _WIN32
-    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s destroy > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-#else
-    sprintf(cmdline,"cd %s && echo yes | %s destroy > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-#endif
-    system(cmdline);
-    wait_for_complete(workdir,"destroy");
-    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to destroy the cluster. Please check the logfile for details.\n");
-        printf("|          Exit now.\n");
-        print_tail();
-        delete_decrypted_files(workdir,crypto_keyfile);
+    if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_A")==0){
-        system(cmdline);
-    }
-    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to destroy the cluster. Please check the logfile for details.\n");
-        printf("|          Exit now.\n");
-        print_tail();
-        delete_decrypted_files(workdir,crypto_keyfile);
-        return -1;
+        if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)!=0){
+            return -1;
+        }
     }
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\currentstate",stackdir);
@@ -835,6 +817,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     char cmdline[CMDLINE_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
     char* sshkey_dir=SSHKEY_DIR;
+    char* error_log=OPERATION_ERROR_LOG;
     int i;
     int del_num=0;
     char filename_temp[FILENAME_LENGTH]="";
@@ -900,25 +883,14 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 sprintf(cmdline,"move %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1", stackdir,i);
                 system(cmdline);
             }
-            archive_log(stackdir);
-            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-            system(cmdline);
-            wait_for_complete(workdir,"apply");
 #else
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
                 system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
                 sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
                 system(cmdline);
             }
-            archive_log(stackdir);
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-            system(cmdline);
-            wait_for_complete(workdir,"apply");
 #endif
-            if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-                printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-                printf("|          Exit now.\n");
-                delete_decrypted_files(workdir,crypto_keyfile);
+            if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 return -1;
             }
             printf("[ -INFO- ] After the cluster operation:\n");
@@ -945,25 +917,14 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         sprintf(cmdline,"move %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1", stackdir,i);
         system(cmdline);
     }
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
 #else
     for(i=1;i<compute_node_num+1;i++){
         system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
         sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
         system(cmdline);
     }
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
 #endif
-    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-        printf("|          Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n");
@@ -987,6 +948,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     char stackdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
+    char* error_log=OPERATION_ERROR_LOG;
     int i;
     int add_number=0;
     int current_node_num=0;
@@ -1037,20 +999,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         sprintf(string_temp,"comp%d",i+1+current_node_num);
         global_replace(filename_temp,"comp1",string_temp);
     }
-    archive_log(stackdir);
-#ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-#else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-#endif
-    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-        printf("|          Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n");
@@ -1079,6 +1028,7 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     char cloud_flag[16]="";
     char* tf_exec=TERRAFORM_EXEC;
     char* sshkey_dir=SSHKEY_DIR;
+    char* error_log=OPERATION_ERROR_LOG;
     int i;
     int down_num=0;
     char filename_temp[FILENAME_LENGTH]="";
@@ -1161,20 +1111,7 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                     global_replace(filename_temp,"running","stopped");
                 }
             }
-            archive_log(stackdir);
-#ifdef _WIN32
-            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-            system(cmdline);
-            wait_for_complete(workdir,"apply");
-#else
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-            system(cmdline);
-            wait_for_complete(workdir,"apply");
-#endif
-            if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-                printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-                printf("|          Exit now.\n");
-                delete_decrypted_files(workdir,crypto_keyfile);
+            if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 return -1;
             }
             printf("[ -INFO- ] After the cluster operation:\n");
@@ -1211,20 +1148,7 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             global_replace(filename_temp,"running","stopped");
         }
     }
-    archive_log(stackdir);
-#ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-#else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-#endif
-    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-        printf("|          Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n");
@@ -1253,6 +1177,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     char cloud_flag[16]="";
     char* tf_exec=TERRAFORM_EXEC;
     char* sshkey_dir=SSHKEY_DIR;
+    char* error_log=OPERATION_ERROR_LOG;
     int i;
     int on_num=0;
     char filename_temp[FILENAME_LENGTH]="";
@@ -1344,20 +1269,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                     global_replace(filename_temp,"stopped","running");
                 }
             }
-            archive_log(stackdir);
-#ifdef _WIN32
-            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-            system(cmdline);
-            wait_for_complete(workdir,"apply");
-#else
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-            system(cmdline);
-            wait_for_complete(workdir,"apply");
-#endif
-            if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-                printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-                printf("|          Exit now.\n");
-                delete_decrypted_files(workdir,crypto_keyfile);
+            if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 return -1;
             }
             printf("[ -INFO- ] After the cluster operation:\n");
@@ -1394,20 +1306,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             global_replace(filename_temp,"stopped","running");
         }
     }
-    archive_log(stackdir);
-#ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-#else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-#endif
-    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-        printf("|          Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n");
@@ -1460,6 +1359,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     char cloud_flag[16]="";
     int compute_node_num=0;
     char* sshkey_dir=SSHKEY_DIR;
+    char* error_log=OPERATION_ERROR_LOG;
     int i;
     char cmdline[CMDLINE_LENGTH]="";
     char node_name_temp[32]="";
@@ -1552,23 +1452,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                     global_replace(filename_temp2,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
                 }
             }
-            printf("[ -INFO- ] The cluster operation is in progress ...\n");
-            printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-            printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-            archive_log(stackdir);
-#ifdef _WIN32
-            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-            system(cmdline);
-            wait_for_complete(workdir,"apply");
-#else
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-            system(cmdline);
-            wait_for_complete(workdir,"apply");
-#endif
-            if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-                printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-                printf("|          Exit now.\n");
-                delete_decrypted_files(workdir,crypto_keyfile);
+            print_operation_in_progress();
+            if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 return -1;
             }
             printf("[ -INFO- ] After the cluster operation:\n");
@@ -1642,23 +1527,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             }
         }
     }
-    printf("[ -INFO- ] The cluster operation is in progress ...\n");
-    printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    archive_log(stackdir);
-#ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-#else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-#endif
-    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-        printf("|          Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
+    print_operation_in_progress();
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n");
@@ -1697,6 +1567,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     char buffer2[64]="";
     char cloud_flag[16]="";
     char* sshkey_dir=SSHKEY_DIR;
+    char* error_log=OPERATION_ERROR_LOG;
     int i;
     char cmdline[CMDLINE_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
@@ -1742,23 +1613,8 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
 #endif
     global_replace(filename_temp,prev_config,new_config);
-    printf("[ -INFO- ] The cluster operation is in progress ...\n");
-    printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    archive_log(stackdir);
-#ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-#else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-#endif
-    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-        printf("|          Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
+    print_operation_in_progress();
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -3;
     }
     printf("[ -INFO- ] After the cluster operation:\n");
@@ -1790,6 +1646,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     char buffer2[128]="";
     char cloud_flag[16]="";
     char* tf_exec=TERRAFORM_EXEC;
+    char* error_log=OPERATION_ERROR_LOG;
     int i;
     char filename_temp[FILENAME_LENGTH]="";
     int compute_node_num=0;
@@ -1892,40 +1749,16 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
             global_replace(filename_temp,"running","stopped");
         }
     }
-    archive_log(stackdir);
-#ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-#else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-#endif
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-        printf("|          Exit now.\n");
-        print_tail();
-        delete_decrypted_files(workdir,crypto_keyfile);
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
             usleep(1000000);
         }
-        archive_log(stackdir);
-#ifdef _WIN32
-        sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-#else
-        sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-#endif
-        system(cmdline);
-        wait_for_complete(workdir,"apply");
-    }
-    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-        printf("|          Exit now.\n");
-        print_tail();
-        delete_decrypted_files(workdir,crypto_keyfile);
-        return -1;
+        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            return -1;
+        }
     }
     printf("[ -INFO- ] After the cluster operation:\n");
     graph(workdir,crypto_keyfile);
@@ -1960,6 +1793,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     char buffer2[128]="";
     char cloud_flag[16]="";
     char* tf_exec=TERRAFORM_EXEC;
+    char* error_log=OPERATION_ERROR_LOG;
     int i;
     char filename_temp[FILENAME_LENGTH]="";
     int compute_node_num=0;
@@ -2041,7 +1875,6 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         global_replace(filename_temp,"stopped","running");
     }
-
     if(strcmp(option,"all")==0){
         for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
@@ -2060,27 +1893,16 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
             }
         }
     }
-    archive_log(stackdir);
-#ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-#else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
-#endif
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+        return -1;
+    }
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
             usleep(1000000);
         }
-        archive_log(stackdir);
-        system(cmdline);
-        wait_for_complete(workdir,"apply");
-    }
-    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
-        printf("|          Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
-        return -1;
+        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            return -1;
+        }
     }
     printf("[ -INFO- ] After the cluster operation:\n");
     graph(workdir,crypto_keyfile);

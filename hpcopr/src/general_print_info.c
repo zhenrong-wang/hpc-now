@@ -24,6 +24,13 @@ void print_empty_cluster_info(void){
     printf("[ FATAL: ] Exit now.\n");
 }
 
+void print_operation_in_progress(void){
+    printf("[ -INFO- ] The cluster operation is in progress, this step may take minutes ...\n");
+    printf("[ -WARN- ] *Do not* terminate this process, otherwise the cluster will be corrupted.\n");
+    printf("|          If an error occurs, the information will be printed to %s.\n",OPERATION_ERROR_LOG);
+    printf("|          You can check that file for details.\n");
+}
+
 void print_help(void){
     printf("[ -INFO- ] Usage: hpcopr command_name PARAM1 PARAM2 ...\n");
     printf("| Commands:\n");
@@ -96,6 +103,7 @@ void print_help(void){
     printf("+ VI . Others:\n");
     printf("|  about       : Display the version and other info.\n");
     printf("|  license     : Read the terms and conditions of the GNU Public License - 2.0\n");
+    printf("|  repair      : Try to repair the hpcopr core components.\n");
     printf("\n");
     printf("<> visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
 }

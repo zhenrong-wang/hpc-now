@@ -88,20 +88,8 @@ int main(int argc, char* argv[]){
         return -3;
     }
 
-    if(check_internet()!=0){
-        write_log("NULL",operation_log,"INTERNET_FAILED",-3);
-        system_cleanup();
-        return -3;
-    }
-
     if(argc==1){
         print_help();
-        return 0;
-    }
-
-    if(strcmp(argv[1],"license")==0){
-        read_license();
-        print_tail();
         return 0;
     }
 
@@ -115,6 +103,56 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
+    if(check_internet()!=0){
+        write_log("NULL",operation_log,"INTERNET_FAILED",-3);
+        system_cleanup();
+        return -3;
+    }
+
+    if(strcmp(argv[1],"license")==0){
+        read_license();
+        print_tail();
+        return 0;
+    }
+
+    if(strcmp(argv[1],"repair")==0){
+        print_help("[ -INFO- ] Entering repair mode. All the locations will be reset to default,\n");
+        print_help("|          and all the core components will be replaced by the default ones.\n");
+        print_help("|          Would you like to continue? Only 'y-e-s' is accepted to confirm.\n");
+        print_help("[ INPUT: ] \n");
+        fflush(stdin);
+        scanf("%s",doubleconfirm);
+        if(strcmp(doubleconfirm,"y-e-s")!=0){
+            printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+            printf("|          Nothing changed. Exit now.\n");
+            print_tail();
+            return 0;
+        }
+        run_flag=check_and_install_prerequisitions(1);
+        if(run_flag==3){
+            write_log("NULL",operation_log,"PREREQ_FAILED",-3);
+            print_tail();
+            system_cleanup();
+            return -3;
+        }
+        else if(run_flag!=0){
+            print_tail();
+            return -3;
+        }
+    }
+
+    run_flag=check_and_install_prerequisitions(0);
+    if(run_flag==3){
+        write_log("NULL",operation_log,"PREREQ_FAILED",-3);
+        print_tail();
+        system_cleanup();
+        return -3;
+    }
+    else if(run_flag!=0){
+        print_tail();
+        return -3;
+    }
+
 #ifdef _WIN32
     system("mkdir -p c:\\programdata\\hpc-now\\etc\\ > nul 2>&1");
 #elif __APPLE__
@@ -123,7 +161,7 @@ int main(int argc, char* argv[]){
     system("mkdir -p /usr/.hpc-now/.etc/ >> /dev/null 2>&1");
 #endif
     if(create_cluster_registry()!=0){
-        printf("[ FATAL: ] Failed to open/write to the cluster registry. Exit now.");
+        printf("[ FATAL: ] Failed to open/write to the cluster registry. Exit now.x\n");
         return -1;
     }
 
@@ -150,22 +188,9 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     
-    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0){
+    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"repair")!=0){
         print_help();
         return 1;
-    }
-
-    run_flag=check_and_install_prerequisitions();
-    if(run_flag==3){
-        write_log("NULL",operation_log,"PREREQ_FAILED",-3);
-        print_tail();
-        system_cleanup();
-        return -3;
-    }
-    else if(run_flag!=0){
-        print_tail();
-        system_cleanup();
-        return -3;
     }
 
     current_cluster_flag=show_current_cluster(workdir,current_cluster_name,1);
