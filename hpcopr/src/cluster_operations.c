@@ -1022,7 +1022,6 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     char buffer1[128]="";
     char buffer2[128]="";
     char cloud_flag[16]="";
@@ -1171,7 +1170,6 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     char buffer1[128]="";
     char buffer2[128]="";
     char cloud_flag[16]="";
@@ -1560,7 +1558,6 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char filename_temp2[FILENAME_LENGTH]="";
     char string_temp[64]="";
     char prev_config[16]="";
     char buffer1[64]="";
@@ -1569,7 +1566,6 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     char* sshkey_dir=SSHKEY_DIR;
     char* error_log=OPERATION_ERROR_LOG;
     int i;
-    char cmdline[CMDLINE_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
@@ -1641,7 +1637,6 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     char buffer1[128]="";
     char buffer2[128]="";
     char cloud_flag[16]="";
@@ -1788,7 +1783,6 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     char buffer1[128]="";
     char buffer2[128]="";
     char cloud_flag[16]="";
