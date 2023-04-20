@@ -33,7 +33,7 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
 
 int get_crypto_key(char* crypto_key_filename, char* md5sum);
 
-int cluster_name_check(char* real_cluster_name);
+int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output);
 int add_to_cluster_registry(char* new_cluster_name);
 int delete_from_cluster_registry(char* deleted_cluster_name);
 int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk);

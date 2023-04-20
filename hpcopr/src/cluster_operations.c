@@ -31,9 +31,14 @@ int create_cluster_registry(void){
     }
 }
 
-int cluster_name_check(char* real_cluster_name){
-    int i;
+int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
+    int i, name_flag;
+    char random_cluster_name[CLUSTER_ID_LENGTH_MIN]="";
     char real_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
+    if(strlen(cluster_name)==0){
+        generate_random_string(cluster_name_output);
+        name_flag=-1;
+    }
     for(i=0;i<strlen(real_cluster_name);i++){
         if(*(real_cluster_name+i)=='-'||*(real_cluster_name+i)=='0'||*(real_cluster_name+i)=='9'){
             continue;
@@ -42,20 +47,32 @@ int cluster_name_check(char* real_cluster_name){
             continue;
         }
         if(*(real_cluster_name+i)<'A'||*(real_cluster_name+i)>'z'){
-            return 1;
+            return 127;
         }
         else if(*(real_cluster_name+i)>'Z'&&*(real_cluster_name+i)<'a'){
-            return 1;
+            return 127;
         }
     }
-    if(strcmp(real_cluster_name,"all")==0||strcmp(real_cluster_name,"none")==0||strcmp(real_cluster_name,"empty")==0||strcmp(real_cluster_name,"ALL")==0||strcmp(real_cluster_name,"NONE")==0||strcmp(real_cluster_name,"EMPTY")==0||strcmp(real_cluster_name,"All")==0||strcmp(real_cluster_name,"None")==0||strcmp(real_cluster_name,"Empty")==0){
-        return 1;
+    if(strlen(cluster_name)<CLUSTER_ID_LENGTH_MIN){
+        sprintf(cluster_name_output,"%s-hpcnow",cluster_name);
+        name_flag=1;
     }
-    sprintf(real_cluster_name_with_prefix,"CLUSTER NAME: %s",real_cluster_name);
+    else if(strlen(cluster_name)>CLUSTER_ID_LENGTH_MAX){
+        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
+            *(cluster_name_output+i)=*(cluster_name+i);
+        }
+        *(cluster_name_output+CLUSTER_ID_LENGTH_MAX)='\0';
+        name_flag=2;
+    }
+    else{
+        strcpy(cluster_name_output,cluster_name);
+        name_flag=0;
+    }
+    sprintf(real_cluster_name_with_prefix,"CLUSTER NAME: %s",cluster_name_output);
     if(find_multi_keys(ALL_CLUSTER_REGISTRY,real_cluster_name_with_prefix,"","","","")>0){
-        return -1;
+        return -127;
     }
-    return 0;
+    return name_flag;
 }
 
 int switch_to_cluster(char* target_cluster_name){
@@ -304,19 +321,21 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
 int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk){
     char cmdline[CMDLINE_LENGTH]="";
     char real_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char input_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char filename_temp[FILENAME_LENGTH]="";
     int i;
-    int cluster_name_length=0;
+    int cluster_name_check_flag=0;
     FILE* file_p=NULL;
     char new_workdir[DIR_LENGTH]="";
     char new_vaultdir[DIR_LENGTH]="";
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char md5sum[33]="";
-    char *now_crypto_exec=NOW_CRYPTO_EXEC;
+    char* now_crypto_exec=NOW_CRYPTO_EXEC;
     int ak_length,sk_length;
     char* cluster_registry=ALL_CLUSTER_REGISTRY;
     char* current_cluster=CURRENT_CLUSTER_INDICATOR;
+    char doubleconfirm[64]="";
     if(file_exist_or_not(crypto_keyfile)!=0){
         return -1;
     }
@@ -332,56 +351,45 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return -1;
     }
     fclose(file_p);
-    cluster_name_length=strlen(cluster_name);
-    if(cluster_name_length>CLUSTER_ID_LENGTH_MAX){
-        printf("[ -WARN- ] The specified cluster name exceeds the maximum length %d. Will cut the length.\n",CLUSTER_ID_LENGTH_MAX);
-        cluster_name_length=CLUSTER_ID_LENGTH_MAX;
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(real_cluster_name+i)=*(cluster_name+i);
-        }
-        *(real_cluster_name+CLUSTER_ID_LENGTH_MAX)='\0';
-    }
-    else if(cluster_name_length<8&&cluster_name_length>0){
-        printf("[ -WARN- ] The specified cluster name is too short (<%d), will add '-hpcnow' as a suffix.\n",CLUSTER_ID_LENGTH_MIN);
-        sprintf(real_cluster_name,"%s-hpcnow",cluster_name);
-        cluster_name_length=strlen(real_cluster_name);
-    }
-    else{
-        strcpy(real_cluster_name,cluster_name);
-        cluster_name_length=strlen(real_cluster_name);
-    }
-    if(cluster_name_length!=0){
-        if(cluster_name_check(real_cluster_name)==1){
-            printf("[ FATAL: ] The cluster name only accepts English letters 'A-Z', 'a-z', '0-9' and '-'.\n");
-            printf("|          The specified name %s contains illegal characters.\n",real_cluster_name);
-            printf("|          Please check and retry. Exit now.\n");
-            return 1;
-        }
-        else if(cluster_name_check(real_cluster_name)==-1){
-            printf("[ FATAL: ] The cluster name %s already exists.\n",real_cluster_name);
-            printf("|          Please check and retry. Exit now.\n");
-            return 1;
-        }
-        printf("[ -INFO- ] Using the specified cluster name %s.\n",real_cluster_name);
-    }
-    else{
+    if(strlen(cluster_name)==0){
         printf("[ -INFO- ] Please input the cluster name (A-Z | a-z | 0-9 | - , maximum length %d):\n",CLUSTER_ID_LENGTH_MAX);
         printf("[ INPUT: ] ");
         fflush(stdin);
-        scanf("%s",real_cluster_name);
-        if(cluster_name_check(real_cluster_name)==1){
-            printf("[ FATAL: ] The cluster name only accepts English letters 'A-Z', 'a-z', '0-9' and '-'.\n");
-            printf("|          The inputs %s contains illegal characters.\n",real_cluster_name);
-            printf("|          Please check and retry. Exit now.\n");
+        scanf("%s",input_cluster_name);
+    }
+    else{
+        strcpy(input_cluster_name,cluster_name);
+    }
+    cluster_name_check_flag=cluster_name_check_and_fix(input_cluster_name,real_cluster_name);
+    if(cluster_name_check_flag==127){
+        printf("[ FATAL: ] The cluster name only accepts English letters 'A-Z', 'a-z', '0-9' and '-'.\n");
+        printf("|          The specified name %s contains illegal characters.\n",input_cluster_name);
+        printf("|          Please check and retry. Exit now.\n");
+        return 1;
+    }
+    else if(cluster_name_check_flag==-127){
+        printf("[ FATAL: ] The specified cluster name %s already exists in the registry.",input_cluster_name);
+        printf("|          Please check and retry. Exit now.\n");
+        return 1;
+    }
+    else if(cluster_name_check_flag==1){
+        printf("[ -WARN- ] The specified cluster name length <%d, add '-hpcnow'.\n",CLUSTER_ID_LENGTH_MIN);
+    }
+    else if(cluster_name_check_flag==2){
+        printf("[ -WARN- ] The specified cluster name length > %d, cut to %d.\n",CLUSTER_ID_LENGTH_MAX,CLUSTER_ID_LENGTH_MAX);
+    }
+    else if(cluster_name_check_flag==-1){
+        printf("[ -WARN- ] Would you like to use the random string %s as a cluster name? \n",real_cluster_name);
+        printf("|          Only 'y-e-s' is accepted as a confirmation. \n");
+        fflush(stdin);
+        scanf("%s",doubleconfirm);
+        if(strcmp(doubleconfirm,"y-e-s")!=0){
+            printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+            printf("|          Nothing changed.\n");
             return 1;
-        }
-        else if(cluster_name_check(real_cluster_name)==-1){
-            printf("[ FATAL: ] The cluster name %s already exists.\n",real_cluster_name);
-            printf("|          Please check and retry. Exit now.\n");
-            return 1;
-            printf("[ -INFO- ] Using the input cluster name %s.\n",real_cluster_name);
         }
     }
+    printf("[ -INFO- ] Using the cluster name %s.\n",real_cluster_name);
     if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
 #ifdef _WIN32
     strcpy(filename_temp,"c:\\programdata\\secret.tmp.txt");
@@ -1908,20 +1916,25 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
     }
+    char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char temp_workdir[DIR_LENGTH]="";
+    if(show_current_cluster(temp_workdir,temp_cluster_name,0)!=0){
+        return -127;
+    }
     char buffer1[64]="";
     char buffer2[64]="";
     char cloud_flag[32]="";
     char doubleconfirm[64]="";
-
+    char conf_line[CONF_LINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
     char URL_AWS_ROOT[LOCATION_LENGTH_EXTENDED]="";
     char URL_ALICLOUD_ROOT[LOCATION_LENGTH_EXTENDED]="";
     char URL_QCLOUD_ROOT[LOCATION_LENGTH_EXTENDED]="";
     char confdir[DIR_LENGTH]="";
-    char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
-    create_and_get_vaultdir(workdir,vaultdir);
 
+    create_and_get_vaultdir(workdir,vaultdir);
     if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
         sprintf(URL_AWS_ROOT,"%s\\tf-templates-aws\\",URL_CODE_ROOT);
@@ -2025,6 +2038,13 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
     else{
         return 1;
     }
+    find_and_replace
+#ifdef _WIN32
+    sprintf(filename_temp,"%s\\tf_prep.conf",confdir);
+#else
+    sprintf(filename_temp,"%s/tf_prep.conf",confdir);
+#endif
+    find_and_replace(filename_temp,"CLUSTER_ID","","","","","hpcnow",temp_cluster_name);
     printf("[ -INFO- ] Would you like to edit the configuration file now? Input 'y-e-s' to confirm:\n");
     printf("[ INPUT: ] ");
     fflush(stdin);
