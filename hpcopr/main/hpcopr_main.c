@@ -87,6 +87,13 @@ int main(int argc, char* argv[]){
         print_tail();
         return -3;
     }
+#ifdef _WIN32
+    system("mkdir -p c:\\programdata\\hpc-now\\etc\\ > nul 2>&1");
+#elif __APPLE__
+    system("mkdir -p /Applications/.hpc-now/.etc/ >> /dev/null 2>&1");
+#elif __linux__
+    system("mkdir -p /usr/.hpc-now/.etc/ >> /dev/null 2>&1");
+#endif
 
     if(argc==1){
         print_help();
@@ -155,14 +162,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return -3;
     }
-
-#ifdef _WIN32
-    system("mkdir -p c:\\programdata\\hpc-now\\etc\\ > nul 2>&1");
-#elif __APPLE__
-    system("mkdir -p /Applications/.hpc-now/.etc/ >> /dev/null 2>&1");
-#elif __linux__
-    system("mkdir -p /usr/.hpc-now/.etc/ >> /dev/null 2>&1");
-#endif
 
     if(strcmp(argv[1],"configloc")==0){
         run_flag=configure_locations();
