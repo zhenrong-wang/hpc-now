@@ -104,6 +104,7 @@ int main(int argc, char* argv[]){
     }
 
     if(check_internet()!=0){
+        print_tail();
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
         system_cleanup();
         return -3;
@@ -289,6 +290,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"usage")==0){
         run_flag=get_usage(usage_log);
+        print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
@@ -296,6 +298,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"syslog")==0){
         run_flag=get_syslog(operation_log);
+        print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
@@ -324,6 +327,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"vault")==0){
         run_flag=get_vault_info(workdir,crypto_keyfile);
+        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
@@ -480,6 +484,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"sleep")==0){
         run_flag=cluster_sleep(workdir,crypto_keyfile);
+        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
@@ -489,6 +494,7 @@ int main(int argc, char* argv[]){
         if(argc==2){
             run_flag=cluster_wakeup(workdir,crypto_keyfile,"minimal");
             sprintf(string_temp,"%s default",argv[1]);
+            print_tail();
             write_log(current_cluster_name,operation_log,string_temp,run_flag);
             system_cleanup();
             return run_flag;
@@ -496,6 +502,7 @@ int main(int argc, char* argv[]){
         else{
             run_flag=cluster_wakeup(workdir,crypto_keyfile,argv[2]);
             sprintf(string_temp,"%s %s",argv[1],argv[2]);
+            print_tail();
             write_log(current_cluster_name,operation_log,string_temp,run_flag);
             system_cleanup();
             return run_flag;
@@ -504,6 +511,7 @@ int main(int argc, char* argv[]){
 
     if(argc==3&&strcmp(argv[1],"destroy")==0&&strcmp(argv[2],"force")==0){
         run_flag=cluster_destroy(workdir,crypto_keyfile,0);
+        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
@@ -522,6 +530,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"destroy")==0&&cluster_empty_or_not(workdir)==1){
         run_flag=cluster_destroy(workdir,crypto_keyfile,1);
+        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
@@ -530,11 +539,13 @@ int main(int argc, char* argv[]){
         if(argc==2){
             printf("[ FATAL: ] You need to specify a number or 'all' as the second parameter.\n");
             printf("|          Exit now.\n");
+            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],17);
             system_cleanup();
             return 17;
         }
         run_flag=delete_compute_node(workdir,crypto_keyfile,argv[2]);
+        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
@@ -549,6 +560,7 @@ int main(int argc, char* argv[]){
             return 17;
         }
         run_flag=add_compute_node(workdir,crypto_keyfile,argv[2]);
+        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
@@ -558,11 +570,13 @@ int main(int argc, char* argv[]){
         if(argc==2){
             printf("[ FATAL: ] You need to specify either 'all' or a number as the second parameter.\n");
             printf("|          Exit now.\n");
+            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],17);
             system_cleanup();
             return 17;
         }
         run_flag=shudown_compute_nodes(workdir,crypto_keyfile,argv[2]);
+        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
@@ -577,6 +591,7 @@ int main(int argc, char* argv[]){
             return 17;
         }
         run_flag=turn_on_compute_nodes(workdir,crypto_keyfile,argv[2]);
+        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
@@ -589,7 +604,6 @@ int main(int argc, char* argv[]){
                 printf("[ FATAL: ] Internal error. Please contact HPC-NOW via info@hpc-now.com\n");
                 printf("|          for technical supports. Exit now.\n");
                 print_tail();
-                system_cleanup();
                 write_log(current_cluster_name,operation_log,argv[1],-1);
                 system_cleanup();
                 return -1;
@@ -602,6 +616,7 @@ int main(int argc, char* argv[]){
         else if(argc==3){
             run_flag=reconfigure_compute_node(workdir,crypto_keyfile,argv[2],"");
             sprintf(string_temp,"%s %s",argv[1],argv[2]);
+            print_tail();
             write_log(current_cluster_name,operation_log,string_temp,run_flag);
             system_cleanup();
             return run_flag;
@@ -609,6 +624,7 @@ int main(int argc, char* argv[]){
         else{
             run_flag=reconfigure_compute_node(workdir,crypto_keyfile,argv[2],argv[3]);
             sprintf(string_temp,"%s %s %s",argv[1],argv[2],argv[3]);
+            print_tail();
             write_log(current_cluster_name,operation_log,string_temp,run_flag);
             system_cleanup();
             return run_flag;
@@ -635,6 +651,7 @@ int main(int argc, char* argv[]){
         else{
             run_flag=reconfigure_master_node(workdir,crypto_keyfile,argv[2]);
             sprintf(string_temp,"%s %s",argv[1],argv[2]);
+            print_tail();
             write_log(current_cluster_name,operation_log,string_temp,run_flag);
             system_cleanup();
             return run_flag;
