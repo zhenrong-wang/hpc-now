@@ -314,7 +314,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"graph")==0){
         decrypt_files(workdir,crypto_keyfile);
-        run_flag=graph(workdir,crypto_keyfile);
+        run_flag=graph(workdir,crypto_keyfile,0);
         if(run_flag!=0){
             print_empty_cluster_info();
         }

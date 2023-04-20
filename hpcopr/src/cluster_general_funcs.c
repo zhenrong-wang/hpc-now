@@ -1017,7 +1017,6 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             }
             printf("%s\n",compute_string);
         }
-        else if(graph_level==1){
     }
     if(graph_level==1){
         if(strlen(ht_status)!=0){
