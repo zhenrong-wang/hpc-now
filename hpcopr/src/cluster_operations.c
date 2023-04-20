@@ -139,6 +139,9 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     fprintf(file_p,"%s\n",temp_line);
     fclose(file_p);
     fclose(file_p_tmp);
+    if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,deleted_cluster_name,"","","","")!=0){
+        exit_current_cluster();
+    }
 #ifdef _WIN32
     sprintf(cmdline,"move /y %s %s > nul 2>&1",filename_temp,cluster_registry);
 #else
@@ -323,7 +326,6 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     char real_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char input_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char filename_temp[FILENAME_LENGTH]="";
-    int i;
     int cluster_name_check_flag=0;
     FILE* file_p=NULL;
     char new_workdir[DIR_LENGTH]="";
@@ -1925,7 +1927,6 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
     char buffer2[64]="";
     char cloud_flag[32]="";
     char doubleconfirm[64]="";
-    char conf_line[CONF_LINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char URL_AWS_ROOT[LOCATION_LENGTH_EXTENDED]="";
     char URL_ALICLOUD_ROOT[LOCATION_LENGTH_EXTENDED]="";
@@ -2038,7 +2039,6 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
     else{
         return 1;
     }
-    find_and_replace
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\tf_prep.conf",confdir);
 #else
