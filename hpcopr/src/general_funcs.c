@@ -180,7 +180,7 @@ int line_replace(char* orig_line, char* new_line, char* orig_string, char* new_s
     reset_string(new_line);
     i=0;
     do{
-        if(*(orig_line+i)==*(orig_string)&&i+length_orig<length){
+        if(*(orig_line+i)==*(orig_string)&&i+length_orig<length+1){
             for(j=0;j<length_orig;j++){
                 *(temp_string+j)=*(orig_line+i+j);
             }
@@ -274,7 +274,6 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
                     continue;
                 }
                 line_replace(single_line,new_single_line,orig_string,new_string);
-                printf("\n\n%s,,,,,%s,%s,,,,%s\n\n",single_line,new_single_line,orig_string,new_string);
                 fprintf(file_temp_p,"%s%c",new_single_line,'\n');
                 reset_string(new_single_line);
             }
