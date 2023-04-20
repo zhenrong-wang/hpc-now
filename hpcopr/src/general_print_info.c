@@ -47,7 +47,7 @@ void print_help(void){
     printf("|  glance      : all | TARGET_CLUSTER_NAME\n");
     printf("|                Quickly view all the clusters or a specified target cluster.\n");
     printf("|  exit-current: Exit the current cluster.\n");
-    printf("|  remove      : TARGET_CLUSTER_NAME");
+    printf("|  remove      : TARGET_CLUSTER_NAME\n");
     printf("|                Completely remove a cluster from the OS and registry.\n");
     printf("+ II. Global Management:\n");
     printf("| * You DO NOT need to switch to a cluster first.\n");

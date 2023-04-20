@@ -127,7 +127,7 @@ int main(int argc, char* argv[]){
         printf("[ -INFO- ] Entering repair mode. All the locations will be reset to default,\n");
         printf("|          and all the core components will be replaced by the default ones.\n");
         printf("|          Would you like to continue? Only 'y-e-s' is accepted to confirm.\n");
-        printf("[ INPUT: ] \n");
+        printf("[ INPUT: ] ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
         if(strcmp(doubleconfirm,"y-e-s")!=0){
@@ -147,6 +147,11 @@ int main(int argc, char* argv[]){
             print_tail();
             system_cleanup();
             return -3;
+        }
+        else{
+            print_tail();
+            system_cleanup();
+            return 0;
         }
     }
 
