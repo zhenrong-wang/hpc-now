@@ -17,24 +17,35 @@
 #ifdef _WIN32
 #include <malloc.h>
 #define LINE_LENGTH 1024
-#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_windows_amd64.exe"
+#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_windows_amd64.exe"
+#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-windows.exe"
+#define NOW_CRYPTO_EXEC "c:\\programdata\\hpc-now\\bin\\now-crypto.exe"
+#define HPCOPR_EXEC "C:\\hpc-now\\hpcopr.exe"
 #elif __linux__
 #include <malloc.h>
 #include <sys/time.h>
-#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_linux_amd64"
+#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_linux_amd64"
+#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-windows.exe"
+#define NOW_CRYPTO_EXEC "/usr/.hpc-now/.bin/now-crypto.exe"
+#define HPCOPR_EXEC "/home/hpc-now/.bin/hpcopr"
 #elif __APPLE__
 #include <sys/time.h>
-#define URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
+#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
+#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-darwin.exe"
+#define NOW_CRYPTO_EXEC "/Applications/.hpc-now/.bin/now-crypto.exe"
+#define HPCOPR_EXEC "/Users/hpc-now/.bin/hpcopr"
 #endif
 
 #define CMDLINE_LENGTH 2048
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"
 #define PASSWORD_STRING_LENGTH 20
 #define PASSWORD_LENGTH 19
+#define LOCATION_LENGTH 512
+#define LOCATION_LENGTH_EXTENDED 768
 
 void print_header(void){
     printf("| Welcome to the HPC-NOW Service Installer! Version: %s\n",VERSION_CODE);
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
     printf("| This is free software; see the source for copying conditions.  There is NO\n");
     printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
 }
@@ -46,16 +57,43 @@ void print_tail(void){
 
 // Print out help info for this installer
 void print_help(void){
-    printf("| Usage: sudo THIS_INSTALLER_FULL_PATH general_option advanced_option\n");
+#ifdef _WIN32
+    printf("| Usage: Open a command prompt window *WITH* the Administrator Role.\n");
+    printf("|        Type the command using either ways below:\n");
+    printf("|    <>  ABSOLUTE_PATH general_option advanced_option(s)\n");
+    printf("|     -> Example 1: C:\\Users\\ABC\\installer.exe install skip_lic=n\n");
+    printf("|    <>  RELATIVE_PATH general_option advanced_options\n");
+    printf("|     -> Example 2: .\\installer.exe install crypto_loc=.\\now-crypto.exe\n");
+#else
+    printf("| Usage: Open a Terminal.\n");
+    printf("|        Type the command using either ways below:\n");
+    printf("|    <>  sudo ABSOLUTE_PATH general_option advanced_option(s)");
+    printf("|     -> Example 1: sudo /home/ABC/installer.exe install skip_lic=n");
+    printf("|    <>  sudo RELATIVE_PATH general_option advanced_option(s)");
+    printf("|     -> Example 2: sudo ./installer.exe install crypto_loc=./now-crypto.exe");
+    printf("| \n");
+#endif
     printf("| general_option:\n");
     printf("|        install          : Install or repair the HPC-NOW Services on your device.\n");
     printf("|        update           : Update the hpcopr to the latest or your own version.\n");
     printf("|        uninstall        : Remove the HPC-NOW services and all relevant data.\n");
     printf("|        help             : Show this information.\n");
+    printf("|      * You MUST specify one of the general options above.\n");
     printf("| advanced_option (for developers, optional):\n");
-    printf("|        hpcopr_loc=LOC   : Provide your own location of hpcopr, both URL and local\n");
+    printf("|        skip_lic=y|n     : Whether to skip reading the license terms.\n");
+    printf("|                             y - agree and skip reading the terms.\n");
+    printf("|                             n - default option, you can decide to accept.\n");
+    printf("|                                   Will exit if you don't accept the terms.\n");
+    printf("|        hpcopr_loc=LOC   * Only valid for install or update option.\n");
+    printf("|                         : Provide your own location of hpcopr, both URL and local\n");
     printf("|                           filesystem path are accepted. You should guarantee that\n");
     printf("|                           the location points to a valid hpcopr executable.\n");
+    printf("|        hpcopr_loc=LOC   * Only valid for install or update option.\n");
+    printf("|                         : Provide your own location of now-crypto.exe, similar to\n");
+    printf("|                           the hpcopr_loc= parameter above.\n");
+    printf("|       * You can specify any or all of the advanced options above.\n");
+    printf("\n");
+    printf("<> visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
 }
 
 // check the internet connectivity by pinging Baidu's url. If connected, return 0; otherwise, return 1
@@ -72,7 +110,10 @@ int check_internet(void){
     return 0;
 }
 
-// Generate a randome string, length = 19.
+/* Borrow it from the general_funcs.c of the hpcopr source code folder. 
+ * It is a better idea to include it, maybe include it in the future.
+ * Please make sure to sync the codes from the hpcopr side
+ */
 int generate_random_passwd(char* password){
     int i,rand_num;
     struct timeval current_time;
@@ -93,6 +134,11 @@ int generate_random_passwd(char* password){
     return 0;
 }
 
+/* 
+ * Borrow it from the general_funcs.c of the hpcopr source code folder. 
+ * It is a better idea to include it, maybe include it in the future.
+ * Please make sure to sync the codes from the hpcopr side
+ */
 #ifdef _WIN32
 void reset_string(char* orig_string){
     int length=strlen(orig_string);
@@ -102,6 +148,11 @@ void reset_string(char* orig_string){
     }
 }
 
+/* 
+ * Borrow it from the general_funcs.c of the hpcopr source code folder. 
+ * It is a better idea to include it, maybe include it in the future.
+ * Please make sure to sync the codes from the hpcopr side
+ */
 int fgetline(FILE* file_p, char* line_string){
     char ch;
     int i=0;
@@ -115,14 +166,14 @@ int fgetline(FILE* file_p, char* line_string){
             *(line_string+i)=ch;
             i++;
         }
-        else if(ch=='\n'){
+/*        else if(ch=='\n'){
             return 0;
         }
-        else if(ch==EOF){
+        else if(ch==EOF&&i==0){
             return 1;
-        }
+        }*/
     }while(ch!=EOF&&ch!='\n');
-    if(ch==EOF){
+    if(ch==EOF&&i==0){
         return 1;
     }
     else{
@@ -130,6 +181,11 @@ int fgetline(FILE* file_p, char* line_string){
     }
 }
 
+/* 
+ * Borrow it from the general_funcs.c of the hpcopr source code folder. 
+ * It is a better idea to include it, maybe include it in the future.
+ * Please make sure to sync the codes from the hpcopr side
+ */
 int file_empty_or_not(char* filename){
     FILE* file_p=fopen(filename,"r");
     char temp_line[LINE_LENGTH]="";
@@ -142,11 +198,17 @@ int file_empty_or_not(char* filename){
             line_num++;
         }
         fclose(file_p);
+        if(strlen(temp_line)>0){
+            line_num++;
+        }
         return line_num;
     }
 }
 #endif
 
+/*
+ * This installer *MUST* be executed with root/Administrator previlege.
+ */
 int check_current_user(void){
 #ifdef _WIN32
     system("whoami /groups | find \"S-1-16-12288\" > c:\\programdata\\check.txt.tmp 2>&1");
@@ -205,10 +267,12 @@ int license_confirmation(void){
 // 3. Create the crypto key file for further encryption and decryption
 // 4. Manage the folder permissions
 
-int install_services(int loc_flag, char* location){
-    char cmdline[CMDLINE_LENGTH]="";
+int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, char* now_crypto_loc){
+    char cmdline1[CMDLINE_LENGTH]="";
+    char cmdline2[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
+    int run_flag1,run_flag2;
 #ifdef _WIN32
     if(system("net user hpc-now > nul 2>&1")==0){
         printf("[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
@@ -216,12 +280,35 @@ int install_services(int loc_flag, char* location){
         printf("|          is not permitted in order to protect your cloud clusters. In order to\n");
         printf("|          uninstall current HPC-NOW services, please run the command:\n");
         printf("|          1. Run a CMD window with Administrator role\n");
-        printf("|          2. Type the full path of this installer with an option, for example\n");
+        printf("|          2. Type the path of this installer with an option, for example\n");
         printf("|             C:\\Users\\ABC\\installer_windows_amd64.exe uninstall\n");
         printf("[ FATAL: ] Exit now.\n");
         return 1;
     }
+#elif __linux__
+    if(system("id hpc-now >> /dev/null 2>&1")==0){
+        printf("[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
+        printf("|          If you'd like to reinstall, please uninstall first. Reinstallation\n");
+        printf("|          is not permitted in order to protect your cloud clusters. In order to\n");
+        printf("|          uninstall current HPC-NOW services, please run the command:\n");
+        printf("|          sudo THIS_INSTALLER_PATH uninstall (Double confirm is needed)\n");
+        printf("[ FATAL: ] Exit now.\n");
+        return 1;
+    }
+#elif __APPLE__
+    int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
+    if(system("id hpc-now >> /dev/null 2>&1")==0){
+        printf("[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
+        printf("|          If you'd like to reinstall, please uninstall first. Reinstallation\n");
+        printf("|          is not permitted in order to protect your cloud clusters. In order to\n");
+        printf("|          uninstall current HPC-NOW services, please run the command:\n");
+        printf("|          sudo THIS_INSTALLER_PATH uninstall (Double confirm is needed)\n");
+        printf("[ FATAL: ] Exit now.\n");
+        return 1;
+    }
+#endif
     printf("[ -INFO- ] Checking and cleaning up current environment ...\n");
+#ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
     system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
     system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
@@ -229,9 +316,9 @@ int install_services(int loc_flag, char* location){
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
     printf("[ -INFO- ] Adding the specific user 'hpc-now' to your OS ...\n");   
-    strcpy(cmdline,"net user hpc-now nowadmin2023~ /add /logonpasswordchg:yes > nul 2>&1");
-    if(system(cmdline)!=0){
-        printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.\n");
+    strcpy(cmdline1,"net user hpc-now nowadmin2023~ /add /logonpasswordchg:yes > nul 2>&1");
+    if(system(cmdline1)!=0){
+        printf("[ FATAL: ] Failed to create the user 'hpc-now' to your system.\n");
         printf("[ FATAL: ] Exit now.\n");
         return -1;
     }
@@ -243,71 +330,21 @@ int install_services(int loc_flag, char* location){
     system("mkdir c:\\programdata\\hpc-now\\bin\\ > nul 2>&1");
     system("icacls c:\\hpc-now /grant hpc-now:(OI)(CI)F /t > nul 2>&1");
     system("icacls c:\\hpc-now /deny hpc-now:(DE) /t > nul 2>&1");
-    printf("[ -INFO- ] Creating a random file for encryption/decryption ...\n");
-    generate_random_passwd(random_string);
-    file_p=fopen("c:\\programdata\\hpc-now\\now_crypto_seed.lock","w+");
-    fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
-    fprintf(file_p,"PLEASE DO NOT HANDLE THIS FILE MANNUALLY! OTHERWISE THE SERVICE WILL BE CORRUPTED!\n");
-    fprintf(file_p,"SHANGHAI HPC-NOW TECHNOLOGIES CO., LTD | info@hpc-now.com | https://www.hpc-now.com\n\n");
-    fprintf(file_p,"%s\n",random_string);
-    fclose(file_p);
-    system("attrib +h +s +r c:\\programdata\\hpc-now\\now_crypto_seed.lock");
-    system("attrib +h +s +r c:\\programdata\\hpc-now > nul 2>&1");
-
-    if(loc_flag==-1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
-        sprintf(cmdline,"curl -s %s -o C:\\hpc-now\\hpcopr.exe",URL_HPCOPR_LATEST);
-    }
-    else if(loc_flag==0){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL ...\n");
-        sprintf(cmdline,"curl -s %s -o C:\\hpc-now\\hpcopr.exe",location);
-    }
-    else{
-        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
-        sprintf(cmdline,"copy %s C:\\hpc-now\\hpcopr.exe > nul 2>&1 ",location);
-    }
-    
-    if(system(cmdline)==0){
-        sprintf(cmdline,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
-        system(cmdline);
-        system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
-        printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
-        printf("|          The user 'hpc-now' has been created with initial password: nowadmin2023~\n");
-        printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:\n");
-        printf("|          1. Run CMD by typing cmd in the Windows Search box\n");
-        printf("|          2. cd c:\\hpc-now ( Change directory to the running directory )\n");
-        printf("|          3. hpcopr help    ( Some core components will be downloaded )\n");
-        printf("|          * You will be required to change the password of 'hpc-now'.\n");
-        printf("|          Enjoy you Cloud HPC journey!\n");
-        printf("[ -INFO- ] Exit now.\n");
-        return 0;
-    }
-    else{
-        system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
-        printf("[ FATAL: ] Failed to get the hpcopr executable. This installation process is\n");
-        printf("|          terminated. If you specified the location of hpcopr executable, please\n");
-        printf("|          make sure the location is correct. Rolling back and exit now.\n");
-        system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
-        system("attrib -h -s -r c:\\hpc-now > nul 2>&1");
-        system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
-        system("rd /s /q c:\\hpc-now > nul 2>&1");
-        system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
-        system("net user hpc-now /delete > nul 2>&1");
+#elif __linux__
+    printf("[ -INFO- ] Checking and cleaning up current environment ...\n");
+    system("rm -rf /home/hpc-now/ >> /dev/null 2>&1");
+    system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+    system("rm -rf /usr/.hpc-now/ >> /dev/null 2>&1");
+    printf("[ -INFO- ] Adding the specific user 'hpc-now' to your OS ...\n");
+    strcpy(cmdline1,"useradd hpc-now -m -s /bin/bash >> /dev/null 2>&1");
+    if(system(cmdline1)!=0){
+        printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.\n");
+        printf("[ FATAL: ] Exit now.\n");
         return -1;
     }
+    printf("[ -INFO- ] Creating and configuring the running directory ...\n");
+    system("mkdir -p /usr/.hpc-now && chmod 777 /usr/.hpc-now");
 #elif __APPLE__
-    int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
-
-    if(system("id hpc-now >> /dev/null 2>&1")==0){
-        printf("[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
-        printf("|          If you'd like to reinstall, please uninstall first. Reinstallation\n");
-        printf("|          is not permitted in order to protect your cloud clusters. In order to\n");
-        printf("|          uninstall current HPC-NOW services, please run the command:\n");
-        printf("|          sudo THIS_INSTALLER_FULL_PATH uninstall (Double confirm is needed)\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
-
     printf("[ -INFO- ] Checking and cleaning up current environment ...\n");
     system("rm -rf /Users/hpc-now/ >> /dev/null 2>&1");
     system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
@@ -320,51 +357,149 @@ int install_services(int loc_flag, char* location){
     flag5=system("dscl . -create /Groups/hpc-now PrimaryGroupID 1988 >> /dev/null 2>&1");
     flag5=system("dscl . -create /Users/hpc-now PrimaryGroupID 1988 >> /dev/null 2>&1");
     flag6=system("dscl . -create /Users/hpc-now NFSHomeDirectory /Users/hpc-now >> /dev/null 2>&1");
-
     if(flag1!=0||flag2!=0||flag3!=0||flag4!=0||flag5!=0||flag6!=0){
-        printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.\n");
-        printf("[ FATAL: ] Exit now.\n");
+        printf("[ FATAL: ] Failed to create the user 'hpc-now' and directories.\n");
+        printf("|          Exit now.\n");
         return -1;
     }
-    
     printf("[ -INFO- ] Creating and configuring the running directory ...\n");
     system("mkdir -p /Applications/.hpc-now >> /dev/null 2>&1 && chmod 777 /Applications/.hpc-now >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now >> /dev/null 2>&1");
+#endif
     printf("[ -INFO- ] Creating a random file for encryption/decryption ...\n");
     generate_random_passwd(random_string);
+#ifdef _WIN32
+    file_p=fopen("c:\\programdata\\hpc-now\\now_crypto_seed.lock","w+");
+#elif __linux__
+    file_p=fopen("/usr/.hpc-now/.now_crypto_seed.lock","w+");
+#elif __APPLE__
     file_p=fopen("/Applications/.hpc-now/.now_crypto_seed.lock","w+");
+#endif
     fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
     fprintf(file_p,"PLEASE DO NOT HANDLE THIS FILE MANNUALLY! OTHERWISE THE SERVICE WILL BE CORRUPTED!\n");
     fprintf(file_p,"SHANGHAI HPC-NOW TECHNOLOGIES CO., LTD | info@hpc-now.com | https://www.hpc-now.com\n\n");
     fprintf(file_p,"%s\n",random_string);
     fclose(file_p);
+#ifdef _WIN32
+    system("attrib +h +s +r c:\\programdata\\hpc-now\\now_crypto_seed.lock");
+    system("attrib +h +s +r c:\\programdata\\hpc-now > nul 2>&1");
+#elif __linux__
+    system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+    system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");   
+    system("mkdir -p /home/hpc-now/.bin >> /dev/null 2>&1");
+#elif __APPLE__
     system("chown -R root:root /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/.bin >> /dev/null 2>&1");
-    if(loc_flag==-1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
-        sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
+#endif
+    if(hpcopr_loc_flag==-1){
+        printf("[ -INFO- ] Will download the main program 'hpcopr' from the default URL.\n");
+        sprintf(cmdline1,"curl -s %s -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
     }
-    else if(loc_flag==0){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL ...\n");
-        sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",location);
-    }
-    else{
-        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
-        sprintf(cmdline,"/bin/cp -r %s /Users/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
-    }
-
-    if(system(cmdline)==0){
-        printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...\n");
-        strcpy(cmdline,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
-        system(cmdline);
-        sprintf(cmdline,"chmod +x /Users/hpc-now/.bin/hpcopr");
-        system(cmdline);
+    else if(hpcopr_loc_flag==0){
+        printf("[ -INFO- ] Will download the main program 'hpcopr' from the specified URL.\n");
+        sprintf(cmdline1,"curl -s %s -o %s",hpcopr_loc,HPCOPR_EXEC);
     }
     else{
-        printf("[ FATAL: ] Failed to get the hpcopr executable. This installation process is\n");
-        printf("|          terminated. If you specified the location of hpcopr executable, please\n");
-        printf("|          make sure the location is correct. Rolling back and exit now.\n");
+        printf("[ -INFO- ] Will copy the main program 'hpcopr' from %s.\n",hpcopr_loc);
+#ifdef _WIN32
+        sprintf(cmdline1,"copy /y %s %s > nul 2>&1 ",hpcopr_loc,HPCOPR_EXEC);
+#else
+        sprintf(cmdline1,"/bin/cp %s %s >> /dev/null 2>&1 ",hpcopr_loc,HPCOPR_EXEC);
+#endif
+    }
+    if(crypto_loc_flag==-1){
+        printf("[ -INFO- ] Will download the component 'now-crypto.exe' from the default URL.\n");
+        sprintf(cmdline2,"curl -s %s -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
+    }
+    else if(crypto_loc_flag==0){
+        printf("[ -INFO- ] Will download the component 'now-crypto.exe' from the specified URL.\n");
+        sprintf(cmdline2,"curl -s %s -o %s",now_crypto_loc,NOW_CRYPTO_EXEC);
+    }
+    else{
+        printf("[ -INFO- ] Will copy the component 'now-crypto.exe' from %s.\n",now_crypto_loc);
+#ifdef _WIN32
+        sprintf(cmdline2,"copy /y %s %s > nul 2>&1 ",now_crypto_loc,NOW_CRYPTO_EXEC);
+#else
+        sprintf(cmdline2,"/bin/cp %s %s >> /dev/null 2>&1 ",now_crypto_loc,NOW_CRYPTO_EXEC);
+#endif
+    }
+    run_flag1=system(cmdline1);
+    run_flag2=system(cmdline2);
+#ifdef _WIN32
+    if(run_flag1!=0||run_flag2!=0){
+        if(run_flag1!=0){
+            printf("[ FATAL: ] Failed to download/copy the 'hpcopr'.\n");
+        }
+        if(run_flag2!=0){
+            printf("[ FATAL: ] Failed to download/copy the 'now-crypto.exe'.\n");
+        }
+        printf("[ FATAL: ] This installation process is terminated. If you specified the\n");
+        printf("|          location of hpcopr executable, please make sure the location \n");
+        printf("|          is correct. Rolling back and exit now.\n");
+        system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
+        system("attrib -h -s -r c:\\hpc-now > nul 2>&1");
+        system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+        system("rd /s /q c:\\hpc-now > nul 2>&1");
+        system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
+        system("net user hpc-now /delete > nul 2>&1");
+        return -1;
+    }
+    sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
+    system(cmdline1);
+    system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
+    printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
+    printf("|          The user 'hpc-now' has been created with initial password: nowadmin2023~\n");
+    printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:\n");
+    printf("|          1. Run CMD by typing cmd in the Windows Search box\n");
+    printf("|          2. cd c:\\hpc-now ( Change directory to the running directory )\n");
+    printf("|          3. hpcopr help    ( Some core components will be downloaded )\n");
+    printf("|          * You will be required to change the password of 'hpc-now'.\n");
+    printf("|          Enjoy you Cloud HPC journey!\n");
+    printf("[ -INFO- ] Exit now.\n");
+    return 0;
+#elif __linux__
+    if(run_flag1!=0||run_flag2!=0){
+        if(run_flag1!=0){
+            printf("[ FATAL: ] Failed to download/copy the 'hpcopr'.\n");
+        }
+        if(run_flag2!=0){
+            printf("[ FATAL: ] Failed to download/copy the 'now-crypto.exe'.\n");
+        }
+        system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+        system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
+        system("userdel -f -r hpc-now >> /dev/null 2>&1");
+        return -1;
+    }
+    printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...\n"); 
+    if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ >> /dev/null 2>&1")!=0){
+        strcpy(cmdline1,"echo \"export PATH=/home/hpc-now/.bin/:$PATH\" >> /home/hpc-now/.bashrc");
+        system(cmdline1);
+    }
+    sprintf(cmdline1,"chmod +x %s && chmod +x %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC);
+    system(cmdline1);
+    printf("[ -INFO- ] Creating other key running directories ...\n");
+    system("mkdir -p /home/hpc-now/.now-ssh/ >> /dev/null 2>&1");
+    system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
+    sprintf(cmdline1,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
+    system(cmdline1);
+    system("chown -R hpc-now:hpc-now /home/hpc-now/ >> /dev/null 2>&1");
+    printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
+    printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
+    printf("|          You *MUST* run 'sudo passwd hpc-now' command to set a password.\n");
+    printf("|          to set a password. Please ensure the complexity of the new password!\n");
+    printf("|          After setting password, please switch to the user 'hpc-now' and run\n");
+    printf("|          the command 'hpcopr help' to get started. Enjoy you Cloud HPC journey!\n");
+    printf("[ -INFO- ] Exit now.\n");
+    return 0;
+#elif __APPLE__
+    if(run_flag1!=0||run_flag2!=0){
+        if(run_flag1!=0){
+            printf("[ FATAL: ] Failed to download/copy the 'hpcopr'.\n");
+        }
+        if(run_flag2!=0){
+            printf("[ FATAL: ] Failed to download/copy the 'now-crypto.exe'.\n");
+        }
         system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
         system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
         system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
@@ -372,12 +507,16 @@ int install_services(int loc_flag, char* location){
         system("rm -rf /Users/hpc-now >> /dev/null 2>&1");
         return -1;
     }
-    
+    printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...\n");
+    strcpy(cmdline1,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
+    system(cmdline1);
+    sprintf(cmdline1,"chmod +x %s && chmod +x %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC);
+    system(cmdline1);
     printf("[ -INFO- ] Creating other key running directories ...\n");
     system("mkdir -p /Users/hpc-now/.now-ssh/ >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
-    sprintf(cmdline,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
-    system(cmdline);
+    sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/LICENSES/GPL-2",URL_LICENSE);
+    system(cmdline1);
     system("chown -R hpc-now:hpc-now /Users/hpc-now/ >> /dev/null 2>&1");
     printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
@@ -386,86 +525,8 @@ int install_services(int loc_flag, char* location){
     printf("|          After setting password, please switch to the user 'hpc-now' and run\n");
     printf("|          the command 'hpcopr help' to get started. Enjoy you Cloud HPC journey!\n");
     printf("[ -INFO- ] Exit now.\n");
-#elif __linux__
-    if(system("id hpc-now >> /dev/null 2>&1")==0){
-        printf("[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
-        printf("|          If you'd like to reinstall, please uninstall first. Reinstallation\n");
-        printf("|          is not permitted in order to protect your cloud clusters. In order to\n");
-        printf("|          uninstall current HPC-NOW services, please run the command:\n");
-        printf("|          sudo THIS_INSTALLER_FULL_PATH uninstall (Double confirm is needed)\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
-
-    printf("[ -INFO- ] Checking and cleaning up current environment ...\n");
-    system("rm -rf /home/hpc-now/ >> /dev/null 2>&1");
-    system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("rm -rf /usr/.hpc-now/ >> /dev/null 2>&1");
-    printf("[ -INFO- ] Adding the specific user 'hpc-now' to your OS ...\n");
-    strcpy(cmdline,"useradd hpc-now -m -s /bin/bash >> /dev/null 2>&1");
-    if(system(cmdline)!=0){
-        printf("[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return -1;
-    }
-    
-    printf("[ -INFO- ] Creating and configuring the running directory ...\n");
-    system("mkdir -p /usr/.hpc-now && chmod 777 /usr/.hpc-now");
-    printf("[ -INFO- ] Creating a random file for encryption/decryption ...\n");
-    generate_random_passwd(random_string);
-    file_p=fopen("/usr/.hpc-now/.now_crypto_seed.lock","w+");
-    fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
-    fprintf(file_p,"PLEASE DO NOT HANDLE THIS FILE MANNUALLY! OTHERWISE THE SERVICE WILL BE CORRUPTED!\n");
-    fprintf(file_p,"SHANGHAI HPC-NOW TECHNOLOGIES CO., LTD | info@hpc-now.com | https://www.hpc-now.com\n\n");
-    fprintf(file_p,"%s\n",random_string);
-    fclose(file_p);
-    system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");   
-    system("mkdir -p /home/hpc-now/.bin >> /dev/null 2>&1");
-    if(loc_flag==-1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
-        sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
-    }
-    else if(loc_flag==0){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL ...\n");
-        sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",location);
-    }
-    else{
-        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
-        sprintf(cmdline,"/bin/cp -r %s /home/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
-    }
-    if(system(cmdline)==0){
-        printf("[ -INFO- ] Setting up environment variables for 'hpc-now' ...\n"); 
-        if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ >> /dev/null 2>&1")!=0){
-            strcpy(cmdline,"echo \"export PATH=/home/hpc-now/.bin/:$PATH\" >> /home/hpc-now/.bashrc");
-            system(cmdline);
-        }
-        sprintf(cmdline,"chmod +x /home/hpc-now/.bin/hpcopr");
-        system(cmdline);
-    }
-    else{
-        printf("[ FATAL: ] Failed to get the hpcopr executable. This installation process is\n");
-        printf("|          terminated. If you specified the location of hpcopr executable, please\n");
-        printf("|          make sure the location is correct. Rolling back and exit now.\n");
-        system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-        system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
-        system("userdel -f -r hpc-now >> /dev/null 2>&1");
-        return -1;
-    }
-    system("mkdir -p /home/hpc-now/.now-ssh/ >> /dev/null 2>&1");
-    system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
-    sprintf(cmdline,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
-    system(cmdline);
-    system("chown -R hpc-now:hpc-now /home/hpc-now/");
-    printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
-    printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
-    printf("|          You *MUST* run 'sudo passwd hpc-now' command to set a password.\n");
-    printf("|          Please ensure the complexity of the new password!\n");
-    printf("|          After setting password, please switch to the user 'hpc-now' and run\n");
-    printf("|          the command 'hpcopr help' to get started. Enjoy you Cloud HPC journey!\n");
-    printf("[ -INFO- ] Exit now.\n");
+    return 0;    
 #endif
-    return 0;
 }
 
 // Forcely uninstall the HPC-NOW services
@@ -525,9 +586,11 @@ int uninstall_services(void){
     return 0;
 }
 
-int update_services(int loc_flag, char* location){
+int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, char* now_crypto_loc){
     char doubleconfirm[128]="";
-    char cmdline[CMDLINE_LENGTH]="";
+    char cmdline1[CMDLINE_LENGTH]="";
+    char cmdline2[CMDLINE_LENGTH]="";
+    int run_flag1,run_flag2;
 #ifdef _WIN32
     if(system("net user hpc-now > nul 2>&1")!=0){
 #else
@@ -554,78 +617,44 @@ int update_services(int loc_flag, char* location){
         return 1;
     }
     printf("[ -INFO- ] UPDATING THE SERVICES NOW ...\n");
-
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
-    if(loc_flag==-1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
-        sprintf(cmdline,"curl -s %s -o C:\\hpc-now\\hpcopr.exe",URL_HPCOPR_LATEST);
-    }
-    else if(loc_flag==0){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL ...\n");
-        sprintf(cmdline,"curl -s %s -o C:\\hpc-now\\hpcopr.exe",location);
-    }
-    else{
-        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
-        sprintf(cmdline,"copy /y %s C:\\hpc-now\\hpcopr.exe > nul 2>&1 ",location);
-    }
-    if(system(cmdline)==0){
-        printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.\n");
-        printf("|          Thanks a lot for using HPC-NOW services!\n");
-        system("mkdir c:\\hpc-now\\LICENSES > nul 2>&1");
-        sprintf(cmdline,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
-        system(cmdline);
-        system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
-        return 0;
-    }
-#elif __APPLE__
-    if(loc_flag==-1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
-        sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
-    }
-    else if(loc_flag==0){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL...\n");
-        sprintf(cmdline,"curl -s %s -o /Users/hpc-now/.bin/hpcopr",location);
-    }
-    else{
-        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
-        sprintf(cmdline,"/bin/cp -r %s /Users/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
-    }
-    if(system(cmdline)==0){
-        sprintf(cmdline,"chmod +x /Users/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /Users/hpc-now/.bin/hpcopr");
-        system(cmdline);
-        system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
-        sprintf(cmdline,"curl -s %s -o /Users/hpc-now/LICENSES/GPL-2",URL_LICENSE);
-        system(cmdline);
-        printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.\n");
-        printf("|          Thanks a lot for using HPC-NOW services!\n");
-        return 0;
-    }
-#elif __linux__
-    if(loc_flag==-1){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from the default URL ...\n");
-        sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",URL_HPCOPR_LATEST);
-    }
-    else if(loc_flag==0){
-        printf("[ -INFO- ] Downloading the main program 'hpcopr' from your own URL...\n");
-        sprintf(cmdline,"curl -s %s -o /home/hpc-now/.bin/hpcopr",location);
-    }
-    else{
-        printf("[ -INFO- ] Copying the main program 'hpcopr' ...\n");
-        sprintf(cmdline,"/bin/cp -r %s /home/hpc-now/.bin/hpcopr >> /dev/null 2>&1 ",location);
-    }
-    if(system(cmdline)==0){
-        sprintf(cmdline,"chmod +x /home/hpc-now/.bin/hpcopr && chown -R hpc-now:hpc-now /home/hpc-now/.bin/hpcopr");
-        system(cmdline);
-        system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
-        sprintf(cmdline,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
-        system(cmdline);
-        printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.\n");
-        printf("|          Thanks a lot for using HPC-NOW services!\n");
-        return 0;
-    }
 #endif
+    if(hpcopr_loc_flag==-1){
+        printf("[ -INFO- ] Will download the main program 'hpcopr' from the default URL.\n");
+        sprintf(cmdline1,"curl -s %s -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+    }
+    else if(hpcopr_loc_flag==0){
+        printf("[ -INFO- ] Will download the main program 'hpcopr' from the specified URL.\n");
+        sprintf(cmdline1,"curl -s %s -o %s",hpcopr_loc,HPCOPR_EXEC);
+    }
     else{
+        printf("[ -INFO- ] Will copy the main program 'hpcopr' from %s.\n",hpcopr_loc);
+#ifdef _WIN32
+        sprintf(cmdline1,"copy /y %s %s > nul 2>&1 ",hpcopr_loc,HPCOPR_EXEC);
+#else
+        sprintf(cmdline1,"/bin/cp %s %s >> /dev/null 2>&1 ",hpcopr_loc,HPCOPR_EXEC);
+#endif
+    }
+    if(crypto_loc_flag==-1){
+        printf("[ -INFO- ] Will download the component 'now-crypto.exe' from the default URL.\n");
+        sprintf(cmdline2,"curl -s %s -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
+    }
+    else if(crypto_loc_flag==0){
+        printf("[ -INFO- ] Will download the component 'now-crypto.exe' from the specified URL.\n");
+        sprintf(cmdline2,"curl -s %s -o %s",now_crypto_loc,NOW_CRYPTO_EXEC);
+    }
+    else{
+        printf("[ -INFO- ] Will copy the component 'now-crypto.exe' from %s.\n",now_crypto_loc);
+#ifdef _WIN32
+        sprintf(cmdline2,"copy /y %s %s > nul 2>&1 ",now_crypto_loc,NOW_CRYPTO_EXEC);
+#else
+        sprintf(cmdline2,"/bin/cp %s %s >> /dev/null 2>&1 ",now_crypto_loc,NOW_CRYPTO_EXEC);
+#endif
+    }
+    run_flag1=system(cmdline1);
+    run_flag2=system(cmdline2);
+    if(run_flag1!=0||run_flag2!=0){
         printf("[ FATAL: ] Failed to update the HPC-NOW services. Please check and make sure:\n");
         printf("|          1. The HPC-NOW Services have been installed previously.\n");
         printf("|          2. The specified location (if specified) is correct.\n");
@@ -636,6 +665,27 @@ int update_services(int loc_flag, char* location){
 #endif
         return 1;
     }
+    printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.\n");
+    printf("|          Thanks a lot for using HPC-NOW services!\n");
+#ifdef _WIN32
+    system("mkdir c:\\hpc-now\\LICENSES > nul 2>&1");
+    sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
+    system(cmdline1);
+    system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
+#elif __linux__
+    system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
+    sprintf(cmdline1,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
+    system(cmdline1);
+    sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
+    system(cmdline1);
+#elif __APPLE__
+    system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
+    sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/LICENSES/GPL-2",URL_LICENSE);
+    system(cmdline1);
+    sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
+    system(cmdline1);
+#endif
+    return 0;
 }
 
 int valid_loc_format_or_not(char* loc_string){
@@ -653,94 +703,123 @@ int valid_loc_format_or_not(char* loc_string){
     return 1;
 }
 
+int split_parameter(char* param, char* param_head, char* param_tail){
+    int param_length=strlen(param);
+    char param_head_temp[32]="";
+    char param_tail_temp[LOCATION_LENGTH]="";
+    int i=0,j=0;
+    if(param_length<10){
+        return -1;
+    }
+    while(*(param+i)!='='&&i<11){
+        *(param_head_temp+i)=*(param+i);
+        i++;
+    }
+    *(param_head_temp+i)='\0';
+    if(strcmp(param_head_temp,"hpcopr_loc")!=0&&strcmp(param_head_temp,"crypto_loc")!=0&&strcmp(param_head_temp,"skip_lic")!=0){
+        return -1;
+    }
+    if(strcmp(param_head_temp,"skip_lic")==0){
+        if(strcmp(param,"skip_lic=y")==0){
+            return 10;
+        }
+        else if(strcmp(param,"skip_lic=n")==0){
+            return 12;
+        }
+        else{
+            return -1;
+        }
+    }
+    strcpy(param_head,param_head_temp);
+    i++;
+    do{
+        *(param_tail_temp+j)=*(param+i);
+        i++;
+        j++;
+    }while(i<param_length);
+    *(param_tail_temp+j)='\0';
+    strcpy(param_tail,param_head_temp);
+    if(strcmp(param_head_temp,"hpcopr_loc")==0){
+        return 2;
+    }
+    else{
+        return 4;
+    }
+}
+
 int main(int argc, char* argv[]){
     int run_flag=0;
     int i;
-    int length;
+    int max_argc=0;
+    int hpcopr_loc_flag=-1;
+    int crypto_loc_flag=-1;
+    int skip_lic_flag=1;
+    char hpcopr_loc[LOCATION_LENGTH]="";
+    char now_crypto_loc[LOCATION_LENGTH]="";
     char advanced_option_head[12]="";
-    char advanced_option_tail[256]="";
-    int loc_flag=-1;
-
+    char advanced_option_tail[512]="";
     print_header();
     if(check_current_user()!=0){
         print_tail();
         return -1;
     }
-    
     if(check_internet()!=0){
         print_tail();
         return -3;
-    }
-    
-    if(argc!=2&&argc!=3){
+    }  
+    if(argc==1){
         print_help();
-        print_tail();
         return 1;
     }
-
     if(strcmp(argv[1],"help")==0){
         print_help();
-        print_tail();
-        return 0;
-    }
-    
-    if(strcmp(argv[1],"uninstall")!=0&&strcmp(argv[1],"update")!=0&&strcmp(argv[1],"install")!=0){
-        print_help();
-        print_tail();
         return 1;
     }
-
-    if(argc==3){
-        length=strlen(argv[2]);
-        if(length<13){
-            print_help();
-            print_tail();
-            return 1;
-        }
-
-        for(i=0;i<11;i++){
-            advanced_option_head[i]=*(argv[2]+i);
-        }
-        advanced_option_head[11]='\0';
-        for(i=0;i<length-11;i++){
-            advanced_option_tail[i]=*(argv[2]+i+11);
-        }
-        advanced_option_tail[length-11]='\0';
-
-        if(strcmp(advanced_option_head,"hpcopr_loc=")!=0){
-            print_help();
-            print_tail();
-            return 1;
-        }
-        loc_flag=valid_loc_format_or_not(advanced_option_tail);
-        if(loc_flag==-1){
-            printf("[ -WARN- ] The location specified in the command has invalid format.\n");
-            printf("           Will use the default location to download.\n");
-        }
-    }
-
-    run_flag=license_confirmation();
-    if(run_flag!=0){
-        print_tail();
-        return run_flag;
-    }
-
     if(strcmp(argv[1],"uninstall")==0){
+        if(argc>3&&split_parameter(argv[2],advanced_option_head,advanced_option_tail)==10){
+            skip_lic_flag=0;
+        }
+        if(skip_lic_flag==1){
+            license_confirmation();
+        }
         run_flag=uninstall_services();
         print_tail();
         return run_flag;
     }
-
+    if(strcmp(argv[1],"update")!=0&&strcmp(argv[1],"install")!=0){
+        print_help();
+        return 1;
+    }
+    if(argc>5){
+        max_argc=5;
+    }
+    else{
+        max_argc=argc;
+    }
+    for(i=2;i<max_argc;i++){
+        if(split_parameter(argv[i],advanced_option_head,advanced_option_tail)==10){
+            skip_lic_flag=0;
+        }
+        else if(split_parameter(argv[i],advanced_option_head,advanced_option_tail)==2){
+            hpcopr_loc_flag=valid_loc_format_or_not(advanced_option_tail);
+            strcpy(hpcopr_loc,advanced_option_tail);
+        }
+        else if(split_parameter(argv[i],advanced_option_head,advanced_option_tail)==4){
+            crypto_loc_flag=valid_loc_format_or_not(advanced_option_tail);
+            strcpy(now_crypto_loc,advanced_option_tail);
+        }
+    }
+    if(skip_lic_flag==1){
+        license_confirmation();
+    }
     if(strcmp(argv[1],"update")==0){
-        run_flag=update_services(loc_flag,advanced_option_tail);
+        run_flag=update_services(hpcopr_loc_flag,hpcopr_loc,crypto_loc_flag,now_crypto_loc);
         print_tail();
         return run_flag;
     }
-
     if(strcmp(argv[1],"install")==0){
-        run_flag=install_services(loc_flag,advanced_option_tail);
+        run_flag=install_services(hpcopr_loc_flag,hpcopr_loc,crypto_loc_flag,now_crypto_loc);
         print_tail();
         return run_flag;
     }
-    return 0;
 }
