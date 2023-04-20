@@ -60,18 +60,17 @@ void print_help(void){
 #ifdef _WIN32
     printf("| Usage: Open a command prompt window *WITH* the Administrator Role.\n");
     printf("|        Type the command using either ways below:\n");
-    printf("|    <>  ABSOLUTE_PATH general_option advanced_option(s)\n");
-    printf("|     -> Example 1: C:\\Users\\ABC\\installer.exe install skip_lic=n\n");
-    printf("|    <>  RELATIVE_PATH general_option advanced_options\n");
-    printf("|     -> Example 2: .\\installer.exe install crypto_loc=.\\now-crypto.exe\n");
+    printf("|        <> ABSOLUTE_PATH general_option advanced_option(s)\n");
+    printf("|         -> Example 1: C:\\Users\\ABC\\installer.exe install skip_lic=n\n");
+    printf("|        <> RELATIVE_PATH general_option advanced_options\n");
+    printf("|         -> Example 2: .\\installer.exe install crypto_loc=.\\now-crypto.exe\n");
 #else
     printf("| Usage: Open a Terminal.\n");
     printf("|        Type the command using either ways below:\n");
-    printf("|    <>  sudo ABSOLUTE_PATH general_option advanced_option(s)");
-    printf("|     -> Example 1: sudo /home/ABC/installer.exe install skip_lic=n");
-    printf("|    <>  sudo RELATIVE_PATH general_option advanced_option(s)");
-    printf("|     -> Example 2: sudo ./installer.exe install crypto_loc=./now-crypto.exe");
-    printf("| \n");
+    printf("|        <> sudo ABSOLUTE_PATH general_option advanced_option(s)\n");
+    printf("|         -> Example 1: sudo /home/ABC/installer.exe install skip_lic=n\n");
+    printf("|        <> sudo RELATIVE_PATH general_option advanced_option(s)\n");
+    printf("|         -> Example 2: sudo ./installer.exe install crypto_loc=./now-crypto.exe\n");
 #endif
     printf("| general_option:\n");
     printf("|        install          : Install or repair the HPC-NOW Services on your device.\n");
