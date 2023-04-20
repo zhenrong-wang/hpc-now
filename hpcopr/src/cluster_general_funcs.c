@@ -958,6 +958,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char ht_status[16]="";
     char string_temp[64]="";
     int i,node_num=0;
+    int running_node_num=0;
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
     sprintf(currentstate,"%s\\currentstate",stackdir);
@@ -1008,6 +1009,9 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     while(fgetline(file_p,compute_address)==0){
         fgetline(file_p,compute_status);
         node_num++;
+        if(strcmp(compute_status,"running")==0||strcmp(compute_status,"Running")==0||strcmp(compute_status,"RUNNING")==0){
+            running_node_num++;
+        }
         if(graph_level==0){
             if(strlen(ht_status)!=0){
                 sprintf(compute_string,"%s|<->compute%d(%s,%s,%s,%s)",string_temp,node_num,compute_address,compute_status,compute_config,ht_status);
@@ -1020,10 +1024,18 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     }
     if(graph_level==1){
         if(strlen(ht_status)!=0){
-            printf("| %s | %s | %s | %d | %s | %s\n",cloud_flag,master_address,master_config,node_num,compute_config,ht_status);
+            printf("| %s | %s %s %s | %d/%d | %s | %s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
         }
         else{
-            printf("| %s | %s | %s | %d | %s \n",cloud_flag,master_address,master_config,node_num,compute_config);
+            printf("| %s | %s %s %s | %d/%d | %s \n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
+        }
+    }
+    if(graph_level==2){
+        if(strlen(ht_status)!=0){
+            printf("%s,%s,%s,%s,%d,%d,%s,%s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
+        }
+        else{
+            printf("%s,%s,%s,%s,%d,%d,%s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
         }
     }
     fclose(file_p);
