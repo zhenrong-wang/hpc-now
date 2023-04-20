@@ -727,21 +727,23 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     create_and_get_stackdir(workdir,stackdir);
     archive_log(stackdir);
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s destroy > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s destroy > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
 #else
-    sprintf(cmdline,"cd %s && echo yes | %s destroy > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | %s destroy > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
 #endif
     system(cmdline);
     wait_for_complete(workdir,"destroy");
+    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
+        printf("[ FATAL: ] Failed to destroy the cluster. Please check the logfile for details.\n");
+        printf("|          Exit now.\n");
+        print_tail();
+        delete_decrypted_files(workdir,crypto_keyfile);
+        return -1;
+    }
     if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_A")==0){
         system(cmdline);
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
-#else
-    sprintf(filename_temp,"%s/log/now_cluster.log",workdir);
-#endif
-    if(file_empty_or_not(filename_temp)!=0){
+    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
         printf("[ FATAL: ] Failed to destroy the cluster. Please check the logfile for details.\n");
         printf("|          Exit now.\n");
         print_tail();
@@ -899,10 +901,9 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 system(cmdline);
             }
             archive_log(stackdir);
-            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
             system(cmdline);
             wait_for_complete(workdir,"apply");
-            sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
 #else
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
                 system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
@@ -910,13 +911,11 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 system(cmdline);
             }
             archive_log(stackdir);
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
             system(cmdline);
             wait_for_complete(workdir,"apply");
-            sprintf(filename_temp,"%s/log/now_cluster.log",workdir);
 #endif
-
-            if(file_empty_or_not(filename_temp)!=0){
+            if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
                 printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
                 printf("|          Exit now.\n");
                 delete_decrypted_files(workdir,crypto_keyfile);
@@ -947,10 +946,9 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         system(cmdline);
     }
     archive_log(stackdir);
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
 #else
     for(i=1;i<compute_node_num+1;i++){
         system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
@@ -958,12 +956,11 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         system(cmdline);
     }
     archive_log(stackdir);
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp,"%s/log/now_cluster.log",workdir);
 #endif
-    if(file_empty_or_not(filename_temp)!=0){
+    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
         printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
         printf("|          Exit now.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1042,17 +1039,15 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     }
     archive_log(stackdir);
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
 #else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp,"%s/log/now_cluster.log",workdir);
 #endif
-    if(file_empty_or_not(filename_temp)!=0){
+    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
         printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
         printf("|          Exit now.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1168,17 +1163,15 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             }
             archive_log(stackdir);
 #ifdef _WIN32
-            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
             system(cmdline);
             wait_for_complete(workdir,"apply");
-            sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
 #else
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
             system(cmdline);
             wait_for_complete(workdir,"apply");
-            sprintf(filename_temp,"%s/log/now_cluster.log",workdir);
 #endif
-            if(file_empty_or_not(filename_temp)!=0){
+            if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
                 printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
                 printf("|          Exit now.\n");
                 delete_decrypted_files(workdir,crypto_keyfile);
@@ -1220,17 +1213,15 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     }
     archive_log(stackdir);
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
 #else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp,"%s/log/now_cluster.log",workdir);
 #endif
-    if(file_empty_or_not(filename_temp)!=0){
+    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
         printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
         printf("|          Exit now.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1355,17 +1346,15 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             }
             archive_log(stackdir);
 #ifdef _WIN32
-            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
             system(cmdline);
             wait_for_complete(workdir,"apply");
-            sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
 #else
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
             system(cmdline);
             wait_for_complete(workdir,"apply");
-            sprintf(filename_temp,"%s/log/now_cluster.log",workdir);
 #endif
-            if(file_empty_or_not(filename_temp)!=0){
+            if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
                 printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
                 printf("|          Exit now.\n");
                 delete_decrypted_files(workdir,crypto_keyfile);
@@ -1407,17 +1396,15 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     }
     archive_log(stackdir);
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
 #else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp,"%s/log/now_cluster.log",workdir);
 #endif
-    if(file_empty_or_not(filename_temp)!=0){
+    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
         printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
         printf("|          Exit now.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1570,17 +1557,15 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
             archive_log(stackdir);
 #ifdef _WIN32
-            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
             system(cmdline);
             wait_for_complete(workdir,"apply");
-            sprintf(filename_temp2,"%s\\log\\now_cluster.log",workdir);
 #else
-            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+            sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
             system(cmdline);
             wait_for_complete(workdir,"apply");
-            sprintf(filename_temp2,"%s/log/now_cluster.log",workdir);
 #endif
-            if(file_empty_or_not(filename_temp2)!=0){
+            if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
                 printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
                 printf("|          Exit now.\n");
                 delete_decrypted_files(workdir,crypto_keyfile);
@@ -1662,17 +1647,15 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     archive_log(stackdir);
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp2,"%s\\log\\now_cluster.log",workdir);
 #else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp2,"%s/log/now_cluster.log",workdir);
 #endif
-    if(file_empty_or_not(filename_temp2)!=0){
+    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
         printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
         printf("|          Exit now.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1764,17 +1747,15 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     archive_log(stackdir);
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp2,"%s\\log\\now_cluster.log",workdir);
 #else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
     system(cmdline);
     wait_for_complete(workdir,"apply");
-    sprintf(filename_temp2,"%s/log/now_cluster.log",workdir);
 #endif
-    if(file_empty_or_not(filename_temp2)!=0){
+    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
         printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
         printf("|          Exit now.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1913,31 +1894,33 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     }
     archive_log(stackdir);
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
 #else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
 #endif
     system(cmdline);
     wait_for_complete(workdir,"apply");
+    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
+        printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
+        printf("|          Exit now.\n");
+        print_tail();
+        delete_decrypted_files(workdir,crypto_keyfile);
+        return -1;
+    }
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
             usleep(1000000);
         }
         archive_log(stackdir);
 #ifdef _WIN32
-        sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+        sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
 #else
-        sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+        sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
 #endif
         system(cmdline);
         wait_for_complete(workdir,"apply");
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
-#else
-    sprintf(filename_temp,"%s/log/now_cluster.log",workdir);
-#endif
-    if(file_empty_or_not(filename_temp)!=0){
+    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
         printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
         printf("|          Exit now.\n");
         print_tail();
@@ -2079,9 +2062,9 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     }
     archive_log(stackdir);
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
 #else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
+    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,OPERATION_ERROR_LOG);
 #endif
     system(cmdline);
     wait_for_complete(workdir,"apply");
@@ -2090,20 +2073,10 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
             usleep(1000000);
         }
         archive_log(stackdir);
-#ifdef _WIN32
-        sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
-#else
-        sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s/log/now_cluster.log &",stackdir,tf_exec,stackdir,workdir);
-#endif
         system(cmdline);
         wait_for_complete(workdir,"apply");
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\log\\now_cluster.log",workdir);
-#else
-    sprintf(filename_temp,"%s/log/now_cluster.log",workdir);
-#endif
-    if(file_empty_or_not(filename_temp)!=0){
+    if(file_empty_or_not(OPERATION_ERROR_LOG)!=0){
         printf("[ FATAL: ] Failed to modify the cluster. Please check the logfile for details.\n");
         printf("|          Exit now.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
