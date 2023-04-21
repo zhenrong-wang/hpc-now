@@ -977,7 +977,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
 #else
     sprintf(currentstate,"%s/currentstate",stackdir);
     sprintf(compute_template,"%s/compute_template",stackdir);
-    sprintf(cloud_flag_file,"%s\\conf\\.cloud_flag.flg",workdir);
+    sprintf(cloud_flag_file,"%s/conf/.cloud_flag.flg",workdir);
 #endif
     FILE* file_p=fopen(currentstate,"r");
     if(file_p==NULL){
