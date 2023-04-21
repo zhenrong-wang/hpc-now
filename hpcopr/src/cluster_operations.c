@@ -2085,17 +2085,16 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     find_and_replace(filename_temp,"CLUSTER_ID","","","","","hpcnow",temp_cluster_name);
     printf("[ -INFO- ] Default configuration file has been downloaded.\n");
     if(edit_flag!=0){
-        return 0;
-    }
-    printf("[ -INFO- ] Would you like to edit it now? Input 'y-e-s' to confirm:\n");
-    printf("[ INPUT: ] ");
-    fflush(stdin);
-    scanf("%s",doubleconfirm);
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
-        printf("|          You can still switch to this cluster and run 'hpcopr edit-conf' to \n");
-        printf("|          modify and save the default configuration file later. Exit now.\n");
-        return 0;
+        printf("[ -INFO- ] Would you like to edit it now? Input 'y-e-s' to confirm:\n");
+        printf("[ INPUT: ] ");
+        fflush(stdin);
+        scanf("%s",doubleconfirm);
+        if(strcmp(doubleconfirm,"y-e-s")!=0){
+            printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+            printf("|          You can still switch to this cluster and run 'hpcopr edit-conf' to \n");
+            printf("|          modify and save the default configuration file later. Exit now.\n");
+            return 3;
+        }
     }
 #ifdef _WIN32
     sprintf(cmdline,"notepad %s\\tf_prep.conf",confdir);
