@@ -58,16 +58,16 @@ void print_help_installer(void){
     printf("| Usage: Open a command prompt window *WITH* the Administrator Role.\n");
     printf("|        Type the command using either ways below:\n");
     printf("|        <> ABSOLUTE_PATH general_option advanced_option(s)\n");
-    printf("|         -> Example 1: C:\\Users\\ABC\\installer.exe install skip_lic=n\n");
+    printf("|         -> Example 1: C:\\Users\\ABC\\installer.exe install skiplic=n\n");
     printf("|        <> RELATIVE_PATH general_option advanced_options\n");
-    printf("|         -> Example 2: .\\installer.exe install crypto_loc=.\\now-crypto.exe\n");
+    printf("|         -> Example 2: .\\installer.exe install cryptoloc=.\\now-crypto.exe\n");
 #else
     printf("| Usage: Open a Terminal.\n");
     printf("|        Type the command using either ways below:\n");
     printf("|        <> sudo ABSOLUTE_PATH general_option advanced_option(s)\n");
-    printf("|         -> Example 1: sudo /home/ABC/installer.exe install skip_lic=n\n");
+    printf("|         -> Example 1: sudo /home/ABC/installer.exe install skiplic=n\n");
     printf("|        <> sudo RELATIVE_PATH general_option advanced_option(s)\n");
-    printf("|         -> Example 2: sudo ./installer.exe install crypto_loc=./now-crypto.exe\n");
+    printf("|         -> Example 2: sudo ./installer.exe install cryptoloc=./now-crypto.exe\n");
 #endif
     printf("| general_option:\n");
     printf("|        install          : Install or repair the HPC-NOW Services on your device.\n");
@@ -76,17 +76,17 @@ void print_help_installer(void){
     printf("|        help             : Show this information.\n");
     printf("|       * You MUST specify one of the general options above.\n");
     printf("| advanced_option (for developers, optional):\n");
-    printf("|        skip_lic=y|n     : Whether to skip reading the license terms.\n");
+    printf("|        skiplic=y|n      : Whether to skip reading the license terms.\n");
     printf("|                             y - agree and skip reading the terms.\n");
     printf("|                             n - default option, you can decide to accept.\n");
     printf("|                                   Will exit if you don't accept the terms.\n");
-    printf("|        hpcopr_loc=LOC   * Only valid for install or update option.\n");
+    printf("|        hpcopr=LOC       * Only valid for install or update option.\n");
     printf("|                         : Provide your own location of hpcopr, both URL and local\n");
     printf("|                           filesystem path are accepted. You should guarantee that\n");
     printf("|                           the location points to a valid hpcopr executable.\n");
-    printf("|        crypto_loc=LOC   * Only valid for install or update option.\n");
+    printf("|        crypto=LOC       * Only valid for install or update option.\n");
     printf("|                         : Provide your own location of now-crypto.exe, similar to\n");
-    printf("|                           the hpcopr_loc= parameter above.\n");
+    printf("|                           the hpcoprloc= parameter above.\n");
     printf("|       * You can specify any or all of the advanced options above.\n");
     printf("\n");
     printf("<> visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
@@ -490,8 +490,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     printf("|*                                C A U T I O N !                                  *\n");
     printf("|*                                                                                 *\n");
     printf("|*     YOU ARE UPDATING THE HPC-NOW SERVICES. THE CURRENT hpcopr BINARY WILL BE    *\n");
-    printf("|*     REPLACED. IF YOU UPDATE WITH THE hpcopr_loc= PARAMETER, PLEASE MAKE SURE    *\n");
-    printf("|*     THAT THE LOCATION POINTS TO A VALID hpcopr EXECUTABLE.                      *\n");
+    printf("|*     REPLACED. IF YOU UPDATE WITH THE hpcoprloc= and/or cryptoloc=, PLEASE MAKE  *\n");
+    printf("|*     SURE THE LOCATION(S) POINT(S) TO VALID EXECUTABLE(S).                       *\n");
     printf("|*                                                                                 *\n");
     printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     printf("[ INPUT: ]  ");
@@ -594,22 +594,22 @@ int split_parameter(char* param, char* param_head, char* param_tail){
     char param_head_temp[32]="";
     char param_tail_temp[LOCATION_LENGTH]="";
     int i=0,j=0;
-    if(param_length<10){
+    if(param_length<9){
         return -1;
     }
-    while(*(param+i)!='='&&i<11){
+    while(*(param+i)!='='&&i<10){
         *(param_head_temp+i)=*(param+i);
         i++;
     }
     *(param_head_temp+i)='\0';
-    if(strcmp(param_head_temp,"hpcopr_loc")!=0&&strcmp(param_head_temp,"crypto_loc")!=0&&strcmp(param_head_temp,"skip_lic")!=0){
+    if(strcmp(param_head_temp,"hpcoprloc")!=0&&strcmp(param_head_temp,"cryptoloc")!=0&&strcmp(param_head_temp,"skiplic")!=0){
         return -1;
     }
-    if(strcmp(param_head_temp,"skip_lic")==0){
-        if(strcmp(param,"skip_lic=y")==0){
+    if(strcmp(param_head_temp,"skiplic")==0){
+        if(strcmp(param,"skiplic=y")==0){
             return 10;
         }
-        else if(strcmp(param,"skip_lic=n")==0){
+        else if(strcmp(param,"skiplic=n")==0){
             return 12;
         }
         else{
@@ -625,7 +625,7 @@ int split_parameter(char* param, char* param_head, char* param_tail){
     }while(i<param_length);
     *(param_tail_temp+j)='\0';
     strcpy(param_tail,param_tail_temp);
-    if(strcmp(param_head_temp,"hpcopr_loc")==0){
+    if(strcmp(param_head_temp,"hpcoprloc")==0){
         return 2;
     }
     else{
