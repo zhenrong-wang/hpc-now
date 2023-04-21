@@ -229,7 +229,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
         return -1;
     }
     printf("[ -INFO- ] Creating and configuring the running directory ...\n");
-    system("mkdir -p /usr/.hpc-now && chmod 777 /usr/.hpc-now");
+    system("mkdir -p /home/hpc-now/.bin >> /dev/null 2>&1");
+    system("mkdir -p /usr/.hpc-now >> /dev/null 2>&1 && chmod 777 /usr/.hpc-now >> /dev/null 2>&1");
+    system("mkdir -p /usr/.hpc-now/.bin >> /dev/null 2>&1");
 #elif __APPLE__
     printf("[ -INFO- ] Checking and cleaning up current environment ...\n");
     system("rm -rf /Users/hpc-now/ >> /dev/null 2>&1");
@@ -249,8 +251,10 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
         return -1;
     }
     printf("[ -INFO- ] Creating and configuring the running directory ...\n");
-    system("mkdir -p /Applications/.hpc-now >> /dev/null 2>&1 && chmod 777 /Applications/.hpc-now >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now >> /dev/null 2>&1");
+    system("mkdir -p /Users/hpc-now/.bin >> /dev/null 2>&1");
+    system("mkdir -p /Applications/.hpc-now >> /dev/null 2>&1 && chmod 777 /Applications/.hpc-now >> /dev/null 2>&1");
+    system("mkdir -p /Applications/.hpc-now/.bin >> /dev/null 2>&1");
 #endif
     printf("[ -INFO- ] Creating a random file for encryption/decryption ...\n");
     generate_random_passwd(random_string);
@@ -272,11 +276,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
 #elif __linux__
     system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");   
-    system("mkdir -p /home/hpc-now/.bin >> /dev/null 2>&1");
 #elif __APPLE__
     system("chown -R root:root /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("mkdir -p /Users/hpc-now/.bin >> /dev/null 2>&1");
 #endif
     if(hpcopr_loc_flag==-1){
         printf("[ -INFO- ] Will download the main program 'hpcopr' from the default URL.\n");
@@ -352,6 +354,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
         if(run_flag2!=0){
             printf("[ FATAL: ] Failed to download/copy the 'now-crypto.exe'.\n");
         }
+        printf("[ FATAL: ] This installation process is terminated. If you specified the\n");
+        printf("|          location of hpcopr executable, please make sure the location \n");
+        printf("|          is correct. Rolling back and exit now.\n");
         system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
         system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
         system("userdel -f -r hpc-now >> /dev/null 2>&1");
@@ -386,6 +391,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
         if(run_flag2!=0){
             printf("[ FATAL: ] Failed to download/copy the 'now-crypto.exe'.\n");
         }
+        printf("[ FATAL: ] This installation process is terminated. If you specified the\n");
+        printf("|          location of hpcopr executable, please make sure the location \n");
+        printf("|          is correct. Rolling back and exit now.\n");
         system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
         system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
         system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
@@ -661,7 +669,7 @@ int main(int argc, char* argv[]){
         return 1;
     }
     if(strcmp(argv[1],"uninstall")==0){
-        if(argc>3&&split_parameter(argv[2],advanced_option_head,advanced_option_tail)==10){
+        if(argc>2&&split_parameter(argv[2],advanced_option_head,advanced_option_tail)==10){
             skip_lic_flag=0;
         }
         if(skip_lic_flag==1){
