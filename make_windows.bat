@@ -14,8 +14,8 @@ if "%~1"=="" (
 	echo [ -INFO- ] Deleting previously built binaries ^(if exist^)...
 	del /s /q /f .\bin\*
 	echo [ -INFO- ] Bulding new binaries with the gcc ...
-	gcc .\hpcopr\main\hpcopr_main.c -Wall -lm -o .\bin\hpcopr_windows.exe
-	gcc .\now-crypto\now-crypto.c -Wall -lm -o .\bin\now-crypto-windows.exe
+	gcc .\hpcopr\main\hpcopr_main.c -Wall -lm -o .\bin\hpcopr.exe
+	gcc .\now-crypto\now-crypto.c -Wall -lm -o .\bin\now-crypto.exe
 	gcc .\installer\installer.c -Wall -lm -o .\bin\installer_windows.exe
 ) else if "%~1"=="delete" (
 	echo [ START: ] Deleting the binaries now ...

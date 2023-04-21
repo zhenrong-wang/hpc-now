@@ -16,8 +16,8 @@ elif [ "$1" = "build" ]; then
     echo -e "[ START: ] Building the binaries now (including hpcmgr) ..."
     mkdir -p ./bin
     rm -rf ./bin/*
-    gcc ./hpcopr/main/hpcopr_main.c -Wall -lm -o ./bin/hpcopr_linux
-    gcc ./now-crypto/now-crypto.c -Wall -lm -o ./bin/now-crypto-linux.exe
+    gcc ./hpcopr/main/hpcopr_main.c -Wall -lm -o ./bin/hpcopr.exe
+    gcc ./now-crypto/now-crypto.c -Wall -lm -o ./bin/now-crypto.exe
     gcc ./installer/installer.c -Wall -lm -o ./bin/installer_linux
     gcc ./hpcmgr/hpcmgr.c -Wall -lm -o ./bin/hpcmgr
     chmod +x ./bin/*

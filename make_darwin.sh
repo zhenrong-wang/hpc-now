@@ -17,8 +17,8 @@ elif [ "$1" = "build" ]; then
     echo "[ -INFO- ] Please build hpcmgr with GNU/Linux, not macOS."
     mkdir -p ./bin
     rm -rf ./bin/*
-    clang ./hpcopr/main/hpcopr_main.c -Wall -o ./bin/hpcopr_darwin
-    clang ./now-crypto/now-crypto.c -Wall -o ./bin/now-crypto-darwin.exe
+    clang ./hpcopr/main/hpcopr_main.c -Wall -o ./bin/hpcopr.exe
+    clang ./now-crypto/now-crypto.c -Wall -o ./bin/now-crypto.exe
     clang ./installer/installer.c -Wall -o ./bin/installer_darwin
     chmod +x ./bin/*
 elif [ "$1" = "delete" ]; then
