@@ -573,7 +573,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("[ -INFO- ] Running environment successfully check and repaired.\n");
     }
     else{
-        printf("[ -INFO- ] Running environment successfully checked. HPC-NOW services are ready.\n");
+        printf("[ -INFO- ] Running environment successfully checked.\n\n");
     }
     return 0;
 }

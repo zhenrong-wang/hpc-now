@@ -157,7 +157,7 @@ int list_all_cluster_names(void){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
         return -1;
     }
-    printf("[ -INFO- ] Cluster list:\n");
+    printf("[ -INFO- ] List of all the clusters:\n");
     while(fgetline(file_p,registry_line)!=1){
         if(strlen(registry_line)!=0){
             if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
@@ -221,7 +221,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                     printf("|          <> %s | ",temp_cluster_name);
                 }
                 if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-                    printf(" * EMPTY CLUSTER *\n");
+                    printf("* EMPTY CLUSTER *\n");
                 }
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }
@@ -250,18 +250,24 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
 }
 
+/*  
+ * If silent_flag==1, verbose. Will tell the user which cluster is active
+ * If silent_flag==0, silent. Will print nothing
+ * If silent_flag== other_number, Will only show the warning
+ */
+
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag){
     FILE* file_p=NULL;
     if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)==0){
         if(silent_flag!=0){
-            printf("[ -INFO- ] Currently you are not operating any cluster.\n");
+            printf("[ -WARN- ] Currently you are not operating any cluster.\n");
         }
         return 1;
     }
     else{
         file_p=fopen(CURRENT_CLUSTER_INDICATOR,"r");
         fscanf(file_p,"%s",current_cluster_name);
-        if(silent_flag!=0){
+        if(silent_flag==1){
             printf("[ -INFO- ] Current cluster: %s\n",current_cluster_name);
         }
         fclose(file_p);

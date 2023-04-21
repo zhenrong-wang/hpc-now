@@ -196,8 +196,8 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
-    current_cluster_flag=show_current_cluster(workdir,current_cluster_name,1);
     if(strcmp(argv[1],"new-cluster")==0){
+        show_current_cluster(workdir,current_cluster_name,2);
         if(argc==2){
             run_flag=create_new_cluster(crypto_keyfile,"","","");
             print_tail();
@@ -221,27 +221,15 @@ int main(int argc, char* argv[]){
         }
     }
     if(strcmp(argv[1],"ls-clusters")==0){
+        show_current_cluster(workdir,current_cluster_name,2);
         run_flag=list_all_cluster_names();
         print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
     }
-    if(strcmp(argv[1],"switch")==0){
-        if(argc==2){
-            printf("[ FATAL: ] You need to specify which cluster to switch to.\n");
-            run_flag=list_all_cluster_names();
-            print_tail();
-            write_log("NULL",operation_log,argv[1],run_flag);
-            system_cleanup();
-            return run_flag;
-        }
-        run_flag=switch_to_cluster(argv[2]);
-        print_tail();
-        system_cleanup();
-        return run_flag;
-    }
     if(strcmp(argv[1],"glance")==0){
+        show_current_cluster(workdir,current_cluster_name,2);
         if(argc<3){
             run_flag=glance_clusters("",crypto_keyfile);
         }
@@ -258,6 +246,21 @@ int main(int argc, char* argv[]){
         }
         print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
+        system_cleanup();
+        return run_flag;
+    }
+    current_cluster_flag=show_current_cluster(workdir,current_cluster_name,1);
+    if(strcmp(argv[1],"switch")==0){
+        if(argc==2){
+            printf("[ FATAL: ] You need to specify which cluster to switch to.\n");
+            run_flag=list_all_cluster_names();
+            print_tail();
+            write_log("NULL",operation_log,argv[1],run_flag);
+            system_cleanup();
+            return run_flag;
+        }
+        run_flag=switch_to_cluster(argv[2]);
+        print_tail();
         system_cleanup();
         return run_flag;
     }
