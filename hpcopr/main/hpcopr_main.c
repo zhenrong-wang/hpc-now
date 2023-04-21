@@ -256,7 +256,7 @@ int main(int argc, char* argv[]){
             list_all_cluster_names();
         }
         else if(run_flag==-1){
-            printf("[ FATAL: ] The specified cluster name %s is not in the registry. Please check.\n");
+            printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",argv[2]);
             list_all_cluster_names();
         }
         print_tail();
