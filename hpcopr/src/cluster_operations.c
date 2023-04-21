@@ -370,7 +370,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return 1;
     }
     else if(cluster_name_check_flag==-127){
-        printf("[ FATAL: ] The specified cluster name %s already exists in the registry.",input_cluster_name);
+        printf("[ FATAL: ] The specified cluster name %s already exists in the registry.\n",input_cluster_name);
         printf("|          Please check and retry. Exit now.\n");
         return 1;
     }
