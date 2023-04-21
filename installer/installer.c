@@ -373,6 +373,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     sprintf(cmdline1,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
     system(cmdline1);
     system("chown -R hpc-now:hpc-now /home/hpc-now/ >> /dev/null 2>&1");
+    system("chown -R hpc-now:hpc-now /usr/.hpc-now/.bin >> /dev/null 2>&1");
     printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          You *MUST* run 'sudo passwd hpc-now' command to set a password.\n");
@@ -410,6 +411,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/LICENSES/GPL-2",URL_LICENSE);
     system(cmdline1);
     system("chown -R hpc-now:hpc-now /Users/hpc-now/ >> /dev/null 2>&1");
+    system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.bin >> /dev/null 2>&1");
     printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          You *MUST* run 'sudo dscl . -passwd /Users/hpc-now PASSWORD' command\n");
