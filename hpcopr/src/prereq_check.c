@@ -118,7 +118,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        . Checking and repairing the registry now ...\n");
     }
     else{
-        printf("[ -INFO- ] Checking running environment for HPC-NOW services ...\n");
+        printf("[ -INFO- ] Checking the environment for HPC-NOW services ...\n");
     }
     if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
         printf("[ -INFO- ] No registry file found. Creating a blank cluster registry now ...\n");
@@ -573,7 +573,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("[ -INFO- ] Running environment successfully check and repaired.\n");
     }
     else{
-        printf("[ -INFO- ] Running environment successfully checked.\n\n");
+        printf("[ -INFO- ] Running environment successfully checked.\n");
     }
     return 0;
 }
