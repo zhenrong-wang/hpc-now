@@ -246,12 +246,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"glance")==0){
         if(argc<3){
-            printf("[ FATAL: ] You need to specify whether to view all the clusters or a specific cluster.\n");
-            run_flag=list_all_cluster_names();
-            print_tail();
-            write_log("NULL",operation_log,argv[1],run_flag);
-            system_cleanup();
-            return run_flag;
+            run_flag=glance_clusters("",crypto_keyfile);
         }
         run_flag=glance_clusters(argv[2],crypto_keyfile);
         print_tail();
