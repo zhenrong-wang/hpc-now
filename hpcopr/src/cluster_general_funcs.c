@@ -962,12 +962,8 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char master_tf[FILENAME_LENGTH]="";
     char cloud_flag_file[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
-    char head_string[128]="";
-    char db_string[128]="";
-    char compute_string[256]="";
     char ht_status[16]="";
-    char string_temp[64]="";
-    int i,node_num=0;
+    int node_num=0;
     int running_node_num=0;
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
