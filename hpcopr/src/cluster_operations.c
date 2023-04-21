@@ -2106,13 +2106,11 @@ int edit_configuration_file(char* workdir, char* crypto_keyfile){
         }
         get_default_conf(workdir,crypto_keyfile,0);
     }
-    else{
 #ifdef _WIN32
-        sprintf(cmdline,"notepad %s",filename_temp);
+    sprintf(cmdline,"notepad %s",filename_temp);
 #else
-        sprintf(cmdline,"vi %s",filename_temp);
+    sprintf(cmdline,"vi %s",filename_temp);
 #endif
-        system(cmdline);
-        return 0;
-    }
+    system(cmdline);
+    return 0;
 }
