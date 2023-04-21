@@ -1930,7 +1930,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     return 0;
 }
 
-int get_default_conf(char* workdir, char* crypto_keyfile){
+int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
     }
@@ -2062,6 +2062,9 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
 #endif
     find_and_replace(filename_temp,"CLUSTER_ID","","","","","hpcnow",temp_cluster_name);
     printf("[ -INFO- ] Default configuration file has been downloaded.\n");
+    if(edit_flag!=0){
+        return 0;
+    }
     printf("[ -INFO- ] Would you like to edit it now? Input 'y-e-s' to confirm:\n");
     printf("[ INPUT: ] ");
     fflush(stdin);
@@ -2081,19 +2084,27 @@ int get_default_conf(char* workdir, char* crypto_keyfile){
     return 0;
 }
 
-int edit_configuration_file(char* workdir){
+int edit_configuration_file(char* workdir, char* crypto_keyfile){
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
     }
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
+    char doubleconfirm[64]="";
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\conf\\tf_prep.conf",workdir);
 #else
     sprintf(filename_temp,"%s/conf/tf_prep.conf",workdir);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        return -1;
+        printf("[ -INFO- ] Cluster configuration file not found. Would you like to get one?\n");
+        printf("[ INPUT: ] Only 'y-e-s' is accepted to confirm: ");
+        fflush(stdin);
+        scanf("%s",doubleconfirm);
+        if(strcmp(doubleconfirm,"y-e-s")!=0){
+            return 1;
+        }
+        get_default_conf(workdir,crypto_keyfile,0);
     }
     else{
 #ifdef _WIN32

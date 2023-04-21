@@ -8,18 +8,50 @@
 #ifndef NOW_FUNCTIONS_H
 #define NOW_FUNCTIONS_H
 
-void print_empty_cluster_info(void);
-void print_operation_in_progress(void);
-void print_cluster_init_done(void);
-void print_help(void);
-void print_header(void);
-void print_tail(void);
-void print_about(void);
-void read_license(void);
-void print_not_in_a_workdir(char* current_dir);
+/* Print information to the stdout */
 
+/* If the cluster is empty, print the info out */
+void print_empty_cluster_info(void);
+
+/* If the operation is progress, print the info out */
+void print_operation_in_progress(void);
+
+/* When the cluster initialization successfully finish, print the info out */
+void print_cluster_init_done(void);
+
+/* Print out the help info */
+void print_help(void);
+
+/* Print out the header information, including version info and license info */
+void print_header(void);
+
+/* Print out the tail information, including the website url of HPC-NOW */
+void print_tail(void);
+
+/* Print out the 'About us' info */
+void print_about(void);
+
+/* Print out the license terms for users to read. */
+void read_license(void);
+
+
+/* Some general functions, mainly for file and string manipulation*/
+
+/* Reset all the current characters in a string to '\0' */
 void reset_string(char* orig_string);
+
+/* 
+ * Function: convert date&time string to a struct number
+ * Input: date_string. Format: 1999-11-11 12:00:00 
+ * Output: time struct. 
+ */
 void datetime_to_num(char* date_string, char* time_string, struct tm* datetime_num);
+
+/* 
+ * Function: calculate time difference between two date-time combination
+ * Input: date and time string.
+ * Output: time difference. Float number. Unit: hour
+ */
 double calc_running_hours(char* prev_date, char* prev_time, char* current_date, char* current_time);
 int fgetline(FILE* file_p, char* line_string);
 int contain_or_not(const char* line, const char* findkey);
@@ -100,8 +132,8 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
 int cluster_sleep(char* workdir, char* crypto_keyfile);
 int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option);
 int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile);
-int get_default_conf(char* workdir, char* crypto_keyfile);
-int edit_configuration_file(char* workdir);
+int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag);
+int edit_configuration_file(char* workdir, char* crypto_keyfile);
 
 int get_usage(char* usage_logfile);
 int get_syslog(char* operation_logfile);

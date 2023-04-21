@@ -17,7 +17,7 @@
  *                |                   |- tencentcloud_provider.zip
  *                |
  *                |-- terraform-darwin --- similar to the structure above
- *                |-- terraform ---------- this refers to the GNU/Linux version
+ *                \-- terraform ---------- this refers to the GNU/Linux version
  *                                         for GNU/Linux, currently there is no suffix
  *
  */
@@ -29,7 +29,7 @@ extern char URL_REPO_ROOT[LOCATION_LENGTH];
  * URL_CODE_ROOT
  *            ├─tf-templates-alicloud
  *            ├─tf-templates-aws
- *            └─tf-templates-qcloud
+ *            \-tf-templates-qcloud
  */
 extern char URL_CODE_ROOT[LOCATION_LENGTH];
 

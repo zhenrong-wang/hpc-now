@@ -43,7 +43,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char cluster_id_temp[16]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-    char conf_print_string_temp1[256]="";
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
     char region_flag[16]="";
@@ -278,8 +277,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
 #else
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
-        printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default \n");
-        printf("|          configuration file to initialize this cluster.\n");
+        printf("[ -INFO- ] IMPORTANT: No configure file found. Use the default one.\n");
         if(CODE_LOC_FLAG==1){
             sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1",URL_AWS_ROOT,conf_file);
         }
@@ -549,22 +547,14 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
     fclose(file_p);
     printf("[ STEP 2 ] Cluster Configuration:\n");
-    sprintf(conf_print_string_temp1,"|          Cluster ID:            %s",cluster_id);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Region:                %s",region_id);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Avalability Zone:      %s",zone_id);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Number of Nodes:       %d",node_num);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Number of Users:       %d",hpc_user_num);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Master Node Instance:  %s",master_inst);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Compute Node Instance: %s",compute_inst);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          OS Image:              %s",os_image_raw);
-    printf("%s\n",conf_print_string_temp1);
+    printf("|          Cluster ID:            %s\n",cluster_id);
+    printf("|          Region:                %s\n",region_id);
+    printf("|          Avalability Zone:      %s\n",zone_id);
+    printf("|          Number of Nodes:       %d\n",node_num);
+    printf("|          Number of Users:       %d\n",hpc_user_num);
+    printf("|          Master Node Instance:  %s\n",master_inst);
+    printf("|          Compute Node Instance: %s\n",compute_inst);
+    printf("|          OS Image:              %s\n",os_image_raw);
     generate_sshkey(sshkey_folder,pubkey);
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\hpc_stack.base",stackdir);
@@ -961,7 +951,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char cluster_id_temp[16]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-    char conf_print_string_temp1[256]="";
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
     char os_image[32]="";
@@ -1144,8 +1133,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
 #else
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
-        printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default \n");
-        printf("|          configuration file to initialize this cluster.\n");
+        printf("[ -INFO- ] IMPORTANT: No configure file found. Use the default one.\n");
         if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
             sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1", URL_QCLOUD_ROOT,conf_file);
@@ -1390,22 +1378,14 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
     fclose(file_p);
     printf("[ STEP 2 ] Cluster Configuration:\n");
-    sprintf(conf_print_string_temp1,"|          Cluster ID:            %s",cluster_id);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Region:                %s",region_id);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Avalability Zone:      %s",zone_id);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Number of Nodes:       %d",node_num);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Number of Users:       %d",hpc_user_num);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Master Node Instance:  %s",master_inst);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Compute Node Instance: %s",compute_inst);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          OS Image:              %s",os_image);
-    printf("%s\n",conf_print_string_temp1);
+    printf("|          Cluster ID:            %s\n",cluster_id);
+    printf("|          Region:                %s\n",region_id);
+    printf("|          Avalability Zone:      %s\n",zone_id);
+    printf("|          Number of Nodes:       %d\n",node_num);
+    printf("|          Number of Users:       %d\n",hpc_user_num);
+    printf("|          Master Node Instance:  %s\n",master_inst);
+    printf("|          Compute Node Instance: %s\n",compute_inst);
+    printf("|          OS Image:              %s\n",os_image);
     generate_sshkey(sshkey_folder,pubkey);
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\hpc_stack.base",stackdir);
@@ -1735,7 +1715,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char cluster_id_temp[16]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-    char conf_print_string_temp1[256]="";
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
     char os_image[32]="";
@@ -1787,8 +1766,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(compute_template,"%s/compute_template",stackdir);
 #endif
     if(file_exist_or_not(currentstate)==0||file_exist_or_not(compute_template)==0){
-        printf("[ FATAL: ] It seems the cluster is already in place. If you do want to rebuild the\n");
-        printf("|          cluster, please run 'destroy' command and retry 'init' command.\n");
+        printf("[ FATAL: ] It seems the cluster is already in place. If you do want to rebuild it\n");
+        printf("|          please run 'destroy' command and retry 'init' command.\n");
         printf("[ FATAL: ] Exit now.\n");
         return 1;
     }
@@ -1827,8 +1806,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
 #endif
     if(file_exist_or_not(conf_file)==1){
-        printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading/Copying the default \n");
-        printf("|          configuration file to initialize this cluster.\n");
+        printf("[ -INFO- ] IMPORTANT: No configure file found. Use the default one. \n");
         if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
             sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1",URL_ALICLOUD_ROOT,conf_file);         
@@ -2148,22 +2126,14 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
     fclose(file_p);
     printf("[ STEP 2 ] Cluster Configuration:\n");
-    sprintf(conf_print_string_temp1,"|          Cluster ID:            %s",cluster_id);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Region:                %s",region_id);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Avalability Zone:      %s",zone_id);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Number of Nodes:       %d",node_num);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Number of Users:       %d",hpc_user_num);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Master Node Instance:  %s",master_inst);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          Compute Node Instance: %s",compute_inst);
-    printf("%s\n",conf_print_string_temp1);
-    sprintf(conf_print_string_temp1,"|          OS Image:              %s",os_image);
-    printf("%s\n",conf_print_string_temp1);
+    printf("|          Cluster ID:            %s\n",cluster_id);
+    printf("|          Region:                %s\n",region_id);
+    printf("|          Avalability Zone:      %s\n",zone_id);
+    printf("|          Number of Nodes:       %d\n",node_num);
+    printf("|          Number of Users:       %d\n",hpc_user_num);
+    printf("|          Master Node Instance:  %s\n",master_inst);
+    printf("|          Compute Node Instance: %s\n",compute_inst);
+    printf("|          OS Image:              %s\n",os_image);
     generate_sshkey(sshkey_folder,pubkey);
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\hpc_stack.base",stackdir);

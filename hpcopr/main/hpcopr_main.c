@@ -395,7 +395,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"get-conf")==0){
-        run_flag=get_default_conf(workdir,crypto_keyfile);
+        run_flag=get_default_conf(workdir,crypto_keyfile,1);
         if(run_flag==-1){
             printf("[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
             printf("|          downloading default configuration file is not permitted. If you do want\n");
@@ -425,7 +425,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"edit-conf")==0){
-        run_flag=edit_configuration_file(workdir);
+        run_flag=edit_configuration_file(workdir,crypto_keyfile);
         if(run_flag==-1){
             printf("[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
             printf("|          downloading default configuration file is not permitted. If you do want\n");

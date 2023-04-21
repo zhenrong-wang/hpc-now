@@ -150,20 +150,6 @@ void print_about(void){
     print_tail();
 }
 
-void print_not_in_a_workdir(char* current_dir){
-    char temp_string[128]="";
-    printf("[ FATAL: ] You are not in a working directory, *NO* critical operation is permitted.\n");
-#ifdef _WIN32
-    printf("|          A typical working directory: C:\\hpc-now\\now-cluster-# (# is a number).\n");
-#else
-    printf("|          A typical working directory: /Users/hpc-now/now-cluster-# (# is a number).\n");
-#endif
-    sprintf(temp_string,"|          Current directory is %s.",current_dir);
-    printf("%s\n",temp_string);
-    printf("|          Please use the 'cd' command to go to a working directory first.\n");
-    printf("[ FATAL: ] Exit now.\n");
-}
-
 void read_license(void){
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
