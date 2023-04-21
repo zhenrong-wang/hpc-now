@@ -84,7 +84,7 @@ void print_help_installer(void){
     printf("|                         : Provide your own location of hpcopr, both URL and local\n");
     printf("|                           filesystem path are accepted. You should guarantee that\n");
     printf("|                           the location points to a valid hpcopr executable.\n");
-    printf("|        hpcopr_loc=LOC   * Only valid for install or update option.\n");
+    printf("|        crypto_loc=LOC   * Only valid for install or update option.\n");
     printf("|                         : Provide your own location of now-crypto.exe, similar to\n");
     printf("|                           the hpcopr_loc= parameter above.\n");
     printf("|       * You can specify any or all of the advanced options above.\n");
