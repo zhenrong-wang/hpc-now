@@ -219,7 +219,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
-                if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,temp_cluster_name,"","","")>0){
+                if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,temp_cluster_name,"","","","")>0){
                     printf("|  active: <> %s\n",temp_cluster_name);
                 }
                 else{
