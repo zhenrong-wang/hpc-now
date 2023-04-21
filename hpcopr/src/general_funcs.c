@@ -386,6 +386,7 @@ int get_seq_string(char* line, char split_ch, int string_seq, char* get_string){
         strcpy(get_string,"");
         return -1;
     }
+    reset_string(get_string);
     if(split_ch==' '){
         string_seq_current=0;
         if(*(line)!=' '&&*(line)!='\t'){

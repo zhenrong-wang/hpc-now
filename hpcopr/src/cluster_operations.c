@@ -164,9 +164,7 @@ int list_all_cluster_names(void){
                 printf("|          %s\n",registry_line);
             }
             else{
-                reset_string(temp_cluster_name);
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
-                printf("\n\n%s\n\n%s\n\n",registry_line,temp_cluster_name);
                 if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,temp_cluster_name,"","","","")>0){
                     printf("|  active: %s\n",registry_line);
                 }
