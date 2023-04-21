@@ -928,7 +928,7 @@ int wait_for_complete(char* workdir, char* option){
 
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
         fflush(stdin);
-        printf("[ -WAIT- ] In progress, this may need %d minute(s). %d second(s) passed ... [(%c)] \r",total_minutes,i,*(annimation+i%4));
+        printf("[ -WAIT- ] This may need %d min(s). %d sec(s) passed ... (%c)\r",total_minutes,i,*(annimation+i%4));
         fflush(stdout);
         i++;
         sleep(1);

@@ -248,7 +248,17 @@ int main(int argc, char* argv[]){
         if(argc<3){
             run_flag=glance_clusters("",crypto_keyfile);
         }
-        run_flag=glance_clusters(argv[2],crypto_keyfile);
+        else{
+            run_flag=glance_clusters(argv[2],crypto_keyfile);
+        }
+        if(run_flag==1){
+            printf("[ FATAL: ] You are not running any clusters. Please swith to or specify one:\n");
+            list_all_cluster_names();
+        }
+        else if(run_flag==-1){
+            printf("[ FATAL: ] The specified cluster name %s is not in the registry. Please check.\n");
+            list_all_cluster_names();
+        }
         print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
         system_cleanup();
@@ -262,7 +272,9 @@ int main(int argc, char* argv[]){
             system_cleanup();
             return current_cluster_flag;
         }
-        run_flag=exit_current_cluster();
+        if(exit_current_cluster()==0){
+            printf("[ -INFO- ] Exit the current cluster.\n");
+        }
         print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
         system_cleanup();

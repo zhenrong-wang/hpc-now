@@ -198,32 +198,27 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     if(strlen(target_cluster_name)==0){
         if(show_current_cluster(temp_cluster_workdir,temp_cluster_name,0)==1){
-            printf("[ -INFO- ] Please specify which cluster to glance:\n");
-            list_all_cluster_names();
             return 1;
         }
         else{
-            printf("[ -INFO- ] You specified to glance the current cluster:\n");
             decrypt_files(temp_cluster_workdir,crypto_keyfile);
-            printf("|  active: <> %s\n",temp_cluster_name);
+            printf("|  active: <> %s | ",temp_cluster_name);
             graph(temp_cluster_workdir,crypto_keyfile,1);
             delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             return 0;
         }
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
-        printf("[ -INFO- ] You specified to glance *all* the clusters:\n");
         while(fgetline(file_p,registry_line)==0){
- //           printf("%s,,,,,\n",registry_line);
             if(strlen(registry_line)!=0){
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
                 if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,temp_cluster_name,"","","","")>0){
-                    printf("|  active: <> %s\n",temp_cluster_name);
+                    printf("|  active: <> %s | ",temp_cluster_name);
                 }
                 else{
-                    printf("|          <> %s\n",temp_cluster_name);
+                    printf("|          <> %s | ",temp_cluster_name);
                 }
                 graph(temp_cluster_workdir,crypto_keyfile,1);
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
@@ -234,14 +229,17 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     fclose(file_p);
     if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
-        printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",target_cluster_name);
-        list_all_cluster_names();
-        return 1;
+        return -1;
     }
     else{
-        printf("[ -INFO- ] You specified to glance the cluster %s:\n",target_cluster_name);
         get_workdir(temp_cluster_workdir,target_cluster_name);
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
+        if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,target_cluster_name,"","","","")>0){
+            printf("|  active: <> %s | ",temp_cluster_name);
+        }
+        else{
+                printf("|          <> %s | ",temp_cluster_name);
+        }
         graph(temp_cluster_workdir,crypto_keyfile,1);
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
@@ -275,7 +273,6 @@ int exit_current_cluster(void){
 #else
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",CURRENT_CLUSTER_INDICATOR);
 #endif
-    printf("[ -INFO- ] Exit the current cluster.\n");
     return system(cmdline);
     
 }
@@ -299,7 +296,8 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
         fflush(stdin);
         scanf("%s",doubleconfirm);
         if(strcmp(doubleconfirm,"y-e-s")==0){
-            printf("[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is *NOT* recoverable!\n",target_cluster_name);
+            printf("[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
+            printf("|          absolutely *NOT* recoverable!\n");
             printf("[ INPUT: ] ");
             fflush(stdin);
             scanf("%s",doubleconfirm);
