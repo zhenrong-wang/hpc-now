@@ -168,10 +168,10 @@ int list_all_cluster_names(void){
             else{
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
                 if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,temp_cluster_name,"","","","")>0){
-                    printf("< ACTIVE > %s\n",registry_line);
+                    printf("|  active: %s\n",registry_line);
                 }
                 else{
-                    printf("           %s\n",registry_line);
+                    printf("|          %s\n",registry_line);
                 }
             }
         }
@@ -196,6 +196,21 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
         return -1;
     }
+    if(strlen(target_cluster_name)==0){
+        if(show_current_cluster(temp_cluster_workdir,temp_cluster_name,0)==1){
+            printf("[ -INFO- ] Please specify which cluster to glance:\n");
+            list_all_cluster_names();
+            return 1;
+        }
+        else{
+            printf("[ -INFO- ] You specified to glance the current cluster:\n");
+            decrypt_files(temp_cluster_workdir,crypto_keyfile);
+            printf("|  active: <> %s\n",temp_cluster_name);
+            graph(temp_cluster_workdir,crypto_keyfile,1);
+            delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+            return 0;
+        }
+    }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         printf("[ -INFO- ] You specified to glance *all* the clusters:\n");
         while(fgetline(file_p,registry_line)==0){
@@ -204,7 +219,12 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
-                printf("|          <> %s\n",temp_cluster_name);
+                if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,temp_cluster_name,"","","")>0){
+                    printf("|  active: <> %s\n",temp_cluster_name);
+                }
+                else{
+                    printf("|          <> %s\n",temp_cluster_name);
+                }
                 graph(temp_cluster_workdir,crypto_keyfile,1);
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }
