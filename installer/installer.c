@@ -699,7 +699,10 @@ int main(int argc, char* argv[]){
         }
     }
     if(skip_lic_flag==1){
-        license_confirmation();
+        if(license_confirmation()!=0){
+            print_tail_installer();
+            return 1;
+        }
     }
     if(strcmp(argv[1],"update")==0){
         run_flag=update_services(hpcopr_loc_flag,hpcopr_loc,crypto_loc_flag,now_crypto_loc);
