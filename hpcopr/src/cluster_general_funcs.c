@@ -961,7 +961,6 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char compute_template[FILENAME_LENGTH]="";
     char master_tf[FILENAME_LENGTH]="";
     char cloud_flag_file[FILENAME_LENGTH]="";
-    char tf_prep_conf[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char ht_status[16]="";
     int node_num=0;
