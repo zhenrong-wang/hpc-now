@@ -933,13 +933,16 @@ int wait_for_complete(char* workdir, char* option){
         i++;
         sleep(1);
         if(file_empty_or_not(errorlog)>0){
+            printf("\n");
             return 127;
         }
     }
     if(i==MAXIMUM_WAIT_TIME){
+        printf("\n");
         return 1;
     }
     else{
+        printf("\n");
         return 0;
     }
 }
