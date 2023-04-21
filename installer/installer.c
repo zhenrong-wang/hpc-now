@@ -13,7 +13,7 @@
 #else
 #include "../hpcopr/include/now_macros.h"
 #include "../hpcopr/include/now_functions.h"
-#include "../src/general_funcs.c"
+#include "../hpcopr/src/general_funcs.c"
 
 #endif
 
