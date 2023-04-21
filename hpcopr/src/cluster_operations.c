@@ -238,7 +238,9 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         else{
             printf("|          <> %s | ",temp_cluster_name);
         }
-        graph(temp_cluster_workdir,crypto_keyfile,1);
+        if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
+            printf(" * EMPTY CLUSTER *\n");
+        }
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
     }
