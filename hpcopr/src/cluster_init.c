@@ -923,8 +923,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
     printf("|          By default, NO HPC software will be built into the cluster.\n");
     printf("|          Please run 'hpcmgr install' command to install the software you need.\n");
-    print_tail();
-    
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\cloud_flag.flg",confdir);
     if(file_exist_or_not(filename_temp)!=0){
@@ -1760,7 +1758,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
     printf("|          By default, NO HPC software will be built into the cluster.\n");
     printf("|          Please run 'hpcmgr install' command to install the software you need.\n");
-    print_tail();
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\cloud_flag.flg",confdir);
     if(file_exist_or_not(filename_temp)!=0){
@@ -2579,7 +2576,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
     printf("|          By default, NO HPC software will be built into the cluster.\n");
     printf("|          Please run 'hpcmgr install' command to install the software you need.\n");
-    print_tail();
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\cloud_flag.flg",confdir);
     if(file_exist_or_not(filename_temp)!=0){
