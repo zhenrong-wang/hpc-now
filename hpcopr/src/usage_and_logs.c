@@ -155,8 +155,7 @@ int get_usage(char* usage_logfile){
     char cmdline[CMDLINE_LENGTH]="";
     if(file_exist_or_not(usage_logfile)!=0){
         printf("[ FATAL: ] Failed to get the usage record. Either you haven't initialize your first\n");
-        printf("|          cluster, or there are internal errors. Please contact us for technical\n");
-        printf("|          supports via: info@hpc-now.com or other channels. Exit now.\n");
+        printf("|          cluster, or there are internal errors. Exit now.\n");
         return 1;
     }
 #ifdef _WIN32
@@ -170,6 +169,13 @@ int get_usage(char* usage_logfile){
     sprintf(cmdline,"/bin/cp %s /home/hpc-now/cluster_usage_temp.log >> /dev/null 2>&1",usage_logfile);
 #endif
     system(cmdline);
+#ifdef _WIN32
+    system("more c:\\hpc-now\\cluster_usage_temp.log");
+#elif __APPLE__
+    system("more /Users/hpc-now/cluster_usage_temp.log");
+#elif __linux__
+    system("more /home/hpc-now/cluster_usage_temp.log");
+#endif
     printf("[ -DONE- ] The latest usage summary has been printed to the file below:\n");
 #ifdef _WIN32
     printf("|          c:\\hpc-now\\cluster_usage_temp.log\n");
@@ -182,17 +188,13 @@ int get_usage(char* usage_logfile){
     printf("|          You can use either any CSV file processing tools (i.e. LibreOffice) or\n");
 #endif
     printf("|          plain text editors (for example, notepad) to view the usage details.\n");
-    printf("[ -DONE- ] Thanks for using HPC-NOW Services!\n");
-    print_tail();
     return 0;
 }
 
 int get_syslog(char* operation_logfile){
     char cmdline[CMDLINE_LENGTH]="";
     if(file_exist_or_not(operation_logfile)!=0){
-        printf("[ FATAL: ] Failed to get the operation log. There might be internal errors. Please\n");
-        printf("|          contact us for technical supports via: info@hpc-now.com\n");
-        printf("|          or other channels. Exit now.\n");
+        printf("[ FATAL: ] Failed to get the operation log. Exit now.\n");      
         return 1;
     }
 #ifdef _WIN32
@@ -206,6 +208,13 @@ int get_syslog(char* operation_logfile){
     sprintf(cmdline,"/bin/cp %s /home/hpc-now/cluster_syslog_temp.log >> /dev/null 2>&1",operation_logfile);
 #endif
     system(cmdline);
+#ifdef _WIN32
+    system("more c:\\hpc-now\\cluster_syslog_temp.log");
+#elif __APPLE__
+    system("more /Users/hpc-now/cluster_syslog_temp.log");
+#elif __linux__
+    system("more /home/hpc-now/cluster_syslog_temp.log");
+#endif
     printf("[ -DONE- ] The latet operation log has been printed to the file below:\n");
 #ifdef _WIN32
     printf("|          c:\\hpc-now\\cluster_syslog_temp.log\n");
@@ -218,8 +227,6 @@ int get_syslog(char* operation_logfile){
     printf("|          You can use either any CSV file processing tools (i.e. LibreOffice) or\n");
 #endif
     printf("|          plain text editors (for example, notepad) to view the detailed log.\n");
-    printf("[ -DONE- ] Thanks for using HPC-NOW Services!\n");
-    print_tail();
     return 0;
 }
 

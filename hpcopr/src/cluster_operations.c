@@ -841,10 +841,9 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
     system(cmdline);
 #endif
-    printf("[ -DONE- ] The whole cluster has been destroyed.\n");
+    printf("[ -DONE- ] The whole cluster has been destroyed successfully.\n");
     printf("|          You can run 'init' command to rebuild it.\n");
-    printf("|          However, *ALL* the data has been erased permenantly.\n");
-    printf("[ -DONE- ] Thanks for using the NOW Cluster service!\n");
+    printf("|          However, all the data has been erased permenantly.\n");
     return 0;
 }
 

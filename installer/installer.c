@@ -476,7 +476,6 @@ int uninstall_services(void){
     printf("|          There are still remaining files for the specific user 'hpc-now'.\n");
     printf("|          Please mannually delete the folder C:\\Users\\hpc-now after reboot.\n");
 #endif
-    printf("|          Thanks a lot for using HPC-NOW services!\n");
     return 0;
 }
 
@@ -560,7 +559,6 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
         return 1;
     }
     printf("[ -DONE- ] The HPC-NOW cluster services have been updated to your device and OS.\n");
-    printf("|          Thanks a lot for using HPC-NOW services!\n");
 #ifdef _WIN32
     system("mkdir c:\\hpc-now\\LICENSES > nul 2>&1");
     sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
