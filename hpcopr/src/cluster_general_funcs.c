@@ -1015,10 +1015,10 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         }
         if(graph_level==0){
             if(strlen(ht_status)!=0){
-                printf("|              +-compute%d(%s,%s,%s,%s)",node_num,compute_address,compute_status,compute_config,ht_status);
+                printf("|              +-compute%d(%s,%s,%s,%s)\n",node_num,compute_address,compute_status,compute_config,ht_status);
             }
             else{
-                printf("|              +-compute%d(%s,%s,%s)",node_num,compute_address,compute_status,compute_config);
+                printf("|              +-compute%d(%s,%s,%s)\n",node_num,compute_address,compute_status,compute_config);
             }
         }
     }
