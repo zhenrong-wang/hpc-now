@@ -230,8 +230,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     }
     printf("[ -INFO- ] Creating and configuring the running directory ...\n");
     system("mkdir -p /home/hpc-now/.bin >> /dev/null 2>&1");
-    system("mkdir -p /usr/.hpc-now >> /dev/null 2>&1 && chmod 777 /usr/.hpc-now >> /dev/null 2>&1");
-    system("mkdir -p /usr/.hpc-now/.bin >> /dev/null 2>&1");
+    system("mkdir -p /usr/.hpc-now/.bin >> /dev/null 2>&1 && chmod -R 777 /usr/.hpc-now >> /dev/null 2>&1");
 #elif __APPLE__
     printf("[ -INFO- ] Checking and cleaning up current environment ...\n");
     system("rm -rf /Users/hpc-now/ >> /dev/null 2>&1");
@@ -253,8 +252,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     printf("[ -INFO- ] Creating and configuring the running directory ...\n");
     system("mkdir -p /Users/hpc-now >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/.bin >> /dev/null 2>&1");
-    system("mkdir -p /Applications/.hpc-now >> /dev/null 2>&1 && chmod 777 /Applications/.hpc-now >> /dev/null 2>&1");
-    system("mkdir -p /Applications/.hpc-now/.bin >> /dev/null 2>&1");
+    system("mkdir -p /Applications/.hpc-now/.bin >> /dev/null 2>&1 && chmod -R 777 /Applications/.hpc-now >> /dev/null 2>&1");
 #endif
     printf("[ -INFO- ] Creating a random file for encryption/decryption ...\n");
     generate_random_passwd(random_string);
