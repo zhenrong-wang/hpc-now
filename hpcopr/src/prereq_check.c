@@ -340,7 +340,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #endif
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,MD5_ALI_TF);
     if(file_check_flag==1){
-        printf("[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/3).\n");
+        printf("[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/3) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr.\n\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,MD5_ALI_TF_ZIP);
         if(file_check_flag==1){
