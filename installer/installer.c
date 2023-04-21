@@ -5,58 +5,53 @@
  * Bug report: info@hpc-now.com
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
-#include <signal.h>
-
-#define VERSION_CODE "0.2.1.0005"
-
 #ifdef _WIN32
-#include <malloc.h>
-#define LINE_LENGTH 1024
-#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_windows_amd64.exe"
-#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-windows.exe"
-#define NOW_CRYPTO_EXEC "c:\\programdata\\hpc-now\\bin\\now-crypto.exe"
-#define HPCOPR_EXEC "C:\\hpc-now\\hpcopr.exe"
-#elif __linux__
-#include <malloc.h>
-#include <sys/time.h>
-#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_linux_amd64"
-#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-windows.exe"
-#define NOW_CRYPTO_EXEC "/usr/.hpc-now/.bin/now-crypto.exe"
-#define HPCOPR_EXEC "/home/hpc-now/.bin/hpcopr"
-#elif __APPLE__
-#include <sys/time.h>
-#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
-#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-darwin.exe"
-#define NOW_CRYPTO_EXEC "/Applications/.hpc-now/.bin/now-crypto.exe"
-#define HPCOPR_EXEC "/Users/hpc-now/.bin/hpcopr"
+#include "..\\hpcopr\\include\\now_macros.h"
+#include "..\\hpcopr\\include\\now_functions.h"
+#include "..\\hpcopr\\src\\general_funcs.c"
+
+#else
+#include "../hpcopr/include/now_macros.h"
+#include "../hpcopr/include/now_functions.h"
+#include "../src/general_funcs.c"
+
 #endif
 
-#define CMDLINE_LENGTH 2048
-#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"
-#define PASSWORD_STRING_LENGTH 20
-#define PASSWORD_LENGTH 19
-#define LOCATION_LENGTH 512
-#define LOCATION_LENGTH_EXTENDED 768
+/* Borrowed the below functions:
+ *   reset_string (from general_funcs.c)
+ *   fgetline (from general_funcs.c)
+ *   generate_random_passwd (from general_funcs.c)
+ */
 
-void print_header(void){
-    printf("| Welcome to the HPC-NOW Service Installer! Version: %s\n",VERSION_CODE);
+int check_internet_installer(void){
+#ifdef _WIN32
+    if(system("ping -n 2 www.baidu.com > nul 2>&1")!=0){
+#else
+    if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
+#endif
+        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
+        printf("|          or check your internet connectivity and retry later.\n");
+        printf("[ FATAL: ] Exit now.\n");
+        return 1;
+    }
+    return 0;
+}
+
+void print_header_installer(void){
+    printf("| Welcome to the HPC-NOW Service Installer! Version: %s\n",INSTALLER_VERSION_CODE);
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
     printf("| This is free software; see the source for copying conditions.  There is NO\n");
     printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
 }
 
-void print_tail(void){
+void print_tail_installer(void){
     printf("\n");
     printf("<> visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
 }
 
+
 // Print out help info for this installer
-void print_help(void){
+void print_help_installer(void){
 #ifdef _WIN32
     printf("| Usage: Open a command prompt window *WITH* the Administrator Role.\n");
     printf("|        Type the command using either ways below:\n");
@@ -95,120 +90,10 @@ void print_help(void){
     printf("<> visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
 }
 
-// check the internet connectivity by pinging Baidu's url. If connected, return 0; otherwise, return 1
-int check_internet(void){
-#ifdef _WIN32
-    if(system("ping -n 2 www.baidu.com > nul 2>&1")!=0){
-#else
-    if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
-#endif
-        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
-        printf("|          or check your internet connectivity and retry later. Exit now.\n");
-        return 1;
-    }
-    return 0;
-}
-
-/* Borrow it from the general_funcs.c of the hpcopr source code folder. 
- * It is a better idea to include it, maybe include it in the future.
- * Please make sure to sync the codes from the hpcopr side
- */
-int generate_random_passwd(char* password){
-    int i,rand_num;
-    struct timeval current_time;
-    char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
-    unsigned int seed_num;
-    for(i=0;i<PASSWORD_LENGTH;i++){
-#ifdef _WIN32
-        mingw_gettimeofday(&current_time,NULL);
-#else
-        gettimeofday(&current_time,NULL); //Get the precise time
-#endif
-        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec); //Calculate the random seed
-        srand(seed_num);
-        rand_num=rand()%72; //Get the random character from the string
-        *(password+i)=*(ch_table+rand_num);
-        usleep(5000); // Must sleep in order to make the timeval different enough
-    }
-    return 0;
-}
-
-/* 
- * Borrow it from the general_funcs.c of the hpcopr source code folder. 
- * It is a better idea to include it, maybe include it in the future.
- * Please make sure to sync the codes from the hpcopr side
- */
-#ifdef _WIN32
-void reset_string(char* orig_string){
-    int length=strlen(orig_string);
-    int i;
-    for(i=0;i<length;i++){
-        *(orig_string+i)='\0';
-    }
-}
-
-/* 
- * Borrow it from the general_funcs.c of the hpcopr source code folder. 
- * It is a better idea to include it, maybe include it in the future.
- * Please make sure to sync the codes from the hpcopr side
- */
-int fgetline(FILE* file_p, char* line_string){
-    char ch;
-    int i=0;
-    if(file_p==NULL){
-        return -1;
-    }
-    reset_string(line_string);
-    do{
-        ch=fgetc(file_p);
-        if(ch!=EOF&&ch!='\n'){
-            *(line_string+i)=ch;
-            i++;
-        }
-/*        else if(ch=='\n'){
-            return 0;
-        }
-        else if(ch==EOF&&i==0){
-            return 1;
-        }*/
-    }while(ch!=EOF&&ch!='\n');
-    if(ch==EOF&&i==0){
-        return 1;
-    }
-    else{
-        return 0;
-    }
-}
-
-/* 
- * Borrow it from the general_funcs.c of the hpcopr source code folder. 
- * It is a better idea to include it, maybe include it in the future.
- * Please make sure to sync the codes from the hpcopr side
- */
-int file_empty_or_not(char* filename){
-    FILE* file_p=fopen(filename,"r");
-    char temp_line[LINE_LENGTH]="";
-    int line_num=0;
-    if(file_p==NULL){
-        return -1;
-    }
-    else{
-        while(fgetline(file_p,temp_line)!=1){
-            line_num++;
-        }
-        fclose(file_p);
-        if(strlen(temp_line)>0){
-            line_num++;
-        }
-        return line_num;
-    }
-}
-#endif
-
 /*
  * This installer *MUST* be executed with root/Administrator previlege.
  */
-int check_current_user(void){
+int check_current_user_root(void){
 #ifdef _WIN32
     system("whoami /groups | find \"S-1-16-12288\" > c:\\programdata\\check.txt.tmp 2>&1");
     if(file_empty_or_not("c:\\programdata\\check.txt.tmp")==0){
@@ -218,7 +103,7 @@ int check_current_user(void){
         printf("|          2. Type the full path of this installer with an option, for example\n");
         printf("|             C:\\Users\\ABC\\installer_windows_amd64.exe install\n");
         printf("|          to run this installer properly. Exit now.\n\n");
-        print_help();
+        print_help_installer();
         system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
         return -1;    
     }
@@ -227,7 +112,7 @@ int check_current_user(void){
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         printf("[ FATAL: ] Please either switch to users with admin privilege and run the installer\n");
         printf("|          with 'sudo', or switch to the root user. Exit now.\n\n");
-        print_help();
+        print_help_installer();
         return -1;    
     }
 #endif
@@ -757,20 +642,20 @@ int main(int argc, char* argv[]){
     char now_crypto_loc[LOCATION_LENGTH]="";
     char advanced_option_head[12]="";
     char advanced_option_tail[512]="";
-    print_header();
-    if(check_current_user()!=0){
+    print_header_installer();
+    if(check_current_user_root()!=0){
         return -1;
     }
-    if(check_internet()!=0){
-        print_tail();
+    if(check_internet_installer()!=0){
+        print_tail_installer();
         return -3;
     }  
     if(argc==1){
-        print_help();
+        print_help_installer();
         return 1;
     }
     if(strcmp(argv[1],"help")==0){
-        print_help();
+        print_help_installer();
         return 1;
     }
     if(strcmp(argv[1],"uninstall")==0){
@@ -778,14 +663,18 @@ int main(int argc, char* argv[]){
             skip_lic_flag=0;
         }
         if(skip_lic_flag==1){
-            license_confirmation();
+            run_flag=license_confirmation();
+        }
+        if(run_flag!=0){
+            print_tail_installer();
+            return 1;
         }
         run_flag=uninstall_services();
-        print_tail();
+        print_tail_installer();
         return run_flag;
     }
     if(strcmp(argv[1],"update")!=0&&strcmp(argv[1],"install")!=0){
-        print_help();
+        print_help_installer();
         return 1;
     }
     if(argc>5){
@@ -812,12 +701,12 @@ int main(int argc, char* argv[]){
     }
     if(strcmp(argv[1],"update")==0){
         run_flag=update_services(hpcopr_loc_flag,hpcopr_loc,crypto_loc_flag,now_crypto_loc);
-        print_tail();
+        print_tail_installer();
         return run_flag;
     }
     if(strcmp(argv[1],"install")==0){
         run_flag=install_services(hpcopr_loc_flag,hpcopr_loc,crypto_loc_flag,now_crypto_loc);
-        print_tail();
+        print_tail_installer();
         return run_flag;
     }
 }
