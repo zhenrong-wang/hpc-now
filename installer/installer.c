@@ -17,10 +17,12 @@
 
 #endif
 
-/* Borrowed the below functions:
+/* Borrowed the below functions from hpcopr.
  *   reset_string (from general_funcs.c)
  *   fgetline (from general_funcs.c)
  *   generate_random_passwd (from general_funcs.c)
+ * 
+ * Considering combine the 2 codes
  */
 
 int check_internet_installer(void){

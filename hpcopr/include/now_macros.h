@@ -16,8 +16,8 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define CORE_VERSION_CODE "0.2.1.0005"
-#define INSTALLER_VERSION_CODE "0.2.1.0005"
+#define CORE_VERSION_CODE "0.2.1.0006"
+#define INSTALLER_VERSION_CODE "0.2.1.0006"
 
 #ifdef _WIN32
 #include <malloc.h>
