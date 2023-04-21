@@ -67,7 +67,7 @@ int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
         strcpy(cluster_name_output,cluster_name);
         name_flag=0;
     }
-    sprintf(real_cluster_name_with_prefix,"cluster name +-  %s",cluster_name_output);
+    sprintf(real_cluster_name_with_prefix,"cluster name +- %s",cluster_name_output);
     if(find_multi_keys(ALL_CLUSTER_REGISTRY,real_cluster_name_with_prefix,"","","","")>0){
         return -127;
     }
@@ -238,7 +238,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             printf("|  active: <> %s | ",temp_cluster_name);
         }
         else{
-                printf("|          <> %s | ",temp_cluster_name);
+            printf("|          <> %s | ",temp_cluster_name);
         }
         graph(temp_cluster_workdir,crypto_keyfile,1);
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);

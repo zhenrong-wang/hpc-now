@@ -961,6 +961,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char compute_template[FILENAME_LENGTH]="";
     char master_tf[FILENAME_LENGTH]="";
     char cloud_flag_file[FILENAME_LENGTH]="";
+    char tf_prep_conf[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char ht_status[16]="";
     int node_num=0;
@@ -1024,13 +1025,13 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     }
     if(graph_level==1){
         if(strlen(ht_status)!=0){
-            printf("|          +-%s | %s %s %s | %d/%d | %s | %s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
+            printf("%s | %s %s %s | %d/%d | %s | %s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
         }
         else{
-            printf("|          +-%s | %s %s %s | %d/%d | %s \n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
+            printf("%s | %s %s %s | %d/%d | %s \n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
         }
     }
-    if(graph_level==2){
+    else if(graph_level==2){
         if(strlen(ht_status)!=0){
             printf("%s,%s,%s,%s,%d,%d,%s,%s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
         }
