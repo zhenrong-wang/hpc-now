@@ -145,18 +145,22 @@ void print_about(void){
 
 void read_license(void){
     char cmdline[CMDLINE_LENGTH]="";
+    if(file_exist_or_not("c:\\hpc-now\\LICENSES\\GPL-2")==0){
+#ifdef __APPLE__
+        sprintf(cmdline,"more /Users/hpc-now/LICENSES/GPL-2");
+#elif _WIN32
+        sprintf(cmdline,"more c:\\hpc-now\\LICENSES\\GPL-2");
+#elif __linux__
+        sprintf(cmdline,"more /home/hpc-now/LICENSES/GPL-2");
+#endif
+        system(cmdline);
+        return 0;
+    }
     sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
     if(system(cmdline)!=0){
         sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
         if(system(cmdline)!=0){
-#ifdef __APPLE__
-            sprintf(cmdline,"more /Users/hpc-now/LICENSES/GPL-2");
-#elif _WIN32
-            sprintf(cmdline,"more c:\\hpc-now\\LICENSES\\GPL-2");
-#elif __linux__
-            sprintf(cmdline,"more /home/hpc-now/LICENSES/GPL-2");
-#endif
-            system(cmdline);
+            return 1;
         }
     }
 }

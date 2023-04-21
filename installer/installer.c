@@ -128,10 +128,13 @@ int license_confirmation(void){
     printf("[ -INFO- ] Please read the following important information before continuing.\n");
     printf("|          You can press 'Enter' to continue reading, or press 'q' to quit reading.\n");
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Currently the installer failed to download or print out the license.\n");
-        printf("|          Please double check your internet connectivity and retry. If this issue\n");
-        printf("|          still occurs, please report to us via info@hpc-now.com . Exit now.\n");
-        return 1;
+        sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
+        if(system(cmdline)!=0){
+            printf("[ FATAL: ] Currently the installer failed to download or print out the license.\n");
+            printf("|          Please double check your internet connectivity and retry. If this issue\n");
+            printf("|          still occurs, please report to us via info@hpc-now.com . Exit now.\n");
+            return 1;
+        }
     }
     printf("[ -INFO- ] If you accept the terms and conditions above, please input 'accept',\n");
     printf("|          If you do not accept, this installation will exit immediately.\n");
