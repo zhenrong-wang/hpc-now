@@ -1537,7 +1537,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back and exit now ...\n");
-        terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,err_log);
+        terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log);
         return -1;
     }
 #ifdef _WIN32
@@ -2297,7 +2297,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back and exit now ...\n");
-        terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,err_log);
+        terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log);
         return -1;
     }
 #ifdef _WIN32
