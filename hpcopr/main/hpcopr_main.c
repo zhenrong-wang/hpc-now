@@ -453,21 +453,21 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"init")==0){
         if(strcmp(cloud_flag,"CLOUD_C")==0){
-            run_flag=aws_cluster_init("",workdir,crypto_keyfile);
+            run_flag=aws_cluster_init(current_cluster_name,workdir,crypto_keyfile);
             write_log(current_cluster_name,operation_log,argv[1],run_flag);
             print_tail();
             system_cleanup();
             return run_flag;
          }
         else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            run_flag=qcloud_cluster_init("",workdir,crypto_keyfile);
+            run_flag=qcloud_cluster_init(current_cluster_name,workdir,crypto_keyfile);
             write_log(current_cluster_name,operation_log,argv[1],run_flag);
             print_tail();
             system_cleanup();
             return run_flag;
         }
         else if(strcmp(cloud_flag,"CLOUD_A")==0){
-            run_flag=alicloud_cluster_init("",workdir,crypto_keyfile);
+            run_flag=alicloud_cluster_init(current_cluster_name,workdir,crypto_keyfile);
             write_log(current_cluster_name,operation_log,argv[1],run_flag);
             print_tail();
             system_cleanup();
