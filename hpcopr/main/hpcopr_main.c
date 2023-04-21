@@ -249,6 +249,38 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
+    if(strcmp(argv[1],"exit-current")==0){
+        current_cluster_flag=show_current_cluster(workdir,current_cluster_name,2);
+        if(current_cluster_flag!=0){
+            print_tail();
+            write_log("NULL",operation_log,argv[1],current_cluster_flag);
+            system_cleanup();
+            return current_cluster_flag;
+        }
+        if(exit_current_cluster()==0){
+            printf("[ -INFO- ] Exit the current cluster %s.\n",current_cluster_name);
+        }
+        print_tail();
+        write_log("NULL",operation_log,argv[1],run_flag);
+        system_cleanup();
+        return run_flag;
+    }
+
+    if(strcmp(argv[1],"usage")==0){
+        run_flag=get_usage(usage_log);
+        print_tail();
+        write_log("NULL",operation_log,argv[1],run_flag);
+        system_cleanup();
+        return run_flag;
+    }
+    if(strcmp(argv[1],"syslog")==0){
+        run_flag=get_syslog(operation_log);
+        print_tail();
+        write_log("NULL",operation_log,argv[1],run_flag);
+        system_cleanup();
+        return run_flag;
+    }
+
     current_cluster_flag=show_current_cluster(workdir,current_cluster_name,1);
     if(strcmp(argv[1],"switch")==0){
         if(argc==2){
@@ -261,21 +293,6 @@ int main(int argc, char* argv[]){
         }
         run_flag=switch_to_cluster(argv[2]);
         print_tail();
-        system_cleanup();
-        return run_flag;
-    }
-    if(strcmp(argv[1],"exit-current")==0){
-        if(current_cluster_flag!=0){
-            print_tail();
-            write_log("NULL",operation_log,argv[1],current_cluster_flag);
-            system_cleanup();
-            return current_cluster_flag;
-        }
-        if(exit_current_cluster()==0){
-            printf("[ -INFO- ] Exit the current cluster.\n");
-        }
-        print_tail();
-        write_log("NULL",operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
     }
@@ -296,22 +313,6 @@ int main(int argc, char* argv[]){
             return run_flag;
         }
     }
-
-    if(strcmp(argv[1],"usage")==0){
-        run_flag=get_usage(usage_log);
-        print_tail();
-        write_log("NULL",operation_log,argv[1],run_flag);
-        system_cleanup();
-        return run_flag;
-    }
-    if(strcmp(argv[1],"syslog")==0){
-        run_flag=get_syslog(operation_log);
-        print_tail();
-        write_log("NULL",operation_log,argv[1],run_flag);
-        system_cleanup();
-        return run_flag;
-    }
-
     if(current_cluster_flag==1){
         run_flag=list_all_cluster_names();
         print_tail();
@@ -319,7 +320,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"graph")==0){
         decrypt_files(workdir,crypto_keyfile);
         run_flag=graph(workdir,crypto_keyfile,0);
@@ -332,7 +332,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"vault")==0){
         run_flag=get_vault_info(workdir,crypto_keyfile);
         print_tail();
@@ -340,7 +339,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     printf("[ -INFO- ] You are operating the cluster %s now, which may affect all\n",current_cluster_name);
     printf("|          the jobs running on this cluster. Please input 'y-e-s' to continue.\n");
     printf("[ INPUT: ] ");
@@ -352,7 +350,6 @@ int main(int argc, char* argv[]){
         print_tail();
         return 0;
     }
-    
     if(strcmp(argv[1],"new-keypair")==0){
         if(argc==2||argc==3){
             run_flag=rotate_new_keypair(workdir,"","",crypto_keyfile);
@@ -387,7 +384,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return 5;
     }
-
     if(check_pslock(workdir)==1){
         printf("[ FATAL: ] Another process is operating this cluster, please wait the termination\n");
         printf("|          of that process. Currently no extra operation is permitted. Exit now.\n");
@@ -396,7 +392,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return 7;
     }
-
     if(strcmp(argv[1],"get-conf")==0){
         run_flag=get_default_conf(workdir,crypto_keyfile,1);
         if(run_flag==-1){
@@ -426,7 +421,6 @@ int main(int argc, char* argv[]){
             return 0;
         }
     }
-
     if(strcmp(argv[1],"edit-conf")==0){
         run_flag=edit_configuration_file(workdir,crypto_keyfile);
         if(run_flag==-1){
@@ -454,7 +448,6 @@ int main(int argc, char* argv[]){
             return 0;
         }
     }
-
     if(strcmp(argv[1],"init")==0){
         if(strcmp(cloud_flag,"CLOUD_C")==0){
             run_flag=aws_cluster_init(current_cluster_name,workdir,crypto_keyfile);
@@ -481,7 +474,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return 0;
     }
-
     if(cluster_empty_or_not(workdir)==0){
         print_empty_cluster_info();
         print_tail();
@@ -490,7 +482,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return 11;
     }
-
     if(strcmp(argv[1],"sleep")==0){
         run_flag=cluster_sleep(workdir,crypto_keyfile);
         print_tail();
@@ -498,7 +489,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"wakeup")==0){
         if(argc==2){
             run_flag=cluster_wakeup(workdir,crypto_keyfile,"minimal");
@@ -517,7 +507,6 @@ int main(int argc, char* argv[]){
             return run_flag;
         }
     }
-
     if(argc==3&&strcmp(argv[1],"destroy")==0&&strcmp(argv[2],"force")==0){
         run_flag=cluster_destroy(workdir,crypto_keyfile,0);
         print_tail();
@@ -525,7 +514,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(cluster_asleep_or_not(workdir)==0){
         printf("[ FATAL: ] The current cluster is in the state of hibernation. No modification is\n");
         printf("|          permitted. Please run 'wakeup' command first to modify the cluster. You\n");
@@ -536,7 +524,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return 13;
     }
-
     if(strcmp(argv[1],"destroy")==0&&cluster_empty_or_not(workdir)==1){
         run_flag=cluster_destroy(workdir,crypto_keyfile,1);
         print_tail();
@@ -559,7 +546,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"addc")==0){
         if(argc==2){
             printf("[ FATAL: ] You need to specify a number (range: 1-%d) as the second parameter.\n",MAXIMUM_ADD_NODE_NUMBER);
@@ -574,7 +560,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"shutdownc")==0){
         if(argc==2){
             printf("[ FATAL: ] You need to specify either 'all' or a number as the second parameter.\n");
@@ -590,7 +575,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"turnonc")==0){
         if(argc==2){
             printf("[ FATAL: ] You need to specify either 'all' or a number as the second parameter.\n");
@@ -605,7 +589,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"reconfc")==0){
         if(argc==2){
             printf("[ FATAL: ] You need to specify a configuration as the second parameter.\n");
@@ -639,7 +622,6 @@ int main(int argc, char* argv[]){
             return run_flag;
         }
     }
-
     if(strcmp(argv[1],"reconfm")==0){
         if(argc==2){
             printf("[ FATAL: ] You need to specify a configuration as the second parameter.\n");
