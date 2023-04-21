@@ -143,7 +143,7 @@ void print_about(void){
     print_tail();
 }
 
-void read_license(void){
+int read_license(void){
     char cmdline[CMDLINE_LENGTH]="";
     if(file_exist_or_not("c:\\hpc-now\\LICENSES\\GPL-2")==0){
 #ifdef __APPLE__
@@ -163,4 +163,5 @@ void read_license(void){
             return 1;
         }
     }
+    return 0;
 }

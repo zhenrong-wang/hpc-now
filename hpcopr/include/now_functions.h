@@ -29,7 +29,7 @@ void print_tail(void);
 void print_about(void);
 
 /* Print out the license terms for users to read. */
-void read_license(void);
+int read_license(void);
 
 
 /* Some general functions, mainly for file and string manipulation*/
