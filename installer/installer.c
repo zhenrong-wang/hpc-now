@@ -624,7 +624,7 @@ int split_parameter(char* param, char* param_head, char* param_tail){
         j++;
     }while(i<param_length);
     *(param_tail_temp+j)='\0';
-    strcpy(param_tail,param_head_temp);
+    strcpy(param_tail,param_tail_temp);
     if(strcmp(param_head_temp,"hpcopr_loc")==0){
         return 2;
     }
