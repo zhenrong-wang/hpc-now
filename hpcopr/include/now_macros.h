@@ -150,7 +150,8 @@
 #define GENERAL_SLEEP_TIME 30
 
 /* You can modify the MAXIMUM_ADD_NODE_NUMBER to allow adding more than 16 nodes in one command */
-#define MAXIMUM_ADD_NODE_NUMBER 16 
+#define MAXIMUM_ADD_NODE_NUMBER 16
+#define MAXIMUM_ADD_USER_NUMBER 8
 /* This macro guarantees the maximum waiting time for terraform running */
 #define MAXIMUM_WAIT_TIME 600
 

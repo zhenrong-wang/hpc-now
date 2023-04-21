@@ -76,7 +76,7 @@ int getstate(char* workdir, char* crypto_filename);
 int generate_sshkey(char* sshkey_folder, char* pubkey);
 int graph(char* workdir, char* crypto_keyfile, int graph_level);
 int update_cluster_summary(char* workdir, char* crypto_keyfile);
-void archive_log(char* stackdir);
+void archive_log(char* stackdir, char* logfile);
 int wait_for_complete(char* workdir, char* option);
 
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);

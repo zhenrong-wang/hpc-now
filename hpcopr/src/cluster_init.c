@@ -25,7 +25,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
-    char logfile[FILENAME_LENGTH]="";
+    char* error_log=OPERATION_ERROR_LOG;
     char secret_file[FILENAME_LENGTH]="";
     char region_valid[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -162,39 +162,22 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(secret_file,"%s\\.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     sprintf(region_valid,"%s\\region_valid.tf",stackdir);
-    sprintf(logfile,"%s\\now_cluster.log",logdir);
-    global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
-    global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && start /b %s init > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"init");
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
 #else
     sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
     system(cmdline);
     sprintf(secret_file,"%s/.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     sprintf(region_valid,"%s/region_valid.tf",stackdir);
-    sprintf(logfile,"%s/now_cluster.log",logdir);
+#endif
     global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
     global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"init");
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-#endif
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-    if(file_empty_or_not(logfile)!=0){
+    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log)!=0){
+        return -1;
+    }
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         global_replace(region_valid,"cn-northwest-1","us-east-1");
-        system(cmdline);
-        wait_for_complete(workdir,"apply");
-        if(file_empty_or_not(logfile)!=0){
-            printf("[ FATAL: ] The keypair is invalid. Please use 'hpcopr new keypair' to update with a\n");
+        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            printf("[ FATAL: ] The keypair may be invalid. Please use 'hpcopr new-keypair' to update with a\n");
             printf("|          valid keypair. Exit now.\n");
 #ifdef _WIN32
             sprintf(cmdline,"del /f /q %s\\region_valid.tf > nul 2>&1",stackdir);
@@ -207,9 +190,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         region_valid_flag=1;
     }
 #ifdef _WIN32
-        sprintf(cmdline,"del /f /q %s\\region_valid.tf > nul 2>&1",stackdir);
+    sprintf(cmdline,"del /f /q %s\\region_valid.tf > nul 2>&1",stackdir);
 #else
-        sprintf(cmdline,"rm -rf %s/region_valid.tf >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"rm -rf %s/region_valid.tf >> /dev/null 2>&1",stackdir);
 #endif
     system(cmdline);
     
@@ -385,9 +368,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     for(j=i;j>0;j--){
         node_num+=(conf_line_buffer[22+i-j]-'0')*pow(10,j-1);
     }
-    if(node_num>16){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value 16, reset to 16.\n",node_num);
-        node_num=16;
+    if(node_num>MAXIMUM_ADD_NODE_NUMBER){
+        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
+        node_num=MAXIMUM_ADD_NODE_NUMBER;
     }
     fgetline(file_p,conf_line_buffer);
     i=strlen(conf_line_buffer)-22;
@@ -395,8 +378,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         hpc_user_num+=(conf_line_buffer[22+i-j]-'0')*pow(10,j-1);
     }
     if(hpc_user_num>8){
-        printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value 8, reset to 8.\n",hpc_user_num);
-        hpc_user_num=8;
+        printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n",hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
+        hpc_user_num=MAXIMUM_ADD_USER_NUMBER;
     }
     fscanf(file_p,"%s%s%s%s\n",conf_param_buffer1,conf_param_buffer2,conf_param1,conf_param2);
     sprintf(master_init_param,"%s %s",conf_param1,conf_param2);
@@ -431,7 +414,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     if(strcmp(region_id,"cn-northwest-1")==0){
         if(region_valid_flag==1){
             printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
-            printf("|          Please run 'hpcopr new keypair' command to update with a valid keypair.\n");
+            printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now.\n");
             return -1;
         }
@@ -443,7 +426,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     else if(strcmp(region_id,"cn-north-1")==0){
         if(region_valid_flag==1){
             printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
-            printf("|          Please run 'hpcopr new keypair' command to update with a valid keypair.\n");
+            printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now.\n");
             return -1;
         }
@@ -455,7 +438,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     else if(strcmp(region_id,"us-east-1")==0){
         if(region_valid_flag==0){
             printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
-            printf("|          Please run 'hpcopr new keypair' command to update with a valid keypair.\n");
+            printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now.\n");
             return -1;
         }
@@ -467,7 +450,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     else if(strcmp(region_id,"us-east-2")==0){
         if(region_valid_flag==0){
             printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
-            printf("|          Please run 'hpcopr new keypair' command to update with a valid keypair.\n");
+            printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now.\n");
             return -1;
         }
@@ -582,9 +565,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          OS Image:              %s",os_image_raw);
     printf("%s\n",conf_print_string_temp1);
-    printf("[ -INFO- ] Building you cluster now, this may take seconds ...\n");
-    printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     generate_sshkey(sshkey_folder,pubkey);
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\hpc_stack.base",stackdir);
@@ -692,8 +672,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     system(cmdline);
     sprintf(cmdline,"del /f /q %s\\hpc_stack.compute > nul 2>&1",stackdir);
     system(cmdline);
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && start /b %s init > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
 #else
     for(i=0;i<node_num;i++){
         sprintf(cmdline,"/bin/cp %s/hpc_stack.compute %s/hpc_stack_compute%d.tf >> /dev/null 2>&1",stackdir,stackdir,i+1);
@@ -714,39 +692,13 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     system(cmdline);
     sprintf(cmdline,"rm -rf %s/hpc_stack.compute >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
 #endif
-    system(cmdline);
-    wait_for_complete(workdir,"init");
-    if(file_empty_or_not(logfile)!=0){
-        printf("[ FATAL: ] Cluster initialization encountered problems.\n");
-        printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
+    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
-    archive_log(stackdir);
-#ifdef _WIN32
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
-#else
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-#endif
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-    if(file_empty_or_not(logfile)!=0){
-        printf("[ FATAL: ] Cluster initialization encountered problems.\n");
-        printf("|          Please check the logfile for details.\n");
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ FATAL: ] Rolling back and exit now ...\n");
-        archive_log(stackdir);
-#ifdef _WIN32
-        sprintf(cmdline,"cd %s\\ && echo yes | start /b %s destroy > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
-#else
-        sprintf(cmdline,"cd %s && echo yes | %s destroy > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-#endif
-        system(cmdline);
-        wait_for_complete(workdir,"destroy");
-        delete_decrypted_files(workdir,crypto_keyfile);
+        terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log);
         return -1;
     }
 #ifdef _WIN32
@@ -996,7 +948,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
-    char logfile[FILENAME_LENGTH]="";
+    char* error_log=OPERATION_ERROR_LOG;
     char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
@@ -1005,7 +957,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
-
     char conf_line_buffer[256]="";
     char conf_param_buffer1[32]="";
     char conf_param_buffer2[32]="";
@@ -1029,28 +980,23 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     int master_bandwidth=0;
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
-
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
     char private_key_file[FILENAME_LENGTH]="";
-
     FILE* file_p=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char md5sum[33]="";
-
     char bucket_id[12]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
     char master_address[32]="";
-
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
     char current_time[12]="";
     char master_cpu_vendor[8]="";
     char compute_cpu_vendor[8]="";
-
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i,j;
@@ -1199,7 +1145,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
 
     sprintf(secret_file,"%s\\.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
-    sprintf(logfile,"%s\\now_cluster.log",logdir);
 #else
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
@@ -1295,7 +1240,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     sprintf(secret_file,"%s/.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
-    sprintf(logfile,"%s/now_cluster.log",logdir);
 #endif
  
     file_p=fopen(conf_file,"r");
@@ -1466,13 +1410,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          OS Image:              %s",os_image);
     printf("%s\n",conf_print_string_temp1);
-
-    printf("[ -INFO- ] Building you cluster now, this may take seconds ...\n");
-    printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-
     generate_sshkey(sshkey_folder,pubkey);
-
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\hpc_stack.base",stackdir);
 #else
@@ -1574,33 +1512,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     system(cmdline);
     sprintf(cmdline,"del /f /q %s\\hpc_stack.compute > nul 2>&1 && del /f /q %s\\NAS_Zones_QCloud.txt > nul 2>&1",stackdir,stackdir);
     system(cmdline);
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && start /b %s init > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"init");
-    if(file_empty_or_not(logfile)!=0){
-        printf("[ FATAL: ] Cluster initialization encountered problems.\n");
-        printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
-        return -1;
-    }
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-    if(file_empty_or_not(logfile)!=0){
-        printf("[ FATAL: ] Cluster initialization encountered problems.\n");
-        printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Rolling back and exit now ...\n");
-        archive_log(stackdir);
-        sprintf(cmdline,"cd %s\\ && echo yes | start /b %s destroy > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
-        system(cmdline);
-        wait_for_complete(workdir,"destroy");
-        delete_decrypted_files(workdir,crypto_keyfile);
-        return -1;
-    }
-    sprintf(cmdline,"copy /y %s\\hpc_stack_compute1.tf %s\\compute_template > nul 2>&1",stackdir,stackdir);
 #else
     for(i=0;i<node_num;i++){
         sprintf(cmdline,"/bin/cp %s/hpc_stack.compute %s/hpc_stack_compute%d.tf >> /dev/null 2>&1",stackdir,stackdir,i+1);
@@ -1610,7 +1521,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         global_replace(filename_temp,"RUNNING_FLAG","true");
     }
-
     sprintf(cmdline,"mv %s/hpc_stack.base %s/hpc_stack_base.tf >> /dev/null 2>&1",stackdir,stackdir);
     system(cmdline);
     sprintf(cmdline,"mv %s/hpc_stack.database %s/hpc_stack_database.tf >> /dev/null 2>&1",stackdir,stackdir);
@@ -1621,38 +1531,23 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     system(cmdline);
     sprintf(cmdline,"rm -rf %s/hpc_stack.compute >> /dev/null && rm -rf %s/NAS_Zones_QCloud.txt >> /dev/null 2>&1",stackdir,stackdir);
     system(cmdline);
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"init");
-    if(file_empty_or_not(logfile)!=0){
-        printf("[ FATAL: ] Cluster initialization encountered problems.\n");
-        printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
+#endif
+    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-    if(file_empty_or_not(logfile)!=0){
-        printf("[ FATAL: ] Cluster initialization encountered problems.\n");
-        printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Rolling back and exit now ...\n");
-        archive_log(stackdir);
-        sprintf(cmdline,"cd %s && echo yes | %s destroy > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-        system(cmdline);
-        wait_for_complete(workdir,"destroy");
-        delete_decrypted_files(workdir,crypto_keyfile);
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+        printf("[ -INFO- ] Rolling back and exit now ...\n");
+        terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,err_log);
         return -1;
     }
+#ifdef _WIN32
+    sprintf(cmdline,"copy /y %s\\hpc_stack_compute1.tf %s\\compute_template > nul 2>&1",stackdir,stackdir);
+#else
     sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,stackdir);
 #endif
     system(cmdline);
     get_crypto_key(crypto_keyfile,md5sum);
     getstate(workdir,crypto_keyfile);
-
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\terraform.tfstate",stackdir);
 #else
@@ -1831,7 +1726,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
-    char logfile[FILENAME_LENGTH]="";
+    char* error_log=OPERATION_ERROR_LOG;
     char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
@@ -2033,7 +1928,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     sprintf(secret_file,"%s\\.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
-    sprintf(logfile,"%s\\now_cluster.log",logdir);
 #else
     sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
     system(cmdline);
@@ -2109,7 +2003,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     sprintf(secret_file,"%s/.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
-    sprintf(logfile,"%s/now_cluster.log",logdir);
 #endif 
     file_p=fopen(conf_file,"r");
     for(i=0;i<3;i++){
@@ -2279,11 +2172,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     printf("%s\n",conf_print_string_temp1);
     sprintf(conf_print_string_temp1,"|          OS Image:              %s",os_image);
     printf("%s\n",conf_print_string_temp1);
-    printf("[ -INFO- ] Building you cluster now, this may take seconds ...\n");
-    printf("[ -WARN- ] *DO NOT* TERMINATE THIS PROCESS MANNUALLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    printf("[ -WARN- ] *OTHERWISE* THE CLUSTER WILL BE CORRUPTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     generate_sshkey(sshkey_folder,pubkey);
-
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\hpc_stack.base",stackdir);
 #else
@@ -2383,33 +2272,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     system(cmdline);
     sprintf(cmdline,"del /f /q %s\\hpc_stack.compute > nul 2>&1 && del /f /q %s\\NAS_Zones_ALI.txt > nul 2>&1",stackdir,stackdir);
     system(cmdline);
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && start /b %s init > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"init");
-    if(file_empty_or_not(logfile)!=0){
-        printf("[ FATAL: ] Cluster initialization encountered problems.\n");
-        printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
-        return -1;
-    }
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && echo yes | start /b %s apply > %s\\tf_prep.log 2>%s",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-    if(file_empty_or_not(logfile)!=0){
-        printf("[ FATAL: ] Cluster initialization encountered problems.\n");
-        printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Rolling back and exit now ...\n");
-        archive_log(stackdir);
-        sprintf(cmdline,"cd %s\\ && echo yes | start /b %s destroy > %s\\tf_prep.log 2>%s\\log\\now_cluster.log",stackdir,tf_exec,stackdir,workdir);
-        system(cmdline);
-        wait_for_complete(workdir,"destroy");
-        delete_decrypted_files(workdir,crypto_keyfile);
-        return -1;
-    }
-    sprintf(cmdline,"copy /y %s\\hpc_stack_compute1.tf %s\\compute_template > nul 2>&1",stackdir,stackdir);
 #else
     for(i=0;i<node_num;i++){
         sprintf(cmdline,"/bin/cp %s/hpc_stack.compute %s/hpc_stack_compute%d.tf >> /dev/null 2>&1",stackdir,stackdir,i+1);
@@ -2429,32 +2291,18 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     system(cmdline);
     sprintf(cmdline,"rm -rf %s/hpc_stack.compute >> /dev/null && rm -rf %s/NAS_Zones_ALI.txt >> /dev/null 2>&1",stackdir,stackdir);
     system(cmdline);
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && %s init > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"init");
-    if(file_empty_or_not(logfile)!=0){
-        printf("[ FATAL: ] Cluster initialization encountered problems.\n");
-        printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        delete_decrypted_files(workdir,crypto_keyfile);
+#endif
+    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
-    archive_log(stackdir);
-    sprintf(cmdline,"cd %s && echo yes | %s apply > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-    system(cmdline);
-    wait_for_complete(workdir,"apply");
-    if(file_empty_or_not(logfile)!=0){
-        printf("[ FATAL: ] Cluster initialization encountered problems.\n");
-        printf("|          Please check the logfile for details.\n");
-        printf("[ FATAL: ] Rolling back and exit now ...\n");
-        archive_log(stackdir);
-        sprintf(cmdline,"cd %s && echo yes | %s destroy > %s/tf_prep.log 2>%s &",stackdir,tf_exec,stackdir,logfile);
-        system(cmdline);
-        wait_for_complete(workdir,"destroy");
-        delete_decrypted_files(workdir,crypto_keyfile);
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+        printf("[ -INFO- ] Rolling back and exit now ...\n");
+        terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,err_log);
         return -1;
     }
+#ifdef _WIN32
+    sprintf(cmdline,"copy /y %s\\hpc_stack_compute1.tf %s\\compute_template > nul 2>&1",stackdir,stackdir);
+#else
     sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,stackdir);
 #endif
     system(cmdline);
