@@ -24,13 +24,6 @@ void print_empty_cluster_info(void){
     printf("[ FATAL: ] Exit now.\n");
 }
 
-void print_operation_in_progress(void){
-    printf("[ -INFO- ] The cluster operation is in progress, this step may take minutes ...\n");
-    printf("[ -WARN- ] *Do not* terminate this process, otherwise the cluster will be corrupted.\n");
-    printf("|          If an error occurs, the information will be printed to %s.\n",OPERATION_ERROR_LOG);
-    printf("|          You can check that file for details.\n");
-}
-
 void print_cluster_init_done(void){
     printf("[ -DONE- ] Congratulations! The cluster is initializing now. This step may take at\n");
     printf("|          least 7 minutes. You can log into the master node now.\n"); 

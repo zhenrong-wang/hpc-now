@@ -1101,7 +1101,8 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     sprintf(cmdline,"cd %s && echo yes | %s %s > %s/tf_prep.log 2>%s &",stackdir,tf_exec,execution_name,stackdir,error_log);
 #endif
     system(cmdline);
-    printf("[ -INFO- ] Do NOT terminate this process mannually. Max execution time: %d s\n",MAXIMUM_WAIT_TIME);
+    printf("[ -INFO- ] DO NOT terminate this process mannually. Max execution time: %d s\n",MAXIMUM_WAIT_TIME);
+    printf("|          Error info will be printed to %s\n",OPERATION_ERROR_LOG);
     wait_for_complete(workdir,execution_name);
     if(file_empty_or_not(error_log)!=0){
         printf("[ FATAL: ] Failed to init/modify/destroy the cluster. Terraform command: %s.\n",execution_name);

@@ -13,9 +13,6 @@
 /* If the cluster is empty, print the info out */
 void print_empty_cluster_info(void);
 
-/* If the operation is progress, print the info out */
-void print_operation_in_progress(void);
-
 /* When the cluster initialization successfully finish, print the info out */
 void print_cluster_init_done(void);
 

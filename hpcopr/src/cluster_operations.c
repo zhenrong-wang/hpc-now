@@ -761,7 +761,6 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
 #endif
         system(cmdline);
     }
-    print_operation_in_progress();
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
     if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)!=0){
@@ -1488,7 +1487,6 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                     global_replace(filename_temp2,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
                 }
             }
-            print_operation_in_progress();
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 return -1;
             }
@@ -1563,7 +1561,6 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             }
         }
     }
-    print_operation_in_progress();
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
@@ -1647,7 +1644,6 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
 #endif
     global_replace(filename_temp,prev_config,new_config);
-    print_operation_in_progress();
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -3;
     }
