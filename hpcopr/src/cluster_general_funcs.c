@@ -1007,6 +1007,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     sprintf(master_tf,"%s/hpc_stack_master.tf",stackdir);
     find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
     if(graph_level==0){
+        printf("|\n");
         printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
         printf("|            +-db(%s)\n",db_status);
     }
@@ -1024,6 +1025,9 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
                 printf("|              +-compute%d(%s,%s,%s)\n",node_num,compute_address,compute_status,compute_config);
             }
         }
+    }
+    if(graph_level==0){
+        printf("|\n");
     }
     if(graph_level==1){
         if(strlen(ht_status)!=0){

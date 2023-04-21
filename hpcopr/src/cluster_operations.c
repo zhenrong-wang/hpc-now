@@ -209,6 +209,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         }
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
+        printf("\n");
         while(fgetline(file_p,registry_line)==0){
             if(strlen(registry_line)!=0){
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
@@ -227,6 +228,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             }
         }
         fclose(file_p);
+        printf("\n");
         return 0;
     }
     fclose(file_p);
@@ -234,6 +236,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         return -1;
     }
     else{
+        printf("\n");
         get_workdir(temp_cluster_workdir,target_cluster_name);
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
         if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,target_cluster_name,"","","","")>0){
@@ -246,6 +249,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             printf(" * EMPTY CLUSTER *\n");
         }
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+        printf("\n");
         return 0;
     }
 }
