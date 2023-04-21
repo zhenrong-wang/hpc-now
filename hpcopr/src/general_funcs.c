@@ -1,9 +1,9 @@
 /*
-* This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
-* The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
-* It is distributed under the license: GNU Public License - v2.0
-* Bug report: info@hpc-now.com
-*/
+ * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+ * It is distributed under the license: GNU Public License - v2.0
+ * Bug report: info@hpc-now.com
+ */
 
 #ifdef _WIN32
 #include "..\\include\\now_macros.h"
@@ -37,14 +37,14 @@ int fgetline(FILE* file_p, char* line_string){
             *(line_string+i)=ch;
             i++;
         }
-        else if(ch=='\n'){
+/*        else if(ch=='\n'){
             return 0;
         }
-        else if(ch==EOF){
+        else if(ch==EOF&&i==0){
             return 1;
-        }
+        }*/
     }while(ch!=EOF&&ch!='\n');
-    if(ch==EOF){
+    if(ch==EOF&&i==0){
         return 1;
     }
     else{
@@ -180,7 +180,7 @@ int line_replace(char* orig_line, char* new_line, char* orig_string, char* new_s
     reset_string(new_line);
     i=0;
     do{
-        if(*(orig_line+i)==*(orig_string)&&i+length_orig<length){
+        if(*(orig_line+i)==*(orig_string)&&i+length_orig<length+1){
             for(j=0;j<length_orig;j++){
                 *(temp_string+j)=*(orig_line+i+j);
             }
@@ -541,6 +541,9 @@ int file_empty_or_not(char* filename){
             line_num++;
         }
         fclose(file_p);
+        if(strlen(temp_line)>0){
+            line_num++;
+        }
         return line_num;
     }
 }

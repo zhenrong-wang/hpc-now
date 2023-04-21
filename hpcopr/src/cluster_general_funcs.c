@@ -1,9 +1,9 @@
 /*
-* This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
-* The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
-* It is distributed under the license: GNU Public License - v2.0
-* Bug report: info@hpc-now.com
-*/
+ * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+ * It is distributed under the license: GNU Public License - v2.0
+ * Bug report: info@hpc-now.com
+ */
 
 #ifdef _WIN32
 #include "..\\include\\now_macros.h"
@@ -54,7 +54,7 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
 
 void create_and_get_stackdir(char* workdir, char* stackdir){
     char cmdline[CMDLINE_LENGTH]="";
-    char string_temp[4]="";
+/*    char string_temp[4]="";
     int i;
     int j=0;
     int cluster_num=0;
@@ -72,13 +72,18 @@ void create_and_get_stackdir(char* workdir, char* stackdir){
     }
     for(j=0;j<strlen(string_temp);j++){
         cluster_num+=(*(string_temp+j)-'0')*pow(10,j);
-    }
+    }*/
 #ifdef _WIN32
-    sprintf(stackdir,"c:\\programdata\\hpc-now\\stack\\cluster-%d",cluster_num);
+    sprintf(stackdir,"%s\\stack",workdir);
     sprintf(cmdline,"mkdir %s > nul 2>&1",stackdir);
     system(cmdline);
     sprintf(cmdline,"attrib +h +s +r %s",stackdir);
     system(cmdline);
+#else
+    sprintf(stackdir,"%s/.stack",workdir);
+    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",stackdir);
+    system(cmdline);
+/*
 #elif __linux__
     sprintf(stackdir,"/usr/.hpc-now/.stack/.cluster-%d",cluster_num);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",stackdir);
@@ -86,7 +91,7 @@ void create_and_get_stackdir(char* workdir, char* stackdir){
 #elif __APPLE__
     sprintf(stackdir,"/Applications/.hpc-now/.stack/.cluster-%d",cluster_num);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",stackdir);
-    system(cmdline);
+    system(cmdline);*/
 #endif
 }
 
@@ -128,7 +133,7 @@ int remote_copy(char* workdir, char* sshkey_dir, char* option){
 
 void create_and_get_vaultdir(char* workdir, char* vaultdir){
     char cmdline[CMDLINE_LENGTH]="";
-    char string_temp[4]="";
+/*    char string_temp[4]="";
     int i;
     int j=0;
     int cluster_num=0;
@@ -146,13 +151,19 @@ void create_and_get_vaultdir(char* workdir, char* vaultdir){
     }
     for(j=0;j<strlen(string_temp);j++){
         cluster_num+=(*(string_temp+j)-'0')*pow(10,j);
-    }
+    }*/
 #ifdef _WIN32
-    sprintf(vaultdir,"c:\\programdata\\hpc-now\\vault\\cluster-%d",cluster_num);
-    sprintf(cmdline,"mkdir -p %s > nul 2>&1",vaultdir);
+//    sprintf(vaultdir,"c:\\programdata\\hpc-now\\vault\\cluster-%d",cluster_num);
+    sprintf(vaultdir,"%s\\vault",workdir);
+    sprintf(cmdline,"mkdir %s > nul 2>&1",vaultdir);
     system(cmdline);
     sprintf(cmdline,"attrib +h +s +r %s",vaultdir);
     system(cmdline);
+#else
+    sprintf(vaultdir,"%s/vault",workdir);
+    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",vaultdir);
+    system(cmdline);
+/*
 #elif __APPLE__
     sprintf(vaultdir,"/Applications/.hpc-now/.vault/.cluster-%d",cluster_num);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",vaultdir);
@@ -160,7 +171,7 @@ void create_and_get_vaultdir(char* workdir, char* vaultdir){
 #elif __linux__
     sprintf(vaultdir,"/usr/.hpc-now/.vault/.cluster-%d",cluster_num);
     sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",vaultdir);
-    system(cmdline);
+    system(cmdline);*/
 #endif
 }
 
@@ -865,12 +876,22 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
     return 0;
 }
 
-void archive_log(char* stackdir){
+void archive_log(char* stackdir, char* logfile){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    sprintf(cmdline,"type %s\\tf_prep.log >> %s\\tf_prep_archive.log 2>nul",stackdir,stackdir);
+    if(strlen(logfile)==0){
+        sprintf(cmdline,"type %s\\tf_prep.log >> %s\\tf_prep_archive.log 2>nul",logfile,stackdir);
+    }
+    else{
+        sprintf(cmdline,"type %s >> %s\\tf_prep_archive.log 2>nul",logfile,stackdir);
+    }
 #else
-    sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log 2>/dev/null",stackdir,stackdir);
+    if(strlen(logfile)==0){
+        sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log 2>/dev/null",logfile,stackdir);
+    }
+    else{
+        sprintf(cmdline,"cat %s >> %s/tf_prep_archive.log 2>/dev/null",logfile,stackdir);
+    }
 #endif
     system(cmdline);
 }
@@ -923,7 +944,7 @@ int wait_for_complete(char* workdir, char* option){
     }
 }
 
-int graph(char* workdir, char* crypto_keyfile){
+int graph(char* workdir, char* crypto_keyfile, int graph_level){
     if(getstate(workdir,crypto_keyfile)!=0){
         return -1;
     }
@@ -931,6 +952,7 @@ int graph(char* workdir, char* crypto_keyfile){
     char master_status[16]="";
     char master_config[16]="";
     char db_status[16]="";
+    char cloud_flag[16]="";
     char compute_address[32]="";
     char compute_status[16]="";
     char compute_config[16]="";
@@ -938,33 +960,39 @@ int graph(char* workdir, char* crypto_keyfile){
     char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
     char master_tf[FILENAME_LENGTH]="";
+    char cloud_flag_file[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
-    char head_string[128]="";
-    char db_string[128]="";
-    char compute_string[256]="";
     char ht_status[16]="";
-    char string_temp[64]="";
-    int i,node_num=0;
+    int node_num=0;
+    int running_node_num=0;
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
     sprintf(currentstate,"%s\\currentstate",stackdir);
+    sprintf(compute_template,"%s\\compute_template",stackdir);
+    sprintf(cloud_flag_file,"%s\\conf\\cloud_flag.flg",workdir);
 #else
     sprintf(currentstate,"%s/currentstate",stackdir);
+    sprintf(compute_template,"%s/compute_template",stackdir);
+    sprintf(cloud_flag_file,"%s/conf/.cloud_flag.flg",workdir);
 #endif
     FILE* file_p=fopen(currentstate,"r");
     if(file_p==NULL){
         return 1;
     }
-#ifdef _WIN32
-    sprintf(compute_template,"%s\\compute_template",stackdir);
-#else
-    sprintf(compute_template,"%s/compute_template",stackdir);
-#endif
     FILE* file_p_2=fopen(compute_template,"r");
     if(file_p_2==NULL){
         fclose(file_p);
         return 1;
     }
+    fclose(file_p_2);
+    FILE* file_p_3=fopen(cloud_flag_file,"r");
+    if(file_p_3==NULL){
+        fclose(file_p);
+        fclose(file_p_2);
+        return 1;
+    }
+    fgetline(file_p_3,cloud_flag);
+    fclose(file_p_3);
     fgetline(file_p,master_address);
     fgetline(file_p,line_buffer);
     fgetline(file_p,master_status);
@@ -975,26 +1003,42 @@ int graph(char* workdir, char* crypto_keyfile){
     }
     sprintf(master_tf,"%s/hpc_stack_master.tf",stackdir);
     find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
-    sprintf(head_string,"master(%s,%s,%s)<->|",master_address,master_status,master_config);
-    for(i=0;i<strlen(head_string)-1;i++){
-        *(string_temp+i)=' ';
+    if(graph_level==0){
+        printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
+        printf("|            +-db(%s)\n",db_status);
     }
-    sprintf(db_string,"%s|<->db(%s)",string_temp,db_status);
-    printf("| HPC-NOW Cluster Graph and Status\n");
-    printf("%s\n%s\n",db_string,head_string);
     while(fgetline(file_p,compute_address)==0){
         fgetline(file_p,compute_status);
         node_num++;
+        if(strcmp(compute_status,"running")==0||strcmp(compute_status,"Running")==0||strcmp(compute_status,"RUNNING")==0){
+            running_node_num++;
+        }
+        if(graph_level==0){
+            if(strlen(ht_status)!=0){
+                printf("|              +-compute%d(%s,%s,%s,%s)\n",node_num,compute_address,compute_status,compute_config,ht_status);
+            }
+            else{
+                printf("|              +-compute%d(%s,%s,%s)\n",node_num,compute_address,compute_status,compute_config);
+            }
+        }
+    }
+    if(graph_level==1){
         if(strlen(ht_status)!=0){
-            sprintf(compute_string,"%s|<->compute%d(%s,%s,%s,%s)",string_temp,node_num,compute_address,compute_status,compute_config,ht_status);
+            printf("|          +-%s | %s %s %s | %d/%d | %s | %s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
         }
         else{
-            sprintf(compute_string,"%s|<->compute%d(%s,%s,%s)",string_temp,node_num,compute_address,compute_status,compute_config);
+            printf("|          +-%s | %s %s %s | %d/%d | %s \n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
         }
-        printf("%s\n",compute_string);
+    }
+    if(graph_level==2){
+        if(strlen(ht_status)!=0){
+            printf("%s,%s,%s,%s,%d,%d,%s,%s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
+        }
+        else{
+            printf("%s,%s,%s,%s,%d,%d,%s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
+        }
     }
     fclose(file_p);
-    fclose(file_p_2);
     return 0;
 }
 
@@ -1041,4 +1085,27 @@ int cluster_asleep_or_not(char* workdir){
     else{
         return 1;
     }
+}
+
+int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log){
+    char cmdline[CMDLINE_LENGTH]="";
+    char stackdir[DIR_LENGTH]="";
+    create_and_get_stackdir(workdir,stackdir);
+    archive_log(stackdir,"");
+#ifdef _WIN32
+    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s %s > %s\\tf_prep.log 2>%s",stackdir,tf_exec,execution_name,stackdir,error_log);
+#else
+    sprintf(cmdline,"cd %s && echo yes | %s %s > %s/tf_prep.log 2>%s &",stackdir,tf_exec,execution_name,stackdir,error_log);
+#endif
+    system(cmdline);
+    printf("[ -INFO- ] Do NOT terminate this process mannually. Max execution time: %d s\n",MAXIMUM_WAIT_TIME);
+    wait_for_complete(workdir,execution_name);
+    if(file_empty_or_not(error_log)!=0){
+        printf("[ FATAL: ] Failed to init/modify/destroy the cluster. Terraform command: %s.\n",execution_name);
+        printf("|          Exit now.\n");
+        archive_log(stackdir,error_log);
+        delete_decrypted_files(workdir,crypto_keyfile);
+        return -1;
+    }
+    return 0;
 }

@@ -1,14 +1,16 @@
 /*
-* This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
-* The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
-* It is distributed under the license: GNU Public License - v2.0
-* Bug report: info@hpc-now.com
-*/
+ * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+ * It is distributed under the license: GNU Public License - v2.0
+ * Bug report: info@hpc-now.com
+ */
 
 #ifndef NOW_FUNCTIONS_H
 #define NOW_FUNCTIONS_H
 
 void print_empty_cluster_info(void);
+void print_operation_in_progress(void);
+void print_cluster_init_done(void);
 void print_help(void);
 void print_header(void);
 void print_tail(void);
@@ -31,10 +33,23 @@ int get_seq_string(char* line, char split_ch, int string_seq, char* get_string);
 int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char* get_string);
 
 int get_crypto_key(char* crypto_key_filename, char* md5sum);
+
+int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output);
+int add_to_cluster_registry(char* new_cluster_name);
+int delete_from_cluster_registry(char* deleted_cluster_name);
+int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk);
+int list_all_cluster_names(void);
+int glance_clusters(char* target_cluster_name, char* crypto_keyfile);
+int switch_to_cluster(char* target_cluster_name);
+int show_current_cluster(char* cluster_workdir,char* current_cluster_name, int silent_flag);
+int exit_current_cluster(void);
+int remove_cluster(char* target_cluster_name, char* crypto_keyfile);
+
 void create_and_get_stackdir(char* workdir, char* stackdir);
 void create_and_get_vaultdir(char* workdir, char* vaultdir);
 int remote_copy(char* workdir, char* sshkey_dir, char* option);
 int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes);
+int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log);
 
 int file_exist_or_not(char* filename);
 int file_empty_or_not(char* filename);
@@ -48,10 +63,10 @@ int generate_random_passwd(char* password);
 int generate_random_db_passwd(char* password);
 int generate_random_string(char* random_string);
 
-int envcheck(char* pwd);
 int check_internet(void);
 int check_current_user(void);
-int check_and_install_prerequisitions(void);
+int file_validity_check(char* filename, int repair_flag, char* target_md5);
+int check_and_install_prerequisitions(int repair_flag);
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag);
 int get_cpu_num(const char* vm_model);
 int check_pslock(char* workdir);
@@ -60,9 +75,9 @@ int decrypt_files(char* workdir, char* crypto_key_filename);
 int delete_decrypted_files(char* workdir, char* crypto_key_filename);
 int getstate(char* workdir, char* crypto_filename);
 int generate_sshkey(char* sshkey_folder, char* pubkey);
-int graph(char* workdir, char* crypto_keyfile);
+int graph(char* workdir, char* crypto_keyfile, int graph_level);
 int update_cluster_summary(char* workdir, char* crypto_keyfile);
-void archive_log(char* stackdir);
+void archive_log(char* stackdir, char* logfile);
 int wait_for_complete(char* workdir, char* option);
 
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
@@ -84,9 +99,9 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
 int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_config);
 int cluster_sleep(char* workdir, char* crypto_keyfile);
 int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option);
-int create_new_workdir(char* crypto_keyfile);
-int rotate_new_keypair(char* workdir, char* crypto_keyfile);
+int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile);
 int get_default_conf(char* workdir, char* crypto_keyfile);
+int edit_configuration_file(char* workdir);
 
 int get_usage(char* usage_logfile);
 int get_syslog(char* operation_logfile);

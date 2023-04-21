@@ -1,9 +1,9 @@
 /*
-* This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
-* The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
-* It is distributed under the license: GNU Public License - v2.0
-* Bug report: info@hpc-now.com
-*/
+ * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+ * It is distributed under the license: GNU Public License - v2.0
+ * Bug report: info@hpc-now.com
+ */
 
 #ifdef _WIN32
 #include "..\\include\\now_macros.h"
@@ -19,32 +19,69 @@
 void print_empty_cluster_info(void){
     printf("[ -INFO- ] It seems the cluster is empty. You can either:\n");
     printf("|          a) Run 'hpcopr init' to generate a *default* cluster directly. OR\n");
-    printf("|          b) Run 'hpcopr conf' to get and modify the configuration file and then\n");
+    printf("|          b) Run 'hpcopr get-conf' to get and modify the configuration file and then\n");
     printf("|             Run 'hpcopr init' to generate a *customized* cluster.\n");
     printf("[ FATAL: ] Exit now.\n");
 }
 
+void print_operation_in_progress(void){
+    printf("[ -INFO- ] The cluster operation is in progress, this step may take minutes ...\n");
+    printf("[ -WARN- ] *Do not* terminate this process, otherwise the cluster will be corrupted.\n");
+    printf("|          If an error occurs, the information will be printed to %s.\n",OPERATION_ERROR_LOG);
+    printf("|          You can check that file for details.\n");
+}
+
+void print_cluster_init_done(void){
+    printf("[ -DONE- ] Congratulations! The cluster is initializing now. This step may take at\n");
+    printf("|          least 7 minutes. You can log into the master node now.\n"); 
+    printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
+    printf("|          By default, NO HPC software will be built into the cluster.\n");
+    printf("|          Please run 'hpcmgr install' command to install the software you need.\n");
+}
+
 void print_help(void){
-    printf("[ -INFO- ] Usage: hpcopr command_name param1 param2\n");
+    printf("[ -INFO- ] Usage: hpcopr command_name PARAM1 PARAM2 ...\n");
     printf("| Commands:\n");
-    printf("+ I  . Initialization:\n");
-    printf("|  new         : Create a new working directory or rotating a new keypair:\n");
-    printf("|        workdir   - Create a new working directory to initialize a new cluster\n");
-    printf("|                    using the 'init' command later.\n");
-    printf("|        keypair   - Rotating a new keypair for an existing cluster.\n");
-    printf("|  init        : Initialize a new cluster. If the configuration file is absent,\n");
-    printf("|                the command will generate a default configuration file. You can\n");
-    printf("|                also add a param to this command to specify a cluster_id.\n");
-    printf("|                    Example: hpcopr init hpcnow-demo\n");
-    printf("|  conf        : Get the default configuration file to edit and build a customized\n");
-    printf("|                HPC cluster later (using the 'init' command).\n");
-    printf("+ II . Management:\n");
+    printf("+ I  . Multi-Cluster Management:\n");
+    printf("| * You DO NOT need to switch to a cluster first.\n");
+    printf("|  new-cluster : Create a new cluster, you can specify the cluster name, extra\n");
+    printf("|                *optional* parameters are accepted:\n");
+    printf("|                  PARAM1 - cluster name (A-Z | a-z | 0-9 | - , %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
+    printf("|                  PARAM2 - cloud access key id\n");
+    printf("|                  PARAM3 - cloud access secret id\n");
+    printf("|  ls-clusters : List all the current clusters.\n");
+    printf("|  switch      : TARGET_CLUSTER_NAME\n");
+    printf("|                Switch to a cluster in the registry to operate.\n");
+    printf("|  glance      : all | TARGET_CLUSTER_NAME\n");
+    printf("|                Quickly view all the clusters or a specified target cluster.\n");
+    printf("|  exit-current: Exit the current cluster.\n");
+    printf("|  remove      : TARGET_CLUSTER_NAME\n");
+    printf("|                Completely remove a cluster from the OS and registry.\n");
+    printf("+ II. Global Management:\n");
+    printf("| * You DO NOT need to switch to a cluster first.\n");
     printf("|  help        : Show this page and the information here.\n");
     printf("|  usage       : Get the usage history of all your cluster(s).\n");
     printf("|  syslog      : Get the detailed operation log of your cluster management.\n");
-    printf("|  vault       : Check the sensitive information of your clusters.\n");
+    printf("+  Advanced - For developers:\n");
+    printf("|  configloc   : Configure the locations for the terraform binaries, providers, IaC\n");
+    printf("|                templates and shell scripts.\n");
+    printf("|  showloc     : Show the current configured locations.\n");
+    printf("|  resetloc    : Reset to the default locations.\n");
+    printf("+ III. Cluster Initialization: \n");
+    printf("| * You need to switch to a cluster first. *\n");
+    printf("|  new-keypair : *Rotate* a new keypair for an existing cluster. The new keypair\n");
+    printf("|                should be valid and comes from the same cloud vendor.\n");
+    printf("|  get-conf    : Get the default configuration file to edit and build a customized\n");
+    printf("|                HPC cluster later (using the 'init' command).\n");
+    printf("|  edit-conf   : Edit and save the default configuration file *before* init.\n");
+    printf("|  init        : Initialize a new cluster. If the configuration file is absent,\n");
+    printf("|                the command will generate a default configuration file.\n");
+    printf("+ IV . Cluster Management:\n");
+    printf("| * You need to switch to a cluster first.\n");
+    printf("|  vault       : Check the sensitive information of the current cluster.\n");
     printf("|  graph       : Display the cluster map including all the nodes and status.\n");
-    printf("+ III. Operation:\n");
+    printf("+ V  . Cluster Operation:\n");
+    printf("| * You need to switch to a specific cluster first *.\n");
     printf("|  delc        : Delete specified compute nodes:\n");
     printf("|        all       - Delete *ALL* the compute nodes, you can run 'hpcopr addc' to\n");
     printf("|                    add compute nodes later.\n");
@@ -71,14 +108,10 @@ void print_help(void){
     printf("|              : minimal - Turn on the management nodes of the cluster.\n");
     printf("|              : all     - Turn on the management and compute nodes of the cluster.\n");
     printf("|  destroy     : *DESTROY* the whole cluster - including all the resources & data.\n");
-    printf("+ IV . Advanced - For developers:\n");
-    printf("|  configloc   : Configure the locations for the terraform binaries, providers, IaC\n");
-    printf("|                templates and shell scripts.\n");
-    printf("|  showloc     : Show the current configured locations.\n");
-    printf("|  resetloc    : Reset to the default locations.\n");
-    printf("+ V  . Other:\n");
+    printf("+ VI . Others:\n");
     printf("|  about       : Display the version and other info.\n");
     printf("|  license     : Read the terms and conditions of the GNU Public License - 2.0\n");
+    printf("|  repair      : Try to repair the hpcopr core components.\n");
     printf("\n");
     printf("<> visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
 }
@@ -88,7 +121,7 @@ void print_header(void){
     struct tm* time_p=NULL;
     time(&current_time_long);
     time_p=localtime(&current_time_long);
-    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: %s\n",VERSION_CODE);
+    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: %s\n",CORE_VERSION_CODE);
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
     printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
 }
