@@ -209,7 +209,6 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         }
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
-        printf("\n");
         while(fgetline(file_p,registry_line)==0){
             if(strlen(registry_line)!=0){
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
@@ -228,7 +227,6 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             }
         }
         fclose(file_p);
-        printf("\n");
         return 0;
     }
     fclose(file_p);
@@ -236,7 +234,6 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         return -1;
     }
     else{
-        printf("\n");
         get_workdir(temp_cluster_workdir,target_cluster_name);
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
         if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,target_cluster_name,"","","","")>0){
@@ -249,7 +246,6 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             printf(" * EMPTY CLUSTER *\n");
         }
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
-        printf("\n");
         return 0;
     }
 }
@@ -935,8 +931,9 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 return -1;
             }
-            printf("[ -INFO- ] After the cluster operation:\n");
+            printf("[ -INFO- ] After the cluster operation:\n|\n");
             graph(workdir,crypto_keyfile,0);
+            printf("|\n");
             remote_copy(workdir,sshkey_dir,"hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
@@ -968,8 +965,9 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
-    printf("[ -INFO- ] After the cluster operation:\n");
+    printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
+    printf("|\n");
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
@@ -1042,8 +1040,9 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
-    printf("[ -INFO- ] After the cluster operation:\n");
+    printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
+    printf("|\n");
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
@@ -1152,8 +1151,9 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 return -1;
             }
-            printf("[ -INFO- ] After the cluster operation:\n");
+            printf("[ -INFO- ] After the cluster operation:\n|\n");
             graph(workdir,crypto_keyfile,0);
+            printf("|\n");
             remote_copy(workdir,sshkey_dir,"hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
@@ -1188,8 +1188,9 @@ int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
-    printf("[ -INFO- ] After the cluster operation:\n");
+    printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
+    printf("|\n");
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
@@ -1307,8 +1308,9 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 return -1;
             }
-            printf("[ -INFO- ] After the cluster operation:\n");
+            printf("[ -INFO- ] After the cluster operation:\n|\n");
             graph(workdir,crypto_keyfile,0);
+            printf("|\n");
             remote_copy(workdir,sshkey_dir,"hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
@@ -1343,8 +1345,9 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
-    printf("[ -INFO- ] After the cluster operation:\n");
+    printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
+    printf("|\n");
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
@@ -1489,7 +1492,6 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 return -1;
             }
-            printf("[ -INFO- ] After the cluster operation:\n");
             for(i=1;i<compute_node_num+1;i++){
                 sprintf(node_name_temp,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,node_name_temp,"stop");
@@ -1500,7 +1502,9 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,stackdir);
 #endif
             system(cmdline);
+            printf("[ -INFO- ] After the cluster operation:\n|\n");
             graph(workdir,crypto_keyfile,0);
+            printf("|\n");
             remote_copy(workdir,sshkey_dir,"hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
@@ -1563,7 +1567,6 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -1;
     }
-    printf("[ -INFO- ] After the cluster operation:\n");
     for(i=1;i<compute_node_num+1;i++){
         sprintf(node_name_temp,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,node_name_temp,"stop");
@@ -1574,7 +1577,9 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     sprintf(cmdline,"/bin/cp -r %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,stackdir);
 #endif
     system(cmdline);
+    printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
+    printf("|\n");
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
@@ -1646,9 +1651,10 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         return -3;
     }
-    printf("[ -INFO- ] After the cluster operation:\n");
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
+    printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
+    printf("|\n");
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds for remote execution ... \r",GENERAL_SLEEP_TIME-i);
         fflush(stdout);
@@ -1786,8 +1792,9 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
             return -1;
         }
     }
-    printf("[ -INFO- ] After the cluster operation:\n");
+    printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
+    printf("|\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
     update_usage_summary(workdir,crypto_keyfile,"database","stop");
@@ -1928,8 +1935,9 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
             return -1;
         }
     }
-    printf("[ -INFO- ] After the cluster operation:\n");
+    printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
+    printf("|\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","start");
     update_usage_summary(workdir,crypto_keyfile,"database","start");

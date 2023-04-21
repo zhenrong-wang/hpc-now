@@ -873,8 +873,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         system(cmdline);
     }
 #endif
-    printf("[ -INFO- ] After the initialization:\n");
+    printf("[ -INFO- ] After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
+    printf("|\n");
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
@@ -1637,8 +1638,9 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         system(cmdline);
     }
 #endif
-    printf("[ -INFO- ] After the initialization:\n");
+    printf("[ -INFO- ] After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
+    printf("|\n");
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
@@ -2394,8 +2396,9 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         system(cmdline);
     }
 #endif
-    printf("[ -INFO- ] After the initialization:\n");
+    printf("[ -INFO- ] After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
+    printf("|\n");
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
