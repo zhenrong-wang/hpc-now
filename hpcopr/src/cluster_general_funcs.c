@@ -876,21 +876,21 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
     return 0;
 }
 
-void archive_log(char* stackdir, char* logfile){
+void archive_log(char* logdir, char* logfile){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
     if(strlen(logfile)==0){
-        sprintf(cmdline,"type %s\\tf_prep.log >> %s\\tf_prep_archive.log 2>nul",logfile,stackdir);
+        sprintf(cmdline,"type %s\\tf_prep.log >> %s\\tf_prep_archive.log 2>nul",logdir,logdir);
     }
     else{
-        sprintf(cmdline,"type %s >> %s\\tf_prep_archive.log 2>nul",logfile,stackdir);
+        sprintf(cmdline,"type %s >> %s\\tf_prep_archive.log 2>nul",logfile,logdir);
     }
 #else
     if(strlen(logfile)==0){
-        sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log 2>/dev/null",logfile,stackdir);
+        sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log 2>/dev/null",logdir,logdir);
     }
     else{
-        sprintf(cmdline,"cat %s >> %s/tf_prep_archive.log 2>/dev/null",logfile,stackdir);
+        sprintf(cmdline,"cat %s >> %s/tf_prep_archive.log 2>/dev/null",logfile,logdir);
     }
 #endif
     system(cmdline);
@@ -1093,21 +1093,27 @@ int cluster_asleep_or_not(char* workdir){
 int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
+    char logdir[DIR_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
-    archive_log(stackdir,"");
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s %s > %s\\tf_prep.log 2>%s",stackdir,tf_exec,execution_name,stackdir,error_log);
+    sprintf(logdir,"%s\\log\\",workdir);
 #else
-    sprintf(cmdline,"cd %s && echo yes | %s %s > %s/tf_prep.log 2>%s &",stackdir,tf_exec,execution_name,stackdir,error_log);
+    sprintf(logdir,"%s/log/",workdir);
+#endif
+    archive_log(logdir,"");
+#ifdef _WIN32
+    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s %s > %s\\tf_prep.log 2>%s",stackdir,tf_exec,execution_name,logdir,error_log);
+#else
+    sprintf(cmdline,"cd %s && echo yes | %s %s > %s/tf_prep.log 2>%s &",stackdir,tf_exec,execution_name,logdir,error_log);
 #endif
     system(cmdline);
     printf("[ -INFO- ] DO NOT terminate this process mannually. Max execution time: %d s\n",MAXIMUM_WAIT_TIME);
-    printf("|          Error info will be printed to %s\n",OPERATION_ERROR_LOG);
+    printf("|          Any errors will be printed to %s\n",OPERATION_ERROR_LOG);
     wait_for_complete(workdir,execution_name);
     if(file_empty_or_not(error_log)!=0){
-        printf("[ FATAL: ] Failed to init/modify/destroy the cluster. Terraform command: %s.\n",execution_name);
+        printf("[ FATAL: ] Failed to operate the cluster. Terraform command: %s.\n",execution_name);
         printf("|          Exit now.\n");
-        archive_log(stackdir,error_log);
+        archive_log(logdir,error_log);
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }

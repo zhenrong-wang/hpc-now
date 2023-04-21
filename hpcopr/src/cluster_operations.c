@@ -314,15 +314,18 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
             if(strcmp(doubleconfirm,target_cluster_name)==0){
                 cluster_destroy(cluster_workdir,crypto_keyfile,0);
                 delete_from_cluster_registry(target_cluster_name);
-                return 0;
             }
-            printf("[ -INFO- ] Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
+            else{
+                printf("[ -INFO- ] Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
+                printf("|          Nothing changed.\n");
+                return 1;
+            }
+        }
+        else{
+            printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
             printf("|          Nothing changed.\n");
             return 1;
         }
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
-        printf("|          Nothing changed.\n");
-        return 1;
     }
     else{
         printf("[ -INFO- ] The specified cluster is empty. This operation will remove all the related files\n");
