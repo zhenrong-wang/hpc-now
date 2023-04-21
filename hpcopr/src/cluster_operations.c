@@ -204,7 +204,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
-                printf("[ -NAME- ] %s\n",temp_cluster_name);
+                printf("|       <> %s\n",temp_cluster_name);
                 graph(temp_cluster_workdir,crypto_keyfile,1);
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }

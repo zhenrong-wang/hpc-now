@@ -1008,13 +1008,8 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     sprintf(master_tf,"%s/hpc_stack_master.tf",stackdir);
     find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
     if(graph_level==0){
-        sprintf(head_string,"| master(%s,%s,%s)<->|",master_address,master_status,master_config);
-        sprintf(string_temp,"| %s",cloud_flag);
-        for(i=strlen(cloud_flag);i<strlen(head_string)-1;i++){
-            *(string_temp+i)=' ';
-        }
-        sprintf(db_string,"%s|<->db(%s)",string_temp,db_status);
-        printf("%s\n%s\n",db_string,head_string);
+        printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
+        printf("|            +-db(%s)\n",db_status);
     }
     while(fgetline(file_p,compute_address)==0){
         fgetline(file_p,compute_status);
@@ -1024,20 +1019,19 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         }
         if(graph_level==0){
             if(strlen(ht_status)!=0){
-                sprintf(compute_string,"%s|<->compute%d(%s,%s,%s,%s)",string_temp,node_num,compute_address,compute_status,compute_config,ht_status);
+                printf("|              +-compute%d(%s,%s,%s,%s)",node_num,compute_address,compute_status,compute_config,ht_status);
             }
             else{
-                sprintf(compute_string,"%s|<->compute%d(%s,%s,%s)",string_temp,node_num,compute_address,compute_status,compute_config);
+                printf("|              +-compute%d(%s,%s,%s)",node_num,compute_address,compute_status,compute_config);
             }
-            printf("%s\n",compute_string);
         }
     }
     if(graph_level==1){
         if(strlen(ht_status)!=0){
-            printf("| %s | %s %s %s | %d/%d | %s | %s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
+            printf("|          +-%s | %s %s %s | %d/%d | %s | %s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
         }
         else{
-            printf("| %s | %s %s %s | %d/%d | %s \n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
+            printf("|          +-%s | %s %s %s | %d/%d | %s \n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
         }
     }
     if(graph_level==2){
