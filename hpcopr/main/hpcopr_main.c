@@ -88,7 +88,7 @@ int main(int argc, char* argv[]){
         return -3;
     }
 #ifdef _WIN32
-    system("mkdir -p c:\\programdata\\hpc-now\\etc\\ > nul 2>&1");
+    system("mkdir c:\\programdata\\hpc-now\\etc\\ > nul 2>&1");
 #elif __APPLE__
     system("mkdir -p /Applications/.hpc-now/.etc/ >> /dev/null 2>&1");
 #elif __linux__

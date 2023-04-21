@@ -108,6 +108,24 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return 1;
     }
     printf("[ START: ] Start initializing the cluster ...\n");
+#ifdef _WIN32
+    if(folder_exist_or_not(stackdir)==1){
+        sprintf(cmdline,"mkdir %s",stackdir);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(vaultdir)==1){
+        sprintf(cmdline,"mkdir %s",vaultdir);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(logdir)==1){
+        sprintf(cmdline,"mkdir %s",logdir);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(confdir)==1){
+        sprintf(cmdline,"mkdir %s",confdir);
+        system(cmdline);
+    }
+#else
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir -p %s",stackdir);
         system(cmdline);
@@ -124,7 +142,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
     }
-
+#endif
     if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
         sprintf(URL_AWS_ROOT,"%s\\tf-templates-aws\\",URL_CODE_ROOT);
@@ -1011,6 +1029,24 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         return 1;
     }
     printf("[ START: ] Start initializing the cluster ...\n");
+#ifdef _WIN32
+    if(folder_exist_or_not(stackdir)==1){
+        sprintf(cmdline,"mkdir %s",stackdir);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(vaultdir)==1){
+        sprintf(cmdline,"mkdir %s",vaultdir);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(logdir)==1){
+        sprintf(cmdline,"mkdir %s",logdir);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(confdir)==1){
+        sprintf(cmdline,"mkdir %s",confdir);
+        system(cmdline);
+    }
+#else
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir -p %s",stackdir);
         system(cmdline);
@@ -1027,7 +1063,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
     }
-
+#endif
     if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
         sprintf(URL_QCLOUD_ROOT,"%s\\tf-templates-qcloud\\",URL_CODE_ROOT);
@@ -1774,6 +1810,26 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         return 1;
     }
     printf("[ START: ] Start initializing the cluster ...\n");
+#ifdef _WIN32
+    if(folder_exist_or_not(stackdir)==1){
+        sprintf(cmdline,"mkdir %s",stackdir);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(vaultdir)==1){
+        sprintf(cmdline,"mkdir %s",vaultdir);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(logdir)==1){
+        sprintf(cmdline,"mkdir %s",logdir);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(confdir)==1){
+        sprintf(cmdline,"mkdir %s",confdir);
+        system(cmdline);
+    }
+
+
+#else
     if(folder_exist_or_not(stackdir)==1){
         sprintf(cmdline,"mkdir -p %s",stackdir);
         system(cmdline);
@@ -1790,7 +1846,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"mkdir -p %s",confdir);
         system(cmdline);
     }
-
+#endif
     if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
         sprintf(URL_ALICLOUD_ROOT,"%s\\tf-templates-alicloud\\",URL_CODE_ROOT);

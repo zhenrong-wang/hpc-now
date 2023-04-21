@@ -337,6 +337,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
     system(cmdline1);
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
+    system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto.exe /grant hpc-now:F /t > nul 2>&1");
     printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created with initial password: nowadmin2023~\n");
     printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:\n");
@@ -515,6 +516,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     printf("[ -INFO- ] UPDATING THE SERVICES NOW ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+    system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto.exe /grant hpc-now:F /t");
 #endif
     if(hpcopr_loc_flag==-1){
         printf("[ -INFO- ] Will download the main program 'hpcopr' from the default URL.\n");
