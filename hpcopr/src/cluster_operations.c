@@ -68,6 +68,7 @@ int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
         name_flag=0;
     }
     sprintf(real_cluster_name_with_prefix,"cluster name: %s",cluster_name_output);
+    printf("%s,,,\n",real_cluster_name_with_prefix);
     if(find_multi_keys(ALL_CLUSTER_REGISTRY,real_cluster_name_with_prefix,"","","","")>0){
         return -127;
     }
@@ -80,9 +81,7 @@ int switch_to_cluster(char* target_cluster_name){
     char temp_workdir[DIR_LENGTH]="";
     FILE* file_p=NULL;
     if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
-        printf("[ FATAL: ] The specified cluster name is not in the registry.\n");
-        printf("|          You can run the 'hpcopr ls-clusters' to view cluster list.\n");
-        printf("[ FATAL: ] Exit now.\n");
+        printf("[ FATAL: ] The specified cluster name is not in the registry. Exit now.\n");
         return 1;
     }
     if(show_current_cluster(temp_workdir,temp_cluster_name,0)==0){
