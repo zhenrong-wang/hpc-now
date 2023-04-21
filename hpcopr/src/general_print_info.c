@@ -31,6 +31,14 @@ void print_operation_in_progress(void){
     printf("|          You can check that file for details.\n");
 }
 
+void print_cluster_init_done(void){
+    printf("[ -DONE- ] Congratulations! The cluster is initializing now. This step may take at\n");
+    printf("|          least 7 minutes. You can log into the master node now.\n"); 
+    printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
+    printf("|          By default, NO HPC software will be built into the cluster.\n");
+    printf("|          Please run 'hpcmgr install' command to install the software you need.\n");
+}
+
 void print_help(void){
     printf("[ -INFO- ] Usage: hpcopr command_name PARAM1 PARAM2 ...\n");
     printf("| Commands:\n");

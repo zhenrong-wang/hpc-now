@@ -868,13 +868,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
-    printf("[ -INFO- ] After the initialization:\n");
-    graph(workdir,crypto_keyfile,0);
-    printf("[ -DONE- ] Congratulations! The cluster is initializing now. This step may take at\n");
-    printf("|          least 7 minutes. You can log into the master node now.\n"); 
-    printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
-    printf("|          By default, NO HPC software will be built into the cluster.\n");
-    printf("|          Please run 'hpcmgr install' command to install the software you need.\n");
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\cloud_flag.flg",confdir);
     if(file_exist_or_not(filename_temp)!=0){
@@ -890,6 +883,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         system(cmdline);
     }
 #endif
+    printf("[ -INFO- ] After the initialization:\n");
+    graph(workdir,crypto_keyfile,0);
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
@@ -936,6 +931,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     fclose(file_p);
     delete_decrypted_files(workdir,crypto_keyfile);
     remote_copy(workdir,sshkey_folder,"hostfile");
+    print_cluster_init_done();
     return 0;
 }
 
@@ -1646,13 +1642,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     system(cmdline);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
-    printf("[ -INFO- ] After the initialization:\n");
-    graph(workdir,crypto_keyfile,0);
-    printf("[ -DONE- ] Congratulations! The cluster is initializing now. This step may take at\n");
-    printf("|          least 7 minutes. You can log into the master node now.\n"); 
-    printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
-    printf("|          By default, NO HPC software will be built into the cluster.\n");
-    printf("|          Please run 'hpcmgr install' command to install the software you need.\n");
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\cloud_flag.flg",confdir);
     if(file_exist_or_not(filename_temp)!=0){
@@ -1668,6 +1657,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         system(cmdline);
     }
 #endif
+    printf("[ -INFO- ] After the initialization:\n");
+    graph(workdir,crypto_keyfile,0);
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
@@ -1714,6 +1705,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     fclose(file_p);
     delete_decrypted_files(workdir,crypto_keyfile);
     remote_copy(workdir,sshkey_folder,"hostfile");
+    print_cluster_init_done();
     return 0;
 }
 
@@ -2417,13 +2409,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     system(cmdline);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
-    printf("[ -INFO- ] After the initialization:\n");
-    graph(workdir,crypto_keyfile,0);
-    printf("[ -DONE- ] Congratulations! The cluster is initializing now. This step may take at\n");
-    printf("|          least 7 minutes. You can log into the master node now.\n"); 
-    printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
-    printf("|          By default, NO HPC software will be built into the cluster.\n");
-    printf("|          Please run 'hpcmgr install' command to install the software you need.\n");
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\cloud_flag.flg",confdir);
     if(file_exist_or_not(filename_temp)!=0){
@@ -2439,6 +2424,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         system(cmdline);
     }
 #endif
+    printf("[ -INFO- ] After the initialization:\n");
+    graph(workdir,crypto_keyfile,0);
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
@@ -2485,5 +2472,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     fclose(file_p);
     delete_decrypted_files(workdir,crypto_keyfile);
     remote_copy(workdir,sshkey_folder,"hostfile");
+    print_cluster_init_done();
     return 0;
 }
