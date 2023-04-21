@@ -10,7 +10,7 @@
 
 void print_empty_cluster_info(void);
 void print_operation_in_progress(void);
-void print_cluster_init_done(void)
+void print_cluster_init_done(void);
 void print_help(void);
 void print_header(void);
 void print_tail(void);
