@@ -237,8 +237,13 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf("|        v The Terraform executable has been repaired.\n");
     }
-
-    file_check_flag=file_validity_check(crypto_exec,force_repair_flag,MD5_NOW_CRYPTO);
+    
+    if(repair_flag!=0){
+        file_check_flag=file_validity_check(crypto_exec,repair_flag,MD5_NOW_CRYPTO);
+    }
+    else{
+        file_check_flag=file_validity_check(crypto_exec,0,MD5_NOW_CRYPTO);
+    }
     if(file_check_flag==1){
         printf("[ -INFO- ] Downloading/Copying the now-crypto.exe ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr.\n\n");
