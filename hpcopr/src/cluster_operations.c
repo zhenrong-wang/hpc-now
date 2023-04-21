@@ -67,7 +67,7 @@ int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
         strcpy(cluster_name_output,cluster_name);
         name_flag=0;
     }
-    sprintf(real_cluster_name_with_prefix,"cluster name +- %s",cluster_name_output);
+    sprintf(real_cluster_name_with_prefix,"cluster name: %s",cluster_name_output);
     if(find_multi_keys(ALL_CLUSTER_REGISTRY,real_cluster_name_with_prefix,"","","","")>0){
         return -127;
     }
@@ -109,7 +109,7 @@ int add_to_cluster_registry(char* new_cluster_name){
         printf("[ FATAL: ] Failed to open/write to the cluster registry. Exit now.");
         return -1;
     }
-    fprintf(file_p,"cluster name +- %s\n",new_cluster_name);
+    fprintf(file_p,"cluster name: %s\n",new_cluster_name);
     fclose(file_p);
     return 0;
 }
@@ -123,7 +123,7 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     FILE* file_p=NULL;
     FILE* file_p_tmp=NULL;
     int replace_flag;
-    sprintf(deleted_cluster_name_with_prefix,"cluster name +- %s",deleted_cluster_name);
+    sprintf(deleted_cluster_name_with_prefix,"cluster name: %s",deleted_cluster_name);
     replace_flag=global_replace(cluster_registry,deleted_cluster_name_with_prefix,"");
     if(replace_flag!=0){
         printf("[ FATAL: ] Failed to delete the cluster %s from the registry.\n",deleted_cluster_name);
