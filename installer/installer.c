@@ -443,7 +443,7 @@ int uninstall_services(void){
     printf("|*                                                                                 *\n");
     printf("|*                                C A U T I O N !                                  *\n");
     printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
-    printf("[ INPUT: ]  ");
+    printf("[ INPUT: ] ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
@@ -502,7 +502,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     printf("|*     SURE THE LOCATION(S) POINT(S) TO VALID EXECUTABLE(S).                       *\n");
     printf("|*                                                                                 *\n");
     printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
-    printf("[ INPUT: ]  ");
+    printf("[ INPUT: ] ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){

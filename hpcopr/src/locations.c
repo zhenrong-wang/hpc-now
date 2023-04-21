@@ -210,7 +210,7 @@ int configure_locations(void){
     printf("|*                                C A U T I O N !                                  *\n");
     printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     fflush(stdin);
-    printf("[ INPUT: ]  ");
+    printf("[ INPUT: ] ");
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
@@ -220,7 +220,7 @@ int configure_locations(void){
     printf("[ LOC1/4 ] Please specify the root location of the terraform binary and providers. \n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_REPO_ROOT);
-    printf("[ INPUT: ]  ");
+    printf("[ INPUT: ] ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
@@ -235,7 +235,7 @@ int configure_locations(void){
     printf("[ LOC2/4 ] Please specify the root location of the terraform templates. \n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_CODE_ROOT);
-    printf("[ INPUT: ]  ");
+    printf("[ INPUT: ] ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
@@ -250,7 +250,7 @@ int configure_locations(void){
     printf("[ LOC3/4 ] Please specify the root location of the *online* shell scripts.\n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
-    printf("[ INPUT: ]  ");
+    printf("[ INPUT: ] ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
@@ -269,7 +269,7 @@ int configure_locations(void){
     printf("[ LOC4/4 ] Please input the root location of the now-crypto binary.\n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_NOW_CRYPTO);
-    printf("[ INPUT: ]  ");
+    printf("[ INPUT: ] ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){

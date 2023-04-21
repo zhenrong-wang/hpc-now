@@ -300,7 +300,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
         scanf("%s",doubleconfirm);
         if(strcmp(doubleconfirm,"y-e-s")==0){
             printf("[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is *NOT* recoverable!\n",target_cluster_name);
-            printf("[ INPUT: ]  ");
+            printf("[ INPUT: ] ");
             fflush(stdin);
             scanf("%s",doubleconfirm);
             if(strcmp(doubleconfirm,target_cluster_name)==0){
@@ -559,7 +559,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     printf("|*                                                                                 *\n");
     printf("|*                                C A U T I O N !                                  *\n");
     printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
-    printf("[ INPUT: ]  ");
+    printf("[ INPUT: ] ");
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
@@ -693,7 +693,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     printf("|*                                C A U T I O N !                                  *\n");
     printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     fflush(stdin);
-    printf("[ INPUT: ]  ");
+    printf("[ INPUT: ] ");
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
