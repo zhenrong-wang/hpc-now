@@ -68,7 +68,6 @@ int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
         name_flag=0;
     }
     sprintf(real_cluster_name_with_prefix,"cluster name: %s",cluster_name_output);
-    printf("%s,,,\n",real_cluster_name_with_prefix);
     if(find_multi_keys(ALL_CLUSTER_REGISTRY,real_cluster_name_with_prefix,"","","","")>0){
         return -127;
     }

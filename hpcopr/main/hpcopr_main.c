@@ -220,7 +220,6 @@ int main(int argc, char* argv[]){
             return run_flag;
         }
     }
-
     if(strcmp(argv[1],"ls-clusters")==0){
         run_flag=list_all_cluster_names();
         print_tail();
@@ -228,7 +227,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"switch")==0){
         if(argc==2){
             printf("[ FATAL: ] You need to specify which cluster to switch to.\n");
@@ -243,7 +241,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"glance")==0){
         if(argc<3){
             run_flag=glance_clusters("",crypto_keyfile);
@@ -264,7 +261,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"exit-current")==0){
         if(current_cluster_flag!=0){
             print_tail();
@@ -280,7 +276,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"remove")==0){
         if(argc==2){
             printf("[ FATAL: ] You need to specify which cluster to be removed.\n");
@@ -306,7 +301,6 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-
     if(strcmp(argv[1],"syslog")==0){
         run_flag=get_syslog(operation_log);
         print_tail();
