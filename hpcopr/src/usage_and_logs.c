@@ -298,7 +298,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
     if(file_p==NULL){
         return -1;
     }
-    printf("+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n");
+    printf("\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n");
     while(fgetline(file_p,single_line)==0){
         if(strlen(single_line)!=0){
             printf("%s\n",single_line);

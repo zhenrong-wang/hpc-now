@@ -325,8 +325,12 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
             fflush(stdin);
             scanf("%s",doubleconfirm);
             if(strcmp(doubleconfirm,target_cluster_name)==0){
-                cluster_destroy(cluster_workdir,crypto_keyfile,0);
-                delete_from_cluster_registry(target_cluster_name);
+                if(cluster_destroy(cluster_workdir,crypto_keyfile,0)==0){
+                    delete_from_cluster_registry(target_cluster_name);
+                }
+                else{
+                    return 1;
+                }
             }
             else{
                 printf("[ -INFO- ] Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
@@ -1068,7 +1072,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     return 0;
 }
 
-int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
+int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     char string_temp[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
@@ -1410,7 +1414,6 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     char* sshkey_dir=SSHKEY_DIR;
     char* error_log=OPERATION_ERROR_LOG;
     int i;
-    char cmdline[CMDLINE_LENGTH]="";
     char node_name_temp[32]="";
     char* tf_exec=TERRAFORM_EXEC;
     int cpu_core_num=0;
@@ -1508,12 +1511,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 sprintf(node_name_temp,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,node_name_temp,"stop");
             }
-#ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\hpc_stack_compute1.tf %s\\compute_template > nul 2>&1",stackdir,stackdir);
-#else
-            sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,stackdir);
-#endif
-            system(cmdline);
+            update_compute_template(stackdir,cloud_flag);
             printf("[ -INFO- ] After the cluster operation:\n|\n");
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
@@ -1529,7 +1527,6 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             return 0;
         }
     }
-
     if(strcmp(cloud_flag,"CLOUD_A")==0||strcmp(cloud_flag,"CLOUD_B")==0){
         for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
@@ -1582,12 +1579,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         sprintf(node_name_temp,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,node_name_temp,"stop");
     }
-#ifdef _WIN32
-    sprintf(cmdline,"copy /y %s\\hpc_stack_compute1.tf %s\\compute_template > nul 2>&1",stackdir,stackdir);
-#else
-    sprintf(cmdline,"/bin/cp -r %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,stackdir);
-#endif
-    system(cmdline);
+    update_compute_template(stackdir,cloud_flag);
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");

@@ -1277,7 +1277,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     reset_string(conf_line_buffer);
     if(node_num>16){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value 16, reset to 16.\n",node_num);
+        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=16;
     }
     fgetline(file_p,conf_line_buffer);
@@ -1287,7 +1287,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     reset_string(conf_line_buffer);
     if(hpc_user_num>8){
-        printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value 8, reset to 8.\n",hpc_user_num);
+        printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n",hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
         hpc_user_num=8;
     }
     fscanf(file_p,"%s%s%s%s\n",conf_param_buffer1,conf_param_buffer2,conf_param1,conf_param2);
@@ -2046,7 +2046,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     reset_string(conf_line_buffer);
     if(node_num>16){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value 16, reset to 16.\n",node_num);
+        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=16;
     }
     fgetline(file_p,conf_line_buffer);
@@ -2056,7 +2056,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     reset_string(conf_line_buffer);
     if(hpc_user_num>8){
-        printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value 8, reset to 8.\n",hpc_user_num);
+        printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n",hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
         hpc_user_num=8;
     }
     fscanf(file_p,"%s%s%s%s\n",conf_param_buffer1,conf_param_buffer2,conf_param1,conf_param2);

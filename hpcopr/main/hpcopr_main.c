@@ -563,7 +563,7 @@ int main(int argc, char* argv[]){
             system_cleanup();
             return 17;
         }
-        run_flag=shudown_compute_nodes(workdir,crypto_keyfile,argv[2]);
+        run_flag=shutdown_compute_nodes(workdir,crypto_keyfile,argv[2]);
         print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
         system_cleanup();

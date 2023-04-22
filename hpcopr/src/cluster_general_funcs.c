@@ -896,6 +896,28 @@ void archive_log(char* logdir, char* logfile){
     system(cmdline);
 }
 
+void update_compute_template(char* stackdir, char* cloud_flag){
+    char cmdline[CMDLINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+#ifdef _WIN32
+    sprintf(filename_temp,"%s\\compute_template",stackdir);
+    sprintf(cmdline,"copy /y %s\\hpc_stack_compute1.tf %s > nul 2>&1",stackdir,filename_temp);
+#else
+    sprintf(filename_tmep,"%s/compute_template",stackdir);
+    sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,filename_temp);
+#endif
+    system(cmdline);
+    if(strcmp(cloud_flag,"CLOUD_A")==0){
+        global_replace(filename_temp,"Stopped","Running");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_B")==0){
+        find_and_replace(filename_temp,"running_flag","","","","","false","true");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_C")==0){
+        global_replace(filename_temp,"stopped","running");
+    }
+}
+
 int wait_for_complete(char* workdir, char* option, char* errorlog){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";

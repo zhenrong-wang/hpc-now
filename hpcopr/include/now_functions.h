@@ -111,6 +111,7 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile);
 void archive_log(char* stackdir, char* logfile);
 int wait_for_complete(char* workdir, char* option, char* errorlog);
 
+void update_compute_template(char* stackdir, char* cloud_flag);
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
@@ -123,7 +124,7 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
 int cluster_destroy(char* workdir, char* crypto_keyfile,int forceflag);
 int delete_compute_node(char* workdir, char* crypto_keyfile, char* param);
 int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_string);
-int shudown_compute_nodes(char* workdir, char* crypto_keyfile, char* param);
+int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param);
 int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param);
 int check_reconfigure_list(char* workdir);
 int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_config, char* htflag);
