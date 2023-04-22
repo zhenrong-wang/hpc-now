@@ -131,7 +131,7 @@ int main(int argc, char* argv[]){
         fflush(stdin);
         scanf("%s",doubleconfirm);
         if(strcmp(doubleconfirm,"y-e-s")!=0){
-            printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+            printf("\n[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
             printf("|          Nothing changed. Exit now.\n");
             print_tail();
             return 0;
@@ -346,7 +346,7 @@ int main(int argc, char* argv[]){
     fflush(stdin);
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+        printf("\n[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
         printf("|          Nothing changed. Exit now.\n");
         print_tail();
         return 0;

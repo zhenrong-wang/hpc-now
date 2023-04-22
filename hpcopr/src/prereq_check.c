@@ -237,7 +237,7 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf("|        v The Terraform executable has been repaired.\n");
     }
-    
+
     if(repair_flag!=0){
         file_check_flag=file_validity_check(crypto_exec,repair_flag,MD5_NOW_CRYPTO);
     }
@@ -556,22 +556,21 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
     strcpy(cmdline,"setx PATH C:\\WINDOWS\\system32;C:\\hpc-now\\;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\ > nul 2>&1");
     system(cmdline);
-    sprintf(filename_temp,"%s\\known_hosts",sshkey_dir);
+    sprintf(cmdline,"del /f /q \%homepath\%\\.ssh\\known_hosts > nul 2>&1");
 #elif __linux__
     if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ > /dev/null 2>&1")!=0){
         strcpy(cmdline,"export PATH=/home/hpc-now/.bin/:$PATH >> /home/hpc-now/.bashrc");
         system(cmdline);
     }
-    sprintf(filename_temp,"%s/known_hosts",sshkey_dir);
+    sprintf(cmdline,"rm -rf %s/known_hosts >> /dev/null 2>&1",sshkey_dir);
 #elif __APPLE__
     if(system("cat /Users/hpc-now/.bashrc | grep PATH=/Users/hpc-now/.bin/ > /dev/null 2>&1")!=0){
         strcpy(cmdline,"export PATH=/Users/hpc-now/.bin/:$PATH >> /Users/hpc-now/.bashrc");
         system(cmdline);
     }
-    sprintf(filename_temp,"%s/known_hosts",sshkey_dir);
+    sprintf(cmdline,"rm -rf %s/known_hosts >> /dev/null 2>&1",sshkey_dir);
 #endif
-    file_p=fopen(filename_temp,"w+");
-    fclose(file_p);
+    system(cmdline);
     if(repair_flag==1){
         printf("|        v Environment variables have been repaired.\n");
         printf("|        v SSH files have been repaired. \n");

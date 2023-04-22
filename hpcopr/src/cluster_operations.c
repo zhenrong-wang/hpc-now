@@ -37,7 +37,7 @@ int current_cluster_or_not(char* current_indicator, char* cluster_name){
     if(file_p==NULL){
         return 1;
     }
-    fscanf(file_p,"%s",current_indicator);
+    fscanf(file_p,"%s",current_cluster_name);
     if(strcmp(current_cluster_name,cluster_name)!=0){
         return -1;
     }
@@ -224,7 +224,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         while(fgetline(file_p,registry_line)==0){
             if(strlen(registry_line)!=0){
-                get_seq_string(registry_line,' ',3,temp_cluster_name);
+                get_seq_string(registry_line,' ',4,temp_cluster_name);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
