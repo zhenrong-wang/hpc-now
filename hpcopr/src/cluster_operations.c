@@ -32,7 +32,7 @@ int create_cluster_registry(void){
 }
 
 int current_cluster_or_not(char* current_indicator, char* cluster_name){
-    char* current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     FILE* file_p=fopen(current_indicator,"r");
     if(file_p==NULL){
         return 1;
@@ -150,7 +150,7 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     fprintf(file_p,"%s\n",temp_line);
     fclose(file_p);
     fclose(file_p_tmp);
-    if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
+    if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,deleted_cluster_name)==0){
         exit_current_cluster();
     }
 #ifdef _WIN32
@@ -165,7 +165,6 @@ int list_all_cluster_names(void){
     FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
     char registry_line[LINE_LENGTH_SHORT]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
 //    int getline_flag=0;
     if(file_p==NULL){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
