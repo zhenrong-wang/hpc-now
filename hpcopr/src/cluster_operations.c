@@ -177,7 +177,7 @@ int list_all_cluster_names(void){
                 printf("|          %s\n",registry_line);
             }
             else{
-                get_seq_string(registry_line,' ',3,temp_cluster_name);
+                get_seq_string(registry_line,' ',4,temp_cluster_name);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
                     printf("|  active: %s\n",registry_line);
                 }
