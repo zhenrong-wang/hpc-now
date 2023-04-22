@@ -715,7 +715,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,stackdir);
 #endif
     system(cmdline);
-    get_crypto_key(crypto_keyfile,md5sum);
     getstate(workdir,crypto_keyfile);
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\terraform.tfstate",stackdir);
@@ -843,27 +842,24 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
 #ifdef _WIN32
-    sprintf(filename_temp,"%s\\db_passwords.txt",vaultdir);
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
+    sprintf(cmdline,"del /f /q %s\\db_passwds.txt > nul 2>&1",vaultdir);
 #else
-    sprintf(filename_temp,"%s/db_passwords.txt",vaultdir);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+    sprintf(cmdline,"rm -rf %s/db_passwds.txt >> /dev/null 2>&1",vaultdir);
 #endif
     system(cmdline);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
 	fclose(file_p);
+    get_crypto_key(crypto_keyfile,md5sum);
 #ifdef _WIN32
-    sprintf(filename_temp,"%s\\root_passwords.txt",vaultdir);
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
+    sprintf(cmdline,"del /f /q %s\\root_passwords.txt > nul 2>&1",vaultdir);
     system(cmdline);
     sprintf(cmdline,"%s encrypt %s\\_CLUSTER_SUMMARY.txt.tmp %s\\_CLUSTER_SUMMARY.txt %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
     sprintf(cmdline,"del /f /q %s\\_CLUSTER_SUMMARY.txt.tmp > nul 2>&1",vaultdir);
     system(cmdline);
 #else
-    sprintf(filename_temp,"%s/root_passwords.txt",vaultdir);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+    sprintf(cmdline,"rm -rf %s/root_passwords.txt >> /dev/null 2>&1",vaultdir);
     system(cmdline);
     sprintf(cmdline,"%s encrypt %s/_CLUSTER_SUMMARY.txt.tmp %s/_CLUSTER_SUMMARY.txt %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
@@ -1555,7 +1551,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,stackdir);
 #endif
     system(cmdline);
-    get_crypto_key(crypto_keyfile,md5sum);
     getstate(workdir,crypto_keyfile);
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\terraform.tfstate",stackdir);
@@ -1630,32 +1625,30 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
 #ifdef _WIN32
-    sprintf(filename_temp,"%s\\db_passwords.txt",vaultdir);
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
+    sprintf(cmdline,"del /f /q %s\\db_passwords.txt > nul 2>&1",vaultdir);
 #else
-    sprintf(filename_temp,"%s/db_passwords.txt",vaultdir);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+    sprintf(cmdline,"rm -rf %s/db_passwords.txt >> /dev/null 2>&1",vaultdir);
 #endif
     system(cmdline);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
 	fclose(file_p);
+    get_crypto_key(crypto_keyfile,md5sum);
+    printf("\n\n%s\n\n",md5sum);
 #ifdef _WIN32
-    sprintf(filename_temp,"%s\\root_passwords.txt",vaultdir);
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
+    sprintf(cmdline,"del /f /q %s\\root_passwords.txt > nul 2>&1",vaultdir);
     system(cmdline);
     sprintf(cmdline,"%s encrypt %s\\_CLUSTER_SUMMARY.txt.tmp %s\\_CLUSTER_SUMMARY.txt %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
-    sprintf(cmdline,"del /f /q %s\\_CLUSTER_SUMMARY.txt.tmp > nul 2>&1",vaultdir);
-    system(cmdline);
+//    sprintf(cmdline,"del /f /q %s\\_CLUSTER_SUMMARY.txt.tmp > nul 2>&1",vaultdir);
+//    system(cmdline);
 #else
-    sprintf(filename_temp,"%s/root_passwords.txt",vaultdir);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+    sprintf(cmdline,"rm -rf %s/root_passwords.txt >> /dev/null 2>&1",vaultdir);
     system(cmdline);
     sprintf(cmdline,"%s encrypt %s/_CLUSTER_SUMMARY.txt.tmp %s/_CLUSTER_SUMMARY.txt %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
-    sprintf(cmdline,"rm -rf %s/_CLUSTER_SUMMARY.txt.tmp >> /dev/null 2>&1",vaultdir);
-    system(cmdline);
+//    sprintf(cmdline,"rm -rf %s/_CLUSTER_SUMMARY.txt.tmp >> /dev/null 2>&1",vaultdir);
+//    system(cmdline);
 #endif
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
