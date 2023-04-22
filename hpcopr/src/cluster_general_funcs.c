@@ -944,6 +944,7 @@ int wait_for_complete(char* workdir, char* option, char* errorlog){
         return 1;
     }
     else{
+        printf("\n");
         return 0;
     }
 }
