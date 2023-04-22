@@ -146,7 +146,7 @@
 #define AWS_SLEEP_TIME_GLOBAL 180
 #define AWS_SLEEP_TIME_CN 180
 #define ALI_SLEEP_TIME 60
-#define QCLOUD_SLEEP_TIME 20
+#define QCLOUD_SLEEP_TIME 60
 #define GENERAL_SLEEP_TIME 30
 
 /* You can modify the MAXIMUM_ADD_NODE_NUMBER to allow adding more than 16 nodes in one command */
