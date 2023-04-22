@@ -225,9 +225,11 @@ int check_and_install_prerequisitions(int repair_flag){
         }
         flag=system(cmdline);
         if(flag!=0){
-            printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-            printf("|          info@hpc-now.com for support. Exit now.\n");
-            return 3;
+            if(system(cmdline)!=0){
+                printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now.\n");
+                return 3;
+            }
         }
     }
 #ifndef _WIN32
