@@ -1634,21 +1634,20 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
 	fclose(file_p);
     get_crypto_key(crypto_keyfile,md5sum);
-    printf("\n\n%s\n\n",md5sum);
 #ifdef _WIN32
     sprintf(cmdline,"del /f /q %s\\root_passwords.txt > nul 2>&1",vaultdir);
     system(cmdline);
     sprintf(cmdline,"%s encrypt %s\\_CLUSTER_SUMMARY.txt.tmp %s\\_CLUSTER_SUMMARY.txt %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
-//    sprintf(cmdline,"del /f /q %s\\_CLUSTER_SUMMARY.txt.tmp > nul 2>&1",vaultdir);
-//    system(cmdline);
+    sprintf(cmdline,"del /f /q %s\\_CLUSTER_SUMMARY.txt.tmp > nul 2>&1",vaultdir);
+    system(cmdline);
 #else
     sprintf(cmdline,"rm -rf %s/root_passwords.txt >> /dev/null 2>&1",vaultdir);
     system(cmdline);
     sprintf(cmdline,"%s encrypt %s/_CLUSTER_SUMMARY.txt.tmp %s/_CLUSTER_SUMMARY.txt %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
-//    sprintf(cmdline,"rm -rf %s/_CLUSTER_SUMMARY.txt.tmp >> /dev/null 2>&1",vaultdir);
-//    system(cmdline);
+    sprintf(cmdline,"rm -rf %s/_CLUSTER_SUMMARY.txt.tmp >> /dev/null 2>&1",vaultdir);
+    system(cmdline);
 #endif
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
