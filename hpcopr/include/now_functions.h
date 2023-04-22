@@ -31,6 +31,7 @@ void print_about(void);
 /* Print out the license terms for users to read. */
 int read_license(void);
 
+int confirm_to_operate_cluster(char* current_cluster_name);
 
 /* Some general functions, mainly for file and string manipulation*/
 

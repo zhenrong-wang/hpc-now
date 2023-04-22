@@ -340,16 +340,9 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-    printf("[ -INFO- ] You are operating the cluster %s now, which may affect all\n",current_cluster_name);
-    printf("|          the jobs running on this cluster. Please input 'y-e-s' to continue.\n");
-    printf("[ INPUT: ] ");
-    fflush(stdin);
-    scanf("%s",doubleconfirm);
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("\n[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
-        printf("|          Nothing changed. Exit now.\n");
+    if(confirm_to_operate_cluster(current_cluster_name)!=0){
         print_tail();
-        return 0;
+        return -1;
     }
     if(strcmp(argv[1],"new-keypair")==0){
         if(argc==2||argc==3){
