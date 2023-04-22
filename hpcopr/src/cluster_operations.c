@@ -31,6 +31,19 @@ int create_cluster_registry(void){
     }
 }
 
+int current_cluster_or_not(char* current_indicator, char* cluster_name){
+    char* current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    FILE* file_p=fopen(current_indicator,"r");
+    if(file_p==NULL){
+        return 1;
+    }
+    fscanf(file_p,"%s",current_indicator);
+    if(strcmp(current_cluster_name,cluster_name)!=0){
+        return -1;
+    }
+    return 0;
+}
+
 int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
     int i, name_flag;
     char real_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
@@ -67,7 +80,7 @@ int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
         strcpy(cluster_name_output,cluster_name);
         name_flag=0;
     }
-    sprintf(real_cluster_name_with_prefix,"cluster name: %s",cluster_name_output);
+    sprintf(real_cluster_name_with_prefix,"< cluster name: %s >",cluster_name_output);
     if(find_multi_keys(ALL_CLUSTER_REGISTRY,real_cluster_name_with_prefix,"","","","")>0){
         return -127;
     }
@@ -107,7 +120,7 @@ int add_to_cluster_registry(char* new_cluster_name){
         printf("[ FATAL: ] Failed to open/write to the cluster registry. Exit now.");
         return -1;
     }
-    fprintf(file_p,"cluster name: %s\n",new_cluster_name);
+    fprintf(file_p,"< cluster name: %s >\n",new_cluster_name);
     fclose(file_p);
     return 0;
 }
@@ -121,7 +134,7 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     FILE* file_p=NULL;
     FILE* file_p_tmp=NULL;
     int replace_flag;
-    sprintf(deleted_cluster_name_with_prefix,"cluster name: %s",deleted_cluster_name);
+    sprintf(deleted_cluster_name_with_prefix,"< cluster name: %s >",deleted_cluster_name);
     replace_flag=global_replace(cluster_registry,deleted_cluster_name_with_prefix,"");
     if(replace_flag!=0){
         printf("[ FATAL: ] Failed to delete the cluster %s from the registry.\n",deleted_cluster_name);
@@ -137,7 +150,7 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     fprintf(file_p,"%s\n",temp_line);
     fclose(file_p);
     fclose(file_p_tmp);
-    if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,deleted_cluster_name,"","","","")!=0){
+    if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
         exit_current_cluster();
     }
 #ifdef _WIN32
@@ -152,6 +165,7 @@ int list_all_cluster_names(void){
     FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
     char registry_line[LINE_LENGTH_SHORT]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
 //    int getline_flag=0;
     if(file_p==NULL){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
@@ -165,7 +179,7 @@ int list_all_cluster_names(void){
             }
             else{
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
-                if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,temp_cluster_name,"","","","")>0){
+                if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
                     printf("|  active: %s\n",registry_line);
                 }
                 else{
@@ -214,7 +228,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_seq_string(registry_line,' ',3,temp_cluster_name);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
-                if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,temp_cluster_name,"","","","")>0){
+                if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
                     printf("|  active: <> %s | ",temp_cluster_name);
                 }
                 else{
@@ -236,7 +250,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
-        if(find_multi_keys(CURRENT_CLUSTER_INDICATOR,target_cluster_name,"","","","")>0){
+        if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
             printf("|  active: <> %s | ",temp_cluster_name);
         }
         else{
@@ -469,8 +483,6 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
 #ifdef _WIN32
     sprintf(new_workdir,"%s\\workdir\\%s\\",HPC_NOW_ROOT_DIR,real_cluster_name);
     sprintf(cmdline,"mkdir %s > nul 2>&1",new_workdir);
-    system(cmdline);
-    sprintf(cmdline,"mkdir c:\\hpc-now\\%s > nul 2>&1",real_cluster_name);
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);

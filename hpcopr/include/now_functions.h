@@ -73,6 +73,7 @@ int switch_to_cluster(char* target_cluster_name);
 int show_current_cluster(char* cluster_workdir,char* current_cluster_name, int silent_flag);
 int exit_current_cluster(void);
 int remove_cluster(char* target_cluster_name, char* crypto_keyfile);
+int current_cluster_or_not(char* current_indicator, char* cluster_name);
 
 void create_and_get_stackdir(char* workdir, char* stackdir);
 void create_and_get_vaultdir(char* workdir, char* vaultdir);
@@ -107,7 +108,7 @@ int generate_sshkey(char* sshkey_folder, char* pubkey);
 int graph(char* workdir, char* crypto_keyfile, int graph_level);
 int update_cluster_summary(char* workdir, char* crypto_keyfile);
 void archive_log(char* stackdir, char* logfile);
-int wait_for_complete(char* workdir, char* option);
+int wait_for_complete(char* workdir, char* option, char* errorlog);
 
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
