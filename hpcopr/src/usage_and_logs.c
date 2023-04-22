@@ -304,7 +304,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
             printf("%s\n",single_line);
         }
     }
-    printf("+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n\n");
+    printf("+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n");
     fclose(file_p);
 #ifdef _WIN32
     sprintf(cmdline,"del /f /s /q %s > nul 2>&1",filename_temp);

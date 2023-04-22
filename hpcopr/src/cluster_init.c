@@ -833,7 +833,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             system(cmdline);
         }
     }
-
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\_CLUSTER_SUMMARY.txt.tmp",vaultdir);
 #else
@@ -843,7 +842,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: s3:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
-
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\db_passwords.txt",vaultdir);
     sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
@@ -855,7 +853,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
 	fclose(file_p);
-
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\root_passwords.txt",vaultdir);
     sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
@@ -872,8 +869,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     system(cmdline);
     sprintf(cmdline,"rm -rf %s/_CLUSTER_SUMMARY.txt.tmp >> /dev/null 2>&1",vaultdir);
     system(cmdline);
-#endif
-    
+#endif   
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
 #ifdef _WIN32
@@ -1587,10 +1583,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     else{
         sprintf(cmdline,"curl %scos.conf -s -o %s\\cos.conf",URL_QCLOUD_ROOT,stackdir);
     }
-    if(system(cmdline)!=0){
-        printf("[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n");
-    }
-    sprintf(filename_temp,"%s\\cos.conf",stackdir);
 #else
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
     if(CODE_LOC_FLAG==1){
@@ -1599,34 +1591,41 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     else{
         sprintf(cmdline,"curl %scos.conf -s -o %s/cos.conf",URL_QCLOUD_ROOT,stackdir);
     }
+#endif
     if(system(cmdline)!=0){
         printf("[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n");
     }
-    sprintf(filename_temp,"%s/cos.conf",stackdir);
-#endif
-    global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
-    global_replace(filename_temp,"BLANK_SECRET_KEY",bucket_sk);
-    global_replace(filename_temp,"DEFAULT_REGION",region_id);
-    global_replace(filename_temp,"BLANK_BUCKET_NAME",bucket_id);
+    else{
 #ifdef _WIN32
-    sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.cos.conf > nul 2>&1",private_key_file,filename_temp,master_address);
-    system(cmdline);
-    sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.cos.conf\" > nul 2>&1",private_key_file,master_address);
-    system(cmdline);
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
-    system(cmdline);
+        sprintf(filename_temp,"%s\\cos.conf",stackdir);
+#else
+        sprintf(filename_temp,"%s/cos.conf",stackdir);
+#endif
+        global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
+        global_replace(filename_temp,"BLANK_SECRET_KEY",bucket_sk);
+        global_replace(filename_temp,"DEFAULT_REGION",region_id);
+        global_replace(filename_temp,"BLANK_BUCKET_NAME",bucket_id);
+#ifdef _WIN32
+        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.cos.conf > nul 2>&1",private_key_file,filename_temp,master_address);
+        system(cmdline);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.cos.conf\" > nul 2>&1",private_key_file,master_address);
+        system(cmdline);
+        sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
+#else
+        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.cos.conf >> /dev/null 2>&1",private_key_file,filename_temp,master_address);
+        system(cmdline);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.cos.conf\" >> /dev/null 2>&1",private_key_file,master_address);
+        system(cmdline);
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+#endif
+        system(cmdline);
+    }
+#ifdef _WIN32
     sprintf(filename_temp,"%s\\_CLUSTER_SUMMARY.txt.tmp",vaultdir);
 #else
-    sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.cos.conf >> /dev/null 2>&1",private_key_file,filename_temp,master_address);
-    system(cmdline);
-    sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.cos.conf\" >> /dev/null 2>&1",private_key_file,master_address);
-    system(cmdline);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
-    system(cmdline);
     sprintf(filename_temp,"%s/_CLUSTER_SUMMARY.txt.tmp",vaultdir);
 #endif
     file_p=fopen(filename_temp,"w+");
-
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: cos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
@@ -1648,6 +1647,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sprintf(cmdline,"%s encrypt %s\\_CLUSTER_SUMMARY.txt.tmp %s\\_CLUSTER_SUMMARY.txt %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
     sprintf(cmdline,"del /f /q %s\\_CLUSTER_SUMMARY.txt.tmp > nul 2>&1",vaultdir);
+    system(cmdline);
 #else
     sprintf(filename_temp,"%s/root_passwords.txt",vaultdir);
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
@@ -1655,8 +1655,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sprintf(cmdline,"%s encrypt %s/_CLUSTER_SUMMARY.txt.tmp %s/_CLUSTER_SUMMARY.txt %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
     sprintf(cmdline,"rm -rf %s/_CLUSTER_SUMMARY.txt.tmp >> /dev/null 2>&1",vaultdir);
-#endif
     system(cmdline);
+#endif
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
 #ifdef _WIN32
@@ -2426,6 +2426,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(cmdline,"%s encrypt %s\\_CLUSTER_SUMMARY.txt.tmp %s\\_CLUSTER_SUMMARY.txt %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
     sprintf(cmdline,"del /f /q %s\\_CLUSTER_SUMMARY.txt.tmp > nul 2>&1",vaultdir);
+    system(cmdline);
 #else
     sprintf(filename_temp,"%s/root_passwords.txt",vaultdir);
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
@@ -2433,8 +2434,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(cmdline,"%s encrypt %s/_CLUSTER_SUMMARY.txt.tmp %s/_CLUSTER_SUMMARY.txt %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
     sprintf(cmdline,"rm -rf %s/_CLUSTER_SUMMARY.txt.tmp >> /dev/null 2>&1",vaultdir);
-#endif
     system(cmdline);
+#endif
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
 #ifdef _WIN32
