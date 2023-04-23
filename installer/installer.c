@@ -5,16 +5,16 @@
  * Bug report: info@hpc-now.com
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #ifdef _WIN32
-#include "..\\hpcopr\\include\\now_macros.h"
-#include "..\\hpcopr\\include\\now_functions.h"
-#include "..\\hpcopr\\src\\general_funcs.c"
-
+#include "..\\hpcopr\\now_macros.h"
+#include "..\\hpcopr\\general_funcs.h"
 #else
-#include "../hpcopr/include/now_macros.h"
-#include "../hpcopr/include/now_functions.h"
-#include "../hpcopr/src/general_funcs.c"
-
+#include "../hpcopr/now_macros.h"
+#include "../hpcopr/general_funcs.h"
 #endif
 
 /* Borrowed the below functions from hpcopr.

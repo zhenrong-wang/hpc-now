@@ -6,6 +6,17 @@
         "malloc.h": "c",
         "now_global_vars.h": "c",
         "stdlib.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "time.h": "c",
+        "cluster_general_funcs.h": "c",
+        "cluster_init.h": "c",
+        "locations.h": "c",
+        "math.h": "c",
+        "general_funcs.h": "c",
+        "string.h": "c",
+        "general_print_info.h": "c",
+        "cluster_operations.h": "c",
+        "signal.h": "c",
+        "time_process.h": "c"
     }
 }
