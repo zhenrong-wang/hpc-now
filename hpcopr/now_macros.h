@@ -15,6 +15,8 @@
 #define QCLOUD_TF_PLUGIN_VERSION "1.80.5"
 #define AWS_TF_PLUGIN_VERSION "4.64.0"
 
+/*Terraform version is relatively stable. Here we use 1.4.5*/
+
 #ifdef _WIN32
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
 #define USAGE_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-usage.log" //This is a global file!
@@ -62,7 +64,7 @@
 #define ALL_CLUSTER_REGISTRY "/usr/.hpc-now/.etc/.all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "/usr/.hpc-now/.etc/current_cluster.dat"
 
-#define MD5_TF_EXEC "9777407ccfce2be14fe4bec072af4738"
+#define MD5_TF_EXEC "6a1056cacf77c7d913a4e1646edb97a1"
 #define MD5_NOW_CRYPTO "26ae6fb1a741dcb8356b650b0812710c"
 
 #define MD5_ALI_TF "88f0da5ec9687a0c0935bb7f0e3306a4"
@@ -92,7 +94,7 @@
 #define ALL_CLUSTER_REGISTRY "/Applications/.hpc-now/.etc/.all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "/Applications/.hpc-now/.etc/current_cluster.dat"
 
-#define MD5_TF_EXEC "821bf13764e8afbc0fb73a73e25aebad"
+#define MD5_TF_EXEC "55fda9502c6e1a3b5e30c77b73e5890d"
 #define MD5_NOW_CRYPTO "202082eac600db6f6f429a1ceb047044"
 
 #define MD5_ALI_TF "6091b17f8454fb6eb58c265938f0852f"
