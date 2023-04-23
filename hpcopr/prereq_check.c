@@ -118,6 +118,11 @@ int check_and_install_prerequisitions(int repair_flag){
     char* crypto_exec=NOW_CRYPTO_EXEC;
 #ifdef _WIN32
     char appdata_dir[128]="";
+    system("echo %APPDATA% > c:\\programdata\\appdata.txt.tmp");
+    file_p=fopen("c:\\programdata\\appdata.txt.tmp","r");
+    fscanf(file_p,"%s",appdata_dir);
+    fclose(file_p);
+    system("del /f /s /q c:\\programdata\\appdata.txt.tmp > nul 2>&1");
 #endif
     if(file_exist_or_not(usage_logfile)!=0){
         force_repair_flag=1;
@@ -247,22 +252,22 @@ int check_and_install_prerequisitions(int repair_flag){
                 sprintf(cmdline,"curl %stf-darwin/terraform_%s_darwin_amd64.zip -o %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
 #endif
             }
-        }
-        flag=system(cmdline);
-        if(flag!=0){
-            if(system(cmdline)!=0){
+            flag=system(cmdline);
+            if(flag!=0){
                 printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
                 printf("|          info@hpc-now.com for support. Exit now.\n");
                 return 3;
             }
         }
+//        printf("%s,,,,,\"\n",cmdline);
 #ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C \"c:\\programdata\\hpc-now\\bin\\\" > nul 2>&1",filename_temp_zip);
+        sprintf(cmdline,"tar zxf %s -C c:\\programdata\\hpc-now\\bin\\ > nul 2>&1",filename_temp_zip);
 #elif __linux__
         sprintf(cmdline,"unzip -o -q %s -d /usr/.hpc-now/.bin/ >> /dev/null 2>&1",filename_temp_zip);
 #elif __APPLE__
         sprintf(cmdline,"unzip -o -q %s -d /Applications/.hpc-now/.bin/ >> /dev/null 2>&1",filename_temp_zip);
 #endif
+        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
         if(flag!=0){
             printf("[ FATAL: ] Failed to unzip the terraform binary file. Exit now.\n");
@@ -300,6 +305,7 @@ int check_and_install_prerequisitions(int repair_flag){
             sprintf(cmdline,"curl %s -o %s",URL_NOW_CRYPTO,crypto_exec);
 #endif
         }
+        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
         if(flag!=0){
             printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
@@ -316,11 +322,6 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 
 #ifdef _WIN32
-    system("echo %APPDATA% > c:\\programdata\\appdata.txt.tmp");
-    file_p=fopen("c:\\programdata\\appdata.txt.tmp","r");
-    fscanf(file_p,"%s",appdata_dir);
-    fclose(file_p);
-    system("del /f /s /q c:\\programdata\\appdata.txt.tmp > nul 2>&1");
     sprintf(filename_temp,"%s\\.terraformrc",appdata_dir);
     if(file_exist_or_not(filename_temp)!=0){
         file_p=fopen(filename_temp,"w+");
@@ -400,6 +401,7 @@ int check_and_install_prerequisitions(int repair_flag){
                 sprintf(cmdline,"curl %stf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip -o %s",URL_TF_ROOT,ali_plugin_version,filename_temp_zip);
 #endif
             }
+            printf("%s,,,,,\"\n",cmdline);
             flag=system(cmdline);
             if(flag!=0){
                 printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
