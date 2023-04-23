@@ -59,7 +59,7 @@
 #define HPC_NOW_ROOT_DIR "/usr/.hpc-now/"
 
 #define NOW_CRYPTO_EXEC "/usr/.hpc-now/.bin/now-crypto.exe"
-#define TERRAFORM_EXEC "/usr/.hpc-now/.bin/terraform.exe"
+#define TERRAFORM_EXEC "/usr/.hpc-now/.bin/terraform"
 #define HPCOPR_EXEC "/home/hpc-now/.bin/hpcopr"
 
 #define LOCATION_CONF_FILE "/usr/.hpc-now/.etc/locations.conf"
