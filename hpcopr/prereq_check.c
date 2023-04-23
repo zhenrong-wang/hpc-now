@@ -202,18 +202,24 @@ int check_and_install_prerequisitions(int repair_flag){
     system("mkdir c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\bin\\ > nul 2>&1");
     system("del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
+    sprintf(cmdline,"mkdir %s\\terraform.d\\ > nul 2>&1",appdata_dir);
+    system(cmdline);
     sprintf(filename_temp_zip,"%s\\terraform.d\\terraform_%s_windows_amd64.zip",appdata_dir,TERRAFORM_VERSION);
 #elif __linux__
     system("rm -rf /home/hpc-now/.ssh/known_hosts >> /dev/null 2>&1");
     system("mkdir -p /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1");
     system("mkdir -p /usr/.hpc-now/.bin/ >> /dev/null 2>&1");
     system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+    sprintf(cmdline,"mkdir -p /home/hpc-now/.terraform.d/ >> /dev/null 2>&1");
+    system(cmdline);
     sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform_%s_linux_amd64.zip",TERRAFORM_VERSION);
 #elif __APPLE__
     system("rm -rf /Users/hpc-now/.ssh/known_hosts >> /dev/null 2>&1");
     system("mkdir -p /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1");
     system("mkdir -p /Applications/.hpc-now/.bin/ >> /dev/null 2>&1");
     system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+    sprintf(cmdline,"mkdir -p /Users/hpc-now/.terraform.d/ >> /dev/null 2>&1");
+    system(cmdline);
     sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform_%s_darwin_amd64.zip",TERRAFORM_VERSION);
 #endif
     file_check_flag=file_validity_check(tf_exec,force_repair_flag,MD5_TF_EXEC);
