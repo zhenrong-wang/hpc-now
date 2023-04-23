@@ -22,7 +22,7 @@ elif [ "$1" = "build" ]; then
     rm -rf ./installer/libgfuncs.a
     ar -rc ./installer/libgfuncs.a ./installer/gfuncs.o
     rm -rf ./installer/gfuncs.o
-    clang ./installer/installer.c -Wall -lgfuncs -o ./build/installer.exe
+    clang ./installer/installer.c libgfuncs.a -Wall -o ./build/installer.exe
     clang ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto.exe
     chmod +x ./build/*
     mv ./installer/libgfuncs.a ./build/
