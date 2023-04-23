@@ -46,7 +46,7 @@
 #define MD5_QCLOUD_TF_ZIP "4ec9c71674c9eb879b0079f9d32e1ac0"
 #define MD5_AWS_TF_ZIP "b7287e8c02fd21755d4ff66c87afec86"
 
-#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-windows.exe"
+#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-crypto/now-crypto-windows.exe"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_windows_amd64.exe"
 
 #elif __linux__
@@ -77,7 +77,7 @@
 #define MD5_QCLOUD_TF_ZIP "8840d19efbdd4e56ec12cc71e1ae4945"
 #define MD5_AWS_TF_ZIP "4044f73b071c681d88e793dd15617b5a"
 
-#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-linux.exe"
+#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-crypto/now-crypto-linux.exe"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_linux_amd64"
 
 #elif __APPLE__
@@ -108,7 +108,7 @@
 #define MD5_QCLOUD_TF_ZIP "13c2632876e3cbd02687d777e30a4708"
 #define MD5_AWS_TF_ZIP "1f01e3b61fa0d4a5e3514a775e27a826"
 
-#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-darwin.exe"
+#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-crypto/now-crypto-darwin.exe"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
 
 #endif
