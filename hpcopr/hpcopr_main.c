@@ -25,7 +25,7 @@
 #include "cluster_operations.h"
 #include "general_funcs.h"
 #include "general_print_info.h"
-#include "locations.h"
+#include "components.h"
 #include "prereq_check.h"
 #include "time_process.h"
 #include "usage_and_logs.h"

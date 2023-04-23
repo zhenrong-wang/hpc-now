@@ -11,7 +11,7 @@
 
 #include "now_macros.h"
 #include "general_funcs.h"
-#include "locations.h"
+#include "components.h"
 
 extern char URL_CODE_ROOT[LOCATION_LENGTH];
 extern char URL_TF_ROOT[LOCATION_LENGTH];

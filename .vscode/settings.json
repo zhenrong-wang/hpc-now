@@ -17,6 +17,8 @@
         "general_print_info.h": "c",
         "cluster_operations.h": "c",
         "signal.h": "c",
-        "time_process.h": "c"
+        "time_process.h": "c",
+        "components.h": "c",
+        "prereq_check.h": "c"
     }
 }

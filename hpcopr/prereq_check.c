@@ -11,7 +11,7 @@
 
 #include "now_macros.h"
 #include "general_funcs.h"
-#include "locations.h"
+#include "components.h"
 #include "cluster_general_funcs.h"
 #include "prereq_check.h"
 
