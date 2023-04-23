@@ -252,7 +252,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
         sprintf(cmdline,"tar zxf %s -C \"c:\\programdata\\hpc-now\\bin\\\" > nul 2>&1",filename_temp_zip);
 #elif __linux__
-        sprintf(cmdline,"unzip -o -q %s -d /usr/.hpc-now/.bin/ -o >> /dev/null 2>&1",filename_temp_zip);
+        sprintf(cmdline,"unzip -o -q %s -d /usr/.hpc-now/.bin/ >> /dev/null 2>&1",filename_temp_zip);
 #elif __APPLE__
         sprintf(cmdline,"unzip -o -q %s -d /Applications/.hpc-now/.bin/ >> /dev/null 2>&1",filename_temp_zip);
 #endif
