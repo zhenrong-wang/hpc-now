@@ -66,7 +66,7 @@
 #define ALL_CLUSTER_REGISTRY "/usr/.hpc-now/.etc/.all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "/usr/.hpc-now/.etc/current_cluster.dat"
 
-#define MD5_TF_EXEC "6a1056cacf77c7d913a4e1646edb97a1"
+#define MD5_TF_EXEC "24dbe458378955df4bc37215c2273b4f"
 #define MD5_TF_ZIP "5fefef8a8c95cc9614cf7d3435f82bd7"
 #define MD5_NOW_CRYPTO "26ae6fb1a741dcb8356b650b0812710c"
 
