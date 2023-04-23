@@ -16,8 +16,8 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define CORE_VERSION_CODE "0.2.0.0016"
-#define INSTALLER_VERSION_CODE "0.2.0.0016"
+#define CORE_VERSION_CODE "0.2.0.0017"
+#define INSTALLER_VERSION_CODE "0.2.0.0017"
 
 #define ALI_TF_PLUGIN_VERSION "1.203.0"
 #define QCLOUD_TF_PLUGIN_VERSION "1.80.5"
