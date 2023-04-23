@@ -208,7 +208,7 @@ int check_and_install_prerequisitions(int repair_flag){
     system("mkdir -p /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1");
     system("mkdir -p /usr/.hpc-now/.bin/ >> /dev/null 2>&1");
     system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-    sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform_%s_linux_amd64.zip",TERRAFORM_VERSION)
+    sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform_%s_linux_amd64.zip",TERRAFORM_VERSION);
 #elif __APPLE__
     system("rm -rf /Users/hpc-now/.ssh/known_hosts >> /dev/null 2>&1");
     system("mkdir -p /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1");
