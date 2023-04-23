@@ -1073,6 +1073,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     sprintf(logdir,"%s/log/",workdir);
 #endif
     archive_log(logdir,"");
+    archive_log(logdir,error_log);
 #ifdef _WIN32
     sprintf(cmdline,"cd %s\\ && echo yes | start /b %s %s > %s\\tf_prep.log 2>%s",stackdir,tf_exec,execution_name,logdir,error_log);
 #else
