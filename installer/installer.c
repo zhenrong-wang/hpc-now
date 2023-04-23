@@ -240,7 +240,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
             }
         }
         else{
-            printf("[ FATAL: ] YUM|DNF|APT not found. Please install the 'unzip' manually. Exit now.\n")
+            printf("[ FATAL: ] YUM|DNF|APT not found. Please install the 'unzip' manually. Exit now.\n");
             return -1;
         }
     }
