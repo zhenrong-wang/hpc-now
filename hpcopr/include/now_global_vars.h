@@ -21,7 +21,7 @@
  *                                         for GNU/Linux, currently there is no suffix
  *
  */
-extern char URL_REPO_ROOT[LOCATION_LENGTH];
+extern char URL_TF_ROOT[LOCATION_LENGTH];
 
 /*
  * URL_CODE_ROOT: the root location of the Terraform IaC codes.

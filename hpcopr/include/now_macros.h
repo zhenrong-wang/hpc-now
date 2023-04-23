@@ -19,6 +19,10 @@
 #define CORE_VERSION_CODE "0.2.0.0016"
 #define INSTALLER_VERSION_CODE "0.2.0.0016"
 
+#define ALI_TF_PLUGIN_VERSION "1.203.0"
+#define QCLOUD_TF_PLUGIN_VERSION "1.80.5"
+#define AWS_TF_PLUGIN_VERSION "4.64.0"
+
 #ifdef _WIN32
 #include <malloc.h>
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
@@ -37,17 +41,15 @@
 #define ALL_CLUSTER_REGISTRY "c:\\programdata\\hpc-now\\etc\\all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "c:\\programdata\\hpc-now\\etc\\current_cluster.dat"
 
-#define ALI_TF_PLUGIN_VERSION "1.198.0"
-#define QCLOUD_TF_PLUGIN_VERSION "1.79.10"
-#define AWS_TF_PLUGIN_VERSION "4.55.0"
 #define MD5_TF_EXEC "4985e962d9bf3d4276fcaff0295ce203"
 #define MD5_NOW_CRYPTO "b0834f0c932a8a736badbf52b3d339e2"
-#define MD5_ALI_TF "eafd246cfd00d605a64e60fc528a49d2"
-#define MD5_QCLOUD_TF "02c253659ffc3fbe980e07d78345ddee"
-#define MD5_AWS_TF "991928c1863f2f8956a2589e9031cbe3"
-#define MD5_ALI_TF_ZIP "d65783aa8504c517ae9c79aa8ca8ea9b"
-#define MD5_QCLOUD_TF_ZIP "9dcad88abf9e06d5e6cd615e9c569be6"
-#define MD5_AWS_TF_ZIP "c064dfa26dcd4f37940e1aef36b4e5b0"
+
+#define MD5_ALI_TF "39e1e304e49741e51fe5e532344dc8fb"
+#define MD5_QCLOUD_TF "360d8dca890f0efed8b5fba3269dd1c9"
+#define MD5_AWS_TF "8da674e9f24e82aecb27bde4448676ba"
+#define MD5_ALI_TF_ZIP "b879dc55dae4357c1ed5f01e4ebad938"
+#define MD5_QCLOUD_TF_ZIP "4ec9c71674c9eb879b0079f9d32e1ac0"
+#define MD5_AWS_TF_ZIP "b7287e8c02fd21755d4ff66c87afec86"
 
 #define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-windows.exe"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_windows_amd64.exe"
@@ -71,17 +73,15 @@
 #define ALL_CLUSTER_REGISTRY "/usr/.hpc-now/.etc/.all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "/usr/.hpc-now/.etc/current_cluster.dat"
 
-#define ALI_TF_PLUGIN_VERSION "1.199.0"
-#define QCLOUD_TF_PLUGIN_VERSION "1.79.12"
-#define AWS_TF_PLUGIN_VERSION "4.56.0"
 #define MD5_TF_EXEC "9777407ccfce2be14fe4bec072af4738"
 #define MD5_NOW_CRYPTO "26ae6fb1a741dcb8356b650b0812710c"
-#define MD5_ALI_TF "52a7b48f682a79909fc122b4ec3afc3e"
-#define MD5_QCLOUD_TF "65740525e092fa6abf89386855594217"
-#define MD5_AWS_TF "c200d65e3301456524a40ae32ddf4eae"
-#define MD5_ALI_TF_ZIP "14b6a80e77b5b8a7ef0a16a40df344cc"
-#define MD5_QCLOUD_TF_ZIP "2a08a0092162ba4cf2173be962654b6c"
-#define MD5_AWS_TF_ZIP "c6281e969b9740c69f6c5164e87900f4"
+
+#define MD5_ALI_TF "88f0da5ec9687a0c0935bb7f0e3306a4"
+#define MD5_QCLOUD_TF "5a1b40aa8343d3618277031633e3194f"
+#define MD5_AWS_TF "ca30654989fe33ad84ecd8e13ef4a563"
+#define MD5_ALI_TF_ZIP "b50080f0c3b76ae5f376eb3734ae110b"
+#define MD5_QCLOUD_TF_ZIP "8840d19efbdd4e56ec12cc71e1ae4945"
+#define MD5_AWS_TF_ZIP "4044f73b071c681d88e793dd15617b5a"
 
 #define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-linux.exe"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_linux_amd64"
@@ -104,17 +104,15 @@
 #define ALL_CLUSTER_REGISTRY "/Applications/.hpc-now/.etc/.all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "/Applications/.hpc-now/.etc/current_cluster.dat"
 
-#define ALI_TF_PLUGIN_VERSION "1.199.0"
-#define QCLOUD_TF_PLUGIN_VERSION "1.79.12"
-#define AWS_TF_PLUGIN_VERSION "4.56.0"
 #define MD5_TF_EXEC "821bf13764e8afbc0fb73a73e25aebad"
 #define MD5_NOW_CRYPTO "202082eac600db6f6f429a1ceb047044"
-#define MD5_ALI_TF "327c71c64bf913c0e6d90cd7b1a15d41"
-#define MD5_QCLOUD_TF "cdb4d3b08328f1dbcbb2df294351f399"
-#define MD5_AWS_TF "4086f1c70b04ebc43d5a58d56021fc81"
-#define MD5_ALI_TF_ZIP "0e23e305aa0d6962a87f3013a1607ae9"
-#define MD5_QCLOUD_TF_ZIP "5ea4e09ae46602959e40c09acd21b4e2"
-#define MD5_AWS_TF_ZIP "463fb946564c91965d58d38e085ebc35"
+
+#define MD5_ALI_TF "6091b17f8454fb6eb58c265938f0852f"
+#define MD5_QCLOUD_TF "98e1a2b414fa3d38a9af20950deba844"
+#define MD5_AWS_TF "aa46b5649535029d96fe6ada7fff1a20"
+#define MD5_ALI_TF_ZIP "a8994ffac784d05f1d4bb45af65371ba"
+#define MD5_QCLOUD_TF_ZIP "13c2632876e3cbd02687d777e30a4708"
+#define MD5_AWS_TF_ZIP "1f01e3b61fa0d4a5e3514a775e27a826"
 
 #define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/now-crypto-darwin.exe"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
@@ -161,7 +159,8 @@
  * There are some subdirectory paths in the program, please follow the directory structure
  * Otherwise the repository won't work properly
  */
-#define DEFAULT_URL_REPO_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/"
+
+#define DEFAULT_URL_TF_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-root/"
 #define DEFAULT_URL_CODE_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/"
 #define DEFAULT_URL_SHELL_SCRIPTS "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/"
 

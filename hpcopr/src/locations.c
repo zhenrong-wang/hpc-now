@@ -90,7 +90,7 @@ int reset_locations(void){
         return -1;
     }
     fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");
-    fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_REPO_ROOT);
+    fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_TF_ROOT);
     fprintf(file_p,"CLOUD_IAC_TEMPLATES_LOC_ROOT %s\n",DEFAULT_URL_CODE_ROOT);
     fprintf(file_p,"ONLINE_SHELL_SCRIPTS_LOC_ROOT %s\n",DEFAULT_URL_SHELL_SCRIPTS);
     fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",DEFAULT_URL_NOW_CRYPTO);
@@ -115,7 +115,7 @@ int get_locations(void){
         for(i=0;i<LOCATION_LINES;i++){
             fscanf(file_p,"%s%s",header_string,loc_string);
             if(strcmp(header_string,"BINARY_AND_PROVIDERS_LOC_ROOT")==0){
-                strcpy(URL_REPO_ROOT,loc_string);
+                strcpy(URL_TF_ROOT,loc_string);
 #ifdef _WIN32
                 if(loc_string[1]==':'){
                     REPO_LOC_FLAG=1;
@@ -219,7 +219,7 @@ int configure_locations(void){
     }
     printf("[ LOC1/4 ] Please specify the root location of the terraform binary and providers. \n");
     printf("|          You can input 'defaut' to use default location below: \n");
-    printf("|          -> %s \n",DEFAULT_URL_REPO_ROOT);
+    printf("|          -> %s \n",DEFAULT_URL_TF_ROOT);
     printf("[ INPUT: ] ");
     fflush(stdin);
     scanf("%s",loc_string);
@@ -229,7 +229,7 @@ int configure_locations(void){
             printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
         }
         else{
-            strcpy(URL_REPO_ROOT,loc_string);
+            strcpy(URL_TF_ROOT,loc_string);
         }
     }
     printf("[ LOC2/4 ] Please specify the root location of the terraform templates. \n");
@@ -289,11 +289,11 @@ int configure_locations(void){
         return -1;
     }
     fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");
-    if(strlen(URL_REPO_ROOT)==0){
-        fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_REPO_ROOT);
+    if(strlen(URL_TF_ROOT)==0){
+        fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_TF_ROOT);
     }
     else{
-        fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",URL_REPO_ROOT);
+        fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",URL_TF_ROOT);
     }
     if(strlen(URL_CODE_ROOT)==0){
         fprintf(file_p,"CLOUD_IAC_TEMPLATES_LOC_ROOT %s\n",DEFAULT_URL_CODE_ROOT);
