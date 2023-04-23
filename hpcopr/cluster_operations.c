@@ -796,11 +796,18 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
     if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)!=0){
-        return -1;
-    }
-    if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_A")==0){
+        printf("[ -WARN- ] Some problems occoured. Retrying destroy now (1/2)...");
+        sleep(2);
         if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)!=0){
-            return -1;
+            printf("[ -WARN- ] Some problems occoured. Retrying destroy now (2/2)...");
+            sleep(2);
+            if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)!=0){
+                printf("[ FATAL: ] Failed to destroy your cluster. This usually caused by either Terraform or\n");
+                printf("|          the providers developed and maintained by cloud service providers.\n");
+                printf("|          You *MUST* manually destroy the remaining cloud resources of this cluster.\n");
+                printf("|          Exit now.\n");
+                return -1;
+            }
         }
     }
 #ifdef _WIN32

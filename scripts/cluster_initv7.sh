@@ -14,6 +14,9 @@
 URL_REPO_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 URL_UTILS=${URL_REPO_ROOT}utils/
 URL_PKGS=${URL_REPO_ROOT}packages/
+NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
+SELINUX_STATUS=`getenforce`
+APP_ROOT="/hpc_apps"
 
 logfile='/root/cluster_init.log'
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
@@ -21,6 +24,7 @@ echo -e "# $time_current Initialization started." >> ${logfile}
 
 CENTOS_V=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 echo -e "export CENTOS_V=$CENTOS_V" >> /etc/profile
+echo -e "timeout=10" >> /etc/yum.conf
 
 #CLOUD_A: Alicloud
 #CLOUD_B: QCloud/TencentCloud
@@ -81,12 +85,7 @@ else
 fi
 
 ######### define something ##############
-yum -y install openssl
-yum -y install openssl-devel
-
-NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
-SELINUX_STATUS=`getenforce`
-APP_ROOT="/hpc_apps"
+yum -y install openssl openssl-devel
 
 rm -rf /root/user_secrets.txt
 touch /root/user_secrets.txt
@@ -111,13 +110,6 @@ if [ -f /root/hostfile ]; then
   sed -i '/NODE_NUM/d' /etc/profile
   echo -e "export NODE_NUM=$number_of_nodes" >> /etc/profile
   source /etc/profile
-#  for j in $(seq 1 $NODE_NUM )
-#  do
-#    compute_private_ip=`cat /root/hostfile | grep compute${j} | awk -F"\t" '{print $1}'`
-#    COMPUTE_PASSWD=`cat /root/compute_passwd.txt`
-#    echo -e "\n$compute_private_ip $COMPUTE_PASSWD\n"
-#    sshpass -p $COMPUTE_PASSWD scp -r /root/.ssh root@$compute_private_ip:/root/
-#  done
 fi
 echo -e "# $time_current SSH Keys spreaded." >> ${logfile}
 
@@ -151,12 +143,6 @@ do
       ssh-keygen -t rsa -N '' -f /home/user${i}/.ssh/id_rsa -q
       cat /home/user${i}/.ssh/id_rsa.pub >> /home/user${i}/.ssh/authorized_keys
       chown -R user${i}:user${i} /home/user${i}    
-    #  for j in $(seq 1 $NODE_NUM )
-    #  do
-    #    compute_private_ip=`cat /root/hostfile | grep compute${j} | awk -F"\t" '{print $1}'`
-    #    COMPUTE_PASSWD=`cat /root/compute_passwd.txt`
-    #    sshpass -p $COMPUTE_PASSWD scp -r /home/user${i}/.ssh root@$compute_private_ip:/home/user${i}/
-    #  done
       if [ ! -d /hpc_data/user${i}_data ]; then
         mkdir -p /hpc_data/user${i}_data
       fi
@@ -184,34 +170,18 @@ echo -e "# $time_current SELINUX Disabled." >> ${logfile}
 if [ $CLOUD_FLAG != 'CLOUD_C' ]; then
   yum -y update
 fi
-yum -y install epel-release #epel release is really slow for China region
+# yum -y install epel-release #epel release is really slow for China region
 yum -y install gtk2 gtk2-devel
 yum -y install python python3
 yum -y install gcc-c++ gcc-gfortran
-yum -y install htop # NOT necessary, and needs epel-release. skip it
-yum -y install sshpass
-#yum -y install munge munge-devel
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "# $time_current Utils installed." >> ${logfile}
-
-########## Build munge #################
-yum -y install rpm-build # This package needs epel-release. Skip it.
 yum -y install bzip2-devel
 yum -y install zlib-devel m4 libxml2-devel
-cd /root
-if ! command -v munge >/dev/null 2>&1; then
-  time_current=`date "+%Y-%m-%d %H:%M:%S"`
-  echo -e "# $time_current Start building munge." >> ${logfile}
-  if [ ! -f munge-0.5.14* ]; then
-    wget ${URL_UTILS}munge/dun.gpg
-    wget ${URL_UTILS}munge/munge-0.5.14.tar.xz
-    wget ${URL_UTILS}munge/munge-0.5.14.tar.xz.asc
-  fi
-  rpmbuild -tb munge-0.5.14.tar.xz
-  cd /rpmbuild/RPMS/x86_64 && rpm -ivh munge*
-fi
-time_current=`date "+%Y-%m-%d %H:%M:%S"`  
-echo -e "# $time_current Munge installed." >> ${logfile}
+# yum -y install htop # NOT necessary, and needs epel-release. skip it
+yum -y install sshpass
+yum -y install munge # try build this to avoid rpm munge
+yum -y install autoconf libtool automake
+time_current=`date "+%Y-%m-%d %H:%M:%S"`
+echo -e "# $time_current Utils installed." >> ${logfile}
 
 ########## Add user slurm ################
 id -u slurm
@@ -227,7 +197,7 @@ if [ -f /root/hostfile ]; then
   rm -rf /etc/my.cnf
   rm -rf /var/lib/mysql
   if [ $CENTOS_V -eq 7 ]; then
-    yum -y install mariadb mariadb-devel mariadb-server
+    yum -y install mariadb mariadb-devel mariadb-server # In case there is no mariadb node, install mariadb-server.
     yum -y install mariadb-libs
   else
     yum -y install mariadb-*
@@ -238,7 +208,7 @@ if [ -f /root/hostfile ]; then
     mv /root/mariadb_slurm_acct_db_pw.txt /root/.cluster_secrets/`
     db_address=`cat /root/mariadb_private_ip.txt | awk -F"\t" '{print $1}'`
     echo -e "# $time_current Mariadb has been installed to the host $db_address. Will not build mariadb on localhost." >> ${logfile}
-  else
+  else # This part is actually deprecated. But in case the dedicated mariadb is absent, keep it
     if [ $2 != db ]; then
       time_current=`date "+%Y-%m-%d %H:%M:%S"`
       echo -e "# $time_current IMPORTANT: No dedicated MariaDB Server found. Automatically install Mariadb Server on localhost." >> ${logfile}
@@ -247,7 +217,6 @@ if [ -f /root/hostfile ]; then
     db_address="LOCALHOST"
     time_current=`date "+%Y-%m-%d %H:%M:%S"`
     echo -e "# $time_current Mariadb installation on localhost started." >> ${logfile}
-    
     if [ $CENTOS_V -eq 7 ]; then
       openssl rand 8 -base64 -out /root/mariadb_root_passwd.txt
       openssl rand 8 -base64 -out /root/mariadb_slurm_acct_db_pw.txt
@@ -292,8 +261,8 @@ mv /root/master_passwd.txt /root/.cluster_secrets/
 mv /root/compute_passwd.txt /root/.cluster_secrets/
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "ALL the secrets are stored in the directory /root/.cluster_secrets/ ."
-echo -e "# $time_current ALL the secrets are stored in the directory /root/.cluster_secrets/ ." >> ${logfile}
+echo -e "All the secrets are stored in the directory /root/.cluster_secrets/ ."
+echo -e "# $time_current All the secrets are stored in the directory /root/.cluster_secrets/ ." >> ${logfile}
 
 ########### Change owners of some directories ################
 if [ ! -d /run/munge ]; then
@@ -306,16 +275,9 @@ chown -R slurm:slurm /var/lib/munge
 chown -R slurm:slurm /var/log/munge
 
 ########## munge #################
-
 if [ -f /root/hostfile ]; then
   mungekey
   chown -R slurm:slurm /etc/munge/munge.key
-#  for i in $(seq 1 $NODE_NUM)
-#  do
-#    compute_private_ip=`cat /root/hostfile | grep compute${i} | awk -F"\t" '{print $1}'`
-#    COMPUTE_PASSWD=`cat /root/.cluster_secrets/compute_passwd.txt`
-#    sshpass -p $COMPUTE_PASSWD scp -r /etc/munge/munge.key root@$compute_private_ip:/etc/munge/
-#  done
 fi
 
 ########### Build SLURM #####################
@@ -392,7 +354,8 @@ if [ -f /root/hostfile ]; then
   elif [ $CLOUD_FLAG = 'CLOUD_B' ]; then
     pip install coscmd
   elif [ $CLOUD_FLAG = 'CLOUD_C' ]; then 
-    yum -y install s3cmd
+    yum -y install epel-release
+    yum -y install s3cmd # This needs epel, hope aws's ec2 has good luck in China region
   fi
 fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
@@ -443,15 +406,27 @@ else
   systemctl stop firewalld
 fi
 systemctl set-default graphical.target
-yum -y install tigervnc tigervnc-server xrdp
+yum -y install tigervnc tigervnc-server
+if [ $CENTOS_V -eq 7 ]; then
+  yum -y install xrdp
+else
+  cd /root && wget ${URL_UTILS}xrdp-0.9.zip
+  unzip -o xrdp-0.9.zip && mv nasm.repo /etc/yum.repos.d/ -f
+  yum makecache && yum -y install nasm
+  yum -y install pam-devel
+  chmod +x /root/xrdp-0.9/bootstrap && chmod +x /root/xrdp-0.9/librfxcodec/src/nasm_lt.sh && chmod +x /root/xrdp-0.9/instfiles/pam.d/mkpamrules
+  cd /root/xrdp-0.9/ && ./bootstrap && ./configure
+  make -j$NUM_PROCESSORS && make install
+  rm -rf /root/xrdp-0.9 
+fi
 sed -i 's/; (1 = ExtendedDesktopSize)/ (1 = ExtendedDesktopSize)/g' /etc/xrdp/xrdp.ini
 sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
-#sed -i '/\[Chansrv\]/i\param=-depth\nparam=24' /etc/xrdp/sesman.ini
+sed -i 's/\[Xorg\]/#\[Xorg\]/g' /etc/xrdp/xrdp.ini
 systemctl start xrdp
 systemctl enable xrdp
-yum -y install remmina
+#yum -y install remmina # This needs epel. But it is not necessary, so skip it.
 yum -y install rpcbind flex
-yum -y install GConf2
+#yum -y install GConf2 # This needs epel, skip it. Forgot why added this, but there must be a reason
 yum -y install cmake
 
 if [ -f /root/hostfile ]; then
