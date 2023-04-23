@@ -219,20 +219,20 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|          Usually *ONLY* for the first time of running hpcopr.\n\n");
         if(TF_LOC_FLAG==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\terraform-win64\\terraform.exe %s",URL_TF_ROOT,tf_exec);
+            sprintf(cmdline,"copy /y %s\\tf-win\\terraform.exe %s",URL_TF_ROOT,tf_exec);
 #elif __linux__
-            sprintf(cmdline,"/bin/cp %s/terraform/terraform %s",URL_TF_ROOT,tf_exec);
+            sprintf(cmdline,"/bin/cp %s/tf-linux/terraform %s",URL_TF_ROOT,tf_exec);
 #elif __APPLE__
-            sprintf(cmdline,"/bin/cp %s/terraform-darwin/terraform %s",URL_TF_ROOT,tf_exec);
+            sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform %s",URL_TF_ROOT,tf_exec);
 #endif
         }
         else{
 #ifdef _WIN32
-            sprintf(cmdline,"curl %sterraform-win64/terraform.exe -o c:\\programdata\\hpc-now\\bin\\terraform.exe",URL_TF_ROOT);
+            sprintf(cmdline,"curl %stf-win/terraform.exe -o c:\\programdata\\hpc-now\\bin\\terraform.exe",URL_TF_ROOT);
 #elif __linux__
-            sprintf(cmdline,"curl %sterraform/terraform -o %s",URL_TF_ROOT,tf_exec);
+            sprintf(cmdline,"curl %stf-linux/terraform -o %s",URL_TF_ROOT,tf_exec);
 #elif __APPLE__
-            sprintf(cmdline,"curl %sterraform-darwin/terraform -o %s",URL_TF_ROOT,tf_exec);
+            sprintf(cmdline,"curl %stf-darwin/terraform -o %s",URL_TF_ROOT,tf_exec);
 #endif
         }
         flag=system(cmdline);
