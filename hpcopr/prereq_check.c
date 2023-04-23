@@ -201,39 +201,45 @@ int check_and_install_prerequisitions(int repair_flag){
     system("attrib +h +s +r c:\\programdata\\hpc-now > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\bin\\ > nul 2>&1");
-    system("del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1"); 
+    system("del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
+    sprintf(filename_temp_zip,"%s\\terraform.d\\terraform_%s_windows_amd64.zip",appdata_dir,TERRAFORM_VERSION);
 #elif __linux__
     system("rm -rf /home/hpc-now/.ssh/known_hosts >> /dev/null 2>&1");
     system("mkdir -p /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1");
     system("mkdir -p /usr/.hpc-now/.bin/ >> /dev/null 2>&1");
     system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+    sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform_%s_linux_amd64.zip",TERRAFORM_VERSION)
 #elif __APPLE__
     system("rm -rf /Users/hpc-now/.ssh/known_hosts >> /dev/null 2>&1");
     system("mkdir -p /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1");
     system("mkdir -p /Applications/.hpc-now/.bin/ >> /dev/null 2>&1");
     system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+    sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform_%s_darwin_amd64.zip",TERRAFORM_VERSION)
 #endif
     file_check_flag=file_validity_check(tf_exec,force_repair_flag,MD5_TF_EXEC);
     if(file_check_flag==1){
-        printf("[ -INFO- ] Downloading/Copying the Terraform binary ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr.\n\n");
-        if(TF_LOC_FLAG==1){
+        file_check_flag=file_validity_check(filename_temp_zip,repair_flag,MD5_TF_ZIP);
+        if(file_check_flag==1){
+            printf("[ -INFO- ] Downloading/Copying the Terraform binary ...\n");
+            printf("|          Usually *ONLY* for the first time of running hpcopr.\n\n");
+            if(TF_LOC_FLAG==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf-win\\terraform.exe %s",URL_TF_ROOT,tf_exec);
+                sprintf(cmdline,"copy /y %s\\tf-win\\terraform_%s_windows_amd64.zip %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
 #elif __linux__
-            sprintf(cmdline,"/bin/cp %s/tf-linux/terraform %s",URL_TF_ROOT,tf_exec);
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform_%s_linux_amd64.zip %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
 #elif __APPLE__
-            sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform %s",URL_TF_ROOT,tf_exec);
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform_%s_darwin_amd64.zip %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
 #endif
-        }
-        else{
+            }
+            else{
 #ifdef _WIN32
-            sprintf(cmdline,"curl %stf-win/terraform.exe -o c:\\programdata\\hpc-now\\bin\\terraform.exe",URL_TF_ROOT);
+                sprintf(cmdline,"curl %stf-win/terraform_%s_windows_amd64.zip -o %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
 #elif __linux__
-            sprintf(cmdline,"curl %stf-linux/terraform -o %s",URL_TF_ROOT,tf_exec);
+                sprintf(cmdline,"curl %stf-linux/terraform_%s_linux_amd64.zip -o %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
 #elif __APPLE__
-            sprintf(cmdline,"curl %stf-darwin/terraform -o %s",URL_TF_ROOT,tf_exec);
+                sprintf(cmdline,"curl %stf-darwin/terraform_%s_darwin_amd64.zip -o %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
 #endif
+            }
         }
         flag=system(cmdline);
         if(flag!=0){
@@ -243,6 +249,18 @@ int check_and_install_prerequisitions(int repair_flag){
                 return 3;
             }
         }
+#ifdef _WIN32
+        sprintf(cmdline,"tar zxf %s -C \"c:\\programdata\\hpc-now\\bin\\\" > nul 2>&1",filename_temp_zip);
+#elif __linux__
+        sprintf(cmdline,"unzip -q %s -d /usr/.hpc-now/.bin/ >> /dev/null 2>&1",filename_temp_zip);
+#elif __APPLE__
+        sprintf(cmdline,"unzip -q %s -d /Applications/.hpc-now/.bin/ >> /dev/null 2>&1",filename_temp_zip);
+#endif
+        flag=system(cmdline);
+        if(flag!=0){
+            printf("[ FATAL: ] Failed to unzip the terraform binary file. Exit now.\n");
+            return 3;
+        }        
     }
 #ifndef _WIN32
         sprintf(cmdline,"chmod +x %s",tf_exec);

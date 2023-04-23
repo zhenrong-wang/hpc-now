@@ -11,6 +11,7 @@
 #define CORE_VERSION_CODE "0.2.0.0017"
 #define INSTALLER_VERSION_CODE "0.2.0.0017"
 
+#define TERRAFORM_VERSION "1.4.5"
 #define ALI_TF_PLUGIN_VERSION "1.203.0"
 #define QCLOUD_TF_PLUGIN_VERSION "1.80.5"
 #define AWS_TF_PLUGIN_VERSION "4.64.0"
@@ -35,6 +36,7 @@
 #define CURRENT_CLUSTER_INDICATOR "c:\\programdata\\hpc-now\\etc\\current_cluster.dat"
 
 #define MD5_TF_EXEC "4985e962d9bf3d4276fcaff0295ce203"
+#define MD5_TF_ZIP "7fc59fe0e503896680bf343bb0687f6f"
 #define MD5_NOW_CRYPTO "b0834f0c932a8a736badbf52b3d339e2"
 
 #define MD5_ALI_TF "39e1e304e49741e51fe5e532344dc8fb"
@@ -65,6 +67,7 @@
 #define CURRENT_CLUSTER_INDICATOR "/usr/.hpc-now/.etc/current_cluster.dat"
 
 #define MD5_TF_EXEC "6a1056cacf77c7d913a4e1646edb97a1"
+#define MD5_TF_ZIP "5fefef8a8c95cc9614cf7d3435f82bd7"
 #define MD5_NOW_CRYPTO "26ae6fb1a741dcb8356b650b0812710c"
 
 #define MD5_ALI_TF "88f0da5ec9687a0c0935bb7f0e3306a4"
@@ -95,6 +98,7 @@
 #define CURRENT_CLUSTER_INDICATOR "/Applications/.hpc-now/.etc/current_cluster.dat"
 
 #define MD5_TF_EXEC "55fda9502c6e1a3b5e30c77b73e5890d"
+#define MD5_TF_ZIP "25b89c2bbd0dec71c307810cfe1bd622"
 #define MD5_NOW_CRYPTO "202082eac600db6f6f429a1ceb047044"
 
 #define MD5_ALI_TF "6091b17f8454fb6eb58c265938f0852f"
