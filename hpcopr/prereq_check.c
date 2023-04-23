@@ -221,7 +221,7 @@ int check_and_install_prerequisitions(int repair_flag){
         file_check_flag=file_validity_check(filename_temp_zip,repair_flag,MD5_TF_ZIP);
         if(file_check_flag==1){
             printf("[ -INFO- ] Downloading/Copying the Terraform binary ...\n");
-            printf("|          Usually *ONLY* for the first time of running hpcopr.\n\n");
+            printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
             if(TF_LOC_FLAG==1){
 #ifdef _WIN32
                 sprintf(cmdline,"copy /y %s\\tf-win\\terraform_%s_windows_amd64.zip %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
@@ -278,7 +278,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     if(file_check_flag==1){
         printf("[ -INFO- ] Downloading/Copying the now-crypto.exe ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr.\n\n");
+        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         if(NOW_CRYPTO_LOC_FLAG==1){
 #ifdef _WIN32
             sprintf(cmdline,"copy /y %s %s",URL_NOW_CRYPTO,crypto_exec);
@@ -372,7 +372,7 @@ int check_and_install_prerequisitions(int repair_flag){
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,MD5_ALI_TF);
     if(file_check_flag==1){
         printf("[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/3) ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr.\n\n");
+        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,MD5_ALI_TF_ZIP);
         if(file_check_flag==1){
             if(TF_LOC_FLAG==1){
@@ -434,7 +434,7 @@ int check_and_install_prerequisitions(int repair_flag){
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,MD5_QCLOUD_TF);
     if(file_check_flag==1){
         printf("[ -INFO- ] Downloading/Copying the cloud Terraform providers (2/3) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
+        printf("           Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,MD5_QCLOUD_TF_ZIP);
         if(file_check_flag==1){
             if(TF_LOC_FLAG==1){
@@ -496,7 +496,7 @@ int check_and_install_prerequisitions(int repair_flag){
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,MD5_AWS_TF);
     if(file_check_flag==1){
         printf("[ -INFO- ] Downloading/Copying the cloud Terraform providers (3/3) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr.\n\n");
+        printf("           Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,MD5_AWS_TF_ZIP);
         if(file_check_flag==1){
             if(TF_LOC_FLAG==1){
