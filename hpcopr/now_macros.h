@@ -8,8 +8,8 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0019"
-#define INSTALLER_VERSION_CODE "0.2.0.0019"
+#define CORE_VERSION_CODE "0.2.0.0020"
+#define INSTALLER_VERSION_CODE "0.2.0.0020"
 
 #define TERRAFORM_VERSION "1.4.5"
 #define ALI_TF_PLUGIN_VERSION "1.203.0"
@@ -155,8 +155,8 @@
  */
 
 #define DEFAULT_URL_TF_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-root/"
-#define DEFAULT_URL_CODE_ROOT "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/"
-#define DEFAULT_URL_SHELL_SCRIPTS "https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/"
+#define DEFAULT_URL_CODE_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/infra-as-code/"
+#define DEFAULT_URL_SHELL_SCRIPTS "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/scripts/"
 
 #define LOCATION_CONF_TOTAL_LINES 5
 #define LOCATION_LINES 4

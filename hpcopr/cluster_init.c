@@ -159,13 +159,13 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
 #endif
     if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
-        sprintf(URL_AWS_ROOT,"%s\\tf-templates-aws\\",URL_CODE_ROOT);
+        sprintf(URL_AWS_ROOT,"%s\\aws\\",URL_CODE_ROOT);
 #else
-        sprintf(URL_AWS_ROOT,"%s/tf-templates-aws/",URL_CODE_ROOT);
+        sprintf(URL_AWS_ROOT,"%s/aws/",URL_CODE_ROOT);
 #endif
     }
     else{
-        sprintf(URL_AWS_ROOT,"%stf-templates-aws/",URL_CODE_ROOT);
+        sprintf(URL_AWS_ROOT,"%saws/",URL_CODE_ROOT);
     }
 
     if(CODE_LOC_FLAG==1){
@@ -1072,13 +1072,13 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
 #endif
     if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
-        sprintf(URL_QCLOUD_ROOT,"%s\\tf-templates-qcloud\\",URL_CODE_ROOT);
+        sprintf(URL_QCLOUD_ROOT,"%s\\qcloud\\",URL_CODE_ROOT);
 #else
-        sprintf(URL_QCLOUD_ROOT,"%s/tf-templates-qcloud/",URL_CODE_ROOT);
+        sprintf(URL_QCLOUD_ROOT,"%s/qcloud/",URL_CODE_ROOT);
 #endif
     }
     else{
-        sprintf(URL_QCLOUD_ROOT,"%stf-templates-qcloud/",URL_CODE_ROOT);
+        sprintf(URL_QCLOUD_ROOT,"%sqcloud/",URL_CODE_ROOT);
     }
 
 #ifdef _WIN32
@@ -1857,13 +1857,13 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
 #endif
     if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
-        sprintf(URL_ALICLOUD_ROOT,"%s\\tf-templates-alicloud\\",URL_CODE_ROOT);
+        sprintf(URL_ALICLOUD_ROOT,"%s\\alicloud\\",URL_CODE_ROOT);
 #else
-        sprintf(URL_ALICLOUD_ROOT,"%s/tf-templates-alicloud/",URL_CODE_ROOT);
+        sprintf(URL_ALICLOUD_ROOT,"%s/alicloud/",URL_CODE_ROOT);
 #endif
     }
     else{
-        sprintf(URL_ALICLOUD_ROOT,"%stf-templates-alicloud/",URL_CODE_ROOT);
+        sprintf(URL_ALICLOUD_ROOT,"%salicloud/",URL_CODE_ROOT);
     }
 
 #ifdef _WIN32
