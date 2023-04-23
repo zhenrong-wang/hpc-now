@@ -172,6 +172,7 @@ int check_and_install_prerequisitions(int repair_flag){
                 printf("[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now.\n");
                 return 2;
             }
+            get_locations();
         }
         else{
             printf("[ -INFO- ] You chose to deny this operation. Would you like to specify the locations\n");
