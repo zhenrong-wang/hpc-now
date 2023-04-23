@@ -11,7 +11,6 @@
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
-#include <signal.h>
 
 #ifndef _WIN32
 #include <sys/time.h>
