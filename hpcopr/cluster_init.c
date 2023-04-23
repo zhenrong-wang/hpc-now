@@ -186,7 +186,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    printf("[ STEP 1 ] Creating input files now...\n");
+    printf("[ STEP 1 ] Creating initialization files now ...\n");
 #ifdef _WIN32
     sprintf(cmdline,"del /f /q %s\\hpc_stack* > nul 2>&1",stackdir);
     system(cmdline);
@@ -739,7 +739,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     find_and_get(filename_temp,"aws_iam_access_key","","",15,"\"id\":","","",'\"',4,bucket_ak);
     find_and_get(filename_temp,"aws_iam_access_key","","",15,"\"secret\":","","",'\"',4,bucket_sk);
     if(strcmp(region_flag,"global_regions")==0){
-        printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...\n",AWS_SLEEP_TIME_GLOBAL);
+        printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",AWS_SLEEP_TIME_GLOBAL);
         for(i=0;i<AWS_SLEEP_TIME_GLOBAL;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",AWS_SLEEP_TIME_GLOBAL-i);
             fflush(stdout);
@@ -748,7 +748,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ -DONE- ] Remote execution commands sent.\n");
     }
     else{
-        printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...\n",AWS_SLEEP_TIME_CN);
+        printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",AWS_SLEEP_TIME_CN);
         for(i=0;i<AWS_SLEEP_TIME_CN;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",AWS_SLEEP_TIME_CN-i);
             fflush(stdout);
@@ -1083,11 +1083,18 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
 
 #ifdef _WIN32
     sprintf(conf_file,"%s\\tf_prep.conf",confdir);
+#else
+    sprintf(conf_file,"%s/tf_prep.conf",confdir);
+#endif
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading the default configure\n");
         printf("|          file to initialize this cluster.\n");
         if(CODE_LOC_FLAG==1){
+#ifdef _WIN32
             sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1", URL_QCLOUD_ROOT,conf_file);
+#else
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1", URL_QCLOUD_ROOT,conf_file);
+#endif
         }
         else{
             sprintf(cmdline,"curl %stf_prep.conf -s -o %s", URL_QCLOUD_ROOT,conf_file);
@@ -1097,7 +1104,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
             return 2;
         }
     }
-    printf("[ STEP 1 ] Creating input files now...\n");
+    printf("[ STEP 1 ] Creating initialization files now ...\n");
+#ifdef _WIN32
     sprintf(cmdline,"del /f /q %s\\hpc_stack* > nul 2>&1",stackdir);
     system(cmdline);
     if(CODE_LOC_FLAG==1){
@@ -1178,11 +1186,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Use the default one.\n");
         if(CODE_LOC_FLAG==1){
-#ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1", URL_QCLOUD_ROOT,conf_file);
-#else
             sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1", URL_QCLOUD_ROOT,conf_file);
-#endif
         }
         else{
             sprintf(cmdline,"curl %stf_prep.conf -s -o %s", URL_QCLOUD_ROOT,conf_file);
@@ -1192,7 +1196,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
             return 2;
         }
     }
-    printf("[ STEP 1 ] Creating input files now...\n");
     sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
     system(cmdline);
     if(CODE_LOC_FLAG==1){
@@ -1268,7 +1271,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sprintf(secret_file,"%s/.secrets.txt",vaultdir);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
 #endif
- 
     file_p=fopen(conf_file,"r");
     for(i=0;i<3;i++){
         fgets(conf_line_buffer,256,file_p);
@@ -1574,7 +1576,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);
     find_and_get(filename_temp,"secret_id","","",1,"secret_id","","",'\"',4,bucket_ak);
     find_and_get(filename_temp,"secret_key","","",1,"secret_key","","",'\"',4,bucket_sk);
-    printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...\n",QCLOUD_SLEEP_TIME);
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",QCLOUD_SLEEP_TIME);
     for(i=0;i<QCLOUD_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",QCLOUD_SLEEP_TIME-i);
         fflush(stdout);
@@ -1886,7 +1888,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
             return 2;
         }
     }
-    printf("[ STEP 1 ] Creating input files now...\n");
+    printf("[ STEP 1 ] Creating initialization files now ...\n");
 #ifdef _WIN32
     sprintf(cmdline,"del /f /q %s\\hpc_stack* > nul 2>&1",stackdir);
     system(cmdline);
@@ -2334,7 +2336,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     system(cmdline);
     get_crypto_key(crypto_keyfile,md5sum);
     getstate(workdir,crypto_keyfile);
-    printf("[ STEP 2 ] Remote executing now, please wait %d seconds for this step ...\n",ALI_SLEEP_TIME);
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",ALI_SLEEP_TIME);
     for(i=0;i<ALI_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",ALI_SLEEP_TIME-i);
         fflush(stdout);
