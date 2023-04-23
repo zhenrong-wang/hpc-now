@@ -214,7 +214,7 @@ int check_and_install_prerequisitions(int repair_flag){
     system("mkdir -p /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1");
     system("mkdir -p /Applications/.hpc-now/.bin/ >> /dev/null 2>&1");
     system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-    sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform_%s_darwin_amd64.zip",TERRAFORM_VERSION)
+    sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform_%s_darwin_amd64.zip",TERRAFORM_VERSION);
 #endif
     file_check_flag=file_validity_check(tf_exec,force_repair_flag,MD5_TF_EXEC);
     if(file_check_flag==1){
