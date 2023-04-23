@@ -23,7 +23,7 @@ elif [ "$1" = "build" ]; then
     rm -rf ./installer/gfuncs.o
     gcc ./installer/installer.c -Wall -lm -lgfuncs -o ./build/installer.exe
     gcc ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto.exe
-    gcc ./hpcmgr/hpcmgr.c -Wall -lm ./build/hpcmgr.exe
+    gcc ./hpcmgr/hpcmgr.c -Wall -lm -o ./build/hpcmgr.exe
     chmod +x ./build/*
     mv ./installer/libgfuncs.a ./build/
 elif [ "$1" = "delete" ]; then
