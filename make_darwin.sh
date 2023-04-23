@@ -22,11 +22,10 @@ elif [ "$1" = "build" ]; then
     rm -rf ./installer/libgfuncs.a
     ar -rc ./installer/libgfuncs.a ./installer/gfuncs.o
     rm -rf ./installer/gfuncs.o
-    clang ./installer/installer.c libgfuncs.a -Wall -o ./build/installer.exe
+    clang ./installer/installer.c ./installer/libgfuncs.a -Wall -o ./build/installer.exe
     clang ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto.exe
     chmod +x ./build/*
     mv ./installer/libgfuncs.a ./build/
-    
 elif [ "$1" = "delete" ]; then
     echo "[ START: ] Deleting the binaries now ..."
     rm -rf ./build/*
