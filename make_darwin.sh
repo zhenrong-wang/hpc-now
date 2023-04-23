@@ -18,7 +18,7 @@ elif [ "$1" = "build" ]; then
     mkdir -p ./build
     rm -rf ./build/*
     clang ./hpcopr/*.c -Wall -o ./build/hpcopr.exe
-    clang ./hpcopr/general_funcs -shared -fPIC -o ./installer/libgfuncs.so
+    clang ./hpcopr/general_funcs.c -shared -fPIC -o ./installer/libgfuncs.so
     clang ./installer/installer.c -Wall -lgfuncs -o ./build/installer.exe
     clang ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto.exe
     chmod +x ./build/*
