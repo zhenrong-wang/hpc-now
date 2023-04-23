@@ -419,9 +419,12 @@ else
   make -j$NUM_PROCESSORS && make install
   rm -rf /root/xrdp-0.9 
 fi
+/bin/cp /etc/xrdp/xrdp.ini /etc/xrdp/xrdp.ini.bkup
+sed -i '/\[Xorg\]/,+7d' /etc/xrdp/xrdp.ini
+sed -i '/\[vnc-any\]/,+7d' /etc/xrdp/xrdp.ini
+sed -i '/\[neutrinordp-any\]/,+8d' /etc/xrdp/xrdp.ini
 sed -i 's/; (1 = ExtendedDesktopSize)/ (1 = ExtendedDesktopSize)/g' /etc/xrdp/xrdp.ini
 sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
-sed -i 's/\[Xorg\]/#\[Xorg\]/g' /etc/xrdp/xrdp.ini
 systemctl start xrdp
 systemctl enable xrdp
 #yum -y install remmina # This needs epel. But it is not necessary, so skip it.

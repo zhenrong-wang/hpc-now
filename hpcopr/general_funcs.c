@@ -45,13 +45,7 @@ int fgetline(FILE* file_p, char* line_string){
             *(line_string+i)=ch;
             i++;
         }
-/*        else if(ch=='\n'){
-            return 0;
-        }
-        else if(ch==EOF&&i==0){
-            return 1;
-        }*/
-    }while(ch!=EOF&&ch!='\n');
+    }while(ch!=EOF&&ch!='\n'&&i!=LINE_LENGTH); // Be careful! This function can only handle lines <= 4096 chars. Extra chars will be ommited
     if(ch==EOF&&i==0){
         return 1;
     }
