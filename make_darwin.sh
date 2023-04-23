@@ -18,11 +18,14 @@ elif [ "$1" = "build" ]; then
     mkdir -p ./build
     rm -rf ./build/*
     clang ./hpcopr/*.c -Wall -o ./build/hpcopr.exe
-    clang ./hpcopr/general_funcs.c -shared -fPIC -o ./installer/libgfuncs.so
+    clang -c ./hpcopr/general_funcs.c -o ./installer/gfuncs.o
+    rm -rf ./installer/libgfuncs.a
+    ar -rc ./installer/libgfuncs.a ./installer/gfuncs.o
+    rm -rf ./installer/gfuncs.o
     clang ./installer/installer.c -Wall -lgfuncs -o ./build/installer.exe
     clang ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto.exe
     chmod +x ./build/*
-    mv ./installer/libgfuncs.so ./build/
+    mv ./installer/libgfuncs.a ./build/
 elif [ "$1" = "delete" ]; then
     echo "[ START: ] Deleting the binaries now ..."
     rm -rf ./build/*

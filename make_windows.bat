@@ -15,9 +15,12 @@ if "%~1"=="" (
 	del /s /q /f .\build\*
 	echo [ -INFO- ] Bulding new binaries with the gcc ...
 	gcc .\hpcopr\*.c -Wall -o .\build\hpcopr.exe
-	gcc .\hpcopr\general_funcs.c -shared -fPIC -o .\installer\libgfuncs.so
-	gcc .\installer\installer.c .\installer\libgfuncs.so -Wall -o .\build\installer.exe
-	move /y .\installer\libgfuncs.so .\build\libgfuncs.so
+	gcc -c .\hpcopr\general_funcs.c -o .\installer\gfuncs.o
+	del /f /s /q .\installer\libgfuncs.a
+	ar -rc .\installer\libgfuncs.a .\installer\gfuncs.o
+	gcc .\installer\installer.c .\installer\libgfuncs.a -Wall -o .\build\installer.exe
+	move /y .\installer\libgfuncs.a .\build\libgfuncs.a
+	del /f /s /q .\installer\gfuncs.o
 	gcc .\now-crypto\now-crypto.c -Wall -o .\build\now-crypto.exe
 ) else if "%~1"=="delete" (
 	echo [ START: ] Deleting the binaries now ...
