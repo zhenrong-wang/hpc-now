@@ -855,7 +855,7 @@ void update_compute_template(char* stackdir, char* cloud_flag){
     sprintf(cmdline,"copy /y %s\\hpc_stack_compute1.tf %s > nul 2>&1",stackdir,filename_temp);
 #else
     sprintf(filename_temp,"%s/compute_template",stackdir);
-    sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,filename_temp);
+    sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s >> /dev/null 2>&1",stackdir,filename_temp);
 #endif
     system(cmdline);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
