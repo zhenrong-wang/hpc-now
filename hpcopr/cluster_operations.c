@@ -2056,6 +2056,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
             sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",URL_ALICLOUD_ROOT,confdir);
 #endif
         }
+        printf("%s,,,,,\n",cmdline);
         if(system(cmdline)!=0){
             return 1;
         }
