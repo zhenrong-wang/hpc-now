@@ -5,6 +5,7 @@ terraform {
     }
   }
 }
+
 provider "alicloud" {
   access_key = "BLANK_ACCESS_KEY_ID"
   secret_key = "BLANK_SECRET_KEY"
