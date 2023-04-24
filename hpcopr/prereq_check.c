@@ -267,7 +267,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __APPLE__
         sprintf(cmdline,"unzip -o -q %s -d /Applications/.hpc-now/.bin/ >> /dev/null 2>&1",filename_temp_zip);
 #endif
-        printf("%s,,,,,\"\n",cmdline);
+//        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
         if(flag!=0){
             printf("[ FATAL: ] Failed to unzip the terraform binary file. Exit now.\n");
@@ -305,7 +305,7 @@ int check_and_install_prerequisitions(int repair_flag){
             sprintf(cmdline,"curl %s -o %s",URL_NOW_CRYPTO,crypto_exec);
 #endif
         }
-        printf("%s,,,,,\"\n",cmdline);
+//        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
         if(flag!=0){
             printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
@@ -401,7 +401,7 @@ int check_and_install_prerequisitions(int repair_flag){
                 sprintf(cmdline,"curl %stf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip -o %s",URL_TF_ROOT,ali_plugin_version,filename_temp_zip);
 #endif
             }
-            printf("%s,,,,,\"\n",cmdline);
+//            printf("%s,,,,,\"\n",cmdline);
             flag=system(cmdline);
             if(flag!=0){
                 printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
