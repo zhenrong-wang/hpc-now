@@ -1275,11 +1275,12 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     for(i=0;i<3;i++){
         fgets(conf_line_buffer,256,file_p);
     }
-    fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,cluster_id);
-    fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,region_id);
-    fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,zone_id);
+    fscanf(file_p,"%s%s%s",conf_param_buffer1,conf_param_buffer2,cluster_id);
+    fscanf(file_p,"%s%s%s",conf_param_buffer1,conf_param_buffer2,region_id);
+    fscanf(file_p,"%s%s%s",conf_param_buffer1,conf_param_buffer2,zone_id);
     fgetline(file_p,conf_line_buffer);
     i=strlen(conf_line_buffer)-22;
+    printf("%s --------\n%d\n\n",conf_line_buffer,i);
     for(j=i;j>0;j--){
         node_num+=(conf_line_buffer[22+i-j]-'0')*pow(10,j-1);
     }
