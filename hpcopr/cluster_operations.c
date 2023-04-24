@@ -2000,19 +2000,19 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     create_and_get_vaultdir(workdir,vaultdir);
     if(CODE_LOC_FLAG==1){
 #ifdef _WIN32
-        sprintf(URL_AWS_ROOT,"%s\\tf-templates-aws\\",URL_CODE_ROOT);
-        sprintf(URL_QCLOUD_ROOT,"%s\\tf-templates-qcloud\\",URL_CODE_ROOT);
-        sprintf(URL_ALICLOUD_ROOT,"%s\\tf-templates-alicloud\\",URL_CODE_ROOT);
+        sprintf(URL_AWS_ROOT,"%s\\aws\\",URL_CODE_ROOT);
+        sprintf(URL_QCLOUD_ROOT,"%s\\qcloud\\",URL_CODE_ROOT);
+        sprintf(URL_ALICLOUD_ROOT,"%s\\alicloud\\",URL_CODE_ROOT);
 #else
-        sprintf(URL_AWS_ROOT,"%s/tf-templates-aws/",URL_CODE_ROOT);
-        sprintf(URL_QCLOUD_ROOT,"%s/tf-templates-qcloud/",URL_CODE_ROOT);
-        sprintf(URL_ALICLOUD_ROOT,"%s/tf-templates-alicloud/",URL_CODE_ROOT);
+        sprintf(URL_AWS_ROOT,"%s/aws/",URL_CODE_ROOT);
+        sprintf(URL_QCLOUD_ROOT,"%s/qcloud/",URL_CODE_ROOT);
+        sprintf(URL_ALICLOUD_ROOT,"%s/alicloud/",URL_CODE_ROOT);
 #endif
     }
     else{
-        sprintf(URL_AWS_ROOT,"%stf-templates-aws/",URL_CODE_ROOT);
-        sprintf(URL_QCLOUD_ROOT,"%stf-templates-qcloud/",URL_CODE_ROOT);
-        sprintf(URL_ALICLOUD_ROOT,"%stf-templates-alicloud/",URL_CODE_ROOT);
+        sprintf(URL_AWS_ROOT,"%saws/",URL_CODE_ROOT);
+        sprintf(URL_QCLOUD_ROOT,"%sqcloud/",URL_CODE_ROOT);
+        sprintf(URL_ALICLOUD_ROOT,"%salicloud/",URL_CODE_ROOT);
     }
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
