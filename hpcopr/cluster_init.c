@@ -1278,12 +1278,15 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     fgetline(file_p,conf_line_buffer);
     printf("##  %s ##\n",conf_line_buffer);
     get_seq_string(conf_line_buffer,' ',3,cluster_id);
+    printf("##  %s ##\n",cluster_id);
     fgetline(file_p,conf_line_buffer);
     printf("##  %s ##\n",conf_line_buffer);
     get_seq_string(conf_line_buffer,' ',3,region_id);
+    printf("##  %s ##\n",region_id);
     fgetline(file_p,conf_line_buffer);
     printf("##  %s ##\n",conf_line_buffer);
     get_seq_string(conf_line_buffer,' ',3,zone_id);
+    printf("##  %s ##\n",zone_id);
 //    fscanf(file_p,"%s%s%s%c",conf_param_buffer1,conf_param_buffer2,cluster_id);
 //    fscanf(file_p,"%s%s%s%c",conf_param_buffer1,conf_param_buffer2,region_id);
 //    fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,zone_id);
