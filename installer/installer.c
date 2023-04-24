@@ -244,6 +244,31 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
             return -1;
         }
     }
+    if(system("which curl >> /dev/null 2>&1")!=0){
+        printf("[ -INFO- ] Curl not found. Install the utility 'curl' by yum|dnf|apt ...\n");
+        if(system("which yum >> /dev/null 2>&1")==0){
+            if(system("yum install curl -y >> /dev/null 2>&1")!=0){
+                printf("[ FATAL: ] Failed to install curl. Please install it first. Exit now.\n");
+                return -1;
+            }
+        }
+        else if(system("which dnf >> /dev/null 2>&1")==0){
+            if(system("dnf install curl -y >> /dev/null 2>&1")!=0){
+                printf("[ FATAL: ] Failed to install curl. Please install it first. Exit now.\n");
+                return -1;
+            }
+        }
+        else if(system("which apt >> /dev/null 2>&1")==0){
+            if(system("apt install curl -y >> /dev/null 2>&1")!=0){
+                printf("[ FATAL: ] Failed to install curl. Please install it first. Exit now.\n");
+                return -1;
+            }
+        }
+        else{
+            printf("[ FATAL: ] YUM|DNF|APT not found. Please install the 'curl' manually. Exit now.\n");
+            return -1;
+        }
+    }
     printf("[ -INFO- ] Checking and cleaning up current environment ...\n");
     system("rm -rf /home/hpc-now/ >> /dev/null 2>&1");
     system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
