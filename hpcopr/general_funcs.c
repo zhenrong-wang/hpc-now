@@ -31,9 +31,12 @@ void reset_string(char* orig_string){
         *(orig_string+i)='\0';
     }
 }
-// Potential risk: If the line_string array is not long enough, there might be overflow! The users should make sure the defined line_string is longer enough
-// and the actually file doesn't contain lines longer than the LINE_LENGTH macro!
-// This function works, but not general or perfect enough!
+/* 
+ * Potential risk: If the line_string array is not long enough, there might be overflow! The users should make sure the defined line_string is long enough
+ * and the actual file doesn't contain lines longer than the LINE_LENGTH macro!
+ * This function works, but not general or perfect at all! 
+ * SEGMENT FAULT MAY OCCUR IF YOU DO NOT USE THIS FUNCTION PROPERLY!
+ */
 int fgetline(FILE* file_p, char* line_string){
     char ch;
     int i=0;
@@ -51,7 +54,7 @@ int fgetline(FILE* file_p, char* line_string){
     if(i==LINE_LENGTH){
         return -127; // When returns this value, the outcome will be unpredictable.
     }
-    *(line_string+i)='\0'; // This is dangerous. You need to guarantee the length of line_string is long enough!
+    *(line_string+i)='\0'; // This is very dangerous. You need to guarantee the length of line_string is long enough!
     if(ch==EOF&&i==0){
         return 1;
     }
