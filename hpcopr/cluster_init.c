@@ -1296,6 +1296,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf("##  %s ##\n",conf_line_buffer);
     printf("%s --------\n%d\n\n",conf_line_buffer,i);
     for(j=i;j>0;j--){
+        printf(",,,,%d,,,,\n",conf_line_buffer[22+i-j]);
         node_num+=(conf_line_buffer[22+i-j]-'0')*pow(10,j-1);
     }
     reset_string(conf_line_buffer);
