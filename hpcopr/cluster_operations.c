@@ -252,7 +252,7 @@ int list_all_cluster_names(void){
 int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
     char registry_line[LINE_LENGTH_SHORT]="";
-    char temp_cluster_name[CLUSTER_ID_LENGTH_MAX]="";
+    char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_cluster_workdir[DIR_LENGTH]="";
     if(file_p==NULL){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
@@ -274,10 +274,14 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         while(fgetline(file_p,registry_line)==0){
+//            printf("test### %s\n",registry_line);
             if(strlen(registry_line)!=0){
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
+//                printf("test### %s\n",registry_line);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
+//                printf("test### %s\n",registry_line);
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
+//                printf("test### %s\n",registry_line);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
                     printf("|  active: <> %s | ",temp_cluster_name);
                 }

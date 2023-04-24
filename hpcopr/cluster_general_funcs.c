@@ -258,6 +258,9 @@ int get_compute_node_num(char* currentstate_file, char* option){
         return -1;
     }
     FILE* file_p=fopen(currentstate_file,"r");
+    if(file_p==NULL){
+        return -1;
+    }
     char buffer[64]="";
     int i,node_num=0;
     int node_num_on=0;
