@@ -14,4 +14,11 @@ int reset_locations(void);
 int show_locations(void);
 int configure_locations(void);
 
+int valid_ver_or_not(char* version_code);
+int valid_md5_or_not(char* md5_input);
+int get_vers_md5_vars(void);
+int reset_vers_md5_vars(void);
+int show_vers_md5vars(int file_flag);
+int configure_vers_md5_vars(char* import_filename, int interactive_flag);
+
 #endif

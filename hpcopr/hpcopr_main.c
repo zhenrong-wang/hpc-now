@@ -38,6 +38,21 @@ int TF_LOC_FLAG=0;
 int CODE_LOC_FLAG=0;
 int NOW_CRYPTO_LOC_FLAG=0;
 
+char terraform_version_var[16]="";
+char ali_tf_plugin_version_var[16]="";
+char qcloud_tf_plugin_version_var[16]="";
+char aws_tf_plugin_version_var[16]="";
+
+char md5_tf_exec_var[64]="";
+char md5_tf_zip_var[64]="";
+char md5_now_crypto_var[64]="";
+char md5_ali_tf_var[64]="";
+char md5_ali_tf_zip_var[64]="";
+char md5_qcloud_tf_var[64]="";
+char md5_qcloud_tf_zip_var[64]="";
+char md5_aws_tf_var[64]="";
+char md5_aws_tf_zip_var[64]="";
+
 int main(int argc, char* argv[]){
     char* crypto_keyfile=CRYPTO_KEY_FILE;
     char buffer1[64];
@@ -181,10 +196,41 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
 
+    if(strcmp(argv[1],"configmd5")==0){
+        if(argc==2){
+            run_flag=configure_vers_md5_vars("",0);
+        }
+        else{
+            run_flag=configure_vers_md5_vars(argv[2],1);
+        }
+        print_tail();
+        system_cleanup();
+        return run_flag;
+    }
+
     if(strcmp(argv[1],"resetloc")==0){
         run_flag=reset_locations();
-        printf("[ -INFO- ] The locations have been reset to the default ones.\n");
-        show_locations();
+        if(run_flag==0){
+            printf("[ -INFO- ] The locations have been reset to the default.\n");
+            show_locations();
+        }
+        else{
+            printf("[ FATAL: ] Internal error, failed to reset the locations.\n");
+        }
+        print_tail();
+        system_cleanup();
+        return run_flag;
+    }
+
+    if(strcmp(argv[1],"resetmd5")==0){
+        run_flag=reset_vers_md5_vars();
+        if(run_flag==0){
+            printf("[ -INFO- ] The versions and md5sum have been reset to the default.\n");
+            show_vers_md5vars(0);
+        }
+        else{
+            printf("[ FATAL: ] Internal error, failed to reset the versions and md5sum.\n");
+        }
         print_tail();
         system_cleanup();
         return run_flag;
@@ -192,6 +238,13 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"showloc")==0){
         run_flag=show_locations();
+        print_tail();
+        system_cleanup();
+        return run_flag;
+    }
+
+    if(strcmp(argv[1],"showmd5")==0){
+        run_flag=show_vers_md5vars(0);
         print_tail();
         system_cleanup();
         return run_flag;

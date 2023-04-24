@@ -23,6 +23,21 @@ extern int TF_LOC_FLAG;
 extern int CODE_LOC_FLAG;
 extern int NOW_CRYPTO_LOC_FLAG;
 
+extern char terraform_version_var[16];
+extern char ali_tf_plugin_version_var[16];
+extern char qcloud_tf_plugin_version_var[16];
+extern char aws_tf_plugin_version_var[16];
+
+extern char md5_tf_exec_var[64];
+extern char md5_tf_zip_var[64];
+extern char md5_now_crypto_var[64];
+extern char md5_ali_tf_var[64];
+extern char md5_ali_tf_zip_var[64];
+extern char md5_qcloud_tf_var[64];
+extern char md5_qcloud_tf_zip_var[64];
+extern char md5_aws_tf_var[64];
+extern char md5_aws_tf_zip_var[64];
+
 int check_internet(void){
 #ifdef _WIN32
     if(system("ping -n 2 www.baidu.com > nul 2>&1")!=0){
@@ -158,17 +173,13 @@ int check_and_install_prerequisitions(int repair_flag){
     flag=get_locations();
     if(flag!=0){
         if(flag==-1){
-            printf("[ -INFO- ] Location configuration file not found. For developers, we recommend\n");
+            printf("[ -INFO- ] Location configuration file not found.\n");
         }
         else{
-            printf("[ -INFO- ] Location configuration format incorrect. For developers, we recommend\n");
+            printf("[ -INFO- ] Location configuration format incorrect.\n");
         }
-        printf("|          to exit and run the command 'hpcopr configloc' to provide your locations\n");
-        printf("|          For general users without self-defined locations, we recommend to use\n");
-        printf("|          the default ones.\n");
-        printf("|          For more information, please check the documentations.\n");
-        printf("[ -INFO- ] Would you like to use the default locations? Only 'y-e-s' is accepted as\n");
-        printf("|          a confirmation. \n");
+        printf("[ -INFO- ] Would you like to use the default settings? Only 'y-e-s' is accepted\n");
+        printf("|          to confirm. \n");
         printf("[ INPUT: ] ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
@@ -180,9 +191,8 @@ int check_and_install_prerequisitions(int repair_flag){
             get_locations();
         }
         else{
-            printf("[ -INFO- ] You chose to deny this operation. Would you like to specify the locations\n");
-            printf("|          immediately? Only 'y-e-s' is accepted as a confirmation. You can also run\n");
-            printf("|          the command 'hpcopr configloc' later to update the locations.\n");
+            printf("[ -INFO- ] Will not use the default settings. Would you like to configure now?\n");
+            printf("|          Only 'y-e-s' is accepted to confirm.\n");
             printf("[ INPUT: ] ");
             fflush(stdin);
             scanf("%s",doubleconfirm);
@@ -200,8 +210,53 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     if(repair_flag==1){
         printf("|        v Location configuration has been repaired.\n");
+        printf("|        . Checking and repairing the versions and md5sums ...\n");
+        if(reset_vers_md5_vars()!=0){
+            printf("[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n");
+            return -1;
+        }
+        printf("|        v Versions and md5sums been repaired.\n");
         printf("|        . Checking and repairing the key directories and files ...\n");
     }
+    flag=get_vers_md5_vars();
+    if(flag!=0){
+        if(flag==-1){
+            printf("[ -INFO- ] Versions and md5sums configuration file not found.\n");
+        }
+        else{
+            printf("[ -INFO- ] Versions and md5sums configuration format incorrect.\n");
+        }
+        printf("[ -INFO- ] Would you like to use the default settings? Only 'y-e-s' is accepted\n");
+        printf("|          to confirm. \n");
+        printf("[ INPUT: ] ");
+        fflush(stdin);
+        scanf("%s",doubleconfirm);
+        if(strcmp(doubleconfirm,"y-e-s")==0){
+            if(reset_vers_md5_vars()!=0){
+                printf("[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n");
+                return 2;
+            }
+            get_vers_md5_vars();
+        }
+        else{
+            printf("[ -INFO- ] Will not use the default settings. Would you like to configure now?\n");
+            printf("|          Only 'y-e-s' is accepted as a confirmation.\n");
+            printf("[ INPUT: ] ");
+            fflush(stdin);
+            scanf("%s",doubleconfirm);
+            if(strcmp(doubleconfirm,"y-e-s")!=0){
+                printf("[ -INFO- ] You chose to deny this operation. Exit now.\n");
+                return 2;
+            }
+            else{
+                if(configure_locations()!=0){
+                    printf("[ FATAL: ] Failed to configure the locations. Exit now.\n");
+                    return 2;
+                }
+            }
+        }
+    }
+
 #ifdef _WIN32
     system("mkdir c:\\programdata\\hpc-now\\ > nul 2>&1");
     system("attrib +h +s +r c:\\programdata\\hpc-now > nul 2>&1");
@@ -210,7 +265,7 @@ int check_and_install_prerequisitions(int repair_flag){
     system("del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
     sprintf(cmdline,"mkdir %s\\terraform.d\\ > nul 2>&1",appdata_dir);
     system(cmdline);
-    sprintf(filename_temp_zip,"%s\\terraform.d\\terraform_%s_windows_amd64.zip",appdata_dir,TERRAFORM_VERSION);
+    sprintf(filename_temp_zip,"%s\\terraform.d\\terraform_%s_windows_amd64.zip",appdata_dir,terraform_version_var);
 #elif __linux__
     system("rm -rf /home/hpc-now/.ssh/known_hosts >> /dev/null 2>&1");
     system("mkdir -p /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1");
@@ -218,7 +273,7 @@ int check_and_install_prerequisitions(int repair_flag){
     system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
     sprintf(cmdline,"mkdir -p /home/hpc-now/.terraform.d/ >> /dev/null 2>&1");
     system(cmdline);
-    sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform_%s_linux_amd64.zip",TERRAFORM_VERSION);
+    sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform_%s_linux_amd64.zip",terraform_version_var);
 #elif __APPLE__
     system("rm -rf /Users/hpc-now/.ssh/known_hosts >> /dev/null 2>&1");
     system("mkdir -p /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1");
@@ -226,30 +281,30 @@ int check_and_install_prerequisitions(int repair_flag){
     system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
     sprintf(cmdline,"mkdir -p /Users/hpc-now/.terraform.d/ >> /dev/null 2>&1");
     system(cmdline);
-    sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform_%s_darwin_amd64.zip",TERRAFORM_VERSION);
+    sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform_%s_darwin_amd64.zip",terraform_version_var);
 #endif
-    file_check_flag=file_validity_check(tf_exec,force_repair_flag,MD5_TF_EXEC);
+    file_check_flag=file_validity_check(tf_exec,force_repair_flag,md5_tf_exec_var);
     if(file_check_flag==1){
-        file_check_flag=file_validity_check(filename_temp_zip,repair_flag,MD5_TF_ZIP);
+        file_check_flag=file_validity_check(filename_temp_zip,repair_flag,md5_tf_zip_var);
         if(file_check_flag==1){
             printf("[ -INFO- ] Downloading/Copying the Terraform binary ...\n");
             printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
             if(TF_LOC_FLAG==1){
 #ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform_%s_windows_amd64.zip %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
+                sprintf(cmdline,"copy /y %s\\tf-win\\terraform_%s_windows_amd64.zip %s",URL_TF_ROOT,terraform_version_var,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform_%s_linux_amd64.zip %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform_%s_linux_amd64.zip %s",URL_TF_ROOT,terraform_version_var,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform_%s_darwin_amd64.zip %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform_%s_darwin_amd64.zip %s",URL_TF_ROOT,terraform_version_var,filename_temp_zip);
 #endif
             }
             else{
 #ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform_%s_windows_amd64.zip -o %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-win/terraform_%s_windows_amd64.zip -o %s",URL_TF_ROOT,terraform_version_var,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform_%s_linux_amd64.zip -o %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-linux/terraform_%s_linux_amd64.zip -o %s",URL_TF_ROOT,terraform_version_var,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform_%s_darwin_amd64.zip -o %s",URL_TF_ROOT,TERRAFORM_VERSION,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-darwin/terraform_%s_darwin_amd64.zip -o %s",URL_TF_ROOT,terraform_version_var,filename_temp_zip);
 #endif
             }
             flag=system(cmdline);
@@ -283,10 +338,10 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 
     if(repair_flag!=0){
-        file_check_flag=file_validity_check(crypto_exec,repair_flag,MD5_NOW_CRYPTO);
+        file_check_flag=file_validity_check(crypto_exec,repair_flag,md5_now_crypto_var);
     }
     else{
-        file_check_flag=file_validity_check(crypto_exec,0,MD5_NOW_CRYPTO);
+        file_check_flag=file_validity_check(crypto_exec,0,md5_now_crypto_var);
     }
     if(file_check_flag==1){
         printf("[ -INFO- ] Downloading/Copying the now-crypto.exe ...\n");
@@ -377,11 +432,11 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
     sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform-provider-alicloud_%s_darwin_amd64.zip",ali_plugin_version);
 #endif
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,MD5_ALI_TF);
+    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_ali_tf_var);
     if(file_check_flag==1){
         printf("[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/3) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,MD5_ALI_TF_ZIP);
+        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_ali_tf_zip_var);
         if(file_check_flag==1){
             if(TF_LOC_FLAG==1){
 #ifdef _WIN32
@@ -440,11 +495,11 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
     sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform-provider-tencentcloud_%s_darwin_amd64.zip",qcloud_plugin_version);
 #endif
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,MD5_QCLOUD_TF);
+    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_qcloud_tf_var);
     if(file_check_flag==1){
         printf("[ -INFO- ] Downloading/Copying the cloud Terraform providers (2/3) ...\n");
         printf("           Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,MD5_QCLOUD_TF_ZIP);
+        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_qcloud_tf_zip_var);
         if(file_check_flag==1){
             if(TF_LOC_FLAG==1){
 #ifdef _WIN32
@@ -502,11 +557,11 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
     sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform-provider-aws_%s_x5_darwin_amd64.zip",aws_plugin_version);
 #endif
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,MD5_AWS_TF);
+    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_aws_tf_var);
     if(file_check_flag==1){
         printf("[ -INFO- ] Downloading/Copying the cloud Terraform providers (3/3) ...\n");
         printf("           Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,MD5_AWS_TF_ZIP);
+        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_aws_tf_zip_var);
         if(file_check_flag==1){
             if(TF_LOC_FLAG==1){
 #ifdef _WIN32
