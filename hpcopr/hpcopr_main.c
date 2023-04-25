@@ -89,7 +89,7 @@ int main(int argc, char* argv[]){
         printf("[ FATAL: ] You *MUST* switch to the user 'hpc-now' to operate cloud clusters.\n");
         printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:\n");
         printf("|          1. Run CMD by typing cmd in the Windows Search box\n");
-        printf("|          2. hpcopr ls-clusters   (You will see all the clusters)");
+        printf("|          2. hpcopr ls-clusters   (You will see all the clusters)\n");
         printf("[ FATAL: ] Exit now.\n");
         print_tail();
         return -1;
