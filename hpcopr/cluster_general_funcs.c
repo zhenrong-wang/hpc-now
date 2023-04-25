@@ -960,14 +960,14 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     FILE* file_p_2=fopen(compute_template,"r");
     if(file_p_2==NULL){
         fclose(file_p);
-        return 1;
+        return 2;
     }
     fclose(file_p_2);
     FILE* file_p_3=fopen(cloud_flag_file,"r");
     if(file_p_3==NULL){
         fclose(file_p);
         fclose(file_p_2);
-        return 1;
+        return 3;
     }
     fgetline(file_p_3,cloud_flag);
     fclose(file_p_3);

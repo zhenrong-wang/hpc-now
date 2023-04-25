@@ -366,6 +366,7 @@ int main(int argc, char* argv[]){
         printf("|\n");
         run_flag=graph(workdir,crypto_keyfile,0);
         if(run_flag!=0){
+            printf("\n\nERROR %d\n\n",run_flag);
             print_empty_cluster_info();
         }
         print_tail();
