@@ -599,7 +599,7 @@ int check_and_install_prerequisitions(int repair_flag){
     system(cmdline);
 #endif
     
-    if(force_repair_flag==1){
+    if(file_exist_or_not(usage_logfile)!=0){
         file_p=fopen(usage_logfile,"w+");
         fprintf(file_p,"UCID,CLOUD_VENDOR,NODE_NAME,vCPU,START_DATE,START_TIME,STOP_DATE,STOP_TIME,RUNNING_HOURS,CPUxHOURS,CPU_MODEL,CLOUD_REGION\n");
         fclose(file_p);
