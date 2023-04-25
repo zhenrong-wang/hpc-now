@@ -170,18 +170,3 @@ int read_license(void){
     }
     return 0;
 }
-
-int confirm_to_operate_cluster(char* current_cluster_name){
-    char doubleconfirm[64]="";
-    printf("[ -INFO- ] You are operating the cluster %s now, which may affect all\n",current_cluster_name);
-    printf("|          the jobs running on this cluster. Please input 'y-e-s' to continue.\n");
-    printf("[ INPUT: ] ");
-    fflush(stdin);
-    scanf("%s",doubleconfirm);
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
-        printf("|          Nothing changed. Exit now.\n");
-        return 1;
-    }
-    return 0;
-}

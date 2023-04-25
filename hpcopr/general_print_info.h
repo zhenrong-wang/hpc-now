@@ -16,6 +16,5 @@ void print_header(void);
 void print_tail(void);
 void print_about(void);
 int read_license(void);
-int confirm_to_operate_cluster(char* current_cluster_name);
 
 #endif

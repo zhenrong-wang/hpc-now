@@ -1285,3 +1285,30 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
     system(cmdline);
     return 0;
 }
+
+int confirm_to_operate_cluster(char* current_cluster_name){
+    char doubleconfirm[64]="";
+    printf("[ -INFO- ] You are operating the cluster %s now, which may affect all\n",current_cluster_name);
+    printf("|          the jobs running on this cluster. Please input 'y-e-s' to continue.\n");
+    printf("[ INPUT: ] ");
+    fflush(stdin);
+    scanf("%s",doubleconfirm);
+    if(strcmp(doubleconfirm,"y-e-s")!=0){
+        printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+        printf("|          Nothing changed. Exit now.\n");
+        return 1;
+    }
+    return 0;
+}
+
+int check_down_nodes(char* workdir){
+    char statefile[FILENAME_LENGTH];
+    char stackdir[DIR_LENGTH];
+    create_and_get_stackdir(workdir,stackdir);
+#ifdef _WIN32
+    sprintf(statefile,"%s\\currentstate",stackdir);
+#else
+    sprintf(statefile,"%s/currentstate",stackdir);
+#endif
+    return get_compute_node_num(statefile,"down");
+}

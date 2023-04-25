@@ -32,5 +32,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
 int get_vault_info(char* workdir, char* crypto_keyfile);
 int check_pslock(char* workdir);
+int confirm_to_operate_cluster(char* current_cluster_name);
+int check_down_nodes(char* workdir);
 
 #endif

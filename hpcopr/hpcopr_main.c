@@ -628,7 +628,13 @@ int main(int argc, char* argv[]){
                 print_tail();
                 write_log(current_cluster_name,operation_log,argv[1],-1);
                 system_cleanup();
-                return -1;
+                return -17;
+            }
+            if(strcmp(argv[1],"reconfc")==0&&check_down_nodes(workdir)!=0&&strcmp(cloud_flag,"CLOUD_B")==0){
+                printf("[ -WARN- ] You need to turn on all the compute nodes before reconfiguring them.\n");
+            }
+            if(strcmp(argv[1],"reconfm")==0&&cluster_asleep_or_not(workdir)==0){
+                printf("[ -WARN- ] You needd to wake up the cluster before reconfiguring the master node.\n");
             }
             print_tail();
             write_log(current_cluster_name,operation_log,argv[1],17);
@@ -639,9 +645,7 @@ int main(int argc, char* argv[]){
 
     if(cluster_asleep_or_not(workdir)==0){
         printf("[ FATAL: ] The current cluster is in the state of hibernation. No modification is\n");
-        printf("|          permitted. Please run 'wakeup' command first to modify the cluster. You\n");
-        printf("|          can run 'wakeup minimal' option to turn the management nodes on, or\n");
-        printf("|          run 'wakeup all' option to turn the whole cluster on. Exit now.\n");
+        printf("|          permitted. Please run 'wakeup' command first. Exit now.\n");
         print_tail();
         write_log(current_cluster_name,operation_log,argv[1],13);
         system_cleanup();
@@ -675,6 +679,13 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     if(strcmp(argv[1],"addc")==0){
+        if(check_down_nodes(workdir)!=0){
+            printf("[ FATAL: ] You need to turn all compute node(s) on before adding new nodes.\n");
+            printf("|          Exit now.\n");
+            print_tail();
+            system_cleanup();
+            return 1;
+        }
         if(argc==2){
             printf("[ FATAL: ] You need to specify a number (range: 1-%d) as the second parameter.\n",MAXIMUM_ADD_NODE_NUMBER);
             printf("|          Exit now.\n");
@@ -733,6 +744,15 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     if(strcmp(argv[1],"reconfc")==0){
+        if(strcmp(cloud_flag,"CLOUD_B")==0){
+            if(check_down_nodes(workdir)!=0){
+                printf("[ FATAL: ] You need to turn all compute node(s) on before reconfiguring them.\n");
+                printf("|          Exit now.\n");
+                print_tail();
+                system_cleanup();
+                return 1;
+            }
+        }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
             print_tail();
             system_cleanup();
