@@ -835,14 +835,14 @@ void archive_log(char* logdir, char* logfile){
         sprintf(cmdline,"type %s\\tf_prep.log >> %s\\tf_prep_archive.log 2>nul",logdir,logdir);
     }
     else{
-        sprintf(cmdline,"type %s >> %s\\tf_prep_archive.log 2>nul",logfile,logdir);
+        sprintf(cmdline,"type %s >> %s.archive 2>nul",logfile,logfile);
     }
 #else
     if(strlen(logfile)==0){
         sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log 2>/dev/null",logdir,logdir);
     }
     else{
-        sprintf(cmdline,"cat %s >> %s/tf_prep_archive.log 2>/dev/null",logfile,logdir);
+        sprintf(cmdline,"cat %s >> %s.archive 2>/dev/null",logfile,logfile);
     }
 #endif
     system(cmdline);

@@ -796,10 +796,10 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
     if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)!=0){
-        printf("[ -WARN- ] Some problems occoured. Retrying destroy now (1/2)...");
+        printf("[ -WARN- ] Some problems occoured. Retrying destroy now (1/2)...\n");
         sleep(2);
         if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)!=0){
-            printf("[ -WARN- ] Some problems occoured. Retrying destroy now (2/2)...");
+            printf("[ -WARN- ] Some problems occoured. Retrying destroy now (2/2)...\n");
             sleep(2);
             if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)!=0){
                 printf("[ FATAL: ] Failed to destroy your cluster. This usually caused by either Terraform or\n");
@@ -881,7 +881,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
 #endif
     printf("[ -DONE- ] The whole cluster has been destroyed successfully.\n");
     printf("|          You can run 'init' command to rebuild it.\n");
-    printf("|          However, all the data has been erased permenantly.\n");
+    printf("|          However, all the data has been erased.\n");
     return 0;
 }
 
@@ -1449,6 +1449,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     char node_name_temp[32]="";
     char* tf_exec=TERRAFORM_EXEC;
     int cpu_core_num=0;
+    char cmdline[CMDLINE_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
 #ifdef _WIN32
@@ -1520,9 +1521,12 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
                     sprintf(filename_temp2,"%s\\hpc_stack_compute%d.tf",stackdir,i);
+                    sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp2,filename_temp2);
 #else
                     sprintf(filename_temp2,"%s/hpc_stack_compute%d.tf",stackdir,i);
+                    sprintf(cmdline,"/bin/copy %s %s.bak >>/dev/null 2>&1",filename_temp2,filename_temp2);
 #endif
+                    system(cmdline);
                     global_replace(filename_temp2,"cpu_threads_per_core = 2","cpu_threads_per_core = 1");
                 }
             }
@@ -1530,13 +1534,27 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
                     sprintf(filename_temp2,"%s\\hpc_stack_compute%d.tf",stackdir,i);
+                    sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp2,filename_temp2);
 #else
                     sprintf(filename_temp2,"%s/hpc_stack_compute%d.tf",stackdir,i);
+                    sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/null 2>&1",filename_temp2,filename_temp2);
 #endif
+                    system(cmdline);
                     global_replace(filename_temp2,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
                 }
             }
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+                for(i=1;i<compute_node_num+1;i++){
+#ifdef _WIN32
+                    sprintf(cmdline,"move /y %s.bak %s > nul 2>&1",filename_temp2,filename_temp2);
+#else
+                    sprintf(cmdline,"mv %s.bak %s >>/dev/null 2>&1",filename_temp2,filename_temp2);
+#endif
+                    system(cmdline);
+                }
+                if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+                    return -127;
+                }
                 return -1;
             }
             for(i=1;i<compute_node_num+1;i++){
@@ -1563,9 +1581,12 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
             sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
+            sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp,filename_temp);
 #else
             sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
+            sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/nul 2>&1",filename_temp,filename_temp);
 #endif
+            system(cmdline);
             global_replace(filename_temp,prev_config,new_config);
         }
     }
@@ -1573,9 +1594,12 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
             sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
+            sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp,filename_temp);
 #else
             sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
+            sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/nul 2>&1",filename_temp,filename_temp);
 #endif
+            system(cmdline);
             global_replace(filename_temp,prev_config,new_config);
             cpu_core_num=get_cpu_num(new_config)/2;
             find_and_get(filename_temp,"cpu_core_count =","","",1,"cpu_core_count =","","",' ',3,string_temp);
@@ -1605,6 +1629,17 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         }
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+        for(i=1;i<compute_node_num+1;i++){
+#ifdef _WIN32
+            sprintf(cmdline,"move /y %s.bak %s > nul 2>&1",filename_temp2,filename_temp2);
+#else
+            sprintf(cmdline,"mv %s.bak %s >>/dev/null 2>&1",filename_temp2,filename_temp2);
+#endif
+            system(cmdline);
+        }
+        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            return -127;
+        }
         return -1;
     }
     for(i=1;i<compute_node_num+1;i++){
@@ -1624,6 +1659,12 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         update_usage_summary(workdir,crypto_keyfile,node_name_temp,"start");
     }
     printf("[ -DONE- ] Congratulations! The compute nodes have been reconfigured.\n");
+#ifdef _WIN32
+    sprintf(cmdline,"del /q /f %s\\*bak > nul 2>&1",stackdir);
+#else
+    sprintf(cmdline,"del /q /f %s/*bak >/dev/null 2>&1",stackdir);
+#endif
+    system(cmdline);
     return 0;
 }
 
@@ -1631,6 +1672,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
     char string_temp[64]="";
     char prev_config[16]="";
     char buffer1[64]="";
@@ -1650,7 +1692,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
 
     decrypt_files(workdir,crypto_keyfile);
 #ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);
+    sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);z
 #else
     sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
 #endif
@@ -1678,11 +1720,23 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     }
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\hpc_stack_master.tf",stackdir);
+    sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp,filename_temp);
 #else
     sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
+    sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/null 2>&1",filename_temp,filename_temp);
 #endif
+    system(cmdline);
     global_replace(filename_temp,prev_config,new_config);
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+#ifdef _WIN32
+        sprintf(cmdline,"move /y %s.bak %s > nul 2>&1",filename_temp,filename_temp);
+#else
+        sprintf(cmdline,"mv %s.bak %s >>/dev/null 2>&1",filename_temp,filename_temp);
+#endif
+        system(cmdline);
+        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            return -127;
+        }
         return -3;
     }
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
@@ -1750,7 +1804,6 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
         printf("|          Exit now.\n");
         return 1;
     }
-
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(filename_temp,"all");
