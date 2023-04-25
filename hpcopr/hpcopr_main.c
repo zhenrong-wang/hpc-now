@@ -621,7 +621,7 @@ int main(int argc, char* argv[]){
 
     if(argc==2){
         if(strcmp(argv[1],"reconfc")==0||strcmp(argv[1],"reconfm")==0){
-            printf("[ -INFO- ] Available configuration list:\n");
+            printf("[ -INFO- ] Available configuration list:\n|\n");
             if(check_reconfigure_list(workdir)!=0){
                 printf("[ FATAL: ] Internal error. Please submit an issue to the community\n");
                 printf("|          for technical supports. Exit now.\n");
@@ -631,10 +631,10 @@ int main(int argc, char* argv[]){
                 return -17;
             }
             if(strcmp(argv[1],"reconfc")==0&&check_down_nodes(workdir)!=0&&strcmp(cloud_flag,"CLOUD_B")==0){
-                printf("[ -WARN- ] You need to turn on all the compute nodes before reconfiguring them.\n");
+                printf("|\n[ -WARN- ] You need to turn on all the compute nodes before reconfiguring them.\n");
             }
             if(strcmp(argv[1],"reconfm")==0&&cluster_asleep_or_not(workdir)==0){
-                printf("[ -WARN- ] You needd to wake up the cluster before reconfiguring the master node.\n");
+                printf("|\n[ -WARN- ] You needd to wake up the cluster before reconfiguring the master node.\n");
             }
             print_tail();
             write_log(current_cluster_name,operation_log,argv[1],17);

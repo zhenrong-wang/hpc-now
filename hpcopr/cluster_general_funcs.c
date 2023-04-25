@@ -1078,6 +1078,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
+    int run_flag=0;
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
     sprintf(logdir,"%s\\log\\",workdir);
@@ -1091,14 +1092,13 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
 #else
     sprintf(cmdline,"cd %s && echo yes | %s %s > %s/tf_prep.log 2>%s &",stackdir,tf_exec,execution_name,logdir,error_log);
 #endif
-    system(cmdline);
+    run_flag=system(cmdline);
     printf("[ -INFO- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
     printf("|          Operation Command: %s. Error log: %s\n",execution_name,OPERATION_ERROR_LOG);
     wait_for_complete(workdir,execution_name,error_log);
-    if(file_empty_or_not(error_log)!=0){
+    if(file_empty_or_not(error_log)!=0||run_flag!=0){
         printf("[ FATAL: ] Failed to operate the cluster. Operation command: %s. Exit now.\n",execution_name);
         archive_log(logdir,error_log);
-        delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
     return 0;

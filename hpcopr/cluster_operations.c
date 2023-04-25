@@ -806,6 +806,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
                 printf("|          the providers developed and maintained by cloud service providers.\n");
                 printf("|          You *MUST* manually destroy the remaining cloud resources of this cluster.\n");
                 printf("|          Exit now.\n");
+                delete_decrypted_files(workdir,crypto_keyfile);
                 return -1;
             }
         }
@@ -952,11 +953,10 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             sprintf(string_temp,"[ -INFO- ] You specified to delete %d from %d compute node(s).",del_num,compute_node_num);
             printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
-
 #ifdef _WIN32
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
                 system("del /f /s /q c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
-                sprintf(cmdline,"move %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1", stackdir,i);
+                sprintf(cmdline,"move /y %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1", stackdir,i);
                 system(cmdline);
             }
 #elif __APPLE__
@@ -972,7 +972,26 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 system(cmdline);
             }
 #endif
-            if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){             
+#ifdef _WIN32
+                for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
+                    sprintf(cmdline,"move /y c:\\programdata\\hpc-now\\.destroyed\\hpc_stack_compute%d.tf %s\\ > nul 2>&1", i,stackdir);
+                }
+#elif __APPLE__
+                for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
+                    sprintf(cmdline,"mv /Applications/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
+                }
+#elif __linux__
+                for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
+                    sprintf(cmdline,"mv /usr/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
+                }
+#endif
+                system(cmdline);
+                if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+                    delete_decrypted_files(workdir,crypto_keyfile);
+                    return -127;
+                }
+                delete_decrypted_files(workdir,crypto_keyfile);
                 return -1;
             }
             printf("[ -INFO- ] After the cluster operation:\n|\n");
@@ -981,12 +1000,12 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             remote_copy(workdir,sshkey_dir,"hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
-            delete_decrypted_files(workdir,crypto_keyfile);
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
                 sprintf(string_temp,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
             }
             printf("[ -DONE- ] Congratulations! The specified compute nodes have been deleted.\n");
+            delete_decrypted_files(workdir,crypto_keyfile);
             return 0;
         }
     }
@@ -1013,6 +1032,24 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     }
 #endif
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+#ifdef _WIN32
+        for(i=1;i<compute_node_num+1;i++){
+            sprintf(cmdline,"move /y c:\\programdata\\hpc-now\\.destroyed\\hpc_stack_compute%d.tf %s\\ > nul 2>&1", i,stackdir);
+        }
+#elif __APPLE__
+        for(i=1;i<compute_node_num+1;i++){
+            sprintf(cmdline,"mv /Applications/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
+        }
+#elif __linux__
+        for(i=1;i<compute_node_num+1;i++){
+            sprintf(cmdline,"mv /usr/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
+        }
+#endif
+        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            delete_decrypted_files(workdir,crypto_keyfile);
+            return -127;
+        }
+        delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n|\n");
@@ -1021,12 +1058,12 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
-    delete_decrypted_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
         sprintf(string_temp,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
     printf("[ -DONE- ] Congratulations! The specified compute nodes have been deleted.\n");
+    delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
 
@@ -1088,6 +1125,18 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         global_replace(filename_temp,"comp1",string_temp);
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+        for(i=0;i<add_number;i++){
+#ifdef _WIN32
+            sprintf(cmdline,"del /f /q %s\\hpc_stack_compute%d.tf",stackdir,i+1+current_node_num);
+#else
+            sprintf(filename_temp,"rm -rf %s/hpc_stack_compute%d.tf",stackdir,i+1+current_node_num);
+#endif
+        }
+        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            delete_decrypted_files(workdir,crypto_keyfile);
+            return -127;
+        }
+        delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n|\n");
@@ -1096,12 +1145,12 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
-    delete_decrypted_files(workdir,crypto_keyfile);
     for(i=0;i<add_number;i++){
         sprintf(string_temp,"compute%d",current_node_num+i+1);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
     }
     printf("[ -DONE- ] Congratulations! The specified compute nodes have been added.\n");
+    delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
 
@@ -1199,6 +1248,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 }
             }
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+                delete_decrypted_files(workdir,crypto_keyfile);
                 return -1;
             }
             printf("[ -INFO- ] After the cluster operation:\n|\n");
@@ -1236,6 +1286,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         }
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+        delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n|\n");
@@ -1244,12 +1295,12 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     remote_copy(workdir,sshkey_dir,"hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
-    delete_decrypted_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
         sprintf(string_temp,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
     printf("[ -DONE- ] Congratulations! The specified compute nodes have been shut down.\n");
+    delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
 
@@ -1356,6 +1407,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 }
             }
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+                delete_decrypted_files(workdir,crypto_keyfile);
                 return -1;
             }
             printf("[ -INFO- ] After the cluster operation:\n|\n");
@@ -1393,6 +1445,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         }
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+        delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
     printf("[ -INFO- ] After the cluster operation:\n|\n");
@@ -1425,7 +1478,7 @@ int check_reconfigure_list(char* workdir){
         return -1;
     }
     while(fgetline(file_p,single_line)==0){
-        printf("%s\n",single_line);
+        printf("|          %s\n",single_line);
     }
     return 0;
 }
@@ -1553,8 +1606,10 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                     system(cmdline);
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+                    delete_decrypted_files(workdir,crypto_keyfile);
                     return -127;
                 }
+                delete_decrypted_files(workdir,crypto_keyfile);
                 return -1;
             }
             for(i=1;i<compute_node_num+1;i++){
@@ -1568,12 +1623,12 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             remote_copy(workdir,sshkey_dir,"hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
-            delete_decrypted_files(workdir,crypto_keyfile);
             for(i=1;i<compute_node_num+1;i++){
                 sprintf(node_name_temp,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,node_name_temp,"start");
             }
             printf("[ -DONE- ] Congratulations! The compute nodes have been reconfigured.\n");
+            delete_decrypted_files(workdir,crypto_keyfile);
             return 0;
         }
     }
@@ -1638,8 +1693,10 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             system(cmdline);
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            delete_decrypted_files(workdir,crypto_keyfile);
             return -127;
         }
+        delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
     for(i=1;i<compute_node_num+1;i++){
@@ -1735,8 +1792,10 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
 #endif
         system(cmdline);
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            delete_decrypted_files(workdir,crypto_keyfile);
             return -127;
         }
+        delete_decrypted_files(workdir,crypto_keyfile);
         return -3;
     }
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
@@ -1869,6 +1928,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
         }
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+        delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_C")==0){
@@ -1876,24 +1936,23 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
             usleep(1000000);
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            delete_decrypted_files(workdir,crypto_keyfile);
             return -1;
         }
     }
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    delete_decrypted_files(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
     update_usage_summary(workdir,crypto_keyfile,"database","stop");
     update_usage_summary(workdir,crypto_keyfile,"natgw","stop");
-
     for(i=1;i<compute_node_num+1;i++){
         sprintf(string_temp,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
-
     update_cluster_summary(workdir,crypto_keyfile);
     printf("[ -DONE- ] Congratulations! All the nodes of the current cluster have been shutdown.\n");
+    delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
 
@@ -2012,6 +2071,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
         }
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+        delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_C")==0){
@@ -2019,13 +2079,13 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
             usleep(1000000);
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+            delete_decrypted_files(workdir,crypto_keyfile);
             return -1;
         }
     }
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    delete_decrypted_files(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","start");
     update_usage_summary(workdir,crypto_keyfile,"database","start");
     update_usage_summary(workdir,crypto_keyfile,"natgw","start");
@@ -2037,6 +2097,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     }
     update_cluster_summary(workdir,crypto_keyfile);
     printf("[ -DONE- ] Congratulations! The cluster is in the state of running.\n");
+    delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
 
