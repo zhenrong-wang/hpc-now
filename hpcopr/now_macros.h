@@ -8,8 +8,10 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0031"
-#define INSTALLER_VERSION_CODE "0.2.0.0031"
+#define CORE_VERSION_CODE "0.2.0.0032"
+#define INSTALLER_VERSION_CODE "0.2.0.0032"
+
+#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/hpcopr-dev/"
 
 /*
 
@@ -68,8 +70,6 @@ Terraform version is relatively stable. Here we use 1.4.5*/
 #define ALL_CLUSTER_REGISTRY "c:\\programdata\\hpc-now\\etc\\all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "c:\\programdata\\hpc-now\\etc\\current_cluster.dat"
 
-#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_windows_amd64.exe"
-
 #elif __linux__
 #define CRYPTO_KEY_FILE "/usr/.hpc-now/.now_crypto_seed.lock"
 #define USAGE_LOG_FILE "/usr/.hpc-now/.now-cluster-usage.log"
@@ -88,8 +88,6 @@ Terraform version is relatively stable. Here we use 1.4.5*/
 #define ALL_CLUSTER_REGISTRY "/usr/.hpc-now/.etc/.all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "/usr/.hpc-now/.etc/current_cluster.dat"
 
-#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_linux_amd64"
-
 #elif __APPLE__
 #define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock"
 #define USAGE_LOG_FILE "/Applications/.hpc-now/.now-cluster-usage.log"
@@ -107,8 +105,6 @@ Terraform version is relatively stable. Here we use 1.4.5*/
 #define VERS_MD5_CONF_FILE "/Applications/.hpc-now/.etc/md5values.conf"
 #define ALL_CLUSTER_REGISTRY "/Applications/.hpc-now/.etc/.all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "/Applications/.hpc-now/.etc/current_cluster.dat"
-
-#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
 
 #endif
 

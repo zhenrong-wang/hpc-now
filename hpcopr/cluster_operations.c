@@ -449,7 +449,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         if(strcmp(doubleconfirm,"y-e-s")!=0){
             printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
             printf("|          Nothing changed.\n");
-            return 1;
+            return 3;
         }
     }
     printf("[ -INFO- ] Using the cluster name %s.\n",real_cluster_name);
@@ -494,7 +494,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
 #endif
         system(cmdline);
-        return 1;
+        return 5;
     }
 #ifdef _WIN32
     sprintf(new_workdir,"%s\\workdir\\%s\\",HPC_NOW_ROOT_DIR,real_cluster_name);

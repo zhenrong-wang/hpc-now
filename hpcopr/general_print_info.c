@@ -40,6 +40,7 @@ void print_help(void){
     printf("| Commands:\n");
     printf("+ I  . Multi-Cluster Management:\n");
     printf("| * You DO NOT need to switch to a cluster first.\n");
+    printf("|  envcheck    : Quickly check the running environment.\n");
     printf("|  new-cluster : Create a new cluster, you can specify the cluster name, extra\n");
     printf("|                *optional* parameters are accepted:\n");
     printf("|                  PARAM1 - cluster name (A-Z | a-z | 0-9 | - , %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);

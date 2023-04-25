@@ -337,7 +337,13 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
 #endif
     if(hpcopr_loc_flag==-1){
         printf("[ -INFO- ] Will download the main program 'hpcopr' from the default URL.\n");
-        sprintf(cmdline1,"curl -s %s -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+#ifdef _WIN32
+        sprintf(cmdline1,"curl -s %shpcopr-win.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+#elif __linux__
+        sprintf(cmdline1,"curl -s %shpcopr-lin.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+#elif __APPLE__
+        sprintf(cmdline1,"curl -s %shpcopr-dwn.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+#endif
     }
     else if(hpcopr_loc_flag==0){
         printf("[ -INFO- ] Will download the main program 'hpcopr' from the specified URL.\n");
@@ -353,7 +359,13 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     }
     if(crypto_loc_flag==-1){
         printf("[ -INFO- ] Will download the component 'now-crypto.exe' from the default URL.\n");
-        sprintf(cmdline2,"curl -s %s -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
+#ifdef _WIN32
+        sprintf(cmdline2,"curl -s %snow-crypto-win.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
+#elif __linux__
+        sprintf(cmdline2,"curl -s %snow-crypto-lin.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
+#elif __APPLE__
+        sprintf(cmdline2,"curl -s %snow-crypto-dwn.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
+#endif
     }
     else if(crypto_loc_flag==0){
         printf("[ -INFO- ] Will download the component 'now-crypto.exe' from the specified URL.\n");
@@ -543,14 +555,19 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     int run_flag1,run_flag2;
 #ifdef _WIN32
     if(system("net user hpc-now > nul 2>&1")!=0){
-#else
-    if(system("id hpc-now >> /dev/null 2>&1")!=0){
-#endif
         printf("[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
         printf("|          installed. Please install it first in order to update.\n");
         printf("[ FATAL: ] Exit now.\n");
         return 1;
     }
+#else
+    if(system("id hpc-now >> /dev/null 2>&1")!=0){
+        printf("[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
+        printf("|          installed. Please install it first in order to update.\n");
+        printf("[ FATAL: ] Exit now.\n");
+        return 1;
+    }
+#endif
     printf("|*                                C A U T I O N !                                  \n");
     printf("|*                                                                                 \n");
     printf("|*     YOU ARE UPDATING THE HPC-NOW SERVICES. THE CURRENT hpcopr BINARY WILL BE    \n");
@@ -573,7 +590,13 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
 #endif
     if(hpcopr_loc_flag==-1){
         printf("[ -INFO- ] Will download the main program 'hpcopr' from the default URL.\n");
-        sprintf(cmdline1,"curl -s %s -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+#ifdef _WIN32
+        sprintf(cmdline1,"curl -s %shpcopr-win.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+#elif __linux__
+        sprintf(cmdline1,"curl -s %shpcopr-lin.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+#elif __APPLE__
+        sprintf(cmdline1,"curl -s %shpcopr-dwn.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+#endif
     }
     else if(hpcopr_loc_flag==0){
         printf("[ -INFO- ] Will download the main program 'hpcopr' from the specified URL.\n");
@@ -589,7 +612,13 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     }
     if(crypto_loc_flag==-1){
         printf("[ -INFO- ] Will download the component 'now-crypto.exe' from the default URL.\n");
-        sprintf(cmdline2,"curl -s %s -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
+#ifdef _WIN32
+        sprintf(cmdline2,"curl -s %snow-crypto-win.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
+#elif __linux__
+        sprintf(cmdline2,"curl -s %snow-crypto-lin.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
+#elif __APPLE__
+        sprintf(cmdline2,"curl -s %snow-crypto-dwn.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
+#endif
     }
     else if(crypto_loc_flag==0){
         printf("[ -INFO- ] Will download the component 'now-crypto.exe' from the specified URL.\n");

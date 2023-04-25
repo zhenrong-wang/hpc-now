@@ -421,67 +421,62 @@ int reset_locations(void){
 }
 
 int get_locations(void){
+    char location_line[LOCATION_LENGTH_EXTENDED]="";
     char header_string[64]="";
     char loc_string[LOCATION_LENGTH]="";
     char title_string[256]="";
     FILE* file_p=NULL;
-    int line_location_conf_file=0;
     int i;
     if(file_exist_or_not(LOCATION_CONF_FILE)!=0){
         return -1;
     }
-    line_location_conf_file=file_empty_or_not(LOCATION_CONF_FILE);
-    if(file_exist_or_not(LOCATION_CONF_FILE)==0&&line_location_conf_file==LOCATION_CONF_TOTAL_LINES){
-        file_p=fopen(LOCATION_CONF_FILE,"r");
-        fgetline(file_p,title_string);
-        for(i=0;i<LOCATION_LINES;i++){
-            fscanf(file_p,"%s%s",header_string,loc_string);
-            if(strcmp(header_string,"BINARY_AND_PROVIDERS_LOC_ROOT")==0){
-                strcpy(url_tf_root_var,loc_string);
+    fgetline(file_p,title_string);
+    while(fgetline(file_p,location_line)==0){
+        get_seq_string(location_line,' ',1,header_string);
+        get_seq_string(location_line,' ',2,loc_string);
+        if(strcmp(header_string,"BINARY_AND_PROVIDERS_LOC_ROOT")==0){
+            strcpy(url_tf_root_var,loc_string);
 #ifdef _WIN32
-                if(loc_string[1]==':'){
-                    tf_loc_flag_var=1;
-                }
+            if(loc_string[1]==':'){
+                tf_loc_flag_var=1;
+            }
 #else
-                if(loc_string[0]=='/'){
-                    tf_loc_flag_var=1;
-                }
+            if(loc_string[0]=='/'){
+                tf_loc_flag_var=1;
+            }
 #endif
-            }
-            else if(strcmp(header_string,"CLOUD_IAC_TEMPLATES_LOC_ROOT")==0){
-                strcpy(url_code_root_var,loc_string);
-#ifdef _WIN32
-                if(loc_string[1]==':'){
-                    code_loc_flag_var=1;
-                }
-#else
-                if(loc_string[0]=='/'){
-                    code_loc_flag_var=1;
-                }
-#endif
-            }
-            else if(strcmp(header_string,"ONLINE_SHELL_SCRIPTS_LOC_ROOT")==0){
-                strcpy(url_shell_scripts_var,loc_string);
-            }
-            else if(strcmp(header_string,"NOW_CRYPTO_BINARY_LOC")==0){
-                strcpy(url_now_crypto_var,loc_string);
-#ifdef _WIN32
-                if(loc_string[1]==':'){
-                    now_crypto_loc_flag_var=1;
-                }
-#else
-                if(loc_string[0]=='/'){
-                    now_crypto_loc_flag_var=1;
-                }
-#endif
-            }
         }
-        fclose(file_p);
-        return 0;
-    }
-    else{
-        return 1;
-    }
+        else if(strcmp(header_string,"CLOUD_IAC_TEMPLATES_LOC_ROOT")==0){
+            strcpy(url_code_root_var,loc_string);
+#ifdef _WIN32
+            if(loc_string[1]==':'){
+                code_loc_flag_var=1;
+            }
+#else
+            if(loc_string[0]=='/'){
+                code_loc_flag_var=1;
+            }
+#endif
+        }
+        else if(strcmp(header_string,"ONLINE_SHELL_SCRIPTS_LOC_ROOT")==0){
+            strcpy(url_shell_scripts_var,loc_string);
+        }
+        else if(strcmp(header_string,"NOW_CRYPTO_BINARY_LOC")==0){
+            strcpy(url_now_crypto_var,loc_string);
+#ifdef _WIN32
+            if(loc_string[1]==':'){
+                now_crypto_loc_flag_var=1;
+            }
+#else
+            if(loc_string[0]=='/'){
+                now_crypto_loc_flag_var=1;
+            }
+#endif
+        }
+        else{
+            continue;
+        }
+    }       
 }
 
 int show_locations(void){

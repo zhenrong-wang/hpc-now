@@ -110,13 +110,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(currentstate,"%s/currentstate",stackdir);
     sprintf(compute_template,"%s/compute_template",stackdir);
 #endif
-
-    if(file_exist_or_not(currentstate)==0||file_exist_or_not(compute_template)==0){
-        printf("[ FATAL: ] It seems the cluster is already in place. If you do want to rebuild the\n");
-        printf("|          cluster, please run 'destroy' command and retry 'init' command.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
     printf("[ START: ] Start initializing the cluster ...\n");
 #ifdef _WIN32
     if(folder_exist_or_not(stackdir)==1){
@@ -1023,13 +1016,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sprintf(currentstate,"%s/currentstate",stackdir);
     sprintf(compute_template,"%s/compute_template",stackdir);
 #endif
-
-    if(file_exist_or_not(currentstate)==0||file_exist_or_not(compute_template)==0){
-        printf("[ FATAL: ] It seems the cluster is already in place. If you do want to rebuild the\n");
-        printf("|          cluster, please run 'destroy' command and retry 'init' command.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
     printf("[ START: ] Start initializing the cluster ...\n");
 #ifdef _WIN32
     if(folder_exist_or_not(stackdir)==1){
@@ -1810,12 +1796,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(currentstate,"%s/currentstate",stackdir);
     sprintf(compute_template,"%s/compute_template",stackdir);
 #endif
-    if(file_exist_or_not(currentstate)==0||file_exist_or_not(compute_template)==0){
-        printf("[ FATAL: ] It seems the cluster is already in place. If you do want to rebuild it\n");
-        printf("|          please run 'destroy' command and retry 'init' command.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
     printf("[ START: ] Start initializing the cluster ...\n");
 #ifdef _WIN32
     if(folder_exist_or_not(stackdir)==1){

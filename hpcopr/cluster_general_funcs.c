@@ -1021,18 +1021,26 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
 }
 
 int cluster_empty_or_not(char* workdir){
-    char filename_temp[FILENAME_LENGTH]="";
+    char statefile[FILENAME_LENGTH]="";
+    char templatefile[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
-    sprintf(filename_temp,"%s\\currentstate",stackdir);
+    sprintf(statefile,"%s\\currentstate",stackdir);
+    sprintf(templatefile,"%s\\compute_template",stackdir);
 #else
-    sprintf(filename_temp,"%s/currentstate",stackdir);
+    sprintf(statefile,"%s/currentstate",stackdir);
+    sprintf(templatefile,"%s/compute_template",stackdir);
 #endif
-    if(file_exist_or_not(filename_temp)!=0||file_empty_or_not(filename_temp)==0){
+    if(file_exist_or_not(statefile)!=0&&file_exist_or_not(templatefile)!=0){
         return 0;
     }
-    return 1;
+    else if(file_empty_or_not(statefile)==0&&file_empty_or_not(templatefile)==0){
+        return 0;
+    }
+    else{
+        return 1;
+    }
 }
 
 int cluster_asleep_or_not(char* workdir){
