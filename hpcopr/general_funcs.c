@@ -114,7 +114,6 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     char temp_string[LINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    int getline_flag;
     int i,j,k,line_length;
 
     sprintf(filename_temp,"%s.tmp",filename);
