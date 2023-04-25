@@ -44,15 +44,7 @@
 
 ### 4. 如何构建
 
-本项目的源代码尚未做比较好的拆分、注释也正在逐步添加中。由于源代码以整文件的方式发布，其构建过程也比较基础，无需复杂的依赖和 make 工具链支持。您只需要运行 gcc 或 clang 命令即可完成构建。以核心程序 hpcopr 为例：
-
-请从本项目的 dev 分支下载源代码至本地目录（ 例如 /home/ABC/hpc-now-dev/ ），使用 'cd' 命令切换至代码所在的本地目录之后：
-
--  **Microsoft Windows用户** ，请运行：`gcc hpcopr-main.c -Wall -o hpcopr.exe`
--  **GNU/Linux用户** ，请运行：`gcc hpcopr-main.c -Wall -lm -o hpcopr`
--  **macOS用户** ，请运行：`clang hpcopr-main.c -Wall -o hpcopr`
-
-此外，还需以相似的方式编译 now-crypto.c 和 installer-OS-VERSION.c，并将生成的可执行文件命名为  **now-crypto.exe**  和  **installer_OS_VERSION.exe** 。
+该部分内容正在更新。如您需要现在构建，请与我们取得联系。
 
 ### 5. 如何使用
 
