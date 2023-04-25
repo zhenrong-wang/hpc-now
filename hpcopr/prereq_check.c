@@ -216,6 +216,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        v Location configuration has been repaired.\n");
         printf("|        . Checking and repairing the versions and md5sums ...\n");
         if(reset_vers_md5_vars()!=0){
+            printf("\n%d,,,,,,,\n",reset_vers_md5_vars());
             printf("[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n");
             return -1;
         }

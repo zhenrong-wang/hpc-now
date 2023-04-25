@@ -425,14 +425,15 @@ int get_locations(void){
     char header_string[64]="";
     char loc_string[LOCATION_LENGTH]="";
     char title_string[256]="";
-    FILE* file_p=NULL;
     if(file_exist_or_not(LOCATION_CONF_FILE)!=0){
         return -1;
     }
+    FILE* file_p=fopen(LOCATION_CONF_FILE,"r");
     fgetline(file_p,title_string);
     while(fgetline(file_p,location_line)==0){
         get_seq_string(location_line,' ',1,header_string);
         get_seq_string(location_line,' ',2,loc_string);
+//        printf("\n%s\t%s\t%s\n\n",location_line,header_string,loc_string);
         if(strcmp(header_string,"BINARY_AND_PROVIDERS_LOC_ROOT")==0){
             strcpy(url_tf_root_var,loc_string);
 #ifdef _WIN32
@@ -476,6 +477,7 @@ int get_locations(void){
             continue;
         }
     }
+//    printf("\n%s  ----\n%s  ----\n%s  ----\n%s  ----\n",url_now_crypto_var,url_tf_root_var,url_shell_scripts_var,url_code_root_var);
     return 0;       
 }
 
