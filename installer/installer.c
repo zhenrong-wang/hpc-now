@@ -27,14 +27,19 @@
 int check_internet_installer(void){
 #ifdef _WIN32
     if(system("ping -n 2 www.baidu.com > nul 2>&1")!=0){
-#else
-    if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
-#endif
         printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
         printf("|          or check your internet connectivity and retry later.\n");
         printf("[ FATAL: ] Exit now.\n");
         return 1;
     }
+#else
+    if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
+        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
+        printf("|          or check your internet connectivity and retry later.\n");
+        printf("[ FATAL: ] Exit now.\n");
+        return 1;
+    }
+#endif
     return 0;
 }
 
@@ -495,7 +500,7 @@ int uninstall_services(void){
     printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
+    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     printf("[ INPUT: ] ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
@@ -519,7 +524,6 @@ int uninstall_services(void){
     system("dscl . -delete /Groups/hpc-now >> /dev/null 2>&1");
     system("rm -rf /Users/hpc-now >> /dev/null 2>&1");
 #elif __linux__
-    printf("[ -INFO- ] UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
     system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
     system("userdel -f -r hpc-now >> /dev/null 2>&1");

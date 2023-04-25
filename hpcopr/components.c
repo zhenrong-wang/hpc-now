@@ -13,13 +13,13 @@
 #include "general_funcs.h"
 #include "components.h"
 
-extern char URL_CODE_ROOT[LOCATION_LENGTH];
-extern char URL_TF_ROOT[LOCATION_LENGTH];
-extern char URL_SHELL_SCRIPTS[LOCATION_LENGTH];
-extern char URL_NOW_CRYPTO[LOCATION_LENGTH];
-extern int TF_LOC_FLAG;
-extern int CODE_LOC_FLAG;
-extern int NOW_CRYPTO_LOC_FLAG;
+extern char url_code_root_var[LOCATION_LENGTH];
+extern char url_tf_root_var[LOCATION_LENGTH];
+extern char url_shell_scripts_var[LOCATION_LENGTH];
+extern char url_now_crypto_var[LOCATION_LENGTH];
+extern int tf_loc_flag_var;
+extern int code_loc_flag_var;
+extern int now_crypto_loc_flag_var;
 
 extern char terraform_version_var[16];
 extern char ali_tf_plugin_version_var[16];
@@ -106,44 +106,81 @@ int get_vers_md5_vars(void){
     if(fgetline(file_p,vers_md5_line)!=0){
         return 1;
     }
+//    printf("\n\n%s\n\n",vers_md5_line);
     get_seq_string(vers_md5_line,'\t',1,terraform_version_var);
     get_seq_string(vers_md5_line,'\t',2,ali_tf_plugin_version_var);
     get_seq_string(vers_md5_line,'\t',3,qcloud_tf_plugin_version_var);
     get_seq_string(vers_md5_line,'\t',4,aws_tf_plugin_version_var);
     if(valid_ver_or_not(terraform_version_var)!=0||valid_ver_or_not(ali_tf_plugin_version_var)!=0||valid_ver_or_not(qcloud_tf_plugin_version_var)!=0||valid_ver_or_not(aws_tf_plugin_version_var)!=0){
+//        printf("%s||%s||%s||%sERROR HERE!.2.\n",terraform_version_var,ali_tf_plugin_version_var,qcloud_tf_plugin_version_var,aws_tf_plugin_version_var);
+//        printf("ERROR HERE!.1.\n");
         return 1;
     }
     while(fgetline(file_p,vers_md5_line)==0){
         get_seq_string(vers_md5_line,' ',1,header);
         get_seq_string(vers_md5_line,' ',2,tail);
-        if(valid_md5_or_not(tail)!=0){
-            return 1;
-        }
+//        printf("%s||%s||%sCHECKIT HERE!.2.\n\n",vers_md5_line,header,tail);
         if(strcmp(header,"TF_EXEC:")==0){
+            if(valid_md5_or_not(tail)!=0){
+//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
+                return 1;
+            }
             strcpy(md5_tf_exec_var,tail);
         }
         else if(strcmp(header,"TF_EXEC_ZIP:")==0){
+            if(valid_md5_or_not(tail)!=0){
+//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
+                return 1;
+            }            
             strcpy(md5_tf_zip_var,tail);
         }
         else if(strcmp(header,"NOW_CRYPTO:")==0){
+            if(valid_md5_or_not(tail)!=0){
+//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
+                return 1;
+            }
             strcpy(md5_now_crypto_var,tail);
         }
         else if(strcmp(header,"ALI_TF:")==0){
+            if(valid_md5_or_not(tail)!=0){
+//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
+                return 1;
+            }
             strcpy(md5_ali_tf_var,tail);
         }
         else if(strcmp(header,"ALI_TF_ZIP:")==0){
+            if(valid_md5_or_not(tail)!=0){
+//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
+                return 1;
+            }
             strcpy(md5_ali_tf_zip_var,tail);
         }
         else if(strcmp(header,"QCLOUD_TF:")==0){
+            if(valid_md5_or_not(tail)!=0){
+//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
+                return 1;
+            }
             strcpy(md5_qcloud_tf_var,tail);
         }
         else if(strcmp(header,"QCLOUD_TF_ZIP:")==0){
+            if(valid_md5_or_not(tail)!=0){
+//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
+                return 1;
+            }
             strcpy(md5_qcloud_tf_zip_var,tail);
         }
         else if(strcmp(header,"AWS_TF:")==0){
+            if(valid_md5_or_not(tail)!=0){
+//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
+                return 1;
+            }
             strcpy(md5_aws_tf_var,tail);
         }
         else if(strcmp(header,"AWS_TF_ZIP:")==0){
+            if(valid_md5_or_not(tail)!=0){
+//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
+                return 1;
+            }
             strcpy(md5_aws_tf_zip_var,tail);
         }
         else{
@@ -156,149 +193,157 @@ int get_vers_md5_vars(void){
 int reset_vers_md5_vars(void){
     FILE* file_p=fopen(VERS_MD5_CONF_FILE,"w+");
     if(file_p==NULL){
+        return -127;
+    }
+    char tf_md5_file[FILENAME_LENGTH]="";
+    char crypto_md5_file[FILENAME_LENGTH]="";
+    char cmdline1[CMDLINE_LENGTH]="";
+    char cmdline2[CMDLINE_LENGTH]="";
+    char md5_line[LINE_LENGTH_SHORT]="";
+    FILE* file_p_1=NULL;
+    FILE* file_p_2=NULL;
+    if(strlen(url_tf_root_var)==0||strlen(url_now_crypto_var)==0){
+        fclose(file_p);
         return -1;
     }
-    fprintf(file_p,"%s\t%s\t\t%s\t\t%s\n",TERRAFORM_VERSION,ALI_TF_PLUGIN_VERSION,QCLOUD_TF_PLUGIN_VERSION,AWS_TF_PLUGIN_VERSION);
+    if(tf_loc_flag_var==1&&now_crypto_loc_flag_var==1){
 #ifdef _WIN32
-    fprintf(file_p,"TF_EXEC:       %s\n",MD5_TF_EXEC_WIN);
-    fprintf(file_p,"TF_EXEC_ZIP:   %s\n",MD5_TF_ZIP_WIN);
-    fprintf(file_p,"NOW_CRYPTO:    %s\n",MD5_NOW_CRYPTO_WIN);
-    fprintf(file_p,"ALI_TF:        %s\n",MD5_ALI_TF_WIN);
-    fprintf(file_p,"ALI_TF_ZIP:    %s\n",MD5_ALI_TF_ZIP_WIN);
-    fprintf(file_p,"QCLOUD_TF:     %s\n",MD5_QCLOUD_TF_WIN);
-    fprintf(file_p,"QCLOUD_TF_ZIP: %s\n",MD5_QCLOUD_TF_ZIP_WIN);
-    fprintf(file_p,"AWS_TF:        %s\n",MD5_AWS_TF_WIN);
-    fprintf(file_p,"AWS_TF_ZIP:    %s\n",MD5_AWS_TF_ZIP_WIN);
+        sprintf(tf_md5_file,"%s\\tf-md5-win.dat",url_tf_root_var);
+        sprintf(crypto_md5_file,"%s\\crypto-md5-win.dat",url_now_crypto_var);
+        if(file_exist_or_not(tf_md5_file)!=0||file_exist_or_not(crypto_md5_file)!=0){
+            fclose(file_p);
+            return -1;
+        }
 #elif __linux__
-    fprintf(file_p,"TF_EXEC:       %s\n",MD5_TF_EXEC_LIN);
-    fprintf(file_p,"TF_EXEC_ZIP:   %s\n",MD5_TF_ZIP_LIN);
-    fprintf(file_p,"NOW_CRYPTO:    %s\n",MD5_NOW_CRYPTO_LIN);
-    fprintf(file_p,"ALI_TF:        %s\n",MD5_ALI_TF_LIN);
-    fprintf(file_p,"ALI_TF_ZIP:    %s\n",MD5_ALI_TF_ZIP_LIN);
-    fprintf(file_p,"QCLOUD_TF:     %s\n",MD5_QCLOUD_TF_LIN);
-    fprintf(file_p,"QCLOUD_TF_ZIP: %s\n",MD5_QCLOUD_TF_ZIP_LIN);
-    fprintf(file_p,"AWS_TF:        %s\n",MD5_AWS_TF_LIN);
-    fprintf(file_p,"AWS_TF_ZIP:    %s\n",MD5_AWS_TF_ZIP_LIN);
+        sprintf(tf_md5_file,"%s/tf-md5-lin.dat",url_tf_root_var);
+        sprintf(crypto_md5_file,"%s/crypto-md5-lin.dat",url_now_crypto_var);
+        if(file_exist_or_not(tf_md5_file)!=0||file_exist_or_not(crypto_md5_file)!=0){
+            fclose(file_p);
+            return -1;
+        }
 #elif __APPLE__
-    fprintf(file_p,"TF_EXEC:       %s\n",MD5_TF_EXEC_DWN);
-    fprintf(file_p,"TF_EXEC_ZIP:   %s\n",MD5_TF_ZIP_DWN);
-    fprintf(file_p,"NOW_CRYPTO:    %s\n",MD5_NOW_CRYPTO_DWN);
-    fprintf(file_p,"ALI_TF:        %s\n",MD5_ALI_TF_DWN);
-    fprintf(file_p,"ALI_TF_ZIP:    %s\n",MD5_ALI_TF_ZIP_DWN);
-    fprintf(file_p,"QCLOUD_TF:     %s\n",MD5_QCLOUD_TF_LIN);
-    fprintf(file_p,"QCLOUD_TF_ZIP: %s\n",MD5_QCLOUD_TF_ZIP_DWN);
-    fprintf(file_p,"AWS_TF:        %s\n",MD5_AWS_TF_DWN);
-    fprintf(file_p,"AWS_TF_ZIP:    %s\n",MD5_AWS_TF_ZIP_DWN);
+        sprintf(tf_md5_file,"%s/tf-md5-dwn.dat",url_tf_root_var);
+        sprintf(crypto_md5_file,"%s/crypto-md5-dwn.dat",url_now_crypto_var);
+        if(file_exist_or_not(tf_md5_file)!=0||file_exist_or_not(crypto_md5_file)!=0){
+            fclose(file_p);
+            return -1;
+        }
 #endif
-    fclose(file_p);
+        file_p_1=fopen(tf_md5_file,"r");
+        file_p_2=fopen(crypto_md5_file,"r");
+        while(fgetline(file_p_1,md5_line)==0){
+            fprintf(file_p,"%s\n",md5_line);
+        }
+        fclose(file_p_1);
+        fgetline(file_p_2,md5_line);
+        fprintf(file_p,"%s\n",md5_line);
+        fclose(file_p_2);
+        fclose(file_p);
+    }
+    else if(tf_loc_flag_var==0&&now_crypto_loc_flag_var==0){
+        fclose(file_p);
+#ifdef _WIN32
+        sprintf(cmdline1,"curl -s %stf-md5-win.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
+        sprintf(cmdline2,"curl -s %scrypto-md5-win.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
+#elif __linux__
+        sprintf(cmdline1,"curl -s %stf-md5-lin.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
+        sprintf(cmdline2,"curl -s %scrypto-md5-lin.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
+#elif __APPLE__
+        sprintf(cmdline1,"curl -s %stf-md5-dwn.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
+        sprintf(cmdline2,"curl -s %scrypto-md5-dwn.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
+#endif
+        if(system(cmdline1)!=0||system(cmdline2)!=0){
+            return 1;
+        }
+    }
+    else if(tf_loc_flag_var==0&&now_crypto_loc_flag_var==1){
+        fclose(file_p);
+#ifdef _WIN32
+        sprintf(cmdline1,"curl -s %stf-md5-win.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
+#elif __linux__
+        sprintf(cmdline1,"curl -s %stf-md5-lin.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
+#elif __APPLE__
+        sprintf(cmdline1,"curl -s %stf-md5-dwn.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
+#endif
+        if(system(cmdline1)!=0){
+            return 1;
+        }
+#ifdef _WIN32
+        sprintf(crypto_md5_file,"%s\\crypto-md5-win.dat",url_now_crypto_var);
+        if(file_exist_or_not(crypto_md5_file)!=0){
+            return -1;
+        }
+#elif __linux__
+        sprintf(crypto_md5_file,"%s/crypto-md5-lin.dat",url_now_crypto_var);
+        if(file_exist_or_not(crypto_md5_file)!=0){
+            return -1;
+        }
+#elif __APPLE__
+        sprintf(crypto_md5_file,"%s/crypto-md5-dwn.dat",url_now_crypto_var);
+        if(file_exist_or_not(crypto_md5_file)!=0){
+            return -1;
+        }
+#endif   
+        file_p=fopen(VERS_MD5_CONF_FILE,"a");
+        file_p_2=fopen(crypto_md5_file,"r");
+        fgetline(file_p_2,md5_line);
+        fprintf(file_p,"%s\n",md5_line);
+        fclose(file_p_2);
+        fclose(file_p);
+    }
+    else if(tf_loc_flag_var==1&&now_crypto_loc_flag_var==0){
+#ifdef _WIN32
+        sprintf(tf_md5_file,"%s\\tf-md5-win.dat",url_tf_root_var);
+        if(file_exist_or_not(tf_md5_file)!=0){
+            fclose(file_p);
+            return -1;
+        }
+#elif __linux__
+        sprintf(tf_md5_file,"%s/tf-md5-lin.dat",url_tf_root_var);
+        if(file_exist_or_not(tf_md5_file)!=0){
+            fclose(file_p);
+            return -1;
+        }
+#elif __APPLE__
+        sprintf(tf_md5_file,"%s/tf-md5-dwn.dat",url_tf_root_var);
+        if(file_exist_or_not(tf_md5_file)!=0){
+            fclose(file_p);
+            return -1;
+        }
+#endif
+        file_p_1=fopen(tf_md5_file,"r");
+        while(fgetline(file_p_1,md5_line)==0){
+            fprintf(file_p,"%s\n",md5_line);
+        }
+        fclose(file_p_1);
+        fclose(file_p);
+#ifdef _WIN32
+        sprintf(cmdline2,"curl -s %scrypto-md5-win.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
+#elif __linux__
+        sprintf(cmdline2,"curl -s %scrypto-md5-lin.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
+#elif __APPLE__
+        sprintf(cmdline2,"curl -s %scrypto-md5-dwn.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
+#endif
+        if(system(cmdline2)!=0){
+            return 1;
+        }
+    }
     return 0;
 }
 
-int show_vers_md5vars(int file_flag){
-    if(file_flag!=0){
-        printf("Sample format - Please strictly follow it.\n\n");
-        printf("The versions in the first row must follow the sequence below:\n");
-        printf("1. Terraform binary version\n");
-        printf("2. AliCloud provider version\n");
-        printf("3. TencentCloud provider version.\n");
-        printf("4. AWS provider version.\n\n"); 
-        printf("%s\t%s\t%s\t%s\n",TERRAFORM_VERSION,ALI_TF_PLUGIN_VERSION,QCLOUD_TF_PLUGIN_VERSION,AWS_TF_PLUGIN_VERSION);
-        printf("TF_EXEC:       %s\n",MD5_TF_EXEC_LIN);
-        printf("TF_EXEC_ZIP:   %s\n",MD5_TF_ZIP_LIN);
-        printf("NOW_CRYPTO:    %s\n",MD5_NOW_CRYPTO_LIN);
-        printf("ALI_TF:        %s\n",MD5_ALI_TF_LIN);
-        printf("ALI_TF_ZIP:    %s\n",MD5_ALI_TF_ZIP_LIN);
-        printf("QCLOUD_TF:     %s\n",MD5_QCLOUD_TF_LIN);
-        printf("QCLOUD_TF_ZIP: %s\n",MD5_QCLOUD_TF_ZIP_LIN);
-        printf("AWS_TF:        %s\n",MD5_AWS_TF_LIN);
-        printf("AWS_TF_ZIP:    %s\n",MD5_AWS_TF_ZIP_LIN);
-        return 0;
-    }
+int show_vers_md5vars(void){
     FILE* file_p=fopen(VERS_MD5_CONF_FILE,"r");
     char vers_and_md5[64]="";
     if(file_p==NULL){
         return -1;
     }
-    printf("Terraform\tAliCloud Provider\tTencentCloud Provider\tAWS Provider\n");
+    printf("[ -INFO- ] Versions and md5sum values\n");
+    printf("|  Vers:   Terraform\tAliCloudProvider TencentCloudProvider AWSProvider\n");
     while(fgetline(file_p,vers_and_md5)==0){
-        printf("%s\n",vers_and_md5);
+        printf("|          %s\n",vers_and_md5);
     }
     fclose(file_p);
     return 0;
-}
-
-int configure_vers_md5_vars(char* import_filename, int interactive_flag){
-    char doubleconfirm[64]="";
-    char input_filename[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    if(file_exist_or_not(VERS_MD5_CONF_FILE)!=0){
-        return -1;
-    }
-    printf("\n");
-    printf("|*                                C A U T I O N !                                  \n");
-    printf("|*                                                                                 \n");
-    printf("|*   YOU ARE MODIFYING THE VERSIONS AND RELATED CHECKSUMS OF CORE COMPONENTS!      \n");
-    printf("|*   YOUR NEED TO MAKE SURE:                                                       \n");
-    printf("|*   1. Provide a plain text file which is readable or downloadable.               \n");
-    printf("|*   2. Strictly follow the sample format below:                                   \n\n");
-    show_vers_md5vars(1);
-    printf("\n|*   3. Make *absolutely* sure that the md5sum values matches the actual files.    \n");
-    printf("|*   4. How to create/get the files:                                               \n");
-    printf("|*      -> Download terraform providers from https://releases.hashicorp.com/       \n");
-    printf("|*      -> Download terraform binary from:                                         \n");
-    printf("|*         -> https://developer.hashicorp.com/terraform/downloads                  \n");
-    printf("|*      -> Build your own now-crypto.exe by using gcc or clang.                    \n");
-    printf("|*   4. Build your own component repository (either URL or local path), and the    \n");
-    printf("|*      tree structure is correct! (See the docs), then run 'hpcopr configloc'.    \n");
-    printf("|*                                                                                 \n");
-    printf("|*   You may need to run 'hpcopr repair' if your settings failed to work.          \n\n");
-    printf("|*   Would you like to continue? Only 'y-e-s' is accepted to confirm:\n");
-
-    fflush(stdin);
-    printf("[ INPUT: ] ");
-    scanf("%s",doubleconfirm);
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
-        printf("|          Nothing changed.\n");
-        return 1;
-    }
-    if(interactive_flag==0){
-        printf("[ -INFO- ] Please input the path or URL of your file.\n");
-        printf("[ INPUT: ] ");
-        fflush(stdin);
-        scanf("%s",input_filename);
-    }
-    else{
-        strcpy(input_filename,import_filename);
-    }
-    if(*(input_filename+0)=='h'&&*(input_filename+1)=='t'&&*(input_filename+2)=='t'&&*(input_filename+3)=='p'&&*(input_filename+4)==':'){
-        sprintf(cmdline,"curl -s %s -o %s",input_filename,VERS_MD5_CONF_FILE);
-    }
-    else if(*(input_filename+0)=='h'&&*(input_filename+1)=='t'&&*(input_filename+2)=='t'&&*(input_filename+3)=='p'&&*(input_filename+4)=='s'&&*(input_filename+5)==':'){
-        sprintf(cmdline,"curl -s %s -o %s",input_filename,VERS_MD5_CONF_FILE);
-    }
-    else{
-#ifdef _WIN32
-        sprintf(cmdline,"copy /y %s %s > nul 2>&1",input_filename,VERS_MD5_CONF_FILE);
-#else
-        sprintf(cmdline,"/bin/cp %s %s >> /dev/null 2>&1",input_filename,VERS_MD5_CONF_FILE);
-#endif
-    }
-    if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy the file to the target place. Exit now.\n");
-        return 1;
-    }
-    else{
-        printf("[ -INFO- ] Successfully copied your file to the target place.\n");
-        printf("|          Now checking the formats ...\n"); 
-        if(get_vers_md5_vars()!=0){
-            printf("[ FATAL: ] The format of the provided file is incorrect. Please check and retry.\n");
-            printf("|          You may need to run 'hpcopr repair' later to recover.\n");
-            return 1;
-        }
-        printf("[ -INFO- ] The format of the provided file is correct. Exit now.\n");
-        return 0;
-    }
 }
 
 int valid_loc_format_or_not(char* loc_string){
@@ -392,41 +437,41 @@ int get_locations(void){
         for(i=0;i<LOCATION_LINES;i++){
             fscanf(file_p,"%s%s",header_string,loc_string);
             if(strcmp(header_string,"BINARY_AND_PROVIDERS_LOC_ROOT")==0){
-                strcpy(URL_TF_ROOT,loc_string);
+                strcpy(url_tf_root_var,loc_string);
 #ifdef _WIN32
                 if(loc_string[1]==':'){
-                    TF_LOC_FLAG=1;
+                    tf_loc_flag_var=1;
                 }
 #else
                 if(loc_string[0]=='/'){
-                    TF_LOC_FLAG=1;
+                    tf_loc_flag_var=1;
                 }
 #endif
             }
             else if(strcmp(header_string,"CLOUD_IAC_TEMPLATES_LOC_ROOT")==0){
-                strcpy(URL_CODE_ROOT,loc_string);
+                strcpy(url_code_root_var,loc_string);
 #ifdef _WIN32
                 if(loc_string[1]==':'){
-                    CODE_LOC_FLAG=1;
+                    code_loc_flag_var=1;
                 }
 #else
                 if(loc_string[0]=='/'){
-                    CODE_LOC_FLAG=1;
+                    code_loc_flag_var=1;
                 }
 #endif
             }
             else if(strcmp(header_string,"ONLINE_SHELL_SCRIPTS_LOC_ROOT")==0){
-                strcpy(URL_SHELL_SCRIPTS,loc_string);
+                strcpy(url_shell_scripts_var,loc_string);
             }
             else if(strcmp(header_string,"NOW_CRYPTO_BINARY_LOC")==0){
-                strcpy(URL_NOW_CRYPTO,loc_string);
+                strcpy(url_now_crypto_var,loc_string);
 #ifdef _WIN32
                 if(loc_string[1]==':'){
-                    NOW_CRYPTO_LOC_FLAG=1;
+                    now_crypto_loc_flag_var=1;
                 }
 #else
                 if(loc_string[0]=='/'){
-                    NOW_CRYPTO_LOC_FLAG=1;
+                    now_crypto_loc_flag_var=1;
                 }
 #endif
             }
@@ -485,7 +530,7 @@ int configure_locations(void){
     printf("|*   THE DEFAULT LOCATIONS IF YOUR LOCATIONS FAIL TO WORK PROPERLY!                \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
+    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     fflush(stdin);
     printf("[ INPUT: ] ");
     scanf("%s",doubleconfirm);
@@ -506,7 +551,7 @@ int configure_locations(void){
             printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
         }
         else{
-            strcpy(URL_TF_ROOT,loc_string);
+            strcpy(url_tf_root_var,loc_string);
         }
     }
     printf("[ LOC2/4 ] Please specify the root location of the terraform templates. \n");
@@ -521,7 +566,7 @@ int configure_locations(void){
             printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
         }
         else{
-            strcpy(URL_CODE_ROOT,loc_string);
+            strcpy(url_code_root_var,loc_string);
         }
     }
     printf("[ LOC3/4 ] Please specify the root location of the *online* shell scripts.\n");
@@ -539,7 +584,7 @@ int configure_locations(void){
             printf("[ -WARN- ] This location must be a public URL. Will not modify.\n");
         }
         else{
-            strcpy(URL_SHELL_SCRIPTS,loc_string);
+            strcpy(url_shell_scripts_var,loc_string);
         }
     }
 
@@ -555,7 +600,7 @@ int configure_locations(void){
             printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
         }
         else{
-            strcpy(URL_NOW_CRYPTO,loc_string);
+            strcpy(url_now_crypto_var,loc_string);
         }
     }
 
@@ -566,29 +611,29 @@ int configure_locations(void){
         return -1;
     }
     fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");
-    if(strlen(URL_TF_ROOT)==0){
+    if(strlen(url_tf_root_var)==0){
         fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_TF_ROOT);
     }
     else{
-        fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",URL_TF_ROOT);
+        fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",url_tf_root_var);
     }
-    if(strlen(URL_CODE_ROOT)==0){
+    if(strlen(url_code_root_var)==0){
         fprintf(file_p,"CLOUD_IAC_TEMPLATES_LOC_ROOT %s\n",DEFAULT_URL_CODE_ROOT);
     }
     else{
-        fprintf(file_p,"CLOUD_IAC_TEMPLATES_LOC_ROOT %s\n",URL_CODE_ROOT);
+        fprintf(file_p,"CLOUD_IAC_TEMPLATES_LOC_ROOT %s\n",url_code_root_var);
     }
-    if(strlen(URL_SHELL_SCRIPTS)==0){
+    if(strlen(url_shell_scripts_var)==0){
         fprintf(file_p,"ONLINE_SHELL_SCRIPTS_LOC_ROOT %s\n",DEFAULT_URL_SHELL_SCRIPTS);
     }
     else{
-        fprintf(file_p,"ONLINE_SHELL_SCRIPTS_LOC_ROOT %s\n",URL_SHELL_SCRIPTS);
+        fprintf(file_p,"ONLINE_SHELL_SCRIPTS_LOC_ROOT %s\n",url_shell_scripts_var);
     }
-    if(strlen(URL_NOW_CRYPTO)==0){
+    if(strlen(url_now_crypto_var)==0){
         fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",DEFAULT_URL_NOW_CRYPTO);
     }
     else{
-        fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",URL_NOW_CRYPTO);
+        fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",url_now_crypto_var);
     }
     fclose(file_p);
     printf("[ -DONE- ] Locations are modified and saved. The latest locations:\n");

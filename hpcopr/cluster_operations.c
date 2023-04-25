@@ -22,13 +22,8 @@
 #include "general_print_info.h"
 #include "cluster_operations.h"
 
-extern char URL_CODE_ROOT[LOCATION_LENGTH];
-extern char URL_TF_ROOT[LOCATION_LENGTH];
-extern char URL_SHELL_SCRIPTS[LOCATION_LENGTH];
-extern char URL_NOW_CRYPTO[LOCATION_LENGTH];
-extern int TF_LOC_FLAG;
-extern int CODE_LOC_FLAG;
-extern int NOW_CRYPTO_LOC_FLAG;
+extern char url_code_root_var[LOCATION_LENGTH];
+extern int code_loc_flag_var;
 
 void get_workdir(char* cluster_workdir, char* cluster_name){
 #ifdef _WIN32
@@ -602,7 +597,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
+    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     printf("[ INPUT: ] ");
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
@@ -2006,29 +2001,29 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     char cloud_flag[32]="";
     char doubleconfirm[64]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char URL_AWS_ROOT[LOCATION_LENGTH_EXTENDED]="";
-    char URL_ALICLOUD_ROOT[LOCATION_LENGTH_EXTENDED]="";
-    char URL_QCLOUD_ROOT[LOCATION_LENGTH_EXTENDED]="";
+    char url_aws_root[LOCATION_LENGTH_EXTENDED]="";
+    char url_alicloud_root[LOCATION_LENGTH_EXTENDED]="";
+    char url_qcloud_root[LOCATION_LENGTH_EXTENDED]="";
     char confdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
 
     create_and_get_vaultdir(workdir,vaultdir);
-    if(CODE_LOC_FLAG==1){
+    if(code_loc_flag_var==1){
 #ifdef _WIN32
-        sprintf(URL_AWS_ROOT,"%s\\aws\\",URL_CODE_ROOT);
-        sprintf(URL_QCLOUD_ROOT,"%s\\qcloud\\",URL_CODE_ROOT);
-        sprintf(URL_ALICLOUD_ROOT,"%s\\alicloud\\",URL_CODE_ROOT);
+        sprintf(url_aws_root,"%s\\aws\\",url_code_root_var);
+        sprintf(url_qcloud_root,"%s\\qcloud\\",url_code_root_var);
+        sprintf(url_alicloud_root,"%s\\alicloud\\",url_code_root_var);
 #else
-        sprintf(URL_AWS_ROOT,"%s/aws/",URL_CODE_ROOT);
-        sprintf(URL_QCLOUD_ROOT,"%s/qcloud/",URL_CODE_ROOT);
-        sprintf(URL_ALICLOUD_ROOT,"%s/alicloud/",URL_CODE_ROOT);
+        sprintf(url_aws_root,"%s/aws/",url_code_root_var);
+        sprintf(url_qcloud_root,"%s/qcloud/",url_code_root_var);
+        sprintf(url_alicloud_root,"%s/alicloud/",url_code_root_var);
 #endif
     }
     else{
-        sprintf(URL_AWS_ROOT,"%saws/",URL_CODE_ROOT);
-        sprintf(URL_QCLOUD_ROOT,"%sqcloud/",URL_CODE_ROOT);
-        sprintf(URL_ALICLOUD_ROOT,"%salicloud/",URL_CODE_ROOT);
+        sprintf(url_aws_root,"%saws/",url_code_root_var);
+        sprintf(url_qcloud_root,"%sqcloud/",url_code_root_var);
+        sprintf(url_alicloud_root,"%salicloud/",url_code_root_var);
     }
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
@@ -2058,18 +2053,18 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     }
 #endif
     if(strcmp(cloud_flag,"CLOUD_A")==0){
-        if(CODE_LOC_FLAG==1){
+        if(code_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf > nul 2>&1",URL_ALICLOUD_ROOT,confdir);
+            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf > nul 2>&1",url_alicloud_root,confdir);
 #else
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",URL_ALICLOUD_ROOT,confdir);
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",url_alicloud_root,confdir);
 #endif
         }
         else{
 #ifdef _WIN32
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s\\tf_prep.conf",URL_ALICLOUD_ROOT,confdir);
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s\\tf_prep.conf",url_alicloud_root,confdir);
 #else
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",URL_ALICLOUD_ROOT,confdir);
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",url_alicloud_root,confdir);
 #endif
         }
         if(system(cmdline)!=0){
@@ -2077,18 +2072,18 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        if(CODE_LOC_FLAG==1){
+        if(code_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf >nul 2>&1",URL_QCLOUD_ROOT,confdir);
+            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf >nul 2>&1",url_qcloud_root,confdir);
 #else
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",URL_QCLOUD_ROOT,confdir);
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",url_qcloud_root,confdir);
 #endif
         }
         else{
 #ifdef _WIN32
-        sprintf(cmdline,"curl %stf_prep.conf -s -o %s\\tf_prep.conf",URL_QCLOUD_ROOT,confdir);
+        sprintf(cmdline,"curl %stf_prep.conf -s -o %s\\tf_prep.conf",url_qcloud_root,confdir);
 #else
-        sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",URL_QCLOUD_ROOT,confdir);
+        sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",url_qcloud_root,confdir);
 #endif
         }
         if(system(cmdline)!=0){
@@ -2096,18 +2091,18 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        if(CODE_LOC_FLAG==1){
+        if(code_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf > nul 2>&1",URL_AWS_ROOT,confdir);
+            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf > nul 2>&1",url_aws_root,confdir);
 #else
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",URL_AWS_ROOT,confdir);
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",url_aws_root,confdir);
 #endif
         }
         else{
 #ifdef _WIN32
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s\\tf_prep.conf",URL_AWS_ROOT,confdir);
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s\\tf_prep.conf",url_aws_root,confdir);
 #else
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",URL_AWS_ROOT,confdir);
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",url_aws_root,confdir);
 #endif
         }
         if(system(cmdline)!=0){

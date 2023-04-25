@@ -63,10 +63,6 @@ void print_help(void){
     printf("|                templates and shell scripts.\n");
     printf("|  showloc     : Show the current configured locations.\n");
     printf("|  resetloc    : Reset to the default locations.\n");
-    printf("|  configmd5   : Configure the versions and checksums of terraform, providers, and\n");
-    printf("|              : the now-crypto.exe .\n");
-    printf("|  showmd5     : Show versions and md5 values of the components above.\n");
-    printf("|  resetmd5    : Reset to the default versions and md5 values.\n");
     printf("+ III. Cluster Initialization: \n");
     printf("| * You need to switch to a cluster first. *\n");
     printf("|  new-keypair : *Rotate* a new keypair for an existing cluster. The new keypair\n");

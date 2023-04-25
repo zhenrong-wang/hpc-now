@@ -22,13 +22,9 @@
 #include "general_print_info.h"
 #include "cluster_init.h"
 
-extern char URL_CODE_ROOT[LOCATION_LENGTH];
-extern char URL_TF_ROOT[LOCATION_LENGTH];
-extern char URL_SHELL_SCRIPTS[LOCATION_LENGTH];
-extern char URL_NOW_CRYPTO[LOCATION_LENGTH];
-extern int TF_LOC_FLAG;
-extern int CODE_LOC_FLAG;
-extern int NOW_CRYPTO_LOC_FLAG;
+extern char url_code_root_var[LOCATION_LENGTH];
+extern char url_shell_scripts_var[LOCATION_LENGTH];
+extern int code_loc_flag_var;
 
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile){
     char stackdir[DIR_LENGTH]="";
@@ -45,7 +41,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char filename_temp[FILENAME_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-    char URL_AWS_ROOT[LOCATION_LENGTH_EXTENDED]="";
+    char url_aws_root[LOCATION_LENGTH_EXTENDED]="";
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
@@ -157,29 +153,29 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         system(cmdline);
     }
 #endif
-    if(CODE_LOC_FLAG==1){
+    if(code_loc_flag_var==1){
 #ifdef _WIN32
-        sprintf(URL_AWS_ROOT,"%s\\aws\\",URL_CODE_ROOT);
+        sprintf(url_aws_root,"%s\\aws\\",url_code_root_var);
 #else
-        sprintf(URL_AWS_ROOT,"%s/aws/",URL_CODE_ROOT);
+        sprintf(url_aws_root,"%s/aws/",url_code_root_var);
 #endif
     }
     else{
-        sprintf(URL_AWS_ROOT,"%saws/",URL_CODE_ROOT);
+        sprintf(url_aws_root,"%saws/",url_code_root_var);
     }
 
-    if(CODE_LOC_FLAG==1){
+    if(code_loc_flag_var==1){
 #ifdef _WIN32
-        sprintf(cmdline,"copy /y %s\\region_valid.tf %s\\region_valid.tf > nul 2>&1",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"copy /y %s\\region_valid.tf %s\\region_valid.tf > nul 2>&1",url_aws_root,stackdir);
 #else
-        sprintf(cmdline,"/bin/cp %s/region_valid.tf %s/region_valid.tf >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"/bin/cp %s/region_valid.tf %s/region_valid.tf >> /dev/null 2>&1",url_aws_root,stackdir);
 #endif
     }
     else{
 #ifdef _WIN32
-        sprintf(cmdline,"curl %sregion_valid.tf -o %s\\region_valid.tf -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %sregion_valid.tf -o %s\\region_valid.tf -s",url_aws_root,stackdir);
 #else
-        sprintf(cmdline,"curl %sregion_valid.tf -o %s/region_valid.tf -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %sregion_valid.tf -o %s/region_valid.tf -s",url_aws_root,stackdir);
 #endif
     }
     if(system(cmdline)!=0){
@@ -232,11 +228,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading the default configure\n");
         printf("|          file to initialize this cluster.\n");
-        if(CODE_LOC_FLAG==1){
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1", URL_AWS_ROOT,conf_file);
+        if(code_loc_flag_var==1){
+            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1", url_aws_root,conf_file);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", URL_AWS_ROOT,conf_file);
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_aws_root,conf_file);
         }
         if(system(cmdline)!=0){
             printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -246,61 +242,61 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             global_replace(conf_file,"cn-northwest-1","us-east-1");
         }
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy %s\\hpc_stack_aws.base %s\\hpc_stack.base > nul 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy %s\\hpc_stack_aws.base %s\\hpc_stack.base > nul 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_aws.base -o %s\\hpc_stack.base -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_aws.base -o %s\\hpc_stack.base -s",url_aws_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stack_aws.master %s\\hpc_stack.master > nul 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stack_aws.master %s\\hpc_stack.master > nul 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_aws.master -o %s\\hpc_stack.master -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_aws.master -o %s\\hpc_stack.master -s",url_aws_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stack_aws.compute %s\\hpc_stack.compute > nul 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stack_aws.compute %s\\hpc_stack.compute > nul 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_aws.compute -o %s\\hpc_stack.compute -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_aws.compute -o %s\\hpc_stack.compute -s",url_aws_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stack_aws.database %s\\hpc_stack.database > nul 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stack_aws.database %s\\hpc_stack.database > nul 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_aws.database -o %s\\hpc_stack.database -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_aws.database -o %s\\hpc_stack.database -s",url_aws_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stack_aws.natgw %s\\hpc_stack.natgw > nul 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stack_aws.natgw %s\\hpc_stack.natgw > nul 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_aws.natgw -o %s\\hpc_stack.natgw -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_aws.natgw -o %s\\hpc_stack.natgw -s",url_aws_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\reconf.list %s\\reconf.list > nul 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\reconf.list %s\\reconf.list > nul 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sreconf.list -o %s\\reconf.list -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %sreconf.list -o %s\\reconf.list -s",url_aws_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -310,11 +306,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Use the default one.\n");
-        if(CODE_LOC_FLAG==1){
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1",URL_AWS_ROOT,conf_file);
+        if(code_loc_flag_var==1){
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1",url_aws_root,conf_file);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", URL_AWS_ROOT,conf_file);
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_aws_root,conf_file);
         }
         if(system(cmdline)!=0){
             printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -324,62 +320,62 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             global_replace(conf_file,"cn-northwest-1","us-east-1");
         }
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.base %s/hpc_stack.base >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.base %s/hpc_stack.base >> /dev/null 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_aws.base -o %s/hpc_stack.base -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_aws.base -o %s/hpc_stack.base -s",url_aws_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.master %s/hpc_stack.master >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.master %s/hpc_stack.master >> /dev/null 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_aws.master -o %s/hpc_stack.master -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_aws.master -o %s/hpc_stack.master -s",url_aws_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.compute %s/hpc_stack.compute >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.compute %s/hpc_stack.compute >> /dev/null 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_aws.compute -o %s/hpc_stack.compute -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_aws.compute -o %s/hpc_stack.compute -s",url_aws_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.database %s/hpc_stack.database >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.database %s/hpc_stack.database >> /dev/null 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_aws.database -o %s/hpc_stack.database -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_aws.database -o %s/hpc_stack.database -s",url_aws_root,stackdir);
     }
     
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.natgw %s/hpc_stack.natgw >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_aws.natgw %s/hpc_stack.natgw >> /dev/null 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_aws.natgw -o %s/hpc_stack.natgw -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_aws.natgw -o %s/hpc_stack.natgw -s",url_aws_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/reconf.list %s/reconf.list >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/reconf.list %s/reconf.list >> /dev/null 2>&1",url_aws_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",URL_AWS_ROOT,stackdir);
+        sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",url_aws_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -626,7 +622,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
-    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
     
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\hpc_stack.master",stackdir);
@@ -765,18 +761,18 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
 #endif
     if(strcmp(region_flag,"cn_regions")==0){
-        if(CODE_LOC_FLAG==1){
+        if(code_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\s3cfg.txt %s\\s3cfg.txt > nul 2>&1",URL_AWS_ROOT,stackdir);
+            sprintf(cmdline,"copy /y %s\\s3cfg.txt %s\\s3cfg.txt > nul 2>&1",url_aws_root,stackdir);
 #else
-            sprintf(cmdline,"/bin/cp %s/s3cfg.txt %s/s3cfg.txt >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+            sprintf(cmdline,"/bin/cp %s/s3cfg.txt %s/s3cfg.txt >> /dev/null 2>&1",url_aws_root,stackdir);
 #endif
         }
         else{
 #ifdef _WIN32
-            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s\\s3cfg.txt",URL_AWS_ROOT,stackdir);
+            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s\\s3cfg.txt",url_aws_root,stackdir);
 #else
-            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s/s3cfg.txt",URL_AWS_ROOT,stackdir);
+            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s/s3cfg.txt",url_aws_root,stackdir);
 #endif
         }
         if(system(cmdline)!=0){
@@ -806,18 +802,18 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         }
     }
     else{
-        if(CODE_LOC_FLAG==1){
+        if(code_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\s3cfg.txt %s\\s3cfg.txt > nul 2>&1",URL_AWS_ROOT,stackdir);
+            sprintf(cmdline,"copy /y %s\\s3cfg.txt %s\\s3cfg.txt > nul 2>&1",url_aws_root,stackdir);
 #else
-            sprintf(cmdline,"/bin/cp %s/s3cfg.txt %s/s3cfg.txt >> /dev/null 2>&1",URL_AWS_ROOT,stackdir);
+            sprintf(cmdline,"/bin/cp %s/s3cfg.txt %s/s3cfg.txt >> /dev/null 2>&1",url_aws_root,stackdir);
 #endif
         }
         else{
 #ifdef _WIN32
-            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s\\s3cfg.txt",URL_AWS_ROOT,stackdir);
+            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s\\s3cfg.txt",url_aws_root,stackdir);
 #else
-            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s/s3cfg.txt",URL_AWS_ROOT,stackdir);
+            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s/s3cfg.txt",url_aws_root,stackdir);
 #endif
         }
         if(system(cmdline)!=0){
@@ -964,7 +960,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char filename_temp[FILENAME_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-    char URL_QCLOUD_ROOT[LOCATION_LENGTH_EXTENDED];
+    char url_qcloud_root[LOCATION_LENGTH_EXTENDED];
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
@@ -1070,15 +1066,15 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         system(cmdline);
     }
 #endif
-    if(CODE_LOC_FLAG==1){
+    if(code_loc_flag_var==1){
 #ifdef _WIN32
-        sprintf(URL_QCLOUD_ROOT,"%s\\qcloud\\",URL_CODE_ROOT);
+        sprintf(url_qcloud_root,"%s\\qcloud\\",url_code_root_var);
 #else
-        sprintf(URL_QCLOUD_ROOT,"%s/qcloud/",URL_CODE_ROOT);
+        sprintf(url_qcloud_root,"%s/qcloud/",url_code_root_var);
 #endif
     }
     else{
-        sprintf(URL_QCLOUD_ROOT,"%sqcloud/",URL_CODE_ROOT);
+        sprintf(url_qcloud_root,"%sqcloud/",url_code_root_var);
     }
 
 #ifdef _WIN32
@@ -1089,15 +1085,15 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading the default configure\n");
         printf("|          file to initialize this cluster.\n");
-        if(CODE_LOC_FLAG==1){
+        if(code_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1", URL_QCLOUD_ROOT,conf_file);
+            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1", url_qcloud_root,conf_file);
 #else
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1", URL_QCLOUD_ROOT,conf_file);
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1", url_qcloud_root,conf_file);
 #endif
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", URL_QCLOUD_ROOT,conf_file);
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_qcloud_root,conf_file);
         }
             if(system(cmdline)!=0){
             printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -1108,71 +1104,71 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
 #ifdef _WIN32
     sprintf(cmdline,"del /f /q %s\\hpc_stack* > nul 2>&1",stackdir);
     system(cmdline);
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.base %s\\hpc_stack.base > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.base %s\\hpc_stack.base > nul 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.base -o %s\\hpc_stack.base -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_qcloud.base -o %s\\hpc_stack.base -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.master %s\\hpc_stack.master > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.master %s\\hpc_stack.master > nul 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.master -o %s\\hpc_stack.master -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_qcloud.master -o %s\\hpc_stack.master -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.compute %s\\hpc_stack.compute > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.compute %s\\hpc_stack.compute > nul 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.compute -o %s\\hpc_stack.compute -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_qcloud.compute -o %s\\hpc_stack.compute -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.database %s\\hpc_stack.database > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stack_qcloud.database %s\\hpc_stack.database > nul 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.database -o %s\\hpc_stack.database -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_qcloud.database -o %s\\hpc_stack.database -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy %s\\hpc_stack_qcloud.natgw %s\\hpc_stack.natgw > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy %s\\hpc_stack_qcloud.natgw %s\\hpc_stack.natgw > nul 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.natgw -o %s\\hpc_stack.natgw -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_qcloud.natgw -o %s\\hpc_stack.natgw -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\NAS_Zones_QCloud.txt %s\\NAS_Zones_QCloud.txt > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\NAS_Zones_QCloud.txt %s\\NAS_Zones_QCloud.txt > nul 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sNAS_Zones_QCloud.txt -o %s\\NAS_Zones_QCloud.txt -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %sNAS_Zones_QCloud.txt -o %s\\NAS_Zones_QCloud.txt -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\reconf.list %s\\reconf.list > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\reconf.list %s\\reconf.list > nul 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sreconf.list -o %s\\reconf.list -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %sreconf.list -o %s\\reconf.list -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -1185,11 +1181,11 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sprintf(conf_file,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Use the default one.\n");
-        if(CODE_LOC_FLAG==1){
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1", URL_QCLOUD_ROOT,conf_file);
+        if(code_loc_flag_var==1){
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1", url_qcloud_root,conf_file);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", URL_QCLOUD_ROOT,conf_file);
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_qcloud_root,conf_file);
         }
         if(system(cmdline)!=0){
             printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -1198,71 +1194,71 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.base %s/hpc_stack.base >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.base %s/hpc_stack.base >> /dev/null 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.base -o %s/hpc_stack.base -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_qcloud.base -o %s/hpc_stack.base -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.master %s/hpc_stack.master >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.master %s/hpc_stack.master >> /dev/null 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.master -o %s/hpc_stack.master -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_qcloud.master -o %s/hpc_stack.master -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.compute %s/hpc_stack.compute >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.compute %s/hpc_stack.compute >> /dev/null 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.compute -o %s/hpc_stack.compute -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_qcloud.compute -o %s/hpc_stack.compute -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.database %s/hpc_stack.database >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.database %s/hpc_stack.database >> /dev/null 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.database -o %s/hpc_stack.database -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_qcloud.database -o %s/hpc_stack.database -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.natgw %s/hpc_stack.natgw >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stack_qcloud.natgw %s/hpc_stack.natgw >> /dev/null 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.natgw -o %s/hpc_stack.natgw -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stack_qcloud.natgw -o %s/hpc_stack.natgw -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/NAS_Zones_QCloud.txt %s/NAS_Zones_QCloud.txt >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/NAS_Zones_QCloud.txt %s/NAS_Zones_QCloud.txt >> /dev/null 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sNAS_Zones_QCloud.txt -o %s/NAS_Zones_QCloud.txt -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %sNAS_Zones_QCloud.txt -o %s/NAS_Zones_QCloud.txt -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/reconf.list %s/reconf.list >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/reconf.list %s/reconf.list >> /dev/null 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",url_qcloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -1472,7 +1468,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
-    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
 
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\hpc_stack.master",stackdir);
@@ -1591,19 +1587,19 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     fclose(file_p);
 #ifdef _WIN32
     sprintf(private_key_file,"%s\\now-cluster-login",sshkey_folder);
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\cos.conf %s\\cos.conf > nul 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\cos.conf %s\\cos.conf > nul 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %scos.conf -s -o %s\\cos.conf",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %scos.conf -s -o %s\\cos.conf",url_qcloud_root,stackdir);
     }
 #else
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/cos.conf %s/cos.conf >> /dev/null 2>&1",URL_QCLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/cos.conf %s/cos.conf >> /dev/null 2>&1",url_qcloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %scos.conf -s -o %s/cos.conf",URL_QCLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %scos.conf -s -o %s/cos.conf",url_qcloud_root,stackdir);
     }
 #endif
     if(system(cmdline)!=0){
@@ -1752,7 +1748,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char filename_temp[FILENAME_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-    char URL_ALICLOUD_ROOT[LOCATION_LENGTH_EXTENDED]="";
+    char url_alicloud_root[LOCATION_LENGTH_EXTENDED]="";
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
@@ -1858,15 +1854,15 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         system(cmdline);
     }
 #endif
-    if(CODE_LOC_FLAG==1){
+    if(code_loc_flag_var==1){
 #ifdef _WIN32
-        sprintf(URL_ALICLOUD_ROOT,"%s\\alicloud\\",URL_CODE_ROOT);
+        sprintf(url_alicloud_root,"%s\\alicloud\\",url_code_root_var);
 #else
-        sprintf(URL_ALICLOUD_ROOT,"%s/alicloud/",URL_CODE_ROOT);
+        sprintf(url_alicloud_root,"%s/alicloud/",url_code_root_var);
 #endif
     }
     else{
-        sprintf(URL_ALICLOUD_ROOT,"%salicloud/",URL_CODE_ROOT);
+        sprintf(url_alicloud_root,"%salicloud/",url_code_root_var);
     }
 
 #ifdef _WIN32
@@ -1876,15 +1872,15 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
 #endif
     if(file_exist_or_not(conf_file)==1){
         printf("[ -INFO- ] IMPORTANT: No configure file found. Use the default one. \n");
-        if(CODE_LOC_FLAG==1){
+        if(code_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1",URL_ALICLOUD_ROOT,conf_file);         
+            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s > nul 2>&1",url_alicloud_root,conf_file);         
 #else
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1",URL_ALICLOUD_ROOT,conf_file);
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s >> /dev/null 2>&1",url_alicloud_root,conf_file);
 #endif
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s",URL_ALICLOUD_ROOT,conf_file);
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s",url_alicloud_root,conf_file);
         }
         if(system(cmdline)!=0){
             printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -1895,71 +1891,71 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
 #ifdef _WIN32
     sprintf(cmdline,"del /f /q %s\\hpc_stack* > nul 2>&1",stackdir);
     system(cmdline);
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stackv2.base %s\\hpc_stack.base > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stackv2.base %s\\hpc_stack.base > nul 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.base -o %s\\hpc_stack.base -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.base -o %s\\hpc_stack.base -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stackv2.master %s\\hpc_stack.master > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stackv2.master %s\\hpc_stack.master > nul 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.master -o %s\\hpc_stack.master -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.master -o %s\\hpc_stack.master -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stackv2.compute %s\\hpc_stack.compute > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stackv2.compute %s\\hpc_stack.compute > nul 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.compute -o %s\\hpc_stack.compute -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.compute -o %s\\hpc_stack.compute -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stackv2.database %s\\hpc_stack.database > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stackv2.database %s\\hpc_stack.database > nul 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.database -o %s\\hpc_stack.database -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.database -o %s\\hpc_stack.database -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\hpc_stackv2.natgw %s\\hpc_stack.natgw > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\hpc_stackv2.natgw %s\\hpc_stack.natgw > nul 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.natgw -o %s\\hpc_stack.natgw -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.natgw -o %s\\hpc_stack.natgw -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\NAS_Zones_ALI.txt %s\\NAS_Zones_ALI.txt > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\NAS_Zones_ALI.txt %s\\NAS_Zones_ALI.txt > nul 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sNAS_Zones_ALI.txt -o %s\\NAS_Zones_ALI.txt -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %sNAS_Zones_ALI.txt -o %s\\NAS_Zones_ALI.txt -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\reconf.list %s\\reconf.list > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\reconf.list %s\\reconf.list > nul 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sreconf.list -o %s\\reconf.list -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %sreconf.list -o %s\\reconf.list -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -1970,71 +1966,71 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
 #else
     sprintf(cmdline,"rm -rf %s/hpc_stack* >> /dev/null 2>&1",stackdir);
     system(cmdline);
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stackv2.base %s/hpc_stack.base >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stackv2.base %s/hpc_stack.base >> /dev/null 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.base -o %s/hpc_stack.base -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.base -o %s/hpc_stack.base -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stackv2.master %s/hpc_stack.master >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stackv2.master %s/hpc_stack.master >> /dev/null 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.master -o %s/hpc_stack.master -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.master -o %s/hpc_stack.master -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stackv2.compute %s/hpc_stack.compute >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stackv2.compute %s/hpc_stack.compute >> /dev/null 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.compute -o %s/hpc_stack.compute -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.compute -o %s/hpc_stack.compute -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stackv2.database %s/hpc_stack.database >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stackv2.database %s/hpc_stack.database >> /dev/null 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.database -o %s/hpc_stack.database -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.database -o %s/hpc_stack.database -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/hpc_stackv2.natgw %s/hpc_stack.natgw >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/hpc_stackv2.natgw %s/hpc_stack.natgw >> /dev/null 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stackv2.natgw -o %s/hpc_stack.natgw -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %shpc_stackv2.natgw -o %s/hpc_stack.natgw -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/NAS_Zones_ALI.txt %s/NAS_Zones_ALI.txt >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/NAS_Zones_ALI.txt %s/NAS_Zones_ALI.txt >> /dev/null 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sNAS_Zones_ALI.txt -o %s/NAS_Zones_ALI.txt -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %sNAS_Zones_ALI.txt -o %s/NAS_Zones_ALI.txt -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
         return 2;
     }
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/reconf.list %s/reconf.list >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/reconf.list %s/reconf.list >> /dev/null 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %sreconf.list -o %s/reconf.list -s",url_alicloud_root,stackdir);
     }
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
@@ -2238,7 +2234,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
-    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",URL_SHELL_SCRIPTS);
+    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
 
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\hpc_stack.master",stackdir);
@@ -2367,19 +2363,19 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     fclose(file_p);
 #ifdef _WIN32
     sprintf(private_key_file,"%s\\now-cluster-login",sshkey_folder);
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"copy /y %s\\.ossutilconfig %s\\ossutilconfig > nul 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"copy /y %s\\.ossutilconfig %s\\ossutilconfig > nul 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %s.ossutilconfig -s -o %s\\ossutilconfig",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %s.ossutilconfig -s -o %s\\ossutilconfig",url_alicloud_root,stackdir);
     }
 #else
     sprintf(private_key_file,"%s/now-cluster-login",sshkey_folder);
-    if(CODE_LOC_FLAG==1){
-        sprintf(cmdline,"/bin/cp %s/.ossutilconfig %s/ossutilconfig >> /dev/null 2>&1",URL_ALICLOUD_ROOT,stackdir);
+    if(code_loc_flag_var==1){
+        sprintf(cmdline,"/bin/cp %s/.ossutilconfig %s/ossutilconfig >> /dev/null 2>&1",url_alicloud_root,stackdir);
     }
     else{
-        sprintf(cmdline,"curl %s.ossutilconfig -s -o %s/ossutilconfig",URL_ALICLOUD_ROOT,stackdir);
+        sprintf(cmdline,"curl %s.ossutilconfig -s -o %s/ossutilconfig",url_alicloud_root,stackdir);
     }
 #endif
     if(system(cmdline)!=0){
