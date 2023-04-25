@@ -14,14 +14,14 @@ if "%~1"=="" (
 	echo [ -INFO- ] Deleting previously built binaries ^(if exist^)...
 	del /s /q /f .\build\*
 	echo [ -INFO- ] Bulding new binaries with the gcc ...
-	gcc .\hpcopr\*.c -Wall -o .\build\hpcopr.exe
+	gcc .\hpcopr\*.c -Wall -o .\build\hpcopr-win.exe
 	gcc -c .\hpcopr\general_funcs.c -o .\installer\gfuncs.o
 	del /f /s /q .\installer\libgfuncs.a
 	ar -rc .\installer\libgfuncs.a .\installer\gfuncs.o
-	gcc .\installer\installer.c .\installer\libgfuncs.a -Wall -o .\build\installer.exe
+	gcc .\installer\installer.c .\installer\libgfuncs.a -Wall -o .\build\installer-win.exe
 	move /y .\installer\libgfuncs.a .\build\libgfuncs.a
 	del /f /s /q .\installer\gfuncs.o
-	gcc .\now-crypto\now-crypto.c -Wall -o .\build\now-crypto.exe
+	gcc .\now-crypto\now-crypto.c -Wall -o .\build\now-crypto-win.exe
 ) else if "%~1"=="delete" (
 	echo [ START: ] Deleting the binaries now ...
 	del /s /q /f .\build\*

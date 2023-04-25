@@ -16,13 +16,13 @@ elif [ "$1" = "build" ]; then
     echo -e "[ START: ] Building the binaries now (including hpcmgr) ..."
     mkdir -p ./build
     rm -rf ./build/*
-    gcc ./hpcopr/*.c -Wall -lm -o ./build/hpcopr.exe
+    gcc ./hpcopr/*.c -Wall -lm -o ./build/hpcopr-lin.exe
     gcc -c ./hpcopr/general_funcs.c -Wall -lm -o ./installer/gfuncs.o
     rm -rf ./installer/libgfuncs.a
     ar -rc ./installer/libgfuncs.a ./installer/gfuncs.o
     rm -rf ./installer/gfuncs.o
-    gcc ./installer/installer.c -Wall -lm ./installer/libgfuncs.a -o ./build/installer.exe
-    gcc ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto.exe
+    gcc ./installer/installer.c -Wall -lm ./installer/libgfuncs.a -o ./build/installer-lin.exe
+    gcc ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto-lin.exe
     gcc ./hpcmgr/hpcmgr.c -Wall -lm -o ./build/hpcmgr.exe
     chmod +x ./build/*
     mv ./installer/libgfuncs.a ./build/
