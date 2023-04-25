@@ -30,13 +30,28 @@
 #include "time_process.h"
 #include "usage_and_logs.h"
 
-char URL_CODE_ROOT[LOCATION_LENGTH]="";
-char URL_TF_ROOT[LOCATION_LENGTH]="";
-char URL_SHELL_SCRIPTS[LOCATION_LENGTH]="";
-char URL_NOW_CRYPTO[LOCATION_LENGTH]="";
-int TF_LOC_FLAG=0;
-int CODE_LOC_FLAG=0;
-int NOW_CRYPTO_LOC_FLAG=0;
+char url_code_root_var[LOCATION_LENGTH]="";
+char url_tf_root_var[LOCATION_LENGTH]="";
+char url_shell_scripts_var[LOCATION_LENGTH]="";
+char url_now_crypto_var[LOCATION_LENGTH]="";
+int tf_loc_flag_var=0;
+int code_loc_flag_var=0;
+int now_crypto_loc_flag_var=0;
+
+char terraform_version_var[16]="";
+char ali_tf_plugin_version_var[16]="";
+char qcloud_tf_plugin_version_var[16]="";
+char aws_tf_plugin_version_var[16]="";
+
+char md5_tf_exec_var[64]="";
+char md5_tf_zip_var[64]="";
+char md5_now_crypto_var[64]="";
+char md5_ali_tf_var[64]="";
+char md5_ali_tf_zip_var[64]="";
+char md5_qcloud_tf_var[64]="";
+char md5_qcloud_tf_zip_var[64]="";
+char md5_aws_tf_var[64]="";
+char md5_aws_tf_zip_var[64]="";
 
 int main(int argc, char* argv[]){
     char* crypto_keyfile=CRYPTO_KEY_FILE;
@@ -54,51 +69,59 @@ int main(int argc, char* argv[]){
     char doubleconfirm[64]="";
     print_header();
 
+#ifdef _WIN32
     if(check_current_user()!=0){
         printf("[ FATAL: ] You *MUST* switch to the user 'hpc-now' to operate cloud clusters.\n");
-#ifdef _WIN32
         printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:\n");
         printf("|          1. Run CMD by typing cmd in the Windows Search box\n");
         printf("|          2. hpcopr ls-clusters   (You will see all the clusters)");
         printf("[ FATAL: ] Exit now.\n");
+        print_tail();
+        return -3;
+    }
 #else
+    if(check_current_user()!=0){
+        printf("[ FATAL: ] You *MUST* switch to the user 'hpc-now' to operate cloud clusters.\n");
         printf("|          Please run the commands below:\n");
         printf("|          1. su hpc-now   (You will be asked to input password without echo)\n");
         printf("|          2. hpcopr ls-clusters   (You will see all the clusters)\n");
         printf("[ FATAL: ] Exit now.\n");
-#endif
         print_tail();
         return -3;
     }
+#endif
 
 #ifdef _WIN32
     if(folder_exist_or_not("c:\\hpc-now")!=0){
         printf("[ FATAL: ] The key directory C:\\hpc-now\\ is missing. The services cannot start.\n");
         printf("|          Please switch to Administrator and re-install the services to fix.\n");
+        printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
+        printf("[ FATAL: ] Exit now.\n");
+        print_tail();
+        return -3;
+    }
 #elif __APPLE__
     if(folder_exist_or_not("/Applications/.hpc-now/")!=0){
         printf("[ FATAL: ] The service is corrupted due to missing critical folder. Please exit\n");
         printf("|          and run the installer with 'sudo' to reinstall it. Sample command:\n");
         printf("|          sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
         printf("|          sudo YOUR_INSTALLER_FULL_PATH install\n");
+        printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
+        printf("[ FATAL: ] Exit now.\n");
+        print_tail();
+        return -3;
+    }
 #elif __linux__
     if(folder_exist_or_not("/usr/.hpc-now/")!=0){
         printf("[ FATAL: ] The service is corrupted due to missing critical folder. Please exit\n");
         printf("|          and run the installer with 'sudo' to reinstall it. Sample command:\n");
         printf("|          sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
         printf("|          sudo YOUR_INSTALLER_FULL_PATH install\n");
-#endif
         printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
         printf("[ FATAL: ] Exit now.\n");
         print_tail();
         return -3;
     }
-#ifdef _WIN32
-    system("mkdir c:\\programdata\\hpc-now\\etc\\ > nul 2>&1");
-#elif __APPLE__
-    system("mkdir -p /Applications/.hpc-now/.etc/ >> /dev/null 2>&1");
-#elif __linux__
-    system("mkdir -p /usr/.hpc-now/.etc/ >> /dev/null 2>&1");
 #endif
 
     if(argc==1){
@@ -183,8 +206,13 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"resetloc")==0){
         run_flag=reset_locations();
-        printf("[ -INFO- ] The locations have been reset to the default ones.\n");
-        show_locations();
+        if(run_flag==0){
+            printf("[ -INFO- ] The locations have been reset to the default.\n");
+            show_locations();
+        }
+        else{
+            printf("[ FATAL: ] Internal error, failed to reset the locations.\n");
+        }
         print_tail();
         system_cleanup();
         return run_flag;
@@ -192,6 +220,13 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"showloc")==0){
         run_flag=show_locations();
+        print_tail();
+        system_cleanup();
+        return run_flag;
+    }
+
+    if(strcmp(argv[1],"showmd5")==0){
+        run_flag=show_vers_md5vars();
         print_tail();
         system_cleanup();
         return run_flag;

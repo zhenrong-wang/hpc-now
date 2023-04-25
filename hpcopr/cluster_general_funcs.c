@@ -258,6 +258,9 @@ int get_compute_node_num(char* currentstate_file, char* option){
         return -1;
     }
     FILE* file_p=fopen(currentstate_file,"r");
+    if(file_p==NULL){
+        return -1;
+    }
     char buffer[64]="";
     int i,node_num=0;
     int node_num_on=0;
@@ -584,24 +587,24 @@ int getstate(char* workdir, char* crypto_filename){
     }
 #ifdef _WIN32
     sprintf(filename_currentstate,"%s\\currentstate",stackdir);
-        if(file_exist_or_not(filename_currentstate)==0){
-            sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_currentstate);
-            system(cmdline);
-        }
-        sprintf(cmdline,"type nul > %s",filename_currentstate);
+    if(file_exist_or_not(filename_currentstate)==0){
+        sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_currentstate);
         system(cmdline);
-        sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
-        sprintf(filename_hostfile,"%s\\hostfile_latest",stackdir);
+    }
+    sprintf(cmdline,"type nul > %s",filename_currentstate);
+    system(cmdline);
+    sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
+    sprintf(filename_hostfile,"%s\\hostfile_latest",stackdir);
 #else
-        sprintf(filename_currentstate,"%s/currentstate",stackdir);
-        if(file_exist_or_not(filename_currentstate)==0){
-            sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_currentstate);
-            system(cmdline);
-        }
-        sprintf(cmdline,"echo \"\" > %s",filename_currentstate);
+    sprintf(filename_currentstate,"%s/currentstate",stackdir);
+    if(file_exist_or_not(filename_currentstate)==0){
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_currentstate);
         system(cmdline);
-        sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
-        sprintf(filename_hostfile,"%s/hostfile_latest",stackdir);
+    }
+    sprintf(cmdline,"echo \"\" > %s",filename_currentstate);
+    system(cmdline);
+    sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
+    sprintf(filename_hostfile,"%s/hostfile_latest",stackdir);
 #endif
     get_ak_sk(filename_temp,crypto_filename,buffer1,buffer2,cloud_flag);
     file_p_currentstate=fopen(filename_currentstate,"w+");
@@ -852,7 +855,7 @@ void update_compute_template(char* stackdir, char* cloud_flag){
     sprintf(cmdline,"copy /y %s\\hpc_stack_compute1.tf %s > nul 2>&1",stackdir,filename_temp);
 #else
     sprintf(filename_temp,"%s/compute_template",stackdir);
-    sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s/compute_template >> /dev/null 2>&1",stackdir,filename_temp);
+    sprintf(cmdline,"/bin/cp %s/hpc_stack_compute1.tf %s >> /dev/null 2>&1",stackdir,filename_temp);
 #endif
     system(cmdline);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
@@ -1073,6 +1076,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     sprintf(logdir,"%s/log/",workdir);
 #endif
     archive_log(logdir,"");
+    archive_log(logdir,error_log);
 #ifdef _WIN32
     sprintf(cmdline,"cd %s\\ && echo yes | start /b %s %s > %s\\tf_prep.log 2>%s",stackdir,tf_exec,execution_name,logdir,error_log);
 #else

@@ -27,14 +27,19 @@
 int check_internet_installer(void){
 #ifdef _WIN32
     if(system("ping -n 2 www.baidu.com > nul 2>&1")!=0){
-#else
-    if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
-#endif
         printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
         printf("|          or check your internet connectivity and retry later.\n");
         printf("[ FATAL: ] Exit now.\n");
         return 1;
     }
+#else
+    if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
+        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
+        printf("|          or check your internet connectivity and retry later.\n");
+        printf("[ FATAL: ] Exit now.\n");
+        return 1;
+    }
+#endif
     return 0;
 }
 
@@ -240,7 +245,32 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
             }
         }
         else{
-            printf("[ FATAL: ] YUM|DNF|APT not found. Please install the 'unzip' manually. Exit now.\n")
+            printf("[ FATAL: ] YUM|DNF|APT not found. Please install the 'unzip' manually. Exit now.\n");
+            return -1;
+        }
+    }
+    if(system("which curl >> /dev/null 2>&1")!=0){
+        printf("[ -INFO- ] Curl not found. Install the utility 'curl' by yum|dnf|apt ...\n");
+        if(system("which yum >> /dev/null 2>&1")==0){
+            if(system("yum install curl -y >> /dev/null 2>&1")!=0){
+                printf("[ FATAL: ] Failed to install curl. Please install it first. Exit now.\n");
+                return -1;
+            }
+        }
+        else if(system("which dnf >> /dev/null 2>&1")==0){
+            if(system("dnf install curl -y >> /dev/null 2>&1")!=0){
+                printf("[ FATAL: ] Failed to install curl. Please install it first. Exit now.\n");
+                return -1;
+            }
+        }
+        else if(system("which apt >> /dev/null 2>&1")==0){
+            if(system("apt install curl -y >> /dev/null 2>&1")!=0){
+                printf("[ FATAL: ] Failed to install curl. Please install it first. Exit now.\n");
+                return -1;
+            }
+        }
+        else{
+            printf("[ FATAL: ] YUM|DNF|APT not found. Please install the 'curl' manually. Exit now.\n");
             return -1;
         }
     }
@@ -470,7 +500,7 @@ int uninstall_services(void){
     printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
+    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     printf("[ INPUT: ] ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
@@ -494,7 +524,6 @@ int uninstall_services(void){
     system("dscl . -delete /Groups/hpc-now >> /dev/null 2>&1");
     system("rm -rf /Users/hpc-now >> /dev/null 2>&1");
 #elif __linux__
-    printf("[ -INFO- ] UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
     system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
     system("userdel -f -r hpc-now >> /dev/null 2>&1");
