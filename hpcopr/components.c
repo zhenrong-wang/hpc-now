@@ -426,7 +426,6 @@ int get_locations(void){
     char loc_string[LOCATION_LENGTH]="";
     char title_string[256]="";
     FILE* file_p=NULL;
-    int i;
     if(file_exist_or_not(LOCATION_CONF_FILE)!=0){
         return -1;
     }
