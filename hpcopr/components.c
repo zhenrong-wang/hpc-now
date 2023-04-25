@@ -475,7 +475,8 @@ int get_locations(void){
         else{
             continue;
         }
-    }       
+    }
+    return 0;       
 }
 
 int show_locations(void){
