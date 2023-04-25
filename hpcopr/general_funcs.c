@@ -119,8 +119,10 @@ int global_replace(char* filename, char* orig_string, char* new_string){
 
     sprintf(filename_temp,"%s.tmp",filename);
     file_p_tmp=fopen(filename_temp,"w+");
-    do{
-        getline_flag=fgetline(file_p,single_line);
+    if(file_p_tmp==NULL){
+        return -1;
+    }
+    while(fgetline(file_p,single_line)==0){
         line_length=strlen(single_line);
         if(contain_or_not(single_line,orig_string)!=0||line_length<length_orig){
             fprintf(file_p_tmp,"%s\n",single_line);
@@ -155,13 +157,8 @@ int global_replace(char* filename, char* orig_string, char* new_string){
                 continue;
             }
         }while(i<line_length);
-        if(getline_flag==1){
-            fprintf(file_p_tmp,"%s",new_line);
-        }
-        else{
-            fprintf(file_p_tmp,"%s\n",new_line);
-        }
-    }while(getline_flag==0);
+        fprintf(file_p_tmp,"%s\n",new_line);
+    }
     fclose(file_p);
     fclose(file_p_tmp);
 #ifdef _WIN32
