@@ -17,11 +17,13 @@
 #include "../hpcopr/general_funcs.h"
 #endif
 
-/* Borrowed the below functions from hpcopr.
+#include "installer.h"
+
+/* 
+ * Borrowed the below functions from hpcopr.
  *   reset_string (from general_funcs.c)
  *   fgetline (from general_funcs.c)
  *   generate_random_passwd (from general_funcs.c)
- *
  */
 
 int check_internet_installer(void){

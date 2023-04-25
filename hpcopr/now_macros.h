@@ -8,11 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0033"
-#define INSTALLER_VERSION_CODE "0.2.0.0033"
-
-/* This MACRO is only used by the installer.c, not hpcopr source codes.*/
-#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/hpcopr-dev/"
+#define CORE_VERSION_CODE "0.2.0.0034"
 
 #ifdef _WIN32
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
