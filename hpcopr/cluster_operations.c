@@ -1427,7 +1427,6 @@ int check_reconfigure_list(char* workdir){
     while(fgetline(file_p,single_line)==0){
         printf("%s\n",single_line);
     }
-    printf("%s\n",single_line);
     return 0;
 }
 
