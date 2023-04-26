@@ -40,7 +40,7 @@
 
 ##### 3.1 多集群管理
 
-- envcheck ：快速检查和修复 hpcopr 的运行环境
+- envcheck ：快速检查和修复 hpcopr 的运行环境，强烈建议首次运行 hpcopr 时运行该命令
 - new-cluster ：创建集群。您需要输入 AWS | 阿里云 | 腾讯云 的访问密钥对。关于如何获取访问密钥，请参考各家云厂商的文档
 - ls-clusters : 列出当前的所有集群
 - switch ：切换集群，您需要提供目标集群的名字作为命令参数
@@ -94,7 +94,8 @@
 
 ### 4. 构建环境需求
 
-为了更方便的获取代码和管理分支，请使用 git。关于如何在不同的操作系统环境中安装 git，请参考公开教程。
+为了更方便的获取代码和管理分支，请使用 [git](https://git-scm.com/)。关于如何在不同的操作系统环境中安装 git，请参考公开教程。
+
 我们使用 C 语言和 GNU/Linux Shell 脚本进行整个平台的构建。其中，三个核心程序  **installer** 、 **hpcopr** 、 **now-crypto**  均为纯 C 语言编写。C 语言跨平台和偏底层的特点，使得其适合用来进行核心程序的开发。对于这三个核心程序而言，构建过程仅需要 C 语言编译器即可，在三个主流操作系统方面，需要安装的 C 语言编译器略有不同。
 
 -  **Microsoft Windows** ：您需要安装最新版 mingw，具体请参考 CSDN 上的[教程](http://blog.csdn.net/LawssssCat/article/details/103407137)，或者参考其他公开来源的教程。请务必注意安装完 mingw 之后，需要将 mingw 安装目录下面的 bin 文件夹路径添加到系统环境变量 PATH 中。 
@@ -138,7 +139,7 @@
     - 如您想要使用在步骤 5 中自行构建的 hpcopr-win.exe，请运行：
         - .\installer-win.exe install hpcoprloc=hpcopr-win.exe （建议开发者）
     - 如您想使用默认的最新版本 hpcopr-win.exe，请运行：
-        - .\installer-win.exe install （建议普通用户）
+        - .\installer-win.exe install （建议一般用户）
     - 同样的，如您想要使用自行构建的 now-crypto-lin.exe，可参考如上方式添加 cryptoloc=now-crypto-lin.exe 参数。
     - 如您想跳过 License 阅读（不建议），可添加 skiplic=y 参数。
 - 此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户，其初始密码为 nowadmin2023~
@@ -161,7 +162,7 @@
     - 如您想要使用在步骤 5 中自行构建的 hpcopr-lin.exe，请运行：
         - sudo ./installer-lin.exe install hpcoprloc=hpcopr-lin.exe （建议开发者）
     - 如您想使用默认的最新版本 hpcopr-lin.exe，请运行：
-        - sudo ./installer-lin.exe install （建议普通用户）
+        - sudo ./installer-lin.exe install （建议一般用户）
     - 同样的，如您想要使用自行构建的 now-crypto-lin.exe，可参考如上方式添加 cryptoloc=now-crypto-lin.exe 参数。
     - 如您想跳过 License 阅读（不建议），可添加 skiplic=y 参数。
     此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户。您需要运行如下命令来为 hpc-now 用户创建密码：
@@ -184,7 +185,7 @@
     - 如您想要使用在步骤 5 中自行构建的 hpcopr-dwn.exe，请运行：
         - sudo ./installer-dwn.exe install hpcoprloc=hpcopr-dwn.exe （建议开发者）
     - 如您想使用默认的最新版本 hpcopr-dwn.exe，请运行：
-        - sudo ./installer-dwn.exe install （建议普通用户）
+        - sudo ./installer-dwn.exe install （建议一般用户）
     - 同样的，如您想要使用自行构建的 now-crypto-dwn.exe，可参考如上方式添加 cryptoloc=now-crypto-dwn.exe 参数。
     - 如您想跳过 License 阅读（不建议），可添加 skiplic=y 参数。
     此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户。您需要运行如下命令来为 hpc-now 用户创建密码：
@@ -222,6 +223,7 @@ C:\Users\ABC\Downloads\installer-win.exe
 则您需要在**由管理员运行***的 CMD 窗口中运行如下命令：
 
 C:\Users\ABC\Downloads\installer-win.exe uninstall
+
 对于 GNU/Linux 或者 macOS 用户，假设您已经切换至安装器所在的目录，则您需要分别运行如下命令：
 
 sudo ./installer-lin uninstall
@@ -240,9 +242,9 @@ sudo ./installer-dwn uninstall
 - 当前区域无法购买您所需要的配置或数量
 - 开机/关机失败（为了成本考虑，云资源的模板之中默认购买的是**停机不收费**机型，对于停机不收费的云主机，云厂商不保障再次开机时能够成功）
 - 其他未知或不可抗的因素
--……
+- ……
 
-HPC-NOW 平台在设计时，尽可能的考虑到上述异常，并作出一定的处理（详见代码的 cluster_operation.c 模块），但是仍然无法保证完全不出差错。在极端情况下，如果发现 hpcopr 已经失去了管理您的集群的能力，为了避免产生意外的资源账单和成本，您**必须**在云平台提供的控制台上进行数据备份、资源监控和手动销毁。
+HPC-NOW 平台在设计时，尽可能的考虑到上述异常，并作出一定的处理（详见代码的 cluster_operation.c 模块 和 cluter_init.c 模块），但是仍然无法保证完全不出差错。在极端情况下，如果发现 hpcopr 已经失去了管理您的集群的能力，为了避免产生意外的资源账单和成本，您**必须**在云平台提供的控制台上进行数据备份、资源监控和手动销毁。
 
 假设您已经登录 AWS | 阿里云 | 腾讯云 的控制台。参考以下建议进行操作：
 
@@ -254,9 +256,11 @@ HPC-NOW 平台在设计时，尽可能的考虑到上述异常，并作出一定
 
 ##### 9.2 资源销毁：
 
-我们**强烈不建议**您在集群中各个节点的系统之中存放任何关键数据！请务必将所有的关键数据都放置在 /hpc_data 对应的共享存储中。因此，通常情况下，您对计算节点的销毁不会影响您的关键数据。在按照 9.1 步骤备份和转存完毕所有关键数据之后，您即可手动销毁该集群所针对的所有资源。此外，针对每个集群，HPC-NOW 都自动生成一个随机的唯一识别码，并将该识别码作为标签打在 VPC、云主机、对象存储、文件存储等关键资源上。您可以在控制台上非常直观的看到该集群所对应的资源。
+**非常重要**：我们**强烈不建议**您在集群中各个节点的系统盘（除了 /hpc_apps 和 /hpc_data 之外的任何目录）中存放任何关键数据！**请务必将所有的关键数据都放置在 /hpc_data 对应的共享存储中**。
 
-- 请使用 hpcopr usage 命令来查看每个集群对应的唯一识别码
+因此，通常情况下，您对计算节点的销毁不会影响您的关键数据。在按照 9.1 步骤备份和转存完毕所有关键数据之后，您即可手动销毁该集群所针对的所有资源。此外，针对每个集群，HPC-NOW 都自动生成一个随机的唯一识别码，并将该识别码作为标签打在 VPC、云主机、对象存储、文件存储等关键资源上。您可以在控制台上非常直观的看到该集群所对应的资源。
+
+- 请在创建完任一集群之后，使用 hpcopr usage 命令来查看每个集群对应的唯一识别码
 
 请依次销毁如下资源：
 
