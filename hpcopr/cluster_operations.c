@@ -341,6 +341,15 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
         return 1;
     }
     get_workdir(cluster_workdir,target_cluster_name);
+#ifdef _WIN32
+    sprintf(tf_realtime_log,"%s\\log\\tf_prep.log",cluster_workdir);
+    sprintf(tf_archive_log,"%s\\log\\tf_prep.log.archive",cluster_workdir);
+#else
+    sprintf(tf_realtime_log,"%s/log/tf_prep.log",cluster_workdir);
+    sprintf(tf_archive_log,"%s/log/tf_prep.log.archive",cluster_workdir);
+#endif
+    archive_log(log_trash,tf_realtime_log);
+    archive_log(log_trash,tf_archive_log);
     if(cluster_empty_or_not(cluster_workdir)!=0){
         printf("[ -WARN- ] The specified cluster is *NOT* empty!\n");
         glance_clusters(target_cluster_name,crypto_keyfile);
@@ -386,16 +395,10 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     }
     printf("[ -INFO- ] Removing all the related files ...\n");
 #ifdef _WIN32
-    sprintf(tf_realtime_log,"%s\\log\\tf_prep.log",cluster_workdir);
-    sprintf(tf_archive_log,"%s\\log\\tf_prep.log.archive",cluster_workdir);
     sprintf(cmdline,"rd /q /s %s > nul 2>&1",cluster_workdir);
 #else
-    sprintf(tf_realtime_log,"%s/log/tf_prep.log",cluster_workdir);
-    sprintf(tf_archive_log,"%s/log/tf_prep.log.archive",cluster_workdir);
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",cluster_workdir);
 #endif
-    archive_log(log_trash,tf_realtime_log);
-    archive_log(log_trash,tf_archive_log);
     system(cmdline);
     printf("[ -INFO- ] Deleting the cluster from the registry ...\n");
     delete_from_cluster_registry(target_cluster_name);
