@@ -1085,13 +1085,13 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     archive_log(tf_realtime_log_archive,tf_realtime_log);
     archive_log(tf_error_log_archive,error_log);
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s %s > %s\\tf_prep.log 2>%s",stackdir,tf_exec,execution_name,logdir,error_log);
+    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s %s > %s 2>%s",stackdir,tf_exec,execution_name,tf_realtime_log,error_log);
 #else
-    sprintf(cmdline,"cd %s && echo yes | %s %s > %s/tf_prep.log 2>%s &",stackdir,tf_exec,execution_name,logdir,error_log);
+    sprintf(cmdline,"cd %s && echo yes | %s %s > %s 2>%s &",stackdir,tf_exec,execution_name,tf_realtime_log,error_log);
 #endif
     run_flag=system(cmdline);
     printf("[ -INFO- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
-    printf("|          Operation Command: %s. Error log: %s\n",execution_name,OPERATION_ERROR_LOG);
+    printf("|          Operation Command: %s. Error log: %s\n",execution_name,error_log);
     wait_for_complete(workdir,execution_name,error_log);
     if(file_empty_or_not(error_log)!=0||run_flag!=0){
         printf("[ FATAL: ] Failed to operate the cluster. Operation command: %s. Exit now.\n",execution_name);
