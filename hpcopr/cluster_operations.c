@@ -893,8 +893,6 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     system(cmdline);
 #endif
     printf("[ -DONE- ] The whole cluster has been destroyed successfully.\n");
-    printf("|          You can run 'init' command to rebuild it.\n");
-    printf("|          However, all the data has been erased.\n");
     return 0;
 }
 
