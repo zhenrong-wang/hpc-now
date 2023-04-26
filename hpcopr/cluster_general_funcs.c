@@ -828,13 +828,13 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
     return 0;
 }
 
-/* Should write a real C function, instead of call system commands. But it is totally OK.*/
+/* Should write a real C function, instead of calling system commands. But it is totally OK.*/
 void archive_log(char* logarchive, char* logfile){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    sprintf(cmdline,"type %s >> %s.archive 2>nul",logarchive,logfile);
+    sprintf(cmdline,"type %s >> %s 2>nul",logfile,logarchive);
 #else
-    sprintf(cmdline,"cat %s >> %s 2>/dev/null",logarchive,logfile);
+    sprintf(cmdline,"cat %s >> %s 2>/dev/null",logfile,logarchive);
 #endif
     system(cmdline);
 }
