@@ -23,8 +23,8 @@
 void print_empty_cluster_info(void){
     printf("[ -INFO- ] It seems the cluster is empty. You can either:\n");
     printf("|          a) Run 'hpcopr init' to generate a *default* cluster directly. OR\n");
-    printf("|          b) Run 'hpcopr get-conf' to get and modify the configuration file and then\n");
-    printf("|             Run 'hpcopr init' to generate a *customized* cluster.\n");
+    printf("|          b) Run 'hpcopr get-conf' to get and modify the configuration file\n");
+    printf("|             then run 'hpcopr init' to generate a *customized* cluster.\n");
     printf("[ FATAL: ] Exit now.\n");
 }
 
@@ -52,6 +52,8 @@ void print_help(void){
     printf("|                Switch to a cluster in the registry to operate.\n");
     printf("|  glance      : all | TARGET_CLUSTER_NAME\n");
     printf("|                Quickly view all the clusters or a specified target cluster.\n");
+    printf("|  refresh     : TARGET_CLUSTER_NAME\n");
+    printf("|                Refresh the target cluster without any resource modifications.\n");
     printf("|  exit-current: Exit the current cluster.\n");
     printf("|  remove      : TARGET_CLUSTER_NAME\n");
     printf("|                Completely remove a cluster from the OS and registry.\n");

@@ -717,8 +717,38 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return -1;
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
-        printf("[ FATAL: ] Rolling back and exit now ...\n");
-        terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log);
+        printf("[ -INFO- ] Rolling back and exit now ...\n");
+        if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)==0){
+            delete_decrypted_files(workdir,crypto_keyfile);
+#ifdef _WIN32
+            system("del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
+            sprintf(cmdline,"move %s\\*.tmp c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",stackdir);
+            system(cmdline);
+            sprintf(cmdline,"move %s\\UCID_LATEST.txt c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",vaultdir);
+            system(cmdline);
+            sprintf(cmdline,"move %s\\conf\\tf_prep.conf %s\\conf\\tf_prep.conf.destroyed > nul 2>&1",workdir,workdir);
+            system(cmdline);
+#elif __APPLE__
+            system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+            sprintf(cmdline,"mv %s/*.tmp /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/UCID_LATEST.txt /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
+            system(cmdline);
+#elif __linux__
+            system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+            sprintf(cmdline,"mv %s/*.tmp /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/UCID_LATEST.txt /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
+            system(cmdline);
+#endif
+            printf("[ -INFO- ] Successfully rolled back. Please check the errolog for details.\n");
+            return -1;
+        }
+        printf("[ -INFO- ] Failed to roll back. Please try 'hpcopr destroy' later.\n");
         return -1;
     }
 #ifdef _WIN32
@@ -1560,7 +1590,38 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back and exit now ...\n");
-        terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log);
+        if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)==0){
+            delete_decrypted_files(workdir,crypto_keyfile);
+#ifdef _WIN32
+            system("del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
+            sprintf(cmdline,"move %s\\*.tmp c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",stackdir);
+            system(cmdline);
+            sprintf(cmdline,"move %s\\UCID_LATEST.txt c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",vaultdir);
+            system(cmdline);
+            sprintf(cmdline,"move %s\\conf\\tf_prep.conf %s\\conf\\tf_prep.conf.destroyed > nul 2>&1",workdir,workdir);
+            system(cmdline);
+#elif __APPLE__
+            system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+            sprintf(cmdline,"mv %s/*.tmp /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/UCID_LATEST.txt /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
+            system(cmdline);
+#elif __linux__
+            system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+            sprintf(cmdline,"mv %s/*.tmp /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/UCID_LATEST.txt /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
+            system(cmdline);
+#endif
+            printf("[ -INFO- ] Successfully rolled back. Please check the errolog for details.\n");
+            return -1;
+        }
+        printf("[ -INFO- ] Failed to roll back. Please try 'hpcopr destroy' later.\n");
+        delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
 #ifdef _WIN32
@@ -2329,7 +2390,37 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back and exit now ...\n");
-        terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log);
+        if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)==0){
+            delete_decrypted_files(workdir,crypto_keyfile);
+#ifdef _WIN32
+            system("del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
+            sprintf(cmdline,"move %s\\*.tmp c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",stackdir);
+            system(cmdline);
+            sprintf(cmdline,"move %s\\UCID_LATEST.txt c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",vaultdir);
+            system(cmdline);
+            sprintf(cmdline,"move %s\\conf\\tf_prep.conf %s\\conf\\tf_prep.conf.destroyed > nul 2>&1",workdir,workdir);
+            system(cmdline);
+#elif __APPLE__
+            system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+            sprintf(cmdline,"mv %s/*.tmp /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/UCID_LATEST.txt /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
+            system(cmdline);
+#elif __linux__
+            system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
+            sprintf(cmdline,"mv %s/*.tmp /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/UCID_LATEST.txt /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+            system(cmdline);
+            sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
+            system(cmdline);
+#endif
+            printf("[ -INFO- ] Successfully rolled back. Please check the errolog for details.\n");
+            return -1;
+        }
+        printf("[ -INFO- ] Failed to roll back. Please try 'hpcopr destroy' later.\n");
         return -1;
     }
 #ifdef _WIN32

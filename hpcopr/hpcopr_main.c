@@ -260,7 +260,7 @@ int main(int argc, char* argv[]){
         return 0;
     }
     
-    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0){
+    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0){
         print_help();
         return -6;
     }
@@ -312,10 +312,47 @@ int main(int argc, char* argv[]){
             run_flag=glance_clusters(argv[2],crypto_keyfile);
         }
         if(run_flag==1){
-            printf("[ FATAL: ] You are not running any clusters. Please swith to or specify one:\n");
+            printf("[ FATAL: ] Please swith to a cluster first, or specify one to glance:\n");
             list_all_cluster_names();
         }
         else if(run_flag==-1){
+            printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",argv[2]);
+            list_all_cluster_names();
+        }
+        print_tail();
+        write_log("NULL",operation_log,argv[1],run_flag);
+        system_cleanup();
+        return run_flag;
+    }
+    if(strcmp(argv[1],"refresh")==0){
+        if(cluster_empty_or_not(workdir)==0){
+            printf("[ FATAL: ] The cluster is empty, please init it first. Exit now.\n");
+            print_tail();
+            write_log("NULL",operation_log,argv[1],-9);
+            system_cleanup();
+            return -9;
+        }
+        show_current_cluster(workdir,current_cluster_name,2);
+        if(argc<3){
+            run_flag=refresh_cluster("",crypto_keyfile);
+        }
+        else{
+            run_flag=refresh_cluster(argv[2],crypto_keyfile);
+        }
+        if(run_flag==1){
+            printf("[ FATAL: ] Please swith to a cluster first, or specify one to refresh:\n");
+            list_all_cluster_names();
+        }
+        else if(run_flag==-3){
+            printf("[ FATAL: ] The current cluster is in operation progress and cannot be refreshed.\n");
+        }
+        else if(run_flag==3){
+            printf("[ FATAL: ] The cluster %s is in operation progress and cannot be refreshed.\n",argv[2]);
+        }
+        else if(run_flag==5){
+            printf("[ FATAL: ] Refreshing operation failed. Exit now.\n");
+        }
+        else if(run_flag==7){
             printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",argv[2]);
             list_all_cluster_names();
         }

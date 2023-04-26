@@ -117,7 +117,7 @@ int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
         for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
             *(cluster_name_output+i)=*(cluster_name+i);
         }
-        *(cluster_name_output+CLUSTER_ID_LENGTH_MAX)='\0';
+        *(cluster_name_output+CLUSTER_ID_LENGTH_MAX)='\0'; //THIS SHOULD BE SECURE.
         name_flag=2;
     }
     else{
@@ -307,6 +307,10 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
+        if(check_pslock(temp_cluster_workdir)!=0){
+            printf("|  active: <> %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name);
+            return 0;
+        }
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
         if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
             printf("|  active: <> %s | ",temp_cluster_name);
@@ -321,6 +325,52 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         return 0;
     }
 }
+
+int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
+    if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
+        printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
+        return -1;
+    }
+    char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char temp_cluster_workdir[DIR_LENGTH]="";
+    if(strlen(target_cluster_name)==0){
+        if(show_current_cluster(temp_cluster_workdir,temp_cluster_name,0)==1){
+            return 1;
+        }
+        else{
+            if(check_pslock(temp_cluster_workdir)!=0){
+                return -3;
+            }
+            printf("[ -INFO- ] Refreshing the current cluster now ...\n");
+            decrypt_files(temp_cluster_workdir,crypto_keyfile);
+            if(terraform_execution(TERRAFORM_EXEC,"apply",temp_cluster_workdir,crypto_keyfile,OPERATION_ERROR_LOG)!=0){
+                delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+                return 5;
+            }
+            delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+            return 0;
+        }
+    }
+    if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
+        printf("[ FATAL: ] The specified cluster is not in the registry. Exit now.\n");
+        return 7;
+    }
+    else{
+        get_workdir(temp_cluster_workdir,target_cluster_name);
+        if(check_pslock(temp_cluster_workdir)!=0){
+            return 3;
+        }
+        printf("[ -INFO- ] Refreshing the target cluster %s now ...\n",temp_cluster_name);
+        decrypt_files(temp_cluster_workdir,crypto_keyfile);
+        if(terraform_execution(TERRAFORM_EXEC,"apply",temp_cluster_workdir,crypto_keyfile,OPERATION_ERROR_LOG)!=0){
+            delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+            return 5;
+        }
+        delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+        return 0;
+    }
+}
+
 
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     char cluster_workdir[DIR_LENGTH]="";
@@ -777,14 +827,14 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     reset_string(buffer2);
     get_crypto_key(crypto_keyfile,md5sum);
 #ifdef _WIN32
-    sprintf(cmdline,"%s decrypt %s\\_CLUSTER_SUMMARY.txt %s\\_CLUSTER_SUMMARY.txt.tmp %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
+    sprintf(cmdline,"%s decrypt %s\\_CLUSTER_SUMMARY.txt %s\\_CLUSTER_SUMMARY.txt.tmp %s > nul 2>&1",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
     sprintf(filename_temp,"%s\\_CLUSTER_SUMMARY.txt.tmp",vaultdir);
     find_and_get(filename_temp,"Master Node IP:","","",1,"Master Node IP:","","",' ',4,master_address);
     find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_address);
     sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
 #else
-    sprintf(cmdline,"%s decrypt %s/_CLUSTER_SUMMARY.txt %s/_CLUSTER_SUMMARY.txt.tmp %s",now_crypto_exec,vaultdir,vaultdir,md5sum);
+    sprintf(cmdline,"%s decrypt %s/_CLUSTER_SUMMARY.txt %s/_CLUSTER_SUMMARY.txt.tmp %s >> /dev/null 2>&1",now_crypto_exec,vaultdir,vaultdir,md5sum);
     system(cmdline);
     sprintf(filename_temp,"%s/_CLUSTER_SUMMARY.txt.tmp",vaultdir);
     find_and_get(filename_temp,"Master Node IP:","","",1,"Master Node IP:","","",' ',4,master_address);

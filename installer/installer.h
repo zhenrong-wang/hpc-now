@@ -9,7 +9,7 @@
 #ifndef INSTALLER_H
 #define INSTALLER_H
 
-#define INSTALLER_VERSION_CODE "0.2.0.0052"
+#define INSTALLER_VERSION_CODE "0.2.0.0056"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/hpcopr-dev/"
 
 int check_internet_installer(void);
