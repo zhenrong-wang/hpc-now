@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0044"
+#define CORE_VERSION_CODE "0.2.0.0045"
 
 #ifdef _WIN32
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
@@ -97,7 +97,9 @@
 
 /* You can modify the MAXIMUM_ADD_NODE_NUMBER to allow adding more than 16 nodes in one command */
 #define MAXIMUM_ADD_NODE_NUMBER 16
+#define MINUMUM_ADD_NODE_NUMBER 1
 #define MAXIMUM_ADD_USER_NUMBER 8
+#define MINIMUM_ADD_USER_NUNMBER 2
 /* This macro guarantees the maximum waiting time for terraform running */
 #define MAXIMUM_WAIT_TIME 600
 
