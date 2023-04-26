@@ -76,8 +76,8 @@ void print_help(void){
     printf("|                the command will generate a default configuration file.\n");
     printf("+ IV . Cluster Management:\n");
     printf("| * You need to switch to a cluster first.\n");
-    printf("|  ssh         : SSH to the master node of your current cluster.\n")
-    printf("|         USERNAME - You can specify to login with which user. For example: user1.\n")
+    printf("|  ssh         : SSH to the master node of your current cluster.\n");
+    printf("|         USERNAME - You can specify to login with which user. For example: user1.\n");
     printf("|  vault       : Check the sensitive information of the current cluster.\n");
     printf("|  graph       : Display the cluster map including all the nodes and status.\n");
     printf("+ V  . Cluster Operation:\n");

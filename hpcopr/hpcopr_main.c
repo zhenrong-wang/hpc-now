@@ -657,7 +657,7 @@ int main(int argc, char* argv[]){
 
     if(argc>2&&strcmp(argv[1],"ssh")==0){
         printf("[ -INFO- ] Trying to ssh to the cluster as %s, may fail if the username doesn't exist.\n",argv[2]);
-        run_flag=cluster_ssh(workdir);
+        run_flag=cluster_ssh(workdir,argv[2]);
         print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
         system_cleanup();

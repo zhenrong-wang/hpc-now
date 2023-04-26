@@ -34,7 +34,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile);
 int check_pslock(char* workdir);
 int confirm_to_operate_cluster(char* current_cluster_name);
 int check_down_nodes(char* workdir);
-int cluster_ssh(char* workdir);
+int cluster_ssh(char* workdir, char* username);
 //void backup_tf_files(char* stackdir);
 //void delete_backups(char* stackdir);
 
