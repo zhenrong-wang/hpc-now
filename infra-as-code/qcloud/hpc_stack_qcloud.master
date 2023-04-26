@@ -24,13 +24,13 @@ touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 sudo yum -y install at
 systemctl start atd && systemctl enable atd
 sudo mkdir /hpc_apps && sudo mkdir /hpc_data
-rm -rf ~/.ssh/id_rsa.pub
-rm -rf ~/.ssh/id_rsa
-rm -rf ~/.ssh/authorized_keys
-rm -rf ~/.ssh/known_hosts
-ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa -q
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-echo -e "\nPUBLIC_KEY" >> ~/.ssh/authorized_keys
+rm -rf /root/.ssh/id_rsa.pub
+rm -rf /root/.ssh/id_rsa
+rm -rf /root/.ssh/authorized_keys
+rm -rf /root/.ssh/known_hosts
+ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa -q
+cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
 systemctl restart sshd
 sudo yum -y install nfs-utils
 sudo mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_apps.mount_ip}:/ /hpc_apps

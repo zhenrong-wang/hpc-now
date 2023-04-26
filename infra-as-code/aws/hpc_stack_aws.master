@@ -20,13 +20,13 @@ userdel -f ec2-user
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config
 echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
-rm -rf ~/.ssh/id_rsa.pub
-rm -rf ~/.ssh/id_rsa
+rm -rf /root/.ssh/id_rsa.pub
+rm -rf /root/.ssh/id_rsa
 rm -rf ~/.ssh/authorized_keys
-rm -rf ~/.ssh/known_hosts
-ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa -q
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-echo -e "\nPUBLIC_KEY" >> ~/.ssh/authorized_keys
+rm -rf /root/.ssh/known_hosts
+ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa -q
+cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
 systemctl restart sshd
 echo -e "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
 mkdir /hpc_apps && mkdir /hpc_data
