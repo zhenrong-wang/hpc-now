@@ -325,6 +325,13 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     if(strcmp(argv[1],"refresh")==0){
+        if(cluster_empty_or_not(workdir)==0){
+            print_empty_cluster_info();
+            print_tail();
+            write_log("NULL",operation_log,argv[1],-9);
+            system_cleanup();
+            return -9;
+        }
         show_current_cluster(workdir,current_cluster_name,2);
         if(argc<3){
             run_flag=refresh_cluster("",crypto_keyfile);
