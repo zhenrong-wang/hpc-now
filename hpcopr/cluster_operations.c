@@ -731,7 +731,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("|  ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
+    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     fflush(stdin);
     printf("[ INPUT: ] ");
     scanf("%s",doubleconfirm);

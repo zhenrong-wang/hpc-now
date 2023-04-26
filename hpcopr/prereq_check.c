@@ -37,21 +37,20 @@ extern char md5_aws_tf_var[64];
 extern char md5_aws_tf_zip_var[64];
 
 int check_internet(void){
+    char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    if(system("ping -n 2 www.baidu.com > nul 2>&1")!=0){
-        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
-        printf("|          or check your internet connectivity and retry later.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
-#else
-    if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
-        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
-        printf("|          or check your internet connectivity and retry later.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
+    strcpy(cmdline,"ping -n 1 www.baidu.com > nul 2>&1");
+#elif __linux__
+    strcpy(cmdline,"ping -c 1 www.baidu.com >> /dev/null 2>&1");
+#elif __APPLE__
+    strcpy(cmdline,"ping -c 1 -t 1 www.baidu.com >> /dev/null 2>&1");
 #endif
+    if(system(cmdline)!=0){
+        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
+        printf("|          or check your internet connectivity and retry later.\n");
+        printf("[ FATAL: ] Exit now.\n");
+        return 1;
+    }
     return 0;
 }
 
