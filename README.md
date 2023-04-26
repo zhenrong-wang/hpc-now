@@ -45,6 +45,7 @@
 - ls-clusters : 列出当前的所有集群
 - switch ：切换集群，您需要提供目标集群的名字作为命令参数
 - glance ：查看集群。您可以用 'all' 或者 目标集群的名字作为命令参数，以分别快速查看所有集群或者某个集群
+- refresh：刷新集群。您可以不用参数以刷新当前集群（如果您已切换至一个集群）或者将目标集群的名字作为命令参数，以刷新目标集群
 - exit-current ：退出当前集群。
 - remove ：彻底删除某个集群。您需要提供目标集群的名字作为命令参数
 
@@ -117,7 +118,7 @@
 
 - hpcopr-win.exe | hpcopr-lin.exe | hpcopr-dwn.exe ：如上所述，该组件是 HPC-NOW 的最核心组件。
 - installer-win.exe | installer-lin.exe | installer-dwn.exe：如上所述，该组件是安装器，您后续需要该安装器来在您的本地环境中安装、更新、卸载 HPC-NOW 服务。
-- now-crypto-win.exe | now-crypto-lin.exe | now-crypto-dwn.exe：如上所述，该组件是**伪****对称**加密和解密程序。是 HPC-NOW 服务的依赖组件。
+- now-crypto-win.exe | now-crypto-lin.exe | now-crypto-dwn.exe：如上所述，该组件是 _**伪**_ 对称加密和解密程序。是 HPC-NOW 服务的依赖组件。
 - libgfuncs.a：如上所述，该组件后续无用，可自行删除和丢弃。
 - hpcmgr.exe：该程序是一个非常轻量化的 hpcmgr 本地程序，您可以在创建好的任意集群中，将该组件放置在 /usr/bin 目录下。用于替换默认的 hpcmgr.exe 。**一般情况下不需要进行该操作。**
 
