@@ -465,9 +465,7 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"get-conf")==0){
         if(cluster_empty_or_not(workdir)!=0){
             printf("[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
-            printf("|          downloading default configuration file is not permitted. If you do want\n");
-            printf("|          to reconfigure the cluster from the default configuration, please run\n");
-            printf("|          the 'destroy' command first and retry. Exit now.\n");
+            printf("|          downloading default configuration file is not permitted. Exit now.\n");
             print_tail();
             write_log(current_cluster_name,operation_log,"CLUSTER_NOT_EMPTY",23);
             system_cleanup();
@@ -498,9 +496,7 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"edit-conf")==0){
         if(cluster_empty_or_not(workdir)!=0){
             printf("[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
-            printf("|          downloading default configuration file is not permitted. If you do want\n");
-            printf("|          to reconfigure the cluster from the default configuration, please run\n");
-            printf("|          the 'destroy' command first and retry. Exit now.\n");
+            printf("|          downloading default configuration file is not permitted. Exit now.\n");
             print_tail();
             write_log(current_cluster_name,operation_log,"CLUSTER_NOT_EMPTY",23);
             system_cleanup();
