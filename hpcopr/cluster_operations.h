@@ -28,6 +28,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile);
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag);
 int exit_current_cluster(void);
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile);
+int refresh_cluster(char* target_cluster_name, char* crypto_keyfile);
 int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk);
 int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile);
 int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag);
