@@ -446,8 +446,7 @@ int main(int argc, char* argv[]){
     sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
 #endif
     if(get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer1,cloud_flag)!=0){
-        printf("[ FATAL: ] Failed to get the key file. HPC-NOW services can not be started.\n");
-        printf("|          Please contact info@hpc-now.com for technical supports.\n");
+        printf("[ FATAL: ] Failed to get the key file. Have you switched to any cluster?\n");
         printf("|          Exit now.\n");
         print_tail();
         write_log(current_cluster_name,operation_log,"KEY_CHECK_FAILED",5);
@@ -619,8 +618,7 @@ int main(int argc, char* argv[]){
         if(strcmp(argv[1],"reconfc")==0||strcmp(argv[1],"reconfm")==0){
             printf("[ -INFO- ] Available configuration list:\n|\n");
             if(check_reconfigure_list(workdir)!=0){
-                printf("[ FATAL: ] Internal error. Please submit an issue to the community\n");
-                printf("|          for technical supports. Exit now.\n");
+                printf("[ FATAL: ] Internal error. Please submit an issue to the community. Exit now.\n");
                 print_tail();
                 write_log(current_cluster_name,operation_log,argv[1],-1);
                 system_cleanup();
