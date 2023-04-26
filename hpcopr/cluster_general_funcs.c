@@ -828,22 +828,13 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
     return 0;
 }
 
-void archive_log(char* logdir, char* logfile){
+/* Should write a real C function, instead of call system commands. But it is totally OK.*/
+void archive_log(char* logarchive, char* logfile){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    if(strlen(logfile)==0){
-        sprintf(cmdline,"type %s\\tf_prep.log >> %s\\tf_prep_archive.log 2>nul",logdir,logdir);
-    }
-    else{
-        sprintf(cmdline,"type %s >> %s.archive 2>nul",logfile,logfile);
-    }
+    sprintf(cmdline,"type %s >> %s.archive 2>nul",logarchive,logfile);
 #else
-    if(strlen(logfile)==0){
-        sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log 2>/dev/null",logdir,logdir);
-    }
-    else{
-        sprintf(cmdline,"cat %s >> %s.archive 2>/dev/null",logfile,logfile);
-    }
+    sprintf(cmdline,"cat %s >> %s 2>/dev/null",logarchive,logfile);
 #endif
     system(cmdline);
 }
@@ -1078,15 +1069,21 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
+    char tf_realtime_log[FILENAME_LENGTH];
+    char tf_realtime_log_archive[FILENAME_LENGTH];
+    char tf_error_log_archive[FILENAME_LENGTH];
     int run_flag=0;
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
-    sprintf(logdir,"%s\\log\\",workdir);
+    sprintf(tf_realtime_log,"%s\\log\\tf_prep.log",workdir);
+    sprintf(tf_realtime_log_archive,"%s\\log\\tf_prep.log.archive",workdir);
 #else
-    sprintf(logdir,"%s/log/",workdir);
+    sprintf(tf_realtime_log,"%s/log/tf_prep.log",workdir);
+    sprintf(tf_realtime_log_archive,"%s/log/tf_prep.log.archive",workdir);
 #endif
-    archive_log(logdir,"");
-    archive_log(logdir,error_log);
+    sprintf(tf_error_log_archive,"%s.archive",error_log);
+    archive_log(tf_realtime_log_archive,tf_realtime_log);
+    archive_log(tf_error_log_archive,error_log);
 #ifdef _WIN32
     sprintf(cmdline,"cd %s\\ && echo yes | start /b %s %s > %s\\tf_prep.log 2>%s",stackdir,tf_exec,execution_name,logdir,error_log);
 #else
@@ -1098,7 +1095,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     wait_for_complete(workdir,execution_name,error_log);
     if(file_empty_or_not(error_log)!=0||run_flag!=0){
         printf("[ FATAL: ] Failed to operate the cluster. Operation command: %s. Exit now.\n",execution_name);
-        archive_log(logdir,error_log);
+        archive_log(tf_error_log_archive,error_log);
         return -1;
     }
     return 0;

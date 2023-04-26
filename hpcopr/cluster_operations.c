@@ -319,6 +319,14 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
+    char log_trash[FILENAME_LENGTH]="";
+    char tf_realtime_log[FILENAME_LENGTH]="";
+    char tf_archive_log[FILENAME_LENGTH]="";
+#ifdef _WIN32
+    sprintf(log_trash,"%s\\log_trashbin.txt",HPC_NOW_ROOT_DIR);
+#else
+    sprintf(log_trash,"%s/log_trashbin.txt",HPC_NOW_ROOT_DIR);
+#endif
     if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
         printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",target_cluster_name);
         list_all_cluster_names();
@@ -339,10 +347,8 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
             fflush(stdin);
             scanf("%s",doubleconfirm);
             if(strcmp(doubleconfirm,target_cluster_name)==0){
-                if(cluster_destroy(cluster_workdir,crypto_keyfile,0)==0){
-                    delete_from_cluster_registry(target_cluster_name);
-                }
-                else{
+                if(cluster_destroy(cluster_workdir,crypto_keyfile,0)!=0){
+                    delete_decrypted_files(cluster_workdir,crypto_keyfile);
                     return 1;
                 }
             }
@@ -370,12 +376,18 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
             return 1;
         }
     }
+    printf("[ -INFO- ] Removing all the related files ...\n");
 #ifdef _WIN32
+    sprintf(tf_realtime_log,"%s\\log\\tf_prep.log",cluster_workdir);
+    sprintf(tf_archive_log,"%s\\log\\tf_prep.log.archive",cluster_workdir);
     sprintf(cmdline,"rd /q /s %s > nul 2>&1",cluster_workdir);
 #else
+    sprintf(tf_realtime_log,"%s/log/tf_prep.log",cluster_workdir);
+    sprintf(tf_archive_log,"%s/log/tf_prep.log.archive",cluster_workdir);
     sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",cluster_workdir);
 #endif
-    printf("[ -INFO- ] Removing all the related files ...\n");
+    archive_log(log_trash,tf_realtime_log);
+    archive_log(log_trash,tf_archive_log);
     system(cmdline);
     printf("[ -INFO- ] Deleting the cluster from the registry ...\n");
     delete_from_cluster_registry(target_cluster_name);
@@ -405,13 +417,13 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     }
     file_p=fopen(cluster_registry,"a+");
     if(file_p==NULL){
-        printf("[ FATAL: ] Failed to open/write to the cluster registry. Exit now.");
+        printf("[ FATAL: ] Failed to open/write to the cluster registry. Exit now.\n");
         return -1;
     }
     fclose(file_p);
     file_p=fopen(current_cluster,"w+");
     if(file_p==NULL){
-        printf("[ FATAL: ] Failed to create the current cluster indicator. Exit now.");
+        printf("[ FATAL: ] Failed to create the current cluster indicator. Exit now.\n");
         return -1;
     }
     fclose(file_p);
