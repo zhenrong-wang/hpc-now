@@ -9,7 +9,7 @@ if [ ! -n "$1" ]; then
 	echo -e "[ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command."
 	echo -e "|          build  - (re)build the binaries"
     echo -e "|          delete - delete the previous binaries"
-    echo -e "|          clear  - remove the 'bin' folder"
+    echo -e "|          clear  - remove the 'build' folder"
 	echo -e "[ -DONE- ] Exit now."
     exit 1
 elif [ "$1" = "build" ]; then

@@ -9,7 +9,7 @@ if "%~1"=="" (
 	echo [ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command.
 	echo ^|          build  - ^(re^)build the binaries
     echo ^|          delete - delete the previous binaries
-    echo ^|          clear  - remove the 'bin' folder
+    echo ^|          clear  - remove the 'build' folder
 	echo [ -DONE- ] Exit now.
 	exit /b 1
 ) else if "%~1"=="build" (
