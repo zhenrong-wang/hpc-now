@@ -1,7 +1,8 @@
 /*
- * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * This code is written and maintained by Zhenrong WANG
+ * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * It is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: GNU Public License - v2.0
  * Bug report: info@hpc-now.com
  */
 
@@ -40,6 +41,7 @@ void print_help(void){
     printf("| Commands:\n");
     printf("+ I  . Multi-Cluster Management:\n");
     printf("| * You DO NOT need to switch to a cluster first.\n");
+    printf("|  envcheck    : Quickly check the running environment.\n");
     printf("|  new-cluster : Create a new cluster, you can specify the cluster name, extra\n");
     printf("|                *optional* parameters are accepted:\n");
     printf("|                  PARAM1 - cluster name (A-Z | a-z | 0-9 | - , %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
@@ -74,6 +76,8 @@ void print_help(void){
     printf("|                the command will generate a default configuration file.\n");
     printf("+ IV . Cluster Management:\n");
     printf("| * You need to switch to a cluster first.\n");
+    printf("|  ssh         : SSH to the master node of your current cluster.\n");
+    printf("|         USERNAME - You can specify to login with which user. For example: user1.\n");
     printf("|  vault       : Check the sensitive information of the current cluster.\n");
     printf("|  graph       : Display the cluster map including all the nodes and status.\n");
     printf("+ V  . Cluster Operation:\n");
@@ -165,21 +169,6 @@ int read_license(void){
         if(system(cmdline)!=0){
             return 1;
         }
-    }
-    return 0;
-}
-
-int confirm_to_operate_cluster(char* current_cluster_name){
-    char doubleconfirm[64]="";
-    printf("[ -INFO- ] You are operating the cluster %s now, which may affect all\n",current_cluster_name);
-    printf("|          the jobs running on this cluster. Please input 'y-e-s' to continue.\n");
-    printf("[ INPUT: ] ");
-    fflush(stdin);
-    scanf("%s",doubleconfirm);
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
-        printf("|          Nothing changed. Exit now.\n");
-        return 1;
     }
     return 0;
 }

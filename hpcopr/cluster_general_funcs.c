@@ -1,7 +1,8 @@
 /*
- * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * This code is written and maintained by Zhenrong WANG
+ * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * It is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: GNU Public License - v2.0
  * Bug report: info@hpc-now.com
  */
 
@@ -423,12 +424,12 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
 #ifdef _WIN32
         sprintf(cmdline,"%s encrypt %s\\hpc_stack_base.tf %s\\hpc_stack_base.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"del /f /q %s",filename_temp);
+        sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
         system(cmdline);
 #else
         sprintf(cmdline,"%s encrypt %s/hpc_stack_base.tf %s/hpc_stack_base.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"rm -rf %s",filename_temp);
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
         system(cmdline);
 #endif
     }
@@ -442,12 +443,12 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
 #ifdef _WIN32
         sprintf(cmdline,"%s encrypt %s\\terraform.tfstate %s\\terraform.tfstate.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"del /f /q %s",filename_temp);
+        sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
         system(cmdline);
 #else
         sprintf(cmdline,"%s encrypt %s/terraform.tfstate %s/terraform.tfstate.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"rm -rf %s",filename_temp);
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
         system(cmdline);
 #endif
     }
@@ -461,12 +462,12 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
 #ifdef _WIN32
         sprintf(cmdline,"%s encrypt %s\\terraform.tfstate.backup %s\\terraform.tfstate.backup.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"del /f /q %s",filename_temp);
+        sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
         system(cmdline);
 #else
         sprintf(cmdline,"%s encrypt %s/terraform.tfstate.backup %s/terraform.tfstate.backup.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"rm -rf %s",filename_temp);
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
         system(cmdline);
 #endif
     }
@@ -479,12 +480,12 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
 #ifdef _WIN32
         sprintf(cmdline,"%s encrypt %s\\hpc_stack_master.tf %s\\hpc_stack_master.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"del /f /q %s",filename_temp);
+        sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
         system(cmdline);
 #else
         sprintf(cmdline,"%s encrypt %s/hpc_stack_master.tf %s/hpc_stack_master.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"rm -rf %s",filename_temp);
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
         system(cmdline);
 #endif
     }
@@ -498,12 +499,12 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
 #ifdef _WIN32
         sprintf(cmdline,"%s encrypt %s\\hpc_stack_database.tf %s\\hpc_stack_database.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"del /f /q %s",filename_temp);
+        sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
         system(cmdline);
 #else
         sprintf(cmdline,"%s encrypt %s/hpc_stack_database.tf %s/hpc_stack_database.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"rm -rf %s",filename_temp);
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
         system(cmdline);
 #endif
     }
@@ -517,12 +518,12 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
 #ifdef _WIN32
         sprintf(cmdline,"%s encrypt %s\\hpc_stack_natgw.tf %s\\hpc_stack_natgw.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"del /f /q %s",filename_temp);
+        sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
         system(cmdline);
 #else
         sprintf(cmdline,"%s encrypt %s/hpc_stack_natgw.tf %s/hpc_stack_natgw.tf.tmp %s",now_crypto_exec,stackdir,stackdir,md5sum);
         system(cmdline);
-        sprintf(cmdline,"rm -rf %s",filename_temp);
+        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
         system(cmdline);
 #endif
     }
@@ -540,7 +541,7 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
         if(file_exist_or_not(filename_temp)==0){
             sprintf(cmdline,"%s encrypt %s\\hpc_stack_compute%d.tf %s\\hpc_stack_compute%d.tf.tmp %s",now_crypto_exec,stackdir,i,stackdir,i,md5sum);
             system(cmdline);
-            sprintf(cmdline,"del /f /q %s",filename_temp);
+            sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
             system(cmdline);
         }
 #else
@@ -548,7 +549,7 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
         if(file_exist_or_not(filename_temp)==0){
             sprintf(cmdline,"%s encrypt %s/hpc_stack_compute%d.tf %s/hpc_stack_compute%d.tf.tmp %s",now_crypto_exec,stackdir,i,stackdir,i,md5sum);
             system(cmdline);
-            sprintf(cmdline,"rm -rf %s",filename_temp);
+            sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
             system(cmdline);
         }
 #endif
@@ -827,22 +828,13 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
     return 0;
 }
 
-void archive_log(char* logdir, char* logfile){
+/* Should write a real C function, instead of calling system commands. But it is totally OK.*/
+void archive_log(char* logarchive, char* logfile){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    if(strlen(logfile)==0){
-        sprintf(cmdline,"type %s\\tf_prep.log >> %s\\tf_prep_archive.log 2>nul",logdir,logdir);
-    }
-    else{
-        sprintf(cmdline,"type %s >> %s\\tf_prep_archive.log 2>nul",logfile,logdir);
-    }
+    sprintf(cmdline,"type %s >> %s 2>nul",logfile,logarchive);
 #else
-    if(strlen(logfile)==0){
-        sprintf(cmdline,"cat %s/tf_prep.log >> %s/tf_prep_archive.log 2>/dev/null",logdir,logdir);
-    }
-    else{
-        sprintf(cmdline,"cat %s >> %s/tf_prep_archive.log 2>/dev/null",logfile,logdir);
-    }
+    sprintf(cmdline,"cat %s >> %s 2>/dev/null",logfile,logarchive);
 #endif
     system(cmdline);
 }
@@ -960,14 +952,14 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     FILE* file_p_2=fopen(compute_template,"r");
     if(file_p_2==NULL){
         fclose(file_p);
-        return 1;
+        return 2;
     }
     fclose(file_p_2);
     FILE* file_p_3=fopen(cloud_flag_file,"r");
     if(file_p_3==NULL){
         fclose(file_p);
         fclose(file_p_2);
-        return 1;
+        return 3;
     }
     fgetline(file_p_3,cloud_flag);
     fclose(file_p_3);
@@ -1021,18 +1013,26 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
 }
 
 int cluster_empty_or_not(char* workdir){
-    char filename_temp[FILENAME_LENGTH]="";
+    char statefile[FILENAME_LENGTH]="";
+    char templatefile[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
-    sprintf(filename_temp,"%s\\currentstate",stackdir);
+    sprintf(statefile,"%s\\currentstate",stackdir);
+    sprintf(templatefile,"%s\\compute_template",stackdir);
 #else
-    sprintf(filename_temp,"%s/currentstate",stackdir);
+    sprintf(statefile,"%s/currentstate",stackdir);
+    sprintf(templatefile,"%s/compute_template",stackdir);
 #endif
-    if(file_exist_or_not(filename_temp)!=0||file_empty_or_not(filename_temp)==0){
+    if(file_exist_or_not(statefile)!=0&&file_exist_or_not(templatefile)!=0){
         return 0;
     }
-    return 1;
+    else if(file_empty_or_not(statefile)==0&&file_empty_or_not(templatefile)==0){
+        return 0;
+    }
+    else{
+        return 1;
+    }
 }
 
 int cluster_asleep_or_not(char* workdir){
@@ -1068,28 +1068,33 @@ int cluster_asleep_or_not(char* workdir){
 int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
-    char logdir[DIR_LENGTH]="";
+    char tf_realtime_log[FILENAME_LENGTH];
+    char tf_realtime_log_archive[FILENAME_LENGTH];
+    char tf_error_log_archive[FILENAME_LENGTH];
+    int run_flag=0;
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
-    sprintf(logdir,"%s\\log\\",workdir);
+    sprintf(tf_realtime_log,"%s\\log\\tf_prep.log",workdir);
+    sprintf(tf_realtime_log_archive,"%s\\log\\tf_prep.log.archive",workdir);
 #else
-    sprintf(logdir,"%s/log/",workdir);
+    sprintf(tf_realtime_log,"%s/log/tf_prep.log",workdir);
+    sprintf(tf_realtime_log_archive,"%s/log/tf_prep.log.archive",workdir);
 #endif
-    archive_log(logdir,"");
-    archive_log(logdir,error_log);
+    sprintf(tf_error_log_archive,"%s.archive",error_log);
+    archive_log(tf_realtime_log_archive,tf_realtime_log);
+    archive_log(tf_error_log_archive,error_log);
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s %s > %s\\tf_prep.log 2>%s",stackdir,tf_exec,execution_name,logdir,error_log);
+    sprintf(cmdline,"cd %s\\ && echo yes | start /b %s %s > %s 2>%s",stackdir,tf_exec,execution_name,tf_realtime_log,error_log);
 #else
-    sprintf(cmdline,"cd %s && echo yes | %s %s > %s/tf_prep.log 2>%s &",stackdir,tf_exec,execution_name,logdir,error_log);
+    sprintf(cmdline,"cd %s && echo yes | %s %s > %s 2>%s &",stackdir,tf_exec,execution_name,tf_realtime_log,error_log);
 #endif
-    system(cmdline);
+    run_flag=system(cmdline);
     printf("[ -INFO- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
-    printf("|          Operation Command: %s. Error log: %s\n",execution_name,OPERATION_ERROR_LOG);
+    printf("|          Operation Command: %s. Error log: %s\n",execution_name,error_log);
     wait_for_complete(workdir,execution_name,error_log);
-    if(file_empty_or_not(error_log)!=0){
+    if(file_empty_or_not(error_log)!=0||run_flag!=0){
         printf("[ FATAL: ] Failed to operate the cluster. Operation command: %s. Exit now.\n",execution_name);
-        archive_log(logdir,error_log);
-        delete_decrypted_files(workdir,crypto_keyfile);
+        archive_log(tf_error_log_archive,error_log);
         return -1;
     }
     return 0;
@@ -1275,4 +1280,64 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
 #endif
     system(cmdline);
     return 0;
+}
+
+int confirm_to_operate_cluster(char* current_cluster_name){
+    char doubleconfirm[64]="";
+    printf("[ -INFO- ] You are operating the cluster %s now, which may affect all\n",current_cluster_name);
+    printf("|          the jobs running on this cluster. Please input 'y-e-s' to continue.\n");
+    printf("[ INPUT: ] ");
+    fflush(stdin);
+    scanf("%s",doubleconfirm);
+    if(strcmp(doubleconfirm,"y-e-s")!=0){
+        printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+        printf("|          Nothing changed. Exit now.\n");
+        return 1;
+    }
+    return 0;
+}
+
+int check_down_nodes(char* workdir){
+    char statefile[FILENAME_LENGTH];
+    char stackdir[DIR_LENGTH];
+    create_and_get_stackdir(workdir,stackdir);
+#ifdef _WIN32
+    sprintf(statefile,"%s\\currentstate",stackdir);
+#else
+    sprintf(statefile,"%s/currentstate",stackdir);
+#endif
+    return get_compute_node_num(statefile,"down");
+}
+
+int cluster_ssh(char* workdir, char* username){
+    char stackdir[DIR_LENGTH]="";
+    char statefile[FILENAME_LENGTH];
+    char master_address[64]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char private_sshkey[FILENAME_LENGTH]="";
+    FILE* file_p=NULL;
+    create_and_get_stackdir(workdir,stackdir);
+#ifdef _WIN32
+    sprintf(statefile,"%s\\currentstate",stackdir);
+#else
+    sprintf(statefile,"%s/currentstate",stackdir);
+#endif
+    if(file_exist_or_not(statefile)!=0){
+        return -1;
+    }
+    file_p=fopen(statefile,"r");
+    fgetline(file_p,master_address);
+    fclose(file_p);
+#ifdef _WIN32
+    sprintf(private_sshkey,"%s\\now-cluster-login",SSHKEY_DIR);
+#else
+    sprintf(private_sshkey,"%s/now-cluster-login",SSHKEY_DIR);
+#endif
+    if(strlen(username)==0){
+        sprintf(cmdline,"ssh -i %s root@%s",private_sshkey,master_address);
+    }
+    else{
+        sprintf(cmdline,"ssh -i %s %s@%s",private_sshkey,username,master_address);
+    }
+    return system(cmdline);
 }

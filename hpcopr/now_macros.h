@@ -1,17 +1,125 @@
 /*
-* This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
-* The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
-* It is distributed under the license: GNU Public License - v2.0
-* Bug report: info@hpc-now.com
-*/
+ * This code is written and maintained by Zhenrong WANG
+ * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
+ * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+ * This code is distributed under the license: GNU Public License - v2.0
+ * Bug report: info@hpc-now.com
+ */
 
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0030"
-#define INSTALLER_VERSION_CODE "0.2.0.0030"
+#define CORE_VERSION_CODE "0.2.0.0052"
 
-/*
+#ifdef _WIN32
+#define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
+#define USAGE_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-usage.log" //This is a global file!
+#define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
+#define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
+#define SSHKEY_DIR "C:\\hpc-now\\.ssh"
+#define OPERATION_ERROR_LOG "c:\\hpc-now\\hpc-now.err.log"
+#define HPC_NOW_ROOT_DIR "c:\\programdata\\hpc-now\\"
+
+#define NOW_CRYPTO_EXEC "c:\\programdata\\hpc-now\\bin\\now-crypto.exe"
+#define TERRAFORM_EXEC "c:\\programdata\\hpc-now\\bin\\terraform.exe"
+#define HPCOPR_EXEC "C:\\hpc-now\\hpcopr.exe"
+
+#define LOCATION_CONF_FILE "c:\\programdata\\hpc-now\\etc\\locations.conf"
+#define VERS_MD5_CONF_FILE "c:\\programdata\\hpc-now\\etc\\md5values.conf"
+#define ALL_CLUSTER_REGISTRY "c:\\programdata\\hpc-now\\etc\\all_clusters.dat"
+#define CURRENT_CLUSTER_INDICATOR "c:\\programdata\\hpc-now\\etc\\current_cluster.dat"
+
+#elif __linux__
+#define CRYPTO_KEY_FILE "/usr/.hpc-now/.now_crypto_seed.lock"
+#define USAGE_LOG_FILE "/usr/.hpc-now/.now-cluster-usage.log"
+#define OPERATION_LOG_FILE "/usr/.hpc-now/.now-cluster-operation.log"
+#define NOW_LIC_DIR "/home/hpc-now/LICENSES"
+#define SSHKEY_DIR "/home/hpc-now/.now-ssh"
+#define OPERATION_ERROR_LOG "/home/hpc-now/hpc-now.err.log"
+#define HPC_NOW_ROOT_DIR "/usr/.hpc-now/"
+
+#define NOW_CRYPTO_EXEC "/usr/.hpc-now/.bin/now-crypto.exe"
+#define TERRAFORM_EXEC "/usr/.hpc-now/.bin/terraform"
+#define HPCOPR_EXEC "/home/hpc-now/.bin/hpcopr"
+
+#define LOCATION_CONF_FILE "/usr/.hpc-now/.etc/locations.conf"
+#define VERS_MD5_CONF_FILE "/usr/.hpc-now/.etc/md5values.conf"
+#define ALL_CLUSTER_REGISTRY "/usr/.hpc-now/.etc/.all_clusters.dat"
+#define CURRENT_CLUSTER_INDICATOR "/usr/.hpc-now/.etc/current_cluster.dat"
+
+#elif __APPLE__
+#define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock"
+#define USAGE_LOG_FILE "/Applications/.hpc-now/.now-cluster-usage.log"
+#define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
+#define NOW_LIC_DIR "/Users/hpc-now/LICENSES"
+#define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
+#define OPERATION_ERROR_LOG "/Users/hpc-now/hpc-now.err.log"
+#define HPC_NOW_ROOT_DIR "/Applications/.hpc-now/"
+
+#define NOW_CRYPTO_EXEC "/Applications/.hpc-now/.bin/now-crypto.exe"
+#define TERRAFORM_EXEC "/Applications/.hpc-now/.bin/terraform"
+#define HPCOPR_EXEC "/Users/hpc-now/.bin/hpcopr"
+
+#define LOCATION_CONF_FILE "/Applications/.hpc-now/.etc/locations.conf"
+#define VERS_MD5_CONF_FILE "/Applications/.hpc-now/.etc/md5values.conf"
+#define ALL_CLUSTER_REGISTRY "/Applications/.hpc-now/.etc/.all_clusters.dat"
+#define CURRENT_CLUSTER_INDICATOR "/Applications/.hpc-now/.etc/current_cluster.dat"
+
+#endif
+
+/* Usually you don't need to modify the macros in this section.*/
+#define CMDLINE_LENGTH 2048
+#define CLUSTER_ID_LENGTH_MAX 24
+#define CLUSTER_ID_LENGTH_MIN 8
+#define CLUSTER_ID_LENGTH_MAX_PLUS 25
+#define DIR_LENGTH 384
+#define FILENAME_LENGTH 512
+#define LOCATION_LENGTH 384
+#define LOCATION_LENGTH_EXTENDED 512
+#define LINE_LENGTH 4096
+#define LINE_LENGTH_SHORT 256
+#define AKSK_LENGTH 128
+#define CONF_STRING_LENTH 64
+
+/* Usually you don't need to modify the macros in this section.*/
+#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"
+#define URL_LICENSE_FSF "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+#define PASSWORD_LENGTH 19
+#define PASSWORD_STRING_LENGTH 20
+#define RANDSTR_LENGTH_PLUS 11
+
+/* Usually you don't need to modify the macros in this section.*/
+#define AWS_SLEEP_TIME_GLOBAL 180
+#define AWS_SLEEP_TIME_CN 180
+#define ALI_SLEEP_TIME 60
+#define QCLOUD_SLEEP_TIME 60
+#define GENERAL_SLEEP_TIME 30
+
+/* You can modify the MAXIMUM_ADD_NODE_NUMBER to allow adding more than 16 nodes in one command */
+#define MAXIMUM_ADD_NODE_NUMBER 16
+#define MINUMUM_ADD_NODE_NUMBER 1
+#define MAXIMUM_ADD_USER_NUMBER 8
+#define MINIMUM_ADD_USER_NUNMBER 2
+/* This macro guarantees the maximum waiting time for terraform running */
+#define MAXIMUM_WAIT_TIME 600
+
+/* 
+ * Usually you don't need to modify the macros in this section
+ * Unless you are going to build your own default public repository
+ * There are some subdirectory paths in the program, please follow the directory structure
+ * Otherwise the repository won't work properly
+ */
+
+#define DEFAULT_URL_TF_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-root/"
+#define DEFAULT_URL_CODE_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/infra-as-code/"
+#define DEFAULT_URL_SHELL_SCRIPTS "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/scripts/"
+#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-crypto/"
+
+#define LOCATION_CONF_TOTAL_LINES 5
+#define LOCATION_LINES 4
+#endif
+
+/* The macros below are deprecated. 
 
 TERRAFORM_VERSION "1.4.5"
 ALI_TF_PLUGIN_VERSION "1.203.0"
@@ -49,115 +157,3 @@ MD5_QCLOUD_TF_ZIP_DWN "13c2632876e3cbd02687d777e30a4708"
 MD5_AWS_TF_ZIP_DWN "1f01e3b61fa0d4a5e3514a775e27a826"
 
 Terraform version is relatively stable. Here we use 1.4.5*/
-
-#ifdef _WIN32
-#define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
-#define USAGE_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-usage.log" //This is a global file!
-#define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
-#define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
-#define SSHKEY_DIR "C:\\hpc-now\\.ssh"
-#define OPERATION_ERROR_LOG "c:\\hpc-now\\hpc-now.err.log"
-#define HPC_NOW_ROOT_DIR "c:\\programdata\\hpc-now\\"
-
-#define NOW_CRYPTO_EXEC "c:\\programdata\\hpc-now\\bin\\now-crypto.exe"
-#define TERRAFORM_EXEC "c:\\programdata\\hpc-now\\bin\\terraform.exe"
-#define HPCOPR_EXEC "C:\\hpc-now\\hpcopr.exe"
-
-#define LOCATION_CONF_FILE "c:\\programdata\\hpc-now\\etc\\locations.conf"
-#define VERS_MD5_CONF_FILE "c:\\programdata\\hpc-now\\etc\\md5values.conf"
-#define ALL_CLUSTER_REGISTRY "c:\\programdata\\hpc-now\\etc\\all_clusters.dat"
-#define CURRENT_CLUSTER_INDICATOR "c:\\programdata\\hpc-now\\etc\\current_cluster.dat"
-
-#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_windows_amd64.exe"
-
-#elif __linux__
-#define CRYPTO_KEY_FILE "/usr/.hpc-now/.now_crypto_seed.lock"
-#define USAGE_LOG_FILE "/usr/.hpc-now/.now-cluster-usage.log"
-#define OPERATION_LOG_FILE "/usr/.hpc-now/.now-cluster-operation.log"
-#define NOW_LIC_DIR "/home/hpc-now/LICENSES"
-#define SSHKEY_DIR "/home/hpc-now/.now-ssh"
-#define OPERATION_ERROR_LOG "/home/hpc-now/hpc-now.err.log"
-#define HPC_NOW_ROOT_DIR "/usr/.hpc-now/"
-
-#define NOW_CRYPTO_EXEC "/usr/.hpc-now/.bin/now-crypto.exe"
-#define TERRAFORM_EXEC "/usr/.hpc-now/.bin/terraform"
-#define HPCOPR_EXEC "/home/hpc-now/.bin/hpcopr"
-
-#define LOCATION_CONF_FILE "/usr/.hpc-now/.etc/locations.conf"
-#define VERS_MD5_CONF_FILE "/usr/.hpc-now/.etc/md5values.conf"
-#define ALL_CLUSTER_REGISTRY "/usr/.hpc-now/.etc/.all_clusters.dat"
-#define CURRENT_CLUSTER_INDICATOR "/usr/.hpc-now/.etc/current_cluster.dat"
-
-#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_linux_amd64"
-
-#elif __APPLE__
-#define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock"
-#define USAGE_LOG_FILE "/Applications/.hpc-now/.now-cluster-usage.log"
-#define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
-#define NOW_LIC_DIR "/Users/hpc-now/LICENSES"
-#define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
-#define OPERATION_ERROR_LOG "/Users/hpc-now/hpc-now.err.log"
-#define HPC_NOW_ROOT_DIR "/Applications/.hpc-now/"
-
-#define NOW_CRYPTO_EXEC "/Applications/.hpc-now/.bin/now-crypto.exe"
-#define TERRAFORM_EXEC "/Applications/.hpc-now/.bin/terraform"
-#define HPCOPR_EXEC "/Users/hpc-now/.bin/hpcopr"
-
-#define LOCATION_CONF_FILE "/Applications/.hpc-now/.etc/locations.conf"
-#define VERS_MD5_CONF_FILE "/Applications/.hpc-now/.etc/md5values.conf"
-#define ALL_CLUSTER_REGISTRY "/Applications/.hpc-now/.etc/.all_clusters.dat"
-#define CURRENT_CLUSTER_INDICATOR "/Applications/.hpc-now/.etc/current_cluster.dat"
-
-#define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-installers/hpcopr_darwin_amd64"
-
-#endif
-
-/* Usually you don't need to modify the macros in this section.*/
-#define CMDLINE_LENGTH 2048
-#define CLUSTER_ID_LENGTH_MAX 24
-#define CLUSTER_ID_LENGTH_MIN 8
-#define CLUSTER_ID_LENGTH_MAX_PLUS 25
-#define DIR_LENGTH 256
-#define FILENAME_LENGTH 512
-#define LOCATION_LENGTH 512
-#define LOCATION_LENGTH_EXTENDED 768
-#define LINE_LENGTH 4096
-#define LINE_LENGTH_SHORT 128
-#define AKSK_LENGTH 128
-#define CONF_STRING_LENTH 64
-
-/* Usually you don't need to modify the macros in this section.*/
-#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"
-#define URL_LICENSE_FSF "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
-#define PASSWORD_LENGTH 19
-#define PASSWORD_STRING_LENGTH 20
-#define RANDSTR_LENGTH_PLUS 11
-
-/* Usually you don't need to modify the macros in this section.*/
-#define AWS_SLEEP_TIME_GLOBAL 180
-#define AWS_SLEEP_TIME_CN 180
-#define ALI_SLEEP_TIME 60
-#define QCLOUD_SLEEP_TIME 60
-#define GENERAL_SLEEP_TIME 30
-
-/* You can modify the MAXIMUM_ADD_NODE_NUMBER to allow adding more than 16 nodes in one command */
-#define MAXIMUM_ADD_NODE_NUMBER 16
-#define MAXIMUM_ADD_USER_NUMBER 8
-/* This macro guarantees the maximum waiting time for terraform running */
-#define MAXIMUM_WAIT_TIME 600
-
-/* 
- * Usually you don't need to modify the macros in this section
- * Unless you are going to build your own default public repository
- * There are some subdirectory paths in the program, please follow the directory structure
- * Otherwise the repository won't work properly
- */
-
-#define DEFAULT_URL_TF_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-root/"
-#define DEFAULT_URL_CODE_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/infra-as-code/"
-#define DEFAULT_URL_SHELL_SCRIPTS "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/scripts/"
-#define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-crypto/"
-
-#define LOCATION_CONF_TOTAL_LINES 5
-#define LOCATION_LINES 4
-#endif

@@ -1,7 +1,8 @@
 /*
- * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * This code is written and maintained by Zhenrong WANG
+ * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * It is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: GNU Public License - v2.0
  * Bug report: info@hpc-now.com
  */
 
@@ -21,7 +22,7 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename);
 int getstate(char* workdir, char* crypto_filename);
 int generate_sshkey(char* sshkey_folder, char* pubkey);
 int update_cluster_summary(char* workdir, char* crypto_keyfile);
-void archive_log(char* logdir, char* logfile);
+void archive_log(char* logarchive, char* logfile);
 void update_compute_template(char* stackdir, char* cloud_flag);
 int wait_for_complete(char* workdir, char* option, char* errorlog);
 int graph(char* workdir, char* crypto_keyfile, int graph_level);
@@ -31,5 +32,10 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
 int get_vault_info(char* workdir, char* crypto_keyfile);
 int check_pslock(char* workdir);
+int confirm_to_operate_cluster(char* current_cluster_name);
+int check_down_nodes(char* workdir);
+int cluster_ssh(char* workdir, char* username);
+//void backup_tf_files(char* stackdir);
+//void delete_backups(char* stackdir);
 
 #endif

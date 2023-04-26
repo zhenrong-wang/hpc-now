@@ -1,7 +1,8 @@
 /*
- * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * This code is written and maintained by Zhenrong WANG
+ * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * It is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: GNU Public License - v2.0
  * Bug report: info@hpc-now.com
  */
 
@@ -15,6 +16,5 @@ void print_header(void);
 void print_tail(void);
 void print_about(void);
 int read_license(void);
-int confirm_to_operate_cluster(char* current_cluster_name);
 
 #endif

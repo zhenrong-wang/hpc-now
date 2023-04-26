@@ -1,7 +1,8 @@
 /*
- * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * This code is written and maintained by Zhenrong WANG
+ * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * It is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: GNU Public License - v2.0
  * Bug report: info@hpc-now.com
  */
 
@@ -36,21 +37,20 @@ extern char md5_aws_tf_var[64];
 extern char md5_aws_tf_zip_var[64];
 
 int check_internet(void){
+    char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    if(system("ping -n 2 www.baidu.com > nul 2>&1")!=0){
-        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
-        printf("|          or check your internet connectivity and retry later.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
-#else
-    if(system("ping -c 2 www.baidu.com >> /dev/null 2>&1")!=0){
-        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
-        printf("|          or check your internet connectivity and retry later.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
+    strcpy(cmdline,"ping -n 1 www.baidu.com > nul 2>&1");
+#elif __linux__
+    strcpy(cmdline,"ping -c 1 www.baidu.com >> /dev/null 2>&1");
+#elif __APPLE__
+    strcpy(cmdline,"ping -c 1 -t 1 www.baidu.com >> /dev/null 2>&1");
 #endif
+    if(system(cmdline)!=0){
+        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
+        printf("|          or check your internet connectivity and retry later.\n");
+        printf("[ FATAL: ] Exit now.\n");
+        return 1;
+    }
     return 0;
 }
 
@@ -216,6 +216,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        v Location configuration has been repaired.\n");
         printf("|        . Checking and repairing the versions and md5sums ...\n");
         if(reset_vers_md5_vars()!=0){
+            printf("\n%d,,,,,,,\n",reset_vers_md5_vars());
             printf("[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n");
             return -1;
         }
@@ -326,20 +327,20 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         if(now_crypto_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\now-crypto-windows.exe %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"copy /y %s\\now-crypto-win.exe %s",url_now_crypto_var,crypto_exec);
 #elif __linux__
-            sprintf(cmdline,"/bin/cp %s/now-crypto-linux.exe %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"/bin/cp %s/now-crypto-lin.exe %s",url_now_crypto_var,crypto_exec);
 #elif __APPLE__
-            sprintf(cmdline,"/bin/cp %s/now-crypto-darwin.exe %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"/bin/cp %s/now-crypto-dwn.exe %s",url_now_crypto_var,crypto_exec);
 #endif
         }
         else{
 #ifdef _WIN32
-            sprintf(cmdline,"curl %snow-crypto-windows.exe -o %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"curl %snow-crypto-win.exe -o %s",url_now_crypto_var,crypto_exec);
 #elif __linux__
-            sprintf(cmdline,"curl %snow-crypto-linux.exe -o %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"curl %snow-crypto-lin.exe -o %s",url_now_crypto_var,crypto_exec);
 #elif __APPLE__
-            sprintf(cmdline,"curl %snow-crypto-darwin.exe -o %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"curl %snow-crypto-dwn.exe -o %s",url_now_crypto_var,crypto_exec);
 #endif
         }
 //        printf("%s,,,,,\"\n",cmdline);
@@ -597,7 +598,7 @@ int check_and_install_prerequisitions(int repair_flag){
     system(cmdline);
 #endif
     
-    if(force_repair_flag==1){
+    if(file_exist_or_not(usage_logfile)!=0){
         file_p=fopen(usage_logfile,"w+");
         fprintf(file_p,"UCID,CLOUD_VENDOR,NODE_NAME,vCPU,START_DATE,START_TIME,STOP_DATE,STOP_TIME,RUNNING_HOURS,CPUxHOURS,CPU_MODEL,CLOUD_REGION\n");
         fclose(file_p);

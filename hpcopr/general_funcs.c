@@ -1,7 +1,8 @@
 /*
- * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * This code is written and maintained by Zhenrong WANG
+ * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * It is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: GNU Public License - v2.0
  * Bug report: info@hpc-now.com
  */
 
@@ -113,13 +114,14 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     char temp_string[LINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    int getline_flag;
     int i,j,k,line_length;
 
     sprintf(filename_temp,"%s.tmp",filename);
     file_p_tmp=fopen(filename_temp,"w+");
-    do{
-        getline_flag=fgetline(file_p,single_line);
+    if(file_p_tmp==NULL){
+        return -1;
+    }
+    while(fgetline(file_p,single_line)==0){
         line_length=strlen(single_line);
         if(contain_or_not(single_line,orig_string)!=0||line_length<length_orig){
             fprintf(file_p_tmp,"%s\n",single_line);
@@ -154,13 +156,8 @@ int global_replace(char* filename, char* orig_string, char* new_string){
                 continue;
             }
         }while(i<line_length);
-        if(getline_flag==1){
-            fprintf(file_p_tmp,"%s",new_line);
-        }
-        else{
-            fprintf(file_p_tmp,"%s\n",new_line);
-        }
-    }while(getline_flag==0);
+        fprintf(file_p_tmp,"%s\n",new_line);
+    }
     fclose(file_p);
     fclose(file_p_tmp);
 #ifdef _WIN32

@@ -44,6 +44,7 @@ fi
 
 sed -i 's/#   StrictHostKeyChecking ask/StrictHostKeyChecking no/g' /etc/ssh/ssh_config
 echo -e "LogLevel QUIET" >> /etc/ssh/ssh_config
+cat /etc/now-pubkey.txt >> /root/.ssh/authorized_keys
 systemctl restart sshd
 systemctl start atd
 systemctl enable atd
@@ -143,6 +144,7 @@ do
       rm -rf /home/user${i}/.ssh/known_hosts
       ssh-keygen -t rsa -N '' -f /home/user${i}/.ssh/id_rsa -q
       cat /home/user${i}/.ssh/id_rsa.pub >> /home/user${i}/.ssh/authorized_keys
+      cat /etc/now-pubkey.txt >> /home/user${i}/.ssh/authorized_keys
       chown -R user${i}:user${i} /home/user${i}    
       if [ ! -d /hpc_data/user${i}_data ]; then
         mkdir -p /hpc_data/user${i}_data

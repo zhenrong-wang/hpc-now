@@ -1,7 +1,8 @@
 /*
- * This code is written and maintained by Zhenrong WANG (mailto: wangzhenrong@hpc-now.com) 
+ * This code is written and maintained by Zhenrong WANG
+ * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * It is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: GNU Public License - v2.0
  * Bug report: info@hpc-now.com
  */
 
@@ -110,13 +111,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(currentstate,"%s/currentstate",stackdir);
     sprintf(compute_template,"%s/compute_template",stackdir);
 #endif
-
-    if(file_exist_or_not(currentstate)==0||file_exist_or_not(compute_template)==0){
-        printf("[ FATAL: ] It seems the cluster is already in place. If you do want to rebuild the\n");
-        printf("|          cluster, please run 'destroy' command and retry 'init' command.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
     printf("[ START: ] Start initializing the cluster ...\n");
 #ifdef _WIN32
     if(folder_exist_or_not(stackdir)==1){
@@ -398,14 +392,22 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=MAXIMUM_ADD_NODE_NUMBER;
     }
+    if(node_num<MINUMUM_ADD_NODE_NUMBER){
+        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
+        node_num=MINUMUM_ADD_NODE_NUMBER;
+    }
     fgetline(file_p,conf_line_buffer);
     i=strlen(conf_line_buffer)-22;
     for(j=i;j>0;j--){
         hpc_user_num+=(conf_line_buffer[22+i-j]-'0')*pow(10,j-1);
     }
-    if(hpc_user_num>8){
+    if(hpc_user_num>MAXIMUM_ADD_USER_NUMBER){
         printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n",hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
         hpc_user_num=MAXIMUM_ADD_USER_NUMBER;
+    }
+    else if(hpc_user_num<MINIMUM_ADD_USER_NUNMBER){
+        printf("[ -WARN- ] The number of HPC users %d is less than %d, reset to %d.\n",hpc_user_num,MINIMUM_ADD_USER_NUNMBER,MINIMUM_ADD_USER_NUNMBER);
+        hpc_user_num=MINIMUM_ADD_USER_NUNMBER;
     }
     fscanf(file_p,"%s%s%s%s\n",conf_param_buffer1,conf_param_buffer2,conf_param1,conf_param2);
     sprintf(master_init_param,"%s %s",conf_param1,conf_param2);
@@ -1023,13 +1025,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sprintf(currentstate,"%s/currentstate",stackdir);
     sprintf(compute_template,"%s/compute_template",stackdir);
 #endif
-
-    if(file_exist_or_not(currentstate)==0||file_exist_or_not(compute_template)==0){
-        printf("[ FATAL: ] It seems the cluster is already in place. If you do want to rebuild the\n");
-        printf("|          cluster, please run 'destroy' command and retry 'init' command.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
     printf("[ START: ] Start initializing the cluster ...\n");
 #ifdef _WIN32
     if(folder_exist_or_not(stackdir)==1){
@@ -1283,9 +1278,13 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         node_num+=(conf_line_buffer[22+i-j]-'0')*pow(10,j-1);
     }
     reset_string(conf_line_buffer);
-    if(node_num>16){
+    if(node_num>MAXIMUM_ADD_NODE_NUMBER){
         printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
-        node_num=16;
+        node_num=MAXIMUM_ADD_NODE_NUMBER;
+    }
+    if(node_num<MINUMUM_ADD_NODE_NUMBER){
+        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
+        node_num=MINUMUM_ADD_NODE_NUMBER;
     }
     fgetline(file_p,conf_line_buffer);
     i=strlen(conf_line_buffer)-22;
@@ -1293,9 +1292,13 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         hpc_user_num+=(conf_line_buffer[22+i-j]-'0')*pow(10,j-1);
     }
     reset_string(conf_line_buffer);
-    if(hpc_user_num>8){
+    if(hpc_user_num>MAXIMUM_ADD_USER_NUMBER){
         printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n",hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
-        hpc_user_num=8;
+        hpc_user_num=MAXIMUM_ADD_USER_NUMBER;
+    }
+    else if(hpc_user_num<MINIMUM_ADD_USER_NUNMBER){
+        printf("[ -WARN- ] The number of HPC users %d is less than %d, reset to %d.\n",hpc_user_num,MINIMUM_ADD_USER_NUNMBER,MINIMUM_ADD_USER_NUNMBER);
+        hpc_user_num=MINIMUM_ADD_USER_NUNMBER;
     }
     fscanf(file_p,"%s%s%s%s\n",conf_param_buffer1,conf_param_buffer2,conf_param1,conf_param2);
     sprintf(master_init_param,"%s %s",conf_param1,conf_param2);
@@ -1810,12 +1813,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(currentstate,"%s/currentstate",stackdir);
     sprintf(compute_template,"%s/compute_template",stackdir);
 #endif
-    if(file_exist_or_not(currentstate)==0||file_exist_or_not(compute_template)==0){
-        printf("[ FATAL: ] It seems the cluster is already in place. If you do want to rebuild it\n");
-        printf("|          please run 'destroy' command and retry 'init' command.\n");
-        printf("[ FATAL: ] Exit now.\n");
-        return 1;
-    }
     printf("[ START: ] Start initializing the cluster ...\n");
 #ifdef _WIN32
     if(folder_exist_or_not(stackdir)==1){
@@ -2052,9 +2049,13 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         node_num+=(conf_line_buffer[22+i-j]-'0')*pow(10,j-1);
     }
     reset_string(conf_line_buffer);
-    if(node_num>16){
+    if(node_num>MAXIMUM_ADD_NODE_NUMBER){
         printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
-        node_num=16;
+        node_num=MAXIMUM_ADD_NODE_NUMBER;
+    }
+    if(node_num<MINUMUM_ADD_NODE_NUMBER){
+        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
+        node_num=MINUMUM_ADD_NODE_NUMBER;
     }
     fgetline(file_p,conf_line_buffer);
     i=strlen(conf_line_buffer)-22;
@@ -2062,9 +2063,13 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         hpc_user_num+=(conf_line_buffer[22+i-j]-'0')*pow(10,j-1);
     }
     reset_string(conf_line_buffer);
-    if(hpc_user_num>8){
+    if(hpc_user_num>MAXIMUM_ADD_USER_NUMBER){
         printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n",hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
-        hpc_user_num=8;
+        hpc_user_num=MAXIMUM_ADD_USER_NUMBER;
+    }
+    else if(hpc_user_num<MINIMUM_ADD_USER_NUNMBER){
+        printf("[ -WARN- ] The number of HPC users %d is less than %d, reset to %d.\n",hpc_user_num,MINIMUM_ADD_USER_NUNMBER,MINIMUM_ADD_USER_NUNMBER);
+        hpc_user_num=MINIMUM_ADD_USER_NUNMBER;
     }
     fscanf(file_p,"%s%s%s%s\n",conf_param_buffer1,conf_param_buffer2,conf_param1,conf_param2);
     sprintf(master_init_param,"%s %s",conf_param1,conf_param2);

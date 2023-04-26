@@ -9,7 +9,7 @@ if [ ! -n "$1" ]; then
 	echo "[ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command."
 	echo "|          build  - (re)build the binaries"
     echo "|          delete - delete the previous binaries"
-    echo "|          clear  - remove the 'bin' folder"
+    echo "|          clear  - remove the 'build' folder"
 	echo "[ -DONE- ] Exit now."
     exit 1
 elif [ "$1" = "build" ]; then
@@ -17,20 +17,20 @@ elif [ "$1" = "build" ]; then
     echo "[ -INFO- ] Please build hpcmgr with GNU/Linux, not macOS."
     mkdir -p ./build
     rm -rf ./build/*
-    clang ./hpcopr/*.c -Wall -o ./build/hpcopr.exe
+    clang ./hpcopr/*.c -Wall -o ./build/hpcopr-dwn.exe
     clang -c ./hpcopr/general_funcs.c -o ./installer/gfuncs.o
     rm -rf ./installer/libgfuncs.a
     ar -rc ./installer/libgfuncs.a ./installer/gfuncs.o
     rm -rf ./installer/gfuncs.o
-    clang ./installer/installer.c ./installer/libgfuncs.a -Wall -o ./build/installer.exe
-    clang ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto.exe
+    clang ./installer/installer.c ./installer/libgfuncs.a -Wall -o ./build/installer-dwn.exe
+    clang ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto-dwn.exe
     chmod +x ./build/*
     mv ./installer/libgfuncs.a ./build/
 elif [ "$1" = "delete" ]; then
     echo "[ START: ] Deleting the binaries now ..."
     rm -rf ./build/*
 elif [ "$1" = "clear" ]; then
-    echo "[ START: ] Removing the bin folder now ..."
+    echo "[ START: ] Removing the build folder now ..."
     rm -rf ./build
 else
     echo "[ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command."
