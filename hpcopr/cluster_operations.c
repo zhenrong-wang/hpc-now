@@ -259,6 +259,10 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             return 1;
         }
         else{
+            if(check_pslock(temp_cluster_workdir)!=0){
+                printf("|  active: <> %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name);
+                return 0;
+            }
             decrypt_files(temp_cluster_workdir,crypto_keyfile);
             printf("|  active: <> %s | ",temp_cluster_name);
             if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
@@ -275,6 +279,10 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
 //                printf("test### %s\n",registry_line);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
+                if(check_pslock(temp_cluster_workdir)!=0){
+                    printf("|  active: <> %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name);
+                    continue;
+                }
 //                printf("test### %s\n",registry_line);
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
 //                printf("test### %s\n",registry_line);
