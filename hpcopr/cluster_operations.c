@@ -1838,7 +1838,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
 
     decrypt_files(workdir,crypto_keyfile);
 #ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);z
+    sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);
 #else
     sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
 #endif
