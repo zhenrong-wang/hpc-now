@@ -745,9 +745,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
             system(cmdline);
 #endif
+            printf("[ -INFO- ] Successfully rolled back. Please check the errolog for details.\n");
             return -1;
         }
-        delete_decrypted_files(workdir,crypto_keyfile);
+        printf("[ -INFO- ] Failed to roll back. Please try 'hpcopr destroy' later.\n");
         return -1;
     }
 #ifdef _WIN32
@@ -1616,8 +1617,10 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
             sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
             system(cmdline);
 #endif
+            printf("[ -INFO- ] Successfully rolled back. Please check the errolog for details.\n");
             return -1;
         }
+        printf("[ -INFO- ] Failed to roll back. Please try 'hpcopr destroy' later.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
@@ -2414,9 +2417,10 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
             sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
             system(cmdline);
 #endif
+            printf("[ -INFO- ] Successfully rolled back. Please check the errolog for details.\n");
             return -1;
         }
-        delete_decrypted_files(workdir,crypto_keyfile);
+        printf("[ -INFO- ] Failed to roll back. Please try 'hpcopr destroy' later.\n");
         return -1;
     }
 #ifdef _WIN32
