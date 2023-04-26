@@ -205,6 +205,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     printf("[ -INFO- ] Checking and cleaning up current environment ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
     system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
     system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
     system("attrib -h -s -r c:\\hpc-now > nul 2>&1");
@@ -289,7 +290,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     }
     printf("[ -INFO- ] Creating and configuring the running directory ...\n");
     system("mkdir -p /home/hpc-now/.bin >> /dev/null 2>&1");
-    system("mkdir -p /usr/.hpc-now/.bin >> /dev/null 2>&1 && chmod -R 777 /usr/.hpc-now >> /dev/null 2>&1");
+    system("mkdir -p /usr/.hpc-now/.bin >> /dev/null 2>&1 && chmod -R 700 /usr/.hpc-now >> /dev/null 2>&1");
 #elif __APPLE__
     printf("[ -INFO- ] Checking and cleaning up current environment ...\n");
     system("rm -rf /Users/hpc-now/ >> /dev/null 2>&1");
@@ -311,7 +312,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     printf("[ -INFO- ] Creating and configuring the running directory ...\n");
     system("mkdir -p /Users/hpc-now >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/.bin >> /dev/null 2>&1");
-    system("mkdir -p /Applications/.hpc-now/.bin >> /dev/null 2>&1 && chmod -R 777 /Applications/.hpc-now >> /dev/null 2>&1");
+    system("mkdir -p /Applications/.hpc-now/.bin >> /dev/null 2>&1 && chmod -R 700 /Applications/.hpc-now >> /dev/null 2>&1");
 #endif
     printf("[ -INFO- ] Creating a random file for encryption/decryption ...\n");
     generate_random_passwd(random_string);
@@ -397,6 +398,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
         system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
         system("attrib -h -s -r c:\\hpc-now > nul 2>&1");
         system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+        system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
         system("rd /s /q c:\\hpc-now > nul 2>&1");
         system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
         system("net user hpc-now /delete > nul 2>&1");
@@ -405,7 +407,8 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
     system(cmdline1);
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
-    system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto.exe /grant hpc-now:F /t > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
+    system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
     printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created with initial password: nowadmin2023~\n");
     printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:\n");
@@ -446,6 +449,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     system(cmdline1);
     system("chown -R hpc-now:hpc-now /home/hpc-now/ >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /usr/.hpc-now/.bin >> /dev/null 2>&1");
+    system("chown hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
     printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          You *MUST* run 'sudo passwd hpc-now' command to set a password.\n");
@@ -484,6 +488,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     system(cmdline1);
     system("chown -R hpc-now:hpc-now /Users/hpc-now/ >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.bin >> /dev/null 2>&1");
+    system("chown hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
     printf("[ -INFO- ] Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          You *MUST* run 'sudo dscl . -passwd /Users/hpc-now PASSWORD' command\n");
@@ -528,6 +533,7 @@ int uninstall_services(void){
     system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
     system("attrib -h -s -r c:\\hpc-now > nul 2>&1");
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
     system("net user hpc-now /delete > nul 2>&1");
@@ -588,7 +594,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     printf("[ -INFO- ] UPDATING THE SERVICES NOW ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
-    system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto.exe /grant hpc-now:F /t > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
 #endif
     if(hpcopr_loc_flag==-1){
         printf("[ -INFO- ] Will download the main program 'hpcopr' from the default URL.\n");
@@ -644,6 +650,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
         printf("|          4. Currently there is no 'hpcopr' thread(s) running.\n");
 #ifdef _WIN32
         system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
+        system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
 #endif
         return 1;
     }
@@ -653,6 +660,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
     system(cmdline1);
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
+    system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto.exe /grant hpc-now:F /t > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
 #elif __linux__
     system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
     sprintf(cmdline1,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
