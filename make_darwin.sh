@@ -30,7 +30,7 @@ elif [ "$1" = "delete" ]; then
     echo "[ START: ] Deleting the binaries now ..."
     rm -rf ./build/*
 elif [ "$1" = "clear" ]; then
-    echo "[ START: ] Removing the bin folder now ..."
+    echo "[ START: ] Removing the build folder now ..."
     rm -rf ./build
 else
     echo "[ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command."
