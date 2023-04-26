@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0055"
+#define CORE_VERSION_CODE "0.2.0.0056"
 
 #ifdef _WIN32
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!

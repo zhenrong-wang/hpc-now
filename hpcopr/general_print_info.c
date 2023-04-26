@@ -23,8 +23,8 @@
 void print_empty_cluster_info(void){
     printf("[ -INFO- ] It seems the cluster is empty. You can either:\n");
     printf("|          a) Run 'hpcopr init' to generate a *default* cluster directly. OR\n");
-    printf("|          b) Run 'hpcopr get-conf' to get and modify the configuration file and then\n");
-    printf("|             Run 'hpcopr init' to generate a *customized* cluster.\n");
+    printf("|          b) Run 'hpcopr get-conf' to get and modify the configuration file\n");
+    printf("|             then run 'hpcopr init' to generate a *customized* cluster.\n");
     printf("[ FATAL: ] Exit now.\n");
 }
 

@@ -312,7 +312,7 @@ int main(int argc, char* argv[]){
             run_flag=glance_clusters(argv[2],crypto_keyfile);
         }
         if(run_flag==1){
-            printf("[ FATAL: ] You are not running any clusters. Please swith to or specify one:\n");
+            printf("[ FATAL: ] Please swith to a cluster first, or specify one to glance:\n");
             list_all_cluster_names();
         }
         else if(run_flag==-1){
@@ -326,7 +326,7 @@ int main(int argc, char* argv[]){
     }
     if(strcmp(argv[1],"refresh")==0){
         if(cluster_empty_or_not(workdir)==0){
-            print_empty_cluster_info();
+            printf("[ FATAL: ] The cluster is empty, please init it first. Exit now.\n");
             print_tail();
             write_log("NULL",operation_log,argv[1],-9);
             system_cleanup();
@@ -340,7 +340,7 @@ int main(int argc, char* argv[]){
             run_flag=refresh_cluster(argv[2],crypto_keyfile);
         }
         if(run_flag==1){
-            printf("[ FATAL: ] You are not running any clusters. Please swith to or specify one:\n");
+            printf("[ FATAL: ] Please swith to a cluster first, or specify one to refresh:\n");
             list_all_cluster_names();
         }
         else if(run_flag==-3){
