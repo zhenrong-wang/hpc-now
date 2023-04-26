@@ -339,10 +339,9 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
         }
         else{
             if(check_pslock(temp_cluster_workdir)!=0){
-                printf("[ FATAL: ] %s - Cluster operation is in progress. Can not refresh.\n",temp_cluster_name);
-                return 3;
+                return -3;
             }
-            printf("[ -INFO- ] Refreshing the current cluster %s now ...\n",temp_cluster_name);
+            printf("[ -INFO- ] Refreshing the current cluster now ...\n");
             decrypt_files(temp_cluster_workdir,crypto_keyfile);
             if(terraform_execution(TERRAFORM_EXEC,"apply",temp_cluster_workdir,crypto_keyfile,OPERATION_ERROR_LOG)!=0){
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
@@ -359,7 +358,6 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
         if(check_pslock(temp_cluster_workdir)!=0){
-            printf("[ FATAL: ] %s - Cluster operation is in progress. Can not refresh.\n",temp_cluster_name);
             return 3;
         }
         printf("[ -INFO- ] Refreshing the target cluster %s now ...\n",temp_cluster_name);
