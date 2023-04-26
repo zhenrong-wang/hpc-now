@@ -1068,7 +1068,6 @@ int cluster_asleep_or_not(char* workdir){
 int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
-    char logdir[DIR_LENGTH]="";
     char tf_realtime_log[FILENAME_LENGTH];
     char tf_realtime_log_archive[FILENAME_LENGTH];
     char tf_error_log_archive[FILENAME_LENGTH];
