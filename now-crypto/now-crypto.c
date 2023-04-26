@@ -6,6 +6,11 @@
  * Bug report: info@hpc-now.com
  */
 
+/*
+ * This is a *psedo* and very *simple* crypto program! Not a real one. If you'd like to use a real
+ * crypto program, try AES, or at least DES. Maybe we will switch to it in th future.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
