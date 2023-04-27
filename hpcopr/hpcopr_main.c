@@ -80,9 +80,11 @@ int main(int argc, char* argv[]){
     char filename_temp[FILENAME_LENGTH]="";
     char* usage_log=USAGE_LOG_FILE;
     char* operation_log=OPERATION_LOG_FILE;
+    char* syserror_log=SYSTEM_CMD_ERROR_LOG;
     char string_temp[128]="";
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX]="";
     char doubleconfirm[64]="";
+    char cmdline[CMDLINE_LENGTH]="";
     print_header();
 
 #ifdef _WIN32
@@ -141,13 +143,14 @@ int main(int argc, char* argv[]){
 #endif
 
 #ifdef _WIN32
-    system("mkdir c:\\programdata\\hpc-now\\etc\\ > nul 2>&1");
+    sprintf(cmdline,"mkdir c:\\programdata\\hpc-now\\etc\\ %s",SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
-    system("mkdir -p /Applications/.hpc-now/.etc/ >> /dev/null 2>&1");
+    sprintf(cmdline,"mkdir -p /Applications/.hpc-now/.etc/ %s",SYSTEM_CMD_REDIRECT);
 #elif __linux__
-    system("mkdir -p /usr/.hpc-now/.etc/ >> /dev/null 2>&1");
+    sprintf(cmdline,"mkdir -p /usr/.hpc-now/.etc/ %s",SYSTEM_CMD_REDIRECT);
 #endif
-
+    system(cmdline);
+    
     if(argc==1){
         print_help();
         return 0;
@@ -278,7 +281,7 @@ int main(int argc, char* argv[]){
         return -4;
     }
     
-    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0){
+    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syserr")!=0&&strcmp(argv[1],"history")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0){
         print_help();
         return -6;
     }
@@ -404,8 +407,15 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
-    if(strcmp(argv[1],"syslog")==0){
-        run_flag=get_syslog(operation_log);
+    if(strcmp(argv[1],"history")==0){
+        run_flag=get_history(operation_log);
+        print_tail();
+        write_log("NULL",operation_log,argv[1],run_flag);
+        system_cleanup();
+        return run_flag;
+    }
+    if(strcmp(argv[1],"syserr")==0){
+        run_flag=get_syserrlog(syserror_log);
         print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
         system_cleanup();

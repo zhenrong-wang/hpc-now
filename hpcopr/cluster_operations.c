@@ -134,9 +134,9 @@ int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
 int exit_current_cluster(void){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",CURRENT_CLUSTER_INDICATOR);
+    sprintf(cmdline,"del /f /q %s %s",CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
 #else
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",CURRENT_CLUSTER_INDICATOR);
+    sprintf(cmdline,"rm -rf %s %s",CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
 #endif
     return system(cmdline);
     
@@ -209,9 +209,9 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
         exit_current_cluster();
     }
 #ifdef _WIN32
-    sprintf(cmdline,"move /y %s %s > nul 2>&1",filename_temp,cluster_registry);
+    sprintf(cmdline,"move /y %s %s %s",filename_temp,cluster_registry,SYSTEM_CMD_REDIRECT);
 #else
-    sprintf(cmdline,"mv %s %s > /dev/null 2>&1",filename_temp,cluster_registry);
+    sprintf(cmdline,"mv %s %s %s",filename_temp,cluster_registry,SYSTEM_CMD_REDIRECT);
 #endif
     return system(cmdline);
 }
@@ -445,9 +445,9 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     }
     printf("[ -INFO- ] Removing all the related files ...\n");
 #ifdef _WIN32
-    sprintf(cmdline,"rd /q /s %s > nul 2>&1",cluster_workdir);
+    sprintf(cmdline,"rd /q /s %s %s",cluster_workdir,SYSTEM_CMD_REDIRECT);
 #else
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",cluster_workdir);
+    sprintf(cmdline,"rm -rf %s %s",cluster_workdir,SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
     printf("[ -INFO- ] Deleting the cluster from the registry ...\n");
@@ -563,40 +563,40 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         printf("[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now.\n");
         fclose(file_p);
 #ifdef _WIN32
-        sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
+        sprintf(cmdline,"del /f /q %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+        sprintf(cmdline,"rm -rf %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #endif
         system(cmdline);
         return 5;
     }
 #ifdef _WIN32
     sprintf(new_workdir,"%s\\workdir\\%s\\",HPC_NOW_ROOT_DIR,real_cluster_name);
-    sprintf(cmdline,"mkdir %s > nul 2>&1",new_workdir);
+    sprintf(cmdline,"mkdir %s %s",new_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
     sprintf(cmdline,"%s encrypt %s %s\\.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,md5sum);
     system(cmdline);
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
+    sprintf(cmdline,"del /f /q %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #elif __linux__
     sprintf(new_workdir,"%s/workdir/%s",HPC_NOW_ROOT_DIR,real_cluster_name);
-    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",new_workdir);
+    sprintf(cmdline,"mkdir -p %s %s",new_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
     sprintf(cmdline,"%s encrypt %s %s/.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,md5sum);
     system(cmdline);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+    sprintf(cmdline,"rm -rf %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
     sprintf(new_workdir,"%s/workdir/%s",HPC_NOW_ROOT_DIR,real_cluster_name);
-    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",new_workdir);
+    sprintf(cmdline,"mkdir -p %s %s",new_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
     sprintf(cmdline,"%s encrypt %s %s/.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,md5sum);
     system(cmdline);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+    sprintf(cmdline,"rm -rf %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
     add_to_cluster_registry(real_cluster_name);
@@ -741,7 +741,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     else{
         printf("[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now.\n");
         fclose(file_p);
-        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+        sprintf(cmdline,"rm -rf %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 1;
     }
@@ -749,11 +749,11 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
 #ifdef _WIN32
     sprintf(cmdline,"%s encrypt %s %s\\.secrets.txt %s",now_crypto_exec,filename_temp,vaultdir,md5sum);
     system(cmdline);
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
+    sprintf(cmdline,"del /f /q %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #else
     sprintf(cmdline,"%s encrypt %s %s/.secrets.txt %s",now_crypto_exec,filename_temp,vaultdir,md5sum);
     system(cmdline);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+    sprintf(cmdline,"rm -rf %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
     create_and_get_stackdir(workdir,stackdir);
@@ -827,42 +827,42 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     reset_string(buffer2);
     get_crypto_key(crypto_keyfile,md5sum);
 #ifdef _WIN32
-    sprintf(cmdline,"%s decrypt %s\\_CLUSTER_SUMMARY.txt %s\\_CLUSTER_SUMMARY.txt.tmp %s > nul 2>&1",now_crypto_exec,vaultdir,vaultdir,md5sum);
+    sprintf(cmdline,"%s decrypt %s\\_CLUSTER_SUMMARY.txt %s\\_CLUSTER_SUMMARY.txt.tmp %s %s",now_crypto_exec,vaultdir,vaultdir,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s\\_CLUSTER_SUMMARY.txt.tmp",vaultdir);
     find_and_get(filename_temp,"Master Node IP:","","",1,"Master Node IP:","","",' ',4,master_address);
     find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_address);
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
+    sprintf(cmdline,"del /f /q %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #else
-    sprintf(cmdline,"%s decrypt %s/_CLUSTER_SUMMARY.txt %s/_CLUSTER_SUMMARY.txt.tmp %s >> /dev/null 2>&1",now_crypto_exec,vaultdir,vaultdir,md5sum);
+    sprintf(cmdline,"%s decrypt %s/_CLUSTER_SUMMARY.txt %s/_CLUSTER_SUMMARY.txt.tmp %s %s",now_crypto_exec,vaultdir,vaultdir,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s/_CLUSTER_SUMMARY.txt.tmp",vaultdir);
     find_and_get(filename_temp,"Master Node IP:","","",1,"Master Node IP:","","",' ',4,master_address);
     find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_address);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+    sprintf(cmdline,"rm -rf %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
     if(strcmp(cloud_flag,"CLOUD_C")==0&&force_flag==1){
 #ifdef _WIN32
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/bin/s3cmd del -rf s3://%s\" > nul 2>&1",sshkey_folder,master_address,bucket_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/bin/s3cmd del -rf s3://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/bin/s3cmd del -rf s3://%s\" >> /dev/null 2>&1",sshkey_folder,master_address,bucket_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/bin/s3cmd del -rf s3://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
 #endif
         system(cmdline);
     }
     else if(strcmp(cloud_flag,"CLOUD_A")==0&&force_flag==1){
 #ifdef _WIN32
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/bin/ossutil64 rm -rf oss://%s\" > nul 2>&1",sshkey_folder,master_address,bucket_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/bin/ossutil64 rm -rf oss://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/usr/bin/ossutil64 rm -rf oss://%s\" >> /dev/null 2>&1",sshkey_folder,master_address,bucket_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/usr/bin/ossutil64 rm -rf oss://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
 #endif
         system(cmdline);
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0&&force_flag==1){
 #ifdef _WIN32
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/local/bin/coscmd delete -rf /\" > nul 2>&1",sshkey_folder,master_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/local/bin/coscmd delete -rf /\" %s",sshkey_folder,master_address,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/usr/local/bin/coscmd delete -rf /\" >> /dev/null 2>&1",sshkey_folder,master_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/usr/local/bin/coscmd delete -rf /\" %s",sshkey_folder,master_address,SYSTEM_CMD_REDIRECT);
 #endif
         system(cmdline);
     }
@@ -899,58 +899,61 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     }
     delete_decrypted_files(workdir,crypto_keyfile);
 #ifdef _WIN32
-    system("del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
-    sprintf(cmdline,"move %s\\*.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",stackdir);
+    sprintf(cmdline,"del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"move %s\\*.tmp c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",stackdir);
+    sprintf(cmdline,"move %s\\*.tf c:\\programdata\\hpc-now\\.destroyed\\ %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"del /f /q %s\\currentstate > nul 2>&1",stackdir);
+    sprintf(cmdline,"move %s\\*.tmp c:\\programdata\\hpc-now\\.destroyed\\ %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"del /f /q %s\\compute_template > nul 2>&1",stackdir);
+    sprintf(cmdline,"del /f /q %s\\currentstate %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"move %s\\hostfile_latest c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",stackdir);
+    sprintf(cmdline,"del /f /q %s\\compute_template %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"move %s\\_CLUSTER_SUMMARY.txt c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",vaultdir);
+    sprintf(cmdline,"move %s\\hostfile_latest c:\\programdata\\hpc-now\\.destroyed\\ %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"move %s\\UCID_LATEST.txt c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",vaultdir);
+    sprintf(cmdline,"move %s\\_CLUSTER_SUMMARY.txt c:\\programdata\\hpc-now\\.destroyed\\ %s",vaultdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"move %s\\conf\\tf_prep.conf %s\\conf\\tf_prep.conf.destroyed > nul 2>&1",workdir,workdir);
+    sprintf(cmdline,"move %s\\UCID_LATEST.txt c:\\programdata\\hpc-now\\.destroyed\\ %s",vaultdir,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"move %s\\conf\\tf_prep.conf %s\\conf\\tf_prep.conf.destroyed %s",workdir,workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 #elif __APPLE__
-    system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-    sprintf(cmdline,"mv %s/*.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"rm -rf /Applications/.hpc-now/.destroyed/* %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"mv %s/*.tmp /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"mv %s/*.tf /Applications/.hpc-now/.destroyed/ %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"rm -rf %s/currentstate >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"mv %s/*.tmp /Applications/.hpc-now/.destroyed/ %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"rm -rf %s/compute_template >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"rm -rf %s/currentstate %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"mv %s/hostfile_latest /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"rm -rf %s/compute_template %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"mv %s/_CLUSTER_SUMMARY.txt /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+    sprintf(cmdline,"mv %s/hostfile_latest /Applications/.hpc-now/.destroyed/ %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"mv %s/UCID_LATEST.txt /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+    sprintf(cmdline,"mv %s/_CLUSTER_SUMMARY.txt /Applications/.hpc-now/.destroyed/ %s",vaultdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
+    sprintf(cmdline,"mv %s/UCID_LATEST.txt /Applications/.hpc-now/.destroyed/ %s",vaultdir,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed %s",workdir,workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 #elif __linux__
-    system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-    sprintf(cmdline,"mv %s/*.tf /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"rm -rf /usr/.hpc-now/.destroyed/* %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"mv %s/*.tmp /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"mv %s/*.tf /usr/.hpc-now/.destroyed/ %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"rm -rf %s/currentstate >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"mv %s/*.tmp /usr/.hpc-now/.destroyed/ %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"rm -rf %s/compute_template >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"rm -rf %s/currentstate %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"mv %s/hostfile_latest /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"rm -rf %s/compute_template %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"mv %s/_CLUSTER_SUMMARY.txt /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+    sprintf(cmdline,"mv %s/hostfile_latest /usr/.hpc-now/.destroyed/ %s",stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"mv %s/UCID_LATEST.txt /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
+    sprintf(cmdline,"mv %s/_CLUSTER_SUMMARY.txt /usr/.hpc-now/.destroyed/ %s",vaultdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
+    sprintf(cmdline,"mv %s/UCID_LATEST.txt /usr/.hpc-now/.destroyed/ %s",vaultdir,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed %s",workdir,workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 #endif
     printf("[ -DONE- ] The whole cluster has been destroyed successfully.\n");
@@ -1026,20 +1029,23 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             decrypt_files(workdir,crypto_keyfile);
 #ifdef _WIN32
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                system("del /f /s /q c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
-                sprintf(cmdline,"move /y %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1", stackdir,i);
+                sprintf(cmdline,"del /f /s /q c:\\programdata\\hpc-now\\.destroyed\\* %s",SYSTEM_CMD_REDIRECT);
+                system(cmdline);
+                sprintf(cmdline,"move /y %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ %s", stackdir,i,SYSTEM_CMD_REDIRECT);
                 system(cmdline);
             }
 #elif __APPLE__
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-                sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
+                sprintf(cmdline,"rm -rf /Applications/.hpc-now/.destroyed/* %s",SYSTEM_CMD_REDIRECT);
+                system(cmdline);
+                sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /Applications/.hpc-now/.destroyed/ %s", stackdir,i,SYSTEM_CMD_REDIRECT);
                 system(cmdline);
             }
 #elif __linux__
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-                sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
+                sprintf(cmdline,"rm -rf /usr/.hpc-now/.destroyed/* %s",SYSTEM_CMD_REDIRECT);
+                system(cmdline);
+                sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /usr/.hpc-now/.destroyed/ %s", stackdir,i,SYSTEM_CMD_REDIRECT);
                 system(cmdline);
             }
 #endif
@@ -1047,15 +1053,15 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 printf("[ -INFO- ] Rolling back now ... \n");            
 #ifdef _WIN32
                 for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                    sprintf(cmdline,"move /y c:\\programdata\\hpc-now\\.destroyed\\hpc_stack_compute%d.tf %s\\ > nul 2>&1", i,stackdir);
+                    sprintf(cmdline,"move /y c:\\programdata\\hpc-now\\.destroyed\\hpc_stack_compute%d.tf %s\\ %s", i,stackdir,SYSTEM_CMD_REDIRECT);
                 }
 #elif __APPLE__
                 for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                    sprintf(cmdline,"mv /Applications/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
+                    sprintf(cmdline,"mv /Applications/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ %s", i,stackdir,SYSTEM_CMD_REDIRECT);
                 }
 #elif __linux__
                 for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                    sprintf(cmdline,"mv /usr/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
+                    sprintf(cmdline,"mv /usr/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ %s", i,stackdir,SYSTEM_CMD_REDIRECT);
                 }
 #endif
                 system(cmdline);
@@ -1086,20 +1092,23 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     decrypt_files(workdir,crypto_keyfile);
 #ifdef _WIN32
     for(i=1;i<compute_node_num+1;i++){
-        system("del /f /s /q c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
-        sprintf(cmdline,"move %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1", stackdir,i);
+        sprintf(cmdline,"del /f /s /q c:\\programdata\\hpc-now\\.destroyed\\* %s",SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"move %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ %s", stackdir,i,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 #elif __APPLE__
     for(i=1;i<compute_node_num+1;i++){
-        system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-        sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
+        sprintf(cmdline,"rm -rf /Applications/.hpc-now/.destroyed/* %s",SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /Applications/.hpc-now/.destroyed/ %s", stackdir,i,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 #elif __linux__
     for(i=1;i<compute_node_num+1;i++){
-        system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-        sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
+        sprintf(cmdline,"rm -rf /usr/.hpc-now/.destroyed/* %s",SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /usr/.hpc-now/.destroyed/ %s", stackdir,i,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 #endif
@@ -1107,15 +1116,15 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         printf("[ -INFO- ] Rolling back now ... \n");
 #ifdef _WIN32
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(cmdline,"move /y c:\\programdata\\hpc-now\\.destroyed\\hpc_stack_compute%d.tf %s\\ > nul 2>&1", i,stackdir);
+            sprintf(cmdline,"move /y c:\\programdata\\hpc-now\\.destroyed\\hpc_stack_compute%d.tf %s\\ %s", i,stackdir,SYSTEM_CMD_REDIRECT);
         }
 #elif __APPLE__
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(cmdline,"mv /Applications/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
+            sprintf(cmdline,"mv /Applications/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ %s", i,stackdir,SYSTEM_CMD_REDIRECT);
         }
 #elif __linux__
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(cmdline,"mv /usr/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
+            sprintf(cmdline,"mv /usr/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ %s", i,stackdir,SYSTEM_CMD_REDIRECT);
         }
 #endif
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
@@ -1184,11 +1193,11 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     current_node_num=get_compute_node_num(filename_temp,"all");
     for(i=0;i<add_number;i++){
 #ifdef _WIN32
-        sprintf(cmdline,"copy /y %s\\compute_template %s\\hpc_stack_compute%d.tf > nul 2>&1",stackdir,stackdir,i+1+current_node_num);
+        sprintf(cmdline,"copy /y %s\\compute_template %s\\hpc_stack_compute%d.tf %s",stackdir,stackdir,i+1+current_node_num,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i+1+current_node_num);
 #else
-        sprintf(cmdline,"/bin/cp %s/compute_template %s/hpc_stack_compute%d.tf >> /dev/null 2>&1",stackdir,stackdir,i+1+current_node_num);
+        sprintf(cmdline,"/bin/cp %s/compute_template %s/hpc_stack_compute%d.tf %s",stackdir,stackdir,i+1+current_node_num,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i+1+current_node_num);
 #endif
@@ -1732,10 +1741,10 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
                     sprintf(filename_temp2,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-                    sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp2,filename_temp2);
+                    sprintf(cmdline,"copy /y %s %s.bak %s",filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
 #else
                     sprintf(filename_temp2,"%s/hpc_stack_compute%d.tf",stackdir,i);
-                    sprintf(cmdline,"/bin/copy %s %s.bak >>/dev/null 2>&1",filename_temp2,filename_temp2);
+                    sprintf(cmdline,"/bin/copy %s %s.bak %s",filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
 #endif
                     system(cmdline);
                     global_replace(filename_temp2,"cpu_threads_per_core = 2","cpu_threads_per_core = 1");
@@ -1745,10 +1754,10 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
                     sprintf(filename_temp2,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-                    sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp2,filename_temp2);
+                    sprintf(cmdline,"copy /y %s %s.bak %s",filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
 #else
                     sprintf(filename_temp2,"%s/hpc_stack_compute%d.tf",stackdir,i);
-                    sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/null 2>&1",filename_temp2,filename_temp2);
+                    sprintf(cmdline,"/bin/cp %s %s.bak %s",filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
 #endif
                     system(cmdline);
                     global_replace(filename_temp2,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
@@ -1758,9 +1767,9 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 printf("[ -INFO- ] Rolling back now ... \n");
                 for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
-                    sprintf(cmdline,"move /y %s.bak %s > nul 2>&1",filename_temp2,filename_temp2);
+                    sprintf(cmdline,"move /y %s.bak %s %s",filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
 #else
-                    sprintf(cmdline,"mv %s.bak %s >>/dev/null 2>&1",filename_temp2,filename_temp2);
+                    sprintf(cmdline,"mv %s.bak %s %s",filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
 #endif
                     system(cmdline);
                 }
@@ -1795,10 +1804,10 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
             sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-            sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp,filename_temp);
+            sprintf(cmdline,"copy /y %s %s.bak %s",filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
 #else
             sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-            sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/nul 2>&1",filename_temp,filename_temp);
+            sprintf(cmdline,"/bin/cp %s %s.bak %s",filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
 #endif
             system(cmdline);
             global_replace(filename_temp,prev_config,new_config);
@@ -1808,10 +1817,10 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
             sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-            sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp,filename_temp);
+            sprintf(cmdline,"copy /y %s %s.bak %s",filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
 #else
             sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-            sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/nul 2>&1",filename_temp,filename_temp);
+            sprintf(cmdline,"/bin/cp %s %s.bak %s",filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
 #endif
             system(cmdline);
             global_replace(filename_temp,prev_config,new_config);
@@ -1846,9 +1855,9 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         printf("[ -INFO- ] Rolling back now ... \n");
         for(i=1;i<compute_node_num+1;i++){
 #ifdef _WIN32
-            sprintf(cmdline,"move /y %s.bak %s > nul 2>&1",filename_temp2,filename_temp2);
+            sprintf(cmdline,"move /y %s.bak %s %s",filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
 #else
-            sprintf(cmdline,"mv %s.bak %s >>/dev/null 2>&1",filename_temp2,filename_temp2);
+            sprintf(cmdline,"mv %s.bak %s %s",filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
 #endif
             system(cmdline);
         }
@@ -1877,9 +1886,9 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     }
     printf("[ -DONE- ] Congratulations! The compute nodes have been reconfigured.\n");
 #ifdef _WIN32
-    sprintf(cmdline,"del /q /f %s\\*bak > nul 2>&1",stackdir);
+    sprintf(cmdline,"del /q /f %s\\*bak %s",stackdir,SYSTEM_CMD_REDIRECT);
 #else
-    sprintf(cmdline,"del /q /f %s/*bak >/dev/null 2>&1",stackdir);
+    sprintf(cmdline,"del /q /f %s/*bak %s",stackdir,SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
     return 0;
@@ -1937,19 +1946,19 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     }
 #ifdef _WIN32
     sprintf(filename_temp,"%s\\hpc_stack_master.tf",stackdir);
-    sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp,filename_temp);
+    sprintf(cmdline,"copy /y %s %s.bak %s",filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
 #else
     sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
-    sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/null 2>&1",filename_temp,filename_temp);
+    sprintf(cmdline,"/bin/cp %s %s.bak %s",filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
     global_replace(filename_temp,prev_config,new_config);
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back now ... \n");
 #ifdef _WIN32
-        sprintf(cmdline,"move /y %s.bak %s > nul 2>&1",filename_temp,filename_temp);
+        sprintf(cmdline,"move /y %s.bak %s %s",filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"mv %s.bak %s >>/dev/null 2>&1",filename_temp,filename_temp);
+        sprintf(cmdline,"mv %s.bak %s %s",filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
 #endif
         system(cmdline);
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
@@ -2432,12 +2441,12 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
     sprintf(confdir,"%s\\conf\\",workdir);
     if(folder_exist_or_not(confdir)!=0){
-        sprintf(cmdline,"mkdir %s > nul 2>&1",confdir);
+        sprintf(cmdline,"mkdir %s %s",confdir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     sprintf(filename_temp,"%s\\tf_prep.conf",confdir);
     if(file_exist_or_not(filename_temp)==0){
-        sprintf(cmdline,"move %s %s.prev > nul 2>&1",filename_temp,filename_temp);
+        sprintf(cmdline,"move %s %s.prev %s",filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 #else
@@ -2445,21 +2454,21 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
     sprintf(confdir,"%s/conf/",workdir);
     if(folder_exist_or_not(confdir)!=0){
-        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",confdir);
+        sprintf(cmdline,"mkdir -p %s %s",confdir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     sprintf(filename_temp,"%s/tf_prep.conf",confdir);
     if(file_exist_or_not(filename_temp)==0){
-        sprintf(cmdline,"mv %s %s.prev >> /dev/null 2>&1",filename_temp,filename_temp);
+        sprintf(cmdline,"mv %s %s.prev %s",filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 #endif
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(code_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf > nul 2>&1",url_alicloud_root,confdir);
+            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf %s",url_alicloud_root,confdir,SYSTEM_CMD_REDIRECT);
 #else
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",url_alicloud_root,confdir);
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf %s",url_alicloud_root,confdir,SYSTEM_CMD_REDIRECT);
 #endif
         }
         else{
@@ -2476,9 +2485,9 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         if(code_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf >nul 2>&1",url_qcloud_root,confdir);
+            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf %s",url_qcloud_root,confdir,SYSTEM_CMD_REDIRECT);
 #else
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",url_qcloud_root,confdir);
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf %s",url_qcloud_root,confdir,SYSTEM_CMD_REDIRECT);
 #endif
         }
         else{
@@ -2495,9 +2504,9 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(code_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf > nul 2>&1",url_aws_root,confdir);
+            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf %s",url_aws_root,confdir,SYSTEM_CMD_REDIRECT);
 #else
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",url_aws_root,confdir);
+            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf %s",url_aws_root,confdir,SYSTEM_CMD_REDIRECT);
 #endif
         }
         else{

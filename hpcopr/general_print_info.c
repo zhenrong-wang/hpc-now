@@ -60,8 +60,9 @@ void print_help(void){
     printf("+ II. Global Management:\n");
     printf("| * You DO NOT need to switch to a cluster first.\n");
     printf("|  help        : Show this page and the information here.\n");
-    printf("|  usage       : Get the usage history of all your cluster(s).\n");
-    printf("|  syslog      : Get the detailed operation log of your cluster management.\n");
+    printf("|  usage       : Get and check the usage history of all your cluster(s).\n");
+    printf("|  history     : Get and check the detailed operation log of your cluster management.\n");
+    printf("|  syserr      : Get and check the system command errors.\n");
     printf("+  Advanced - For developers:\n");
     printf("|  configloc   : Configure the locations for the terraform binaries, providers, IaC\n");
     printf("|                templates and shell scripts.\n");

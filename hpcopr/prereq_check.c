@@ -39,11 +39,11 @@ extern char md5_aws_tf_zip_var[64];
 int check_internet(void){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    strcpy(cmdline,"ping -n 1 www.baidu.com > nul 2>&1");
+    sprintf(cmdline,"ping -n 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT);
 #elif __linux__
-    strcpy(cmdline,"ping -c 1 www.baidu.com >> /dev/null 2>&1");
+    sprintf(cmdline,"ping -c 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
-    strcpy(cmdline,"ping -c 1 -t 1 www.baidu.com >> /dev/null 2>&1");
+    sprintf(cmdline,"ping -c 1 -t 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT);
 #endif
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
@@ -135,7 +135,8 @@ int check_and_install_prerequisitions(int repair_flag){
     file_p=fopen("c:\\programdata\\appdata.txt.tmp","r");
     fscanf(file_p,"%s",appdata_dir);
     fclose(file_p);
-    system("del /f /s /q c:\\programdata\\appdata.txt.tmp > nul 2>&1");
+    sprintf(cmdline,"del /f /s /q c:\\programdata\\appdata.txt.tmp %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
 #endif
 
     if(file_exist_or_not(usage_logfile)!=0){

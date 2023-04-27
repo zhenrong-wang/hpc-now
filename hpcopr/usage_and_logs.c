@@ -27,10 +27,8 @@ int get_usage(char* usage_logfile){
         return 1;
     }
 #ifdef _WIN32
-    system("del /f /s /q c:\\hpc-now\\cluster_usage_temp.log > nul 2>&1");
     sprintf(cmdline,"copy /y %s c:\\hpc-now\\cluster_usage_temp.log > nul 2>&1",usage_logfile);
 #elif __APPLE__
-    system("rm -rf /Users/hpc-now/now-cluster-usage-latest.log >> /dev/null 2>&1");
     sprintf(cmdline,"/bin/cp %s /Users/hpc-now/cluster_usage_temp.log >> /dev/null 2>&1",usage_logfile);
 #elif __linux__
     system("rm -rf /home/hpc-now/now-cluster-usage-latest.log >> /dev/null 2>&1");
@@ -59,42 +57,67 @@ int get_usage(char* usage_logfile){
     return 0;
 }
 
-int get_syslog(char* operation_logfile){
+int get_history(char* operation_logfile){
     char cmdline[CMDLINE_LENGTH]="";
     if(file_exist_or_not(operation_logfile)!=0){
-        printf("[ FATAL: ] Failed to get the operation log. Exit now.\n");      
+        printf("[ FATAL: ] Failed to get the operation history. Exit now.\n");      
         return 1;
     }
 #ifdef _WIN32
-    system("del /f /s /q c:\\hpc-now\\cluster_syslog_temp.log > nul 2>&1");
-    sprintf(cmdline,"copy /y %s c:\\hpc-now\\cluster_syslog_temp.log > nul 2>&1",operation_logfile);
+    sprintf(cmdline,"copy /y %s c:\\hpc-now\\hpcopr_history_temp.log > nul 2>&1",operation_logfile);
 #elif __APPLE__
-    system("rm -rf /Users/hpc-now/now-cluster-operation-latest.log >> /dev/null 2>&1");
-    sprintf(cmdline,"/bin/cp %s /Users/hpc-now/cluster_syslog_temp.log >> /dev/null 2>&1",operation_logfile);
+    sprintf(cmdline,"/bin/cp %s /Users/hpc-now/hpcopr_history_temp.log >> /dev/null 2>&1",operation_logfile);
 #elif __linux__
-    system("rm -rf /home/hpc-now/now-cluster-operation-latest.log >> /dev/null 2>&1");
-    sprintf(cmdline,"/bin/cp %s /home/hpc-now/cluster_syslog_temp.log >> /dev/null 2>&1",operation_logfile);
+    sprintf(cmdline,"/bin/cp %s /home/hpc-now/hpcopr_history_temp.log >> /dev/null 2>&1",operation_logfile);
 #endif
     system(cmdline);
 #ifdef _WIN32
-    system("more c:\\hpc-now\\cluster_syslog_temp.log");
+    system("more c:\\hpc-now\\hpcopr_history_temp.log");
 #elif __APPLE__
-    system("more /Users/hpc-now/cluster_syslog_temp.log");
+    system("more /Users/hpc-now/hpcopr_history_temp.log");
 #elif __linux__
-    system("more /home/hpc-now/cluster_syslog_temp.log");
+    system("more /home/hpc-now/hpcopr_history_temp.log");
 #endif
-    printf("[ -DONE- ] The latet operation log has been printed to the file below:\n");
+    printf("[ -DONE- ] The latest operation log has been printed to the file below:\n");
 #ifdef _WIN32
-    printf("|          c:\\hpc-now\\cluster_syslog_temp.log\n");
-    printf("|          You can use either MS Office Excel (*strongly recommended*) or other\n");
+    printf("|          c:\\hpc-now\\hpcopr_history_temp.log\n");
+#elif __APPLE__
+    printf("|          /Users/hpc-now/hpcopr_history_temp.log\n");
+#elif __linux__
+    printf("|          /home/hpc-now/hpcopr_history_temp.log\n");
+#endif
+    return 0;
+}
+
+int get_syserrlog(char* syserror_logfile){
+    char cmdline[CMDLINE_LENGTH]="";
+    if(file_exist_or_not(syserror_logfile)!=0){
+        printf("[ FATAL: ] Failed to get the system command error log file. Exit now.\n");      
+        return 1;
+    }
+#ifdef _WIN32
+    sprintf(cmdline,"copy /y %s c:\\hpc-now\\hpcopr_syserr_temp.log > nul 2>&1",syserror_logfile);
+#elif __APPLE__
+    sprintf(cmdline,"/bin/cp %s /Users/hpc-now/hpcopr_syserr_temp.log >> /dev/null 2>&1",syserror_logfile);
+#elif __linux__
+    sprintf(cmdline,"/bin/cp %s /home/hpc-now/hpcopr_syserr_temp.log >> /dev/null 2>&1",syserror_logfile);
+#endif
+    system(cmdline);
+#ifdef _WIN32
+    system("more c:\\hpc-now\\hpcopr_syserr_temp.log");
+#elif __APPLE__
+    system("more /Users/hpc-now/hpcopr_syserr_temp.log");
+#elif __linux__
+    system("more /home/hpc-now/hpcopr_syserr_temp.log");
+#endif
+    printf("[ -DONE- ] The latest system command error log has been printed to the file below:\n");
+#ifdef _WIN32
+    printf("|          c:\\hpc-now\\hpcopr_syserr_temp.log\n");
 #elif __APPLE__
     printf("|          /Users/hpc-now/cluster_syslog_temp.log\n");
-    printf("|          You can use either any CSV file processing tools (i.e. LibreOffice) or\n");
 #elif __linux__
     printf("|          /home/hpc-now/cluster_syslog_temp.log\n");
-    printf("|          You can use either any CSV file processing tools (i.e. LibreOffice) or\n");
 #endif
-    printf("|          plain text editors (for example, notepad) to view the detailed log.\n");
     return 0;
 }
 

@@ -161,9 +161,9 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     fclose(file_p);
     fclose(file_p_tmp);
 #ifdef _WIN32
-    sprintf(cmdline,"move /y %s %s > nul 2>&1",filename_temp,filename);
+    sprintf(cmdline,"move /y %s %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #else
-    sprintf(cmdline,"mv %s %s >> /dev/null 2>&1",filename_temp,filename);
+    sprintf(cmdline,"mv %s %s %s",filename_temp,filename,SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
     return 0;
@@ -292,9 +292,9 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     fclose(file_p);
     fclose(file_temp_p);
 #ifdef _WIN32
-    sprintf(cmdline,"del /f /q %s > nul 2>&1 && move /y %s %s > nul 2>&1",filename,filename_temp,filename);
+    sprintf(cmdline,"del /f /q %s %s && move /y %s %s %s",filename,SYSTEM_CMD_REDIRECT,filename_temp,filename,SYSTEM_CMD_REDIRECT);
 #else
-    sprintf(cmdline,"rm -rf %s >> /dev/null && mv %s %s >> /dev/null 2>&1",filename,filename_temp,filename);
+    sprintf(cmdline,"rm -rf %s %s && mv %s %s %s",filename,SYSTEM_CMD_REDIRECT,filename_temp,filename,SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
     return replace_count;
@@ -572,9 +572,9 @@ int folder_exist_or_not(char* foldername){
     else{
         fclose(test_file);
 #ifdef _WIN32
-        sprintf(cmdline,"del /q /f %s > nul 2>&1",filename);
+        sprintf(cmdline,"del /q /f %s %s",filename,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename);
+        sprintf(cmdline,"rm -rf %s %s",filename,SYSTEM_CMD_REDIRECT);
 #endif
         system(cmdline);
         return 0;

@@ -9,12 +9,14 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0058"
+#define CORE_VERSION_CODE "0.2.0.0059"
 
 #ifdef _WIN32
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
 #define USAGE_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-usage.log" //This is a global file!
 #define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
+#define SYSTEM_CMD_ERROR_LOG "C:\\programdata\\hpc-now\\system_command_error.log"
+#define SYSTEM_CMD_REDIRECT "> nul 2 >> C:\\programdata\\hpc-now\\system_command_error.log"
 #define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
 #define SSHKEY_DIR "C:\\hpc-now\\.ssh"
 #define OPERATION_ERROR_LOG "c:\\hpc-now\\hpc-now.err.log"
@@ -33,6 +35,8 @@
 #define CRYPTO_KEY_FILE "/usr/.hpc-now/.now_crypto_seed.lock"
 #define USAGE_LOG_FILE "/usr/.hpc-now/.now-cluster-usage.log"
 #define OPERATION_LOG_FILE "/usr/.hpc-now/.now-cluster-operation.log"
+#define SYSTEM_CMD_ERROR_LOG "/usr/.hpc-now/system_command_error.log"
+#define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/usr/.hpc-now/system_command_error.log"
 #define NOW_LIC_DIR "/home/hpc-now/LICENSES"
 #define SSHKEY_DIR "/home/hpc-now/.now-ssh"
 #define OPERATION_ERROR_LOG "/home/hpc-now/hpc-now.err.log"
@@ -51,6 +55,8 @@
 #define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock"
 #define USAGE_LOG_FILE "/Applications/.hpc-now/.now-cluster-usage.log"
 #define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
+#define SYSTEM_CMD_ERROR_LOG "/Applications/.hpc-now/system_command_error.log"
+#define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/Applications/.hpc-now/system_command_error.log"
 #define NOW_LIC_DIR "/Users/hpc-now/LICENSES"
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
 #define OPERATION_ERROR_LOG "/Users/hpc-now/hpc-now.err.log"
