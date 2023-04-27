@@ -451,15 +451,23 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     if(strcmp(argv[1],"graph")==0){
+        if(check_pslock(workdir)!=0){
+            printf("[ -WARN- ] %s | * OPERATION-IN-PROGRESS * The graph here is *NOT* updated !\n|\n",current_cluster_name);
+            run_flag=graph(workdir,crypto_keyfile,0);
+            print_tail();
+            write_log(current_cluster_name,operation_log,argv[1],run_flag);
+            system_cleanup();
+            return run_flag;
+        }
         decrypt_files(workdir,crypto_keyfile);
         printf("|\n");
         run_flag=graph(workdir,crypto_keyfile,0);
         if(run_flag!=0){
             print_empty_cluster_info();
         }
-        print_tail();
         delete_decrypted_files(workdir,crypto_keyfile);
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
+        print_tail();
         system_cleanup();
         return run_flag;
     }

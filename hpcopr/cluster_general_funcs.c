@@ -242,9 +242,9 @@ int check_pslock(char* workdir){
     char filename_temp[FILENAME_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
 #ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);
+    sprintf(filename_temp,"%s\\terraform.tfstate",stackdir);
 #else
-    sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
+    sprintf(filename_temp,"%s/terraform.tfstate",stackdir);
 #endif
     if(file_exist_or_not(filename_temp)==0){
         return 1;
