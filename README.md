@@ -149,7 +149,6 @@
     - cd c:\hpc-now
     - hpcopr envcheck
 
-<<<<<<< development
 此时，hpcopr 将开始下载必要的组件并部署在您的系统之中，部件的总大小约 150 MB；该过程视您的网络情况而定，可能需要 1 ~ 5 分钟。如您看到如下回显，则说明 hpcopr 已经可以运行。您可以跳至步骤 7 。
 
 [ -INFO- ] Running environment successfully checked.
