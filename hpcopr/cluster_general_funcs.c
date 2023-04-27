@@ -1084,7 +1084,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     archive_log(tf_realtime_log_archive,tf_realtime_log);
     archive_log(tf_error_log_archive,error_log);
 #ifdef _WIN32
-    sprintf(cmdline,"cd %s\\ && set TF_LOG=DEBUG && set TF_LOG_PATH=%s\\log\\terraform.log && echo yes | start /b %s %s > %s 2>%s",stackdir,workdir,tf_exec,execution_name,tf_realtime_log,error_log);
+    sprintf(cmdline,"cd %s\\ && set TF_LOG=DEBUG&&set TF_LOG_PATH=%s\\log\\terraform.log&& echo yes | start /b %s %s > %s 2>%s",stackdir,workdir,tf_exec,execution_name,tf_realtime_log,error_log);
 #else
     sprintf(cmdline,"cd %s && export TF_LOG=DEBUG && export TF_LOG_PATH=%s/log/terraform.log && echo yes | %s %s > %s 2>%s &",stackdir,workdir,tf_exec,execution_name,tf_realtime_log,error_log);
 #endif
