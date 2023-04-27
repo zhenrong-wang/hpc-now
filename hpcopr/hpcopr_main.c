@@ -150,7 +150,7 @@ int main(int argc, char* argv[]){
     sprintf(cmdline,"mkdir -p /usr/.hpc-now/.etc/ %s",SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
-    
+
     if(argc==1){
         print_help();
         return 0;
@@ -719,8 +719,8 @@ int main(int argc, char* argv[]){
     }
 
     if(cluster_asleep_or_not(workdir)==0){
-        printf("[ FATAL: ] The current cluster is in the state of hibernation. No modification is\n");
-        printf("|          permitted. Please run 'wakeup' command first. Exit now.\n");
+        printf("[ FATAL: ] The current cluster is in the state of hibernation. Please wake up\n");
+        printf("|          first. Command: hpcopr wakeup minimal/all . Exit now.\n");
         print_tail();
         write_log(current_cluster_name,operation_log,argv[1],13);
         system_cleanup();
