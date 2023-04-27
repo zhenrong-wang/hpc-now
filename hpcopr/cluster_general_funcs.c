@@ -878,17 +878,17 @@ int wait_for_complete(char* workdir, char* option, char* errorlog){
 
     if(strcmp(option,"init")==0){
 #ifdef _WIN32
-        sprintf(cmdline,"type %s\\tf_prep.log | findstr successfully | findstr initialized! %s",logdir,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"type %s\\tf_prep.log | findstr successfully | findstr initialized! > nul 2>&1",logdir);
 #else
-        sprintf(cmdline,"cat %s/tf_prep.log | grep \"successfully initialized!\" %s",logdir,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"cat %s/tf_prep.log | grep \"successfully initialized!\" >>/dev/null 2>&1",logdir);
 #endif
         total_minutes=1;
     }
     else{
 #ifdef _WIN32
-        sprintf(cmdline,"type %s\\tf_prep.log | findstr complete! %s",logdir,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"type %s\\tf_prep.log | findstr complete! > nul 2>&1",logdir);
 #else
-        sprintf(cmdline,"cat %s/tf_prep.log | grep \"complete!\" %s",logdir,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"cat %s/tf_prep.log | grep \"complete!\" >>/dev/null 2>&1",logdir);
 #endif
         total_minutes=3;
     }
