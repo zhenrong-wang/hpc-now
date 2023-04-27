@@ -2572,6 +2572,7 @@ int edit_configuration_file(char* workdir, char* crypto_keyfile){
             return 1;
         }
         get_default_conf(workdir,crypto_keyfile,0);
+        return 0;
     }
 #ifdef _WIN32
     sprintf(cmdline,"notepad %s",filename_temp);
