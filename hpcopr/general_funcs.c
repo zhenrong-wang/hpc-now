@@ -161,7 +161,7 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     fclose(file_p);
     fclose(file_p_tmp);
 #ifdef _WIN32
-    sprintf(cmdline,"move /y %s %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"move /y %s %s %s",filename_temp,filename,SYSTEM_CMD_REDIRECT);
 #else
     sprintf(cmdline,"mv %s %s %s",filename_temp,filename,SYSTEM_CMD_REDIRECT);
 #endif
