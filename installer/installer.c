@@ -206,9 +206,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
-    system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
     system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
-    system("attrib -h -s -r c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
     printf("[ -INFO- ] Adding the specific user 'hpc-now' to your OS ...\n");   
@@ -330,7 +328,6 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     fclose(file_p);
 #ifdef _WIN32
     system("attrib +h +s +r c:\\programdata\\hpc-now\\now_crypto_seed.lock");
-    system("attrib +h +s +r c:\\programdata\\hpc-now > nul 2>&1");
 #elif __linux__
     system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");   
@@ -395,8 +392,6 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
         printf("[ FATAL: ] This installation process is terminated. If you specified the\n");
         printf("|          location of hpcopr executable, please make sure the location \n");
         printf("|          is correct. Rolling back and exit now.\n");
-        system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
-        system("attrib -h -s -r c:\\hpc-now > nul 2>&1");
         system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
         system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
         system("rd /s /q c:\\hpc-now > nul 2>&1");
@@ -532,8 +527,6 @@ int uninstall_services(void){
     }
     printf("[ -INFO- ] UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
 #ifdef _WIN32
-    system("attrib -h -s -r c:\\programdata\\hpc-now > nul 2>&1");
-    system("attrib -h -s -r c:\\hpc-now > nul 2>&1");
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
     system("rd /s /q c:\\hpc-now > nul 2>&1");
