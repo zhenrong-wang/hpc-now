@@ -16,7 +16,7 @@
 #define USAGE_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-usage.log" //This is a global file!
 #define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG "C:\\programdata\\hpc-now\\system_command_error.log"
-#define SYSTEM_CMD_REDIRECT "> nul 2 >> C:\\programdata\\hpc-now\\system_command_error.log"
+#define SYSTEM_CMD_REDIRECT ">nul 2>>C:\\programdata\\hpc-now\\system_command_error.log"
 #define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
 #define SSHKEY_DIR "C:\\hpc-now\\.ssh"
 #define OPERATION_ERROR_LOG "c:\\hpc-now\\hpc-now.err.log"
