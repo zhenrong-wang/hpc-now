@@ -128,6 +128,7 @@ int check_and_install_prerequisitions(int repair_flag){
     char doubleconfirm[64]="";
     char* tf_exec=TERRAFORM_EXEC;
     char* crypto_exec=NOW_CRYPTO_EXEC;
+
 #ifdef _WIN32
     char appdata_dir[128]="";
     system("echo %APPDATA% > c:\\programdata\\appdata.txt.tmp");
@@ -135,11 +136,6 @@ int check_and_install_prerequisitions(int repair_flag){
     fscanf(file_p,"%s",appdata_dir);
     fclose(file_p);
     system("del /f /s /q c:\\programdata\\appdata.txt.tmp > nul 2>&1");
-    system("mkdir c:\\programdata\\hpc-now\\etc\\ > nul 2>&1");
-#elif __APPLE__
-    system("mkdir -p /Applications/.hpc-now/.etc/ >> /dev/null 2>&1");
-#elif __linux__
-    system("mkdir -p /usr/.hpc-now/.etc/ >> /dev/null 2>&1");
 #endif
 
     if(file_exist_or_not(usage_logfile)!=0){
@@ -321,7 +317,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        v The Terraform executable has been repaired.\n");
     }
 
-    file_check_flag=file_validity_check(crypto_exec,force_repair_flag,md5_now_crypto_var);
+    file_check_flag=file_validity_check(crypto_exec,repair_flag,md5_now_crypto_var);
     if(file_check_flag==1){
         printf("[ -INFO- ] Downloading/Copying the now-crypto.exe ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");

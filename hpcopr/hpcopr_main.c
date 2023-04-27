@@ -140,6 +140,14 @@ int main(int argc, char* argv[]){
     }
 #endif
 
+#ifdef _WIN32
+    system("mkdir c:\\programdata\\hpc-now\\etc\\ > nul 2>&1");
+#elif __APPLE__
+    system("mkdir -p /Applications/.hpc-now/.etc/ >> /dev/null 2>&1");
+#elif __linux__
+    system("mkdir -p /usr/.hpc-now/.etc/ >> /dev/null 2>&1");
+#endif
+
     if(argc==1){
         print_help();
         return 0;
@@ -210,17 +218,14 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    run_flag=check_and_install_prerequisitions(0);
-    if(run_flag==3){
-        write_log("NULL",operation_log,"PREREQ_FAILED",-4);
+    if(strcmp(argv[1],"configloc")==0){
+        run_flag=configure_locations();
         print_tail();
         system_cleanup();
-        return -4;
-    }
-    else if(run_flag!=0){
-        print_tail();
-        system_cleanup();
-        return -4;
+        if(run_flag!=0){
+            return -5;
+        }
+        return 0;
     }
 
     if(strcmp(argv[1],"resetloc")==0){
@@ -258,6 +263,19 @@ int main(int argc, char* argv[]){
             return -127;
         }
         return 0;
+    }
+
+    run_flag=check_and_install_prerequisitions(0);
+    if(run_flag==3){
+        write_log("NULL",operation_log,"PREREQ_FAILED",-4);
+        print_tail();
+        system_cleanup();
+        return -4;
+    }
+    else if(run_flag!=0){
+        print_tail();
+        system_cleanup();
+        return -4;
     }
     
     if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syslog")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0){

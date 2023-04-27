@@ -336,6 +336,8 @@ int show_vers_md5vars(void){
     FILE* file_p=fopen(VERS_MD5_CONF_FILE,"r");
     char vers_and_md5[64]="";
     if(file_p==NULL){
+        printf("[ -FATAL- ] Failed to open the md5 file. Please try 'hpcopr envcheck',\n");
+        printf("|           or 'hpcopr configloc'. Or run 'hpcopr repair',\n");
         return -1;
     }
     printf("[ -INFO- ] Versions and md5sum values\n");
@@ -489,7 +491,8 @@ int show_locations(void){
     char loc_string[LOCATION_LENGTH]="";
     int i;
     if(file_p==NULL){
-        printf("[ FATAL: ] Failed to open the location configuration file. Exit now.\n");
+        printf("[ -FATAL- ] Failed to open the location config. Please try 'hpcopr envcheck',\n");
+        printf("|           or 'hpcopr configloc'. Or run 'hpcopr repair',\n");
         return -1;
     }
     fgetline(file_p,loc_string);
