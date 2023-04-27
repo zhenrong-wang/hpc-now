@@ -344,7 +344,8 @@ int main(int argc, char* argv[]){
     }
     if(strcmp(argv[1],"refresh")==0){
         if(cluster_empty_or_not(workdir)==0){
-            printf("[ FATAL: ] The cluster is empty, please init it first. Exit now.\n");
+            printf("[ FATAL: ] The cluster cannot be refreshed (either in operation progress or empty).\n");
+            printf("|          Please run 'hpcopr glance all' to check. Exit now.\n");
             print_tail();
             write_log("NULL",operation_log,argv[1],-9);
             system_cleanup();

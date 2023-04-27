@@ -1093,7 +1093,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     printf("|          Operation Command: %s. Error log: %s\n",execution_name,error_log);
     wait_for_complete(workdir,execution_name,error_log);
     if(file_empty_or_not(error_log)!=0||run_flag!=0){
-        printf("[ FATAL: ] Failed to operate the cluster. Operation command: %s. Exit now.\n",execution_name);
+        printf("[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n",execution_name);
         archive_log(tf_error_log_archive,error_log);
         return -1;
     }
