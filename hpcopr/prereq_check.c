@@ -40,10 +40,8 @@ int check_internet(void){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
     sprintf(cmdline,"ping -n 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT);
-#elif __linux__
+#else
     sprintf(cmdline,"ping -c 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT);
-#elif __APPLE__
-    sprintf(cmdline,"ping -c 1 -t 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT);
 #endif
     if(system(cmdline)!=0){
         printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
