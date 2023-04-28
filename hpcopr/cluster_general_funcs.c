@@ -1284,8 +1284,8 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
 
 int confirm_to_operate_cluster(char* current_cluster_name){
     char doubleconfirm[64]="";
-    printf("[ -INFO- ] You are operating the cluster %s now, which may affect all\n",current_cluster_name);
-    printf("|          the resources/data/jobs. Please input 'y-e-s' to continue.\n");
+    printf("[ -INFO- ] You are operating the cluster %s now, which may affect the related\n",current_cluster_name);
+    printf("|          resources|data|jobs. Please input 'y-e-s' to continue.\n");
     printf("[ INPUT: ] ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
