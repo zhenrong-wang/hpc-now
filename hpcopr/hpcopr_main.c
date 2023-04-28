@@ -355,7 +355,10 @@ int main(int argc, char* argv[]){
             system_cleanup();
             return -9;
         }
-        confirm_to_operate_cluster(current_cluster_name);
+        if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            print_tail();
+            return -1;
+        }
         if(argc<3){
             run_flag=refresh_cluster("",crypto_keyfile);
         }
