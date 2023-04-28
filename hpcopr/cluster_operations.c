@@ -83,8 +83,10 @@ int current_cluster_or_not(char* current_indicator, char* cluster_name){
     }
     fscanf(file_p,"%s",current_cluster_name);
     if(strcmp(current_cluster_name,cluster_name)!=0){
+        fclose(file_p);
         return -1;
     }
+    fclose(file_p);
     return 0;
 }
 
