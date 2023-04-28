@@ -1490,6 +1490,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"SECURITY_GROUP_INTRA",string_temp);
     sprintf(string_temp,"%smysql",randstr);
     global_replace(filename_temp,"SECURITY_GROUP_MYSQL",string_temp);
+    sprintf(string_temp,"%snatgw",randstr);
+    global_replace(filename_temp,"SECURITY_GROUP_NATGW",string_temp);
     sprintf(string_temp,"%snag",randstr);
     global_replace(filename_temp,"NAS_ACCESS_GROUP",string_temp);
     global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);
