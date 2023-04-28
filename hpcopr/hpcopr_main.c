@@ -379,7 +379,7 @@ int main(int argc, char* argv[]){
             list_all_cluster_names();
         }
         else{
-            printf("[ -DONE- ] The cluster %s was successfully refreshed.\n",argv[2]);
+            printf("[ -DONE- ] The cluster was successfully refreshed.\n");
         }
         print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
