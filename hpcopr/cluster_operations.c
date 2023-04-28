@@ -371,7 +371,6 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
     }
 }
 
-
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     char cluster_workdir[DIR_LENGTH]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
