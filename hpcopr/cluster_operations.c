@@ -260,36 +260,34 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
         return -1;
     }
-    #ifdef _WIN32
-    sprintf(filename_temp,"%s\\conf\\cloud_flag.flg",temp_cluster_workdir);
-#else
-    sprintf(filename_temp,"%s/conf/.cloud_flag.flg",temp_cluster_workdir);
-#endif
-    if(file_exist_or_not(filename_temp)==0){
-        file_p2=fopen(filename_temp,"r");
-        fscanf(file_p2,cloud_flag);
-        fclose(file_p2);
-    }
     if(strlen(target_cluster_name)==0){
         if(show_current_cluster(temp_cluster_workdir,temp_cluster_name,0)==1){
             fclose(file_p);
             return 1;
         }
-        else{
-            if(check_pslock(temp_cluster_workdir)!=0){
-                printf("|  active: <> %s | %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name,cloud_flag);
-                fclose(file_p);
-                return 0;
-            }
-            decrypt_files(temp_cluster_workdir,crypto_keyfile);
-            printf("|  active: <> %s | ",temp_cluster_name);
-            if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-                printf("%s | * EMPTY CLUSTER *\n",cloud_flag);
-            }
-            delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+#ifdef _WIN32
+        sprintf(filename_temp,"%s\\conf\\cloud_flag.flg",temp_cluster_workdir);
+#else
+        sprintf(filename_temp,"%s/conf/.cloud_flag.flg",temp_cluster_workdir);
+#endif
+        if(file_exist_or_not(filename_temp)==0){
+            file_p2=fopen(filename_temp,"r");
+            fscanf(file_p2,"%s",cloud_flag);
+            fclose(file_p2);
+        }
+        if(check_pslock(temp_cluster_workdir)!=0){
+            printf("|  active: <> %s | %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name,cloud_flag);
             fclose(file_p);
             return 0;
         }
+        decrypt_files(temp_cluster_workdir,crypto_keyfile);
+        printf("|  active: <> %s | ",temp_cluster_name);
+        if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
+            printf("%s | * EMPTY CLUSTER *\n",cloud_flag);
+        }
+        delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+        fclose(file_p);
+        return 0;
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         while(fgetline(file_p,registry_line)==0){
@@ -298,6 +296,16 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
 //                printf("test### %s\n",registry_line);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
+#ifdef _WIN32
+                sprintf(filename_temp,"%s\\conf\\cloud_flag.flg",temp_cluster_workdir);
+#else
+                sprintf(filename_temp,"%s/conf/.cloud_flag.flg",temp_cluster_workdir);
+#endif
+                if(file_exist_or_not(filename_temp)==0){
+                    file_p2=fopen(filename_temp,"r");
+                    fscanf(file_p2,"%s",cloud_flag);
+                    fclose(file_p2);
+                }
                 if(check_pslock(temp_cluster_workdir)!=0){
                     printf("|  active: <> %s | %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name,cloud_flag);
                     i++;
@@ -332,6 +340,16 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
+        #ifdef _WIN32
+        sprintf(filename_temp,"%s\\conf\\cloud_flag.flg",temp_cluster_workdir);
+#else
+        sprintf(filename_temp,"%s/conf/.cloud_flag.flg",temp_cluster_workdir);
+#endif
+        if(file_exist_or_not(filename_temp)==0){
+            file_p2=fopen(filename_temp,"r");
+            fscanf(file_p2,"%s",cloud_flag);
+            fclose(file_p2);
+        }
         if(check_pslock(temp_cluster_workdir)!=0){
             printf("|  active: <> %s | %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name,cloud_flag);
             return 0;
