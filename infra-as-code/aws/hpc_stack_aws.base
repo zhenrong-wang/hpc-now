@@ -497,10 +497,11 @@ resource "aws_s3_bucket" "hpc_data_storage" {
   }
 }
 
+/*
 resource "aws_s3_bucket_acl" "hpcdatastor_acl" {
   bucket = aws_s3_bucket.hpc_data_storage.id
   acl = "private"
-}
+}*/
 
 #create an iam user with the policy to only access the bucket, nothing else
 resource "aws_iam_user" "hpc_bucket_user" {
