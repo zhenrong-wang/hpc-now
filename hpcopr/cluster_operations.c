@@ -249,29 +249,45 @@ int list_all_cluster_names(void){
 
 int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
+    FILE* file_p2=NULL;
     char registry_line[LINE_LENGTH_SHORT]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_cluster_workdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char cloud_flag[32]="";
     int i=0;
     if(file_p==NULL){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
         return -1;
     }
+    #ifdef _WIN32
+    sprintf(filename_temp,"%s\\conf\\cloud_flag.flg",temp_cluster_workdir);
+#else
+    sprintf(filename_temp,"%s/conf/.cloud_flag.flg",temp_cluster_workdir);
+#endif
+    if(file_exist_or_not(filename_temp)==0){
+        file_p2=fopen(filename_temp,"r");
+        fscanf(file_p2,cloud_flag);
+        fclose(file_p2);
+    }
     if(strlen(target_cluster_name)==0){
         if(show_current_cluster(temp_cluster_workdir,temp_cluster_name,0)==1){
+            fclose(file_p);
             return 1;
         }
         else{
             if(check_pslock(temp_cluster_workdir)!=0){
-                printf("|  active: <> %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name);
+                printf("|  active: <> %s | %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name,cloud_flag);
+                fclose(file_p);
                 return 0;
             }
             decrypt_files(temp_cluster_workdir,crypto_keyfile);
             printf("|  active: <> %s | ",temp_cluster_name);
             if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-                printf(" * EMPTY CLUSTER *\n");
+                printf("%s | * EMPTY CLUSTER *\n",cloud_flag);
             }
             delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+            fclose(file_p);
             return 0;
         }
     }
@@ -283,7 +299,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
 //                printf("test### %s\n",registry_line);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 if(check_pslock(temp_cluster_workdir)!=0){
-                    printf("|  active: <> %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name);
+                    printf("|  active: <> %s | %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name,cloud_flag);
                     i++;
                     continue;
                 }
@@ -298,7 +314,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 }
                 i++;
                 if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-                    printf("* EMPTY CLUSTER *\n");
+                    printf("%s | * EMPTY CLUSTER *\n",cloud_flag);
                 }
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }
@@ -317,7 +333,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
         if(check_pslock(temp_cluster_workdir)!=0){
-            printf("|  active: <> %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name);
+            printf("|  active: <> %s | %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name,cloud_flag);
             return 0;
         }
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
@@ -328,7 +344,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             printf("|          <> %s | ",temp_cluster_name);
         }
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-            printf(" * EMPTY CLUSTER *\n");
+            printf("%s | * EMPTY CLUSTER *\n",cloud_flag);
         }
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
