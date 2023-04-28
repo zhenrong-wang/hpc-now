@@ -237,28 +237,39 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
 #ifdef _WIN32
-    system("mkdir c:\\programdata\\hpc-now\\ > nul 2>&1");
-    system("attrib +h +s +r c:\\programdata\\hpc-now > nul 2>&1");
-    system("mkdir c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1");
-    system("mkdir c:\\programdata\\hpc-now\\bin\\ > nul 2>&1");
-    system("del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
-    sprintf(cmdline,"mkdir %s\\terraform.d\\ > nul 2>&1",appdata_dir);
+    sprintf(cmdline,"mkdir c:\\programdata\\hpc-now\\ %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"mkdir c:\\programdata\\hpc-now\\.destroyed\\ %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"mkdir c:\\programdata\\hpc-now\\bin\\ %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"mkdir %s\\terraform.d\\ %s",appdata_dir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp_zip,"%s\\terraform.d\\terraform_%s_windows_amd64.zip",appdata_dir,terraform_version_var);
 #elif __linux__
-    system("rm -rf /home/hpc-now/.ssh/known_hosts >> /dev/null 2>&1");
-    system("mkdir -p /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1");
-    system("mkdir -p /usr/.hpc-now/.bin/ >> /dev/null 2>&1");
-    system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-    sprintf(cmdline,"mkdir -p /home/hpc-now/.terraform.d/ >> /dev/null 2>&1");
+    sprintf(cmdline,"rm -rf /home/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"mkdir -p /usr/.hpc-now/.destroyed/ %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"mkdir -p /usr/.hpc-now/.bin/ %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"rm -rf /usr/.hpc-now/.destroyed/* %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"mkdir -p /home/hpc-now/.terraform.d/ %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform_%s_linux_amd64.zip",terraform_version_var);
 #elif __APPLE__
-    system("rm -rf /Users/hpc-now/.ssh/known_hosts >> /dev/null 2>&1");
-    system("mkdir -p /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1");
-    system("mkdir -p /Applications/.hpc-now/.bin/ >> /dev/null 2>&1");
-    system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-    sprintf(cmdline,"mkdir -p /Users/hpc-now/.terraform.d/ >> /dev/null 2>&1");
+    sprintf(cmdline,"rm -rf /Users/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"mkdir -p /Applications/.hpc-now/.destroyed/ %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"mkdir -p /Applications/.hpc-now/.bin/ %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"rm -rf /Applications/.hpc-now/.destroyed/* %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"mkdir -p /Users/hpc-now/.terraform.d/ %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform_%s_darwin_amd64.zip",terraform_version_var);
 #endif
@@ -295,11 +306,11 @@ int check_and_install_prerequisitions(int repair_flag){
         }
 //        printf("%s,,,,,\"\n",cmdline);
 #ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C c:\\programdata\\hpc-now\\bin\\ > nul 2>&1",filename_temp_zip);
+        sprintf(cmdline,"tar zxf %s -C c:\\programdata\\hpc-now\\bin\\ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
 #elif __linux__
-        sprintf(cmdline,"unzip -o -q %s -d /usr/.hpc-now/.bin/ >> /dev/null 2>&1",filename_temp_zip);
+        sprintf(cmdline,"unzip -o -q %s -d /usr/.hpc-now/.bin/ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
-        sprintf(cmdline,"unzip -o -q %s -d /Applications/.hpc-now/.bin/ >> /dev/null 2>&1",filename_temp_zip);
+        sprintf(cmdline,"unzip -o -q %s -d /Applications/.hpc-now/.bin/ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
 #endif
 //        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
@@ -393,19 +404,19 @@ int check_and_install_prerequisitions(int repair_flag){
 
 #ifdef _WIN32
     sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\aliyun\\alicloud\\%s\\windows_amd64\\",appdata_dir,ali_plugin_version);
-    sprintf(cmdline,"mkdir %s > nul 2>&1", dirname_temp);
+    sprintf(cmdline,"mkdir %s %s", dirname_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s\\terraform-provider-alicloud_v%s.exe",dirname_temp,ali_plugin_version);
     sprintf(filename_temp_zip,"%s\\terraform.d\\terraform-provider-alicloud_%s_windows_amd64.zip",appdata_dir,ali_plugin_version);
 #elif __linux__
     sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/aliyun/alicloud/%s/linux_amd64/",ali_plugin_version);
-    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
+    sprintf(cmdline,"mkdir -p %s %s", dirname_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
     sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform-provider-alicloud_%s_linux_amd64.zip",ali_plugin_version);
 #elif __APPLE__
     sprintf(dirname_temp,"/Users/hpc-now/.terraform.d/plugins/registry.terraform.io/aliyun/alicloud/%s/darwin_amd64/",ali_plugin_version);
-    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
+    sprintf(cmdline,"mkdir -p %s %s", dirname_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
     sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform-provider-alicloud_%s_darwin_amd64.zip",ali_plugin_version);
@@ -443,9 +454,9 @@ int check_and_install_prerequisitions(int repair_flag){
             }
         }
 #ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s > nul 2>&1",filename_temp_zip,dirname_temp);
+        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"unzip -o -q %s -d %s >> /dev/null 2>&1",filename_temp_zip,dirname_temp);
+        sprintf(cmdline,"unzip -o -q %s -d %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
         flag=system(cmdline);
         if(flag!=0){
@@ -456,19 +467,19 @@ int check_and_install_prerequisitions(int repair_flag){
 
 #ifdef _WIN32
     sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\tencentcloudstack\\tencentcloud\\%s\\windows_amd64\\",appdata_dir,qcloud_plugin_version);
-    sprintf(cmdline,"mkdir %s > nul 2>&1", dirname_temp);
+    sprintf(cmdline,"mkdir %s %s", dirname_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s\\terraform-provider-tencentcloud_v%s.exe",dirname_temp,qcloud_plugin_version);
     sprintf(filename_temp_zip,"%s\\terraform.d\\terraform-provider-tencentcloud_%s_windows_amd64.zip",appdata_dir,qcloud_plugin_version);
 #elif __linux__
     sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/linux_amd64/",qcloud_plugin_version);
-    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
+    sprintf(cmdline,"mkdir -p %s %s", dirname_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
     sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform-provider-tencentcloud_%s_linux_amd64.zip",qcloud_plugin_version);
 #elif __APPLE__
     sprintf(dirname_temp,"/Users/hpc-now/.terraform.d/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/darwin_amd64/",qcloud_plugin_version);
-    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
+    sprintf(cmdline,"mkdir -p %s %s", dirname_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
     sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform-provider-tencentcloud_%s_darwin_amd64.zip",qcloud_plugin_version);
@@ -505,9 +516,9 @@ int check_and_install_prerequisitions(int repair_flag){
             }
         }
 #ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s > nul 2>&1",filename_temp_zip,dirname_temp);
+        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"unzip -o -q %s -d %s >> /dev/null 2>&1",filename_temp_zip,dirname_temp);
+        sprintf(cmdline,"unzip -o -q %s -d %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
         flag=system(cmdline);
         if(flag!=0){
@@ -518,19 +529,19 @@ int check_and_install_prerequisitions(int repair_flag){
 
 #ifdef _WIN32
     sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\hashicorp\\aws\\%s\\windows_amd64\\",appdata_dir,aws_plugin_version);
-    sprintf(cmdline,"mkdir %s > nul 2>&1", dirname_temp);
+    sprintf(cmdline,"mkdir %s %s", dirname_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s\\terraform-provider-aws_v%s_x5.exe",dirname_temp,aws_plugin_version);
     sprintf(filename_temp_zip,"%s\\terraform.d\\terraform-provider-aws_%s_windows_amd64.zip",appdata_dir,aws_plugin_version);
 #elif __linux__
     sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/hashicorp/aws/%s/linux_amd64/",aws_plugin_version);
-    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
+    sprintf(cmdline,"mkdir -p %s %s", dirname_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
     sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform-provider-aws_%s_linux_amd64.zip",aws_plugin_version);
 #elif __APPLE__
     sprintf(dirname_temp,"/Users/hpc-now/.terraform.d/plugins/registry.terraform.io/hashicorp/aws/%s/darwin_amd64/",aws_plugin_version);
-    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1", dirname_temp);
+    sprintf(cmdline,"mkdir -p %s %s", dirname_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
     sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform-provider-aws_%s_x5_darwin_amd64.zip",aws_plugin_version);
@@ -567,9 +578,9 @@ int check_and_install_prerequisitions(int repair_flag){
             }
         }
 #ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s > nul 2>&1",filename_temp_zip,dirname_temp);
+        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"unzip -o -q %s -d %s >> /dev/null 2>&1",filename_temp_zip,dirname_temp);
+        sprintf(cmdline,"unzip -o -q %s -d %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
         flag=system(cmdline);
         if(flag!=0){
@@ -584,12 +595,12 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 
 #ifdef _WIN32
-    sprintf(cmdline,"mkdir %s > nul 2>&1",sshkey_dir);
+    sprintf(cmdline,"mkdir %s %s",sshkey_dir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"attrib +h +s +r %s",sshkey_dir);
     system(cmdline);
 #else
-    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",sshkey_dir);
+    sprintf(cmdline,"mkdir -p %s %s",sshkey_dir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 #endif
     
@@ -601,21 +612,21 @@ int check_and_install_prerequisitions(int repair_flag){
         fclose(file_p);
     }    
 #ifdef _WIN32
-    strcpy(cmdline,"setx PATH C:\\WINDOWS\\system32;C:\\hpc-now\\;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\ > nul 2>&1");
+    sprintf(cmdline,"setx PATH C:\\WINDOWS\\system32;C:\\hpc-now\\;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\ %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"del /f /q %%homepath%%\\.ssh\\known_hosts > nul 2>&1");
+    sprintf(cmdline,"del /f /q %%homepath%%\\.ssh\\known_hosts %s",SYSTEM_CMD_REDIRECT);
 #elif __linux__
     if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ > /dev/null 2>&1")!=0){
         strcpy(cmdline,"export PATH=/home/hpc-now/.bin/:$PATH >> /home/hpc-now/.bashrc");
         system(cmdline);
     }
-    sprintf(cmdline,"rm -rf %s/known_hosts >> /dev/null 2>&1",sshkey_dir);
+    sprintf(cmdline,"rm -rf %s/known_hosts %s",sshkey_dir,SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
     if(system("cat /Users/hpc-now/.bashrc | grep PATH=/Users/hpc-now/.bin/ > /dev/null 2>&1")!=0){
         strcpy(cmdline,"export PATH=/Users/hpc-now/.bin/:$PATH >> /Users/hpc-now/.bashrc");
         system(cmdline);
     }
-    sprintf(cmdline,"rm -rf %s/known_hosts >> /dev/null 2>&1",sshkey_dir);
+    sprintf(cmdline,"rm -rf %s/known_hosts %s",sshkey_dir,SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
     if(repair_flag==1){
