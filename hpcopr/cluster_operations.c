@@ -250,6 +250,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     char registry_line[LINE_LENGTH_SHORT]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_cluster_workdir[DIR_LENGTH]="";
+    int i=0;
     if(file_p==NULL){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
         return -1;
@@ -281,6 +282,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 if(check_pslock(temp_cluster_workdir)!=0){
                     printf("|  active: <> %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name);
+                    i++;
                     continue;
                 }
 //                printf("test### %s\n",registry_line);
@@ -292,6 +294,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 else{
                     printf("|          <> %s | ",temp_cluster_name);
                 }
+                i++;
                 if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
                     printf("* EMPTY CLUSTER *\n");
                 }
@@ -299,6 +302,10 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             }
         }
         fclose(file_p);
+        if(i==0){
+            printf("[ FATAL: ] The registry is empty. Have you created any clusters?\n");
+            return 0;
+        }
         return 0;
     }
     fclose(file_p);
