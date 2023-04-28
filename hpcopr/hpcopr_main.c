@@ -378,6 +378,9 @@ int main(int argc, char* argv[]){
             printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",argv[2]);
             list_all_cluster_names();
         }
+        else{
+            printf("[ -DONE- ] The cluster %s was successfully refreshed.\n",argv[2]);
+        }
         print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
         system_cleanup();
