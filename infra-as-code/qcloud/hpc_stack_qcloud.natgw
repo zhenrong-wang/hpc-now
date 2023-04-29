@@ -34,3 +34,10 @@ systemctl start iptables
 systemctl enable iptables
 EOF
 }
+
+resource "tencentcloud_route_table_entry" "natgw_instance" {
+  route_table_id = tencentcloud_route_table.subnet_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  next_type = "NORMAL_CVM"
+  next_hub = tencentcloud_instance.natgw.private_ip
+}

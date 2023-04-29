@@ -1,4 +1,4 @@
-#CREATE_DATABASE_NODE
+#CREATE_NATGW_NODE
 resource "alicloud_instance" "natgw" {
   #cn-hangzhou
   availability_zone = "DEFAULT_ZONE_ID"
@@ -32,4 +32,11 @@ systemctl start iptables
 systemctl enable iptables
 echo "${alicloud_nas_mount_target.hpc_apps_mount.id}${alicloud_nas_mount_target.hpc_data_mount.id}" >> /dev/null
 EOF
+}
+
+resource "alicloud_route_entry" "vsw_rt_entry" {
+  route_table_id = alicloud_route_table.vsw_rt.id
+  destination_cidrblock = "0.0.0.0/0"
+  nexthop_type = "Instance"
+  nexthop_id = alicloud_instance.natgw.id
 }

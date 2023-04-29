@@ -29,6 +29,7 @@
 #define HPCOPR_EXEC "C:\\hpc-now\\hpcopr.exe"
 
 #define DELETE_FILE_CMD "del /f /q /s"
+#define DELETE_FOLDER_CMD "rd /s /q"
 #define COPY_FILE_CMD "copy /y"
 #define MOVE_FILE_CMD "move /y"
 #define CAT_FILE_CMD "type"
@@ -65,6 +66,7 @@
 #define HPCOPR_EXEC "/home/hpc-now/.bin/hpcopr"
 
 #define DELETE_FILE_CMD "rm -rf"
+#define DELETE_FOLDER_CMD "rm -rf"
 #define COPY_FILE_CMD "/bin/cp"
 #define MOVE_FILE_CMD "mv"
 #define CAT_FILE_CMD "cat"
@@ -101,6 +103,7 @@
 #define HPCOPR_EXEC "/Users/hpc-now/.bin/hpcopr"
 
 #define DELETE_FILE_CMD "rm -rf"
+#define DELETE_FOLDER_CMD "rm -rf"
 #define COPY_FILE_CMD "/bin/cp"
 #define MOVE_FILE_CMD "mv"
 #define CAT_FILE_CMD "cat"

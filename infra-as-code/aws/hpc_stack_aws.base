@@ -291,14 +291,6 @@ resource "aws_subnet" "hpc_stack_pub_subnet" {
   }
 }
 
-resource "aws_route_table" "subnet_rt" {
-  vpc_id = aws_vpc.hpc_stack.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    network_interface_id = aws_instance.natgw.primary_network_interface_id
-  }
-}
-
 resource "aws_route_table_association" "subnet_as" {
   subnet_id = aws_subnet.hpc_stack_subnet.id
   route_table_id = aws_route_table.subnet_rt.id

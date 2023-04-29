@@ -1678,7 +1678,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     node_file_to_stop(stackdir,"natgw",cloud_flag);
     for(i=1;i<compute_node_num+1;i++){
         sprintf(node_name,"compute%d",i);
-        node_file_to_stop(filename_temp,cloud_flag,cloud_flag);
+        node_file_to_stop(stackdir,node_name,cloud_flag);
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back now ...\n");
@@ -1939,7 +1939,7 @@ int edit_configuration_file(char* workdir, char* crypto_keyfile){
 }
 
 int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
-    if(strcmp(option,"mc")!=0&&strcmp(option,"mcdb")!=0){
+    if(strcmp(option,"mc")!=0&&strcmp(option,"mcdb")!=0&&strcmp(option,"all")!=0){
         return -5;
     }
     if(cluster_empty_or_not(workdir)==0){
@@ -1989,12 +1989,19 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         system(cmdline);
     }
     decrypt_files(workdir,crypto_keyfile);
+    printf("[ -INFO- ] Removing previous nodes ...\n");
     if(terraform_execution(TERRAFORM_EXEC,"apply",workdir,crypto_keyfile,OPERATION_ERROR_LOG)!=0){
-        printf("[ FATAL: ] Failed to delete the previous nodes. Rolling back now.\n");
+        printf("[ FATAL: ] Failed to delete the previous nodes. Rolling back now ...\n");
+        sprintf(cmdline,"%s %s%stmp%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,stackdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
         delete_decrypted_files(workdir,crypto_keyfile);
         return 3;
     }
     sprintf(cmdline,"%s %s%stmp%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,stackdir,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"%s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     decrypt_files(workdir,crypto_keyfile);
     get_cloud_flag(workdir,cloud_flag);
@@ -2007,6 +2014,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         sprintf(node_name,"compute%d",i);
         node_file_to_running(stackdir,node_name,cloud_flag);
     }
+    printf("[ -INFO- ] Successfully removed previous nodes. Rebuilding new nodes ...\n");
     if(terraform_execution(TERRAFORM_EXEC,"apply",workdir,crypto_keyfile,OPERATION_ERROR_LOG)!=0){
         printf("[ FATAL: ] Failed to rebuild the nodes. Exit now.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -2057,7 +2065,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile");
     update_cluster_summary(workdir,crypto_keyfile);
     printf("[ -INFO- ] The reinitialization process may need 7 minutes. Please do not operate\n");
-    printf("|          this cluster during this period. Exit now.\n");
+    printf("|          this cluster during the period. Exit now.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }

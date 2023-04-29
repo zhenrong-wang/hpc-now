@@ -192,13 +192,6 @@ resource "alicloud_route_table" "vsw_rt" {
   route_table_name = "vsw_rt_name"
 }
 
-resource "alicloud_route_entry" "vsw_rt_entry" {
-  route_table_id = alicloud_route_table.vsw_rt.id
-  destination_cidrblock = "0.0.0.0/0"
-  nexthop_type = "Instance"
-  nexthop_id = alicloud_instance.natgw.id
-}
-
 resource "alicloud_route_table_attachment" "rt_attach" {
   vswitch_id = alicloud_vswitch.vsw.id
   route_table_id = alicloud_route_table.vsw_rt.id

@@ -185,22 +185,6 @@ resource "tencentcloud_route_table" "subnet_rt" {
   name = "subnet_rt"
 }
 
-resource "tencentcloud_route_table_entry" "natgw_instance" {
-  route_table_id = tencentcloud_route_table.subnet_rt.id
-  destination_cidr_block = "0.0.0.0/0"
-  next_type = "NORMAL_CVM"
-  next_hub = tencentcloud_instance.natgw.private_ip
-}
-
-/*
-resource "tencentcloud_route_entry" "natgw_instance" {
-  vpc_id=tencentcloud_vpc.hpc_stack.id
-  route_table_id = tencentcloud_route_table.subnet_rt.id
-  cidr_block = "0.0.0.0/0"
-  next_type = "instance"
-  next_hub = tencentcloud_instance.natgw.private_ip
-}*/
-
 resource "tencentcloud_security_group" "natgw_transparent" {
   name = "SECURITY_GROUP_NATGW"
 }

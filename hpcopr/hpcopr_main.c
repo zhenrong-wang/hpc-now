@@ -649,17 +649,26 @@ int main(int argc, char* argv[]){
             else if(strcmp(argv[2],"mcdb")==0){
                 run_flag=rebuild_nodes(workdir,crypto_keyfile,"mcdb");
             }
+            else if(strcmp(argv[2],"all")==0){
+                run_flag=rebuild_nodes(workdir,crypto_keyfile,"all");
+            }
+            else{
+                printf("[ FATAL: ] Please specify 'mc', 'mcdb', or 'all' as the second parameter.\n");
+                printf("|          Run 'hpcopr help' for more details. Exit now.\n");
+            }
             print_tail();
             write_log(current_cluster_name,operation_log,argv[1],run_flag);
             system_cleanup();
             return run_flag;
         }
-        printf("[ FATAL: ] Please specify 'mc', 'mcdb', or 'all' as the second parameter.\n");
-        printf("|          Run 'hpcopr help' for more details. Exit now.\n");
-        print_tail();
-        system_cleanup();
-        write_log(current_cluster_name,operation_log,argv[1],13);
-        return 13;
+        else{
+            printf("[ FATAL: ] Please specify 'mc', 'mcdb', or 'all' as the second parameter.\n");
+            printf("|          Run 'hpcopr help' for more details. Exit now.\n");
+            print_tail();
+            system_cleanup();
+            write_log(current_cluster_name,operation_log,argv[1],13);
+            return 13;
+        }
     }
 
     if(strcmp(argv[1],"sleep")==0){
