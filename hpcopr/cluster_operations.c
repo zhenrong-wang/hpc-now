@@ -1953,15 +1953,15 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     char bucket_conf[FILENAME_LENGTH]="";
     int i;
     int compute_node_num=0;
-
     printf("\n");
-    printf("|*                                C A U T I O N !                                  \n");
-    printf("|*                                                                                 \n");
-    printf("|*   YOU ARE RE-INITIALIZING THE CLUSTER NODES! YOUR CRITICAL RESOURCES WILL BE    \n");
-    printf("|*   DESTROYED AND RE-CREATED !! THIS OPERATION MAY FAIL DUE TO VARIOUS REASONS    \n");
-    printf("|*   AND YOU WILL HAVE TO DESTROY THE *WHOLE* CLUSTER AND RE-INIT IF ANYTHING      \n");
-    printf("|*   GOES WRONG ! Usually we do not recommend users to do this operation.          \n");
-    printf("|*                                                                                 \n");
+    printf("|*                                C A U T I O N !                            \n");
+    printf("|*                                                                           \n");
+    printf("|*   YOU ARE REBUILDING THE CLUSTER NODES! YOUR CRITICAL NODES WILL BE       \n");
+    printf("|*   REMOVED AND RECREATED ! THIS OPERATION MAY FAIL DUE TO VARIOUS REASONS. \n");
+    printf("|*   IF ANYTHING GOES WRONG, YOU WILL HAVE TO DESTROY THE WHOLE CLUSTER      \n");
+    printf("|*   AND RE-INIT ! Usually we do not recommend users to do this operation.   \n");
+    printf("|*                                                                           \n");
+    printf("|*                                C A U T I O N !                            \n");
     printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
     printf("[ INPUT: ] ");
     scanf("%s",doubleconfirm);
@@ -1970,7 +1970,15 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         printf("|          Nothing changed.\n");
         return 1;
     }
-
+    if(strcmp(option,"mc")==0){
+        printf("|          * Will rebuild the master and compute nodes.\n");
+    }
+    else if(strcmp(option,"mcdb")==0){
+        printf("|          * Will rebuild the master, compute and mariadb nodes.\n");
+    }
+    else{
+        printf("|          * Will try to rebuild all the cluster nodes.\n");
+    }
     create_and_get_stackdir(workdir,stackdir);
     sprintf(cmdline,"%s %s%stmp %s && %s %s%stmp%s* %s",MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
