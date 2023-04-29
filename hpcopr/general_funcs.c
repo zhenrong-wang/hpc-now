@@ -560,22 +560,14 @@ int file_empty_or_not(char* filename){
 int folder_exist_or_not(char* foldername){
     char filename[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-#ifdef _WIN32
-    sprintf(filename,"%s\\testfile.txt",foldername);
-#else
-    sprintf(filename,"%s/testfile.txt",foldername);
-#endif
+    sprintf(filename,"%s%stestfile.txt",foldername,PATH_SLASH);
     FILE* test_file=fopen(filename,"w+");
     if(test_file==NULL){
         return 1;
     }
     else{
         fclose(test_file);
-#ifdef _WIN32
-        sprintf(cmdline,"del /q /f %s %s",filename,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"rm -rf %s %s",filename,SYSTEM_CMD_REDIRECT);
-#endif
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 0;
     }

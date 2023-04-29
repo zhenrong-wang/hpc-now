@@ -77,6 +77,11 @@ void print_help(void){
     printf("|  edit-conf   : Edit and save the default configuration file *before* init.\n");
     printf("|  init        : Initialize a new cluster. If the configuration file is absent,\n");
     printf("|                the command will generate a default configuration file.\n");
+    printf("|  rebuild   mc|mcdb|all\n");
+    printf("|               : Rebuild the nodes without destroying the cluster's storage.\n");
+    printf("|               : mc   - Only rebuild the master and all the compute node(s).\n");
+    printf("|               : mcdb - All the nodes above + database node.\n");
+    printf("|               : all  - All the nodes above + nat node.\n");
     printf("+ IV . Cluster Management:\n");
     printf("| * You need to switch to a cluster first.\n");
     printf("|  ssh         : SSH to the master node of your current cluster.\n");

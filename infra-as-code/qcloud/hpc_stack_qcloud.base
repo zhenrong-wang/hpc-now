@@ -302,6 +302,7 @@ resource "tencentcloud_cfs_file_system" "hpc_data" {
 #CREATE a bucket for data storage
 resource "tencentcloud_cos_bucket" "hpc_data_storage" {
   bucket = "BUCKET_ID-${data.tencentcloud_user_info.current_user.app_id}"
+  force_clean = "true"
   acl = "private"
 }
 

@@ -208,28 +208,12 @@ int reset_vers_md5_vars(void){
         return -1;
     }
     if(tf_loc_flag_var==1&&now_crypto_loc_flag_var==1){
-#ifdef _WIN32
-        sprintf(tf_md5_file,"%s\\tf-md5-win.dat",url_tf_root_var);
-        sprintf(crypto_md5_file,"%s\\crypto-md5-win.dat",url_now_crypto_var);
+        sprintf(tf_md5_file,"%s%stf-md5-%s.dat",url_tf_root_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
+        sprintf(crypto_md5_file,"%s%scrypto-md5-%s.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
         if(file_exist_or_not(tf_md5_file)!=0||file_exist_or_not(crypto_md5_file)!=0){
             fclose(file_p);
             return -1;
         }
-#elif __linux__
-        sprintf(tf_md5_file,"%s/tf-md5-lin.dat",url_tf_root_var);
-        sprintf(crypto_md5_file,"%s/crypto-md5-lin.dat",url_now_crypto_var);
-        if(file_exist_or_not(tf_md5_file)!=0||file_exist_or_not(crypto_md5_file)!=0){
-            fclose(file_p);
-            return -1;
-        }
-#elif __APPLE__
-        sprintf(tf_md5_file,"%s/tf-md5-dwn.dat",url_tf_root_var);
-        sprintf(crypto_md5_file,"%s/crypto-md5-dwn.dat",url_now_crypto_var);
-        if(file_exist_or_not(tf_md5_file)!=0||file_exist_or_not(crypto_md5_file)!=0){
-            fclose(file_p);
-            return -1;
-        }
-#endif
         file_p_1=fopen(tf_md5_file,"r");
         file_p_2=fopen(crypto_md5_file,"r");
         while(fgetline(file_p_1,md5_line)==0){
@@ -243,48 +227,22 @@ int reset_vers_md5_vars(void){
     }
     else if(tf_loc_flag_var==0&&now_crypto_loc_flag_var==0){
         fclose(file_p);
-#ifdef _WIN32
-        sprintf(cmdline1,"curl -s %stf-md5-win.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
-        sprintf(cmdline2,"curl -s %scrypto-md5-win.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
-#elif __linux__
-        sprintf(cmdline1,"curl -s %stf-md5-lin.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
-        sprintf(cmdline2,"curl -s %scrypto-md5-lin.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
-#elif __APPLE__
-        sprintf(cmdline1,"curl -s %stf-md5-dwn.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
-        sprintf(cmdline2,"curl -s %scrypto-md5-dwn.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
-#endif
+        sprintf(cmdline1,"curl -s %stf-md5-%s.dat >> %s",url_tf_root_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
+        sprintf(cmdline2,"curl -s %scrypto-md5-%s.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
         if(system(cmdline1)!=0||system(cmdline2)!=0){
             return 1;
         }
     }
     else if(tf_loc_flag_var==0&&now_crypto_loc_flag_var==1){
         fclose(file_p);
-#ifdef _WIN32
-        sprintf(cmdline1,"curl -s %stf-md5-win.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
-#elif __linux__
-        sprintf(cmdline1,"curl -s %stf-md5-lin.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
-#elif __APPLE__
-        sprintf(cmdline1,"curl -s %stf-md5-dwn.dat >> %s",url_tf_root_var,VERS_MD5_CONF_FILE);
-#endif
+        sprintf(cmdline1,"curl -s %stf-md5-%s.dat >> %s",url_tf_root_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
         if(system(cmdline1)!=0){
             return 1;
         }
-#ifdef _WIN32
-        sprintf(crypto_md5_file,"%s\\crypto-md5-win.dat",url_now_crypto_var);
+        sprintf(crypto_md5_file,"%s%scrypto-md5-%s.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
         if(file_exist_or_not(crypto_md5_file)!=0){
             return -1;
-        }
-#elif __linux__
-        sprintf(crypto_md5_file,"%s/crypto-md5-lin.dat",url_now_crypto_var);
-        if(file_exist_or_not(crypto_md5_file)!=0){
-            return -1;
-        }
-#elif __APPLE__
-        sprintf(crypto_md5_file,"%s/crypto-md5-dwn.dat",url_now_crypto_var);
-        if(file_exist_or_not(crypto_md5_file)!=0){
-            return -1;
-        }
-#endif   
+        }  
         file_p=fopen(VERS_MD5_CONF_FILE,"a");
         file_p_2=fopen(crypto_md5_file,"r");
         fgetline(file_p_2,md5_line);
@@ -293,38 +251,18 @@ int reset_vers_md5_vars(void){
         fclose(file_p);
     }
     else if(tf_loc_flag_var==1&&now_crypto_loc_flag_var==0){
-#ifdef _WIN32
-        sprintf(tf_md5_file,"%s\\tf-md5-win.dat",url_tf_root_var);
+        sprintf(tf_md5_file,"%s%stf-md5-%s.dat",url_tf_root_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
         if(file_exist_or_not(tf_md5_file)!=0){
             fclose(file_p);
             return -1;
         }
-#elif __linux__
-        sprintf(tf_md5_file,"%s/tf-md5-lin.dat",url_tf_root_var);
-        if(file_exist_or_not(tf_md5_file)!=0){
-            fclose(file_p);
-            return -1;
-        }
-#elif __APPLE__
-        sprintf(tf_md5_file,"%s/tf-md5-dwn.dat",url_tf_root_var);
-        if(file_exist_or_not(tf_md5_file)!=0){
-            fclose(file_p);
-            return -1;
-        }
-#endif
         file_p_1=fopen(tf_md5_file,"r");
         while(fgetline(file_p_1,md5_line)==0){
             fprintf(file_p,"%s\n",md5_line);
         }
         fclose(file_p_1);
         fclose(file_p);
-#ifdef _WIN32
-        sprintf(cmdline2,"curl -s %scrypto-md5-win.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
-#elif __linux__
-        sprintf(cmdline2,"curl -s %scrypto-md5-lin.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
-#elif __APPLE__
-        sprintf(cmdline2,"curl -s %scrypto-md5-dwn.dat >> %s",url_now_crypto_var,VERS_MD5_CONF_FILE);
-#endif
+        sprintf(cmdline2,"curl -s %scrypto-md5-%s.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
         if(system(cmdline2)!=0){
             return 1;
         }

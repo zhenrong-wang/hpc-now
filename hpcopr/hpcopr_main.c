@@ -72,6 +72,7 @@ char md5_aws_tf_zip_var[64]="";
 int main(int argc, char* argv[]){
     char* crypto_keyfile=CRYPTO_KEY_FILE;
     char buffer1[64];
+    char buffer2[64];
     char cloud_flag[16];
     int run_flag=0;
     int current_cluster_flag=0;
@@ -142,13 +143,7 @@ int main(int argc, char* argv[]){
     }
 #endif
 
-#ifdef _WIN32
-    sprintf(cmdline,"mkdir c:\\programdata\\hpc-now\\etc\\ %s",SYSTEM_CMD_REDIRECT);
-#elif __APPLE__
-    sprintf(cmdline,"mkdir -p /Applications/.hpc-now/.etc/ %s",SYSTEM_CMD_REDIRECT);
-#elif __linux__
-    sprintf(cmdline,"mkdir -p /usr/.hpc-now/.etc/ %s",SYSTEM_CMD_REDIRECT);
-#endif
+    sprintf(cmdline,"%s %s %s",MKDIR_CMD,GENERAL_CONF_DIR,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 
     if(argc==1){
@@ -281,7 +276,7 @@ int main(int argc, char* argv[]){
         return -4;
     }
     
-    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syserr")!=0&&strcmp(argv[1],"history")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0){
+    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syserr")!=0&&strcmp(argv[1],"history")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0&&strcmp(argv[1],"rebuild")!=0){
         print_help();
         return -6;
     }
@@ -521,12 +516,8 @@ int main(int argc, char* argv[]){
     }
 
     create_and_get_vaultdir(workdir,vaultdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
-#else
-    sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
-#endif
-    if(get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer1,cloud_flag)!=0){
+    sprintf(filename_temp,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    if(get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag)!=0){
         printf("[ FATAL: ] Failed to get the key file. Have you switched to any cluster?\n");
         printf("|          Exit now.\n");
         print_tail();
@@ -535,8 +526,8 @@ int main(int argc, char* argv[]){
         return 5;
     }
     if(check_pslock(workdir)==1){
-        printf("[ FATAL: ] Another process is operating this cluster, please wait the termination\n");
-        printf("|          of that process. Currently no extra operation is permitted. Exit now.\n");
+        printf("[ FATAL: ] Another process is operating this cluster, please wait and retry.\n");
+        printf("|          Exit now.\n");
         print_tail();
         write_log(current_cluster_name,operation_log,"PROCESS_LOCKED",7);
         system_cleanup();
@@ -545,7 +536,7 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"get-conf")==0){
         if(cluster_empty_or_not(workdir)!=0){
             printf("[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
-            printf("|          downloading default configuration file is not permitted. Exit now.\n");
+            printf("|          this operation is not allowed. Exit now.\n");
             print_tail();
             write_log(current_cluster_name,operation_log,"CLUSTER_NOT_EMPTY",23);
             system_cleanup();
@@ -576,7 +567,7 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"edit-conf")==0){
         if(cluster_empty_or_not(workdir)!=0){
             printf("[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
-            printf("|          downloading default configuration file is not permitted. Exit now.\n");
+            printf("|          this operation is not allowed. Exit now.\n");
             print_tail();
             write_log(current_cluster_name,operation_log,"CLUSTER_NOT_EMPTY",23);
             system_cleanup();
@@ -604,9 +595,7 @@ int main(int argc, char* argv[]){
     }
     if(strcmp(argv[1],"init")==0){
         if(cluster_empty_or_not(workdir)!=0){
-            printf("[ FATAL: ] It seems the cluster is already in place. If you do want to rebuild it\n");
-            printf("|          please run 'destroy' command and retry 'init' command.\n");
-            printf("|          Exit now.\n");
+            printf("[ FATAL: ] The cluster has already been initialized. Exit now.\n");
             print_tail();
             system_cleanup();
             return -1;
@@ -647,11 +636,32 @@ int main(int argc, char* argv[]){
     if(cluster_empty_or_not(workdir)==0){
         print_empty_cluster_info();
         print_tail();
-        delete_decrypted_files(workdir,crypto_keyfile);
         write_log(current_cluster_name,operation_log,"EMPTY_CLUSTER",11);
         system_cleanup();
         return 11;
     }
+
+    if(strcmp(argv[1],"rebuild")==0){
+        if(argc>2){
+            if(strcmp(argv[2],"mc")==0){
+                run_flag=rebuild_nodes(workdir,crypto_keyfile,"mc");
+            }
+            else if(strcmp(argv[2],"mcdb")==0){
+                run_flag=rebuild_nodes(workdir,crypto_keyfile,"mcdb");
+            }
+            print_tail();
+            write_log(current_cluster_name,operation_log,argv[1],run_flag);
+            system_cleanup();
+            return run_flag;
+        }
+        printf("[ FATAL: ] Please specify 'mc', 'mcdb', or 'all' as the second parameter.\n");
+        printf("|          Run 'hpcopr help' for more details. Exit now.\n");
+        print_tail();
+        system_cleanup();
+        write_log(current_cluster_name,operation_log,argv[1],13);
+        return 13;
+    }
+
     if(strcmp(argv[1],"sleep")==0){
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
             print_tail();

@@ -9,14 +9,16 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0064"
+#define CORE_VERSION_CODE "0.2.0.0066"
 
 #ifdef _WIN32
+#define PATH_SLASH "\\"
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
 #define USAGE_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-usage.log" //This is a global file!
 #define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG "C:\\programdata\\hpc-now\\system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">nul 2>>C:\\programdata\\hpc-now\\system_command_error.log"
+#define DESTROYED_DIR "c:\\programdata\\hpc-now\\.destroyed\\"
 #define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
 #define SSHKEY_DIR "C:\\hpc-now\\.ssh"
 #define OPERATION_ERROR_LOG "c:\\hpc-now\\hpc-now.err.log"
@@ -26,17 +28,33 @@
 #define TERRAFORM_EXEC "c:\\programdata\\hpc-now\\bin\\terraform.exe"
 #define HPCOPR_EXEC "C:\\hpc-now\\hpcopr.exe"
 
+#define DELETE_FILE_CMD "del /f /q /s"
+#define COPY_FILE_CMD "copy /y"
+#define MOVE_FILE_CMD "move /y"
+#define CAT_FILE_CMD "type"
+#define GREP_CMD "findstr"
+#define SET_ENV_CMD "set"
+#define START_BG_JOB "start /b"
+#define MKDIR_CMD "mkdir"
+#define EDITOR_CMD "notepad"
+
+#define NOW_BINARY_DIR "c:\\programdata\\hpc-now\\bin\\"
+#define GENERAL_CONF_DIR "c:\\programdata\\hpc-now\\etc\\"
 #define LOCATION_CONF_FILE "c:\\programdata\\hpc-now\\etc\\locations.conf"
 #define VERS_MD5_CONF_FILE "c:\\programdata\\hpc-now\\etc\\md5values.conf"
 #define ALL_CLUSTER_REGISTRY "c:\\programdata\\hpc-now\\etc\\all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "c:\\programdata\\hpc-now\\etc\\current_cluster.dat"
+#define FILENAME_SUFFIX_SHORT "win"
+#define FILENAME_SUFFIX_FULL "windows"
 
 #elif __linux__
+#define PATH_SLASH "/"
 #define CRYPTO_KEY_FILE "/usr/.hpc-now/.now_crypto_seed.lock"
 #define USAGE_LOG_FILE "/usr/.hpc-now/.now-cluster-usage.log"
 #define OPERATION_LOG_FILE "/usr/.hpc-now/.now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG "/usr/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/usr/.hpc-now/system_command_error.log"
+#define DESTROYED_DIR "/usr/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/home/hpc-now/LICENSES"
 #define SSHKEY_DIR "/home/hpc-now/.now-ssh"
 #define OPERATION_ERROR_LOG "/home/hpc-now/hpc-now.err.log"
@@ -46,17 +64,33 @@
 #define TERRAFORM_EXEC "/usr/.hpc-now/.bin/terraform"
 #define HPCOPR_EXEC "/home/hpc-now/.bin/hpcopr"
 
+#define DELETE_FILE_CMD "rm -rf"
+#define COPY_FILE_CMD "/bin/cp"
+#define MOVE_FILE_CMD "mv"
+#define CAT_FILE_CMD "cat"
+#define GREP_CMD "grep"
+#define SET_ENV_CMD "export"
+#define START_BG_JOB ""
+#define MKDIR_CMD "mkdir -p"
+#define EDITOR_CMD "vi"
+
+#define NOW_BINARY_DIR "/usr/.hpc-now/.bin/"
+#define GENERAL_CONF_DIR "/usr/.hpc-now/.etc/"
 #define LOCATION_CONF_FILE "/usr/.hpc-now/.etc/locations.conf"
 #define VERS_MD5_CONF_FILE "/usr/.hpc-now/.etc/md5values.conf"
 #define ALL_CLUSTER_REGISTRY "/usr/.hpc-now/.etc/.all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "/usr/.hpc-now/.etc/current_cluster.dat"
+#define FILENAME_SUFFIX_SHORT "lin"
+#define FILENAME_SUFFIX_FULL "linux"
 
 #elif __APPLE__
+#define PATH_SLASH "/"
 #define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock"
 #define USAGE_LOG_FILE "/Applications/.hpc-now/.now-cluster-usage.log"
 #define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG "/Applications/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/Applications/.hpc-now/system_command_error.log"
+#define DESTROYED_DIR "/Applications/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/Users/hpc-now/LICENSES"
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
 #define OPERATION_ERROR_LOG "/Users/hpc-now/hpc-now.err.log"
@@ -66,10 +100,24 @@
 #define TERRAFORM_EXEC "/Applications/.hpc-now/.bin/terraform"
 #define HPCOPR_EXEC "/Users/hpc-now/.bin/hpcopr"
 
+#define DELETE_FILE_CMD "rm -rf"
+#define COPY_FILE_CMD "/bin/cp"
+#define MOVE_FILE_CMD "mv"
+#define CAT_FILE_CMD "cat"
+#define GREP_CMD "grep"
+#define SET_ENV_CMD "export"
+#define START_BG_JOB ""
+#define MKDIR_CMD "mkdir -p"
+#define EDITOR_CMD "vi"
+
+#define NOW_BINARY_DIR "/Applications/.hpc-now/.bin/"
+#define GENERAL_CONF_DIR "/Applications/.hpc-now/.etc/"
 #define LOCATION_CONF_FILE "/Applications/.hpc-now/.etc/locations.conf"
 #define VERS_MD5_CONF_FILE "/Applications/.hpc-now/.etc/md5values.conf"
 #define ALL_CLUSTER_REGISTRY "/Applications/.hpc-now/.etc/.all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "/Applications/.hpc-now/.etc/current_cluster.dat"
+#define FILENAME_SUFFIX_SHORT "dwn"
+#define FILENAME_SUFFIX_FULL "darwin"
 
 #endif
 
@@ -163,3 +211,4 @@ MD5_QCLOUD_TF_ZIP_DWN "13c2632876e3cbd02687d777e30a4708"
 MD5_AWS_TF_ZIP_DWN "1f01e3b61fa0d4a5e3514a775e27a826"
 
 Terraform version is relatively stable. Here we use 1.4.5*/
+/*#define PROTECTION_FILE_NAME "PROTECTION.txt"*/

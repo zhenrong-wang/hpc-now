@@ -492,6 +492,7 @@ resource "aws_efs_mount_target" "hpc_data_mount_target" {
 #CREATE a bucket for data storage
 resource "aws_s3_bucket" "hpc_data_storage" {
   bucket = "BUCKET_ID"
+  force_destroy = "true"
   tags = {
     Project = "RG_NAME"
   }
@@ -506,7 +507,7 @@ resource "aws_s3_bucket_acl" "hpcdatastor_acl" {
 #create an iam user with the policy to only access the bucket, nothing else
 resource "aws_iam_user" "hpc_bucket_user" {
   name = "BUCKET_USER_ID"
-  force_destroy = true
+  force_destroy = "true"
 }
 
 resource "aws_iam_access_key" "hpc_bucket_user_key" {

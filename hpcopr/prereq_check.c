@@ -249,8 +249,6 @@ int check_and_install_prerequisitions(int repair_flag){
     system(cmdline);
     sprintf(filename_temp_zip,"%s\\terraform.d\\terraform_%s_windows_amd64.zip",appdata_dir,terraform_version_var);
 #elif __linux__
-    sprintf(cmdline,"rm -rf /home/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
-    system(cmdline);
     sprintf(cmdline,"mkdir -p /usr/.hpc-now/.destroyed/ %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"mkdir -p /usr/.hpc-now/.bin/ %s",SYSTEM_CMD_REDIRECT);
@@ -261,8 +259,6 @@ int check_and_install_prerequisitions(int repair_flag){
     system(cmdline);
     sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform_%s_linux_amd64.zip",terraform_version_var);
 #elif __APPLE__
-    sprintf(cmdline,"rm -rf /Users/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
-    system(cmdline);
     sprintf(cmdline,"mkdir -p /Applications/.hpc-now/.destroyed/ %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"mkdir -p /Applications/.hpc-now/.bin/ %s",SYSTEM_CMD_REDIRECT);
@@ -620,13 +616,15 @@ int check_and_install_prerequisitions(int repair_flag){
         strcpy(cmdline,"export PATH=/home/hpc-now/.bin/:$PATH >> /home/hpc-now/.bashrc");
         system(cmdline);
     }
-    sprintf(cmdline,"rm -rf %s/known_hosts %s",sshkey_dir,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"rm -rf /home/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
 #elif __APPLE__
     if(system("cat /Users/hpc-now/.bashrc | grep PATH=/Users/hpc-now/.bin/ > /dev/null 2>&1")!=0){
         strcpy(cmdline,"export PATH=/Users/hpc-now/.bin/:$PATH >> /Users/hpc-now/.bashrc");
         system(cmdline);
     }
-    sprintf(cmdline,"rm -rf %s/known_hosts %s",sshkey_dir,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"rm -rf /Users/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
+    system(cmdline);
 #endif
     system(cmdline);
     if(repair_flag==1){

@@ -379,6 +379,7 @@ resource "alicloud_nas_mount_target" "hpc_data_mount" {
 #CREATE a bucket for data storage
 resource "alicloud_oss_bucket" "hpc_data_storage" {
   bucket = "BUCKET_ID"
+  force_destroy = "true"
   acl = "private"
 }
 
