@@ -556,8 +556,7 @@ int main(int argc, char* argv[]){
         }
         else{
             printf("[ -INFO- ] The default configuration file has been downloaded to the local place.\n");
-            printf("|          Please edit it, and then run the 'init' command to build a customized\n");
-            printf("|          HPC cluster. \n");
+            printf("|          You can init directly, or edit it before init. Exit now.\n");
             print_tail();
             write_log(current_cluster_name,operation_log,argv[1],0);
             system_cleanup();

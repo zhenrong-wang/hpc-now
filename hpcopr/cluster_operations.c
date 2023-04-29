@@ -1900,8 +1900,6 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
         scanf("%s",doubleconfirm);
         if(strcmp(doubleconfirm,"y-e-s")!=0){
             printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
-            printf("|          You can still switch to this cluster and run 'hpcopr edit-conf' to \n");
-            printf("|          modify and save the default configuration file later. Exit now.\n");
             return 3;
         }
     }
