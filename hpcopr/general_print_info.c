@@ -60,8 +60,9 @@ void print_help(void){
     printf("+ II. Global Management:\n");
     printf("| * You DO NOT need to switch to a cluster first.\n");
     printf("|  help        : Show this page and the information here.\n");
-    printf("|  usage       : Get the usage history of all your cluster(s).\n");
-    printf("|  syslog      : Get the detailed operation log of your cluster management.\n");
+    printf("|  usage       : Get and check the usage history of all your cluster(s).\n");
+    printf("|  history     : Get and check the detailed operation log of your cluster management.\n");
+    printf("|  syserr      : Get and check the system command errors.\n");
     printf("+  Advanced - For developers:\n");
     printf("|  configloc   : Configure the locations for the terraform binaries, providers, IaC\n");
     printf("|                templates and shell scripts.\n");
@@ -76,6 +77,11 @@ void print_help(void){
     printf("|  edit-conf   : Edit and save the default configuration file *before* init.\n");
     printf("|  init        : Initialize a new cluster. If the configuration file is absent,\n");
     printf("|                the command will generate a default configuration file.\n");
+    printf("|  rebuild   mc|mcdb|all\n");
+    printf("|               : Rebuild the nodes without destroying the cluster's storage.\n");
+    printf("|               : mc     - Only rebuild the master and all the compute node(s).\n");
+    printf("|               : mcdb   - All the nodes above + database node.\n");
+    printf("|               : all    - All the nodes above + nat node.\n");
     printf("+ IV . Cluster Management:\n");
     printf("| * You need to switch to a cluster first.\n");
     printf("|  ssh         : SSH to the master node of your current cluster.\n");

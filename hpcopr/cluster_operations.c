@@ -27,11 +27,7 @@ extern char url_code_root_var[LOCATION_LENGTH];
 extern int code_loc_flag_var;
 
 void get_workdir(char* cluster_workdir, char* cluster_name){
-#ifdef _WIN32
-    sprintf(cluster_workdir,"%s\\workdir\\%s\\",HPC_NOW_ROOT_DIR,cluster_name);
-#else
-    sprintf(cluster_workdir,"%s/workdir/%s/",HPC_NOW_ROOT_DIR,cluster_name);
-#endif
+    sprintf(cluster_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,PATH_SLASH);
 }
 
 int create_cluster_registry(void){
@@ -83,8 +79,10 @@ int current_cluster_or_not(char* current_indicator, char* cluster_name){
     }
     fscanf(file_p,"%s",current_cluster_name);
     if(strcmp(current_cluster_name,cluster_name)!=0){
+        fclose(file_p);
         return -1;
     }
+    fclose(file_p);
     return 0;
 }
 
@@ -134,9 +132,9 @@ int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
 int exit_current_cluster(void){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",CURRENT_CLUSTER_INDICATOR);
+    sprintf(cmdline,"del /f /q %s %s",CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
 #else
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",CURRENT_CLUSTER_INDICATOR);
+    sprintf(cmdline,"rm -rf %s %s",CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
 #endif
     return system(cmdline);
     
@@ -209,9 +207,9 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
         exit_current_cluster();
     }
 #ifdef _WIN32
-    sprintf(cmdline,"move /y %s %s > nul 2>&1",filename_temp,cluster_registry);
+    sprintf(cmdline,"move /y %s %s %s",filename_temp,cluster_registry,SYSTEM_CMD_REDIRECT);
 #else
-    sprintf(cmdline,"mv %s %s > /dev/null 2>&1",filename_temp,cluster_registry);
+    sprintf(cmdline,"mv %s %s %s",filename_temp,cluster_registry,SYSTEM_CMD_REDIRECT);
 #endif
     return system(cmdline);
 }
@@ -250,27 +248,31 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     char registry_line[LINE_LENGTH_SHORT]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_cluster_workdir[DIR_LENGTH]="";
+    char cloud_flag[32]="";
+    int i=0;
     if(file_p==NULL){
         printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
         return -1;
     }
     if(strlen(target_cluster_name)==0){
         if(show_current_cluster(temp_cluster_workdir,temp_cluster_name,0)==1){
+            fclose(file_p);
             return 1;
         }
-        else{
-            if(check_pslock(temp_cluster_workdir)!=0){
-                printf("|  active: <> %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name);
-                return 0;
-            }
-            decrypt_files(temp_cluster_workdir,crypto_keyfile);
-            printf("|  active: <> %s | ",temp_cluster_name);
-            if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-                printf(" * EMPTY CLUSTER *\n");
-            }
-            delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+        get_cloud_flag(temp_cluster_workdir,cloud_flag);
+        if(check_pslock(temp_cluster_workdir)!=0){
+            printf("|  active: <> %s | %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name,cloud_flag);
+            fclose(file_p);
             return 0;
         }
+        decrypt_files(temp_cluster_workdir,crypto_keyfile);
+        printf("|  active: <> %s | ",temp_cluster_name);
+        if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
+            printf("%s | * EMPTY CLUSTER *\n",cloud_flag);
+        }
+        delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+        fclose(file_p);
+        return 0;
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         while(fgetline(file_p,registry_line)==0){
@@ -279,26 +281,34 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
 //                printf("test### %s\n",registry_line);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
-                if(check_pslock(temp_cluster_workdir)!=0){
-                    printf("|  active: <> %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name);
-                    continue;
-                }
-//                printf("test### %s\n",registry_line);
-                decrypt_files(temp_cluster_workdir,crypto_keyfile);
-//                printf("test### %s\n",registry_line);
+                get_cloud_flag(temp_cluster_workdir,cloud_flag);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
                     printf("|  active: <> %s | ",temp_cluster_name);
                 }
                 else{
                     printf("|          <> %s | ",temp_cluster_name);
                 }
+                if(check_pslock(temp_cluster_workdir)!=0){
+                    printf("%s | * OPERATION-IN-PROGRESS * \n",cloud_flag);
+                    i++;
+                    continue;
+                }
+//                printf("test### %s\n",registry_line);
+                decrypt_files(temp_cluster_workdir,crypto_keyfile);
+//                printf("test### %s\n",registry_line);
+                
+                i++;
                 if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-                    printf("* EMPTY CLUSTER *\n");
+                    printf("%s | * EMPTY CLUSTER *\n",cloud_flag);
                 }
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }
         }
         fclose(file_p);
+        if(i==0){
+            printf("[ FATAL: ] The registry is empty. Have you created any clusters?\n");
+            return 0;
+        }
         return 0;
     }
     fclose(file_p);
@@ -307,19 +317,20 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
-        if(check_pslock(temp_cluster_workdir)!=0){
-            printf("|  active: <> %s | * OPERATION-IN-PROGRESS * \n",temp_cluster_name);
-            return 0;
-        }
-        decrypt_files(temp_cluster_workdir,crypto_keyfile);
+        get_cloud_flag(temp_cluster_workdir,cloud_flag);
         if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
             printf("|  active: <> %s | ",temp_cluster_name);
         }
         else{
             printf("|          <> %s | ",temp_cluster_name);
         }
+        if(check_pslock(temp_cluster_workdir)!=0){
+            printf("%s | * OPERATION-IN-PROGRESS * \n",cloud_flag);
+            return 0;
+        }
+        decrypt_files(temp_cluster_workdir,crypto_keyfile);
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-            printf(" * EMPTY CLUSTER *\n");
+            printf("%s | * EMPTY CLUSTER *\n",cloud_flag);
         }
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
@@ -371,7 +382,6 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
     }
 }
 
-
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     char cluster_workdir[DIR_LENGTH]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
@@ -380,24 +390,15 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     char log_trash[FILENAME_LENGTH]="";
     char tf_realtime_log[FILENAME_LENGTH]="";
     char tf_archive_log[FILENAME_LENGTH]="";
-#ifdef _WIN32
-    sprintf(log_trash,"%s\\log_trashbin.txt",HPC_NOW_ROOT_DIR);
-#else
-    sprintf(log_trash,"%s/log_trashbin.txt",HPC_NOW_ROOT_DIR);
-#endif
+    sprintf(log_trash,"%s%slog_trashbin.txt",HPC_NOW_ROOT_DIR,PATH_SLASH);
     if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
         printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",target_cluster_name);
         list_all_cluster_names();
         return 1;
     }
     get_workdir(cluster_workdir,target_cluster_name);
-#ifdef _WIN32
-    sprintf(tf_realtime_log,"%s\\log\\tf_prep.log",cluster_workdir);
-    sprintf(tf_archive_log,"%s\\log\\tf_prep.log.archive",cluster_workdir);
-#else
-    sprintf(tf_realtime_log,"%s/log/tf_prep.log",cluster_workdir);
-    sprintf(tf_archive_log,"%s/log/tf_prep.log.archive",cluster_workdir);
-#endif
+    sprintf(tf_realtime_log,"%s%slog%stf_prep.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
+    sprintf(tf_archive_log,"%s%slog%stf_prep.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
     archive_log(log_trash,tf_realtime_log);
     archive_log(log_trash,tf_archive_log);
     if(cluster_empty_or_not(cluster_workdir)!=0){
@@ -444,12 +445,9 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
         }
     }
     printf("[ -INFO- ] Removing all the related files ...\n");
-#ifdef _WIN32
-    sprintf(cmdline,"rd /q /s %s > nul 2>&1",cluster_workdir);
-#else
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",cluster_workdir);
-#endif
-    system(cmdline);
+    archive_log(log_trash,tf_realtime_log);
+    archive_log(log_trash,tf_archive_log);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,cluster_workdir,SYSTEM_CMD_REDIRECT);
     printf("[ -INFO- ] Deleting the cluster from the registry ...\n");
     delete_from_cluster_registry(target_cluster_name);
     printf("[ -DONE- ] The cluster %s has been removed completely.\n",target_cluster_name);
@@ -462,6 +460,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     char input_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char filename_temp[FILENAME_LENGTH]="";
     int cluster_name_check_flag=0;
+    char cloud_flag[16]="";
     FILE* file_p=NULL;
     char new_workdir[DIR_LENGTH]="";
     char new_vaultdir[DIR_LENGTH]="";
@@ -548,57 +547,42 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     ak_length=strlen(access_key);
     sk_length=strlen(secret_key);
     if(ak_length==24&&sk_length==30){
-        fprintf(file_p,"%s\n%s\nCLOUD_A",access_key,secret_key);
+        strcpy(cloud_flag,"CLOUD_A");
+        fprintf(file_p,"%s\n%s\n%s\n",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
     else if(ak_length==36&&sk_length==32){
-        fprintf(file_p,"%s\n%s\nCLOUD_B",access_key,secret_key);
+        strcpy(cloud_flag,"CLOUD_B");
+        fprintf(file_p,"%s\n%s\n%s\n",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
     else if(ak_length==20&&sk_length==40){
-        fprintf(file_p,"%s\n%s\nCLOUD_C",access_key,secret_key);
+        strcpy(cloud_flag,"CLOUD_C");
+        fprintf(file_p,"%s\n%s\n%s\n",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
     else{
         printf("[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now.\n");
         fclose(file_p);
-#ifdef _WIN32
-        sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
-#else
-        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
-#endif
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 5;
     }
-#ifdef _WIN32
-    sprintf(new_workdir,"%s\\workdir\\%s\\",HPC_NOW_ROOT_DIR,real_cluster_name);
-    sprintf(cmdline,"mkdir %s > nul 2>&1",new_workdir);
+    sprintf(new_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,real_cluster_name,PATH_SLASH);
+    sprintf(cmdline,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s\\.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,md5sum);
+    sprintf(cmdline,"%s encrypt %s %s%s.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,PATH_SLASH,md5sum);
     system(cmdline);
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
-#elif __linux__
-    sprintf(new_workdir,"%s/workdir/%s",HPC_NOW_ROOT_DIR,real_cluster_name);
-    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",new_workdir);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    create_and_get_vaultdir(new_workdir,new_vaultdir);
-    get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s/.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,md5sum);
-    system(cmdline);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
-#elif __APPLE__
-    sprintf(new_workdir,"%s/workdir/%s",HPC_NOW_ROOT_DIR,real_cluster_name);
-    sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",new_workdir);
-    system(cmdline);
-    create_and_get_vaultdir(new_workdir,new_vaultdir);
-    get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s/.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,md5sum);
-    system(cmdline);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
-#endif
-    system(cmdline);
+    sprintf(filename_temp,"%s%scloud_flag.flg",new_vaultdir,PATH_SLASH);
+    file_p=fopen(filename_temp,"w+");
+    if(file_p!=NULL){
+        fprintf(file_p,"%s\n",cloud_flag);
+        fclose(file_p);
+    }
     add_to_cluster_registry(real_cluster_name);
     switch_to_cluster(real_cluster_name);
     printf("[ -INFO- ] The secrets key pair has been encrypted and stored locally. You can either:\n");
@@ -646,11 +630,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     }
 
     create_and_get_vaultdir(workdir,vaultdir);
-#ifdef _WIN32
-    sprintf(filename_temp2,"%s\\.secrets.txt",vaultdir);
-#else
-    sprintf(filename_temp2,"%s/.secrets.txt",vaultdir);
-#endif
+    sprintf(filename_temp2,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp2)!=0){
         printf("[ FATAL: ] Currently there is no secrets keypair. This working directory may be\n");
         printf("|          corrputed, which is very unusual. Please contact us via:\n");
@@ -741,31 +721,19 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     else{
         printf("[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now.\n");
         fclose(file_p);
-        sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+        sprintf(cmdline,"rm -rf %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 1;
     }
     get_crypto_key(crypto_keyfile,md5sum);
-#ifdef _WIN32
-    sprintf(cmdline,"%s encrypt %s %s\\.secrets.txt %s",now_crypto_exec,filename_temp,vaultdir,md5sum);
+    sprintf(cmdline,"%s encrypt %s %s%s.secrets.txt %s",now_crypto_exec,filename_temp,vaultdir,PATH_SLASH,md5sum);
     system(cmdline);
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
-#else
-    sprintf(cmdline,"%s encrypt %s %s/.secrets.txt %s",now_crypto_exec,filename_temp,vaultdir,md5sum);
-    system(cmdline);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
-#endif
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     create_and_get_stackdir(workdir,stackdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_base.tf.tmp",stackdir);
+    sprintf(filename_temp,"%s%shpc_stack_base.tf.tmp",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        sprintf(filename_temp2,"%s\\hpc_stack_base.tf",stackdir);
-#else
-    sprintf(filename_temp,"%s/hpc_stack_base.tf.tmp",stackdir);
-    if(file_exist_or_not(filename_temp)==0){
-        sprintf(filename_temp2,"%s/hpc_stack_base.tf",stackdir);
-#endif
+        sprintf(filename_temp2,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
         sprintf(cmdline,"%s decrypt %s %s %s",now_crypto_exec,filename_temp,filename_temp2,md5sum);
         system(cmdline);
         global_replace(filename_temp2,access_key_prev,access_key);
@@ -780,19 +748,11 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
 
 int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     char doubleconfirm[32]="";
-    char cloud_flag[16]="";
-    char buffer1[64]="";
-    char buffer2[64]="";
     char cmdline[LINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char string_temp[LINE_LENGTH];
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char* tf_exec=TERRAFORM_EXEC;
-    char* sshkey_folder=SSHKEY_DIR;
     char* error_log=OPERATION_ERROR_LOG;
-    char md5sum[33]="";
-    char master_address[32]="";
-    char bucket_address[32]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     int i;
@@ -817,7 +777,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
         printf("[ -INFO- ] Cluster operation started ...\n");
     }
     create_and_get_vaultdir(workdir,vaultdir);
-#ifdef _WIN32
+/*#ifdef _WIN32
     sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
 #else
     sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
@@ -827,45 +787,45 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     reset_string(buffer2);
     get_crypto_key(crypto_keyfile,md5sum);
 #ifdef _WIN32
-    sprintf(cmdline,"%s decrypt %s\\_CLUSTER_SUMMARY.txt %s\\_CLUSTER_SUMMARY.txt.tmp %s > nul 2>&1",now_crypto_exec,vaultdir,vaultdir,md5sum);
+    sprintf(cmdline,"%s decrypt %s\\_CLUSTER_SUMMARY.txt %s\\_CLUSTER_SUMMARY.txt.tmp %s %s",now_crypto_exec,vaultdir,vaultdir,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s\\_CLUSTER_SUMMARY.txt.tmp",vaultdir);
     find_and_get(filename_temp,"Master Node IP:","","",1,"Master Node IP:","","",' ',4,master_address);
     find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_address);
-    sprintf(cmdline,"del /f /q %s > nul 2>&1",filename_temp);
+    sprintf(cmdline,"del /f /q %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #else
-    sprintf(cmdline,"%s decrypt %s/_CLUSTER_SUMMARY.txt %s/_CLUSTER_SUMMARY.txt.tmp %s >> /dev/null 2>&1",now_crypto_exec,vaultdir,vaultdir,md5sum);
+    sprintf(cmdline,"%s decrypt %s/_CLUSTER_SUMMARY.txt %s/_CLUSTER_SUMMARY.txt.tmp %s %s",now_crypto_exec,vaultdir,vaultdir,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s/_CLUSTER_SUMMARY.txt.tmp",vaultdir);
     find_and_get(filename_temp,"Master Node IP:","","",1,"Master Node IP:","","",' ',4,master_address);
     find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_address);
-    sprintf(cmdline,"rm -rf %s >> /dev/null 2>&1",filename_temp);
+    sprintf(cmdline,"rm -rf %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
     if(strcmp(cloud_flag,"CLOUD_C")==0&&force_flag==1){
 #ifdef _WIN32
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/bin/s3cmd del -rf s3://%s\" > nul 2>&1",sshkey_folder,master_address,bucket_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/bin/s3cmd del -rf s3://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/bin/s3cmd del -rf s3://%s\" >> /dev/null 2>&1",sshkey_folder,master_address,bucket_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/bin/s3cmd del -rf s3://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
 #endif
         system(cmdline);
     }
     else if(strcmp(cloud_flag,"CLOUD_A")==0&&force_flag==1){
 #ifdef _WIN32
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/bin/ossutil64 rm -rf oss://%s\" > nul 2>&1",sshkey_folder,master_address,bucket_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/bin/ossutil64 rm -rf oss://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/usr/bin/ossutil64 rm -rf oss://%s\" >> /dev/null 2>&1",sshkey_folder,master_address,bucket_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/usr/bin/ossutil64 rm -rf oss://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
 #endif
         system(cmdline);
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0&&force_flag==1){
 #ifdef _WIN32
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/local/bin/coscmd delete -rf /\" > nul 2>&1",sshkey_folder,master_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/local/bin/coscmd delete -rf /\" %s",sshkey_folder,master_address,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/usr/local/bin/coscmd delete -rf /\" >> /dev/null 2>&1",sshkey_folder,master_address);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/usr/local/bin/coscmd delete -rf /\" %s",sshkey_folder,master_address,SYSTEM_CMD_REDIRECT);
 #endif
         system(cmdline);
-    }
+    }*/
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
     if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)!=0){
@@ -884,11 +844,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
             }
         }
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\currentstate",stackdir);
-#else
-    sprintf(filename_temp,"%s/currentstate",stackdir);
-#endif
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     compute_node_num=get_compute_node_num(filename_temp,"all");
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
     update_usage_summary(workdir,crypto_keyfile,"database","stop");
@@ -898,61 +854,24 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
     delete_decrypted_files(workdir,crypto_keyfile);
-#ifdef _WIN32
-    system("del /f /q /s c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
-    sprintf(cmdline,"move %s\\*.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",stackdir);
+    sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"move %s\\*.tmp c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",stackdir);
+    sprintf(cmdline,"%s %s%s*.tf %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"del /f /q %s\\currentstate > nul 2>&1",stackdir);
+    sprintf(cmdline,"%s %s%s*.tmp %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"del /f /q %s\\compute_template > nul 2>&1",stackdir);
+    sprintf(cmdline,"%s %s%scurrentstate %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"move %s\\hostfile_latest c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",stackdir);
+    sprintf(cmdline,"%s %s%scompute_template %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"move %s\\_CLUSTER_SUMMARY.txt c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",vaultdir);
+    sprintf(cmdline,"%s %s%shostfile_latest %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"move %s\\UCID_LATEST.txt c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1",vaultdir);
+    sprintf(cmdline,"%s %s%sCLUSTER_SUMMARY.txt %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"move %s\\conf\\tf_prep.conf %s\\conf\\tf_prep.conf.destroyed > nul 2>&1",workdir,workdir);
+    sprintf(cmdline,"%s %s%sUCID_LATEST.txt %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-#elif __APPLE__
-    system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-    sprintf(cmdline,"mv %s/*.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
+    sprintf(cmdline,"%s %s%sconf%stf_prep.conf %s%sconf%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,workdir,PATH_SLASH,PATH_SLASH,workdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"mv %s/*.tmp /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
-    system(cmdline);
-    sprintf(cmdline,"rm -rf %s/currentstate >> /dev/null 2>&1",stackdir);
-    system(cmdline);
-    sprintf(cmdline,"rm -rf %s/compute_template >> /dev/null 2>&1",stackdir);
-    system(cmdline);
-    sprintf(cmdline,"mv %s/hostfile_latest /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
-    system(cmdline);
-    sprintf(cmdline,"mv %s/_CLUSTER_SUMMARY.txt /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
-    system(cmdline);
-    sprintf(cmdline,"mv %s/UCID_LATEST.txt /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
-    system(cmdline);
-    sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
-    system(cmdline);
-#elif __linux__
-    system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-    sprintf(cmdline,"mv %s/*.tf /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
-    system(cmdline);
-    sprintf(cmdline,"mv %s/*.tmp /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
-    system(cmdline);
-    sprintf(cmdline,"rm -rf %s/currentstate >> /dev/null 2>&1",stackdir);
-    system(cmdline);
-    sprintf(cmdline,"rm -rf %s/compute_template >> /dev/null 2>&1",stackdir);
-    system(cmdline);
-    sprintf(cmdline,"mv %s/hostfile_latest /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",stackdir);
-    system(cmdline);
-    sprintf(cmdline,"mv %s/_CLUSTER_SUMMARY.txt /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
-    system(cmdline);
-    sprintf(cmdline,"mv %s/UCID_LATEST.txt /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1",vaultdir);
-    system(cmdline);
-    sprintf(cmdline,"mv %s/conf/tf_prep.conf %s/conf/tf_prep.conf.destroyed >> /dev/null 2>&1",workdir,workdir);
-    system(cmdline);
-#endif
     printf("[ -DONE- ] The whole cluster has been destroyed successfully.\n");
     return 0;
 }
@@ -971,11 +890,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     char filename_temp[FILENAME_LENGTH]="";
     int compute_node_num=0;
     create_and_get_vaultdir(workdir,vaultdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\UCID_LATEST.txt",vaultdir);
-#else
-    sprintf(filename_temp,"%s/UCID_LATEST.txt",vaultdir);
-#endif
+    sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
@@ -983,11 +898,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     fscanf(file_p,"%s",unique_cluster_id);
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\currentstate",stackdir);
-#else
-    sprintf(filename_temp,"%s/currentstate",stackdir);
-#endif
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1024,41 +935,18 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             sprintf(string_temp,"[ -INFO- ] You specified to delete %d from %d compute node(s).",del_num,compute_node_num);
             printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
-#ifdef _WIN32
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                system("del /f /s /q c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
-                sprintf(cmdline,"move /y %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1", stackdir,i);
+                sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+                system(cmdline);
+                sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,i,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
                 system(cmdline);
             }
-#elif __APPLE__
-            for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-                sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
-                system(cmdline);
-            }
-#elif __linux__
-            for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-                sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
-                system(cmdline);
-            }
-#endif
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){ 
-                printf("[ -INFO- ] Rolling back now ... \n");            
-#ifdef _WIN32
+                printf("[ -INFO- ] Rolling back now ... \n");
                 for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                    sprintf(cmdline,"move /y c:\\programdata\\hpc-now\\.destroyed\\hpc_stack_compute%d.tf %s\\ > nul 2>&1", i,stackdir);
+                    sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,i,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+                    system(cmdline);
                 }
-#elif __APPLE__
-                for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                    sprintf(cmdline,"mv /Applications/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
-                }
-#elif __linux__
-                for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                    sprintf(cmdline,"mv /usr/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
-                }
-#endif
-                system(cmdline);
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
                     return -127;
@@ -1068,8 +956,9 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             }
             printf("[ -INFO- ] After the cluster operation:\n|\n");
             graph(workdir,crypto_keyfile,0);
+            get_latest_hosts(stackdir,filename_temp);
             printf("|\n");
-            remote_copy(workdir,sshkey_dir,"hostfile");
+            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
@@ -1084,40 +973,18 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     sprintf(string_temp,"[ -INFO- ] You specified to delete *ALL* the %d compute node(s).",compute_node_num);
     printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
-#ifdef _WIN32
     for(i=1;i<compute_node_num+1;i++){
-        system("del /f /s /q c:\\programdata\\hpc-now\\.destroyed\\* > nul 2>&1");
-        sprintf(cmdline,"move %s\\hpc_stack_compute%d.tf c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1", stackdir,i);
+        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,i,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-#elif __APPLE__
-    for(i=1;i<compute_node_num+1;i++){
-        system("rm -rf /Applications/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-        sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /Applications/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
-        system(cmdline);
-    }
-#elif __linux__
-    for(i=1;i<compute_node_num+1;i++){
-        system("rm -rf /usr/.hpc-now/.destroyed/* >> /dev/null 2>&1");
-        sprintf(cmdline,"mv %s/hpc_stack_compute%d.tf /usr/.hpc-now/.destroyed/ >> /dev/null 2>&1", stackdir,i);
-        system(cmdline);
-    }
-#endif
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back now ... \n");
-#ifdef _WIN32
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(cmdline,"move /y c:\\programdata\\hpc-now\\.destroyed\\hpc_stack_compute%d.tf %s\\ > nul 2>&1", i,stackdir);
+            sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,i,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
         }
-#elif __APPLE__
-        for(i=1;i<compute_node_num+1;i++){
-            sprintf(cmdline,"mv /Applications/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
-        }
-#elif __linux__
-        for(i=1;i<compute_node_num+1;i++){
-            sprintf(cmdline,"mv /usr/.hpc-now/.destroyed/hpc_stack_compute%d.tf %s/ >> /dev/null 2>&1", i,stackdir);
-        }
-#endif
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             return -127;
@@ -1128,7 +995,8 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    remote_copy(workdir,sshkey_dir,"hostfile");
+    get_latest_hosts(stackdir,filename_temp);
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     for(i=1;i<compute_node_num+1;i++){
@@ -1176,22 +1044,12 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     decrypt_files(workdir,crypto_keyfile);
     printf("[ -INFO- ] The cluster operation is in progress ...\n");
     create_and_get_stackdir(workdir,stackdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\currentstate",stackdir);
-#else
-    sprintf(filename_temp,"%s/currentstate",stackdir);
-#endif
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     current_node_num=get_compute_node_num(filename_temp,"all");
     for(i=0;i<add_number;i++){
-#ifdef _WIN32
-        sprintf(cmdline,"copy /y %s\\compute_template %s\\hpc_stack_compute%d.tf > nul 2>&1",stackdir,stackdir,i+1+current_node_num);
+        sprintf(cmdline,"%s %s%scompute_template %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1+current_node_num,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i+1+current_node_num);
-#else
-        sprintf(cmdline,"/bin/cp %s/compute_template %s/hpc_stack_compute%d.tf >> /dev/null 2>&1",stackdir,stackdir,i+1+current_node_num);
-        system(cmdline);
-        sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i+1+current_node_num);
-#endif
+        sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1+current_node_num);
         sprintf(string_temp,"compute%d",i+1+current_node_num);
         global_replace(filename_temp,"compute1",string_temp);
         sprintf(string_temp,"comp%d",i+1+current_node_num);
@@ -1200,11 +1058,8 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back now ... \n");
         for(i=0;i<add_number;i++){
-#ifdef _WIN32
-            sprintf(cmdline,"del /f /q %s\\hpc_stack_compute%d.tf",stackdir,i+1+current_node_num);
-#else
-            sprintf(filename_temp,"rm -rf %s/hpc_stack_compute%d.tf",stackdir,i+1+current_node_num);
-#endif
+            sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf",DELETE_FILE_CMD,stackdir,PATH_SLASH,i+1+current_node_num);
+            system(cmdline);
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
@@ -1216,7 +1071,8 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    remote_copy(workdir,sshkey_dir,"hostfile");
+    get_latest_hosts(stackdir,filename_temp);
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     for(i=0;i<add_number;i++){
@@ -1233,8 +1089,6 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
-    char buffer1[128]="";
-    char buffer2[128]="";
     char cloud_flag[16]="";
     char* tf_exec=TERRAFORM_EXEC;
     char* sshkey_dir=SSHKEY_DIR;
@@ -1242,13 +1096,10 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     int i;
     int down_num=0;
     char filename_temp[FILENAME_LENGTH]="";
+    char node_name[16]="";
     int compute_node_num=0;
     create_and_get_vaultdir(workdir,vaultdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\UCID_LATEST.txt",vaultdir);
-#else
-    sprintf(filename_temp,"%s/UCID_LATEST.txt",vaultdir);
-#endif
+    sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
@@ -1256,20 +1107,11 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     fscanf(file_p,"%s",unique_cluster_id);
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
-#else
-    sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
-#endif
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
+    get_cloud_flag(workdir,cloud_flag);
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
         return -1;
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\currentstate",stackdir);
-#else
-    sprintf(filename_temp,"%s/currentstate",stackdir);
-#endif
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1306,38 +1148,14 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
             for(i=compute_node_num-down_num+1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-                sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-                sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-                if(strcmp(cloud_flag,"CLOUD_A")==0){
-                    global_replace(filename_temp,"Running","Stopped");
-                }
-                else if(strcmp(cloud_flag,"CLOUD_B")==0){
-                    find_and_replace(filename_temp,"running_flag","","","","","true","false");
-                }
-                else if(strcmp(cloud_flag,"CLOUD_C")==0){
-                    global_replace(filename_temp,"running","stopped");
-                }
+                sprintf(node_name,"compute%d",i);
+                node_file_to_stop(stackdir,node_name,cloud_flag);
             }
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 printf("[ -INFO- ] Rolling back now ... \n");
                 for(i=compute_node_num-down_num+1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-                    sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-                    sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-                    if(strcmp(cloud_flag,"CLOUD_A")==0){
-                        global_replace(filename_temp,"Stopped","Running");
-                    }
-                    else if(strcmp(cloud_flag,"CLOUD_B")==0){
-                        find_and_replace(filename_temp,"running_flag","","","","","false","true");
-                    }
-                    else if(strcmp(cloud_flag,"CLOUD_C")==0){
-                        global_replace(filename_temp,"stopped","running");
-                    }
+                    sprintf(node_name,"compute%d",i);
+                    node_file_to_running(stackdir,node_name,cloud_flag);
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1349,7 +1167,8 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             printf("[ -INFO- ] After the cluster operation:\n|\n");
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
-            remote_copy(workdir,sshkey_dir,"hostfile");
+            get_latest_hosts(stackdir,filename_temp);
+            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
             delete_decrypted_files(workdir,crypto_keyfile);
@@ -1365,38 +1184,14 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-        sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-        if(strcmp(cloud_flag,"CLOUD_A")==0){
-            global_replace(filename_temp,"Running","Stopped");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            find_and_replace(filename_temp,"running_flag","","","","","true","false");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_C")==0){
-            global_replace(filename_temp,"running","stopped");
-        }
+        sprintf(node_name,"compute%d",i);
+        node_file_to_stop(stackdir,node_name,cloud_flag);
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back now ... \n");
         for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-            sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-            sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-            if(strcmp(cloud_flag,"CLOUD_A")==0){
-                global_replace(filename_temp,"Stopped","Running");
-            }
-            else if(strcmp(cloud_flag,"CLOUD_B")==0){
-                find_and_replace(filename_temp,"running_flag","","","","","false","true");
-            }
-            else if(strcmp(cloud_flag,"CLOUD_C")==0){
-                global_replace(filename_temp,"stopped","running");
-            }
+            sprintf(node_name,"compute%d",i);
+            node_file_to_running(stackdir,node_name,cloud_flag);
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
@@ -1408,7 +1203,8 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    remote_copy(workdir,sshkey_dir,"hostfile");
+    get_latest_hosts(stackdir,filename_temp);
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     for(i=1;i<compute_node_num+1;i++){
@@ -1425,8 +1221,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
-    char buffer1[128]="";
-    char buffer2[128]="";
+    char node_name[16]="";
     char cloud_flag[16]="";
     char* tf_exec=TERRAFORM_EXEC;
     char* sshkey_dir=SSHKEY_DIR;
@@ -1437,11 +1232,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     int compute_node_num=0;
     int compute_node_num_on=0;
     create_and_get_vaultdir(workdir,vaultdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\UCID_LATEST.txt",vaultdir);
-#else
-    sprintf(filename_temp,"%s/UCID_LATEST.txt",vaultdir);
-#endif
+    sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
@@ -1449,20 +1240,11 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     fscanf(file_p,"%s",unique_cluster_id);
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
-#else
-    sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
-#endif
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
+    get_cloud_flag(workdir,cloud_flag);
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
         return -1;
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\currentstate",stackdir);
-#else
-    sprintf(filename_temp,"%s/currentstate",stackdir);
-#endif
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1507,38 +1289,14 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
             for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
-#ifdef _WIN32
-                sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-                sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-                if(strcmp(cloud_flag,"CLOUD_A")==0){
-                    global_replace(filename_temp,"Stopped","Running");
-                }
-                else if(strcmp(cloud_flag,"CLOUD_B")==0){
-                    find_and_replace(filename_temp,"running_flag","","","","","false","true");
-                }
-                else if(strcmp(cloud_flag,"CLOUD_C")==0){
-                    global_replace(filename_temp,"stopped","running");
-                }
+                sprintf(node_name,"compute%d",i);
+                node_file_to_running(stackdir,node_name,cloud_flag);
             }
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 printf("[ -INFO- ] Rolling back now ...");
                 for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
-#ifdef _WIN32
-                    sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-                    sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-                    if(strcmp(cloud_flag,"CLOUD_A")==0){
-                        global_replace(filename_temp,"Running","Stopped");
-                    }
-                    else if(strcmp(cloud_flag,"CLOUD_B")==0){
-                        find_and_replace(filename_temp,"running_flag","","","","","true","false");
-                    }
-                    else if(strcmp(cloud_flag,"CLOUD_C")==0){
-                        global_replace(filename_temp,"running","stopped");
-                    }
+                    sprintf(node_name,"compute%d",i);
+                    node_file_to_stop(stackdir,node_name,cloud_flag);
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1550,7 +1308,8 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             printf("[ -INFO- ] After the cluster operation:\n|\n");
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
-            remote_copy(workdir,sshkey_dir,"hostfile");
+            get_latest_hosts(stackdir,filename_temp);
+            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
             delete_decrypted_files(workdir,crypto_keyfile);
@@ -1566,38 +1325,14 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     for(i=compute_node_num_on+1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-        sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-        if(strcmp(cloud_flag,"CLOUD_A")==0){
-            global_replace(filename_temp,"Stopped","Running");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            find_and_replace(filename_temp,"running_flag","","","","","false","true");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_C")==0){
-            global_replace(filename_temp,"stopped","running");
-        }
+        sprintf(node_name,"compute%d",i);
+        node_file_to_running(stackdir,node_name,cloud_flag);
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back now ...\n");
         for(i=compute_node_num_on+1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-            sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-            sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-            if(strcmp(cloud_flag,"CLOUD_A")==0){
-                global_replace(filename_temp,"Running","Stopped");
-            }
-            else if(strcmp(cloud_flag,"CLOUD_B")==0){
-                find_and_replace(filename_temp,"running_flag","","","","","true","false");
-            }
-            else if(strcmp(cloud_flag,"CLOUD_C")==0){
-                global_replace(filename_temp,"running","stopped");
-            }
+            sprintf(node_name,"compute%d",i);
+            node_file_to_stop(stackdir,node_name,cloud_flag);
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
@@ -1609,7 +1344,8 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    remote_copy(workdir,sshkey_dir,"hostfile");
+    get_latest_hosts(stackdir,filename_temp);
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1627,11 +1363,7 @@ int check_reconfigure_list(char* workdir){
     char reconf_list[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
     create_and_get_stackdir(workdir,stackdir);
-#ifdef _WIN32
-    sprintf(reconf_list,"%s\\reconf.list",stackdir);
-#else
-    sprintf(reconf_list,"%s/reconf.list",stackdir);
-#endif
+    sprintf(reconf_list,"%s%sreconf.list",stackdir,PATH_SLASH);
     if((file_p=fopen(reconf_list,"r"))==NULL){
         return -1;
     }
@@ -1650,8 +1382,6 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     char string_temp2[64]="";
     char string_temp3[128]="";
     char prev_config[16]="";
-    char buffer1[64]="";
-    char buffer2[64]="";
     char cloud_flag[16]="";
     int compute_node_num=0;
     char* sshkey_dir=SSHKEY_DIR;
@@ -1663,11 +1393,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     char cmdline[CMDLINE_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\currentstate",stackdir);
-#else
-    sprintf(filename_temp,"%s/currentstate",stackdir);
-#endif
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     compute_node_num=get_compute_node_num(filename_temp,"all");
     if(compute_node_num==0){
         printf("[ -WARN- ] Currently there is no compute nodes in your cluster. Exit now.\n");
@@ -1675,26 +1401,15 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     }
 
     decrypt_files(workdir,crypto_keyfile);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);
-#else
-    sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
-#endif
+    sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     sprintf(string_temp,"\"%s\"",new_config);
     if(find_multi_keys(filename_temp,string_temp,"","","","")==0||find_multi_keys(filename_temp,string_temp,"","","","")<0){
         printf("[ FATAL: ] Invalid compute configuration.  Exit now.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
-    sprintf(filename_temp,"%s\\compute_template",stackdir);
-#else
-    sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
-    sprintf(filename_temp,"%s/compute_template",stackdir);
-#endif
+    get_cloud_flag(workdir,cloud_flag);
+    sprintf(filename_temp,"%s%scompute_template",stackdir,PATH_SLASH);
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
     if(strcmp(prev_config,new_config)==0){
         if(strcmp(cloud_flag,"CLOUD_A")==0||strcmp(cloud_flag,"CLOUD_B")==0){
@@ -1730,26 +1445,16 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             }
             if(find_multi_keys(filename_temp,"cpu_threads_per_core = 2","","","","")>0){
                 for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-                    sprintf(filename_temp2,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-                    sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp2,filename_temp2);
-#else
-                    sprintf(filename_temp2,"%s/hpc_stack_compute%d.tf",stackdir,i);
-                    sprintf(cmdline,"/bin/copy %s %s.bak >>/dev/null 2>&1",filename_temp2,filename_temp2);
-#endif
+                    sprintf(filename_temp2,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
+                    sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
                     system(cmdline);
                     global_replace(filename_temp2,"cpu_threads_per_core = 2","cpu_threads_per_core = 1");
                 }
             }
             if(find_multi_keys(filename_temp,"cpu_threads_per_core = 1","","","","")>0){
                 for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-                    sprintf(filename_temp2,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-                    sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp2,filename_temp2);
-#else
-                    sprintf(filename_temp2,"%s/hpc_stack_compute%d.tf",stackdir,i);
-                    sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/null 2>&1",filename_temp2,filename_temp2);
-#endif
+                    sprintf(filename_temp2,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
+                    sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
                     system(cmdline);
                     global_replace(filename_temp2,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
                 }
@@ -1757,11 +1462,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
                 printf("[ -INFO- ] Rolling back now ... \n");
                 for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-                    sprintf(cmdline,"move /y %s.bak %s > nul 2>&1",filename_temp2,filename_temp2);
-#else
-                    sprintf(cmdline,"mv %s.bak %s >>/dev/null 2>&1",filename_temp2,filename_temp2);
-#endif
+                    sprintf(cmdline,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
                     system(cmdline);
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
@@ -1779,7 +1480,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             printf("[ -INFO- ] After the cluster operation:\n|\n");
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
-            remote_copy(workdir,sshkey_dir,"hostfile");
+            get_latest_hosts(stackdir,filename_temp);
+            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
             for(i=1;i<compute_node_num+1;i++){
@@ -1793,26 +1495,16 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0||strcmp(cloud_flag,"CLOUD_B")==0){
         for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-            sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-            sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp,filename_temp);
-#else
-            sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-            sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/nul 2>&1",filename_temp,filename_temp);
-#endif
+            sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
+            sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             global_replace(filename_temp,prev_config,new_config);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-            sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-            sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp,filename_temp);
-#else
-            sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-            sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/nul 2>&1",filename_temp,filename_temp);
-#endif
+            sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
+            sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             global_replace(filename_temp,prev_config,new_config);
             cpu_core_num=get_cpu_num(new_config)/2;
@@ -1823,21 +1515,13 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         }
         if(strcmp(htflag,"hton")==0&&find_multi_keys(filename_temp,"cpu_threads_per_core = 1","","","","")>0){
             for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-                sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-                sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
+                printf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
                 global_replace(filename_temp,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
             }
         }
         if(strcmp(htflag,"htoff")==0&&find_multi_keys(filename_temp,"cpu_threads_per_core = 2","","","","")>0){
             for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-                sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-                sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
+                sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
                 global_replace(filename_temp,"cpu_threads_per_core = 2","cpu_threads_per_core = 1");
             }
         }
@@ -1845,11 +1529,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back now ... \n");
         for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-            sprintf(cmdline,"move /y %s.bak %s > nul 2>&1",filename_temp2,filename_temp2);
-#else
-            sprintf(cmdline,"mv %s.bak %s >>/dev/null 2>&1",filename_temp2,filename_temp2);
-#endif
+            sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
+            sprintf(cmdline,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
@@ -1867,7 +1548,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    remote_copy(workdir,sshkey_dir,"hostfile");
+    get_latest_hosts(stackdir,filename_temp);
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1876,11 +1558,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         update_usage_summary(workdir,crypto_keyfile,node_name_temp,"start");
     }
     printf("[ -DONE- ] Congratulations! The compute nodes have been reconfigured.\n");
-#ifdef _WIN32
-    sprintf(cmdline,"del /q /f %s\\*bak > nul 2>&1",stackdir);
-#else
-    sprintf(cmdline,"del /q /f %s/*bak >/dev/null 2>&1",stackdir);
-#endif
+    sprintf(cmdline,"%s %s%s*bak %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 0;
 }
@@ -1892,8 +1570,6 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     char cmdline[CMDLINE_LENGTH]="";
     char string_temp[64]="";
     char prev_config[16]="";
-    char buffer1[64]="";
-    char buffer2[64]="";
     char cloud_flag[16]="";
     char* sshkey_dir=SSHKEY_DIR;
     char* error_log=OPERATION_ERROR_LOG;
@@ -1908,26 +1584,15 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     }
 
     decrypt_files(workdir,crypto_keyfile);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_base.tf",stackdir);
-#else
-    sprintf(filename_temp,"%s/hpc_stack_base.tf",stackdir);
-#endif
+    sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     sprintf(string_temp,"\"%s\"",new_config);
     if(find_multi_keys(filename_temp,string_temp,"","","","")==0||find_multi_keys(filename_temp,string_temp,"","","","")<0){
         printf("[ FATAL: ] Invalid master node configuration.  Exit now.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
-    sprintf(filename_temp,"%s\\hpc_stack_master.tf",stackdir);
-#else
-    sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
-    sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
-#endif
+    get_cloud_flag(workdir,cloud_flag);
+    sprintf(filename_temp,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
     if(strcmp(prev_config,new_config)==0){
         printf("[ -INFO- ] The specified configuration is the same as previous configuration.\n");
@@ -1935,22 +1600,13 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         delete_decrypted_files(workdir,crypto_keyfile);
         return 1;
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_master.tf",stackdir);
-    sprintf(cmdline,"copy /y %s %s.bak > nul 2>&1",filename_temp,filename_temp);
-#else
-    sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
-    sprintf(cmdline,"/bin/cp %s %s.bak >>/dev/null 2>&1",filename_temp,filename_temp);
-#endif
+    sprintf(filename_temp,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
+    sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     global_replace(filename_temp,prev_config,new_config);
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back now ... \n");
-#ifdef _WIN32
-        sprintf(cmdline,"move /y %s.bak %s > nul 2>&1",filename_temp,filename_temp);
-#else
-        sprintf(cmdline,"mv %s.bak %s >>/dev/null 2>&1",filename_temp,filename_temp);
-#endif
+        sprintf(cmdline,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
@@ -1959,6 +1615,8 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         delete_decrypted_files(workdir,crypto_keyfile);
         return -3;
     }
+    sprintf(cmdline,"%s %s.bak %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
@@ -1968,7 +1626,8 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         fflush(stdout);
         sleep(1);
     }
-    remote_copy(workdir,sshkey_dir,"hostfile");
+    get_latest_hosts(stackdir,filename_temp);
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1983,20 +1642,15 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
-    char buffer1[128]="";
-    char buffer2[128]="";
     char cloud_flag[16]="";
     char* tf_exec=TERRAFORM_EXEC;
     char* error_log=OPERATION_ERROR_LOG;
     int i;
     char filename_temp[FILENAME_LENGTH]="";
+    char node_name[16]="";
     int compute_node_num=0;
     create_and_get_vaultdir(workdir,vaultdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\UCID_LATEST.txt",vaultdir);
-#else
-    sprintf(filename_temp,"%s/UCID_LATEST.txt",vaultdir);
-#endif
+    sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
@@ -2004,20 +1658,11 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     fscanf(file_p,"%s",unique_cluster_id);
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
-#else
-    sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
-#endif
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
+    get_cloud_flag(workdir,cloud_flag);
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
         return -1;
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\currentstate",stackdir);
-#else
-    sprintf(filename_temp,"%s/currentstate",stackdir);
-#endif
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     if(find_multi_keys(filename_temp,"running","","","","")==0&&find_multi_keys(filename_temp,"Running","","","","")==0&&find_multi_keys(filename_temp,"RUNNING","","","","")==0){
         printf("[ -INFO- ] Currently the cluster is in the state of hibernation. No node is running.\n");
         printf("|          If you'd like to make it ready for running, please run 'wakeup' command.\n");
@@ -2028,124 +1673,21 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     getstate(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(filename_temp,"all");
     printf("[ -INFO- ] You planned to shutdown *ALL* the nodes of the current cluster.\n");
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_master.tf",stackdir);
-#else
-    sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
-#endif
-    if(strcmp(cloud_flag,"CLOUD_A")==0){
-        global_replace(filename_temp,"Running","Stopped");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        find_and_replace(filename_temp,"running_flag","","","","","true","false");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        global_replace(filename_temp,"running","stopped");
-    }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_database.tf",stackdir);
-#else
-    sprintf(filename_temp,"%s/hpc_stack_database.tf",stackdir);
-#endif
-    if(strcmp(cloud_flag,"CLOUD_A")==0){
-        global_replace(filename_temp,"Running","Stopped");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        find_and_replace(filename_temp,"running_flag","","","","","true","false");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        global_replace(filename_temp,"running","stopped");
-    }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_natgw.tf",stackdir);
-#else
-    sprintf(filename_temp,"%s/hpc_stack_natgw.tf",stackdir);
-#endif
-    if(strcmp(cloud_flag,"CLOUD_A")==0){
-        global_replace(filename_temp,"Running","Stopped");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        find_and_replace(filename_temp,"running_flag","","","","","true","false");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        global_replace(filename_temp,"running","stopped");
-    }
-
+    node_file_to_stop(stackdir,"master",cloud_flag);
+    node_file_to_stop(stackdir,"database",cloud_flag);
+    node_file_to_stop(stackdir,"natgw",cloud_flag);
     for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-        sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-        if(strcmp(cloud_flag,"CLOUD_A")==0){
-            global_replace(filename_temp,"Running","Stopped");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            find_and_replace(filename_temp,"running_flag","","","","","true","false");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_C")==0){
-            global_replace(filename_temp,"running","stopped");
-        }
+        sprintf(node_name,"compute%d",i);
+        node_file_to_stop(stackdir,node_name,cloud_flag);
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back now ...\n");
-#ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_master.tf",stackdir);
-#else
-        sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
-#endif
-        if(strcmp(cloud_flag,"CLOUD_A")==0){
-            global_replace(filename_temp,"Stopped","Running");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            find_and_replace(filename_temp,"running_flag","","","","","false","true");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_C")==0){
-            global_replace(filename_temp,"stopped","running");
-        }
-#ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_database.tf",stackdir);
-#else
-        sprintf(filename_temp,"%s/hpc_stack_database.tf",stackdir);
-#endif
-        if(strcmp(cloud_flag,"CLOUD_A")==0){
-            global_replace(filename_temp,"Stopped","Running");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            find_and_replace(filename_temp,"running_flag","","","","","false","true");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_C")==0){
-            global_replace(filename_temp,"stopped","running");
-        }
-#ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_natgw.tf",stackdir);
-#else
-        sprintf(filename_temp,"%s/hpc_stack_natgw.tf",stackdir);
-#endif
-        if(strcmp(cloud_flag,"CLOUD_A")==0){
-            global_replace(filename_temp,"Stopped","Running");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            find_and_replace(filename_temp,"running_flag","","","","","false","true");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_C")==0){
-            global_replace(filename_temp,"stopped","running");
-        }
+        node_file_to_running(stackdir,"master",cloud_flag);
+        node_file_to_running(stackdir,"database",cloud_flag);
+        node_file_to_running(stackdir,"natgw",cloud_flag);
         for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-            sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-            sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-            if(strcmp(cloud_flag,"CLOUD_A")==0){
-                global_replace(filename_temp,"Stopped","Running");
-            }
-            else if(strcmp(cloud_flag,"CLOUD_B")==0){
-                find_and_replace(filename_temp,"running_flag","","","","","false","true");
-            }
-            else if(strcmp(cloud_flag,"CLOUD_C")==0){
-                global_replace(filename_temp,"stopped","running");
-            }
+            sprintf(node_name,"compute%d",i);
+            node_file_to_running(stackdir,node_name,cloud_flag);
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
@@ -2189,20 +1731,15 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
-    char buffer1[128]="";
-    char buffer2[128]="";
     char cloud_flag[16]="";
     char* tf_exec=TERRAFORM_EXEC;
     char* error_log=OPERATION_ERROR_LOG;
     int i;
     char filename_temp[FILENAME_LENGTH]="";
+    char node_name[16]="";
     int compute_node_num=0;
     create_and_get_vaultdir(workdir,vaultdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\UCID_LATEST.txt",vaultdir);
-#else
-    sprintf(filename_temp,"%s/UCID_LATEST.txt",vaultdir);
-#endif
+    sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
@@ -2210,20 +1747,11 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     fscanf(file_p,"%s",unique_cluster_id);
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
-#else
-    sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
-#endif
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
+    get_cloud_flag(workdir,cloud_flag);
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
         return -1;
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\currentstate",stackdir);
-#else
-    sprintf(filename_temp,"%s/currentstate",stackdir);
-#endif
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(filename_temp,"all");
@@ -2233,126 +1761,24 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     else{
         printf("[ -INFO- ] MINIMAL MODE: Turning on the management nodes of the current cluster.\n");
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_master.tf",stackdir);
-#else
-    sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
-#endif
-    if(strcmp(cloud_flag,"CLOUD_A")==0){
-        global_replace(filename_temp,"Stopped","Running");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        find_and_replace(filename_temp,"running_flag","","","","","false","true");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        global_replace(filename_temp,"stopped","running");
-    }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_database.tf",stackdir);
-#else
-    sprintf(filename_temp,"%s/hpc_stack_database.tf",stackdir);
-#endif
-    if(strcmp(cloud_flag,"CLOUD_A")==0){
-        global_replace(filename_temp,"Stopped","Running");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        find_and_replace(filename_temp,"running_flag","","","","","false","true");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        global_replace(filename_temp,"stopped","running");
-    }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\hpc_stack_natgw.tf",stackdir);
-#else
-    sprintf(filename_temp,"%s/hpc_stack_natgw.tf",stackdir);
-#endif
-    if(strcmp(cloud_flag,"CLOUD_A")==0){
-        global_replace(filename_temp,"Stopped","Running");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        find_and_replace(filename_temp,"running_flag","","","","","false","true");
-    }
-    else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        global_replace(filename_temp,"stopped","running");
-    }
+    node_file_to_running(stackdir,"master",cloud_flag);
+    node_file_to_running(stackdir,"database",cloud_flag);
+    node_file_to_running(stackdir,"natgw",cloud_flag);
     if(strcmp(option,"all")==0){
         for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-            sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-            sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-            if(strcmp(cloud_flag,"CLOUD_A")==0){
-                global_replace(filename_temp,"Stopped","Running");
-            }
-            else if(strcmp(cloud_flag,"CLOUD_B")==0){
-                find_and_replace(filename_temp,"running_flag","","","","","false","true");
-            }
-            else if(strcmp(cloud_flag,"CLOUD_C")==0){
-                global_replace(filename_temp,"stopped","running");
-            }
+            sprintf(node_name,"compute%d",i);
+            node_file_to_running(stackdir,node_name,cloud_flag);
         }
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
         printf("[ -INFO- ] Rolling back now ...\n");
-#ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_master.tf",stackdir);
-#else
-        sprintf(filename_temp,"%s/hpc_stack_master.tf",stackdir);
-#endif
-        if(strcmp(cloud_flag,"CLOUD_A")==0){
-            global_replace(filename_temp,"Running","Stopped");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            find_and_replace(filename_temp,"running_flag","","","","","true","false");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_C")==0){
-            global_replace(filename_temp,"running","stopped");
-        }
-#ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_database.tf",stackdir);
-#else
-        sprintf(filename_temp,"%s/hpc_stack_database.tf",stackdir);
-#endif
-        if(strcmp(cloud_flag,"CLOUD_A")==0){
-            global_replace(filename_temp,"Running","Stopped");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            find_and_replace(filename_temp,"running_flag","","","","","true","false");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_C")==0){
-            global_replace(filename_temp,"running","stopped");
-        }
-#ifdef _WIN32
-        sprintf(filename_temp,"%s\\hpc_stack_natgw.tf",stackdir);
-#else
-        sprintf(filename_temp,"%s/hpc_stack_natgw.tf",stackdir);
-#endif
-        if(strcmp(cloud_flag,"CLOUD_A")==0){
-            global_replace(filename_temp,"Running","Stopped");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            find_and_replace(filename_temp,"running_flag","","","","","true","false");
-        }
-        else if(strcmp(cloud_flag,"CLOUD_C")==0){
-            global_replace(filename_temp,"running","stopped");
-        }
+        node_file_to_stop(stackdir,"master",cloud_flag);
+        node_file_to_stop(stackdir,"database",cloud_flag);
+        node_file_to_stop(stackdir,"natgw",cloud_flag);
         if(strcmp(option,"all")==0){
             for(i=1;i<compute_node_num+1;i++){
-#ifdef _WIN32
-                sprintf(filename_temp,"%s\\hpc_stack_compute%d.tf",stackdir,i);
-#else
-                sprintf(filename_temp,"%s/hpc_stack_compute%d.tf",stackdir,i);
-#endif
-                if(strcmp(cloud_flag,"CLOUD_A")==0){
-                    global_replace(filename_temp,"Running","Stopped");
-                }
-                else if(strcmp(cloud_flag,"CLOUD_B")==0){
-                    find_and_replace(filename_temp,"running_flag","","","","","true","false");
-                }
-                else if(strcmp(cloud_flag,"CLOUD_C")==0){
-                    global_replace(filename_temp,"running","stopped");
-                }
+                sprintf(node_name,"compute%d",i);
+                node_file_to_stop(stackdir,node_name,cloud_flag);
             }
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
@@ -2398,8 +1824,6 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     if(show_current_cluster(temp_workdir,temp_cluster_name,0)!=0){
         return -127;
     }
-    char buffer1[64]="";
-    char buffer2[64]="";
     char cloud_flag[32]="";
     char doubleconfirm[64]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -2412,62 +1836,30 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
 
     create_and_get_vaultdir(workdir,vaultdir);
     if(code_loc_flag_var==1){
-#ifdef _WIN32
-        sprintf(url_aws_root,"%s\\aws\\",url_code_root_var);
-        sprintf(url_qcloud_root,"%s\\qcloud\\",url_code_root_var);
-        sprintf(url_alicloud_root,"%s\\alicloud\\",url_code_root_var);
-#else
-        sprintf(url_aws_root,"%s/aws/",url_code_root_var);
-        sprintf(url_qcloud_root,"%s/qcloud/",url_code_root_var);
-        sprintf(url_alicloud_root,"%s/alicloud/",url_code_root_var);
-#endif
+        sprintf(url_aws_root,"%s%saws%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        sprintf(url_qcloud_root,"%s%sqcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        sprintf(url_alicloud_root,"%s%salicloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
     }
     else{
         sprintf(url_aws_root,"%saws/",url_code_root_var);
         sprintf(url_qcloud_root,"%sqcloud/",url_code_root_var);
         sprintf(url_alicloud_root,"%salicloud/",url_code_root_var);
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
-    sprintf(confdir,"%s\\conf\\",workdir);
-    if(folder_exist_or_not(confdir)!=0){
-        sprintf(cmdline,"mkdir %s > nul 2>&1",confdir);
-        system(cmdline);
-    }
-    sprintf(filename_temp,"%s\\tf_prep.conf",confdir);
+    get_cloud_flag(workdir,cloud_flag);
+    sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
+    sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(filename_temp,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        sprintf(cmdline,"move %s %s.prev > nul 2>&1",filename_temp,filename_temp);
+        sprintf(cmdline,"%s %s %s.prev %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-#else
-    sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
-    sprintf(confdir,"%s/conf/",workdir);
-    if(folder_exist_or_not(confdir)!=0){
-        sprintf(cmdline,"mkdir -p %s >> /dev/null 2>&1",confdir);
-        system(cmdline);
-    }
-    sprintf(filename_temp,"%s/tf_prep.conf",confdir);
-    if(file_exist_or_not(filename_temp)==0){
-        sprintf(cmdline,"mv %s %s.prev >> /dev/null 2>&1",filename_temp,filename_temp);
-        system(cmdline);
-    }
-#endif
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(code_loc_flag_var==1){
-#ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf > nul 2>&1",url_alicloud_root,confdir);
-#else
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",url_alicloud_root,confdir);
-#endif
+            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-#ifdef _WIN32
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s\\tf_prep.conf",url_alicloud_root,confdir);
-#else
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",url_alicloud_root,confdir);
-#endif
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_alicloud_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2475,18 +1867,10 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         if(code_loc_flag_var==1){
-#ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf >nul 2>&1",url_qcloud_root,confdir);
-#else
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",url_qcloud_root,confdir);
-#endif
+            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-#ifdef _WIN32
-        sprintf(cmdline,"curl %stf_prep.conf -s -o %s\\tf_prep.conf",url_qcloud_root,confdir);
-#else
-        sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",url_qcloud_root,confdir);
-#endif
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_qcloud_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2494,18 +1878,10 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(code_loc_flag_var==1){
-#ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\tf_prep.conf %s\\tf_prep.conf > nul 2>&1",url_aws_root,confdir);
-#else
-            sprintf(cmdline,"/bin/cp %s/tf_prep.conf %s/tf_prep.conf >> /dev/null 2>&1",url_aws_root,confdir);
-#endif
+            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-#ifdef _WIN32
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s\\tf_prep.conf",url_aws_root,confdir);
-#else
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s/tf_prep.conf",url_aws_root,confdir);
-#endif
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_aws_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2514,11 +1890,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     else{
         return 1;
     }
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\tf_prep.conf",confdir);
-#else
-    sprintf(filename_temp,"%s/tf_prep.conf",confdir);
-#endif
+    sprintf(filename_temp,"%s%stf_prep.conf",confdir,PATH_SLASH);
     find_and_replace(filename_temp,"CLUSTER_ID","","","","","hpcnow",temp_cluster_name);
     printf("[ -INFO- ] Default configuration file has been downloaded.\n");
     if(edit_flag!=0){
@@ -2528,16 +1900,10 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
         scanf("%s",doubleconfirm);
         if(strcmp(doubleconfirm,"y-e-s")!=0){
             printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
-            printf("|          You can still switch to this cluster and run 'hpcopr edit-conf' to \n");
-            printf("|          modify and save the default configuration file later. Exit now.\n");
             return 3;
         }
     }
-#ifdef _WIN32
-    sprintf(cmdline,"notepad %s\\tf_prep.conf",confdir);
-#else
-    sprintf(cmdline,"vi %s/tf_prep.conf",confdir);
-#endif
+    sprintf(cmdline,"%s %s%stf_prep.conf",EDITOR_CMD,confdir,PATH_SLASH);
     system(cmdline);
     return 0;
 }
@@ -2549,11 +1915,7 @@ int edit_configuration_file(char* workdir, char* crypto_keyfile){
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char doubleconfirm[64]="";
-#ifdef _WIN32
-    sprintf(filename_temp,"%s\\conf\\tf_prep.conf",workdir);
-#else
-    sprintf(filename_temp,"%s/conf/tf_prep.conf",workdir);
-#endif
+    sprintf(filename_temp,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         printf("[ -INFO- ] Cluster configuration file not found. Would you like to get one?\n");
         printf("[ INPUT: ] Only 'y-e-s' is accepted to confirm: ");
@@ -2563,6 +1925,7 @@ int edit_configuration_file(char* workdir, char* crypto_keyfile){
             return 1;
         }
         get_default_conf(workdir,crypto_keyfile,0);
+        return 0;
     }
 #ifdef _WIN32
     sprintf(cmdline,"notepad %s",filename_temp);
@@ -2570,5 +1933,137 @@ int edit_configuration_file(char* workdir, char* crypto_keyfile){
     sprintf(cmdline,"vi %s",filename_temp);
 #endif
     system(cmdline);
+    return 0;
+}
+
+int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
+    if(strcmp(option,"mc")!=0&&strcmp(option,"mcdb")!=0&&strcmp(option,"all")!=0){
+        return -5;
+    }
+    if(cluster_empty_or_not(workdir)==0){
+        return -1;
+    }
+    char stackdir[DIR_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char* sshkey_folder=SSHKEY_DIR;
+    char cloud_flag[16]="";
+    char node_name[16]="";
+    char doubleconfirm[64]="";
+    char bucket_conf[FILENAME_LENGTH]="";
+    int i;
+    int compute_node_num=0;
+
+    printf("\n");
+    printf("|*                                C A U T I O N !                                  \n");
+    printf("|*                                                                                 \n");
+    printf("|*   YOU ARE RE-INITIALIZING THE CLUSTER NODES! YOUR CRITICAL RESOURCES WILL BE    \n");
+    printf("|*   DESTROYED AND RE-CREATED !! THIS OPERATION MAY FAIL DUE TO VARIOUS REASONS    \n");
+    printf("|*   AND YOU WILL HAVE TO DESTROY THE *WHOLE* CLUSTER AND RE-INIT IF ANYTHING      \n");
+    printf("|*   GOES WRONG ! Usually we do not recommend users to do this operation.          \n");
+    printf("|*                                                                                 \n");
+    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
+    printf("[ INPUT: ] ");
+    scanf("%s",doubleconfirm);
+    if(strcmp(doubleconfirm,"y-e-s")!=0){
+        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+        printf("|          Nothing changed.\n");
+        return 1;
+    }
+
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(cmdline,"%s %s%stmp %s && %s %s%stmp%s* %s",MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"%s %s%shpc_stack_master.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"%s %s%shpc_stack_compute*.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    if(strcmp(option,"mcdb")==0||strcmp(option,"all")==0){
+        sprintf(cmdline,"%s %s%shpc_stack_database.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    if(strcmp(option,"all")==0){
+        sprintf(cmdline,"%s %s%shpc_stack_natgw.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    decrypt_files(workdir,crypto_keyfile);
+    printf("[ -INFO- ] Removing previous nodes ...\n");
+    if(terraform_execution(TERRAFORM_EXEC,"apply",workdir,crypto_keyfile,OPERATION_ERROR_LOG)!=0){
+        printf("[ FATAL: ] Failed to delete the previous nodes. Rolling back now ...\n");
+        sprintf(cmdline,"%s %s%stmp%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,stackdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        delete_decrypted_files(workdir,crypto_keyfile);
+        return 3;
+    }
+    sprintf(cmdline,"%s %s%stmp%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,stackdir,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"%s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    decrypt_files(workdir,crypto_keyfile);
+    get_cloud_flag(workdir,cloud_flag);
+    node_file_to_running(stackdir,"master",cloud_flag);
+    node_file_to_running(stackdir,"natgw",cloud_flag);
+    node_file_to_running(stackdir,"database",cloud_flag);
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    compute_node_num=get_compute_node_num(filename_temp,"all");
+    for(i=1;i<compute_node_num+1;i++){
+        sprintf(node_name,"compute%d",i);
+        node_file_to_running(stackdir,node_name,cloud_flag);
+    }
+    printf("[ -INFO- ] Successfully removed previous nodes. Rebuilding new nodes ...\n");
+    if(terraform_execution(TERRAFORM_EXEC,"apply",workdir,crypto_keyfile,OPERATION_ERROR_LOG)!=0){
+        printf("[ FATAL: ] Failed to rebuild the nodes. Exit now.\n");
+        delete_decrypted_files(workdir,crypto_keyfile);
+        return 5;
+    }
+    if(strcmp(cloud_flag,"CLOUD_A")==0){
+        printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",ALI_SLEEP_TIME);
+        for(i=0;i<ALI_SLEEP_TIME;i++){
+            printf("[ -WAIT- ] Still need to wait %d seconds ... \r",ALI_SLEEP_TIME-i);
+            fflush(stdout);
+            sleep(1);
+        }
+    }
+    else if(strcmp(cloud_flag,"CLOUD_B")==0){
+        printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",QCLOUD_SLEEP_TIME);
+        for(i=0;i<QCLOUD_SLEEP_TIME;i++){
+            printf("[ -WAIT- ] Still need to wait %d seconds ... \r",QCLOUD_SLEEP_TIME-i);
+            fflush(stdout);
+            sleep(1);
+        }
+    }
+    else if(strcmp(cloud_flag,"CLOUD_C")==0){
+        printf("[ -INFO- ] Remote executing now, please wait %d seconds for this step ...\n",AWS_SLEEP_TIME_GLOBAL);
+        for(i=0;i<AWS_SLEEP_TIME_GLOBAL;i++){
+            printf("[ -WAIT- ] Still need to wait %d seconds ... \r",AWS_SLEEP_TIME_GLOBAL-i);
+            fflush(stdout);
+            sleep(1);
+        }
+    }
+    else{
+        return -127;
+    }
+    printf("[ -INFO- ] Remote execution commands sent.\n");
+    printf("[ -INFO- ] After the cluster operation:\n|\n");
+    graph(workdir,crypto_keyfile,0);
+    printf("|\n");
+    decrypt_get_bucket_conf(workdir,crypto_keyfile,bucket_conf);
+    if(strcmp(cloud_flag,"CLOUD_A")==0){
+        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.ossutilconfig");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_B")==0){
+        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.cos.conf");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_C")==0){
+        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.s3cfg");
+    }
+    get_latest_hosts(stackdir,filename_temp);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile");
+    update_cluster_summary(workdir,crypto_keyfile);
+    printf("[ -INFO- ] The reinitialization process may need 7 minutes. Please do not operate\n");
+    printf("|          this cluster during the period. Exit now.\n");
+    delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }

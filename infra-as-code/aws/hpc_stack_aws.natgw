@@ -37,3 +37,11 @@ resource "aws_ec2_instance_state" "ngw_state" {
   instance_id = aws_instance.natgw.id
   state = "running"
 }
+
+resource "aws_route_table" "subnet_rt" {
+  vpc_id = aws_vpc.hpc_stack.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    network_interface_id = aws_instance.natgw.primary_network_interface_id
+  }
+}

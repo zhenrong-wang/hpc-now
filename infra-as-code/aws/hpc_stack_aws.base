@@ -291,14 +291,6 @@ resource "aws_subnet" "hpc_stack_pub_subnet" {
   }
 }
 
-resource "aws_route_table" "subnet_rt" {
-  vpc_id = aws_vpc.hpc_stack.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    network_interface_id = aws_instance.natgw.primary_network_interface_id
-  }
-}
-
 resource "aws_route_table_association" "subnet_as" {
   subnet_id = aws_subnet.hpc_stack_subnet.id
   route_table_id = aws_route_table.subnet_rt.id
@@ -492,20 +484,22 @@ resource "aws_efs_mount_target" "hpc_data_mount_target" {
 #CREATE a bucket for data storage
 resource "aws_s3_bucket" "hpc_data_storage" {
   bucket = "BUCKET_ID"
+  force_destroy = "true"
   tags = {
     Project = "RG_NAME"
   }
 }
 
+/*
 resource "aws_s3_bucket_acl" "hpcdatastor_acl" {
   bucket = aws_s3_bucket.hpc_data_storage.id
   acl = "private"
-}
+}*/
 
 #create an iam user with the policy to only access the bucket, nothing else
 resource "aws_iam_user" "hpc_bucket_user" {
   name = "BUCKET_USER_ID"
-  force_destroy = true
+  force_destroy = "true"
 }
 
 resource "aws_iam_access_key" "hpc_bucket_user_key" {
