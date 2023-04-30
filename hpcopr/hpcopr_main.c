@@ -341,7 +341,13 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     if(strcmp(argv[1],"refresh")==0){
-        show_current_cluster(workdir,current_cluster_name,2);
+        if(show_current_cluster(workdir,current_cluster_name,2)==1){
+            printf("[ FATAL: ] Please swith to a cluster first, or specify one to refresh:\n");
+            list_all_cluster_names();
+            print_tail();
+            system_cleanup();
+            return -9;
+        }
         if(cluster_empty_or_not(workdir)==0){
             printf("[ FATAL: ] The cluster cannot be refreshed (either in operation progress or empty).\n");
             printf("|          Please run 'hpcopr glance all' to check. Exit now.\n");
