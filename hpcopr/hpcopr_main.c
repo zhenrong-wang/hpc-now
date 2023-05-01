@@ -328,12 +328,10 @@ int main(int argc, char* argv[]){
             run_flag=glance_clusters(argv[2],crypto_keyfile);
         }
         if(run_flag==1){
-            printf("[ FATAL: ] Please swith to a cluster first, or specify one to glance:\n");
-            list_all_cluster_names();
+            printf("[ FATAL: ] Please swith to a cluster first, or specify one to glance.\n");
         }
         else if(run_flag==-1){
             printf("[ FATAL: ] The specified cluster name %s is not in the registry.\n",argv[2]);
-            list_all_cluster_names();
         }
         print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
@@ -748,7 +746,7 @@ int main(int argc, char* argv[]){
             return 17;
         }
     }
-    
+
     if(cluster_asleep_or_not(workdir)==0){
         printf("[ FATAL: ] The current cluster is in the state of hibernation. Please wake up\n");
         printf("|          first. Command: hpcopr wakeup minimal/all . Exit now.\n");
