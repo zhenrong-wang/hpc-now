@@ -220,8 +220,12 @@ int list_all_cluster_names(void){
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
 //    int getline_flag=0;
     if(file_p==NULL){
-        printf("[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n");
+        printf("[ FATAL: ] Failed to open the registry. Please repair the HPC-NOW services.\n");
         return -1;
+    }
+    if(file_empty_or_not(ALL_CLUSTER_REGISTRY)==0){
+        printf("[ -INFO- ] The registry is empty. Please create one to operate.\n");
+        return 1;
     }
     printf("[ -INFO- ] List of all the clusters:\n");
     while(fgetline(file_p,registry_line)!=1){
@@ -448,6 +452,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     archive_log(log_trash,tf_realtime_log);
     archive_log(log_trash,tf_archive_log);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,cluster_workdir,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
     printf("[ -INFO- ] Deleting the cluster from the registry ...\n");
     delete_from_cluster_registry(target_cluster_name);
     printf("[ -DONE- ] The cluster %s has been removed completely.\n",target_cluster_name);

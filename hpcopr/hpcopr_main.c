@@ -748,7 +748,7 @@ int main(int argc, char* argv[]){
             return 17;
         }
     }
-
+    
     if(cluster_asleep_or_not(workdir)==0){
         printf("[ FATAL: ] The current cluster is in the state of hibernation. Please wake up\n");
         printf("|          first. Command: hpcopr wakeup minimal/all . Exit now.\n");
