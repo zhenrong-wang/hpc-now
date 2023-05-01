@@ -492,9 +492,6 @@ int generate_sshkey(char* sshkey_folder, char* pubkey){
     FILE* file_p=NULL;
 
     sprintf(cmdline,"%s %s %s",MKDIR_CMD,sshkey_folder,SYSTEM_CMD_REDIRECT);
-    if(system(cmdline)!=0){
-        return -1;
-    }
 #ifdef _WIN32
     sprintf(cmdline,"attrib +h +s +r %s",sshkey_folder);
     system(cmdline);
