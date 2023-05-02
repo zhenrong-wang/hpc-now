@@ -551,10 +551,27 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
 }
 
 /* Should write a real C function, instead of calling system commands. But it is totally OK.*/
-void archive_log(char* logarchive, char* logfile){
-    char cmdline[CMDLINE_LENGTH]="";
-    sprintf(cmdline,"%s %s >> %s 2>>%s",CAT_FILE_CMD,logfile,logarchive,SYSTEM_CMD_ERROR_LOG);
-    system(cmdline);
+int archive_log(char* logarchive, char* logfile){
+    char line_buffer[LINE_LENGTH]="";
+    time_t current_time_long;
+    struct tm* time_p=NULL;
+    time(&current_time_long);
+    time_p=localtime(&current_time_long);
+    if(file_exist_or_not(logfile)!=0){
+        return -1;
+    }
+    FILE* file_p=fopen(logarchive,"a+");
+    if(file_p==NULL){
+        return -1;
+    }
+    FILE* file_p_2=fopen(logfile,"r");
+    fprintf(file_p,"\n\n# TIMESTAMP OF THIS ARCHIVE: %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
+    while(fgetline(file_p_2,line_buffer)==0){
+        fprintf(file_p,"%s\n",line_buffer);
+    }
+    fclose(file_p_2);
+    fclose(file_p);
+    return 0;
 }
 
 void single_file_to_running(char* filename_temp, char* cloud_flag){

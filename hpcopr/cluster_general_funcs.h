@@ -27,7 +27,7 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename);
 int getstate(char* workdir, char* crypto_filename);
 int generate_sshkey(char* sshkey_folder, char* pubkey);
 int update_cluster_summary(char* workdir, char* crypto_keyfile);
-void archive_log(char* logarchive, char* logfile);
+int archive_log(char* logarchive, char* logfile);
 void update_compute_template(char* stackdir, char* cloud_flag);
 int wait_for_complete(char* workdir, char* option, char* errorlog);
 int graph(char* workdir, char* crypto_keyfile, int graph_level);

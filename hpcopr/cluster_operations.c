@@ -131,13 +131,8 @@ int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
 
 int exit_current_cluster(void){
     char cmdline[CMDLINE_LENGTH]="";
-#ifdef _WIN32
-    sprintf(cmdline,"del /f /q %s %s",CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
-#else
-    sprintf(cmdline,"rm -rf %s %s",CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
-#endif
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
     return system(cmdline);
-    
 }
 
 int switch_to_cluster(char* target_cluster_name){
@@ -206,11 +201,7 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,deleted_cluster_name)==0){
         exit_current_cluster();
     }
-#ifdef _WIN32
-    sprintf(cmdline,"move /y %s %s %s",filename_temp,cluster_registry,SYSTEM_CMD_REDIRECT);
-#else
-    sprintf(cmdline,"mv %s %s %s",filename_temp,cluster_registry,SYSTEM_CMD_REDIRECT);
-#endif
+    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,cluster_registry,SYSTEM_CMD_REDIRECT);
     return system(cmdline);
 }
 
@@ -1930,11 +1921,7 @@ int edit_configuration_file(char* workdir, char* crypto_keyfile){
         get_default_conf(workdir,crypto_keyfile,0);
         return 0;
     }
-#ifdef _WIN32
-    sprintf(cmdline,"notepad %s",filename_temp);
-#else
-    sprintf(cmdline,"vi %s",filename_temp);
-#endif
+    sprintf(cmdline,"%s %s",EDITOR_CMD,filename_temp);
     system(cmdline);
     return 0;
 }

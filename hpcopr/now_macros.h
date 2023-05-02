@@ -20,7 +20,7 @@
 #define SYSTEM_CMD_REDIRECT ">nul 2>>C:\\programdata\\hpc-now\\system_command_error.log"
 #define DESTROYED_DIR "c:\\programdata\\hpc-now\\.destroyed\\"
 #define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
-#define SSHKEY_DIR "C:\\hpc-now\\.ssh"
+#define SSHKEY_DIR "C:\\hpc-now\\.now-ssh"
 #define OPERATION_ERROR_LOG "c:\\hpc-now\\hpc-now.err.log"
 #define HPC_NOW_ROOT_DIR "c:\\programdata\\hpc-now\\"
 

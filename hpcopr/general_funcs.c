@@ -160,11 +160,7 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     }
     fclose(file_p);
     fclose(file_p_tmp);
-#ifdef _WIN32
-    sprintf(cmdline,"move /y %s %s %s",filename_temp,filename,SYSTEM_CMD_REDIRECT);
-#else
-    sprintf(cmdline,"mv %s %s %s",filename_temp,filename,SYSTEM_CMD_REDIRECT);
-#endif
+    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 0;
 }
@@ -291,11 +287,7 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     fprintf(file_temp_p,"%s",single_line);
     fclose(file_p);
     fclose(file_temp_p);
-#ifdef _WIN32
-    sprintf(cmdline,"del /f /q %s %s && move /y %s %s %s",filename,SYSTEM_CMD_REDIRECT,filename_temp,filename,SYSTEM_CMD_REDIRECT);
-#else
-    sprintf(cmdline,"rm -rf %s %s && mv %s %s %s",filename,SYSTEM_CMD_REDIRECT,filename_temp,filename,SYSTEM_CMD_REDIRECT);
-#endif
+    sprintf(cmdline,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return replace_count;
 }
