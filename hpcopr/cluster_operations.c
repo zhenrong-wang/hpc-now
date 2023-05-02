@@ -1841,8 +1841,10 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     }
     get_cloud_flag(workdir,cloud_flag);
     sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(folder_exist_or_not(confdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
     sprintf(filename_temp,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
         sprintf(cmdline,"%s %s %s.prev %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
@@ -1970,7 +1972,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         printf("|          * Will try to rebuild all the cluster nodes.\n");
     }
     create_and_get_stackdir(workdir,stackdir);
-    sprintf(cmdline,"%s %s%stmp %s && %s %s%stmp%s* %s",MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%stmp %s && %s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s%shpc_stack_master.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);

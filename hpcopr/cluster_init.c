@@ -105,14 +105,22 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
     printf("[ START: ] Start initializing the cluster ...\n");
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(folder_exist_or_not(stackdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(vaultdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(logdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(confdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
     if(code_loc_flag_var==1){
         sprintf(url_aws_root,"%s%saws%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
     }
@@ -743,14 +751,22 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
     printf("[ START: ] Start initializing the cluster ...\n");
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(folder_exist_or_not(stackdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(vaultdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(logdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(confdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
     if(code_loc_flag_var==1){
         sprintf(url_qcloud_root,"%s%sqcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
     }
@@ -1283,14 +1299,22 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
     printf("[ START: ] Start initializing the cluster ...\n");
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(folder_exist_or_not(stackdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(vaultdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(logdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(confdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
     if(code_loc_flag_var==1){
         sprintf(url_alicloud_root,"%s%salicloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
     }

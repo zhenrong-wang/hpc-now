@@ -114,9 +114,9 @@ int get_syserrlog(char* syserror_logfile){
 #ifdef _WIN32
     printf("|          c:\\hpc-now\\hpcopr_syserr_temp.log\n");
 #elif __APPLE__
-    printf("|          /Users/hpc-now/cluster_syslog_temp.log\n");
+    printf("|          /Users/hpc-now/hpcopr_syserr_temp.log\n");
 #elif __linux__
-    printf("|          /home/hpc-now/cluster_syslog_temp.log\n");
+    printf("|          /home/hpc-now/hpcopr_syserr_temp.log\n");
 #endif
     return 0;
 }

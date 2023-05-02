@@ -142,9 +142,10 @@ int main(int argc, char* argv[]){
         return -2;
     }
 #endif
-
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,GENERAL_CONF_DIR,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(folder_exist_or_not(GENERAL_CONF_DIR)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,GENERAL_CONF_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
 
     if(argc==1){
         print_help();

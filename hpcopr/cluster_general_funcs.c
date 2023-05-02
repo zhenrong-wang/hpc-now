@@ -120,8 +120,10 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
 void create_and_get_vaultdir(char* workdir, char* vaultdir){
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(vaultdir,"%s%svault",workdir,PATH_SLASH);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(folder_exist_or_not(vaultdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
 }
 
 int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes){
@@ -491,8 +493,10 @@ int generate_sshkey(char* sshkey_folder, char* pubkey){
     char filename_temp2[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
 
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,sshkey_folder,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(folder_exist_or_not(sshkey_folder)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,sshkey_folder,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
 #ifdef _WIN32
     sprintf(cmdline,"attrib +h +s +r %s",sshkey_folder);
     system(cmdline);
