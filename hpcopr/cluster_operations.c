@@ -403,8 +403,6 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     get_workdir(cluster_workdir,target_cluster_name);
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_archive_log,"%s%slog%stf_prep.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
-    archive_log(log_trash,tf_realtime_log);
-    archive_log(log_trash,tf_archive_log);
     if(cluster_empty_or_not(cluster_workdir)!=0){
         printf("[ -WARN- ] The specified cluster is *NOT* empty!\n");
         glance_clusters(target_cluster_name,crypto_keyfile);
@@ -423,6 +421,8 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
                     delete_decrypted_files(cluster_workdir,crypto_keyfile);
                     return 1;
                 }
+                archive_log(log_trash,tf_realtime_log);
+                archive_log(log_trash,tf_archive_log);
             }
             else{
                 printf("[ -INFO- ] Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
@@ -449,8 +449,6 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
         }
     }
     printf("[ -INFO- ] Removing all the related files ...\n");
-    archive_log(log_trash,tf_realtime_log);
-    archive_log(log_trash,tf_archive_log);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,cluster_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     printf("[ -INFO- ] Deleting the cluster from the registry ...\n");
