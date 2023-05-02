@@ -421,8 +421,8 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
                     delete_decrypted_files(cluster_workdir,crypto_keyfile);
                     return 1;
                 }
-                archive_log(log_trash,tf_realtime_log);
                 archive_log(log_trash,tf_archive_log);
+                archive_log(log_trash,tf_realtime_log);
             }
             else{
                 printf("[ -INFO- ] Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
