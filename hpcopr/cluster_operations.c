@@ -1084,7 +1084,6 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     char vaultdir[DIR_LENGTH]="";
     char cloud_flag[16]="";
     char* tf_exec=TERRAFORM_EXEC;
-    char* sshkey_dir=SSHKEY_DIR;
     char* error_log=OPERATION_ERROR_LOG;
     int i;
     int down_num=0;
