@@ -146,12 +146,12 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(region_valid,"%s%sregion_valid.tf",stackdir,PATH_SLASH);
     global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
     global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
-    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log)!=0){
+    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log,0)!=0){
         return -1;
     }
-    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,0)!=0){
         global_replace(region_valid,"cn-northwest-1","us-east-1");
-        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,0)!=0){
             printf("[ FATAL: ] The keypair may be invalid. Please use 'hpcopr new-keypair' to update with a\n");
             printf("|          valid keypair. Exit now.\n");
             sprintf(cmdline,"%s %s%sregion_valid.tf %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -521,12 +521,12 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     system(cmdline);
     sprintf(cmdline,"%s %s%shpc_stack.compute %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log)!=0){
+    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log,0)!=0){
         return -1;
     }
-    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
         printf("[ -INFO- ] Rolling back and exit now ...\n");
-        if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)==0){
+        if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log,1)==0){
             delete_decrypted_files(workdir,crypto_keyfile);
             sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
@@ -1105,12 +1105,12 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     system(cmdline);
     sprintf(cmdline,"%s %s%shpc_stack.compute %s && %s %s%sNAS_Zones_QCloud.txt %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log)!=0){
+    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log,0)!=0){
         return -1;
     }
-    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
         printf("[ -INFO- ] Rolling back and exit now ...\n");
-        if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)==0){
+        if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log,1)==0){
             delete_decrypted_files(workdir,crypto_keyfile);
             sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
@@ -1646,12 +1646,12 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     system(cmdline);
     sprintf(cmdline,"%s %s%shpc_stack.compute %s && %s %s%sNAS_Zones_ALI.txt %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log)!=0){
+    if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log,0)!=0){
         return -1;
     }
-    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log)!=0){
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
         printf("[ -INFO- ] Rolling back and exit now ...\n");
-        if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log)==0){
+        if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log,1)==0){
             delete_decrypted_files(workdir,crypto_keyfile);
             sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
