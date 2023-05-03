@@ -459,7 +459,7 @@ if [ -f /root/hostfile ]; then
       echo -e "alias cos='/opt/cosbrowser.AppImage --no-sandbox'" >> /etc/profile
     fi
   elif [ $CLOUD_FLAG = 'CLOUD_A' ]; then
-    wget ${URL_UTILS}oss-browser-linux-x64.zip -O /opt/oss.zip
+    wget https://gosspublic.alicdn.com/oss-browser/1.16.0/oss-browser-linux-x64.zip -O /opt/oss.zip
     cd /opt && unzip -o oss.zip && rm -rf oss.zip 
     cat /etc/profile | grep ossbrowser
     if [ $? -ne 0 ]; then
