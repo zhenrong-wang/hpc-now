@@ -1032,7 +1032,6 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag){
 int get_cluster_bucket_id(char* workdir, char* crypto_keyfile, char* bucket_id){
     char vaultdir[DIR_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
-    char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char md5sum[64]="";
     create_and_get_vaultdir(workdir,vaultdir);
