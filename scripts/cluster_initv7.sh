@@ -170,10 +170,22 @@ echo -e "# $time_current SELINUX Disabled." >> ${logfile}
 
 ######### Yum some packages ############
 # The update step really takes time, trying to avoid it.
-if [ $CLOUD_FLAG != 'CLOUD_C' ]; then
+if [ $CLOUD_FLAG = 'CLOUD_B' ]; then
   yum -y update
+  yum -y install https://mirrors.cloud.tencent.com/epel/epel-release-latest-9.noarch.rpm
+  yum -y install https://mirrors.cloud.tencent.com/epel/epel-next-release-latest-9.noarch.rpm
+  sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.cloud.tencent.com|' /etc/yum.repos.d/epel*
+  sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
+elif [ $CLOUD_FLAG = 'CLOUD_A' ]; then
+  yum -y update
+  yum -y install https://mirrors.aliyun.com/epel/epel-release-latest-9.noarch.rpm?spm=a2c6h.25603864.0.0.21fa5993AxlJwA
+  yum -y install https://mirrors.aliyun.com/epel/epel-next-release-latest-9.noarch.rpm?spm=a2c6h.25603864.0.0.21fa5993AxlJwA
+  sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.aliyun.com|' /etc/yum.repos.d/epel*
+  sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
+else
+  yum -y install epel-release #epel release is really slow for China region
 fi
-yum -y install epel-release #epel release is really slow for China region
+yum -y makecache
 yum -y install gtk2 gtk2-devel
 yum -y install python python3
 yum -y install gcc-c++ gcc-gfortran

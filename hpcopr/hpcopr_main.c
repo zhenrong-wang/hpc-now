@@ -491,6 +491,9 @@ int main(int argc, char* argv[]){
     }
     if(strcmp(argv[1],"vault")==0){
         run_flag=get_vault_info(workdir,crypto_keyfile);
+        if(run_flag==-1){
+            print_empty_cluster_info();
+        }
         print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
         system_cleanup();
