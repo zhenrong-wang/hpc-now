@@ -1789,11 +1789,11 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
         }
     }
     update_cluster_summary(workdir,crypto_keyfile);
-    printf("[ -DONE- ] Congratulations! The cluster is in the state of running.\n");
-    delete_decrypted_files(workdir,crypto_keyfile);
     if(strcmp(option,"all")==0){
         remote_exec(workdir,sshkeydir,"quick",1);
     }
+    printf("[ -DONE- ] Congratulations! The cluster is in the state of running.\n");
+    delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
 
