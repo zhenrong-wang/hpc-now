@@ -1676,9 +1676,9 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     }
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
-            usleep(1000000);
+            sleep(1);
         }
-        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
+        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,0)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             return -1;
         }
@@ -1769,9 +1769,9 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     }
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
-            usleep(1000000);
+            sleep(1);
         }
-        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
+        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,0)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             return -1;
         }
