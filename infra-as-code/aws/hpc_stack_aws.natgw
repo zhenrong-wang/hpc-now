@@ -38,6 +38,11 @@ resource "aws_ec2_instance_state" "ngw_state" {
   state = "running"
 }
 
+resource "aws_route_table_association" "subnet_as" {
+  subnet_id = aws_subnet.hpc_stack_subnet.id
+  route_table_id = aws_route_table.subnet_rt.id
+}
+
 resource "aws_route_table" "subnet_rt" {
   vpc_id = aws_vpc.hpc_stack.id
   route {

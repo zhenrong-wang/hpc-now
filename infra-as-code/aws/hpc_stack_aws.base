@@ -291,11 +291,6 @@ resource "aws_subnet" "hpc_stack_pub_subnet" {
   }
 }
 
-resource "aws_route_table_association" "subnet_as" {
-  subnet_id = aws_subnet.hpc_stack_subnet.id
-  route_table_id = aws_route_table.subnet_rt.id
-}
-
 resource "aws_route_table" "pub_subnet_rt" {
   vpc_id = aws_vpc.hpc_stack.id
   route {
@@ -455,7 +450,7 @@ resource "aws_security_group" "efs_security_group" {
 
 resource "aws_efs_file_system" "hpc_apps" {
   tags = {
-    Name = "hpc_apps"
+    Name = "hpc_apps_RG_NAME"
     Project = "RG_NAME"
   }
   availability_zone_name = "DEFAULT_ZONE_ID"
@@ -467,9 +462,16 @@ resource "aws_efs_mount_target" "hpc_apps_mount_target" {
   security_groups = [aws_security_group.efs_security_group.id]
 }
 
+resource "aws_efs_backup_policy" "no_backup_hpc_apps" {
+  file_system_id = aws_efs_file_system.hpc_apps.id
+  backup_policy {
+    status = "DISABLED"
+  }
+}
+
 resource "aws_efs_file_system" "hpc_data" {
   tags = {
-    Name = "hpc_data"
+    Name = "hpc_data_RG_NAME"
     Project = "RG_NAME"
   }
   availability_zone_name = "DEFAULT_ZONE_ID"
@@ -479,6 +481,13 @@ resource "aws_efs_mount_target" "hpc_data_mount_target" {
   file_system_id = aws_efs_file_system.hpc_data.id
   subnet_id = aws_subnet.hpc_stack_subnet.id
   security_groups = [aws_security_group.efs_security_group.id]
+}
+
+resource "aws_efs_backup_policy" "no_backup_hpc_data" {
+  file_system_id = aws_efs_file_system.hpc_data.id
+  backup_policy {
+    status = "DISABLED"
+  }
 }
 
 #CREATE a bucket for data storage
