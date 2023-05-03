@@ -22,18 +22,15 @@
 
 void print_empty_cluster_info(void){
     printf("[ -INFO- ] It seems the cluster is empty. You can either:\n");
-    printf("|          a) Run 'hpcopr init' to generate a *default* cluster directly. OR\n");
-    printf("|          b) Run 'hpcopr get-conf' to get and modify the configuration file\n");
-    printf("|             then run 'hpcopr init' to generate a *customized* cluster.\n");
-    printf("[ FATAL: ] Exit now.\n");
+    printf("|          a) Run 'hpcopr init' to create a *default* cluster directly. OR\n");
+    printf("|          b) Run 'hpcopr get-conf' -> 'hpcopr init' \n");
+    printf("|          Exit now.\n");
 }
 
 void print_cluster_init_done(void){
     printf("[ -DONE- ] Congratulations! The cluster is initializing now. This step may take at\n");
-    printf("|          least 7 minutes. You can log into the master node now.\n"); 
-    printf("|          Please check the initialization progress in the /root/cluster_init.log.\n");
-    printf("|          By default, NO HPC software will be built into the cluster.\n");
-    printf("|          Please run 'hpcmgr install' command to install the software you need.\n");
+    printf("|          least 7 minutes. Please do not operate the cluster during this period. \n"); 
+    printf("|          You can now log on the master node by 'hpcopr ssh USERNAME'.\n");
 }
 
 void print_help(void){
