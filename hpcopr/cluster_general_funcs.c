@@ -355,6 +355,8 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     get_crypto_key(crypto_key_filename,md5sum);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
+    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
@@ -1036,13 +1038,15 @@ int get_cluster_bucket_id(char* workdir, char* crypto_keyfile, char* bucket_id){
     char md5sum[64]="";
     create_and_get_vaultdir(workdir,vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         return -1;
     }
     decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
-    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
-    return find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_id);
+    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
+    find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_id);
+    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    return 0;
 }
 
 /*int create_protection(char* workdir, int minutes){
