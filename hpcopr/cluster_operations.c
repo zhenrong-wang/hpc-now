@@ -1066,8 +1066,8 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
-    remote_exec(workdir,sshkey_dir,"connect",5);
-    remote_exec(workdir,sshkey_dir,"all",6);
+    remote_exec(workdir,sshkey_dir,"connect",7);
+    remote_exec(workdir,sshkey_dir,"all",8);
     for(i=0;i<add_number;i++){
         sprintf(string_temp,"compute%d",current_node_num+i+1);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
