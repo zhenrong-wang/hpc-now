@@ -571,11 +571,7 @@ int generate_random_passwd(char* password){
     char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
     unsigned int seed_num;
     for(i=0;i<PASSWORD_LENGTH;i++){
-#ifdef _WIN32
-        mingw_gettimeofday(&current_time,NULL);
-#else
-        gettimeofday(&current_time,NULL);
-#endif
+        GETTIMEOFDAY_FUNC(&current_time,NULL);
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);
         rand_num=rand()%72;
@@ -591,11 +587,7 @@ int generate_random_db_passwd(char* password){
     char ch_table[62]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     unsigned int seed_num;
     for(i=0;i<PASSWORD_LENGTH;i++){
-#ifdef _WIN32
-        mingw_gettimeofday(&current_time,NULL);
-#else
-        gettimeofday(&current_time,NULL);
-#endif
+        GETTIMEOFDAY_FUNC(&current_time,NULL);
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);
         rand_num=rand()%62;
@@ -610,22 +602,14 @@ int generate_random_string(char* random_string){
     struct timeval current_time;
     char ch_table[36]="abcdefghijklmnopqrstuvwxyz0123456789";
     unsigned int seed_num;
-#ifdef _WIN32
-    mingw_gettimeofday(&current_time,NULL);
-#else
-    gettimeofday(&current_time,NULL);
-#endif
+    GETTIMEOFDAY_FUNC(&current_time,NULL);
     seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
     srand(seed_num);
     rand_num=rand()%26;
     *(random_string+0)=*(ch_table+rand_num);
     usleep(5000);
     for(i=1;i<RANDSTR_LENGTH_PLUS-1;i++){
-#ifdef _WIN32
-        mingw_gettimeofday(&current_time,NULL);
-#else
-        gettimeofday(&current_time,NULL);
-#endif
+        GETTIMEOFDAY_FUNC(&current_time,NULL);
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);
         rand_num=rand()%36;

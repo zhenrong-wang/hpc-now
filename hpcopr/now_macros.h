@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0072"
+#define CORE_VERSION_CODE "0.2.0.0073"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -48,6 +48,8 @@
 #define FILENAME_SUFFIX_SHORT "win"
 #define FILENAME_SUFFIX_FULL "windows"
 
+#define GETTIMEOFDAY_FUNC mingw_gettimeofday
+
 #elif __linux__
 #define PATH_SLASH "/"
 #define CRYPTO_KEY_FILE "/usr/.hpc-now/.now_crypto_seed.lock"
@@ -85,6 +87,8 @@
 #define FILENAME_SUFFIX_SHORT "lin"
 #define FILENAME_SUFFIX_FULL "linux"
 
+#define GETTIMEOFDAY_FUNC gettimeofday
+
 #elif __APPLE__
 #define PATH_SLASH "/"
 #define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock"
@@ -121,6 +125,8 @@
 #define CURRENT_CLUSTER_INDICATOR "/Applications/.hpc-now/.etc/current_cluster.dat"
 #define FILENAME_SUFFIX_SHORT "dwn"
 #define FILENAME_SUFFIX_FULL "darwin"
+
+#define GETTIMEOFDAY_FUNC gettimeofday
 
 #endif
 
