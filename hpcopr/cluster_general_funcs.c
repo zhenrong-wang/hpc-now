@@ -152,6 +152,34 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     return system(cmdline);
 }
 
+int remote_exec_general(char* workdir, char* sshkey_folder, char* commands, int delay_minutes){
+    if(delay_minutes<0){
+        return -1;
+    }
+    char cmdline[CMDLINE_LENGTH]="";
+    char stackdir[DIR_LENGTH]="";
+    char private_key[FILENAME_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char remote_address[32]="";
+    FILE* file_p=NULL;
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    file_p=fopen(filename_temp,"r");
+    if(file_p==NULL){
+        return 1;
+    }
+    fgetline(file_p,remote_address);
+    fclose(file_p);
+    sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
+    if(delay_minutes==0){
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"%s\"",private_key,remote_address,commands);
+    }
+    else{
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"%s\" | at now + %d minutes\"",private_key,remote_address,commands,delay_minutes);
+    }
+    return system(cmdline);
+}
+
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag){
     if(file_exist_or_not(secret_file)!=0){
         return 1;
@@ -999,6 +1027,23 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag){
         global_replace(filename_temp,"running","stopped");
     }
     return 0;
+}
+
+int get_cluster_bucket_id(char* workdir, char* crypto_keyfile, char* bucket_id){
+    char vaultdir[DIR_LENGTH]="";
+    char* now_crypto_exec=NOW_CRYPTO_EXEC;
+    char cmdline[CMDLINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char md5sum[64]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    get_crypto_key(crypto_keyfile,md5sum);
+    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        return -1;
+    }
+    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
+    return find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_id);
 }
 
 /*int create_protection(char* workdir, int minutes){

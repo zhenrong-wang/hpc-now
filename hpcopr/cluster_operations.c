@@ -1925,12 +1925,14 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     }
     char stackdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
+    char remote_commands[64]="";
     char filename_temp[FILENAME_LENGTH]="";
     char* sshkey_folder=SSHKEY_DIR;
     char cloud_flag[16]="";
     char node_name[16]="";
     char doubleconfirm[64]="";
     char bucket_conf[FILENAME_LENGTH]="";
+    char bucket_id[32]="";
     int i;
     int compute_node_num=0;
     printf("\n");
@@ -2033,6 +2035,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     else{
         return -127;
     }
+    get_cluster_bucket_id(workdir,crypto_keyfile,bucket_id);
     printf("[ -INFO- ] Remote execution commands sent.\n");
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
@@ -2040,13 +2043,17 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     decrypt_get_bucket_conf(workdir,crypto_keyfile,bucket_conf);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.ossutilconfig");
+        sprintf(remote_commands,"echo oss://%s > /root/bucket_id.txt",bucket_id);
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.cos.conf");
+        sprintf(remote_commands,"echo cos://%s > /root/bucket_id.txt",bucket_id);
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.s3cfg");
+        sprintf(remote_commands,"echo s3://%s > /root/bucket_id.txt",bucket_id);
     }
+    remote_exec_general(workdir,sshkey_folder,remote_commands,0);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile");
     update_cluster_summary(workdir,crypto_keyfile);

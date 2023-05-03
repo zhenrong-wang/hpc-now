@@ -81,7 +81,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char md5sum[33]="";
-    char bucket_id[12]="";
+    char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
     char master_address[32]="";
@@ -590,6 +590,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             global_replace(filename_temp,"DEFAULT_ENDPOINT",string_temp);
             sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.s3cfg %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
             system(cmdline);
+            sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo s3://%s > /root/bucket_id.txt\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
         }
     }
     else{
@@ -610,6 +612,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             global_replace(filename_temp,"DEFAULT_REGION",region_id);
             global_replace(filename_temp,"DEFAULT_ENDPOINT",string_temp);
             sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.s3cfg %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo s3://%s > /root/bucket_id.txt\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
     }
@@ -728,7 +732,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char md5sum[33]="";
-    char bucket_id[12]="";
+    char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
     char master_address[32]="";
@@ -1160,6 +1164,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         system(cmdline);
         sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.cos.conf\" %s",private_key_file,master_address,SYSTEM_CMD_REDIRECT);
         system(cmdline);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo cos://%s > /root/bucket_id.txt\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
     }
     get_crypto_key(crypto_keyfile,md5sum);
     sprintf(cmdline,"%s encrypt %s %s.tmp %s",now_crypto_exec,filename_temp,filename_temp,md5sum);
@@ -1276,7 +1282,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char md5sum[33]="";
-    char bucket_id[12]="";
+    char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
     char master_address[32]="";
@@ -1699,6 +1705,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.ossutilconfig %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.ossutilconfig\" %s",private_key_file,master_address,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo oss://%s > /root/bucket_id.txt\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     get_crypto_key(crypto_keyfile,md5sum);
