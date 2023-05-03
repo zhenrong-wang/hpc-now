@@ -2043,15 +2043,15 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     decrypt_get_bucket_conf(workdir,crypto_keyfile,bucket_conf);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.ossutilconfig");
-        sprintf(remote_commands,"echo oss://%s > /root/bucket_id.txt",bucket_id);
+        sprintf(remote_commands,"export BUCKET=oss://%s >> /etc/profile",bucket_id);
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.cos.conf");
-        sprintf(remote_commands,"echo cos://%s > /root/bucket_id.txt",bucket_id);
+        sprintf(remote_commands,"export BUCKET=cos://%s >> /etc/profile",bucket_id);
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.s3cfg");
-        sprintf(remote_commands,"echo s3://%s > /root/bucket_id.txt",bucket_id);
+        sprintf(remote_commands,"export BUCKET=s3://%s >> /etc/profile",bucket_id);
     }
     remote_exec_general(workdir,sshkey_folder,remote_commands,0);
     get_latest_hosts(stackdir,filename_temp);

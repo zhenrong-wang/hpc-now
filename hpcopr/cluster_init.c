@@ -590,7 +590,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             global_replace(filename_temp,"DEFAULT_ENDPOINT",string_temp);
             sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.s3cfg %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo s3://%s > /root/bucket_id.txt\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"export BUCKET=s3://%s >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
     }
@@ -613,7 +613,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             global_replace(filename_temp,"DEFAULT_ENDPOINT",string_temp);
             sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.s3cfg %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo s3://%s > /root/bucket_id.txt\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"export BUCKET=s3://%s >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
     }
@@ -1164,7 +1164,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         system(cmdline);
         sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.cos.conf\" %s",private_key_file,master_address,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo cos://%s > /root/bucket_id.txt\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"export BUCKET=cos://%s >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     get_crypto_key(crypto_keyfile,md5sum);
@@ -1706,7 +1706,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         system(cmdline);
         sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.ossutilconfig\" %s",private_key_file,master_address,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo oss://%s > /root/bucket_id.txt\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"export BUCKET=oss://%s >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     get_crypto_key(crypto_keyfile,md5sum);
