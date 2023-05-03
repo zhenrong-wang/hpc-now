@@ -74,7 +74,7 @@ variable "centos7cn" {
 
 variable "centoss9cn" {
   type = list(string)
-  default = ["ami-04f6760c1e4636a33", "ami-057d5a9efe364bef0"]
+  default = ["ami-0c05d3ac21c731fe7", "ami-0500471e9279f267f"]
 }
 
 // us-east-1 & us-east-2

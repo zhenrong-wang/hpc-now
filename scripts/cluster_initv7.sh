@@ -382,7 +382,7 @@ if [ -f /root/hostfile ]; then
   
   yum -y install git python-devel
   if [ $CLOUD_FLAG = 'CLOUD_A' ]; then
-    wget ${URL_UTILS}ossutil64 -O /usr/bin/ossutil64 && chmod 755 /usr/bin/ossutil64
+    sudo -v ; curl https://gosspublic.alicdn.com/ossutil/install.sh | sudo bash
   elif [ $CLOUD_FLAG = 'CLOUD_B' ]; then
     pip install coscmd
   elif [ $CLOUD_FLAG = 'CLOUD_C' ]; then 

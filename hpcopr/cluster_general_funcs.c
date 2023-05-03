@@ -148,7 +148,7 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     fgetline(file_p,remote_address);
     fclose(file_p);
     sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\"",private_key,remote_address,exec_type,delay_minutes);
+    sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\" %s",private_key,remote_address,exec_type,delay_minutes,SYSTEM_CMD_REDIRECT);
     return system(cmdline);
 }
 
@@ -172,10 +172,10 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* commands, int 
     fclose(file_p);
     sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     if(delay_minutes==0){
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"%s\"",private_key,remote_address,commands);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"%s\" %s",private_key,remote_address,commands,SYSTEM_CMD_REDIRECT);
     }
     else{
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"%s\" | at now + %d minutes\"",private_key,remote_address,commands,delay_minutes);
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"%s\" | at now + %d minutes\" %s",private_key,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
     }
     return system(cmdline);
 }
