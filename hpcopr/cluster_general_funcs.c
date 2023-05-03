@@ -127,7 +127,7 @@ void create_and_get_vaultdir(char* workdir, char* vaultdir){
 }
 
 int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes){
-    if(strcmp(exec_type,"connect")!=0&&strcmp(exec_type,"all")!=0&&strcmp(exec_type,"clear")!=0){
+    if(strcmp(exec_type,"connect")!=0&&strcmp(exec_type,"all")!=0&&strcmp(exec_type,"clear")!=0&&strcmp(exec_type,"quick")!=0){
         return -1;
     }
     if(delay_minutes<0){
@@ -148,21 +148,8 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     fgetline(file_p,remote_address);
     fclose(file_p);
     sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    if(strcmp(exec_type,"clear")==0){
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr clear\" | at now + %d minutes\"",private_key,remote_address,delay_minutes);
-        return system(cmdline);
-    }
-    else if(strcmp(exec_type,"connect")==0){
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr connect\" | at now + %d minutes\"",private_key,remote_address,delay_minutes);
-        return system(cmdline);
-    }
-    else if(strcmp(exec_type,"all")==0){
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr all\" | at now + %d minutes\"",private_key,remote_address,delay_minutes);
-        return system(cmdline);
-    }
-    else{
-        return -1;
-    }
+    sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\"",private_key,remote_address,exec_type,delay_minutes);
+    return system(cmdline);
 }
 
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag){

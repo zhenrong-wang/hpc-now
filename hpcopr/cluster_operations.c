@@ -901,7 +901,6 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         printf("[ FATAL: ] Currently, there is no compute nodes, nothing deleted. Exit now.\n");
         return -1;
     }
-
     if(strcmp(param,"all")!=0){
         for(i=0;i<strlen(param);i++){
             if(*(param+i)<'0'||*(param+i)>'9'){
@@ -1067,8 +1066,8 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
-    remote_exec(workdir,sshkey_dir,"connect",1);
-    remote_exec(workdir,sshkey_dir,"all",2);
+    remote_exec(workdir,sshkey_dir,"connect",5);
+    remote_exec(workdir,sshkey_dir,"all",6);
     for(i=0;i<add_number;i++){
         sprintf(string_temp,"compute%d",current_node_num+i+1);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
@@ -1161,10 +1160,6 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             printf("[ -INFO- ] After the cluster operation:\n|\n");
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
-            get_latest_hosts(stackdir,filename_temp);
-            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
-            remote_exec(workdir,sshkey_dir,"connect",1);
-            remote_exec(workdir,sshkey_dir,"all",2);
             delete_decrypted_files(workdir,crypto_keyfile);
             for(i=compute_node_num-down_num+1;i<compute_node_num+1;i++){
                 sprintf(string_temp,"compute%d",i);
@@ -1197,10 +1192,6 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
-    remote_exec(workdir,sshkey_dir,"connect",1);
-    remote_exec(workdir,sshkey_dir,"all",2);
     for(i=1;i<compute_node_num+1;i++){
         sprintf(string_temp,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
@@ -1302,10 +1293,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             printf("[ -INFO- ] After the cluster operation:\n|\n");
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
-            get_latest_hosts(stackdir,filename_temp);
-            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
-            remote_exec(workdir,sshkey_dir,"connect",1);
-            remote_exec(workdir,sshkey_dir,"all",2);
+            remote_exec(workdir,sshkey_dir,"quick",1);
             delete_decrypted_files(workdir,crypto_keyfile);
             for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
                 sprintf(string_temp,"compute%d",i);
@@ -1338,10 +1326,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     printf("[ -INFO- ] After the cluster operation:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
-    remote_exec(workdir,sshkey_dir,"connect",1);
-    remote_exec(workdir,sshkey_dir,"all",2);
+    remote_exec(workdir,sshkey_dir,"quick",1);
     delete_decrypted_files(workdir,crypto_keyfile);
     for(i=compute_node_num_on+1;i<compute_node_num+1;i++){
         sprintf(string_temp,"compute%d",i);
@@ -1730,6 +1715,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     char* error_log=OPERATION_ERROR_LOG;
     int i;
     char filename_temp[FILENAME_LENGTH]="";
+    char* sshkeydir=SSHKEY_DIR;
     char node_name[16]="";
     int compute_node_num=0;
     create_and_get_vaultdir(workdir,vaultdir);
@@ -1806,6 +1792,9 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     update_cluster_summary(workdir,crypto_keyfile);
     printf("[ -DONE- ] Congratulations! The cluster is in the state of running.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
+    if(strcmp(option,"all")==0){
+        remote_exec(workdir,sshkeydir,"quick",1);
+    }
     return 0;
 }
 
