@@ -419,7 +419,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
     fclose(file_p);
-    printf("[ STEP 2 ] Cluster Configuration:\n");
+    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
     printf("|          Cluster ID:            %s\n",cluster_id);
     printf("|          Region:                %s\n",region_id);
     printf("|          Avalability Zone:      %s\n",zone_id);
@@ -427,7 +427,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf("|          Number of Users:       %d\n",hpc_user_num);
     printf("|          Master Node Instance:  %s\n",master_inst);
     printf("|          Compute Node Instance: %s\n",compute_inst);
-    printf("|          OS Image:              %s\n",os_image_raw);
+    printf("|          OS Image:              %s\n" RESET_DISPLAY,os_image_raw);
     generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
@@ -996,7 +996,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
     fclose(file_p);
-    printf("[ STEP 2 ] Cluster Configuration:\n");
+    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
     printf("|          Cluster ID:            %s\n",cluster_id);
     printf("|          Region:                %s\n",region_id);
     printf("|          Avalability Zone:      %s\n",zone_id);
@@ -1004,7 +1004,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf("|          Number of Users:       %d\n",hpc_user_num);
     printf("|          Master Node Instance:  %s\n",master_inst);
     printf("|          Compute Node Instance: %s\n",compute_inst);
-    printf("|          OS Image:              %s\n",os_image);
+    printf("|          OS Image:              %s\n" RESET_DISPLAY,os_image);
     generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
@@ -1533,7 +1533,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
     fclose(file_p);
-    printf("[ STEP 2 ] Cluster Configuration:\n");
+    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
     printf("|          Cluster ID:            %s\n",cluster_id);
     printf("|          Region:                %s\n",region_id);
     printf("|          Avalability Zone:      %s\n",zone_id);
@@ -1541,7 +1541,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     printf("|          Number of Users:       %d\n",hpc_user_num);
     printf("|          Master Node Instance:  %s\n",master_inst);
     printf("|          Compute Node Instance: %s\n",compute_inst);
-    printf("|          OS Image:              %s\n",os_image);
+    printf("|          OS Image:              %s\n" RESET_DISPLAY,os_image);
     generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
