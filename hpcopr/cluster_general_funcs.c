@@ -801,8 +801,8 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,error_log);
     run_flag=system(cmdline);
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
-        printf("|          Command: %s. Error log: %s\n",execution_name,error_log);
+        printf(GENERAL_BOLD "[ -INFO- ]" WARN_YELLO_BOLD " Do not terminate this process manually." GENERAL_BOLD " Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
+        printf("|          Command: %s. Error log: %s\n" RESET_DISPLAY,execution_name,error_log);
     }
     wait_for_complete(workdir,execution_name,error_log,silent_flag);
     if(file_empty_or_not(error_log)!=0||run_flag!=0){
