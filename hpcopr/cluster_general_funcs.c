@@ -952,13 +952,13 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
     if(file_p==NULL){
         return -1;
     }
-    printf("\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n");
+    printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n");
     while(fgetline(file_p,single_line)==0){
         if(strlen(single_line)!=0){
             printf("%s\n",single_line);
         }
     }
-    printf("+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n");
+    printf("+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n" RESET_DISPLAY);
     fclose(file_p);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
