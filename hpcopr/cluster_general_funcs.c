@@ -193,7 +193,7 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     char decrypted_file_name[FILENAME_LENGTH]="";
     FILE* decrypted_file=NULL;
     if(get_crypto_key(crypto_key_file,md5)!=0){
-        printf("[ FATAL: ] Failed to get the crypto key. Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key. Exit now.\n" RESET_DISPLAY);
         return -1;
     }
     sprintf(cmdline,"%s decrypt %s %s.dat %s", now_crypto_exec, secret_file, secret_file, md5);
@@ -799,12 +799,12 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,error_log);
     run_flag=system(cmdline);
     if(silent_flag!=0){
-        printf("[ -INFO- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
         printf("|          Command: %s. Error log: %s\n",execution_name,error_log);
     }
     wait_for_complete(workdir,execution_name,error_log,silent_flag);
     if(file_empty_or_not(error_log)!=0||run_flag!=0){
-        printf("[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n",execution_name);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,error_log);
         return -1;
     }
@@ -965,13 +965,13 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
 
 int confirm_to_operate_cluster(char* current_cluster_name){
     char doubleconfirm[64]="";
-    printf("[ -INFO- ] You are operating the cluster %s now, which may affect\n",current_cluster_name);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster %s now, which may affect\n",current_cluster_name);
     printf("|          the resources|data|jobs. Please input 'y-e-s' to continue.\n");
-    printf("[ INPUT: ] ");
+    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
         printf("|          Nothing changed. Exit now.\n");
         return 1;
     }

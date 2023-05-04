@@ -21,7 +21,7 @@
 #include "general_print_info.h"
 
 void print_empty_cluster_info(void){
-    printf("[ -INFO- ] It seems the cluster is empty. You can either:\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " It seems the cluster is empty. You can either:\n");
     printf("|          a) Run 'hpcopr init' to create a *default* cluster directly. OR\n");
     printf("|          b) Run 'hpcopr get-conf' -> 'hpcopr init' \n");
     printf("|          Exit now.\n");
@@ -34,10 +34,10 @@ void print_cluster_init_done(void){
 }
 
 void print_help(void){
-    printf("[ -INFO- ] Usage: hpcopr command_name PARAM1 PARAM2 ...\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Usage: hpcopr command_name PARAM1 PARAM2 ...\n");
     printf("| Commands:\n");
-    printf("+ I  . Multi-Cluster Management:\n");
-    printf("| * You DO NOT need to switch to a cluster first.\n");
+    printf(GENERAL_BOLD "+ I  . Multi-Cluster Management:\n");
+    printf("| * You DO NOT need to switch to a cluster first.\n" RESET_DISPLAY);
     printf("|  envcheck    : Quickly check the running environment.\n");
     printf("|  new-cluster : Create a new cluster, you can specify the cluster name, extra\n");
     printf("|                *optional* parameters are accepted:\n");
@@ -54,8 +54,8 @@ void print_help(void){
     printf("|  exit-current: Exit the current cluster.\n");
     printf("|  remove      : TARGET_CLUSTER_NAME\n");
     printf("|                Completely remove a cluster from the OS and registry.\n");
-    printf("+ II. Global Management:\n");
-    printf("| * You DO NOT need to switch to a cluster first.\n");
+    printf(GENERAL_BOLD "+ II. Global Management:\n");
+    printf("| * You DO NOT need to switch to a cluster first.\n" RESET_DISPLAY);
     printf("|  help        : Show this page and the information here.\n");
     printf("|  usage       : Get and check the usage history of all your cluster(s).\n");
     printf("|  history     : Get and check the detailed operation log of your cluster management.\n");
@@ -65,8 +65,8 @@ void print_help(void){
     printf("|                templates and shell scripts.\n");
     printf("|  showloc     : Show the current configured locations.\n");
     printf("|  resetloc    : Reset to the default locations.\n");
-    printf("+ III. Cluster Initialization: \n");
-    printf("| * You need to switch to a cluster first. *\n");
+    printf(GENERAL_BOLD "+ III. Cluster Initialization: \n");
+    printf("| * You need to switch to a cluster first. *\n" RESET_DISPLAY);
     printf("|  new-keypair : *Rotate* a new keypair for an existing cluster. The new keypair\n");
     printf("|                should be valid and comes from the same cloud vendor.\n");
     printf("|  get-conf    : Get the default configuration file to edit and build a customized\n");
@@ -79,8 +79,8 @@ void print_help(void){
     printf("|               : mc     - Only rebuild the master and all the compute node(s).\n");
     printf("|               : mcdb   - All the nodes above + database node.\n");
     printf("|               : all    - All the nodes above + nat node.\n");
-    printf("+ IV . Cluster Management:\n");
-    printf("| * You need to switch to a cluster first.\n");
+    printf(GENERAL_BOLD "+ IV . Cluster Management:\n");
+    printf("| * You need to switch to a cluster first.\n" RESET_DISPLAY);
     printf("|  ssh         : SSH to the master node of your current cluster.\n");
     printf("|         USERNAME - You can specify to login with which user. For example: user1.\n");
     printf("|  vault       : Check the sensitive information of the current cluster.\n");
@@ -113,12 +113,12 @@ void print_help(void){
     printf("|              : minimal - Turn on the management nodes of the cluster.\n");
     printf("|              : all     - Turn on the management and compute nodes of the cluster.\n");
     printf("|  destroy     : *DESTROY* the whole cluster - including all the resources & data.\n");
-    printf("+ VI . Others:\n");
+    printf(GENERAL_BOLD "+ VI . Others:\n" RESET_DISPLAY);
     printf("|  about       : Display the version and other info.\n");
     printf("|  license     : Read the terms and conditions of the GNU Public License - 2.0\n");
     printf("|  repair      : Try to repair the hpcopr core components.\n");
     printf("\n");
-    printf("<> visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
+    printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com" GENERAL_BOLD " <> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
 }
 
 void print_header(void){
@@ -126,14 +126,14 @@ void print_header(void){
     struct tm* time_p=NULL;
     time(&current_time_long);
     time_p=localtime(&current_time_long);
-    printf("|   /HPC->  Welcome to HPC_NOW Cluster Operator! Version: %s\n",CORE_VERSION_CODE);
+    printf(GENERAL_BOLD "|   /HPC->  Welcome to HPC-NOW Cluster Operator! Version: %s\n",CORE_VERSION_CODE);
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n" RESET_DISPLAY);
 }
 
 void print_tail(void){
     printf("\n");
-    printf("<> visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
+    printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com" GENERAL_BOLD " <> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
 }
 
 void print_about(void){

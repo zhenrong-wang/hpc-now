@@ -22,8 +22,8 @@
 int get_usage(char* usage_logfile){
     char cmdline[CMDLINE_LENGTH]="";
     if(file_exist_or_not(usage_logfile)!=0){
-        printf("[ FATAL: ] Failed to get the usage record. Either you haven't initialize your first\n");
-        printf("|          cluster, or there are internal errors. Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the usage record. Either you haven't initialize your first\n");
+        printf("|          cluster, or there are internal errors. Exit now.\n" RESET_DISPLAY);
         return 1;
     }
 #ifdef _WIN32
@@ -42,7 +42,7 @@ int get_usage(char* usage_logfile){
 #elif __linux__
     system("more /home/hpc-now/cluster_usage_temp.log");
 #endif
-    printf("[ -DONE- ] The latest usage summary has been printed to the file below:\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The latest usage summary has been printed to the file below:\n");
 #ifdef _WIN32
     printf("|          c:\\hpc-now\\cluster_usage_temp.log\n");
     printf("|          You can use either MS Office Excel (*strongly recommended*) or other\n");
@@ -60,7 +60,7 @@ int get_usage(char* usage_logfile){
 int get_history(char* operation_logfile){
     char cmdline[CMDLINE_LENGTH]="";
     if(file_exist_or_not(operation_logfile)!=0){
-        printf("[ FATAL: ] Failed to get the operation history. Exit now.\n");      
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the operation history. Exit now.\n" RESET_DISPLAY);      
         return 1;
     }
 #ifdef _WIN32
@@ -78,7 +78,7 @@ int get_history(char* operation_logfile){
 #elif __linux__
     system("more /home/hpc-now/hpcopr_history_temp.log");
 #endif
-    printf("[ -DONE- ] The latest operation log has been printed to the file below:\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The latest operation log has been printed to the file below:\n");
 #ifdef _WIN32
     printf("|          c:\\hpc-now\\hpcopr_history_temp.log\n");
 #elif __APPLE__
@@ -92,7 +92,7 @@ int get_history(char* operation_logfile){
 int get_syserrlog(char* syserror_logfile){
     char cmdline[CMDLINE_LENGTH]="";
     if(file_exist_or_not(syserror_logfile)!=0){
-        printf("[ FATAL: ] Failed to get the system command error log file. Exit now.\n");      
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the system command error log file. Exit now.\n" RESET_DISPLAY);      
         return 1;
     }
 #ifdef _WIN32
@@ -110,7 +110,7 @@ int get_syserrlog(char* syserror_logfile){
 #elif __linux__
     system("more /home/hpc-now/hpcopr_syserr_temp.log");
 #endif
-    printf("[ -DONE- ] The latest system command error log has been printed to the file below:\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The latest system command error log has been printed to the file below:\n");
 #ifdef _WIN32
     printf("|          c:\\hpc-now\\hpcopr_syserr_temp.log\n");
 #elif __APPLE__
@@ -150,8 +150,8 @@ int write_log(char* workdir, char* operation_logfile, char* operation, int runfl
     time_p=gmtime(&current_time_long);
     FILE* file_p=fopen(operation_logfile,"a+");
     if(file_p==NULL){
-        printf("[ -WARN- ] Failed to write operation log to the records. The cluster operation may\n");
-        printf("|          not be affected, but will not be recorded to your system.\n");
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to write operation log to the records. The cluster operation may\n");
+        printf("|          not be affected, but will not be recorded to your system.\n" RESET_DISPLAY);
         return -1;
     }
     fprintf(file_p,"%d-%d-%d,%d:%d:%d,%s,%s,%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,workdir,operation,runflag);

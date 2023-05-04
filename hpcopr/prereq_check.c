@@ -44,9 +44,9 @@ int check_internet(void){
     sprintf(cmdline,"ping -c 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT);
 #endif
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
         printf("|          or check your internet connectivity and retry later.\n");
-        printf("[ FATAL: ] Exit now.\n");
+        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return 1;
     }
     return 0;
@@ -145,17 +145,17 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 
     if(repair_flag==1){
-        printf("[ -INFO- ] Start checking and repairing the HPC-NOW services now ... \n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Start checking and repairing the HPC-NOW services now ... \n");
         printf("|        . Checking and repairing the registry now ...\n");
     }
     else{
-        printf("[ -INFO- ] Checking the environment for HPC-NOW services ...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the environment for HPC-NOW services ...\n");
     }
     if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
-        printf("[ -INFO- ] No registry file found. Creating a blank cluster registry now ...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " No registry file found. Creating a blank cluster registry now ...\n");
         file_p=fopen(ALL_CLUSTER_REGISTRY,"w+");
         if(file_p==NULL){
-            printf("[ FATAL: ] Failed to open/write to the cluster registry. Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open/write to the cluster registry. Exit now.\n" RESET_DISPLAY);
             return -1;
         }
         fclose(file_p);
@@ -164,7 +164,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        v The registry has been repaired.\n");
         printf("|        . Checking and repairing the location configuration file now ...\n");
         if(reset_locations()!=0){
-            printf("[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now.\n" RESET_DISPLAY);
             return -1;
         }
         printf("|        v All the locations has been reset to the default ones.\n");
@@ -172,36 +172,36 @@ int check_and_install_prerequisitions(int repair_flag){
     flag=get_locations();
     if(flag!=0){
         if(flag==-1){
-            printf("[ -INFO- ] Location configuration file not found.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Location configuration file not found.\n");
         }
         else{
-            printf("[ -INFO- ] Location configuration format incorrect.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Location configuration format incorrect.\n");
         }
-        printf("[ -INFO- ] Would you like to use the default settings? Only 'y-e-s' is accepted\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to use the default settings? Only 'y-e-s' is accepted\n");
         printf("|          to confirm. \n");
-        printf("[ INPUT: ] ");
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
         if(strcmp(doubleconfirm,"y-e-s")==0){
             if(reset_locations()!=0){
-                printf("[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now.\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now.\n" RESET_DISPLAY);
                 return 2;
             }
             get_locations();
         }
         else{
-            printf("[ -INFO- ] Will not use the default settings. Would you like to configure now?\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will not use the default settings. Would you like to configure now?\n");
             printf("|          Only 'y-e-s' is accepted to confirm.\n");
-            printf("[ INPUT: ] ");
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
             fflush(stdin);
             scanf("%s",doubleconfirm);
             if(strcmp(doubleconfirm,"y-e-s")!=0){
-                printf("[ -INFO- ] You chose to deny this operation. Exit now.\n");
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
                 return 2;
             }
             else{
                 if(configure_locations()!=0){
-                    printf("[ FATAL: ] Failed to configure the locations. Exit now.\n");
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure the locations. Exit now.\n" RESET_DISPLAY);
                     return 2;
                 }
             }
@@ -211,8 +211,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        v Location configuration has been repaired.\n");
         printf("|        . Checking and repairing the versions and md5sums ...\n");
         if(reset_vers_md5_vars()!=0){
-            printf("\n%d,,,,,,,\n",reset_vers_md5_vars());
-            printf("[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n" RESET_DISPLAY);
             return -1;
         }
         printf("|        v Versions and md5sums been repaired.\n");
@@ -221,18 +220,18 @@ int check_and_install_prerequisitions(int repair_flag){
     flag=get_vers_md5_vars();
     if(flag!=0){
         if(flag==-1){
-            printf("[ -INFO- ] Versions and md5sums not found. Trying to fix ...\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Versions and md5sums not found. Trying to fix ...\n");
         }
         else{
-            printf("[ -INFO- ] Versions and md5sums format incorrect. Trying to fix ...\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Versions and md5sums format incorrect. Trying to fix ...\n");
         }
         if(reset_vers_md5_vars()!=0){
-            printf("[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n" RESET_DISPLAY);
             return -1;
         }
         if(get_vers_md5_vars()!=0){
-            printf("[ FATAL: ] Failed to configure versions and md5sums of core components.\n");
-            printf("|          Please check the format of md5 files. Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure versions and md5sums of core components.\n");
+            printf("|          Please check the format of md5 files. Exit now.\n" RESET_DISPLAY);
             return -1;
         }
     }
@@ -273,7 +272,7 @@ int check_and_install_prerequisitions(int repair_flag){
     if(file_check_flag==1){
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_tf_zip_var);
         if(file_check_flag==1){
-            printf("[ -INFO- ] Downloading/Copying the Terraform binary ...\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Downloading/Copying the Terraform binary ...\n");
             printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
@@ -295,8 +294,8 @@ int check_and_install_prerequisitions(int repair_flag){
             }
             flag=system(cmdline);
             if(flag!=0){
-                printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now.\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now.\n" RESET_DISPLAY);
                 return 3;
             }
         }
@@ -311,7 +310,7 @@ int check_and_install_prerequisitions(int repair_flag){
 //        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
         if(flag!=0){
-            printf("[ FATAL: ] Failed to unzip the terraform binary file. Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the terraform binary file. Exit now.\n" RESET_DISPLAY);
             return 3;
         }        
     }
@@ -325,7 +324,7 @@ int check_and_install_prerequisitions(int repair_flag){
 
     file_check_flag=file_validity_check(crypto_exec,repair_flag,md5_now_crypto_var);
     if(file_check_flag==1){
-        printf("[ -INFO- ] Downloading/Copying the now-crypto.exe ...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Downloading/Copying the now-crypto.exe ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         if(now_crypto_loc_flag_var==1){
 #ifdef _WIN32
@@ -348,8 +347,8 @@ int check_and_install_prerequisitions(int repair_flag){
 //        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
         if(flag!=0){
-            printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-            printf("|          info@hpc-now.com for support. Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+            printf("|          info@hpc-now.com for support. Exit now.\n" RESET_DISPLAY);
             return 3;
         }
     }
@@ -419,7 +418,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #endif
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_ali_tf_var);
     if(file_check_flag==1){
-        printf("[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/3) ...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Downloading/Copying the cloud Terraform providers (1/3) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_ali_tf_zip_var);
         if(file_check_flag==1){
@@ -444,8 +443,8 @@ int check_and_install_prerequisitions(int repair_flag){
 //            printf("%s,,,,,\"\n",cmdline);
             flag=system(cmdline);
             if(flag!=0){
-                printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now.\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now.\n" RESET_DISPLAY);
                 return 3;
             }
         }
@@ -456,7 +455,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #endif
         flag=system(cmdline);
         if(flag!=0){
-            printf("[ FATAL: ] Failed to unzip the provider file. Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now.\n" RESET_DISPLAY);
             return 3;
         }
     }
@@ -482,7 +481,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #endif
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_qcloud_tf_var);
     if(file_check_flag==1){
-        printf("[ -INFO- ] Downloading/Copying the cloud Terraform providers (2/3) ...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Downloading/Copying the cloud Terraform providers (2/3) ...\n");
         printf("           Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_qcloud_tf_zip_var);
         if(file_check_flag==1){
@@ -506,8 +505,8 @@ int check_and_install_prerequisitions(int repair_flag){
             }
             flag=system(cmdline);
             if(flag!=0){
-                printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now.\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now.\n" RESET_DISPLAY);
                 return 3;
             }
         }
@@ -518,7 +517,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #endif
         flag=system(cmdline);
         if(flag!=0){
-            printf("[ FATAL: ] Failed to unzip the provider file. Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now.\n" RESET_DISPLAY);
             return 3;
         }
     }
@@ -544,7 +543,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #endif
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_aws_tf_var);
     if(file_check_flag==1){
-        printf("[ -INFO- ] Downloading/Copying the cloud Terraform providers (3/3) ...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Downloading/Copying the cloud Terraform providers (3/3) ...\n");
         printf("           Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_aws_tf_zip_var);
         if(file_check_flag==1){
@@ -568,8 +567,8 @@ int check_and_install_prerequisitions(int repair_flag){
             }
             flag=system(cmdline);
             if(flag!=0){
-                printf("[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now.\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now.\n" RESET_DISPLAY);
                 return 3;
             }
         }
@@ -580,7 +579,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #endif
         flag=system(cmdline);
         if(flag!=0){
-            printf("[ FATAL: ] Failed to unzip the provider file. Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now.\n" RESET_DISPLAY);
             return 3;
         }
     }
@@ -630,10 +629,10 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf("|        v Environment variables have been repaired.\n");
         printf("|        v SSH files have been repaired. \n");
-        printf("[ -INFO- ] Running environment successfully check and repaired.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Running environment successfully check and repaired.\n");
     }
     else{
-        printf("[ -INFO- ] Running environment successfully checked.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Running environment successfully checked.\n");
     }
     return 0;
 }

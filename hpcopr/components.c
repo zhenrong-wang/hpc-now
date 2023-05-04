@@ -278,7 +278,7 @@ int show_vers_md5vars(void){
         printf("|           or 'hpcopr configloc'. Or run 'hpcopr repair',\n");
         return -1;
     }
-    printf("[ -INFO- ] Versions and md5sum values\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Versions and md5sum values\n");
     printf("|  Vers:   Terraform\tAliCloudProvider TencentCloudProvider AWSProvider\n");
     while(fgetline(file_p,vers_and_md5)==0){
         printf("|          %s\n",vers_and_md5);
@@ -447,7 +447,7 @@ int configure_locations(void){
     char loc_string[LOCATION_LENGTH]="";
     int format_flag=0;
     FILE* file_p=NULL;
-    printf("\n");
+    printf(GENERAL_BOLD "\n");
     printf("|*                                C A U T I O N !                                  \n");
     printf("|*                                                                                 \n");
     printf("|*   YOU ARE MODIFYING THE LOCATIONS OF COMPONENTS FOR THE HPC-NOW SERVICES!       \n");
@@ -469,25 +469,25 @@ int configure_locations(void){
     printf("|*   THE DEFAULT LOCATIONS IF YOUR LOCATIONS FAIL TO WORK PROPERLY!                \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n");
+    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
     fflush(stdin);
-    printf("[ INPUT: ] ");
+    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
         return 1;
     }
     printf("[ LOC1/4 ] Please specify the root location of the terraform binary and providers. \n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_TF_ROOT);
-    printf("[ INPUT: ] ");
+    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
-            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location.\n" RESET_DISPLAY);
         }
         else{
             strcpy(url_tf_root_var,loc_string);
@@ -496,13 +496,13 @@ int configure_locations(void){
     printf("[ LOC2/4 ] Please specify the root location of the terraform templates. \n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_CODE_ROOT);
-    printf("[ INPUT: ] ");
+    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
-            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location.\n" RESET_DISPLAY);
         }
         else{
             strcpy(url_code_root_var,loc_string);
@@ -511,16 +511,16 @@ int configure_locations(void){
     printf("[ LOC3/4 ] Please specify the root location of the *online* shell scripts.\n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
-    printf("[ INPUT: ] ");
+    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
-            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location.\n" RESET_DISPLAY);
         }
         else if(format_flag==1){
-            printf("[ -WARN- ] This location must be a public URL. Will not modify.\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify.\n" RESET_DISPLAY);
         }
         else{
             strcpy(url_shell_scripts_var,loc_string);
@@ -530,23 +530,23 @@ int configure_locations(void){
     printf("[ LOC4/4 ] Please input the root location of the now-crypto binary.\n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_NOW_CRYPTO);
-    printf("[ INPUT: ] ");
+    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",loc_string);
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
-            printf("[ -WARN- ] Invalid format. Will not modify this location.\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location.\n" RESET_DISPLAY);
         }
         else{
             strcpy(url_now_crypto_var,loc_string);
         }
     }
 
-    printf("[ -INFO- ] Updating the location configuration file now ... \n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Updating the location configuration file now ... \n");
     file_p=fopen(LOCATION_CONF_FILE,"w+");
     if(file_p==NULL){
-        printf("[ FATAL: ] Failed to create or modify the target file. Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create or modify the target file. Exit now.\n" RESET_DISPLAY);
         return -1;
     }
     fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");
@@ -575,7 +575,7 @@ int configure_locations(void){
         fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",url_now_crypto_var);
     }
     fclose(file_p);
-    printf("[ -DONE- ] Locations are modified and saved. The latest locations:\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Locations are modified and saved. The latest locations:\n");
     show_locations();
     return 0;
 }

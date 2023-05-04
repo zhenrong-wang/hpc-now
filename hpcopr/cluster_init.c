@@ -135,7 +135,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %sregion_valid.tf -o %s%sregion_valid.tf -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -152,8 +152,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,0)!=0){
         global_replace(region_valid,"cn-northwest-1","us-east-1");
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,0)!=0){
-            printf("[ FATAL: ] The keypair may be invalid. Please use 'hpcopr new-keypair' to update with a\n");
-            printf("|          valid keypair. Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The keypair may be invalid. Please use 'hpcopr new-keypair' to update with a\n");
+            printf("|          valid keypair. Exit now.\n" RESET_DISPLAY);
             sprintf(cmdline,"%s %s%sregion_valid.tf %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             return -1;
@@ -164,8 +164,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     system(cmdline);
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(conf_file)==1){
-        printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading the default configure\n");
-        printf("|          file to initialize this cluster.\n");
+        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. \n" RESET_DISPLAY);
         if(code_loc_flag_var==1){
             sprintf(cmdline,"%s %s%stf_prep.conf %s %s", COPY_FILE_CMD,url_aws_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
         }
@@ -173,7 +172,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_aws_root,conf_file);
         }
         if(system(cmdline)!=0){
-            printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
             return 2;
         }
         if(region_valid_flag==1){
@@ -187,7 +186,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %shpc_stack_aws.base -o %s%shpc_stack.base -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -197,7 +196,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %shpc_stack_aws.master -o %s%shpc_stack.master -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -207,7 +206,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %shpc_stack_aws.compute -o %s%shpc_stack.compute -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -217,7 +216,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %shpc_stack_aws.database -o %s%shpc_stack.database -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -227,7 +226,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %shpc_stack_aws.natgw -o %s%shpc_stack.natgw -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -237,7 +236,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     file_p=fopen(conf_file,"r");
@@ -253,11 +252,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         node_num+=(conf_line_buffer[22+i-j]-'0')*pow(10,j-1);
     }
     if(node_num>MAXIMUM_ADD_NODE_NUMBER){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=MAXIMUM_ADD_NODE_NUMBER;
     }
     if(node_num<MINUMUM_ADD_NODE_NUMBER){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=MINUMUM_ADD_NODE_NUMBER;
     }
     fgetline(file_p,conf_line_buffer);
@@ -266,11 +265,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         hpc_user_num+=(conf_line_buffer[22+i-j]-'0')*pow(10,j-1);
     }
     if(hpc_user_num>MAXIMUM_ADD_USER_NUMBER){
-        printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n",hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
         hpc_user_num=MAXIMUM_ADD_USER_NUMBER;
     }
     else if(hpc_user_num<MINIMUM_ADD_USER_NUNMBER){
-        printf("[ -WARN- ] The number of HPC users %d is less than %d, reset to %d.\n",hpc_user_num,MINIMUM_ADD_USER_NUNMBER,MINIMUM_ADD_USER_NUNMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of HPC users %d is less than %d, reset to %d.\n" RESET_DISPLAY,hpc_user_num,MINIMUM_ADD_USER_NUNMBER,MINIMUM_ADD_USER_NUNMBER);
         hpc_user_num=MINIMUM_ADD_USER_NUNMBER;
     }
     fscanf(file_p,"%s%s%s%s\n",conf_param_buffer1,conf_param_buffer2,conf_param1,conf_param2);
@@ -291,23 +290,23 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         threads=2;
     }
     if(strcmp(region_id,"cn-north-1")!=0&&strcmp(region_id,"cn-northwest-1")!=0&&strcmp(region_id,"us-east-1")!=0&&strcmp(region_id,"us-east-2")!=0){
-        printf("[ FATAL: ] Currently the NOW Cluster Service only support AWS Regions below:\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Currently the NOW Cluster Service only support AWS Regions below:\n");
         printf("|          cn-northwest-1 | cn-north-1 | us-east-1 | us-east-2\n");
         printf("|          If you'd like to use NOW Cluster in other AWS regions,\n");
         printf("|          Please contact info@hpc-now.com\n\n");
-        printf("[ FATAL: ] Exit now.\n");
+        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return -1;
     }
     if(contain_or_not(zone_id,region_id)!=0){
-        printf("[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
+        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return -1;
     }
     if(strcmp(region_id,"cn-northwest-1")==0){
         if(region_valid_flag==1){
-            printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
-            printf("|          Exit now.\n");
+            printf("|          Exit now.\n" RESET_DISPLAY);
             return -1;
         }
         strcpy(region_flag,"cn_regions");
@@ -317,9 +316,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     else if(strcmp(region_id,"cn-north-1")==0){
         if(region_valid_flag==1){
-            printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
-            printf("|          Exit now.\n");
+            printf("|          Exit now.\n" RESET_DISPLAY);
             return -1;
         }
         strcpy(region_flag,"cn_regions");
@@ -329,9 +328,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     else if(strcmp(region_id,"us-east-1")==0){
         if(region_valid_flag==0){
-            printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
-            printf("|          Exit now.\n");
+            printf("|          Exit now.\n" RESET_DISPLAY);
             return -1;
         }
         strcpy(region_flag,"global_regions");
@@ -341,9 +340,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     else if(strcmp(region_id,"us-east-2")==0){
         if(region_valid_flag==0){
-            printf("[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
-            printf("|          Exit now.\n");
+            printf("|          Exit now.\n" RESET_DISPLAY);
             return -1;
         }
         strcpy(region_flag,"global_regions");
@@ -385,11 +384,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
             *(cluster_id+i)=*(cluster_id_input+i);
         }
-        printf("[ -WARN- ] The CLUSTER_ID '%s' specified by the command is too long (length>%d).\n",cluster_id_input,CLUSTER_ID_LENGTH_MAX);
-        printf("|          Cut it to %s\n",cluster_id);
     }
     else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
-        printf("[ -WARN- ] Using the CLUSTER_ID '%s' specified by the command.\n",cluster_id_input);
         global_replace(conf_file,cluster_id,cluster_id_input);
         reset_string(cluster_id);
         for(i=0;i<strlen(cluster_id_input);i++){
@@ -401,15 +397,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         global_replace(conf_file,cluster_id,cluster_id_temp);
         reset_string(cluster_id);
         strcpy(cluster_id,cluster_id_temp);
-        printf("[ -WARN- ] The CLUSTER_ID specified by the command and conf file is too short.\n");
-        printf("|          Extend to %s.\n", cluster_id);
-    }
-    else{
-        printf("[ -INFO- ] Using the CLUSTER_ID '%s' speficied in the conf file.\n",cluster_id);
     }
     sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==1){
-        printf("[ -INFO- ] Creating a Unique Cluster ID now...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
         reset_string(randstr);
         generate_random_string(randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
@@ -525,7 +516,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return -1;
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
-        printf("[ -INFO- ] Rolling back and exit now ...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back and exit now ...\n");
         if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log,1)==0){
             delete_decrypted_files(workdir,crypto_keyfile);
             sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -536,10 +527,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             system(cmdline);
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            printf("[ -INFO- ] Successfully rolled back. Please check the errolog for details.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back. Please check the errolog for details.\n");
             return -1;
         }
-        printf("[ -INFO- ] Failed to roll back. Please try 'hpcopr destroy' later.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
         return -1;
     }
     sprintf(cmdline,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -556,7 +547,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             fflush(stdout);
             sleep(1);
         }
-        printf("[ -DONE- ] Remote execution commands sent.\n");
+        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     }
     else{
         printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",AWS_SLEEP_TIME_CN);
@@ -565,7 +556,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             fflush(stdout);
             sleep(1);
         }
-        printf("[ -DONE- ] Remote execution commands sent.\n");
+        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     }
     file_p=fopen(currentstate,"r");
     fgetline(file_p,master_address);
@@ -579,7 +570,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             sprintf(cmdline,"curl %ss3cfg.txt -s -o %s%sbucket.conf",url_aws_root,vaultdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
-            printf("[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n" RESET_DISPLAY);
         }
         else{
             sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
@@ -602,7 +593,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             sprintf(cmdline,"curl %ss3cfg.txt -s -o %s%sbucket.conf",url_aws_root,vaultdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
-            printf("[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n" RESET_DISPLAY);
         }
         else{
             sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
@@ -639,7 +630,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"echo %s > %s%scloud_flag.flg",cloud_flag,vaultdir,PATH_SLASH);
         system(cmdline);
     }
-    printf("[ -INFO- ] After the initialization:\n|\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     time(&current_time_long);
@@ -779,8 +770,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(conf_file)==1){
-        printf("[ -INFO- ] IMPORTANT: No configure file found. Downloading the default configure\n");
-        printf("|          file to initialize this cluster.\n");
+        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. \n" RESET_DISPLAY);
         if(code_loc_flag_var==1){
             sprintf(cmdline,"%s %s%stf_prep.conf %s %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
         }
@@ -788,7 +778,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
             sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_qcloud_root,conf_file);
         }
             if(system(cmdline)!=0){
-            printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
             return 2;
         }
     }
@@ -802,7 +792,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %shpc_stack_qcloud.base -o %s%shpc_stack.base -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -812,7 +802,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %shpc_stack_qcloud.master -o %s%shpc_stack.master -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -822,7 +812,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %shpc_stack_qcloud.compute -o %s%shpc_stack.compute -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -832,7 +822,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %shpc_stack_qcloud.database -o %s%shpc_stack.database -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -842,7 +832,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %shpc_stack_qcloud.natgw -o %s%shpc_stack.natgw -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -852,7 +842,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %sNAS_Zones_QCloud.txt -o %s%sNAS_Zones_QCloud.txt -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -862,7 +852,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
 
@@ -885,11 +875,11 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     reset_string(conf_line_buffer);
     if(node_num>MAXIMUM_ADD_NODE_NUMBER){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=MAXIMUM_ADD_NODE_NUMBER;
     }
     if(node_num<MINUMUM_ADD_NODE_NUMBER){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=MINUMUM_ADD_NODE_NUMBER;
     }
     fgetline(file_p,conf_line_buffer);
@@ -899,11 +889,11 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     reset_string(conf_line_buffer);
     if(hpc_user_num>MAXIMUM_ADD_USER_NUMBER){
-        printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n",hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
         hpc_user_num=MAXIMUM_ADD_USER_NUMBER;
     }
     else if(hpc_user_num<MINIMUM_ADD_USER_NUNMBER){
-        printf("[ -WARN- ] The number of HPC users %d is less than %d, reset to %d.\n",hpc_user_num,MINIMUM_ADD_USER_NUNMBER,MINIMUM_ADD_USER_NUNMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of HPC users %d is less than %d, reset to %d.\n" RESET_DISPLAY,hpc_user_num,MINIMUM_ADD_USER_NUNMBER,MINIMUM_ADD_USER_NUNMBER);
         hpc_user_num=MINIMUM_ADD_USER_NUNMBER;
     }
     fscanf(file_p,"%s%s%s%s\n",conf_param_buffer1,conf_param_buffer2,conf_param1,conf_param2);
@@ -918,7 +908,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     reset_string(conf_line_buffer);
     if(master_bandwidth>50){
-        printf("[ -WARN- ] The master node bandwidth %d exceeds the maximum value 50, reset to 50.\n",master_bandwidth);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The master node bandwidth %d exceeds the maximum value 50, reset to 50.\n" RESET_DISPLAY,master_bandwidth);
         master_bandwidth=50;
     }
     fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,compute_inst);
@@ -933,8 +923,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
  
     if(contain_or_not(zone_id,region_id)!=0){
-        printf("[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
+        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return -1;
     }
     sprintf(filename_temp,"%s%sdb_passwords.txt",vaultdir,PATH_SLASH);
@@ -971,11 +961,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
             *(cluster_id+i)=*(cluster_id_input+i);
         }
-        printf("[ -WARN- ] The CLUSTER_ID '%s' specified by the command is too long (length>%d).\n",cluster_id_input,CLUSTER_ID_LENGTH_MAX);
-        printf("|          Cut it to %s\n",cluster_id);
     }
     else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
-        printf("[ -WARN- ] Using the CLUSTER_ID '%s' specified by the command.\n",cluster_id_input);
         global_replace(conf_file,cluster_id,cluster_id_input);
         reset_string(cluster_id);
         for(i=0;i<strlen(cluster_id_input);i++){
@@ -987,15 +974,10 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         global_replace(conf_file,cluster_id,cluster_id_temp);
         reset_string(cluster_id);
         strcpy(cluster_id,cluster_id_temp);
-        printf("[ -WARN- ] The CLUSTER_ID specified by the command and conf file is too short.\n");
-        printf("|          Extend to %s.\n", cluster_id);
-    }
-    else{
-        printf("[ -INFO- ] Using the CLUSTER_ID '%s' speficied in the conf file.\n",cluster_id);
     }
     sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==1){
-        printf("[ -INFO- ] Creating a Unique Cluster ID now...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
         reset_string(randstr);
         generate_random_string(randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
@@ -1109,7 +1091,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         return -1;
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
-        printf("[ -INFO- ] Rolling back and exit now ...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back and exit now ...\n");
         if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log,1)==0){
             delete_decrypted_files(workdir,crypto_keyfile);
             sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -1120,10 +1102,10 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
             system(cmdline);
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            printf("[ -INFO- ] Successfully rolled back. Please check the errolog for details.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back. Please check the errolog for details.\n");
             return -1;
         }
-        printf("[ -INFO- ] Failed to roll back. Please try 'hpcopr destroy' later.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
@@ -1140,7 +1122,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         fflush(stdout);
         sleep(1);
     }
-    printf("[ -DONE- ] Remote execution commands sent.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     file_p=fopen(currentstate,"r");
     fgetline(file_p,master_address);
     fclose(file_p);
@@ -1152,7 +1134,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %scos.conf -s -o %s%sbucket.conf",url_qcloud_root,vaultdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n");
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n" RESET_DISPLAY);
     }
     else{
         sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
@@ -1189,7 +1171,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"echo %s > %s%scloud_flag.flg",cloud_flag,vaultdir,PATH_SLASH);
         system(cmdline);
     }
-    printf("[ -INFO- ] After the initialization:\n|\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     time(&current_time_long);
@@ -1329,7 +1311,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(conf_file)==1){
-        printf("[ -INFO- ] IMPORTANT: No configure file found. Use the default one. \n");
+        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. \n" RESET_DISPLAY);
         if(code_loc_flag_var==1){
             sprintf(cmdline,"%s %s%stf_prep.conf %s %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
         }
@@ -1337,7 +1319,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
             sprintf(cmdline,"curl %stf_prep.conf -s -o %s",url_alicloud_root,conf_file);
         }
         if(system(cmdline)!=0){
-            printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
             return 2;
         }
     }
@@ -1351,7 +1333,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %shpc_stackv2.base -o %s%shpc_stack.base -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1361,7 +1343,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %shpc_stackv2.master -o %s%shpc_stack.master -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1371,7 +1353,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %shpc_stackv2.compute -o %s%shpc_stack.compute -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1381,7 +1363,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %shpc_stackv2.database -o %s%shpc_stack.database -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1391,7 +1373,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %shpc_stackv2.natgw -o %s%shpc_stack.natgw -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1401,7 +1383,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %sNAS_Zones_ALI.txt -o %s%sNAS_Zones_ALI.txt -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1411,7 +1393,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
         return 2;
     }
     sprintf(secret_file,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
@@ -1430,11 +1412,11 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     reset_string(conf_line_buffer);
     if(node_num>MAXIMUM_ADD_NODE_NUMBER){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=MAXIMUM_ADD_NODE_NUMBER;
     }
     if(node_num<MINUMUM_ADD_NODE_NUMBER){
-        printf("[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n",node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=MINUMUM_ADD_NODE_NUMBER;
     }
     fgetline(file_p,conf_line_buffer);
@@ -1444,11 +1426,11 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     reset_string(conf_line_buffer);
     if(hpc_user_num>MAXIMUM_ADD_USER_NUMBER){
-        printf("[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n",hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
         hpc_user_num=MAXIMUM_ADD_USER_NUMBER;
     }
     else if(hpc_user_num<MINIMUM_ADD_USER_NUNMBER){
-        printf("[ -WARN- ] The number of HPC users %d is less than %d, reset to %d.\n",hpc_user_num,MINIMUM_ADD_USER_NUNMBER,MINIMUM_ADD_USER_NUNMBER);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of HPC users %d is less than %d, reset to %d.\n" RESET_DISPLAY,hpc_user_num,MINIMUM_ADD_USER_NUNMBER,MINIMUM_ADD_USER_NUNMBER);
         hpc_user_num=MINIMUM_ADD_USER_NUNMBER;
     }
     fscanf(file_p,"%s%s%s%s\n",conf_param_buffer1,conf_param_buffer2,conf_param1,conf_param2);
@@ -1463,7 +1445,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     reset_string(conf_line_buffer);
     if(master_bandwidth>50){
-        printf("[ -WARN- ] The master node bandwidth %d exceeds the maximum value 50, reset to 50.\n",master_bandwidth);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The master node bandwidth %d exceeds the maximum value 50, reset to 50.\n" RESET_DISPLAY,master_bandwidth);
         master_bandwidth=50;
     }
     fscanf(file_p,"%s%s%s\n",conf_param_buffer1,conf_param_buffer2,compute_inst);
@@ -1478,8 +1460,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
  
     if(contain_or_not(zone_id,region_id)!=0){
-        printf("[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
+        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return -1;
     }
     sprintf(filename_temp,"%s%sdb_passwords.txt",vaultdir,PATH_SLASH);
@@ -1516,11 +1498,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
             *(cluster_id+i)=*(cluster_id_input+i);
         }
-        printf("[ -WARN- ] The CLUSTER_ID '%s' specified by the command is too long (length>%d).\n",cluster_id_input,CLUSTER_ID_LENGTH_MAX);
-        printf("|          Cut it to %s\n",cluster_id);
     }
     else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
-        printf("[ -WARN- ] Using the CLUSTER_ID '%s' specified by the command.\n",cluster_id_input);
         global_replace(conf_file,cluster_id,cluster_id_input);
         reset_string(cluster_id);
         for(i=0;i<strlen(cluster_id_input);i++){
@@ -1532,15 +1511,10 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         global_replace(conf_file,cluster_id,cluster_id_temp);
         reset_string(cluster_id);
         strcpy(cluster_id,cluster_id_temp);
-        printf("[ -WARN- ] The CLUSTER_ID specified by the command and conf file is too short.\n");
-        printf("|          Extend to %s.\n", cluster_id);
-    }
-    else{
-        printf("[ -INFO- ] Using the CLUSTER_ID '%s' speficied in the conf file.\n",cluster_id);
     }
     sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==1){
-        printf("[ -INFO- ] Creating a Unique Cluster ID now...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
         reset_string(randstr);
         generate_random_string(randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
@@ -1650,7 +1624,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         return -1;
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
-        printf("[ -INFO- ] Rolling back and exit now ...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back and exit now ...\n");
         if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log,1)==0){
             delete_decrypted_files(workdir,crypto_keyfile);
             sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -1661,10 +1635,10 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
             system(cmdline);
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            printf("[ -INFO- ] Successfully rolled back. Please check the errolog for details.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back. Please check the errolog for details.\n");
             return -1;
         }
-        printf("[ -INFO- ] Failed to roll back. Please try 'hpcopr destroy' later.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
         return -1;
     }
     sprintf(cmdline,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -1676,7 +1650,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         fflush(stdout);
         sleep(1);
     }
-    printf("[ -DONE- ] Remote execution commands sent.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);
     sprintf(filename_temp,"%s%sbucket_secrets.txt",stackdir,PATH_SLASH);
@@ -1695,7 +1669,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %s.ossutilconfig -s -o %s%sbucket.conf",url_alicloud_root,vaultdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf("[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n");
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n" RESET_DISPLAY);
     }
     else{
         sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
@@ -1731,7 +1705,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"echo %s > %s%scloud_flag.flg",cloud_flag,vaultdir,PATH_SLASH);
         system(cmdline);
     }
-    printf("[ -INFO- ] After the initialization:\n|\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     time(&current_time_long);

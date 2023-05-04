@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0075"
+#define CORE_VERSION_CODE "0.2.0.0076"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -180,6 +180,13 @@
 
 #define LOCATION_CONF_TOTAL_LINES 5
 #define LOCATION_LINES 4
+
+#define FATAL_RED_BOLD "\033[1;31m"
+#define WARN_YELLO_BOLD "\033[1;33m"
+#define HIGH_GREEN_BOLD "\033[1;32m"
+#define GENERAL_BOLD "\033[1m"
+#define RESET_DISPLAY "\033[0m"
+
 #endif
 
 /* The macros below are deprecated. 

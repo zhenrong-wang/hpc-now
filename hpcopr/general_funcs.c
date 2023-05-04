@@ -15,6 +15,7 @@
 
 #ifdef _WIN32
 #include <malloc.h>
+#include <conio.h> // This header is not standard! Only for mingw.
 #elif __linux__
 #include <malloc.h>
 #include <sys/time.h>
@@ -619,3 +620,31 @@ int generate_random_string(char* random_string){
     *(random_string+RANDSTR_LENGTH_PLUS-1)='\0';
     return 0;  
 }
+
+#ifdef _WIN32
+char* getpass_windows(char* prompt){
+    static char passwd[AKSK_LENGTH];
+    char ch='\0';
+    int i=0;
+    printf("%s",prompt);
+    while((ch=_getch())!='\r'&&i!=AKSK_LENGTH-1){
+        if(ch!='\b'&&ch!='\t'&&ch!=' '){
+            passwd[i]=ch;
+            putchar('*');
+            i++;
+        }
+        else if(ch=='\b'){
+            if(i==0){
+                continue;
+            }
+            else{
+                printf("\b \b");
+                i--;
+                passwd[i]='\0';
+            }
+        }
+    }
+    passwd[i]='\0';
+    return passwd;
+}
+#endif
