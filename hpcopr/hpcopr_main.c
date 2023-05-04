@@ -732,10 +732,10 @@ int main(int argc, char* argv[]){
                 return -17;
             }
             if(strcmp(argv[1],"reconfc")==0&&check_down_nodes(workdir)!=0&&strcmp(cloud_flag,"CLOUD_B")==0){
-                printf("|\n[ -WARN- ] You need to turn on all the compute nodes before reconfiguring them.\n");
+                printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You need to turn on all the compute nodes before reconfiguring them.\n" RESET_DISPLAY);
             }
             if(strcmp(argv[1],"reconfm")==0&&cluster_asleep_or_not(workdir)==0){
-                printf("|\n[ -WARN- ] You needd to wake up the cluster before reconfiguring the master node.\n");
+                printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You needd to wake up the cluster before reconfiguring the master node.\n" RESET_DISPLAY);
             }
             print_tail();
             write_log(current_cluster_name,operation_log,argv[1],17);
