@@ -645,6 +645,7 @@ char* getpass_windows(char* prompt){
         }
     }
     passwd[i]='\0';
+    printf("\n");
     return passwd;
 }
 #endif
