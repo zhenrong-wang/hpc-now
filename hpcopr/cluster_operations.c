@@ -2084,7 +2084,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     update_cluster_summary(workdir,crypto_keyfile);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The reinitialization process may need 7 minutes. Please do not operate\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The rebuild process may need 7 minutes. Please do not operate\n");
     printf("|          this cluster during the period. Exit now.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
