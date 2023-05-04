@@ -1387,6 +1387,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     char prev_config[16]="";
     char cloud_flag[16]="";
     int compute_node_num=0;
+    int compute_node_down_num=0;
     char* sshkey_dir=SSHKEY_DIR;
     char* error_log=OPERATION_ERROR_LOG;
     int i;
@@ -1398,6 +1399,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     compute_node_num=get_compute_node_num(filename_temp,"all");
+    compute_node_down_num=get_compute_node_num(filename_temp,"down");
     if(compute_node_num==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no compute nodes in your cluster. Exit now.\n" RESET_DISPLAY);
         return -1;
@@ -1553,8 +1555,14 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
-    remote_exec(workdir,sshkey_dir,"connect",1);
-    remote_exec(workdir,sshkey_dir,"all",2);
+    if(compute_node_down_num!=0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Please turn on all the compute nodes, log on to the master\n");
+        printf("|          node, and run: sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY);
+    }
+    else{
+        remote_exec(workdir,sshkey_dir,"connect",1);
+        remote_exec(workdir,sshkey_dir,"all",2);
+    }
     delete_decrypted_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
         sprintf(node_name_temp,"compute%d",i);
