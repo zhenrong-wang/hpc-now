@@ -445,7 +445,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
         }
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing all the related files ...\n");
-    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,cluster_workdir,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,cluster_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Deleting the cluster from the registry ...\n");
     delete_from_cluster_registry(target_cluster_name);
