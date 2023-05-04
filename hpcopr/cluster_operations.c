@@ -1925,7 +1925,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     }
     char stackdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    char remote_commands[64]="";
+    char remote_commands[128]="";
     char filename_temp[FILENAME_LENGTH]="";
     char* sshkey_folder=SSHKEY_DIR;
     char cloud_flag[16]="";
