@@ -57,7 +57,6 @@ void print_tail_installer(void){
     printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com" GENERAL_BOLD " <> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
 }
 
-
 // Print out help info for this installer
 void print_help_installer(void){
 #ifdef _WIN32

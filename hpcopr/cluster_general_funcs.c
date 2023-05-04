@@ -61,8 +61,10 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
 void create_and_get_stackdir(char* workdir, char* stackdir){
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(stackdir,"%s%sstack",workdir,PATH_SLASH);
-    sprintf(cmdline,"mkdir %s %s",stackdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(folder_exist_or_not(stackdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
 }
 
 void get_latest_hosts(char* stackdir, char* hostfile_latest){

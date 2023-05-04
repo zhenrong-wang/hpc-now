@@ -1987,7 +1987,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         printf("|          * Will try to rebuild all the cluster nodes.\n");
     }
     create_and_get_stackdir(workdir,stackdir);
-    sprintf(cmdline,"%s %s%stmp %s && %s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%stmp %s && %s %s%stmp%s* %s",MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s%shpc_stack_master.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);

@@ -178,8 +178,8 @@ if [ $CLOUD_FLAG = 'CLOUD_B' ]; then
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 elif [ $CLOUD_FLAG = 'CLOUD_A' ]; then
   yum -y update
-  yum -y install https://mirrors.aliyun.com/epel/epel-release-latest-9.noarch.rpm?spm=a2c6h.25603864.0.0.21fa5993AxlJwA
-  yum -y install https://mirrors.aliyun.com/epel/epel-next-release-latest-9.noarch.rpm?spm=a2c6h.25603864.0.0.21fa5993AxlJwA
+  yum -y install https://mirrors.aliyun.com/epel/epel-release-latest-9.noarch.rpm
+  yum -y install https://mirrors.aliyun.com/epel/epel-next-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.aliyun.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 else
