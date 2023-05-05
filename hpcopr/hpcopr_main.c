@@ -505,10 +505,10 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"graph")==0){
         if(check_pslock(workdir)!=0){
             if(cluster_empty_or_not(workdir)!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * The graph here is *NOT* updated !\n\n" RESET_DISPLAY,current_cluster_name);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * Graph NOT updated !\n\n" RESET_DISPLAY,current_cluster_name);
             }
             else{
-                printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * The graph here is *NOT* updated !\n" RESET_DISPLAY,current_cluster_name);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * Graph NOT updated !\n" RESET_DISPLAY,current_cluster_name);
             }
             run_flag=graph(workdir,crypto_keyfile,0);
             print_tail();
