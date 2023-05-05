@@ -666,9 +666,9 @@ int wait_for_complete(char* workdir, char* option, char* errorlog, int silent_fl
 }
 
 int graph(char* workdir, char* crypto_keyfile, int graph_level){
-    if(getstate(workdir,crypto_keyfile)!=0){
+/*    if(getstate(workdir,crypto_keyfile)!=0){
         return -1;
-    }
+    }*/
     char master_address[32]="";
     char master_status[16]="";
     char master_config[16]="";

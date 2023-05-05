@@ -15,8 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CH_BUFFER_MAX 65536 
-
+#define CH_BUFFER_MAX 524288
+                      
 int read_file(char* filename, char* ch_array){
     int i=0;
     char ch='\0';

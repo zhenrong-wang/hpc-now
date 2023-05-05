@@ -915,6 +915,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 return -1;
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+            getstate(workdir,crypto_keyfile);
             graph(workdir,crypto_keyfile,0);
             get_latest_hosts(stackdir,filename_temp);
             printf("|\n");
@@ -953,6 +954,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+    getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
@@ -1029,6 +1031,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+    getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
@@ -1125,6 +1128,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 return -1;
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+            getstate(workdir,crypto_keyfile);
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
             delete_decrypted_files(workdir,crypto_keyfile);
@@ -1157,6 +1161,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+    getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     for(i=1;i<compute_node_num+1;i++){
@@ -1259,6 +1264,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 return -1;
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+            getstate(workdir,crypto_keyfile);
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
             remote_exec(workdir,sshkey_dir,"quick",1);
@@ -1292,6 +1298,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+    getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     remote_exec(workdir,sshkey_dir,"quick",1);
@@ -1427,6 +1434,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             }
             update_compute_template(stackdir,cloud_flag);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+            getstate(workdir,crypto_keyfile);
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
             get_latest_hosts(stackdir,filename_temp);
@@ -1495,6 +1503,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     }
     update_compute_template(stackdir,cloud_flag);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+    getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
@@ -1574,6 +1583,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     system(cmdline);
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+    getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
@@ -1661,6 +1671,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
         }
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+    getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
@@ -1754,6 +1765,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
         }
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+    getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     update_usage_summary(workdir,crypto_keyfile,"master","start");
@@ -2018,6 +2030,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     get_cluster_bucket_id(workdir,crypto_keyfile,bucket_id);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+    getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     decrypt_get_bucket_conf(workdir,crypto_keyfile,bucket_conf);
