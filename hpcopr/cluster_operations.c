@@ -453,7 +453,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     return 0;
 }
 
-int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk){
+int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* echo_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char real_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char input_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
@@ -490,8 +490,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     if(strlen(cluster_name)==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the cluster name (A-Z | a-z | 0-9 | - , maximum length %d):\n",CLUSTER_ID_LENGTH_MAX);
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-        fflush(stdin);
         scanf("%s",input_cluster_name);
+        getchar();
     }
     else{
         strcpy(input_cluster_name,cluster_name);
@@ -538,22 +538,16 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input your secrets key pair:\n");
-#ifndef _WIN32
-    keypair_temp=getpass("[ INPUT: ] *echo off* Access key ID  : ");
+    keypair_temp=get_keypair_input("[ INPUT: ] Access key ID  : ");
     strcpy(access_key,keypair_temp);
     reset_string(keypair_temp);
-    keypair_temp=getpass("[ INPUT: ] *echo off* Access secrets : ");
+    keypair_temp=get_keypair_input("[ INPUT: ] Access secrets : ");
     strcpy(secret_key,keypair_temp);
     reset_string(keypair_temp);
-#else
-    keypair_temp=getpass_windows("[ INPUT: ] Access key ID  : ");
-    strcpy(access_key,keypair_temp);
-    reset_string(keypair_temp);
-    keypair_temp=getpass_windows("[ INPUT: ] Access secrets : ");
-    strcpy(secret_key,keypair_temp);
-    reset_string(keypair_temp);
-#endif
-//    printf("\n%s,%ld\n%s,%ld\n",access_key,strlen(access_key),secret_key,strlen(secret_key));
+    if(strcmp(echo_flag,"echo")==0){
+        printf(WARN_YELLO_BOLD "\n|          Access key ID  : %s\n",access_key);
+        printf("|          Access secrets : %s\n\n" RESET_DISPLAY,secret_key);
+    }
     ak_length=strlen(access_key);
     sk_length=strlen(secret_key);
     if(ak_length==24&&sk_length==30){
@@ -604,7 +598,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     return 0;
 }
 
-int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile){
+int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile, char* echo_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
@@ -664,34 +658,29 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n" RESET_DISPLAY);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
+    getchar();
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
         return 1;
     }
-
     get_ak_sk(filename_temp2,crypto_keyfile,access_key_prev,secret_key_prev,cloud_flag_prev);
     if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input your new secrets key pair:\n");
-#ifndef _WIN32
-        keypair_temp=getpass("[ INPUT: ] *echo off* Access key ID  : ");
+        keypair_temp=get_keypair_input("[ INPUT: ] Access key ID  : ");
         strcpy(access_key,keypair_temp);
         reset_string(keypair_temp);
-        keypair_temp=getpass("[ INPUT: ] *echo off* Access secrets : ");
+        keypair_temp=get_keypair_input("[ INPUT: ] Access secrets : ");
         strcpy(secret_key,keypair_temp);
         reset_string(keypair_temp);
-#else
-        keypair_temp=getpass_windows("[ INPUT: ] Access key ID  : ");
-        strcpy(access_key,keypair_temp);
-        reset_string(keypair_temp);
-        keypair_temp=getpass_windows("[ INPUT: ] Access secrets : ");
-        strcpy(access_key,keypair_temp);
-        reset_string(keypair_temp);
-#endif
     }
     else{
         strcpy(access_key,cloud_ak);
         strcpy(secret_key,cloud_sk);
+    }
+    if(strcmp(echo_flag,"echo")==0){
+        printf(WARN_YELLO_BOLD "\n|          Access key ID  : %s\n",access_key);
+        printf("|          Access secrets : %s\n\n" RESET_DISPLAY,secret_key);
     }
     ak_length=strlen(access_key);
     sk_length=strlen(secret_key);
@@ -787,6 +776,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     fflush(stdin);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
+    getchar();
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
@@ -796,55 +786,6 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster operation started ...\n");
     }
     create_and_get_vaultdir(workdir,vaultdir);
-/*#ifdef _WIN32
-    sprintf(filename_temp,"%s\\.secrets.txt",vaultdir);
-#else
-    sprintf(filename_temp,"%s/.secrets.txt",vaultdir);
-#endif
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag);
-    reset_string(buffer1);
-    reset_string(buffer2);
-    get_crypto_key(crypto_keyfile,md5sum);
-#ifdef _WIN32
-    sprintf(cmdline,"%s decrypt %s\\_CLUSTER_SUMMARY.txt %s\\_CLUSTER_SUMMARY.txt.tmp %s %s",now_crypto_exec,vaultdir,vaultdir,md5sum,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(filename_temp,"%s\\_CLUSTER_SUMMARY.txt.tmp",vaultdir);
-    find_and_get(filename_temp,"Master Node IP:","","",1,"Master Node IP:","","",' ',4,master_address);
-    find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_address);
-    sprintf(cmdline,"del /f /q %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
-#else
-    sprintf(cmdline,"%s decrypt %s/_CLUSTER_SUMMARY.txt %s/_CLUSTER_SUMMARY.txt.tmp %s %s",now_crypto_exec,vaultdir,vaultdir,md5sum,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(filename_temp,"%s/_CLUSTER_SUMMARY.txt.tmp",vaultdir);
-    find_and_get(filename_temp,"Master Node IP:","","",1,"Master Node IP:","","",' ',4,master_address);
-    find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_address);
-    sprintf(cmdline,"rm -rf %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
-#endif
-    system(cmdline);
-    if(strcmp(cloud_flag,"CLOUD_C")==0&&force_flag==1){
-#ifdef _WIN32
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/bin/s3cmd del -rf s3://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/bin/s3cmd del -rf s3://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
-#endif
-        system(cmdline);
-    }
-    else if(strcmp(cloud_flag,"CLOUD_A")==0&&force_flag==1){
-#ifdef _WIN32
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/bin/ossutil64 rm -rf oss://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/usr/bin/ossutil64 rm -rf oss://%s\" %s",sshkey_folder,master_address,bucket_address,SYSTEM_CMD_REDIRECT);
-#endif
-        system(cmdline);
-    }
-    else if(strcmp(cloud_flag,"CLOUD_B")==0&&force_flag==1){
-#ifdef _WIN32
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s\\now-cluster-login root@%s \"/usr/local/bin/coscmd delete -rf /\" %s",sshkey_folder,master_address,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s/now-cluster-login root@%s \"/usr/local/bin/coscmd delete -rf /\" %s",sshkey_folder,master_address,SYSTEM_CMD_REDIRECT);
-#endif
-        system(cmdline);
-    }*/
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
     if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log,1)!=0){
@@ -944,6 +885,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm:  ");
             fflush(stdin);
             scanf("%s",string_temp);
+            getchar();
             if(strcmp(string_temp,"y-e-s")!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
                 return 1;
@@ -1155,6 +1097,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm:  ");
             fflush(stdin);
             scanf("%s",string_temp);
+            getchar();
             if(strcmp(string_temp,"y-e-s")!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
                 return 1;
@@ -1288,6 +1231,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm:  ");
             fflush(stdin);
             scanf("%s",string_temp);
+            getchar();
             if(strcmp(string_temp,"y-e-s")!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
                 return 1;
@@ -1915,6 +1859,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
+        getchar();
         if(strcmp(doubleconfirm,"y-e-s")!=0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
             return 3;
@@ -1938,6 +1883,7 @@ int edit_configuration_file(char* workdir, char* crypto_keyfile){
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm: ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
+        getchar();
         if(strcmp(doubleconfirm,"y-e-s")!=0){
             return 1;
         }
@@ -1980,6 +1926,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
+    getchar();
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");

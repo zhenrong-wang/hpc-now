@@ -621,19 +621,30 @@ int generate_random_string(char* random_string){
     return 0;  
 }
 
-#ifdef _WIN32
-char* getpass_windows(char* prompt){
+char* get_keypair_input(char* prompt){
     static char passwd[AKSK_LENGTH];
     char ch='\0';
     int i=0;
+    fflush(stdin);
     printf("%s",prompt);
-    while((ch=_getch())!='\r'&&i!=AKSK_LENGTH-1){
-        if(ch!='\b'&&ch!='\t'&&ch!=' '){
+#ifdef _WIN32
+    #define GETCHAR _getch
+    char BACKSPACE='\b';
+    char ENTER='\r';
+#else
+    #define GETCHAR getchar
+    #define BACKSPACE 0x08
+    system("stty -icanon");
+    system("stty -echo");
+    char ENTER='\n';
+#endif
+    while((ch=GETCHAR())!=ENTER&&i!=AKSK_LENGTH-1){
+        if(ch!=BACKSPACE&&ch!='\t'&&ch!=' '){
             passwd[i]=ch;
             putchar('*');
             i++;
         }
-        else if(ch=='\b'){
+        else if(ch==BACKSPACE){
             if(i==0){
                 continue;
             }
@@ -646,6 +657,10 @@ char* getpass_windows(char* prompt){
     }
     passwd[i]='\0';
     printf("\n");
+#undef GETCHAR
+#ifndef _WIN32
+system("stty icanon");
+system("stty echo");
+#endif
     return passwd;
 }
-#endif

@@ -285,7 +285,7 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"new-cluster")==0){
         show_current_cluster(workdir,current_cluster_name,2);
         if(argc==2){
-            run_flag=create_new_cluster(crypto_keyfile,"","","");
+            run_flag=create_new_cluster(crypto_keyfile,"","","","");
             print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
             system_cleanup();
@@ -297,15 +297,49 @@ int main(int argc, char* argv[]){
             }
             return run_flag;
         }
-        else if(argc==3||argc==4){
-            run_flag=create_new_cluster(crypto_keyfile,argv[2],"","");
+        else if(argc==3){
+            if(strcmp(argv[2],"echo")==0){
+                run_flag=create_new_cluster(crypto_keyfile,"","","","echo");
+            }
+            else{
+                run_flag=create_new_cluster(crypto_keyfile,argv[2],"","","");
+            }
+            print_tail();
+            write_log("NULL",operation_log,argv[1],run_flag);
+            system_cleanup();
+            return run_flag;
+        }
+        else if(argc==4){
+            if(strcmp(argv[2],"echo")==0){
+                run_flag=create_new_cluster(crypto_keyfile,argv[3],"","","echo");
+            }
+            else{
+                run_flag=create_new_cluster(crypto_keyfile,argv[2],"","","");
+            }
+            print_tail();
+            write_log("NULL",operation_log,argv[1],run_flag);
+            system_cleanup();
+            return run_flag;
+        }
+        else if(argc==5){
+            if(strcmp(argv[2],"echo")==0){
+                run_flag=create_new_cluster(crypto_keyfile,argv[3],"","","echo");
+            }
+            else{
+                run_flag=create_new_cluster(crypto_keyfile,argv[2],argv[3],argv[4],"");
+            }
             print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
             system_cleanup();
             return run_flag;
         }
         else{
-            run_flag=create_new_cluster(crypto_keyfile,argv[2],argv[3],argv[4]);
+            if(strcmp(argv[2],"echo")==0){
+                run_flag=create_new_cluster(crypto_keyfile,argv[3],argv[4],argv[5],"echo");
+            }
+            else{
+                run_flag=create_new_cluster(crypto_keyfile,argv[2],argv[3],argv[4],"");
+            }
             print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
             system_cleanup();
@@ -470,7 +504,12 @@ int main(int argc, char* argv[]){
     }
     if(strcmp(argv[1],"graph")==0){
         if(check_pslock(workdir)!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * The graph here is *NOT* updated !\n|\n" RESET_DISPLAY,current_cluster_name);
+            if(cluster_empty_or_not(workdir)!=0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * The graph here is *NOT* updated !\n\n" RESET_DISPLAY,current_cluster_name);
+            }
+            else{
+                printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * The graph here is *NOT* updated !\n" RESET_DISPLAY,current_cluster_name);
+            }
             run_flag=graph(workdir,crypto_keyfile,0);
             print_tail();
             write_log(current_cluster_name,operation_log,argv[1],run_flag);
@@ -505,11 +544,27 @@ int main(int argc, char* argv[]){
             print_tail();
             return -1;
         }
-        if(argc==2||argc==3){
-            run_flag=rotate_new_keypair(workdir,"","",crypto_keyfile);
+        if(argc==2){
+            run_flag=rotate_new_keypair(workdir,"","",crypto_keyfile,"");
+        }
+        else if(argc==3){
+            run_flag=rotate_new_keypair(workdir,"","",crypto_keyfile,argv[2]);
+        }
+        else if(argc==4){
+            if(strcmp(argv[2],"echo")==0){
+                run_flag=rotate_new_keypair(workdir,"","",crypto_keyfile,"echo");
+            }
+            else{
+                run_flag=rotate_new_keypair(workdir,argv[2],argv[3],crypto_keyfile,"echo");
+            }
         }
         else{
-            run_flag=rotate_new_keypair(workdir,argv[2],argv[3],crypto_keyfile);
+            if(strcmp(argv[2],"echo")==0){
+                run_flag=rotate_new_keypair(workdir,argv[3],argv[4],crypto_keyfile,"echo");
+            }
+            else{
+                run_flag=rotate_new_keypair(workdir,argv[2],argv[3],crypto_keyfile,"");
+            }
         }
         if(run_flag!=0){
             write_log(current_cluster_name,operation_log,"new keypair",-1);
