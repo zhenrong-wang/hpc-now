@@ -1663,6 +1663,8 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     }
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
+            printf("[ -WAIT- ] Still need to wait %d seconds ... \r",10-i);
+            fflush(stdout);
             sleep(1);
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,0)!=0){
