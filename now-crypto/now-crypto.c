@@ -17,7 +17,7 @@
 
 #define CH_BUFFER_MAX 1048576
                       
-int read_file(char* filename, int* ch_array){
+int read_file(char* filename, char* ch_array){
     int i=0;
     int ch='\0';
     FILE* file_p=fopen(filename,"r");
@@ -33,7 +33,7 @@ int read_file(char* filename, int* ch_array){
     return i;
 }
 
-int write_file(char* filename, int* ch_array, int file_length){
+int write_file(char* filename, char* ch_array, int file_length){
     int i;
     FILE* file_p=fopen(filename,"w+");
     if(file_p==NULL){
@@ -63,10 +63,10 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         return 1;
     }
-    int real_key=((encrypt_key%1000*17+1301)%100+19)*7%41;
-    int salt_position=real_key%11+2;
+    int real_key=((encrypt_key%1000*17+1301)%100+19)*7%31;
+    int salt_position=real_key%29+2;
     int i=0,j=0,file_length;
-    int ch_array_buffer[CH_BUFFER_MAX]={'\0',};
+    char ch_array_buffer[CH_BUFFER_MAX]="";
     FILE* filep_orig=fopen(orig_file,"r");
     if(filep_orig==NULL){
         return -1;
@@ -82,10 +82,10 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
     do{
         if(i%salt_position==0){
             if(strcmp(option,"encrypt")==0){
-                *(ch_array_buffer+i)+=((i*j)%17+real_key);
+                *(ch_array_buffer+i)+=((i*j)%7+real_key);
             }
             else{
-                *(ch_array_buffer+i)-=((i*j)%17+real_key);
+                *(ch_array_buffer+i)-=((i*j)%7+real_key);
             }
             i++;
             j++;
@@ -103,10 +103,10 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
         }
         else{
             if(strcmp(option,"encrypt")==0){
-                *(ch_array_buffer+i)+=(i%17+real_key);
+                *(ch_array_buffer+i)+=(i%7+real_key);
             }
             else{
-                *(ch_array_buffer+i)-=(i%17+real_key);
+                *(ch_array_buffer+i)-=(i%7+real_key);
             }
             i++;
             continue;
