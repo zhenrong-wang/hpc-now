@@ -182,6 +182,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
+        getchar();
         if(strcmp(doubleconfirm,"y-e-s")==0){
             if(reset_locations()!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now.\n" RESET_DISPLAY);
@@ -195,6 +196,7 @@ int check_and_install_prerequisitions(int repair_flag){
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
             fflush(stdin);
             scanf("%s",doubleconfirm);
+            getchar();
             if(strcmp(doubleconfirm,"y-e-s")!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
                 return 2;
