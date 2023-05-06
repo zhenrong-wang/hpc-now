@@ -537,10 +537,12 @@ int uninstall_services(void){
     system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
     system("dscl . -delete /Groups/hpc-now >> /dev/null 2>&1");
     system("rm -rf /Users/hpc-now >> /dev/null 2>&1");
+    system("ps -ax | grep hpc-now | cut -c 1-6 | xargs kill -9 >> /dev/null 2>&1");
 #elif __linux__
     system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
     system("userdel -f -r hpc-now >> /dev/null 2>&1");
+    system("ps -aux | grep hpc-now | cut -c 9-16 | xargs kill -9 >> /dev/null 2>&1");
 #endif
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been deleted from this OS and device.\n");
 #ifdef _WIN32
