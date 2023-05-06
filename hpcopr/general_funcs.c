@@ -15,6 +15,7 @@
 
 #ifdef _WIN32
 #include <malloc.h>
+#include <conio.h> // This header is not standard! Only for mingw.
 #elif __linux__
 #include <malloc.h>
 #include <sys/time.h>
@@ -160,11 +161,7 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     }
     fclose(file_p);
     fclose(file_p_tmp);
-#ifdef _WIN32
-    sprintf(cmdline,"move /y %s %s %s",filename_temp,filename,SYSTEM_CMD_REDIRECT);
-#else
-    sprintf(cmdline,"mv %s %s %s",filename_temp,filename,SYSTEM_CMD_REDIRECT);
-#endif
+    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 0;
 }
@@ -291,11 +288,7 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     fprintf(file_temp_p,"%s",single_line);
     fclose(file_p);
     fclose(file_temp_p);
-#ifdef _WIN32
-    sprintf(cmdline,"del /f /q %s %s && move /y %s %s %s",filename,SYSTEM_CMD_REDIRECT,filename_temp,filename,SYSTEM_CMD_REDIRECT);
-#else
-    sprintf(cmdline,"rm -rf %s %s && mv %s %s %s",filename,SYSTEM_CMD_REDIRECT,filename_temp,filename,SYSTEM_CMD_REDIRECT);
-#endif
+    sprintf(cmdline,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return replace_count;
 }
@@ -579,11 +572,7 @@ int generate_random_passwd(char* password){
     char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
     unsigned int seed_num;
     for(i=0;i<PASSWORD_LENGTH;i++){
-#ifdef _WIN32
-        mingw_gettimeofday(&current_time,NULL);
-#else
-        gettimeofday(&current_time,NULL);
-#endif
+        GETTIMEOFDAY_FUNC(&current_time,NULL);
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);
         rand_num=rand()%72;
@@ -599,11 +588,7 @@ int generate_random_db_passwd(char* password){
     char ch_table[62]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     unsigned int seed_num;
     for(i=0;i<PASSWORD_LENGTH;i++){
-#ifdef _WIN32
-        mingw_gettimeofday(&current_time,NULL);
-#else
-        gettimeofday(&current_time,NULL);
-#endif
+        GETTIMEOFDAY_FUNC(&current_time,NULL);
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);
         rand_num=rand()%62;
@@ -618,22 +603,14 @@ int generate_random_string(char* random_string){
     struct timeval current_time;
     char ch_table[36]="abcdefghijklmnopqrstuvwxyz0123456789";
     unsigned int seed_num;
-#ifdef _WIN32
-    mingw_gettimeofday(&current_time,NULL);
-#else
-    gettimeofday(&current_time,NULL);
-#endif
+    GETTIMEOFDAY_FUNC(&current_time,NULL);
     seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
     srand(seed_num);
     rand_num=rand()%26;
     *(random_string+0)=*(ch_table+rand_num);
     usleep(5000);
     for(i=1;i<RANDSTR_LENGTH_PLUS-1;i++){
-#ifdef _WIN32
-        mingw_gettimeofday(&current_time,NULL);
-#else
-        gettimeofday(&current_time,NULL);
-#endif
+        GETTIMEOFDAY_FUNC(&current_time,NULL);
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);
         rand_num=rand()%36;
@@ -642,4 +619,48 @@ int generate_random_string(char* random_string){
     }
     *(random_string+RANDSTR_LENGTH_PLUS-1)='\0';
     return 0;  
+}
+
+char* get_keypair_input(char* prompt){
+    static char passwd[AKSK_LENGTH];
+    char ch='\0';
+    int i=0;
+    fflush(stdin);
+    printf("%s",prompt);
+#ifdef _WIN32
+    #define GETCHAR _getch
+    char BACKSPACE='\b';
+    char ENTER='\r';
+#else
+    #define GETCHAR getchar
+    #define BACKSPACE 0x08
+    system("stty -icanon");
+    system("stty -echo");
+    char ENTER='\n';
+#endif
+    while((ch=GETCHAR())!=ENTER&&i!=AKSK_LENGTH-1){
+        if(ch!=BACKSPACE&&ch!='\t'&&ch!=' '){
+            passwd[i]=ch;
+            putchar('*');
+            i++;
+        }
+        else if(ch==BACKSPACE){
+            if(i==0){
+                continue;
+            }
+            else{
+                printf("\b \b");
+                i--;
+                passwd[i]='\0';
+            }
+        }
+    }
+    passwd[i]='\0';
+    printf("\n");
+#undef GETCHAR
+#ifndef _WIN32
+system("stty icanon");
+system("stty echo");
+#endif
+    return passwd;
 }

@@ -61,8 +61,10 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
 void create_and_get_stackdir(char* workdir, char* stackdir){
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(stackdir,"%s%sstack",workdir,PATH_SLASH);
-    sprintf(cmdline,"mkdir %s %s",stackdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(folder_exist_or_not(stackdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
 }
 
 void get_latest_hosts(char* stackdir, char* hostfile_latest){
@@ -120,12 +122,14 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
 void create_and_get_vaultdir(char* workdir, char* vaultdir){
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(vaultdir,"%s%svault",workdir,PATH_SLASH);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(folder_exist_or_not(vaultdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
 }
 
 int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes){
-    if(strcmp(exec_type,"connect")!=0&&strcmp(exec_type,"all")!=0&&strcmp(exec_type,"clear")!=0){
+    if(strcmp(exec_type,"connect")!=0&&strcmp(exec_type,"all")!=0&&strcmp(exec_type,"clear")!=0&&strcmp(exec_type,"quick")!=0){
         return -1;
     }
     if(delay_minutes<0){
@@ -146,21 +150,36 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     fgetline(file_p,remote_address);
     fclose(file_p);
     sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    if(strcmp(exec_type,"clear")==0){
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr clear\" | at now + %d minutes\"",private_key,remote_address,delay_minutes);
-        return system(cmdline);
-    }
-    else if(strcmp(exec_type,"connect")==0){
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr connect\" | at now + %d minutes\"",private_key,remote_address,delay_minutes);
-        return system(cmdline);
-    }
-    else if(strcmp(exec_type,"all")==0){
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr all\" | at now + %d minutes\"",private_key,remote_address,delay_minutes);
-        return system(cmdline);
-    }
-    else{
+    sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\" %s",private_key,remote_address,exec_type,delay_minutes,SYSTEM_CMD_REDIRECT);
+    return system(cmdline);
+}
+
+int remote_exec_general(char* workdir, char* sshkey_folder, char* commands, int delay_minutes){
+    if(delay_minutes<0){
         return -1;
     }
+    char cmdline[CMDLINE_LENGTH]="";
+    char stackdir[DIR_LENGTH]="";
+    char private_key[FILENAME_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char remote_address[32]="";
+    FILE* file_p=NULL;
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    file_p=fopen(filename_temp,"r");
+    if(file_p==NULL){
+        return 1;
+    }
+    fgetline(file_p,remote_address);
+    fclose(file_p);
+    sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
+    if(delay_minutes==0){
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"%s\" %s",private_key,remote_address,commands,SYSTEM_CMD_REDIRECT);
+    }
+    else{
+        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"%s\" | at now + %d minutes\" %s",private_key,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
+    }
+    return system(cmdline);
 }
 
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag){
@@ -176,7 +195,7 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     char decrypted_file_name[FILENAME_LENGTH]="";
     FILE* decrypted_file=NULL;
     if(get_crypto_key(crypto_key_file,md5)!=0){
-        printf("[ FATAL: ] Failed to get the crypto key. Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key. Exit now.\n" RESET_DISPLAY);
         return -1;
     }
     sprintf(cmdline,"%s decrypt %s %s.dat %s", now_crypto_exec, secret_file, secret_file, md5);
@@ -338,6 +357,8 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     get_crypto_key(crypto_key_filename,md5sum);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
+    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
@@ -491,9 +512,9 @@ int generate_sshkey(char* sshkey_folder, char* pubkey){
     char filename_temp2[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
 
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,sshkey_folder,SYSTEM_CMD_REDIRECT);
-    if(system(cmdline)!=0){
-        return -1;
+    if(folder_exist_or_not(sshkey_folder)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,sshkey_folder,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
     }
 #ifdef _WIN32
     sprintf(cmdline,"attrib +h +s +r %s",sshkey_folder);
@@ -553,10 +574,27 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
 }
 
 /* Should write a real C function, instead of calling system commands. But it is totally OK.*/
-void archive_log(char* logarchive, char* logfile){
-    char cmdline[CMDLINE_LENGTH]="";
-    sprintf(cmdline,"%s %s >> %s 2>>%s",CAT_FILE_CMD,logfile,logarchive,SYSTEM_CMD_ERROR_LOG);
-    system(cmdline);
+int archive_log(char* logarchive, char* logfile){
+    char line_buffer[LINE_LENGTH]="";
+    time_t current_time_long;
+    struct tm* time_p=NULL;
+    time(&current_time_long);
+    time_p=localtime(&current_time_long);
+    if(file_exist_or_not(logfile)!=0){
+        return -1;
+    }
+    FILE* file_p=fopen(logarchive,"a+");
+    if(file_p==NULL){
+        return -1;
+    }
+    FILE* file_p_2=fopen(logfile,"r");
+    fprintf(file_p,"\n\n# TIMESTAMP OF THIS ARCHIVE: %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
+    while(fgetline(file_p_2,line_buffer)==0){
+        fprintf(file_p,"%s\n",line_buffer);
+    }
+    fclose(file_p_2);
+    fclose(file_p);
+    return 0;
 }
 
 void single_file_to_running(char* filename_temp, char* cloud_flag){
@@ -580,7 +618,7 @@ void update_compute_template(char* stackdir, char* cloud_flag){
     single_file_to_running(filename_temp,cloud_flag);
 }
 
-int wait_for_complete(char* workdir, char* option, char* errorlog){
+int wait_for_complete(char* workdir, char* option, char* errorlog, int silent_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
@@ -599,30 +637,38 @@ int wait_for_complete(char* workdir, char* option, char* errorlog){
         total_minutes=3;
     }
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
-        fflush(stdin);
-        printf("[ -WAIT- ] This may need %d min(s). %d sec(s) passed ... (%c)\r",total_minutes,i,*(annimation+i%4));
-        fflush(stdout);
+        if(silent_flag!=0){
+            fflush(stdin);
+            printf("[ -WAIT- ] This may need %d min(s). %d sec(s) passed ... (%c)\r",total_minutes,i,*(annimation+i%4));
+            fflush(stdout);
+        }
         i++;
         sleep(1);
         if(file_empty_or_not(errorlog)>0){
-            printf("\n");
+            if(silent_flag!=0){
+                printf("\n");
+            }
             return 127;
         }
     }
     if(i==MAXIMUM_WAIT_TIME){
-        printf("\n");
+        if(silent_flag!=0){
+            printf("\n");
+        }
         return 1;
     }
     else{
-        printf("\n");
+        if(silent_flag!=0){
+            printf("\n");
+        }
         return 0;
     }
 }
 
 int graph(char* workdir, char* crypto_keyfile, int graph_level){
-    if(getstate(workdir,crypto_keyfile)!=0){
+/*    if(getstate(workdir,crypto_keyfile)!=0){
         return -1;
-    }
+    }*/
     char master_address[32]="";
     char master_status[16]="";
     char master_config[16]="";
@@ -657,8 +703,8 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     sprintf(master_tf,"%s/hpc_stack_master.tf",stackdir);
     find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
     if(graph_level==0){
-        printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
-        printf("|            +-db(%s)\n",db_status);
+        printf(HIGH_GREEN_BOLD "|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
+        printf("|            +-db(%s)\n" RESET_DISPLAY,db_status);
     }
     while(fgetline(file_p,compute_address)==0){
         fgetline(file_p,compute_status);
@@ -668,10 +714,10 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         }
         if(graph_level==0){
             if(strlen(ht_status)!=0){
-                printf("|              +-compute%d(%s,%s,%s,%s)\n",node_num,compute_address,compute_status,compute_config,ht_status);
+                printf(HIGH_GREEN_BOLD "|              +-compute%d(%s,%s,%s,%s)\n" RESET_DISPLAY,node_num,compute_address,compute_status,compute_config,ht_status);
             }
             else{
-                printf("|              +-compute%d(%s,%s,%s)\n",node_num,compute_address,compute_status,compute_config);
+                printf(HIGH_GREEN_BOLD "|              +-compute%d(%s,%s,%s)\n" RESET_DISPLAY,node_num,compute_address,compute_status,compute_config);
             }
         }
     }
@@ -739,7 +785,7 @@ int cluster_asleep_or_not(char* workdir){
     }
 }
 
-int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log){
+int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log, int silent_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char tf_realtime_log[FILENAME_LENGTH];
@@ -754,11 +800,13 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     archive_log(tf_error_log_archive,error_log);
     sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,error_log);
     run_flag=system(cmdline);
-    printf("[ -INFO- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
-    printf("|          Operation Command: %s. Error log: %s\n",execution_name,error_log);
-    wait_for_complete(workdir,execution_name,error_log);
+    if(silent_flag!=0){
+        printf(WARN_YELLO_BOLD "[ -INFO- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
+        printf("|          Command: %s. Error log: %s\n" RESET_DISPLAY,execution_name,error_log);
+    }
+    wait_for_complete(workdir,execution_name,error_log,silent_flag);
     if(file_empty_or_not(error_log)!=0||run_flag!=0){
-        printf("[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n",execution_name);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,error_log);
         return -1;
     }
@@ -904,13 +952,13 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
     if(file_p==NULL){
         return -1;
     }
-    printf("\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n");
+    printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n");
     while(fgetline(file_p,single_line)==0){
         if(strlen(single_line)!=0){
             printf("%s\n",single_line);
         }
     }
-    printf("+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n");
+    printf("+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n" RESET_DISPLAY);
     fclose(file_p);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -919,13 +967,14 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
 
 int confirm_to_operate_cluster(char* current_cluster_name){
     char doubleconfirm[64]="";
-    printf("[ -INFO- ] You are operating the cluster %s now, which may affect\n",current_cluster_name);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster %s now, which may affect\n",current_cluster_name);
     printf("|          the resources|data|jobs. Please input 'y-e-s' to continue.\n");
-    printf("[ INPUT: ] ");
+    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
+    getchar();
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf("[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
         printf("|          Nothing changed. Exit now.\n");
         return 1;
     }
@@ -992,6 +1041,24 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag){
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         global_replace(filename_temp,"running","stopped");
     }
+    return 0;
+}
+
+int get_cluster_bucket_id(char* workdir, char* crypto_keyfile, char* bucket_id){
+    char vaultdir[DIR_LENGTH]="";
+    char* now_crypto_exec=NOW_CRYPTO_EXEC;
+    char filename_temp[FILENAME_LENGTH]="";
+    char md5sum[64]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    get_crypto_key(crypto_keyfile,md5sum);
+    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        return -1;
+    }
+    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
+    find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_id);
+    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     return 0;
 }
 

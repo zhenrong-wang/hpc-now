@@ -170,10 +170,22 @@ echo -e "# $time_current SELINUX Disabled." >> ${logfile}
 
 ######### Yum some packages ############
 # The update step really takes time, trying to avoid it.
-if [ $CLOUD_FLAG != 'CLOUD_C' ]; then
+if [ $CLOUD_FLAG = 'CLOUD_B' ]; then
   yum -y update
+  yum -y install https://mirrors.cloud.tencent.com/epel/epel-release-latest-9.noarch.rpm
+  yum -y install https://mirrors.cloud.tencent.com/epel/epel-next-release-latest-9.noarch.rpm
+  sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.cloud.tencent.com|' /etc/yum.repos.d/epel*
+  sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
+elif [ $CLOUD_FLAG = 'CLOUD_A' ]; then
+  yum -y update
+  yum -y install https://mirrors.aliyun.com/epel/epel-release-latest-9.noarch.rpm
+  yum -y install https://mirrors.aliyun.com/epel/epel-next-release-latest-9.noarch.rpm
+  sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.aliyun.com|' /etc/yum.repos.d/epel*
+  sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
+else
+  yum -y install epel-release #epel release is really slow for China region
 fi
-yum -y install epel-release #epel release is really slow for China region
+yum -y makecache
 yum -y install gtk2 gtk2-devel
 yum -y install python python3
 yum -y install gcc-c++ gcc-gfortran
@@ -370,7 +382,7 @@ if [ -f /root/hostfile ]; then
   
   yum -y install git python-devel
   if [ $CLOUD_FLAG = 'CLOUD_A' ]; then
-    wget ${URL_UTILS}ossutil64 -O /usr/bin/ossutil64 && chmod 755 /usr/bin/ossutil64
+    sudo -v ; curl https://gosspublic.alicdn.com/ossutil/install.sh | sudo bash
   elif [ $CLOUD_FLAG = 'CLOUD_B' ]; then
     pip install coscmd
   elif [ $CLOUD_FLAG = 'CLOUD_C' ]; then 
@@ -447,7 +459,7 @@ if [ -f /root/hostfile ]; then
       echo -e "alias cos='/opt/cosbrowser.AppImage --no-sandbox'" >> /etc/profile
     fi
   elif [ $CLOUD_FLAG = 'CLOUD_A' ]; then
-    wget ${URL_UTILS}oss-browser-linux-x64.zip -O /opt/oss.zip
+    wget https://gosspublic.alicdn.com/oss-browser/1.16.0/oss-browser-linux-x64.zip -O /opt/oss.zip
     cd /opt && unzip -o oss.zip && rm -rf oss.zip 
     cat /etc/profile | grep ossbrowser
     if [ $? -ne 0 ]; then

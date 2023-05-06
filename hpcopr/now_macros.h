@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0067"
+#define CORE_VERSION_CODE "0.2.0.0083"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -20,7 +20,7 @@
 #define SYSTEM_CMD_REDIRECT ">nul 2>>C:\\programdata\\hpc-now\\system_command_error.log"
 #define DESTROYED_DIR "c:\\programdata\\hpc-now\\.destroyed\\"
 #define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
-#define SSHKEY_DIR "C:\\hpc-now\\.ssh"
+#define SSHKEY_DIR "C:\\hpc-now\\.now-ssh"
 #define OPERATION_ERROR_LOG "c:\\hpc-now\\hpc-now.err.log"
 #define HPC_NOW_ROOT_DIR "c:\\programdata\\hpc-now\\"
 
@@ -47,6 +47,8 @@
 #define CURRENT_CLUSTER_INDICATOR "c:\\programdata\\hpc-now\\etc\\current_cluster.dat"
 #define FILENAME_SUFFIX_SHORT "win"
 #define FILENAME_SUFFIX_FULL "windows"
+
+#define GETTIMEOFDAY_FUNC mingw_gettimeofday
 
 #elif __linux__
 #define PATH_SLASH "/"
@@ -85,6 +87,8 @@
 #define FILENAME_SUFFIX_SHORT "lin"
 #define FILENAME_SUFFIX_FULL "linux"
 
+#define GETTIMEOFDAY_FUNC gettimeofday
+
 #elif __APPLE__
 #define PATH_SLASH "/"
 #define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock"
@@ -121,6 +125,8 @@
 #define CURRENT_CLUSTER_INDICATOR "/Applications/.hpc-now/.etc/current_cluster.dat"
 #define FILENAME_SUFFIX_SHORT "dwn"
 #define FILENAME_SUFFIX_FULL "darwin"
+
+#define GETTIMEOFDAY_FUNC gettimeofday
 
 #endif
 
@@ -174,6 +180,13 @@
 
 #define LOCATION_CONF_TOTAL_LINES 5
 #define LOCATION_LINES 4
+
+#define FATAL_RED_BOLD "\033[1;31m"
+#define WARN_YELLO_BOLD "\033[1;33m"
+#define HIGH_GREEN_BOLD "\033[1;32m"
+#define GENERAL_BOLD "\033[1m"
+#define RESET_DISPLAY "\033[0m"
+
 #endif
 
 /* The macros below are deprecated. 
