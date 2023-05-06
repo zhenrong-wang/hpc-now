@@ -547,7 +547,7 @@ int uninstall_services(void){
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been deleted from this OS and device.\n");
 #ifdef _WIN32
     printf("|          There are still remaining files for the specific user 'hpc-now'.\n");
-    printf("|          Please mannually delete the folder C:\\Users\\hpc-now after reboot.\n");
+    printf("|          Please mannually delete the folder C:\\Users\\hpc-now-* after reboot.\n");
 #endif
     return 0;
 }
