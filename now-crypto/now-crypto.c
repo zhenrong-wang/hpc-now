@@ -63,8 +63,8 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         return 1;
     }
-    int real_key=((encrypt_key%1000*17+1301)%100+19)*7%31;
-    int salt_position=real_key%5+2;
+    int real_key=((encrypt_key%1000*17+1301)%100+19)*7%41;
+    int salt_position=real_key%11+2;
     int i=0,j=0,file_length;
     char ch_array_buffer[CH_BUFFER_MAX]="";
     FILE* filep_orig=fopen(orig_file,"r");
