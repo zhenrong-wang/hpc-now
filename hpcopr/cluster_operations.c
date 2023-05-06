@@ -1345,6 +1345,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     char node_name_temp[32]="";
     char* tf_exec=TERRAFORM_EXEC;
     int cpu_core_num=0;
+    int reinit_flag=0;
     char cmdline[CMDLINE_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
@@ -1406,6 +1407,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                     system(cmdline);
                     global_replace(filename_temp2,"cpu_threads_per_core = 2","cpu_threads_per_core = 1");
                 }
+                reinit_flag=1;
             }
             if(find_multi_keys(filename_temp,"cpu_threads_per_core = 1","","","","")>0){
                 for(i=1;i<compute_node_num+1;i++){
@@ -1414,6 +1416,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                     system(cmdline);
                     global_replace(filename_temp2,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
                 }
+                reinit_flag=1;
             }
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
@@ -1513,8 +1516,14 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         printf("|          node, and run: sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY);
     }
     else{
-        remote_exec(workdir,sshkey_dir,"connect",1);
-        remote_exec(workdir,sshkey_dir,"all",2);
+        if(reinit_flag==0){
+            remote_exec(workdir,sshkey_dir,"connect",1);
+            remote_exec(workdir,sshkey_dir,"all",2);
+        }
+        else{
+            remote_exec(workdir,sshkey_dir,"connect",7);
+            remote_exec(workdir,sshkey_dir,"all",8);
+        }
     }
     delete_decrypted_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
