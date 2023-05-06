@@ -15,11 +15,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CH_BUFFER_MAX 524288
+#define CH_BUFFER_MAX 1048576
                       
-int read_file(char* filename, char* ch_array){
+int read_file(char* filename, int* ch_array){
     int i=0;
-    char ch='\0';
+    int ch='\0';
     FILE* file_p=fopen(filename,"r");
     if(file_p==NULL){
         return -1;
@@ -33,7 +33,7 @@ int read_file(char* filename, char* ch_array){
     return i;
 }
 
-int write_file(char* filename, char* ch_array, int file_length){
+int write_file(char* filename, int* ch_array, int file_length){
     int i;
     FILE* file_p=fopen(filename,"w+");
     if(file_p==NULL){
@@ -66,7 +66,7 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
     int real_key=((encrypt_key%1000*17+1301)%100+19)*7%41;
     int salt_position=real_key%11+2;
     int i=0,j=0,file_length;
-    char ch_array_buffer[CH_BUFFER_MAX]="";
+    int ch_array_buffer[CH_BUFFER_MAX]={'\0',};
     FILE* filep_orig=fopen(orig_file,"r");
     if(filep_orig==NULL){
         return -1;
