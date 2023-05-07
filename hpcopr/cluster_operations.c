@@ -1478,12 +1478,14 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 printf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
                 global_replace(filename_temp,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
             }
+            reinit_flag=1;
         }
         if(strcmp(htflag,"htoff")==0&&find_multi_keys(filename_temp,"cpu_threads_per_core = 2","","","","")>0){
             for(i=1;i<compute_node_num+1;i++){
                 sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
                 global_replace(filename_temp,"cpu_threads_per_core = 2","cpu_threads_per_core = 1");
             }
+            reinit_flag=2;
         }
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
