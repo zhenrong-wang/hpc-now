@@ -94,7 +94,7 @@ int decrypt_get_bucket_conf(char* workdir, char* crypto_keyfile, char* bucket_co
     create_and_get_vaultdir(workdir,vaultdir);
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(bucket_conf,"%s%sbucket.conf",vaultdir,PATH_SLASH);
-    sprintf(cmdline,"%s decrypt %s/bucket.conf.tmp %s/bucket.conf %s",NOW_CRYPTO_EXEC,vaultdir,vaultdir,md5sum);
+    sprintf(cmdline,"%s decrypt %s%sbucket.conf.tmp %s%sbucket.conf %s",NOW_CRYPTO_EXEC,vaultdir,PATH_SLASH,vaultdir,PATH_SLASH,md5sum);
     return system(cmdline);
 }
 
@@ -613,7 +613,7 @@ void update_compute_template(char* stackdir, char* cloud_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     sprintf(filename_temp,"%s%scompute_template",stackdir,PATH_SLASH);
-    sprintf(cmdline,"%s %s/hpc_stack_compute1.tf %s %s",COPY_FILE_CMD,stackdir,filename_temp,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%shpc_stack_compute1.tf %s %s",COPY_FILE_CMD,stackdir,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     single_file_to_running(filename_temp,cloud_flag);
 }
@@ -700,7 +700,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     if(find_multi_keys(compute_template,"cpu_threads_per_core = 1","","","","")!=0){
         strcpy(ht_status,"*HT-OFF*");
     }
-    sprintf(master_tf,"%s/hpc_stack_master.tf",stackdir);
+    sprintf(master_tf,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
     find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
     if(graph_level==0){
         printf(HIGH_GREEN_BOLD "|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
