@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0090"
+#define CORE_VERSION_CODE "0.2.0.0091"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -32,7 +32,7 @@
 #define DELETE_FOLDER_CMD "rd /s /q"
 #define COPY_FILE_CMD "copy /y"
 #define MOVE_FILE_CMD "move /y"
-#define CAT_FILE_CMD "type"
+#define CAT_FILE_CMD "type 2>nul"
 #define GREP_CMD "findstr"
 #define SET_ENV_CMD "set"
 #define START_BG_JOB "start /b"
