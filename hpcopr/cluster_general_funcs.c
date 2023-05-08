@@ -1075,12 +1075,26 @@ int tail_f_for_windows(char* filename){
     fseek(file_p,-1,SEEK_END);
     while(1){
         time(&current_time);
-        if((ch=fgetc(file_p))!=EOF){
-            putchar(ch);
-        }
         if((current_time-start_time)>30){
             fclose(file_p);
             return 1;
+        }
+        if((current_time-start_time)%10==0){
+            printf(HIGH_GREEN_BOLD "\n\n[ -INFO- ] This stream will close in %d seconds.\n\n" RESET_DISPLAY,30-(current_time-start_time))
+        }
+        ch=fgetc(file_p);
+        if(ch!=EOF){
+            putchar(ch);
+        }
+        else{
+            fclose(file_p);
+            file_p=fopen(filename,"r");
+            if(file_p==NULL){
+                return -1;
+            }
+            else{
+                fseek(file_p,-1,SEEK_END);
+            }
         }
     }
     fclose(file_p);
