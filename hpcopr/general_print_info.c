@@ -85,6 +85,7 @@ void print_help(void){
     printf("|         USERNAME - You can specify to login with which user. For example: user1.\n");
     printf("|  " HIGH_GREEN_BOLD "vault" RESET_DISPLAY "       : Check the sensitive information of the current cluster.\n");
     printf("|  " HIGH_GREEN_BOLD "graph" RESET_DISPLAY "       : Display the cluster map including all the nodes and status.\n");
+    printf("|  " HIGH_GREEN_BOLD "realtime" RESET_DISPLAY "    : Stream out the real-time cluster operation process log.\n");
     printf(GENERAL_BOLD "+ V  . Cluster Operation:\n");
     printf("| * You need to switch to a specific cluster first *.\n" RESET_DISPLAY);
     printf("|  " HIGH_GREEN_BOLD "delc" RESET_DISPLAY "        : Delete specified compute nodes:\n");

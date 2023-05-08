@@ -792,6 +792,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     char tf_realtime_log_archive[FILENAME_LENGTH];
     char tf_error_log_archive[FILENAME_LENGTH];
     int run_flag=0;
+    int wait_flag=0;
     create_and_get_stackdir(workdir,stackdir);
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_realtime_log_archive,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
@@ -804,8 +805,8 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
         printf(WARN_YELLO_BOLD "[ -INFO- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
         printf("|          Command: %s. Error log: %s\n" RESET_DISPLAY,execution_name,error_log);
     }
-    wait_for_complete(workdir,execution_name,error_log,silent_flag);
-    if(file_empty_or_not(error_log)!=0||run_flag!=0){
+    wait_flag=wait_for_complete(workdir,execution_name,error_log,1);
+    if(file_empty_or_not(error_log)!=0||run_flag!=0||wait_flag!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,error_log);
         return -1;
@@ -1059,6 +1060,30 @@ int get_cluster_bucket_id(char* workdir, char* crypto_keyfile, char* bucket_id){
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_id);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    return 0;
+}
+
+int tail_f_for_windows(char* filename){
+    FILE* file_p=fopen(filename,"r");
+    char ch='\0';
+    time_t start_time;
+    time_t current_time;
+    time(&start_time);
+    if(file_p==NULL){
+        return -1;
+    }
+    fseek(file_p,-1,SEEK_END);
+    while(1){
+        time(&current_time);
+        if((ch=fgetc(file_p))!=EOF){
+            putchar(ch);
+        }
+        if((current_time-start_time)>30){
+            fclose(file_p);
+            return 1;
+        }
+    }
+    fclose(file_p);
     return 0;
 }
 

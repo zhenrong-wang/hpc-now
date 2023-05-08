@@ -358,6 +358,10 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
                 return 5;
             }
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+            getstate(temp_cluster_workdir,crypto_keyfile);
+            graph(temp_cluster_workdir,crypto_keyfile,0);
+            printf("|\n");
             delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             return 0;
         }
@@ -377,6 +381,10 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
             delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             return 5;
         }
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+        getstate(temp_cluster_workdir,crypto_keyfile);
+        graph(temp_cluster_workdir,crypto_keyfile,0);
+        printf("|\n");
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
     }
@@ -1694,7 +1702,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -1;
     }
-    if(strcmp(cloud_flag,"CLOUD_C")==0){
+    /*if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",10-i);
             fflush(stdout);
@@ -1704,7 +1712,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
             delete_decrypted_files(workdir,crypto_keyfile);
             return -1;
         }
-    }
+    }*/
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
@@ -1793,11 +1801,12 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_C")==0){
-        for(i=0;i<10;i++){
-            printf("[ -WAIT- ] Still need to wait %d seconds ... \r",10-i);
+        for(i=0;i<5;i++){
+            printf("[ -WAIT- ] Refreshing the cluster now %d ...\r",5-i);
             fflush(stdout);
             sleep(1);
         }
+        printf("\n");
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,0)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             return -1;
@@ -2095,4 +2104,20 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     printf("|          this cluster during the period. Exit now.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
+}
+
+void real_time_log(char* workdir){
+    char real_time_log[FILENAME_LENGTH]="";
+#ifndef _WIN32
+    char cmdline[CMDLINE_LENGTH]="";
+#endif
+    sprintf(real_time_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
+#ifdef _WIN32
+    if(tail_f_for_windows(real_time_log)==1){
+        printf("[ -INFO- ] Time is up. Please run this command again.\n");
+    }
+#else
+    sprintf(cmdline,"tail -f %s",real_time_log);
+    system(cmdline);
+#endif
 }
