@@ -1079,9 +1079,6 @@ int tail_f_for_windows(char* filename){
             fclose(file_p);
             return 1;
         }
-        if((current_time-start_time)%10==0){
-            printf(HIGH_GREEN_BOLD "\n\n[ -INFO- ] This stream will close in %ld seconds.\n\n" RESET_DISPLAY,30-(current_time-start_time));
-        }
         ch=fgetc(file_p);
         if(ch!=EOF){
             putchar(ch);
