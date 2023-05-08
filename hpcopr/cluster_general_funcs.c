@@ -1075,12 +1075,12 @@ int tail_f_for_windows(char* filename){
     fseek(file_p,-1,SEEK_END);
     while(1){
         time(&current_time);
+        if((ch=fgetc(file_p))!=EOF){
+            putchar(ch);
+        }
         if((current_time-start_time)>30){
             fclose(file_p);
             return 1;
-        }
-        if((ch=fgetc(file_p))!=EOF){
-            putchar(ch);
         }
     }
     fclose(file_p);
