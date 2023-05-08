@@ -1079,19 +1079,8 @@ int tail_f_for_windows(char* filename){
             fclose(file_p);
             return 1;
         }
-        ch=fgetc(file_p);
-        if(ch!=EOF){
+        if((ch=fgetc(file_p))!=EOF){
             putchar(ch);
-        }
-        else{
-            fclose(file_p);
-            file_p=fopen(filename,"r");
-            if(file_p==NULL){
-                return -1;
-            }
-            else{
-                fseek(file_p,-1,SEEK_END);
-            }
         }
     }
     fclose(file_p);
