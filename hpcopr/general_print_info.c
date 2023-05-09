@@ -49,8 +49,10 @@ void print_help(void){
     printf("|                Switch to a cluster in the registry to operate.\n");
     printf("|  " HIGH_GREEN_BOLD "glance" RESET_DISPLAY "      : all | TARGET_CLUSTER_NAME\n");
     printf("|                Quickly view all the clusters or a specified target cluster.\n");
-    printf("|  " HIGH_GREEN_BOLD "refresh" RESET_DISPLAY "     : TARGET_CLUSTER_NAME\n");
+    printf("|  " HIGH_GREEN_BOLD "refresh" RESET_DISPLAY "     : NONE|TARGET_CLUSTER_NAME NONE|force\n");
     printf("|                Refresh the target cluster without any resource modifications.\n");
+    printf("|                  Specify a cluster name. None refers to the current cluster.\n");
+    printf("|                  Specify 'force' as the last param to do force-refresh ( Danger! ).\n");
     printf("|  " HIGH_GREEN_BOLD "exit-current" RESET_DISPLAY ": Exit the current cluster.\n");
     printf("|  " HIGH_GREEN_BOLD "remove" RESET_DISPLAY "      : TARGET_CLUSTER_NAME\n");
     printf("|                Completely remove a cluster from the OS and registry.\n");
@@ -114,6 +116,7 @@ void print_help(void){
     printf("|              : minimal - Turn on the management nodes of the cluster.\n");
     printf("|              : all     - Turn on the management and compute nodes of the cluster.\n");
     printf("|  " HIGH_GREEN_BOLD "destroy" RESET_DISPLAY "     : *DESTROY* the whole cluster - including all the resources & data.\n");
+    printf("|                Specify 'force' as the second param to do force-destroy ( Danger! ).\n");
     printf(GENERAL_BOLD "+ VI . Others:\n" RESET_DISPLAY);
     printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       : Display the version and other info.\n");
     printf("|  " HIGH_GREEN_BOLD "license" RESET_DISPLAY "     : Read the terms and conditions of the GNU Public License - 2.0\n");

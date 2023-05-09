@@ -337,20 +337,41 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
 }
 
-int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
+int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_flag){
     if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n" RESET_DISPLAY);
         return -1;
     }
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_cluster_workdir[DIR_LENGTH]="";
+    char doubleconfirm[64]="";
     if(strlen(target_cluster_name)==0){
         if(show_current_cluster(temp_cluster_workdir,temp_cluster_name,0)==1){
             return 1;
         }
         else{
-            if(check_pslock(temp_cluster_workdir)!=0){
-                return -3;
+            if(strcmp(force_flag,"force")==0){
+                printf(GENERAL_BOLD "\n");
+                printf("|*                                C A U T I O N !                                  \n");
+                printf("|*                                                                                 \n");
+                printf("|*   YOU ARE REFRESHING THE CLUSTER *WITHOUT* CHECKING OPERATION LOCK STATUS !     \n");
+                printf("|*   PLEASE MAKE SURE CURRENTLY THE CLUSTER IS *NOT* IN A OPERATION PROGRESS !     \n");
+                printf("|*                                                                                 \n");
+                printf("|*                                C A U T I O N !                                  \n");
+                printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+                scanf("%s",doubleconfirm);
+                getchar();
+                if(strcmp(doubleconfirm,"y-e-s")!=0){
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+                    printf("|          Nothing changed.\n");
+                    return 13;
+                }
+            }
+            else{
+                if(check_pslock(temp_cluster_workdir)!=0){
+                    return -3;
+                }
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Refreshing the current cluster now ...\n");
             decrypt_files(temp_cluster_workdir,crypto_keyfile);
@@ -372,8 +393,28 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
     }
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
-        if(check_pslock(temp_cluster_workdir)!=0){
-            return 3;
+        if(strcmp(force_flag,"force")==0){
+            printf(GENERAL_BOLD "\n");
+            printf("|*                                C A U T I O N !                                  \n");
+            printf("|*                                                                                 \n");
+            printf("|*   YOU ARE REFRESHING THE CLUSTER *WITHOUT* CHECKING OPERATION LOCK STATUS !     \n");
+            printf("|*   PLEASE MAKE SURE CURRENTLY THE CLUSTER IS *NOT* IN A OPERATION PROGRESS !     \n");
+            printf("|*                                                                                 \n");
+            printf("|*                                C A U T I O N !                                  \n");
+            printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+            scanf("%s",doubleconfirm);
+            getchar();
+            if(strcmp(doubleconfirm,"y-e-s")!=0){
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+                printf("|          Nothing changed.\n");
+                return 13;
+            }
+        }
+         else{
+            if(check_pslock(temp_cluster_workdir)!=0){
+                return -3;
+            }
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Refreshing the target cluster %s now ...\n",temp_cluster_name);
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
