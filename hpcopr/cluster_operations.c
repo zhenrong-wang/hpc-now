@@ -337,20 +337,41 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
 }
 
-int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
+int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_flag){
     if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n" RESET_DISPLAY);
         return -1;
     }
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_cluster_workdir[DIR_LENGTH]="";
+    char doubleconfirm[64]="";
     if(strlen(target_cluster_name)==0){
         if(show_current_cluster(temp_cluster_workdir,temp_cluster_name,0)==1){
             return 1;
         }
         else{
-            if(check_pslock(temp_cluster_workdir)!=0){
-                return -3;
+            if(strcmp(force_flag,"force")==0){
+                printf(GENERAL_BOLD "\n");
+                printf("|*                                C A U T I O N !                                  \n");
+                printf("|*                                                                                 \n");
+                printf("|*   YOU ARE REFRESHING THE CLUSTER *WITHOUT* CHECKING OPERATION LOCK STATUS !     \n");
+                printf("|*   PLEASE MAKE SURE CURRENTLY THE CLUSTER IS *NOT* IN A OPERATION PROGRESS !     \n");
+                printf("|*                                                                                 \n");
+                printf("|*                                C A U T I O N !                                  \n");
+                printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+                scanf("%s",doubleconfirm);
+                getchar();
+                if(strcmp(doubleconfirm,"y-e-s")!=0){
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+                    printf("|          Nothing changed.\n");
+                    return 13;
+                }
+            }
+            else{
+                if(check_pslock(temp_cluster_workdir)!=0){
+                    return -3;
+                }
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Refreshing the current cluster now ...\n");
             decrypt_files(temp_cluster_workdir,crypto_keyfile);
@@ -358,6 +379,10 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
                 return 5;
             }
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+            getstate(temp_cluster_workdir,crypto_keyfile);
+            graph(temp_cluster_workdir,crypto_keyfile,0);
+            printf("|\n");
             delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             return 0;
         }
@@ -368,8 +393,28 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
     }
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
-        if(check_pslock(temp_cluster_workdir)!=0){
-            return 3;
+        if(strcmp(force_flag,"force")==0){
+            printf(GENERAL_BOLD "\n");
+            printf("|*                                C A U T I O N !                                  \n");
+            printf("|*                                                                                 \n");
+            printf("|*   YOU ARE REFRESHING THE CLUSTER *WITHOUT* CHECKING OPERATION LOCK STATUS !     \n");
+            printf("|*   PLEASE MAKE SURE CURRENTLY THE CLUSTER IS *NOT* IN A OPERATION PROGRESS !     \n");
+            printf("|*                                                                                 \n");
+            printf("|*                                C A U T I O N !                                  \n");
+            printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+            scanf("%s",doubleconfirm);
+            getchar();
+            if(strcmp(doubleconfirm,"y-e-s")!=0){
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+                printf("|          Nothing changed.\n");
+                return 13;
+            }
+        }
+         else{
+            if(check_pslock(temp_cluster_workdir)!=0){
+                return -3;
+            }
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Refreshing the target cluster %s now ...\n",temp_cluster_name);
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
@@ -377,6 +422,10 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile){
             delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             return 5;
         }
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+        getstate(temp_cluster_workdir,crypto_keyfile);
+        graph(temp_cluster_workdir,crypto_keyfile,0);
+        printf("|\n");
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
     }
@@ -909,8 +958,10 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
                     return -127;
                 }
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
                 delete_decrypted_files(workdir,crypto_keyfile);
                 return -1;
             }
@@ -948,9 +999,11 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
@@ -1025,9 +1078,11 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
@@ -1122,9 +1177,11 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
                     return -127;
                 }
                 delete_decrypted_files(workdir,crypto_keyfile);
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
                 return -1;
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
@@ -1155,9 +1212,11 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
             return -127;
         }        
         delete_decrypted_files(workdir,crypto_keyfile);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
@@ -1251,16 +1310,18 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 node_file_to_running(stackdir,node_name,cloud_flag);
             }
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ...");
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
                 for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
                     sprintf(node_name,"compute%d",i);
                     node_file_to_stop(stackdir,node_name,cloud_flag);
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
                     return -127;
                 }
                 delete_decrypted_files(workdir,crypto_keyfile);
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
                 return -1;
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
@@ -1292,9 +1353,11 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
@@ -1345,6 +1408,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     char node_name_temp[32]="";
     char* tf_exec=TERRAFORM_EXEC;
     int cpu_core_num=0;
+    int reinit_flag=0;
     char cmdline[CMDLINE_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
@@ -1406,6 +1470,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                     system(cmdline);
                     global_replace(filename_temp2,"cpu_threads_per_core = 2","cpu_threads_per_core = 1");
                 }
+                reinit_flag=1;
             }
             if(find_multi_keys(filename_temp,"cpu_threads_per_core = 1","","","","")>0){
                 for(i=1;i<compute_node_num+1;i++){
@@ -1414,6 +1479,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                     system(cmdline);
                     global_replace(filename_temp2,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
                 }
+                reinit_flag=1;
             }
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
@@ -1423,9 +1489,11 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
                     return -127;
                 }
                 delete_decrypted_files(workdir,crypto_keyfile);
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
                 return -1;
             }
             for(i=1;i<compute_node_num+1;i++){
@@ -1475,12 +1543,14 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 printf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
                 global_replace(filename_temp,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
             }
+            reinit_flag=1;
         }
         if(strcmp(htflag,"htoff")==0&&find_multi_keys(filename_temp,"cpu_threads_per_core = 2","","","","")>0){
             for(i=1;i<compute_node_num+1;i++){
                 sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
                 global_replace(filename_temp,"cpu_threads_per_core = 2","cpu_threads_per_core = 1");
             }
+            reinit_flag=2;
         }
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
@@ -1492,9 +1562,11 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -1;
     }
     for(i=1;i<compute_node_num+1;i++){
@@ -1513,8 +1585,14 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         printf("|          node, and run: sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY);
     }
     else{
-        remote_exec(workdir,sshkey_dir,"connect",1);
-        remote_exec(workdir,sshkey_dir,"all",2);
+        if(reinit_flag==0){
+            remote_exec(workdir,sshkey_dir,"connect",1);
+            remote_exec(workdir,sshkey_dir,"all",2);
+        }
+        else{
+            remote_exec(workdir,sshkey_dir,"connect",7);
+            remote_exec(workdir,sshkey_dir,"all",8);
+        }
     }
     delete_decrypted_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
@@ -1574,9 +1652,11 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         system(cmdline);
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -3;
     }
     sprintf(cmdline,"%s %s.bak %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
@@ -1656,20 +1736,24 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -1;
     }
-    if(strcmp(cloud_flag,"CLOUD_C")==0){
+    /*if(strcmp(cloud_flag,"CLOUD_C")==0){
         for(i=0;i<10;i++){
+            printf("[ -WAIT- ] Still need to wait %d seconds ... \r",10-i);
+            fflush(stdout);
             sleep(1);
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,0)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             return -1;
         }
-    }
+    }*/
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
@@ -1750,15 +1834,20 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_C")==0){
-        for(i=0;i<10;i++){
+        for(i=0;i<5;i++){
+            printf("[ -WAIT- ] Refreshing the cluster now %d ...\r",5-i);
+            fflush(stdout);
             sleep(1);
         }
+        printf("\n");
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,0)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             return -1;
@@ -2056,4 +2145,20 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     printf("|          this cluster during the period. Exit now.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
+}
+
+void real_time_log(char* workdir){
+    char real_time_log[FILENAME_LENGTH]="";
+#ifndef _WIN32
+    char cmdline[CMDLINE_LENGTH]="";
+#endif
+    sprintf(real_time_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
+#ifdef _WIN32
+    if(tail_f_for_windows(real_time_log)==1){
+        printf("[ -INFO- ] Time is up. Please run this command again.\n");
+    }
+#else
+    sprintf(cmdline,"tail -f %s",real_time_log);
+    system(cmdline);
+#endif
 }

@@ -277,7 +277,7 @@ int main(int argc, char* argv[]){
         return -4;
     }
     
-    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syserr")!=0&&strcmp(argv[1],"history")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0&&strcmp(argv[1],"rebuild")!=0){
+    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syserr")!=0&&strcmp(argv[1],"history")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0&&strcmp(argv[1],"rebuild")!=0&&strcmp(argv[1],"realtime")!=0){
         print_help();
         return -6;
     }
@@ -381,8 +381,20 @@ int main(int argc, char* argv[]){
             system_cleanup();
             return -9;
         }
-        if(cluster_empty_or_not(workdir)==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster cannot be refreshed (either in operation progress or empty).\n");
+        if(argc<3){
+            run_flag=cluster_empty_or_not(workdir);
+        }
+        if(argc==3&&strcmp(argv[2],"force")!=0){
+            run_flag=cluster_empty_or_not(workdir);
+        }
+        else if(argc>3&&strcmp(argv[3],"force")!=0){
+            run_flag=cluster_empty_or_not(workdir);
+        }
+        else{
+            run_flag=3;
+        }
+        if(run_flag==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster cannot be refreshed (either in init progress or empty).\n");
             printf("|          Please run 'hpcopr glance all' to check. Exit now.\n" RESET_DISPLAY);
             print_tail();
             write_log("NULL",operation_log,argv[1],-9);
@@ -394,10 +406,23 @@ int main(int argc, char* argv[]){
             return -1;
         }
         if(argc<3){
-            run_flag=refresh_cluster("",crypto_keyfile);
+            run_flag=refresh_cluster("",crypto_keyfile,"");
+        }
+        else if(argc==3){
+            if(run_flag==3){
+                run_flag=refresh_cluster("",crypto_keyfile,"force");
+            }
+            else{
+                run_flag=refresh_cluster("",crypto_keyfile,"");
+            }
         }
         else{
-            run_flag=refresh_cluster(argv[2],crypto_keyfile);
+            if(run_flag==3){
+                run_flag=refresh_cluster(argv[2],crypto_keyfile,"force");
+            }
+            else{
+                run_flag=refresh_cluster(argv[2],crypto_keyfile,"");
+            }
         }
         if(run_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] Please swith to a cluster first, or specify one to refresh:\n" RESET_DISPLAY);
@@ -416,11 +441,11 @@ int main(int argc, char* argv[]){
             printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is not in the registry.\n" RESET_DISPLAY,argv[2]);
             list_all_cluster_names();
         }
-        else{
+        else if(run_flag==0){
             printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The cluster was successfully refreshed.\n");
         }
         print_tail();
-        write_log("NULL",operation_log,argv[1],run_flag);
+        write_log(argv[2],operation_log,argv[1],run_flag);
         system_cleanup();
         return run_flag;
     }
@@ -502,6 +527,15 @@ int main(int argc, char* argv[]){
         system_cleanup();
         return run_flag;
     }
+    
+    if(strcmp(argv[1],"realtime")==0){
+        real_time_log(workdir);
+        write_log(current_cluster_name,operation_log,argv[1],0);
+        print_tail();
+        system_cleanup();
+        return 0;
+    }
+
     if(strcmp(argv[1],"graph")==0){
         if(check_pslock(workdir)!=0){
             if(cluster_empty_or_not(workdir)!=0){

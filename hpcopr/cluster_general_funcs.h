@@ -45,6 +45,7 @@ int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
 void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);
 int get_cluster_bucket_id(char* workdir, char* crypto_keyfilke, char* bucket_id);
+int tail_f_for_windows(char* filename);
 //int create_protection(char* workdir, int minutes);
 //int check_protection(char* workdir);
 //int delete_protection(char* workdir);

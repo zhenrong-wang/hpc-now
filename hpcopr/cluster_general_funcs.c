@@ -94,7 +94,7 @@ int decrypt_get_bucket_conf(char* workdir, char* crypto_keyfile, char* bucket_co
     create_and_get_vaultdir(workdir,vaultdir);
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(bucket_conf,"%s%sbucket.conf",vaultdir,PATH_SLASH);
-    sprintf(cmdline,"%s decrypt %s/bucket.conf.tmp %s/bucket.conf %s",NOW_CRYPTO_EXEC,vaultdir,vaultdir,md5sum);
+    sprintf(cmdline,"%s decrypt %s%sbucket.conf.tmp %s%sbucket.conf %s",NOW_CRYPTO_EXEC,vaultdir,PATH_SLASH,vaultdir,PATH_SLASH,md5sum);
     return system(cmdline);
 }
 
@@ -613,7 +613,7 @@ void update_compute_template(char* stackdir, char* cloud_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     sprintf(filename_temp,"%s%scompute_template",stackdir,PATH_SLASH);
-    sprintf(cmdline,"%s %s/hpc_stack_compute1.tf %s %s",COPY_FILE_CMD,stackdir,filename_temp,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%shpc_stack_compute1.tf %s %s",COPY_FILE_CMD,stackdir,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     single_file_to_running(filename_temp,cloud_flag);
 }
@@ -700,7 +700,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     if(find_multi_keys(compute_template,"cpu_threads_per_core = 1","","","","")!=0){
         strcpy(ht_status,"*HT-OFF*");
     }
-    sprintf(master_tf,"%s/hpc_stack_master.tf",stackdir);
+    sprintf(master_tf,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
     find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
     if(graph_level==0){
         printf(HIGH_GREEN_BOLD "|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
@@ -792,6 +792,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     char tf_realtime_log_archive[FILENAME_LENGTH];
     char tf_error_log_archive[FILENAME_LENGTH];
     int run_flag=0;
+    int wait_flag=0;
     create_and_get_stackdir(workdir,stackdir);
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_realtime_log_archive,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
@@ -804,8 +805,8 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
         printf(WARN_YELLO_BOLD "[ -INFO- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
         printf("|          Command: %s. Error log: %s\n" RESET_DISPLAY,execution_name,error_log);
     }
-    wait_for_complete(workdir,execution_name,error_log,silent_flag);
-    if(file_empty_or_not(error_log)!=0||run_flag!=0){
+    wait_flag=wait_for_complete(workdir,execution_name,error_log,1);
+    if(file_empty_or_not(error_log)!=0||run_flag!=0||wait_flag!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,error_log);
         return -1;
@@ -1059,6 +1060,30 @@ int get_cluster_bucket_id(char* workdir, char* crypto_keyfile, char* bucket_id){
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_id);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    return 0;
+}
+
+int tail_f_for_windows(char* filename){
+    FILE* file_p=fopen(filename,"r");
+    char ch='\0';
+    time_t start_time;
+    time_t current_time;
+    time(&start_time);
+    if(file_p==NULL){
+        return -1;
+    }
+    fseek(file_p,-1,SEEK_END);
+    while(1){
+        time(&current_time);
+        if((ch=fgetc(file_p))!=EOF){
+            putchar(ch);
+        }
+        if((current_time-start_time)>30){
+            fclose(file_p);
+            return 1;
+        }
+    }
+    fclose(file_p);
     return 0;
 }
 

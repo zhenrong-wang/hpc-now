@@ -596,7 +596,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
     sprintf(cmdline,"setx PATH C:\\WINDOWS\\system32;C:\\hpc-now\\;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\ %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"del /f /q %%homepath%%\\.ssh\\known_hosts %s",SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"del /f /q %%homepath%%\\.ssh\\known_hosts* >nul 2>&1");
 #elif __linux__
     if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ > /dev/null 2>&1")!=0){
         strcpy(cmdline,"export PATH=/home/hpc-now/.bin/:$PATH >> /home/hpc-now/.bashrc");
