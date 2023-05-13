@@ -41,6 +41,7 @@ int check_pslock(char* workdir);
 int confirm_to_operate_cluster(char* current_cluster_name);
 int check_down_nodes(char* workdir);
 int cluster_ssh(char* workdir, char* username);
+int set_user_passwd(char* workdir, char* sshkey_dir, char* username, char* passwd_string);
 int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
 void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);

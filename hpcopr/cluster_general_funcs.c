@@ -357,6 +357,8 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     get_crypto_key(crypto_key_filename,md5sum);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
@@ -940,7 +942,9 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
     char single_line[LINE_LENGTH]="";
     char* crypto_exec=NOW_CRYPTO_EXEC;
     FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
     char filename_temp[FILENAME_LENGTH]="";
+    int i=0;
     if(cluster_empty_or_not(workdir)==0){
         return -1;
     }
@@ -948,19 +952,40 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
     decrypt_single_file(crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
+    decrypt_single_file(crypto_exec,filename_temp,md5sum);
+
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
     }
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    file_p_2=fopen(filename_temp,"r");
+    if(file_p_2==NULL){
+        fclose(file_p);
+        return -1;
+    }
+
     printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n");
-    while(fgetline(file_p,single_line)==0){
+    while(fgetline(file_p,single_line)==0&&i<8){
+        if(strlen(single_line)!=0){
+            printf("%s\n",single_line);
+        }
+        i++;
+    }
+    fclose(file_p);
+    while(fgetline(file_p_2,single_line)==0){
         if(strlen(single_line)!=0){
             printf("%s\n",single_line);
         }
     }
     printf("+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n" RESET_DISPLAY);
-    fclose(file_p);
+    fclose(file_p_2);
+    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 0;
@@ -1084,6 +1109,11 @@ int tail_f_for_windows(char* filename){
         }
     }
     fclose(file_p);
+    return 0;
+}
+
+int set_user_passwd(char* workdir, char* sshkey_dir, char* username, char* passwd_string){
+
     return 0;
 }
 

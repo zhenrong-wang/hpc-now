@@ -664,3 +664,47 @@ system("stty echo");
 #endif
     return passwd;
 }
+
+int insert_lines(char* filename, char* keyword, char* insert_string){
+    if(strlen(keyword)==0||strlen(insert_string)==0){
+        return -1;
+    }
+    if(file_exist_or_not(filename)!=0){
+        return -3;
+    }
+    FILE* file_p=fopen(filename,"r");
+    FILE* file_p_2=NULL;
+    char cmdline[CMDLINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char single_line[LINE_LENGTH]="";
+    int line_num=0;
+    int i;
+    while(fgetline(file_p,single_line)==0){
+        if(contain_or_not(single_line,keyword)==0){
+            break;
+        }
+        else{
+            line_num++;
+        }
+    }
+    fseek(file_p,0,SEEK_SET);
+    sprintf(filename_temp,"%s.tmp",filename);
+    file_p_2=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        fclose(file_p);
+        return -1;
+    }
+    for(i=0;i<line_num;i++){
+        fgetline(file_p,single_line);
+        fprintf(file_p_2,"%s\n",single_line);
+    }
+    fprintf(file_p_2,"%s\n",insert_string);
+    while(fgetline(file_p,single_line)==0){
+        fprintf(file_p_2,"%s\n",single_line);
+    }
+    fclose(file_p);
+    fclose(file_p_2);
+    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+    return 0;
+}

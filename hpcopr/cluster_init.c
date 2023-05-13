@@ -40,7 +40,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char secret_file[FILENAME_LENGTH]="";
     char region_valid[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
+    char user_passwords[FILENAME_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
     char url_aws_root[LOCATION_LENGTH_EXTENDED]="";
     char access_key[AKSK_LENGTH]="";
@@ -78,9 +78,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     int cpu_core_num=0;
     int threads;
     FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
-    char md5sum[33]="";
+    char user_passwd_temp[PASSWORD_STRING_LENGTH]="";
+    char user_registry_line[LINE_LENGTH]="";
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
@@ -481,7 +483,19 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
-    
+
+    file_p=fopen(filename_temp,"a");
+    sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    file_p_2=fopen(user_passwords,"w+");
+    for(i=0;i<hpc_user_num;i++){
+        reset_string(user_passwd_temp);
+        generate_random_passwd(user_passwd_temp);
+        fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s\n",i+1,user_passwd_temp);
+    }
+    fclose(file_p);
+    fclose(file_p_2);
+
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
     global_replace(filename_temp,"MASTER_INST",master_inst);
@@ -489,6 +503,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+
+    for(i=0;i<hpc_user_num;i++){
+        sprintf(user_registry_line,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        insert_lines(filename_temp,"master_private_ip",user_registry_line);
+    }
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -625,9 +644,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             system(cmdline);
         }
     }
-    get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s.tmp %s",now_crypto_exec,filename_temp,filename_temp,md5sum);
-    system(cmdline);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: s3:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -705,7 +721,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char* error_log=OPERATION_ERROR_LOG;
     char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
+    char user_passwords[FILENAME_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
     char url_qcloud_root[LOCATION_LENGTH_EXTENDED];
     char access_key[AKSK_LENGTH]="";
@@ -737,9 +753,11 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char pubkey[LINE_LENGTH]="";
     char private_key_file[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
-    char md5sum[33]="";
+    char user_passwd_temp[PASSWORD_STRING_LENGTH]="";
+    char user_registry_line[LINE_LENGTH]="";
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
@@ -1076,6 +1094,18 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
 
+    file_p=fopen(filename_temp,"a");
+    sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    file_p_2=fopen(user_passwords,"w+");
+    for(i=0;i<hpc_user_num;i++){
+        reset_string(user_passwd_temp);
+        generate_random_passwd(user_passwd_temp);
+        fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s\n",i+1,user_passwd_temp);
+    }
+    fclose(file_p);
+    fclose(file_p_2);
+
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
     global_replace(filename_temp,"MASTER_INST",master_inst);
@@ -1085,6 +1115,11 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
     global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    for(i=0;i<hpc_user_num;i++){
+        sprintf(user_registry_line,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        insert_lines(filename_temp,"master_private_ip",user_registry_line);
+    }
+
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -1182,9 +1217,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=cos://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s.tmp %s",now_crypto_exec,filename_temp,filename_temp,md5sum);
-    system(cmdline);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: cos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -1262,7 +1294,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char* error_log=OPERATION_ERROR_LOG;
     char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
+    char user_passwords[FILENAME_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
     char url_alicloud_root[LOCATION_LENGTH_EXTENDED]="";
     char access_key[AKSK_LENGTH]="";
@@ -1294,9 +1326,11 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char pubkey[LINE_LENGTH]="";
     char private_key_file[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
-    char md5sum[33]="";
+    char user_passwd_temp[PASSWORD_STRING_LENGTH]="";
+    char user_registry_line[LINE_LENGTH]="";
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
@@ -1623,6 +1657,17 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
+    file_p=fopen(filename_temp,"a");
+    sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    file_p_2=fopen(user_passwords,"w+");
+    for(i=0;i<hpc_user_num;i++){
+        reset_string(user_passwd_temp);
+        generate_random_passwd(user_passwd_temp);
+        fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s\n",i+1,user_passwd_temp);
+    }
+    fclose(file_p);
+    fclose(file_p_2);
 
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -1633,6 +1678,10 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
     global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    for(i=0;i<hpc_user_num;i++){
+        sprintf(user_registry_line,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        insert_lines(filename_temp,"master_private_ip",user_registry_line);
+    }
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -1732,9 +1781,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=oss://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s.tmp %s",now_crypto_exec,filename_temp,filename_temp,md5sum);
-    system(cmdline);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: oss:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);

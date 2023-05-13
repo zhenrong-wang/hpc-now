@@ -6,8 +6,6 @@
 #arg1: # of users to be created
 #arg2: db - whether reinstall mariadb or not
 #arg3: mpi - whether install openmpi or not
-#arg4: gcc8 - whether install gcc8 - Deprecated
-#arg5: of7 - Whether install OpenFOAM7 to /hpc_apps or not - Deprecated
 
 # Define URL prefixes for the 'wget' command
 
@@ -50,12 +48,12 @@ systemctl start atd
 systemctl enable atd
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current SSH setup finished" >> ${logfile}
-
 source /etc/profile
+
 mkdir -p /root/.cluster_secrets
+
 time1=$(date)
 echo -e  "\n${time1}" >> ${logfile}
-
 if [ ! -n "$1" ] || [ ! -n "$2" ] || [ ! -n "$3" ]; then
   echo -e "Lack of Parameters.\n# arg1: #\n# arg2: db\n# arg3: mpi\n# arg4: gcc8\n# arg5: of7\nPLEASE PAY ATTENTION TO THE SEQUENCE OF THE PARAMETERS!\nExit now."
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
@@ -72,18 +70,11 @@ if [ -f /root/hostfile ]; then
   fi
 fi
 
-if [ $1 -gt $((0)) ] && [ $1 -le $((8)) ]; then
-  echo -e "# Plan to create $1 users."
-  echo -e "# Plan create $1 users." >> ${logfile} 
-else
-  echo -e "WARNING: The first parameter is incorrect. Will create 3 users."
-  echo -e "WARNING: The first parameter is incorrect. Will create 3 users." >> ${logfile}
-  exit
-fi
+echo -e "# Plan to create $1 users."
+echo -e "# Plan create $1 users." >> ${logfile} 
 
 ######### define something ##############
-yum -y install openssl
-yum -y install openssl-devel
+yum -y install openssl openssl-devel
 
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 SELINUX_STATUS=`getenforce`
@@ -97,9 +88,7 @@ echo -e "source /etc/profile" >> /root/.bashrc
 ########## root ssh-passwd-free among nodes ############
 
 if [ -f /root/hostfile ]; then
-  if [ ! -d /hpc_data/root_data ]; then
-    mkdir -p /hpc_data/root_data
-  fi
+  mkdir -p /hpc_data/root_data
   chmod -R 750 /hpc_data/root_data
 fi
 
@@ -121,47 +110,38 @@ do
   id user${i}
   if [ $? -eq 1 ]; then
     useradd user${i}
-    if [ ! -d /home/user${i} ]; then
-      mkdir -p /home/user${i} && chown -R user${i}:user${i} /home/user${i}
-    fi
-    
+    mkdir -p /home/user${i} && chown -R user${i}:user${i} /home/user${i}
     if [ -f /root/hostfile ]; then
-      if [ $CENTOS_V -eq 7 ]; then
-        openssl rand 8 -base64 -out /root/secret_user${i}.txt
+      if [ ! -f /root/user_secrets.txt ]; then
+        if [ $CENTOS_V -eq 7 ]; then
+          openssl rand 8 -base64 -out /root/secret_user${i}.txt
+        else
+          openssl rand -base64 -out /root/secret_user${i}.txt 8
+        fi
+        cat /root/secret_user${i}.txt | passwd user${i} --stdin > /dev/null 2>&1
+        echo -n "username: user${i} " >> /root/user_secrets.txt
+        cat /root/secret_user${i}.txt >> /root/user_secrets.txt
       else
-        openssl rand -base64 -out /root/secret_user${i}.txt 8
+        cat /root/user_secrets.txt | grep -w user${i} | awk '{print $3}' | passwd user${i} --stdin > /dev/null 2>&1
       fi
-      cat /root/secret_user${i}.txt | passwd user${i} --stdin > /dev/null 2>&1
-      echo -n "username: user${i}    " >> /root/user_secrets.txt
-      cat /root/secret_user${i}.txt >> /root/user_secrets.txt
-      if [ ! -d /home/user${i}/.ssh ]; then
-        mkdir -p /home/user${i}/.ssh
-      fi
-# To make sure ssh password-free login for useri
-      rm -rf /home/user${i}/.ssh/id_rsa.pub
-      rm -rf /home/user${i}/.ssh/id_rsa
-      rm -rf /home/user${i}/.ssh/authorized_keys
-      rm -rf /home/user${i}/.ssh/known_hosts
+      mkdir -p /home/user${i}/.ssh && rm -rf /home/user${i}/.ssh/*
       ssh-keygen -t rsa -N '' -f /home/user${i}/.ssh/id_rsa -q
       cat /home/user${i}/.ssh/id_rsa.pub >> /home/user${i}/.ssh/authorized_keys
       cat /etc/now-pubkey.txt >> /home/user${i}/.ssh/authorized_keys
       chown -R user${i}:user${i} /home/user${i}    
-      if [ ! -d /hpc_data/user${i}_data ]; then
-        mkdir -p /hpc_data/user${i}_data
-      fi
+      mkdir -p /hpc_data/user${i}_data
       chmod -R 750 /hpc_data/user${i}_data
       chown -R user${i}:user${i} /hpc_data/user${i}_data
     fi
     echo -e "source /etc/profile" >> /home/user${i}/.bashrc
     time_current=`date "+%Y-%m-%d %H:%M:%S"`
-    echo -e "# $time_current user${i} added, password set. Please check /root/.user_secrets.txt for secrets. SSH-password free has been set." >> ${logfile}  
+    echo -e "# $time_current user${i} added, password set. Please check /root/.user_secrets.txt." >> ${logfile}  
   fi
   echo -e "user1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 done
 
 ########## stop firewall and SELinux ###############
-systemctl stop firewalld
-systemctl disable firewalld
+systemctl stop firewalld && systemctl disable firewalld
 if [ $SELINUX_STATUS != Disabled ]; then
   sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 fi
@@ -183,22 +163,15 @@ elif [ $CLOUD_FLAG = 'CLOUD_A' ]; then
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.aliyun.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 else
-  yum -y install epel-release #epel release is really slow for China region
+  yum -y install epel-release # epel release is really slow for China region
 fi
 yum -y makecache
-yum -y install gtk2 gtk2-devel
-yum -y install python python3
-yum -y install gcc-c++ gcc-gfortran
-yum -y install htop 
-yum -y install sshpass
-#yum -y install munge munge-devel
+yum -y install gtk2 gtk2-devel python python3 gcc-c++ gcc-gfortran htop sshpass
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Utils installed." >> ${logfile}
 
 ########## Build munge #################
-yum -y install rpm-build 
-yum -y install bzip2-devel
-yum -y install zlib-devel m4 libxml2-devel
+yum -y install rpm-build bzip2-devel zlib-devel m4 libxml2-devel
 cd /root
 if ! command -v munge >/dev/null 2>&1; then
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
@@ -234,9 +207,9 @@ if [ -f /root/hostfile ]; then
     yum -y install mariadb-*
   fi
   if [ -f /root/mariadb_private_ip.txt ]; then
-    time_current=`date "+%Y-%m-%d %H:%M:%S"
+    time_current=`date "+%Y-%m-%d %H:%M:%S"`
     mv /root/mariadb_root_passwd.txt /root/.cluster_secrets/
-    mv /root/mariadb_slurm_acct_db_pw.txt /root/.cluster_secrets/`
+    mv /root/mariadb_slurm_acct_db_pw.txt /root/.cluster_secrets/
     db_address=`cat /root/mariadb_private_ip.txt | awk -F"\t" '{print $1}'`
     echo -e "# $time_current Mariadb has been installed to the host $db_address. Will not build mariadb on localhost." >> ${logfile}
   else
@@ -256,10 +229,8 @@ if [ -f /root/hostfile ]; then
       openssl rand -base64 -out /root/mariadb_root_passwd.txt 8
       openssl rand -base64 -out /root/mariadb_slurm_acct_db_pw.txt 8
     fi
-    
     root_passwd=`cat /root/mariadb_root_passwd.txt`
     slurm_acct_db_pwd=`cat /root/mariadb_slurm_acct_db_pw.txt`
-    
     echo -e "Reinstalling MariadbNow ...\n"
     yum -y install expect
     systemctl enable mariadb.service
@@ -287,8 +258,8 @@ if [ -f /root/hostfile ]; then
 fi
 ########### Move sensative file to .cluster_secrets folder #############
 
-mv /root/secret_user* /root/.cluster_secrets/
-mv /root/user_secret* /root/.cluster_secrets/
+rm -rf /root/secret_user*
+mv /root/user_secrets.txt /root/.cluster_secrets/
 mv /root/master_passwd.txt /root/.cluster_secrets/
 mv /root/compute_passwd.txt /root/.cluster_secrets/
 
@@ -297,9 +268,7 @@ echo -e "ALL the secrets are stored in the directory /root/.cluster_secrets/ ."
 echo -e "# $time_current ALL the secrets are stored in the directory /root/.cluster_secrets/ ." >> ${logfile}
 
 ########### Change owners of some directories ################
-if [ ! -d /run/munge ]; then
-  mkdir /run/munge
-fi
+mkdir -p /run/munge
 chown -R slurm:slurm /run/munge
 chown -R slurm:slurm /etc/munge
 chown -R slurm:slurm /var/run/munge
@@ -333,10 +302,7 @@ if [ $? -ne 0 ]; then
 fi
 ln -s /opt/slurm/bin/* /usr/bin/
 ln -s /opt/slurm/sbin/* /usr/sbin/
-
-if [ ! -d /opt/slurm/etc ]; then
-  mkdir -p /opt/slurm/etc/
-fi
+mkdir -p /opt/slurm/etc/
 
 if [ -f /root/hostfile ]; then
   if [ ! -f /opt/slurm/etc/slurm.conf.128 ]; then
@@ -352,27 +318,22 @@ if [ -f /root/hostfile ]; then
   fi
   local_address=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
   dbd_passwd=`cat /root/.cluster_secrets/mariadb_slurm_acct_db_pw.txt`  
-  sed -i "s@DBD_HOST@$local_address@g" /opt/slurm/etc/slurmdbd.conf  
+  sed -i "s@DBD_HOST@$local_address@g" /opt/slurm/etc/slurmdbd.conf
   sed -i "s@clarkwin2019@$dbd_passwd@g" /opt/slurm/etc/slurmdbd.conf
   chmod 600 /opt/slurm/etc/slurmdbd.conf
   chown -R slurm:slurm /opt/slurm/etc/slurmdbd.conf
-  if [ ! -d /var/spool/slurmctld ]; then
-    mkdir -p /var/spool/slurmctld
-  fi
+  mkdir -p /var/spool/slurmctld
   chown -R slurm:slurm /var/spool/slurmctld
   systemctl start slurmdbd
   systemctl enable slurmdbd
   if [ -f /etc/munge/munge.key ]; then
     chown -R slurm:slurm /etc/munge/munge.key
   fi
+  mkdir -p /opt/slurm/archive
+  time_current=`date "+%Y-%m-%d %H:%M:%S"`
+  echo -e "# $time_current Slurm built and configured in path /opt/slurm." >> ${logfile}
 
-  if [ ! -d /opt/slurm/archive ]; then
-    mkdir /opt/slurm/archive
-  fi
-
-  if [ ! -f /etc/hosts-clean ]; then
-    cp /etc/hosts /etc/hosts-clean
-  fi
+  /bin/cp /etc/hosts /etc/hosts-clean
   if [ $CENTOS_V -eq 7 ]; then
     wget ${URL_UTILS}hpcmgr-gcc4 -O /usr/bin/hpcmgr
   else
@@ -389,8 +350,6 @@ if [ -f /root/hostfile ]; then
     yum -y install s3cmd
   fi
 fi
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "# $time_current Slurm built and configured in path /opt/slurm." >> ${logfile}
 
 ############## install environment-module ######################
 cd /root
@@ -472,9 +431,7 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Desktop Environment and RDP has been installed." >> ${logfile}
 
 ####################### Download scripts & Desktop shortcuts ##########################
-if [ ! -d /root/Desktop ]; then
-  mkdir -p /root/Desktop
-fi
+mkdir -p /root/Desktop
 ln -s /hpc_apps /root/Desktop/
 ln -s /hpc_data/root_data /root/Desktop/
 wget ${URL_UTILS}pics/app.png -O /opt/app.png
@@ -493,9 +450,7 @@ fi
 
 for i in $( seq 1 $1 )
 do
-  if [ ! -d /home/user${i}/Desktop ]; then
-    mkdir -p /home/user${i}/Desktop
-  fi
+  mkdir -p /home/user${i}/Desktop
   ln -s /hpc_apps /home/user${i}/Desktop/
   ln -s /hpc_data/user${i}_data /home/user${i}/Desktop/
   cp /root/Desktop/*.desktop /home/user${i}/Desktop

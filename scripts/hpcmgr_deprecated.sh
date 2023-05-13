@@ -110,7 +110,7 @@ if [ $1 = 'users' ]; then
         useradd $3
         if [ -n "$4" ]; then
           echo "$4" | passwd $3 --stdin > /dev/null 2>&1
-          echo -e "username: $3 $4" >> /root/.cluster_secrets/user_secrets.txt
+          echo "$4" > /root/.cluster_secrets/secret_$3.txt
         else
           echo -e "Generate random string for password." 
           if [ $CENTOS_V -eq 7 ]; then
@@ -119,9 +119,6 @@ if [ $1 = 'users' ]; then
             openssl rand -base64 -out /root/.cluster_secrets/secret_$3.txt 8
           fi
           cat /root/.cluster_secrets/secret_$3.txt | passwd $3 --stdin > /dev/null 2>&1
-          echo -n "username: $3 " >> /root/.cluster_secrets/user_secrets.txt
-          cat /root/.cluster_secrets/secret_$3.txt >> /root/.cluster_secrets/user_secrets.txt
-          rm -rf /root/.cluster_secrets/secret_$3.txt
         fi
         if [ ! -d /home/$3/.ssh ]; then
           mkdir -p /home/$3/.ssh
@@ -142,8 +139,8 @@ if [ $1 = 'users' ]; then
         for i in $(seq 1 $NODE_NUM )
         do
           ssh compute${i} "useradd $3"
-          user_passwd=`cat /root/.cluster_secrets/user_secrets.txt | grep $3 | aws '{print $3}'`
-          ssh compute${i} "echo $user_passwd | passwd $3 --stdin > /dev/null 2>&1"
+          scp -q /root/.cluster_secrets/secret_$3.txt root@compute${i}:/root
+          ssh compute${i} "cat /root/secret_$3.txt | passwd $3 --stdin > /dev/null 2>&1"
           ssh compute${i} "rm -rf /home/$3/.ssh"
           ssh compute${i} "mkdir -p /home/$3/Desktop && ln -s /hpc_apps /home/$3/Desktop/ && ln -s /hpc_data/$3_data /home/$3/Desktop/"
           scp -r -q /home/$3/.ssh root@compute${i}:/home/$3/
@@ -369,14 +366,14 @@ if [ $1 = 'connect' ]; then
   for i in $(seq 1 $NODE_NUM )
   do
     scp -r -q /etc/munge/munge.key root@compute${i}:/etc/munge
-    while read hpc_user_row
+    for j in $(seq 1 $HPC_USER_NUM )
     do
-      username=`echo -e $hpc_user_row | awk '{print $2}'`
-      user_passwd=`echo -e $hpc_user_row | awk '{print $3}'`
-      ssh compute${i} "echo $user_passwd | passwd $username --stdin > /dev/null 2>&1"
-      scp -r -q /home/$username/.ssh root@compute${i}:/home/$username/
-      ssh compute${i} "chown -R $username:$username /home/$username"
-    done < /root/.cluster_secrets/user_secrets.txt
+      ssh compute${i} "mkdir -p /root/.cluster_secrets"
+      scp -r -q /root/.cluster_secrets/secret_user${j}.txt root@compute${i}:/root/.cluster_secrets/
+      ssh compute${i} "cat /root/.cluster_secrets/secret_user${j}.txt | passwd user${j} --stdin > /dev/null 2>&1"
+      scp -r -q /home/user${j}/.ssh root@compute${i}:/home/user${j}/
+      ssh compute${i} "chown -R user${j}:user${j} /home/user${j}"
+    done
   done
   echo -e "[ STEP 5 ] Users are ready."
   echo -e "[ -DONE- ] Connectivety check finished! \n[ -DONE- ] You need to run the command 'hpcmgr all' on the master node to update the cluster.\n[ -DONE- ] Exit now.\n"

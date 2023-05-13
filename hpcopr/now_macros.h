@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0094"
+#define CORE_VERSION_CODE "0.2.0.0095"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -18,6 +18,7 @@
 #define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG "C:\\programdata\\hpc-now\\system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">nul 2>>C:\\programdata\\hpc-now\\system_command_error.log"
+#define SYSTEM_CMD_REDIRECT_NULL ">nul 2>&1"
 #define DESTROYED_DIR "c:\\programdata\\hpc-now\\.destroyed\\"
 #define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
 #define SSHKEY_DIR "C:\\hpc-now\\.now-ssh"
@@ -57,6 +58,7 @@
 #define OPERATION_LOG_FILE "/usr/.hpc-now/.now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG "/usr/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/usr/.hpc-now/system_command_error.log"
+#define SYSTEM_CMD_REDIRECT_NULL ">>/dev/null 2>&1"
 #define DESTROYED_DIR "/usr/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/home/hpc-now/LICENSES"
 #define SSHKEY_DIR "/home/hpc-now/.now-ssh"
@@ -96,6 +98,7 @@
 #define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG "/Applications/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/Applications/.hpc-now/system_command_error.log"
+#define SYSTEM_CMD_REDIRECT_NULL ">>/dev/null 2>&1"
 #define DESTROYED_DIR "/Applications/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/Users/hpc-now/LICENSES"
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
