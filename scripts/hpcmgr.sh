@@ -13,11 +13,11 @@ if [ $CURRENT_USER != 'root' ]; then
   echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now.\n"
   exit
 fi
-
-URL_INSTSCRIPTS_ROOT=https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/hpcmgr-install/
-
 #CRITICAL: Environment Variable $NODE_NUM and $NODE_CORES MUST be written to /etc/profile IN ADVANCE!
 source /etc/profile
+if [ ! -z $APPS_INSTALL_SCRIPTS_URL ]; then
+  URL_INSTSCRIPTS_ROOT=$APPS_INSTALL_SCRIPTS_URL
+fi
 rm -rf ~/.ssh/known_hosts
 logfile='/var/log/hpcmgr.log'
 time1=$(date)
@@ -489,6 +489,10 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
 fi
 
 if [ $1 = 'install' ]; then
+  if [ -z $URL_INSTSCRIPTS_ROOT ]; then
+    echo -e "[ FATAL: ] Failed to connect to a valid appstore repo. Exit now."
+    exit
+  fi
   if [[ ! -n "$2" || $2 = 'list' ]]; then
     echo -e "[ -INFO- ] Usage: hpcmgr install software_to_be_installed"
     echo -e "[ -INFO- ] Please specify the software you'd like to build:\n"

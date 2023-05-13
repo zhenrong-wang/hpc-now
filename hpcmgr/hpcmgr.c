@@ -17,10 +17,31 @@
 #include <string.h>
 #include <time.h>
 
-#define HPCMGR_SHELL_DOWNLOAD "wget -q https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/scripts/hpcmgr.sh -O /tmp/.thread-"
+int env_ready_or_not(void){
+  int mgr_flag=system("cat /etc/profile | grep HPCMGR_SCRIPT_URL= >> /dev/null 2>&1");
+  int appstore_flag=system("cat /etc/profile | grep APPS_INSTALL_SCRIPTS_URL= >> /dev/null 2>&1");
+  if(mgr_flag!=0&&appstore_flag!=0){
+    return -1;
+  }
+  else if(mgr_flag==0&&appstore_flag!=0){
+    return 1;
+  }
+  else if(mgr_flag!=0&&appstore_flag!=0){
+    return 3;
+  }
+  else{
+    return 0;
+  }
+}
 
-int main(int argc,char *argv[]) 
-{
+int main(int argc,char *argv[]){
+  int env_flag=env_ready_or_not();
+  if(env_flag==-1||env_flag==3){
+    return -1;
+  }
+  else if(env_flag==1){
+    printf("[ -WARN- ] The appstore may not work properly.\n");
+  }
   int i,start,end;
   int system_run_flag=0;
   int param1_length=0;
@@ -32,7 +53,7 @@ int main(int argc,char *argv[])
   char* param2=argv[2];
   char* param3=argv[3];
   char* param4=argv[4];
-  char* cmd_dl=HPCMGR_SHELL_DOWNLOAD;
+  char* cmd_dl="wget -q $HPCMGR_SCRIPT_URL -O /tmp/.thread-";
   char* cmd_chmod="chmod +x /tmp/.thread-";
   char* cmd_base="/tmp/.thread-";
   char* cmd_dele="rm -rf /tmp/.thread-";
@@ -44,7 +65,7 @@ int main(int argc,char *argv[])
   char confirm[64];
   int param_number=argc-1;
   
-  printf("\nHign Performance Computing - start NOW!\n\nHPC-NOW Cluster Manager\n\nShanghai HPC-NOW Technologies Co., Ltd\nLICENSE: GPL-2.0\ninfo@hpc-now.com\n\n");
+  printf("\nHign Performance Computing - start NOW!\nHPC-NOW Cluster Manager\nShanghai HPC-NOW Technologies Co., Ltd\nLICENSE: GPL-2.0\ninfo@hpc-now.com\n");
   
   char rand_num_string[7]="";
   srand((unsigned)time(NULL));
@@ -85,7 +106,6 @@ int main(int argc,char *argv[])
     *(final_cmd_run+i)=' ';
   }
   *(final_cmd_run+63)='\0';  
-//  printf("%s,,,,,,,,,,,,,,,\n",final_cmd_run);
   base_length=strlen(cmd_run);
   
   for(i=0;i<base_length;i++){
@@ -123,7 +143,7 @@ int main(int argc,char *argv[])
       *(final_cmd_run+i)=*(param4+i-start);
     }
   }
-  
+
   if(param1_length!=0&&param2_length!=0&&param3_length!=0&&param4_length!=0){
     if(strcmp(param1,"users")==0&&strcmp(param2,"delete")==0&&strcmp(param4,"os")==0){
       printf("WARNING: You are deleting User%s from the cluster and the Operating System! Please input 'y-e-s' to confirm: ", param3);

@@ -82,7 +82,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char user_passwd_temp[PASSWORD_STRING_LENGTH]="";
-    char user_registry_line[LINE_LENGTH]="";
+    char line_temp[LINE_LENGTH]="";
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
@@ -503,11 +503,14 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
-
     for(i=0;i<hpc_user_num;i++){
-        sprintf(user_registry_line,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
-        insert_lines(filename_temp,"master_private_ip",user_registry_line);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        insert_lines(filename_temp,"master_private_ip",line_temp);
     }
+    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\" >> /etc/profile",url_shell_scripts_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
+    sprintf(line_temp,"echo -e \"export APPS_INSTALL_SCRIPTS_URL=%sapps-install/\" >> /etc/profile",url_shell_scripts_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -757,7 +760,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char user_passwd_temp[PASSWORD_STRING_LENGTH]="";
-    char user_registry_line[LINE_LENGTH]="";
+    char line_temp[LINE_LENGTH]="";
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
@@ -1116,10 +1119,13 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(user_registry_line,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
-        insert_lines(filename_temp,"master_private_ip",user_registry_line);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-
+    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\" >> /etc/profile",url_shell_scripts_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
+    sprintf(line_temp,"echo -e \"export APPS_INSTALL_SCRIPTS_URL=%sapps-install/\" >> /etc/profile",url_shell_scripts_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -1330,7 +1336,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char user_passwd_temp[PASSWORD_STRING_LENGTH]="";
-    char user_registry_line[LINE_LENGTH]="";
+    char line_temp[LINE_LENGTH]="";
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
@@ -1679,9 +1685,13 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(user_registry_line,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
-        insert_lines(filename_temp,"master_private_ip",user_registry_line);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        insert_lines(filename_temp,"master_private_ip",line_temp);
     }
+    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\" >> /etc/profile",url_shell_scripts_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
+    sprintf(line_temp,"echo -e \"export APPS_INSTALL_SCRIPTS_URL=%sapps-install/\" >> /etc/profile",url_shell_scripts_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
