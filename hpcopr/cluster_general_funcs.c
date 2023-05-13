@@ -975,6 +975,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
         i++;
     }
     fclose(file_p);
+    printf("+------------------ CLUSTER USERS AND PASSWORDS -----------------+\n");
     while(fgetline(file_p_2,single_line)==0){
         if(strlen(single_line)!=0){
             printf("%s\n",single_line);

@@ -75,23 +75,15 @@ echo -e "# Plan create $1 users." >> ${logfile}
 
 ######### define something ##############
 yum -y install openssl openssl-devel
-
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 SELINUX_STATUS=`getenforce`
 APP_ROOT="/hpc_apps"
-
-rm -rf /root/user_secrets.txt
-touch /root/user_secrets.txt
-echo -e "VERY IMPORTANT: PLEASE DO NOT DISCLOSE THIS FILE FOR ANY PURPOSE!\n PASSWORDS of ALL USERS. YOU CAN USE THESE PASSWORDS FOR RDP CONNECTIONS WITH IN YOUR CLUSTER." >> /root/user_secrets.txt
 echo -e "source /etc/profile" >> /root/.bashrc
-
 ########## root ssh-passwd-free among nodes ############
-
 if [ -f /root/hostfile ]; then
   mkdir -p /hpc_data/root_data
   chmod -R 750 /hpc_data/root_data
 fi
-
 ########## Spread .ssh keys ###################
 echo -e "# $time_current Spawning ssh keys." >> ${logfile}
 if [ -f /root/hostfile ]; then 
