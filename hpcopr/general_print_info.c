@@ -51,7 +51,7 @@ void print_help(void){
     printf("|                Quickly view all the clusters or a specified target cluster.\n");
     printf("|  " HIGH_GREEN_BOLD "refresh" RESET_DISPLAY "     : NONE|TARGET_CLUSTER_NAME NONE|force\n");
     printf("|                Refresh the target cluster without any resource modifications.\n");
-    printf("|                  Specify a cluster name. None refers to the current cluster.\n");
+    printf("|                  Specify a cluster name. NONE refers to the current cluster.\n");
     printf("|                  Specify 'force' as the last param to do force-refresh ( DANGER! ).\n");
     printf("|  " HIGH_GREEN_BOLD "exit-current" RESET_DISPLAY ": Exit the current cluster.\n");
     printf("|  " HIGH_GREEN_BOLD "remove" RESET_DISPLAY "      : TARGET_CLUSTER_NAME\n");
@@ -86,6 +86,8 @@ void print_help(void){
     printf("|  " HIGH_GREEN_BOLD "ssh" RESET_DISPLAY "         : SSH to the master node of your current cluster.\n");
     printf("|         USERNAME - You can specify to login with which user. For example: user1.\n");
     printf("|  " HIGH_GREEN_BOLD "vault" RESET_DISPLAY "       : Check the sensitive information of the current cluster.\n");
+    printf("|         root     - Display with root password. By default, the root password\n");
+    printf("|                    is hidden.\n");
     printf("|  " HIGH_GREEN_BOLD "graph" RESET_DISPLAY "       : Display the cluster map including all the nodes and status.\n");
     printf("|  " HIGH_GREEN_BOLD "realtime" RESET_DISPLAY "    : Stream out the real-time cluster operation process log.\n");
     printf(GENERAL_BOLD "+ V  . Cluster Operation:\n");

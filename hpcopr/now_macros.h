@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0095"
+#define CORE_VERSION_CODE "0.2.0.0096"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -39,6 +39,7 @@
 #define START_BG_JOB "start /b"
 #define MKDIR_CMD "mkdir"
 #define EDITOR_CMD "notepad"
+#define CLEAR_SCREEN_CMD "cls"
 
 #define NOW_BINARY_DIR "c:\\programdata\\hpc-now\\bin\\"
 #define GENERAL_CONF_DIR "c:\\programdata\\hpc-now\\etc\\"
@@ -79,6 +80,7 @@
 #define START_BG_JOB ""
 #define MKDIR_CMD "mkdir -p"
 #define EDITOR_CMD "vi"
+#define CLEAR_SCREEN_CMD "clear"
 
 #define NOW_BINARY_DIR "/usr/.hpc-now/.bin/"
 #define GENERAL_CONF_DIR "/usr/.hpc-now/.etc/"
@@ -119,6 +121,7 @@
 #define START_BG_JOB ""
 #define MKDIR_CMD "mkdir -p"
 #define EDITOR_CMD "vi"
+#define CLEAR_SCREEN_CMD "clear"
 
 #define NOW_BINARY_DIR "/Applications/.hpc-now/.bin/"
 #define GENERAL_CONF_DIR "/Applications/.hpc-now/.etc/"
@@ -187,6 +190,7 @@
 #define FATAL_RED_BOLD "\033[1;31m"
 #define WARN_YELLO_BOLD "\033[1;33m"
 #define HIGH_GREEN_BOLD "\033[1;32m"
+#define GREY_LIGHT "\033[2;37m"
 #define GENERAL_BOLD "\033[1m"
 #define RESET_DISPLAY "\033[0m"
 

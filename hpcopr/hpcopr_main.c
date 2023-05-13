@@ -563,7 +563,12 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     if(strcmp(argv[1],"vault")==0){
-        run_flag=get_vault_info(workdir,crypto_keyfile);
+        if(argc==2){
+            run_flag=get_vault_info(workdir,crypto_keyfile,"");
+        }
+        else{
+            run_flag=get_vault_info(workdir,crypto_keyfile,argv[2]);
+        }
         if(run_flag==-1){
             print_empty_cluster_info();
         }

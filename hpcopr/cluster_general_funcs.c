@@ -935,7 +935,7 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     return -1;
 }
 
-int get_vault_info(char* workdir, char* crypto_keyfile){
+int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
     char md5sum[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -944,6 +944,12 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
     char filename_temp[FILENAME_LENGTH]="";
+    char username[32]="";
+    char password[32]="";
+    char header_string[64]="";
+    char tail_string[64]="";
+    char bucket_header[16]="";
+    char bucket_name[32]="";
     int i=0;
     if(cluster_empty_or_not(workdir)==0){
         return -1;
@@ -967,21 +973,43 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
         return -1;
     }
 
-    printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n");
+    printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n" RESET_DISPLAY);
     while(fgetline(file_p,single_line)==0&&i<8){
         if(strlen(single_line)!=0){
-            printf("%s\n",single_line);
+            if(contain_or_not(single_line,"Address")==0){
+                get_seq_string(single_line,' ',3,bucket_header);
+                get_seq_string(single_line,' ',4,bucket_name);
+                printf(GENERAL_BOLD "| NetDisk Address: " RESET_DISPLAY "%s%s\n",bucket_header,bucket_name);
+                
+            }
+            else{
+                get_seq_string(single_line,':',1,header_string);
+                get_seq_string(single_line,':',2,tail_string);
+                if(contain_or_not(single_line,"Password")==0){
+                    if(strcmp(root_flag,"root")==0){
+                        printf(GENERAL_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
+                    }
+                }
+                else if(contain_or_not(single_line,"Key")==0){
+                    printf(GENERAL_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
+                }
+                else{
+                    printf(GENERAL_BOLD "| %s:" RESET_DISPLAY "%s\n",header_string,tail_string);
+                }
+            }
         }
         i++;
     }
     fclose(file_p);
-    printf("+------------------ CLUSTER USERS AND PASSWORDS -----------------+\n");
+    printf(WARN_YELLO_BOLD "+---------------- CLUSTER USERS AND *PASSWORDS* -----------------+\n" RESET_DISPLAY);
     while(fgetline(file_p_2,single_line)==0){
         if(strlen(single_line)!=0){
-            printf("%s\n",single_line);
+            get_seq_string(single_line,' ',2,username);
+            get_seq_string(single_line,' ',3,password);
+            printf(GENERAL_BOLD "| Username: %s    Password: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,username,password);
         }
     }
-    printf("+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n" RESET_DISPLAY);
+    printf(WARN_YELLO_BOLD "+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n" RESET_DISPLAY);
     fclose(file_p_2);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
@@ -1114,7 +1142,14 @@ int tail_f_for_windows(char* filename){
 }
 
 int set_user_passwd(char* workdir, char* sshkey_dir, char* username, char* passwd_string){
-
+    char vaultdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(filename_temp,"%s%suser_secrets.txt.tmp",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        return -1;
+    }
+    //Still work in progress
     return 0;
 }
 

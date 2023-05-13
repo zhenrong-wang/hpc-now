@@ -27,30 +27,29 @@ int get_usage(char* usage_logfile){
         return 1;
     }
 #ifdef _WIN32
-    sprintf(cmdline,"copy /y %s c:\\hpc-now\\cluster_usage_temp.log > nul 2>&1",usage_logfile);
+    sprintf(cmdline,"copy /y %s c:\\hpc-now\\cluster_usage_temp.csv > nul 2>&1",usage_logfile);
 #elif __APPLE__
-    sprintf(cmdline,"/bin/cp %s /Users/hpc-now/cluster_usage_temp.log >> /dev/null 2>&1",usage_logfile);
+    sprintf(cmdline,"/bin/cp %s /Users/hpc-now/cluster_usage_temp.csv >> /dev/null 2>&1",usage_logfile);
 #elif __linux__
-    system("rm -rf /home/hpc-now/now-cluster-usage-latest.log >> /dev/null 2>&1");
-    sprintf(cmdline,"/bin/cp %s /home/hpc-now/cluster_usage_temp.log >> /dev/null 2>&1",usage_logfile);
+    sprintf(cmdline,"/bin/cp %s /home/hpc-now/cluster_usage_temp.csv >> /dev/null 2>&1",usage_logfile);
 #endif
     system(cmdline);
 #ifdef _WIN32
-    system("more c:\\hpc-now\\cluster_usage_temp.log");
+    system("notepad c:\\hpc-now\\cluster_usage_temp.csv");
 #elif __APPLE__
-    system("more /Users/hpc-now/cluster_usage_temp.log");
+    system("more /Users/hpc-now/cluster_usage_temp.csv");
 #elif __linux__
-    system("more /home/hpc-now/cluster_usage_temp.log");
+    system("more /home/hpc-now/cluster_usage_temp.csv");
 #endif
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The latest usage summary has been printed to the file below:\n");
 #ifdef _WIN32
-    printf("|          c:\\hpc-now\\cluster_usage_temp.log\n");
+    printf("|          c:\\hpc-now\\cluster_usage_temp.csv\n");
     printf("|          You can use either MS Office Excel (*strongly recommended*) or other\n");
 #elif __APPLE__
-    printf("|          /Users/hpc-now/cluster_usage_temp.log\n");
+    printf("|          /Users/hpc-now/cluster_usage_temp.csv\n");
     printf("|          You can use either any CSV file processing tools (i.e. LibreOffice) or\n");
 #elif __linux__
-    printf("|          /home/hpc-now/cluster_usage_temp.log\n");
+    printf("|          /home/hpc-now/cluster_usage_temp.csv\n");
     printf("|          You can use either any CSV file processing tools (i.e. LibreOffice) or\n");
 #endif
     printf("|          plain text editors (for example, notepad) to view the usage details.\n");
