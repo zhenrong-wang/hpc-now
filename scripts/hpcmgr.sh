@@ -10,7 +10,7 @@ CURRENT_USER=`whoami`
 if [ $CURRENT_USER != 'root' ]; then
   echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr'. "
   echo -e "           Please make sure you use either user1 with 'sudo' privilege, OR"
-  echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now.\n"
+  echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now."
   exit
 fi
 #CRITICAL: Environment Variable $NODE_NUM and $NODE_CORES MUST be written to /etc/profile IN ADVANCE!
@@ -356,9 +356,9 @@ if [ $1 = 'connect' ]; then
     do
       username=`echo -e $hpc_user_row | awk '{print $2}'`
       user_passwd=`echo -e $hpc_user_row | awk '{print $3}'`
-      ssh compute${i} "echo '$user_passwd' | passwd $username --stdin > /dev/null 2>&1"
+      ssh -n compute${i} "echo '$user_passwd' | passwd $username --stdin >> /dev/null 2>&1"
       scp -r -q /home/$username/.ssh root@compute${i}:/home/$username/
-      ssh compute${i} "chown -R $username:$username /home/$username"
+      ssh -n compute${i} "chown -R $username:$username /home/$username >> /dev/null 2>&1"
     done < $user_registry
   done
   echo -e "[ STEP 5 ] Users are ready."

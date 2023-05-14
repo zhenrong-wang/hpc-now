@@ -1149,6 +1149,21 @@ int tail_f_for_windows(char* filename){
     return 0;
 }
 
+int get_ucid(char* workdir, char* ucid_string){
+    char vaultdir[DIR_LENGTH]="";
+    char filename_ucid[FILENAME_LENGTH]="";
+    FILE* file_p=NULL;
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(filename_ucid,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
+    file_p=fopen(filename_ucid,"r");
+    if(file_p==NULL){
+        return -1;
+    }
+    fgetline(file_p,ucid_string);
+    fclose(file_p);
+    return 0;
+}
+
 int set_user_passwd(char* workdir, char* sshkey_dir, char* username, char* passwd_string){
     char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";

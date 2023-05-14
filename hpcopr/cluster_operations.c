@@ -258,7 +258,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         }
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
         if(check_pslock(temp_cluster_workdir)!=0){
-            printf(HIGH_GREEN_BOLD "|  active: <> %s | %s | * OPERATION-IN-PROGRESS * \n" RESET_DISPLAY,temp_cluster_name,cloud_flag);
+            printf(HIGH_GREEN_BOLD "|  active: <> %s | %s | * OPERATION-IN-PROGRESS *\n" RESET_DISPLAY,temp_cluster_name,cloud_flag);
             fclose(file_p);
             return 0;
         }
@@ -274,10 +274,8 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         while(fgetline(file_p,registry_line)==0){
-//            printf("test### %s\n",registry_line);
             if(strlen(registry_line)!=0){
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
-//                printf("test### %s\n",registry_line);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 get_cloud_flag(temp_cluster_workdir,cloud_flag);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
@@ -287,14 +285,11 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                     printf(GENERAL_BOLD "|          <> %s | ",temp_cluster_name);
                 }
                 if(check_pslock(temp_cluster_workdir)!=0){
-                    printf("%s | * OPERATION-IN-PROGRESS * \n" RESET_DISPLAY,cloud_flag);
+                    printf("%s | * OPERATION-IN-PROGRESS *\n" RESET_DISPLAY,cloud_flag);
                     i++;
                     continue;
                 }
-//                printf("test### %s\n",registry_line);
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
-//                printf("test### %s\n",registry_line);
-                
                 i++;
                 if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
                     printf(GENERAL_BOLD "%s | * EMPTY CLUSTER *\n" RESET_DISPLAY,cloud_flag);

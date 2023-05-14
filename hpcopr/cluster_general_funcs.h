@@ -48,6 +48,7 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);
 int get_cluster_bucket_id(char* workdir, char* crypto_keyfilke, char* bucket_id);
 int tail_f_for_windows(char* filename);
 int sync_user_passwords(char* workdir, char* sshkey_dir);
+int get_ucid(char* workdir, char* ucid_string);
 //int create_protection(char* workdir, int minutes);
 //int check_protection(char* workdir);
 //int delete_protection(char* workdir);

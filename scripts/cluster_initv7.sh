@@ -14,6 +14,7 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Initialization started." >> ${logfile}
 centos_version=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 echo -e "export CENTOS_V=$centos_version" >> /etc/profile
+echo -e "alias sudo='sudo -E'" >> /etc/profile
 
 source /etc/profile 
 # The system global env INITUTILS_REPO_ROOT must be set and written in /etc/profile befor execution
