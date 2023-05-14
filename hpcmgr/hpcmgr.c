@@ -17,6 +17,8 @@
 #include <string.h>
 #include <time.h>
 
+#define HPCMGR_VERSION "0.2.0.0013"
+
 int env_ready_or_not(void){
   int mgr_flag=system("cat /etc/profile | grep HPCMGR_SCRIPT_URL= >> /dev/null 2>&1");
   int appstore_flag=system("cat /etc/profile | grep APPS_INSTALL_SCRIPTS_URL= >> /dev/null 2>&1");
@@ -34,13 +36,28 @@ int env_ready_or_not(void){
   }
 }
 
+void print_header_hpcmgr(void){
+  time_t current_time_long;
+  struct tm* time_p=NULL;
+  time(&current_time_long);
+  time_p=localtime(&current_time_long);
+  printf("|   /HPC->  Welcome to HPC-NOW Cluster Manager! Version: %s\n",HPCMGR_VERSION);
+  printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
+  printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
+}
+
+void print_tail_hpcmgr(void){
+  printf("\n");
+  printf("<> visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
+}
+
 int main(int argc,char *argv[]){
   int env_flag=env_ready_or_not();
   if(env_flag==-1||env_flag==3){
     return -1;
   }
   else if(env_flag==1){
-    printf("[ -WARN- ] The appstore may not work properly.\n");
+    printf("[ -WARN- ] The HPC appstore may not work properly.\n");
   }
   int i,start,end;
   int system_run_flag=0;
@@ -65,8 +82,8 @@ int main(int argc,char *argv[]){
   char confirm[64];
   int param_number=argc-1;
   
-  printf("\nHign Performance Computing - start NOW!\nHPC-NOW Cluster Manager\nShanghai HPC-NOW Technologies Co., Ltd\nLICENSE: GPL-2.0\ninfo@hpc-now.com\n");
-  
+  print_header_hpcmgr();
+
   char rand_num_string[7]="";
   srand((unsigned)time(NULL));
   int rand_num=rand();
@@ -78,10 +95,6 @@ int main(int argc,char *argv[]){
   sprintf(final_cmd_chmod,"%s%s",cmd_chmod,rand_num_string);
   sprintf(cmd_run,"%s%s",cmd_base,rand_num_string);
   sprintf(final_cmd_dele,"%s%s",cmd_dele,rand_num_string);
-  
-  for(i=0;i<3;i++){
-    *(confirm+i)=' ';
-  }
   
   if(param_number==1){
     param1_length=strlen(param1);
@@ -149,11 +162,13 @@ int main(int argc,char *argv[]){
       printf("WARNING: You are deleting User%s from the cluster and the Operating System! Please input 'y-e-s' to confirm: ", param3);
       fflush(stdin);
       scanf("%s",confirm);
+      getchar();
       if(strcmp(confirm,"y-e-s")==0){
         printf("Operation confirmed.\n");
       }
       else{
         printf("You denied the operation. Nothing changed.\n");
+        print_tail_hpcmgr();
         return 1;
       }
     }
@@ -161,20 +176,24 @@ int main(int argc,char *argv[]){
   system_run_flag=system(final_cmd_dl);
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 1.\n");
+    print_tail_hpcmgr();
     return 1;
   }
   system_run_flag=system(final_cmd_chmod);  
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 2.\n");
     system(final_cmd_dele);
+    print_tail_hpcmgr();
     return 1;
   }    
   system_run_flag=system(final_cmd_run);
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 3.\n");
     system(final_cmd_dele);
+    print_tail_hpcmgr();
     return 1;
   } 
   system(final_cmd_dele);
+  print_tail_hpcmgr();
   return 0;
 }

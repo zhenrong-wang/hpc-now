@@ -19,49 +19,43 @@ if [ ! -z $APPS_INSTALL_SCRIPTS_URL ]; then
   URL_INSTSCRIPTS_ROOT=$APPS_INSTALL_SCRIPTS_URL
 fi
 rm -rf ~/.ssh/known_hosts
+user_registry=/root/.cluster_secrets/user_secrets.txt
 logfile='/var/log/hpcmgr.log'
 time1=$(date)
 
-echo -e "   /HPC->  Welcome to HPC_NOW hpcmgr!\n \\/ ->NOW  ${time1}\n"
-if [ -f ${logfile} ]; then
-  echo -e "   /HPC->  Welcome to HPC_NOW hpcmgr!\n \\/ ->NOW  ${time1}\n" >> ${logfile}
-fi
+echo -e "${time1}: HPC-NOW Cluster Manager task started." >> ${logfile}
 
-if [ ! -n "$1" ]; then
-  echo -e "[ FATAL: ] The first parameter is invalid. Valid parameters are:\n"
+function help_info() {
+  echo -e "[ FATAL: ] The command parameter is invalid. Valid parameters are:"
   echo -e "           quick   - quick config"
   echo -e "           master  - refresh only master node"
   echo -e "           connect - check cluster connectivity"
   echo -e "           all     - refresh the whole cluster"
   echo -e "           clear   - clear the hostfile_dead_nodes list"
   echo -e "           users   - add, delete cluster users"
-  echo -e "           install - install software\n"
-  echo -e "[ -INFO- ] Please double check your input. Exit now.\n"
+  echo -e "           install - install software"
+  echo -e "[ FATAL: ] Please double check your input. Exit now."
+}
+
+function node_invalid_info() {
+  echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
+  echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
+  echo -e "           Exit now."
+}
+
+if [ ! -n "$1" ]; then
+  help_info
   exit
 fi
 
 if [ $1 != 'quick' ] && [ $1 != 'master' ] && [ $1 != 'all' ] && [ $1 != 'clear' ] && [ $1 != 'users' ] && [ $1 != 'connect' ] && [ $1 != 'install' ]; then
-  echo -e "[ FATAL: ] The first parameter is invalid. Valid parameters are:\n"
-  echo -e "           quick   - quick config"
-  echo -e "           master  - refresh only master node"
-  echo -e "           connect - check cluster connectivity"
-  echo -e "           all     - refresh the whole cluster"
-  echo -e "           clear   - clear the hostfile_dead_nodes list"
-  echo -e "           users   - add, delete cluster users"
-  echo -e "           install - install software\n"
-  echo -e "[ -INFO- ] Please double check your input. Exit now.\n"
+  help_info
   exit
-fi
-
-if [ ! -f /var/log/hpcmgr.log ]; then
-  touch /var/log/hpcmgr.log
 fi
 
 if [ $1 = 'clear' ]; then
   if [ ! -f /root/hostfile ]; then
-    echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
-    echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
-    echo -e "[ FATAL: ] Exit now."
+    node_invalid_info
     exit
   fi
   rm -rf /root/hostfile_dead_nodes && touch /root/hostfile_dead_nodes
@@ -73,9 +67,7 @@ fi
 ##### USER MANAGEMENT #####################
 if [ $1 = 'users' ]; then
   if [ ! -f /root/hostfile ]; then
-    echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
-    echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
-    echo -e "[ FATAL: ] Exit now."
+    node_invalid_info
     exit
   fi
   if [ ! -n "$2" ]; then
@@ -110,7 +102,7 @@ if [ $1 = 'users' ]; then
         useradd $3
         if [ -n "$4" ]; then
           echo "$4" | passwd $3 --stdin > /dev/null 2>&1
-          echo -e "username: $3 $4" >> /root/.cluster_secrets/user_secrets.txt
+          echo -e "username: $3 $4" >> $user_registry
         else
           echo -e "Generate random string for password." 
           if [ $CENTOS_V -eq 7 ]; then
@@ -119,8 +111,8 @@ if [ $1 = 'users' ]; then
             openssl rand -base64 -out /root/.cluster_secrets/secret_$3.txt 8
           fi
           cat /root/.cluster_secrets/secret_$3.txt | passwd $3 --stdin > /dev/null 2>&1
-          echo -n "username: $3 " >> /root/.cluster_secrets/user_secrets.txt
-          cat /root/.cluster_secrets/secret_$3.txt >> /root/.cluster_secrets/user_secrets.txt
+          echo -n "username: $3 " >> $user_registry
+          cat /root/.cluster_secrets/secret_$3.txt >> $user_registry
           rm -rf /root/.cluster_secrets/secret_$3.txt
         fi
         if [ ! -d /home/$3/.ssh ]; then
@@ -142,8 +134,8 @@ if [ $1 = 'users' ]; then
         for i in $(seq 1 $NODE_NUM )
         do
           ssh compute${i} "useradd $3"
-          user_passwd=`cat /root/.cluster_secrets/user_secrets.txt | grep $3 | aws '{print $3}'`
-          ssh compute${i} "echo $user_passwd | passwd $3 --stdin > /dev/null 2>&1"
+          user_passwd=`cat $user_registry | grep $3 | aws '{print $3}'`
+          ssh compute${i} "echo '$user_passwd' | passwd $3 --stdin > /dev/null 2>&1"
           ssh compute${i} "rm -rf /home/$3/.ssh"
           ssh compute${i} "mkdir -p /home/$3/Desktop && ln -s /hpc_apps /home/$3/Desktop/ && ln -s /hpc_data/$3_data /home/$3/Desktop/"
           scp -r -q /home/$3/.ssh root@compute${i}:/home/$3/
@@ -198,6 +190,7 @@ if [ $1 = 'users' ]; then
       do
         ssh compute${i} "userdel -f $3 && rm -rf /home/$3 && rm -rf /var/spool/mail/$3"
       done
+      sed -i "@$3@d" /root/.cluster_secrets
       exit
     fi 
   fi
@@ -206,9 +199,7 @@ fi
 # quick mode - quickly restart all the services in master and compute nodes
 if [ $1 = 'quick' ]; then
   if [ ! -f /root/hostfile ]; then
-    echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
-    echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
-    echo -e "[ FATAL: ] Exit now."
+    node_invalid_info
     exit
   fi
   sacct >> /dev/null 2>&1
@@ -224,42 +215,34 @@ if [ $1 = 'quick' ]; then
   echo -e "[ -INFO- ] Please make sure you've already run the command 'hpcmgr all' "
   echo -e "[ STEP 1 ] Restarting services on the master node ..."
   mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged >> $logfile 2>&1
-#  echo -e "           Munge service restarted. Restarting slurm services ... "
   systemctl restart slurmdbd >> $logfile 2>&1
   for i in $(seq 1 2 )
   do
     sleep 1
   done
   systemctl restart slurmctld >> $logfile 2>&1
-#  echo -e "           Slurm services started. "
   systemctl status slurmdbd >> ${logfile}
   systemctl status slurmctld >> ${logfile}
   echo -e "[ STEP 2 ] Restarting services on the compute node(s) ..."
   for i in $( seq 1 $NODE_NUM )
   do
     ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged" >> $logfile 2>&1
-#    echo -e "           Compute node $i : Munge service restarted. Restarting slurm service ..."
     ssh compute${i} "systemctl restart slurmd" >> $logfile 2>&1
-#    echo -e "           Compute node $i : Slurm service restarted. Updating Node status ... "
     scontrol update NodeName=compute${i} State=DOWN Reason=hung_completing
     scontrol update NodeName=compute${i} State=RESUME
-#    echo -e "           Compute node $i : Slurm service and node status are resumed."
     echo -e "\nSlurmd Status of Node ${i}:" >> ${logfile}
     ssh compute${i} "systemctl status slurmd" >> ${logfile}
     echo -e "\n" >> ${logfile}
   done
   echo -e "[ -DONE- ] HPC-NOW Cluster Status:\n"
   sinfo -N
-  echo -e "" 
   exit
 fi
 
 ####### Check connectivities ###########################
 if [ $1 = 'connect' ]; then
   if [ ! -f /root/hostfile ]; then
-    echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
-    echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
-    echo -e "[ FATAL: ] Exit now."
+    node_invalid_info
     exit
   fi
   compute_passwd=`cat /root/.cluster_secrets/compute_passwd.txt`
@@ -373,21 +356,19 @@ if [ $1 = 'connect' ]; then
     do
       username=`echo -e $hpc_user_row | awk '{print $2}'`
       user_passwd=`echo -e $hpc_user_row | awk '{print $3}'`
-      ssh compute${i} "echo $user_passwd | passwd $username --stdin > /dev/null 2>&1"
+      ssh compute${i} "echo '$user_passwd' | passwd $username --stdin > /dev/null 2>&1"
       scp -r -q /home/$username/.ssh root@compute${i}:/home/$username/
       ssh compute${i} "chown -R $username:$username /home/$username"
-    done < /root/.cluster_secrets/user_secrets.txt
+    done < $user_registry
   done
   echo -e "[ STEP 5 ] Users are ready."
-  echo -e "[ -DONE- ] Connectivety check finished! \n[ -DONE- ] You need to run the command 'hpcmgr all' on the master node to update the cluster.\n[ -DONE- ] Exit now.\n"
+  echo -e "[ -DONE- ] Connectivety check finished! \n[ -DONE- ] You need to run the command 'hpcmgr all' on the master node.\n[ -DONE- ] Exit now."
   exit
 fi
 # all mode: restart services on all nodes
 if [[ $1 = 'master' || $1 = 'all' ]]; then
   if [ ! -f /root/hostfile ]; then
-    echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
-    echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
-    echo -e "[ FATAL: ] Exit now."
+    node_invalid_info
     exit
   fi
   if [ $((NODE_NUM)) -lt $((1)) ]; then
@@ -484,8 +465,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   done
   echo -e "[ STEP 5 ] Cluster users are ready."
   echo -e "[ -DONE- ] HPC-NOW Cluster Status:\n"
-  sinfo -N 
-  echo -e ""      
+  sinfo -N
 fi
 
 if [ $1 = 'install' ]; then
@@ -534,7 +514,7 @@ if [ $1 = 'install' ]; then
     echo -e "\trar       - RAR for Linux (RECOMMENDED)" 
     echo -e "\tkswps     - WPS Office Suite for Linux (RECOMMENDED)" 
     echo -e "\tenvmod    - Environment Modules" 
-    echo -e "\tvscode    - Visual Studio Code\n" 
+    echo -e "\tvscode    - Visual Studio Code" 
     exit
   elif [[ -n $2 && $2 = 'of7' ]]; then
     curl -s ${URL_INSTSCRIPTS_ROOT}install_of7.sh | bash

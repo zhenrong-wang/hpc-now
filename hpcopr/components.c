@@ -18,6 +18,7 @@ extern char url_code_root_var[LOCATION_LENGTH];
 extern char url_tf_root_var[LOCATION_LENGTH];
 extern char url_shell_scripts_var[LOCATION_LENGTH];
 extern char url_now_crypto_var[LOCATION_LENGTH];
+extern char url_initutils_root_var[LOCATION_LENGTH];
 extern int tf_loc_flag_var;
 extern int code_loc_flag_var;
 extern int now_crypto_loc_flag_var;
@@ -353,10 +354,11 @@ int reset_locations(void){
         return -1;
     }
     fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");
-    fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_TF_ROOT);
+    fprintf(file_p,"TF_BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_TF_ROOT);
     fprintf(file_p,"CLOUD_IAC_TEMPLATES_LOC_ROOT %s\n",DEFAULT_URL_CODE_ROOT);
     fprintf(file_p,"ONLINE_SHELL_SCRIPTS_LOC_ROOT %s\n",DEFAULT_URL_SHELL_SCRIPTS);
     fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",DEFAULT_URL_NOW_CRYPTO);
+    fprintf(file_p,"ONLINE_URL_INITUTILS_ROOT %s\n",DEFAULT_INITUTILS_REPO_ROOT);
     fclose(file_p);
     return 0;
 }
@@ -374,8 +376,7 @@ int get_locations(void){
     while(fgetline(file_p,location_line)==0){
         get_seq_string(location_line,' ',1,header_string);
         get_seq_string(location_line,' ',2,loc_string);
-//        printf("\n%s\t%s\t%s\n\n",location_line,header_string,loc_string);
-        if(strcmp(header_string,"BINARY_AND_PROVIDERS_LOC_ROOT")==0){
+        if(strcmp(header_string,"TF_BINARY_AND_PROVIDERS_LOC_ROOT")==0){
             strcpy(url_tf_root_var,loc_string);
 #ifdef _WIN32
             if(loc_string[1]==':'){
@@ -414,11 +415,13 @@ int get_locations(void){
             }
 #endif
         }
+        else if(strcmp(header_string,"ONLINE_URL_INITUTILS_ROOT")==0){
+            strcpy(url_initutils_root_var,loc_string);
+        }
         else{
             continue;
         }
     }
-//    printf("\n%s  ----\n%s  ----\n%s  ----\n%s  ----\n",url_now_crypto_var,url_tf_root_var,url_shell_scripts_var,url_code_root_var);
     return 0;       
 }
 
@@ -473,17 +476,19 @@ int configure_locations(void){
     fflush(stdin);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
+    getchar();
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
         return 1;
     }
-    printf("[ LOC1/4 ] Please specify the root location of the terraform binary and providers. \n");
+    printf("[ LOC1/5 ] Please specify the root location of the terraform binary and providers. \n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_TF_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",loc_string);
+    getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
@@ -493,12 +498,13 @@ int configure_locations(void){
             strcpy(url_tf_root_var,loc_string);
         }
     }
-    printf("[ LOC2/4 ] Please specify the root location of the terraform templates. \n");
+    printf("[ LOC2/5 ] Please specify the root location of the terraform templates. \n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_CODE_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",loc_string);
+    getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
@@ -508,12 +514,13 @@ int configure_locations(void){
             strcpy(url_code_root_var,loc_string);
         }
     }
-    printf("[ LOC3/4 ] Please specify the root location of the *online* shell scripts.\n");
+    printf("[ LOC3/5 ] Please specify the root location of the *online* shell scripts.\n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",loc_string);
+    getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
@@ -526,13 +533,13 @@ int configure_locations(void){
             strcpy(url_shell_scripts_var,loc_string);
         }
     }
-
-    printf("[ LOC4/4 ] Please input the root location of the now-crypto binary.\n");
+    printf("[ LOC4/5 ] Please input the root location of the now-crypto binary.\n");
     printf("|          You can input 'defaut' to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_NOW_CRYPTO);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",loc_string);
+    getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
@@ -540,6 +547,25 @@ int configure_locations(void){
         }
         else{
             strcpy(url_now_crypto_var,loc_string);
+        }
+    }
+    printf("[ LOC5/5 ] Please specify the location of the *online* repo for utils and apps.\n");
+    printf("|          You can input 'defaut' to use default location below: \n");
+    printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
+    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+    fflush(stdin);
+    scanf("%s",loc_string);
+    getchar();
+    if(strcmp(loc_string,"default")!=0){
+        format_flag=valid_loc_format_or_not(loc_string);
+        if(format_flag==-1){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location.\n" RESET_DISPLAY);
+        }
+        else if(format_flag==1){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify.\n" RESET_DISPLAY);
+        }
+        else{
+            strcpy(url_initutils_root_var,loc_string);
         }
     }
 
@@ -551,10 +577,10 @@ int configure_locations(void){
     }
     fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");
     if(strlen(url_tf_root_var)==0){
-        fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_TF_ROOT);
+        fprintf(file_p,"TF_BINARY_AND_PROVIDERS_LOC_ROOT %s\n",DEFAULT_URL_TF_ROOT);
     }
     else{
-        fprintf(file_p,"BINARY_AND_PROVIDERS_LOC_ROOT %s\n",url_tf_root_var);
+        fprintf(file_p,"TF_BINARY_AND_PROVIDERS_LOC_ROOT %s\n",url_tf_root_var);
     }
     if(strlen(url_code_root_var)==0){
         fprintf(file_p,"CLOUD_IAC_TEMPLATES_LOC_ROOT %s\n",DEFAULT_URL_CODE_ROOT);
@@ -573,6 +599,12 @@ int configure_locations(void){
     }
     else{
         fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",url_now_crypto_var);
+    }
+    if(strlen(url_initutils_root_var)==0){
+        fprintf(file_p,"ONLINE_URL_INITUTILS_ROOT %s\n",DEFAULT_INITUTILS_REPO_ROOT);
+    }
+    else{
+        fprintf(file_p,"ONLINE_URL_INITUTILS_ROOT %s\n",url_initutils_root_var);
     }
     fclose(file_p);
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Locations are modified and saved. The latest locations:\n");

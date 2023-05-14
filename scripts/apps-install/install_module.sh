@@ -20,7 +20,7 @@ if [ -f /opt/environment-modules/bin/modulecmd ]; then
 fi
 
 URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_UTILS=${URL_ROOT}utils/
+URL_PKGS=${URL_ROOT}packages/envmod/
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 logfile=/var/log/hpcmgr_install.log && echo -e "\n# $time_current INSTALLING environment-module" >> ${logfile}
 tmp_log=/tmp/hpcmgr_install.log
@@ -28,7 +28,7 @@ NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 
 yum install tcl-devel -y -q >> $tmp_log
 if [ ! -f /opt/packs/modules-5.1.0.tar.gz ]; then
-  wget ${URL_UTILS}modules-5.1.0.tar.gz -q -O /opt/packs/modules-5.1.0.tar.gz
+  wget ${URL_PKGS}modules-5.1.0.tar.gz -q -O /opt/packs/modules-5.1.0.tar.gz
 fi
 mkdir -p /etc/modulefiles
 tar zxf /opt/packs/modules-5.1.0.tar.gz -C /opt/packs

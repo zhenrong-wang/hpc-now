@@ -23,14 +23,15 @@
 void print_empty_cluster_info(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " It seems the cluster is empty. You can either:\n");
     printf("|          a) Run 'hpcopr init' to create a *default* cluster directly. OR\n");
-    printf("|          b) Run 'hpcopr get-conf' -> 'hpcopr init' \n");
+    printf("|          b) Run 'hpcopr get-conf' -> 'hpcopr edit-conf' -> 'hpcopr init' \n");
     printf("|          Exit now.\n");
 }
 
 void print_cluster_init_done(void){
-    printf("[ -DONE- ] Congratulations! The cluster is initializing now. This step may take at\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The cluster is initializing now. This step may take at\n");
     printf("|          least 7 minutes. Please do not operate the cluster during this period. \n"); 
-    printf("|          You can now log on the master node by 'hpcopr ssh USERNAME'.\n");
+    printf("|          You can now log on the master node by 'hpcopr ssh USERNAME'." HIGH_GREEN_BOLD " A desktop\n");
+    printf("|          environment will be ready after the init process.\n" RESET_DISPLAY);
 }
 
 void print_help(void){
@@ -120,7 +121,8 @@ void print_help(void){
     printf("|  " HIGH_GREEN_BOLD "destroy" RESET_DISPLAY "     : *DESTROY* the whole cluster - including all the resources & data.\n");
     printf("|                Specify 'force' as the second param to do force-destroy ( DANGER! ).\n");
     printf(GENERAL_BOLD "+ VI . Others:\n" RESET_DISPLAY);
-    printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       : Display the version and other info.\n");
+    printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       : About this software and HPC-NOW project.\n");
+    printf("|  " HIGH_GREEN_BOLD "version" RESET_DISPLAY "     : Display the version info.\n");
     printf("|  " HIGH_GREEN_BOLD "license" RESET_DISPLAY "     : Read the terms and conditions of the GNU Public License - 2.0\n");
     printf("|  " HIGH_GREEN_BOLD "repair" RESET_DISPLAY "      : Try to repair the hpcopr core components.\n");
     printf("\n");
@@ -140,6 +142,13 @@ void print_header(void){
 void print_tail(void){
     printf("\n");
     printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com" GENERAL_BOLD " <> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
+}
+
+void print_version(void){
+    printf("| This is free software; see the source for copying conditions.  There is NO\n");
+    printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
+    printf(HIGH_GREEN_BOLD "| Version: %s\n" RESET_DISPLAY,CORE_VERSION_CODE);
+    print_tail();
 }
 
 void print_about(void){

@@ -25,6 +25,7 @@
 
 extern char url_code_root_var[LOCATION_LENGTH];
 extern char url_shell_scripts_var[LOCATION_LENGTH];
+extern char url_initutils_root_var[LOCATION_LENGTH];
 extern int code_loc_flag_var;
 
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile){
@@ -507,9 +508,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\" >> /etc/profile",url_shell_scripts_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
-    sprintf(line_temp,"echo -e \"export APPS_INSTALL_SCRIPTS_URL=%sapps-install/\" >> /etc/profile",url_shell_scripts_var);
+    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -522,6 +521,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"CPU_CORE_NUM",string_temp);
     sprintf(string_temp,"%d",threads);
     global_replace(filename_temp,"THREADS_PER_CORE",string_temp);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"mount",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -706,7 +707,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
@@ -1122,9 +1123,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\" >> /etc/profile",url_shell_scripts_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
-    sprintf(line_temp,"echo -e \"export APPS_INSTALL_SCRIPTS_URL=%sapps-install/\" >> /etc/profile",url_shell_scripts_var);
+    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -1133,6 +1132,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"OS_IMAGE",os_image);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"mount",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -1282,7 +1283,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
@@ -1688,9 +1689,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\" >> /etc/profile",url_shell_scripts_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
-    sprintf(line_temp,"echo -e \"export APPS_INSTALL_SCRIPTS_URL=%sapps-install/\" >> /etc/profile",url_shell_scripts_var);
+    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -1699,6 +1698,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"COMPUTE_INST",compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"OS_IMAGE",os_image);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"mount",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -1850,7 +1851,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;

@@ -35,6 +35,7 @@ char url_code_root_var[LOCATION_LENGTH]="";
 char url_tf_root_var[LOCATION_LENGTH]="";
 char url_shell_scripts_var[LOCATION_LENGTH]="";
 char url_now_crypto_var[LOCATION_LENGTH]="";
+char url_initutils_root_var[LOCATION_LENGTH]="";
 int tf_loc_flag_var=0;
 int code_loc_flag_var=0;
 int now_crypto_loc_flag_var=0;
@@ -159,6 +160,11 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"about")==0){
         print_about();
+        return 0;
+    }
+    
+    if(strcmp(argv[1],"version")==0){
+        print_version();
         return 0;
     }
 

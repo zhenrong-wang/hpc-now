@@ -7,7 +7,7 @@
 # This script is used by 'hpcmgr' command to build *WPS* to HPC-NOW cluster.
 
 URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_UTILS=${URL_ROOT}utils/
+URL_PKGS=${URL_ROOT}packages/
 tmp_log=/tmp/hpcmgr_install.log
 
 if [ ! -d /opt/packs ]; then
@@ -34,7 +34,7 @@ if [ $CENTOS_V -eq 7 ]; then
   fi
   if [ ! -f /opt/packs/wps-office-10.1.0.6634-1.x86_64.rpm ]; then
     echo -e "[ -INFO- ] Downloading package(s) ..."
-    wget ${URL_UTILS}wps-office-10.1.0.6634-1.x86_64.rpm -O /opt/packs/wps-office-10.1.0.6634-1.x86_64.rpm -q
+    wget ${URL_PKGS}wps-office-10.1.0.6634-1.x86_64.rpm -O /opt/packs/wps-office-10.1.0.6634-1.x86_64.rpm -q
   fi
   rpm -ivh /opt/packs/wps-office-10.1.0.6634-1.x86_64.rpm
   echo -e "[ -DONE- ] WPS Office has been installed."

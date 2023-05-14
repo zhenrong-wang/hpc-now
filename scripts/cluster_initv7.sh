@@ -9,33 +9,39 @@
 
 # Define URL prefixes for the 'wget' command
 
-URL_REPO_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_UTILS=${URL_REPO_ROOT}utils/
-URL_PKGS=${URL_REPO_ROOT}packages/
-
 logfile='/root/cluster_init.log'
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Initialization started." >> ${logfile}
+centos_version=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
+echo -e "export CENTOS_V=$centos_version" >> /etc/profile
 
-CENTOS_V=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
-echo -e "export CENTOS_V=$CENTOS_V" >> /etc/profile
-
+source /etc/profile 
+# The system global env INITUTILS_REPO_ROOT must be set and written in /etc/profile befor execution
+if [ -z $INITUTILS_REPO_ROOT ]; then
+  echo -e "# $time_current [ FATAL: ] The critical environment var INITUTILS_REPO_ROOT is not set. Init abort." >> ${logfile}
+  exit 1
+fi
+if [[ -f /root/hostfile && -z $HPCMGR_SCRIPT_URL ]]; then
+  echo -e "# $time_current [ FATAL: ] The critical environment var HPCMGR_SCRIPT_URL is not set. Init abort." >> ${logfile}
+  exit 1
+fi
+url_utils=${INITUTILS_REPO_ROOT}
 #CLOUD_A: Alicloud
 #CLOUD_B: QCloud/TencentCloud
 #CLOUD_C: Amazon Web Services
 if [ -f /root/CLOUD_A ]; then
-  CLOUD_FLAG="CLOUD_A"
+  cloud_flag="CLOUD_A"
 elif [ -f /root/CLOUD_B ]; then
-  CLOUD_FLAG="CLOUD_B"
+  cloud_flag="CLOUD_B"
 elif [ -f /root/CLOUD_C ]; then
-  CLOUD_FLAG="CLOUD_C"
+  cloud_flag="CLOUD_C"
 else
   echo -e "# $time_current [ FATAL: ] Cloud flag is missing. Initialization abort." >> ${logfile}
-  exit
+  exit 1
 fi
 
 # Sync Time among cluster nodes
-if [ $CENTOS_V -eq 7 ]; then
+if [ $centos_version -eq 7 ]; then
   yum -y install ntpdate
   ntpdate ntp.ntsc.ac.cn
 fi
@@ -105,7 +111,7 @@ do
     mkdir -p /home/user${i} && chown -R user${i}:user${i} /home/user${i}
     if [ -f /root/hostfile ]; then
       if [ ! -f /root/user_secrets.txt ]; then
-        if [ $CENTOS_V -eq 7 ]; then
+        if [ $centos_version -eq 7 ]; then
           openssl rand 8 -base64 -out /root/secret_user${i}.txt
         else
           openssl rand -base64 -out /root/secret_user${i}.txt 8
@@ -142,13 +148,13 @@ echo -e "# $time_current SELINUX Disabled." >> ${logfile}
 
 ######### Yum some packages ############
 # The update step really takes time, trying to avoid it.
-if [ $CLOUD_FLAG = 'CLOUD_B' ]; then
+if [ $cloud_flag = 'CLOUD_B' ]; then
   yum -y update
   yum -y install https://mirrors.cloud.tencent.com/epel/epel-release-latest-9.noarch.rpm
   yum -y install https://mirrors.cloud.tencent.com/epel/epel-next-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.cloud.tencent.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
-elif [ $CLOUD_FLAG = 'CLOUD_A' ]; then
+elif [ $cloud_flag = 'CLOUD_A' ]; then
   yum -y update
   yum -y install https://mirrors.aliyun.com/epel/epel-release-latest-9.noarch.rpm
   yum -y install https://mirrors.aliyun.com/epel/epel-next-release-latest-9.noarch.rpm
@@ -169,9 +175,9 @@ if ! command -v munge >/dev/null 2>&1; then
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "# $time_current Start building munge." >> ${logfile}
   if [ ! -f munge-0.5.14* ]; then
-    wget ${URL_UTILS}munge/dun.gpg
-    wget ${URL_UTILS}munge/munge-0.5.14.tar.xz
-    wget ${URL_UTILS}munge/munge-0.5.14.tar.xz.asc
+    wget ${url_utils}munge/dun.gpg
+    wget ${url_utils}munge/munge-0.5.14.tar.xz
+    wget ${url_utils}munge/munge-0.5.14.tar.xz.asc
   fi
   rpmbuild -tb munge-0.5.14.tar.xz
   cd /rpmbuild/RPMS/x86_64 && rpm -ivh munge*
@@ -192,7 +198,7 @@ if [ -f /root/hostfile ]; then
   yum remove -y `rpm -aq mariadb*`
   rm -rf /etc/my.cnf
   rm -rf /var/lib/mysql
-  if [ $CENTOS_V -eq 7 ]; then
+  if [ $centos_version -eq 7 ]; then
     yum -y install mariadb mariadb-devel mariadb-server
     yum -y install mariadb-libs
   else
@@ -214,7 +220,7 @@ if [ -f /root/hostfile ]; then
     time_current=`date "+%Y-%m-%d %H:%M:%S"`
     echo -e "# $time_current Mariadb installation on localhost started." >> ${logfile}
     
-    if [ $CENTOS_V -eq 7 ]; then
+    if [ $centos_version -eq 7 ]; then
       openssl rand 8 -base64 -out /root/mariadb_root_passwd.txt
       openssl rand 8 -base64 -out /root/mariadb_slurm_acct_db_pw.txt
     else
@@ -278,7 +284,7 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Started building Slurm 21.08.8." >> ${logfile}
 cd /root
 if [ ! -f slurm-21.08.8-2.tar.bz2 ]; then
-  wget ${URL_UTILS}slurm/slurm-21.08.8-2.tar.bz2
+  wget ${url_utils}slurm/slurm-21.08.8-2.tar.bz2
 fi
 tar xf slurm-21.08.8-2.tar.bz2
 cd slurm-21.08.8-2
@@ -298,10 +304,10 @@ mkdir -p /opt/slurm/etc/
 
 if [ -f /root/hostfile ]; then
   if [ ! -f /opt/slurm/etc/slurm.conf.128 ]; then
-    wget ${URL_UTILS}slurm/slurm.conf.128 -O /opt/slurm/etc/slurm.conf.128
+    wget ${url_utils}slurm/slurm.conf.128 -O /opt/slurm/etc/slurm.conf.128
   fi
   if [ ! -f /opt/slurm/etc/slurmdbd.conf ]; then
-    wget ${URL_UTILS}slurm/slurmdbd.conf -O /opt/slurm/etc/slurmdbd.conf
+    wget ${url_utils}slurm/slurmdbd.conf -O /opt/slurm/etc/slurmdbd.conf
   fi
   if [ $db_address != "LOCALHOST" ]; then
     sed -i "s@STORAGE_HOST@$db_address@g" /opt/slurm/etc/slurmdbd.conf
@@ -326,19 +332,17 @@ if [ -f /root/hostfile ]; then
   echo -e "# $time_current Slurm built and configured in path /opt/slurm." >> ${logfile}
 
   /bin/cp /etc/hosts /etc/hosts-clean
-  if [ $CENTOS_V -eq 7 ]; then
-    wget ${URL_UTILS}hpcmgr-gcc4 -O /usr/bin/hpcmgr
+  if [ $centos_version -eq 7 ]; then
+    wget ${HPCMGR_SCRIPT_URL} -o /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr # This is a workaround. CentOS-7 will be deprecated in the future
   else
-    wget ${URL_UTILS}hpcmgr-gcc11 -O /usr/bin/hpcmgr
+    wget ${url_utils}hpcmgr.exe -O /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr
   fi
-  chmod +x /usr/bin/hpcmgr
-  
   yum -y install git python-devel
-  if [ $CLOUD_FLAG = 'CLOUD_A' ]; then
+  if [ $cloud_flag = 'CLOUD_A' ]; then
     sudo -v ; curl https://gosspublic.alicdn.com/ossutil/install.sh | sudo bash
-  elif [ $CLOUD_FLAG = 'CLOUD_B' ]; then
+  elif [ $cloud_flag = 'CLOUD_B' ]; then
     pip install coscmd
-  elif [ $CLOUD_FLAG = 'CLOUD_C' ]; then 
+  elif [ $cloud_flag = 'CLOUD_C' ]; then 
     yum -y install s3cmd
   fi
 fi
@@ -348,7 +352,7 @@ cd /root
 if ! command -v module >/dev/null 2>&1; then
   yum install tcl-devel -y
   if [ ! -f modules-5.1.0.tar.gz ]; then
-    wget ${URL_UTILS}modules-5.1.0.tar.gz
+    wget ${url_utils}modules-5.1.0.tar.gz
   fi
   tar zvxf modules-5.1.0.tar.gz
   cd modules-5.1.0
@@ -364,10 +368,10 @@ echo -e "# $time_current Environment Module has been installed." >> ${logfile}
 ######### Install Desktop Env-NECESSARY- ##############
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
-if [ $CENTOS_V -eq 7 ]; then
+if [ $centos_version -eq 7 ]; then
   yum -y groupinstall "GNOME Desktop"
   if [ -f /root/hostfile ]; then
-    wget ${URL_UTILS}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26
+    wget ${url_utils}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26
     rm -rf /usr/lib64/libstdc++.so.6
     ln -s /usr/lib64/libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6
   fi
@@ -378,7 +382,7 @@ if [ $CENTOS_V -eq 7 ]; then
   sed -i '/gini/d' /etc/profile
   echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
 else
-  echo -e "# $time_current CENTOS VERSION $CENTOS_V. Installing GUI now." >> ${logfile}
+  echo -e "# $time_current CENTOS VERSION $centos_version. Installing GUI now." >> ${logfile}
   yum grouplist installed -q | grep "Server with GUI" >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     yum -y groupinstall "Server with GUI"
@@ -402,14 +406,14 @@ if [ -f /root/hostfile ]; then
   yum -y install ibus
   yum -y install libXScrnSaver
   yum -y install ibus-pinyin
-  if [ $CLOUD_FLAG = 'CLOUD_B' ]; then
+  if [ $cloud_flag = 'CLOUD_B' ]; then
     wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O /opt/cosbrowser.zip
     cd /opt && unzip -o cosbrowser.zip && rm -rf cosbrowser.zip
     cat /etc/profile | grep cosbrowser
     if [ $? -ne 0 ]; then
       echo -e "alias cos='/opt/cosbrowser.AppImage --no-sandbox'" >> /etc/profile
     fi
-  elif [ $CLOUD_FLAG = 'CLOUD_A' ]; then
+  elif [ $cloud_flag = 'CLOUD_A' ]; then
     wget https://gosspublic.alicdn.com/oss-browser/1.16.0/oss-browser-linux-x64.zip -O /opt/oss.zip
     cd /opt && unzip -o oss.zip && rm -rf oss.zip 
     cat /etc/profile | grep ossbrowser
@@ -426,17 +430,14 @@ echo -e "# $time_current Desktop Environment and RDP has been installed." >> ${l
 mkdir -p /root/Desktop
 ln -s /hpc_apps /root/Desktop/
 ln -s /hpc_data/root_data /root/Desktop/
-wget ${URL_UTILS}pics/app.png -O /opt/app.png
-wget ${URL_UTILS}pics/logo.png -O /opt/logo.png
+wget ${url_utils}pics/app.png -O /opt/app.png
+wget ${url_utils}pics/logo.png -O /opt/logo.png
 
 if [ -f /root/hostfile ]; then
-  if [ $CENTOS_V -eq 7 ]; then
-    wget ${URL_UTILS}shortcuts/baidu.desktop -O /root/Desktop/baidu.desktop
-  fi
-  if [ $CLOUD_FLAG = 'CLOUD_A' ]; then
-    wget ${URL_UTILS}shortcuts/oss-.desktop -O /root/Desktop/oss-.desktop
-  elif [ $CLOUD_FLAG = 'CLOUD_B' ]; then
-    wget ${URL_UTILS}shortcuts/cos.desktop -O /root/Desktop/cos.desktop
+  if [ $cloud_flag = 'CLOUD_A' ]; then
+    wget ${url_utils}shortcuts/oss-.desktop -O /root/Desktop/oss-.desktop
+  elif [ $cloud_flag = 'CLOUD_B' ]; then
+    wget ${url_utils}shortcuts/cos.desktop -O /root/Desktop/cos.desktop
   fi
 fi
 
@@ -446,13 +447,13 @@ do
   ln -s /hpc_apps /home/user${i}/Desktop/
   ln -s /hpc_data/user${i}_data /home/user${i}/Desktop/
   cp /root/Desktop/*.desktop /home/user${i}/Desktop
-  if [ $CLOUD_FLAG = 'CLOUD_A' ]; then
+  if [ $cloud_flag = 'CLOUD_A' ]; then
     cp /root/.ossutilconfig /home/user${i}/
     chown -R user${i}:user${i} /home/user${i}/.ossutilconfig
-  elif [ $CLOUD_FLAG = 'CLOUD_B' ]; then
+  elif [ $cloud_flag = 'CLOUD_B' ]; then
     cp /root/.cos.conf /home/user${i}/
     chown -R user${i}:user${i} /home/user${i}/.cos.conf
-  elif [ $CLOUD_FLAG = 'CLOUD_C' ]; then
+  elif [ $cloud_flag = 'CLOUD_C' ]; then
     cp /root/.s3cfg /home/user${i}/
     chown -R user${i}:user${i} /home/user${i}/.s3cfg
   fi
@@ -462,9 +463,9 @@ done
 #Set the wallpaper of HPC_NOW
 rm -rf /usr/share/backgrounds/*.png
 rm -rf /usr/share/backgrounds/*.jpg
-wget ${URL_UTILS}pics/wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
+wget ${url_utils}pics/wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
 cd /usr/share/backgrounds && unzip wallpapers.zip
-if [ $CENTOS_V -ne 7 ]; then
+if [ $centos_version -ne 7 ]; then
   sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm/custom.conf
   yum -y install gnome-tweaks gnome-extensions-app.x86_64
   echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options centered\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/day.jpg" > /etc/g_ini.sh
@@ -473,11 +474,11 @@ if [ $CENTOS_V -ne 7 ]; then
 fi
 
 if [ ! -f /hpc_data/sbatch_sample.sh ]; then
-  wget ${URL_UTILS}slurm/sbatch_sample.sh -O /hpc_data/sbatch_sample.sh
+  wget ${url_utils}slurm/sbatch_sample.sh -O /hpc_data/sbatch_sample.sh
 fi
 
 # Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
-if [ $CLOUD_FLAG = 'CLOUD_B' ]; then
+if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete
 fi
 
@@ -498,7 +499,7 @@ if [[ $3 = 'mpi' && -f /root/hostfile ]]; then
     rm -rf /hpc_apps/ompi-4.1.2/*
     cd /root
     if [ ! -f openmpi-4.1.2.tar.gz ]; then
-      wget ${URL_PKGS}openmpi-4.1.2.tar.gz
+      wget ${url_utils}openmpi-4.1.2.tar.gz
     fi
     tar zvxf openmpi-4.1.2.tar.gz
     cd openmpi-4.1.2

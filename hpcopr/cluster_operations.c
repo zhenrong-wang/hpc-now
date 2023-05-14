@@ -875,9 +875,9 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     system(cmdline);
     sprintf(cmdline,"%s %s%shostfile_latest %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%sCLUSTER_SUMMARY.txt %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%s*.tmp %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%sUCID_LATEST.txt %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%s*.txt %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s%sconf%stf_prep.conf %s%sconf%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,workdir,PATH_SLASH,PATH_SLASH,workdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -970,7 +970,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             graph(workdir,crypto_keyfile,0);
             get_latest_hosts(stackdir,filename_temp);
             printf("|\n");
-            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
+            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
@@ -1011,7 +1011,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     for(i=1;i<compute_node_num+1;i++){
@@ -1090,7 +1090,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
     remote_exec(workdir,sshkey_dir,"connect",7);
     remote_exec(workdir,sshkey_dir,"all",8);
     for(i=0;i<add_number;i++){
@@ -1506,7 +1506,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
             get_latest_hosts(stackdir,filename_temp);
-            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
+            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
             for(i=1;i<compute_node_num+1;i++){
@@ -1579,7 +1579,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
     if(compute_node_down_num!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Please turn on all the compute nodes, log on to the master\n");
         printf("|          node, and run: sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY);
@@ -1672,7 +1672,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         sleep(1);
     }
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile");
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -2124,20 +2124,20 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     printf("|\n");
     decrypt_get_bucket_conf(workdir,crypto_keyfile,bucket_conf);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
-        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.ossutilconfig");
+        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.ossutilconfig","root","put");
         sprintf(remote_commands,"echo -e \"export BUCKET=oss://%s\" >> /etc/profile",bucket_id);
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.cos.conf");
+        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.cos.conf","root","put");
         sprintf(remote_commands,"echo -e \"export BUCKET=cos://%s\" >> /etc/profile",bucket_id);
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.s3cfg");
+        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.s3cfg","root","put");
         sprintf(remote_commands,"echo -e \"export BUCKET=s3://%s\" >> /etc/profile",bucket_id);
     }
     remote_exec_general(workdir,sshkey_folder,remote_commands,0);
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
     update_cluster_summary(workdir,crypto_keyfile);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);

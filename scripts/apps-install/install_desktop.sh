@@ -7,8 +7,7 @@
 # This script is used by 'hpcmgr' command to install *Desktop* to HPC-NOW cluster.
 
 URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_UTILS=${URL_ROOT}utils/
-URL_PKGS=${URL_ROOT}packages/
+URL_PKGS=${URL_ROOT}packages/desktop/
 tmp_log=/tmp/hpcmgr_install.log
 
 CENTOS_V=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
@@ -30,7 +29,7 @@ if [ $CENTOS_V -eq 7 ]; then
   yum -y install tigervnc tigervnc-server xrdp gcc-c++ gfortran -q >> $tmp_log 2>&1
   yum -y install ibus ibus-libpinyin -q >> $tmp_log 2>&1
   yum -y install kde-l10n-Chinese -q >> $tmp_log 2>&1
-  systemctl start ntpd.service && systemct enable ntpd.service >> $tmp_log 2>&1
+  systemctl start ntpd.service && systemctl enable ntpd.service >> $tmp_log 2>&1
   sed -i 's/; (1 = ExtendedDesktopSize)/ (1 = ExtendedDesktopSize)/g' /etc/xrdp/xrdp.ini
   sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
   #localectl set-locale LANG=zh_CN.UTF-8
@@ -42,7 +41,7 @@ if [ $CENTOS_V -eq 7 ]; then
   sed -i '/gini/d' /etc/profile
   echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
   echo -e "[ -DONE- ] *IMPORTANT*: Please set password for the users in order to log into the desktop by using RDP.\n"
-  wget ${URL_UTILS}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26 -q
+  wget ${URL_PKGS}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26 -q
   rm -rf /usr/lib64/libstdc++.so.6
   ln -s /usr/lib64/libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6
   cat /root/.bashrc | grep "source /etc/profile" >> /dev/null 2>&1
@@ -86,7 +85,7 @@ elif [ $CENTOS_V -eq 9 ]; then
   if [ ! -f /usr/share/backgrounds/wallpapers.zip ]; then
     rm -rf /usr/share/backgrounds/*.png
     rm -rf /usr/share/backgrounds/*.jpg
-    wget -q ${URL_UTILS}pics/wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
+    wget -q ${URL_PKGS}wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
     cd /usr/share/backgrounds && unzip -q wallpapers.zip
   fi
 # Make sure the desktop is user-friendly

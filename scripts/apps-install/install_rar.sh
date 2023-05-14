@@ -7,7 +7,7 @@
 # This script is used by 'hpcmgr' command to build *rarlinux* to HPC-NOW cluster.
 
 URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_UTILS=${URL_ROOT}utils/
+URL_PKGS=${URL_ROOT}packages/rar/
 tmp_log=/tmp/hpcmgr_install.log
 
 echo -e "[ -INFO- ] Software: RAR for Linux "
@@ -19,7 +19,7 @@ fi
 mkdir -p /opt/packs
 if [ ! -f /opt/packs/rarlinux-x64-612.tar.gz ]; then
   echo -e "[ -INFO- ] Downloading package(s) ..."
-  wget ${URL_UTILS}rarlinux-x64-612.tar.gz -O /opt/packs/rarlinux-x64-612.tar.gz -q
+  wget ${URL_PKGS}rarlinux-x64-612.tar.gz -O /opt/packs/rarlinux-x64-612.tar.gz -q
 fi
 
 tar zxf /opt/packs/rarlinux-x64-612.tar.gz -C /opt/packs

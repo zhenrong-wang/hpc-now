@@ -26,7 +26,6 @@ if [ ! -d /opt/packs ]; then
 fi
 
 URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_UTILS=${URL_ROOT}utils/
 URL_PKGS=${URL_ROOT}packages/
 NUM_PROCESSORS=`cat /proc/cpuinfo | grep "processor" | wc -l`
 APP_ROOT=/hpc_apps

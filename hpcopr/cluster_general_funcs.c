@@ -98,7 +98,10 @@ int decrypt_get_bucket_conf(char* workdir, char* crypto_keyfile, char* bucket_co
     return system(cmdline);
 }
 
-int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path){
+int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option){
+    if(strcmp(option,"put")!=0&&strcmp(option,"get")!=0){
+        return 1;
+    }
     char stackdir[DIR_LENGTH]="";
     char private_key[FILENAME_LENGTH]="";
     char remote_address[32]="";
@@ -114,7 +117,12 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
     fgetline(file_p,remote_address);
     fclose(file_p);
     sprintf(private_key,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
-    sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:%s %s",private_key,local_path,remote_address,remote_path,SYSTEM_CMD_REDIRECT);
+    if(strcmp(option,"put")==0){
+        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s %s@%s:%s %s",private_key,local_path,username,remote_address,remote_path,SYSTEM_CMD_REDIRECT);
+    }
+    else{
+        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s@%s:%s %s %s",private_key,username,remote_address,remote_path,local_path,SYSTEM_CMD_REDIRECT);
+    }
     system(cmdline);
     return 0;
 }
