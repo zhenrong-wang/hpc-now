@@ -40,7 +40,7 @@ if [ $CENTOS_V -eq 7 ]; then
   chmod +x /etc/g_ini.sh
   sed -i '/gini/d' /etc/profile
   echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
-  echo -e "[ -DONE- ] *IMPORTANT*: Please set password for the users in order to log into the desktop by using RDP.\n"
+  echo -e "[ -DONE- ] *IMPORTANT*: Please set password for the users in order to log into the desktop by using RDP."
   wget ${URL_PKGS}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26 -q
   rm -rf /usr/lib64/libstdc++.so.6
   ln -s /usr/lib64/libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6
@@ -96,7 +96,7 @@ elif [ $CENTOS_V -eq 9 ]; then
   sed -i '/gini/d' /etc/profile
   echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
   echo -e "[ -DONE- ] Desktop environment installed."
-  echo -e "[ -DONE- ] *IMPORTANT*: Please set password for the users in order to log into the desktop by using RDP.\n"
+  echo -e "[ -DONE- ] *IMPORTANT*: Please set password for the users in order to log into the desktop by using RDP."
   cat /root/.bashrc | grep "source /etc/profile" >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "source /etc/profile" >> /root/.bashrc

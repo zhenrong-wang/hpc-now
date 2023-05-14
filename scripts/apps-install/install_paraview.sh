@@ -12,7 +12,7 @@ if [ ! -d /opt/packs ]; then
   mkdir -p /opt/packs
 fi
 if [ -f /opt/ParaView/bin/paraview ]; then
-  echo -e "[ -INFO- ] It seems ParaView is already in place. If you do want to reinstall it, pease delete the /opt/ParaView folder and retry. Exit now.\n"
+  echo -e "[ -INFO- ] It seems ParaView is already in place. If you do want to reinstall it, pease delete the /opt/ParaView folder and retry. Exit now."
   cat /etc/profile | grep paraview >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "alias paraview='/opt/ParaView/bin/paraview'" >> /etc/profile

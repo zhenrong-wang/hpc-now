@@ -30,7 +30,7 @@ if [ $? -eq 0 ]; then
       echo -e "alias of2112='source $APP_ROOT/OpenFOAM/of2112.sh'" >> /etc/profile
     fi
     echo -e "[ -INFO- ] It seems $foam2112check Openfoam2112 binaries are in place."
-    echo -e "[ -INFO- ] If you REALLY want to rebuild, please move the previous binaries to other folders and retry. Exit now.\n" 
+    echo -e "[ -INFO- ] If you REALLY want to rebuild, please move the previous binaries to other folders and retry. Exit now." 
     exit
   fi
 fi
@@ -225,7 +225,7 @@ PATH=$APP_ROOT/$mpi_version/bin:$PATH LD_LIBRARY_PATH=$APP_ROOT/$mpi_version/lib
 $APP_ROOT/OpenFOAM/ThirdParty-v2112/Allclean -build > $APP_ROOT/OpenFOAM/Build_OF.log 2>&1
 $APP_ROOT/OpenFOAM/OpenFOAM-v2112/Allwmake -j$NUM_PROCESSORS >> $APP_ROOT/OpenFOAM/Build_OF.log 2>&1
 if [ $? -ne 0 ]; then
-  echo -e "[ FATAL: ] Building OpenFOAM-v2112 failed. Please check the Build_OF.log and retry later. Exit now.\n"
+  echo -e "[ FATAL: ] Building OpenFOAM-v2112 failed. Please check the Build_OF.log and retry later. Exit now."
   exit
 fi
 if [ $systemgcc = 'true' ]; then

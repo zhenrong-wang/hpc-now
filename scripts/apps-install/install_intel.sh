@@ -39,7 +39,7 @@ if [ -f /hpc_apps/intel/oneapi/setvars.sh ]; then
 elif [ -f /hpc_apps/intel/setvars.sh ]; then
   echo -e "alias intelenv='source /hpc_apps/intel/setvars.sh'" >> /etc/profile
 else
-  echo -e "[ FATAL: ] It seems you didn't install the intel HPC kit to the required path /hpc_apps/intel . Please reinstall to the required path.\n" 
+  echo -e "[ FATAL: ] It seems you didn't install the intel HPC kit to the required path /hpc_apps/intel . Please reinstall to the required path." 
   exit
 fi  
 echo -e "[ -DONE- ] Congratulations! Intel(R) HPC Kit - Latest version has been installed. \n[ -INFO- ] Please run 'intelenv' command to load environment for your session."

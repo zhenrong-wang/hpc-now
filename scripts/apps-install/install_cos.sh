@@ -45,4 +45,4 @@ cat /etc/profile | grep "alias cos=" >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "alias cos='/opt/cosbrowser.AppImage --no-sandbox'" >> /etc/profile
 fi
-echo -e "[ -DONE- ] COS has been installed to your system.\n"
+echo -e "[ -DONE- ] COS has been installed to your system."

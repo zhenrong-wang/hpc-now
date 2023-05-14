@@ -27,7 +27,7 @@ source /etc/profile
 
 if [ -f $APP_ROOT/abinit/build/bin/abinit ]; then
   echo -e "[ -INFO- ] It seems ABINIT binaries are in place."
-  echo -e "[ -INFO- ] If you REALLY want to rebuild, please move the previous binaries to other folders and retry. Exit now.\n"
+  echo -e "[ -INFO- ] If you REALLY want to rebuild, please move the previous binaries to other folders and retry. Exit now."
   cat /etc/profile | grep abinit >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "alias abinitenv='source ${APP_ROOT}/abinit/abinit_env.sh'" >> /etc/profile

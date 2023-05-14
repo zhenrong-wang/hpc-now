@@ -25,7 +25,7 @@ APP_ROOT=/hpc_apps
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 
 if [ -f $APP_ROOT/gcc-9.5.0/bin/gcc ]; then
-  echo -e "[ -INFO- ] It seems GNU Compiler Collections - Version 9.5.0 is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the gcc-9.5.0 folder and retry. Exit now.\n"
+  echo -e "[ -INFO- ] It seems GNU Compiler Collections - Version 9.5.0 is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the gcc-9.5.0 folder and retry. Exit now."
   echo -e "#%Module1.0\nprepend-path PATH $APP_ROOT/gcc-9.5.0/bin\nprepend-path LD_LIBRARY_PATH $APP_ROOT/gcc-9.5.0/lib64\n" > /etc/modulefiles/gcc-9.5.0
   exit
 fi

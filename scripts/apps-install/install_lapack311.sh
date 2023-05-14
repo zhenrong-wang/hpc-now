@@ -22,7 +22,7 @@ echo -e "\n# $time_current SOFTWARE: LAPACK-3.11.0"
 
 if [[ -f /hpc_apps/lapack-3.11/libcblas.a && -f /hpc_apps/lapack-3.11/liblapack.a && -f /hpc_apps/lapack-3.11/liblapacke.a && -f /hpc_apps/lapack-3.11/librefblas.a && -f /hpc_apps/lapack-3.11/libtmglib.a ]]; then
   echo -e "[ -INFO- ] It seems LAPACK-3.11.0 libraries are already in place (/hpc_apps/lapack-3.11)."
-  echo -e "[ -INFO- ] If you REALLY want to rebuild, please remove the previous libraries and retry. Exit now.\n"
+  echo -e "[ -INFO- ] If you REALLY want to rebuild, please remove the previous libraries and retry. Exit now."
   exit 
 fi
 rm -rf /hpc_apps/lapack-3.11/libcblas.a

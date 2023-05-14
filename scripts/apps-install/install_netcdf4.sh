@@ -23,7 +23,7 @@ echo -e "\n# $time_current SOFTWARE: netCDF-c-4.9.0, netcdf-fortran-4.5.3"
 
 if [[ -f /hpc_apps/netcdf4/bin/nc-config && -f /hpc_apps/netcdf4/bin/nf-config ]]; then
   echo -e "[ -INFO- ] It seems netCDF binaries are already in place (/hpc_apps/netcdf4)."
-  echo -e "[ -INFO- ] If you REALLY want to rebuild, please remove the previous folder and retry. Exit now.\n"
+  echo -e "[ -INFO- ] If you REALLY want to rebuild, please remove the previous folder and retry. Exit now."
   cat /etc/profile | grep "LD_LIBRARY_PATH=/hpc_apps/netcdf4/lib" >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "export LD_LIBRARY_PATH=/hpc_apps/netcdf4/lib:\$LD_LIBRARY_PATH" >> /etc/profile

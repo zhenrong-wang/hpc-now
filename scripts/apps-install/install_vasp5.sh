@@ -34,7 +34,7 @@ echo -e "|"
 
 if [[ -f /hpc_apps/vasp.5.4.4/bin/vasp_std || -f /hpc_apps/vasp.5.4.4/bin/vasp_gam || -f /hpc_apps/vasp.5.4.4/bin/vasp_ncl ]]; then
   echo -e "[ -INFO- ] It seems VASP-5.4.4 binaries are in place."
-  echo -e "[ -INFO- ] If you REALLY want to rebuild, please move the previous binaries to other folders and retry. Exit now.\n"
+  echo -e "[ -INFO- ] If you REALLY want to rebuild, please move the previous binaries to other folders and retry. Exit now."
   exit
 fi
 if [ ! -d /hpc_apps ]; then

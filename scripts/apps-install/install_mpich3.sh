@@ -23,7 +23,7 @@ tmp_log=/tmp/hpcmgr_install.log
 APP_ROOT=/hpc_apps
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 if [ -f $APP_ROOT/mpich-3.2.1/bin/mpicc ]; then
-  echo -e "[ -INFO- ] It seems MPICH-3.2.1 is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the mpich-3.2.1 folder and retry. Exit now.\n"
+  echo -e "[ -INFO- ] It seems MPICH-3.2.1 is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the mpich-3.2.1 folder and retry. Exit now."
   echo -e "#%Module1.0\nprepend-path PATH /hpc_apps/mpich-3.2.1/bin\nprepend-path LD_LIBRARY_PATH /hpc_apps/mpich-3.2.1/lib\nprepend-path C_INCLUDE_PATH /hpc_apps/mpich-3.2.1/include\nprepend-path CPLUS_INCLUDE_PATH /hpc_apps/mpich-3.2.1/include\n" > /etc/modulefiles/mpich-3.2.1
   exit
 fi

@@ -26,7 +26,7 @@ NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 yum -y install python3-devel >> ${tmp_log} 2>&1
 
 if [ -f $APP_ROOT/gromacs2022/bin/gmx_mpi_d ]; then
-  echo -e "[ FATAL: ] It seems GROMACS mpi version is already in place. If you do want to rebuild it, please emtpy $APP_ROOT/gromacs2022/ folder and retry. Exit now.\n"
+  echo -e "[ FATAL: ] It seems GROMACS mpi version is already in place. If you do want to rebuild it, please emtpy $APP_ROOT/gromacs2022/ folder and retry. Exit now."
   exit
 fi
 
@@ -47,7 +47,7 @@ else
     module load $mpi_version
     echo -e "[ -INFO- ] GROMACS will be built with $mpi_version. However, we recommend MPICH-4 for compiling GROMACS."
   else
-    echo -e "[ -WARN- ] No MPI version found. Installing MPICH-4 ...\n"
+    echo -e "[ -WARN- ] No MPI version found. Installing MPICH-4 ..."
     hpcmgr install mpich4 >> $tmp_log 2>&1
     mpi_version=mpich-4.0.2
     module load $mpi_version
@@ -149,7 +149,7 @@ echo -e "[ -INFO- ] Building GROMACS-2022 to $APP_ROOT/gromacs2022 now...This st
 cd /opt/packs/gromacs-2022.2 && mkdir build && cd build
 cmake .. -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=/hpc_apps/gromacs2022 -DGMX_FFT_LIBRARY=fftw3 -DFFTW_LIBRARY=/hpc_apps/fftw3/lib/libfftw3.a -DFFTW_INCLUDE_DIR=/hpc_apps/fftw3/include -DGMX_DOUBLE=on >> ${tmp_log} 2>&1
 if [ $? -ne 0 ]; then
-  echo -e "[ FATAL: ] CMake processing error. Exit now.\n"
+  echo -e "[ FATAL: ] CMake processing error. Exit now."
   exit
 fi
 make -j $NUM_PROCESSORS >> ${tmp_log} 2>${logfile}

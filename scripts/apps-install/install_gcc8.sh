@@ -26,12 +26,12 @@ NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 
 CENTOS_VER=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 if [ $CENTOS_VER -eq 9 ]; then
-  echo -e "[ -INFO- ] GNU Compiler Collections - Version 8.2.0 is *ONLY* for CentOS 7.x to upgrade. Exit now.\n"
+  echo -e "[ -INFO- ] GNU Compiler Collections - Version 8.2.0 is *ONLY* for CentOS 7.x to upgrade. Exit now."
   exit
 fi
 
 if [ -f $APP_ROOT/gcc-8.2.0/bin/gcc ]; then
-  echo -e "[ -INFO- ] It seems GNU Compiler Collections - Version 8.2.0 is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the gcc-8.2.0 folder and retry. Exit now.\n"
+  echo -e "[ -INFO- ] It seems GNU Compiler Collections - Version 8.2.0 is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the gcc-8.2.0 folder and retry. Exit now."
   echo -e "#%Module1.0\nprepend-path PATH $APP_ROOT/gcc-8.2.0/bin\nprepend-path LD_LIBRARY_PATH $APP_ROOT/gcc-8.2.0/lib64\n" > /etc/modulefiles/gcc-8.2.0
   exit
 fi

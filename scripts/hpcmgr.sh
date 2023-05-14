@@ -99,7 +99,7 @@ if [ $1 = 'users' ]; then
           exit
         fi
       else
-        useradd $3
+        useradd $3 -m
         if [ -n "$4" ]; then
           echo "$4" | passwd $3 --stdin > /dev/null 2>&1
           echo -e "username: $3 $4" >> $user_registry
@@ -115,41 +115,27 @@ if [ $1 = 'users' ]; then
           cat /root/.cluster_secrets/secret_$3.txt >> $user_registry
           rm -rf /root/.cluster_secrets/secret_$3.txt
         fi
-        if [ ! -d /home/$3/.ssh ]; then
-          mkdir -p /home/$3/.ssh
-        fi
-        rm -rf /home/$3/.ssh/id_rsa.pub
-        rm -rf /home/$3/.ssh/id_rsa
-        rm -rf /home/$3/.ssh/authorized_keys
-        rm -rf /home/$3/.ssh/known_hosts
+        mkdir -p /home/$3/.ssh
+        rm -rf /home/$3/.ssh/*
         ssh-keygen -t rsa -N '' -f /home/$3/.ssh/id_rsa -q
         cat /home/$3/.ssh/id_rsa.pub >> /home/$3/.ssh/authorized_keys
+        cat /etc/now-pubkey.txt >> /home/$3/.ssh/authorized_keys
         chown -R $3:$3 /home/$3/.ssh
-        cp -r /home/user1/Desktop /home/$3/ && chown -R $3:$3 /home/$3
-        if [ ! -d /hpc_data/$3_data ]; then
-          mkdir -p /hpc_data/$3_data
-        fi
-        chmod -R 750 /hpc_data/$3_data && chown -R $3:$3 /hpc_data/$3_data && ln -s /hpc_data/$3_data /home/$3/Desktop/
-        ln -s /hpc_apps /home/$3/Desktop/
+        cp -r /home/user1/Desktop /home/$3/ && unlink /home/$3/Desktop/user1_data
+        mkdir -p /hpc_data/$3_data && chmod -R 750 /hpc_data/$3_data && chown -R $3:$3 /hpc_data/$3_data
+        ln -s /hpc_data/$3_data /home/$3/Desktop/
+        ln -s /hpc_apps /home/$3/Desktop/ >> /dev/null 2>&1
         for i in $(seq 1 $NODE_NUM )
         do
-          ssh compute${i} "useradd $3"
-          user_passwd=`cat $user_registry | grep $3 | aws '{print $3}'`
-          ssh compute${i} "echo '$user_passwd' | passwd $3 --stdin > /dev/null 2>&1"
-          ssh compute${i} "rm -rf /home/$3/.ssh"
-          ssh compute${i} "mkdir -p /home/$3/Desktop && ln -s /hpc_apps /home/$3/Desktop/ && ln -s /hpc_data/$3_data /home/$3/Desktop/"
+          ssh -n compute${i} "useradd $3 -m"
+          user_passwd=`cat $user_registry | grep $3 | awk '{print $3}'`
+          ssh -n compute${i} "echo '$user_passwd' | passwd $3 --stdin > /dev/null 2>&1"
+          ssh -n compute${i} "rm -rf /home/$3/.ssh"
+          ssh -n compute${i} "mkdir -p /home/$3/Desktop && ln -s /hpc_apps /home/$3/Desktop/ && ln -s /hpc_data/$3_data /home/$3/Desktop/"
           scp -r -q /home/$3/.ssh root@compute${i}:/home/$3/
           scp -q /home/$3/Desktop/*desktop root@compute${i}:/home/$3/Desktop/
-          ssh compute${i} "chown -R $3:$3 /home/$3"
+          ssh -n compute${i} "chown -R $3:$3 /home/$3"
         done
-        if [ -f /root/self_defined_users.txt ]; then
-          cat /root/self_defined_users.txt | grep -w $3
-          if [ $? -ne 0 ]; then
-            echo -e "$3" >> /root/self_defined_users.txt
-          fi
-        else
-          echo -e "$3" >> /root/self_defined_users.txt
-        fi
         if [ -f /root/.cos.conf ]; then
           cp /root/.cos.conf /home/$3/ && chown -R $3:$3 /home/$3/.cos.conf
         fi
@@ -174,23 +160,27 @@ if [ $1 = 'users' ]; then
       exit
     fi
     getname=`sacctmgr list user | grep -w $3 | awk '{print $1}'`
-    if [ "$getname" != "$3" ]; then
-      echo -e "$3 is not in the cluster. Nothing deleted, exit now.\n"
-      exit
+    if [ ! -n "$4" ] || [ $4 != 'os' ]; then
+      if [ "$getname" != "$3" ]; then
+        echo -e "$3 is not in the cluster. Nothing deleted, exit now."
+        exit
+      fi
     fi
-    echo "y" | sacctmgr delete user $3
-    sed -i '/$3/d' /root/self_defined_users.txt
+    if [ "$getname" = "$3" ]; then
+      echo "y" | sacctmgr delete user $3
+    fi
     if [[ ! -n "$4" || $4 != "os" ]]; then
-      echo -e "User $3 has been deleted from the cluster, but still in the OS.\n"
+      echo -e "User $3 has been deleted from the cluster, but still in the OS."
       exit
     else
       echo -e "[ -WARN- ] User $3 will be erased from the Operating System permenantly!"
-      userdel -f $3 && rm -rf /home/$3 && rm -rf /var/spool/mail/$3 && mv /hpc_data/$3_data /hpc_data/$3_data_deleted_user
+      userdel -f -r $3 && mv /hpc_data/${3}_data /hpc_data/${3}_data_deleted_user
       for i in $(seq 1 $NODE_NUM )
       do
-        ssh compute${i} "userdel -f $3 && rm -rf /home/$3 && rm -rf /var/spool/mail/$3"
+        ssh -n compute${i} "userdel -f -r $3"
       done
-      sed -i "@$3@d" /root/.cluster_secrets
+      sed -i "/$3/d" $user_registry
+      echo -e "[ -DONE- ] User $3 Deleted permenantly."
       exit
     fi 
   fi

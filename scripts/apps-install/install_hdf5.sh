@@ -16,7 +16,7 @@ echo -e "\n# $time_current SOFTWARE: HDF5-1.10.9"
 
 if [ -f /hpc_apps/hdf5-1.10.9/bin/h5pcc ]; then
   echo -e "[ -INFO- ] It seems HDF5-1.10.9 is already in place (/hpc_apps/hdf5-1.10.9)."
-  echo -e "[ -INFO- ] If you REALLY want to rebuild, please remove the previous folder and retry. Exit now.\n"
+  echo -e "[ -INFO- ] If you REALLY want to rebuild, please remove the previous folder and retry. Exit now."
   cat /etc/profile | grep "LD_LIBRARY_PATH=/hpc_apps/hdf5-1.10.9" >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "export LD_LIBRARY_PATH=/hpc_apps/hdf5-1.10.9/lib:\$LD_LIBRARY_PATH" >> /etc/profile

@@ -15,7 +15,7 @@ if [ ! -d /opt/packs ]; then
 fi
 
 if [ -f /opt/environment-modules/bin/modulecmd ]; then
-  echo -e "[ -INFO- ] It seems environment-module is in place (opt/environment-modules).\n[ -INFO- ] If you really want to rebuild it. Please delete folder and retry. Exit now.\n"
+  echo -e "[ -INFO- ] It seems environment-module is in place (opt/environment-modules).\n[ -INFO- ] If you really want to rebuild it. Please delete folder and retry. Exit now."
   exit
 fi
 

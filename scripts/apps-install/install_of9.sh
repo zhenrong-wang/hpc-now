@@ -29,7 +29,7 @@ if [ $? -eq 0 ]; then
       echo -e "alias of9='source $APP_ROOT/OpenFOAM/of9.sh'" >> /etc/profile
     fi
     echo -e "[ -INFO- ] It seems $foam9check OpenFOAM9 binaries are in place."
-    echo -e "[ -INFO- ] If you REALLY want to rebuild, please move the previous binaries to other folders and retry. Exit now.\n" 
+    echo -e "[ -INFO- ] If you REALLY want to rebuild, please move the previous binaries to other folders and retry. Exit now." 
     exit
   fi
 fi
@@ -92,7 +92,7 @@ else
     module load $mpi_version
     echo -e "[ -INFO- ] OpenFOAM will be built with $mpi_version."
   else
-    echo -e "[ -INFO- ] No MPI version found. Installing mpich-4.0.2 now ...\n"
+    echo -e "[ -INFO- ] No MPI version found. Installing mpich-4.0.2 now ..."
     hpcmgr install mpich4 >> $tmp_log 2>&1
     if [ $? -ne 0 ]; then
       echo -e "[ FATAL: ] Failed to install mpich. Exit now."
@@ -183,7 +183,7 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 3 ] $time_current Started compiling source codes ..." >> $logfile
 $APP_ROOT/OpenFOAM/OpenFOAM-9/Allwmake -j$NUM_PROCESSORS > $APP_ROOT/OpenFOAM/Build_OF.log 2>&1
 if [ $? -ne 0 ]; then
-  echo -e "[ FATAL: ] Building OpenFOAM-9 failed. Please check the Build_OF.log and retry later. Exit now.\n"
+  echo -e "[ FATAL: ] Building OpenFOAM-9 failed. Please check the Build_OF.log and retry later. Exit now."
   exit
 fi
 if [ $systemgcc = 'true' ]; then

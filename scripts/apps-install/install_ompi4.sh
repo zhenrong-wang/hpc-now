@@ -26,7 +26,7 @@ NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 yum -y install perl >> $tmp_log 2>&1
 
 if [ -f $APP_ROOT/ompi-4.1.2/bin/mpicc ]; then
-  echo -e "[ -INFO- ] It seems OpenMPI-4.1.2 is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the ompi-4.1.2 folder and retry. Exit now.\n"
+  echo -e "[ -INFO- ] It seems OpenMPI-4.1.2 is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the ompi-4.1.2 folder and retry. Exit now."
   echo -e "#%Module1.0\nprepend-path PATH /hpc_apps/ompi-4.1.2/bin\nprepend-path LD_LIBRARY_PATH /hpc_apps/ompi-4.1.2/lib\nprepend-path C_INCLUDE_PATH /hpc_apps/ompi-4.1.2/include\nprepend-path CPLUS_INCLUDE_PATH /hpc_apps/ompi-4.1.2/include\n" > /etc/modulefiles/ompi-4.1.2
   exit
 fi

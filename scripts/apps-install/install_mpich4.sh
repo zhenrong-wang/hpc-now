@@ -22,7 +22,7 @@ logfile=/var/log/hpcmgr_install.log && echo -e "\n# $time_current INSTALLING MPI
 APP_ROOT=/hpc_apps
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 if [ -f $APP_ROOT/mpich-4.0.2/bin/mpicc ]; then
-  echo -e "[ -INFO- ] It seems MPICH-4.0.2 is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the mpich-4.0.2 folder and retry. Exit now.\n"
+  echo -e "[ -INFO- ] It seems MPICH-4.0.2 is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the mpich-4.0.2 folder and retry. Exit now."
   echo -e "#%Module1.0\nprepend-path PATH /hpc_apps/mpich-4.0.2/bin\nprepend-path LD_LIBRARY_PATH /hpc_apps/mpich-4.0.2/lib\nprepend-path C_INCLUDE_PATH /hpc_apps/mpich-4.0.2/include\nprepend-path CPLUS_INCLUDE_PATH /hpc_apps/mpich-4.0.2/include\n" > /etc/modulefiles/mpich-4.0.2
   exit
 fi

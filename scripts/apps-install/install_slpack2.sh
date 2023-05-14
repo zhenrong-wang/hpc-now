@@ -32,7 +32,7 @@ else
     module load $mpi_version
     echo -e "[ -INFO- ] ScaLAPACK will be built with $mpi_version. However, we recommend OpenMPI for compiling ScaLAPACK."
   else
-    echo -e "[ FATAL: ] No MPI version found. Please install mpi first. You can run 'hpcmgr install mpich3/mpich4/ompi3/ompi4' and retry. Exit now.\n"
+    echo -e "[ FATAL: ] No MPI version found. Please install mpi first. You can run 'hpcmgr install mpich3/mpich4/ompi3/ompi4' and retry. Exit now."
     exit
   fi
 fi
@@ -50,7 +50,7 @@ echo -e "\n# $time_current SOFTWARE: ScaLAPACK-Latest"
 
 if [ -f /hpc_apps/scalapack/libscalapack.a ]; then
   echo -e "[ -INFO- ] It seems ScaLAPACK-Latest libraries are already in place (/hpc_apps/scalapack)."
-  echo -e "[ -INFO- ] If you REALLY want to rebuild, please remove the previous libraries and retry. Exit now.\n"
+  echo -e "[ -INFO- ] If you REALLY want to rebuild, please remove the previous libraries and retry. Exit now."
   cat /etc/profile | grep "LIBRARY_PATH=/hpc_apps/scalapack" >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "export LIBRARY_PATH=/hpc_apps/scalapack:\$LIBRARY_PATH" >> /etc/profile

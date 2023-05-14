@@ -159,7 +159,8 @@ int main(int argc,char *argv[]){
 
   if(param1_length!=0&&param2_length!=0&&param3_length!=0&&param4_length!=0){
     if(strcmp(param1,"users")==0&&strcmp(param2,"delete")==0&&strcmp(param4,"os")==0){
-      printf("WARNING: You are deleting User%s from the cluster and the Operating System! Please input 'y-e-s' to confirm: ", param3);
+      printf("[ -WARN- ] You are deleting User %s from the cluster and the OS!\n", param3);
+      printf("[ INPUT: ] Please input 'y-e-s' to confirm: ");
       fflush(stdin);
       scanf("%s",confirm);
       getchar();
@@ -167,7 +168,7 @@ int main(int argc,char *argv[]){
         printf("Operation confirmed.\n");
       }
       else{
-        printf("You denied the operation. Nothing changed.\n");
+        printf("[ -INFO- ]You denied the operation. Nothing changed.\n");
         print_tail_hpcmgr();
         return 1;
       }

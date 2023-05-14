@@ -27,8 +27,8 @@ NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 
 if [ -f $APP_ROOT/openblas/lib/libopenblas.a ]; then
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
-  echo -e "[ -INFO- ] It seems OpenBLAS is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the /hpc_apps/openblas folder and retry. Exit now.\n"
-  echo -e "[ -INFO- ] # $time_current It seems OpenBLAS is in place.\n[ -INFO- ] # $time_current If you really want to rebuild it. Please delete the /hpc_apps/openblas folder and retry. Exit now.\n" >> ${logfile}
+  echo -e "[ -INFO- ] It seems OpenBLAS is in place.\n[ -INFO- ] If you really want to rebuild it. Please delete the /hpc_apps/openblas folder and retry. Exit now."
+  echo -e "[ -INFO- ] # $time_current It seems OpenBLAS is in place.\n[ -INFO- ] # $time_current If you really want to rebuild it. Please delete the /hpc_apps/openblas folder and retry. Exit now." >> ${logfile}
   echo -e "#%Module1.0\nprepend-path PATH $APP_ROOT/openblas/bin\nprepend-path LD_LIBRARY_PATH $APP_ROOT/openblas/lib\n" > /etc/modulefiles/openblas
   exit
 fi
