@@ -32,7 +32,6 @@ function help_info() {
   echo -e "           connect - check cluster connectivity"
   echo -e "           all     - refresh the whole cluster"
   echo -e "           clear   - clear the hostfile_dead_nodes list"
-  echo -e "           users   - add, delete cluster users"
   echo -e "           install - install software"
   echo -e "[ FATAL: ] Please double check your input. Exit now."
 }
@@ -96,14 +95,14 @@ if [ $1 = 'users' ]; then
         else
           echo -e "User $3 already exists in this OS but not in this cluster. Adding to the cluster now.\n"
           echo "y" | sacctmgr add user $3 account=hpc_users
-          sed -i "/$3/,+0 s/DISABLED/ENABLED/g" $user_registry
+          sed -i "/$3/,+0 s/DISABLED/ENABLED/g" ${user_registry}
           exit 0
         fi
       else
         useradd $3 -m
         if [ -n "$4" ]; then
           echo "$4" | passwd $3 --stdin > /dev/null 2>&1
-          echo -e "username: $3 $4 ENABLED" >> $user_registry
+          echo -e "username: $3 $4 ENABLED" >> ${user_registry}
         else
           echo -e "Generate random string for password." 
           if [ $CENTOS_V -eq 7 ]; then
@@ -112,9 +111,9 @@ if [ $1 = 'users' ]; then
             openssl rand -base64 -out /root/.cluster_secrets/secret_$3.txt 8
           fi
           cat /root/.cluster_secrets/secret_$3.txt | passwd $3 --stdin > /dev/null 2>&1
-          echo -n "username: $3 " >> $user_registry
+          echo -n "username: $3 " >> ${user_registry}
           new_passwd=`cat /root/.cluster_secrets/secret_$3.txt`
-          echo -e "$new_passwd ENABLED" >> $user_registry
+          echo -e "$new_passwd ENABLED" >> ${user_registry}
           rm -rf /root/.cluster_secrets/secret_$3.txt
         fi
         mkdir -p /home/$3/.ssh
@@ -132,12 +131,8 @@ if [ $1 = 'users' ]; then
           ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
           if [ $? -eq 0 ]; then
             ssh -n compute${i} "useradd $3 -m"
-            #user_passwd=`cat $user_registry | grep $3 | awk '{print $3}'`
-            #ssh -n compute${i} "echo '$user_passwd' | passwd $3 --stdin > /dev/null 2>&1"
             ssh -n compute${i} "rm -rf /home/$3/.ssh"
-            #ssh -n compute${i} "mkdir -p /home/$3/Desktop && ln -s /hpc_apps /home/$3/Desktop/ && ln -s /hpc_data/$3_data /home/$3/Desktop/"
             scp -r -q /home/$3/.ssh root@compute${i}:/home/$3/
-            #scp -q /home/$3/Desktop/*desktop root@compute${i}:/home/$3/Desktop/
             ssh -n compute${i} "chown -R $3:$3 /home/$3"
           fi
         done
@@ -164,7 +159,7 @@ if [ $1 = 'users' ]; then
       echo -e "ROOT USER and User1 cannot be deleted! Exit now."
       exit 13
     fi
-    sacctmgr list user $3 >> /dev/null 2>&1
+    sacctmgr list user $3 | grep hpc_users >> /dev/null 2>&1
     if [ ! -n "$4" ] || [ $4 != 'os' ]; then
       if [ $? -ne 0 ]; then
         echo -e "$3 is not in the cluster. Nothing deleted, exit now."
@@ -179,7 +174,7 @@ if [ $1 = 'users' ]; then
     fi
     if [[ ! -n "$4" || $4 != "os" ]]; then
       echo -e "User $3 has been deleted from the cluster, but still in the OS."
-      sed -i "/$3/,+0 s/ENABLED/DISABLED/g" $user_registry
+      sed -i "/$3/,+0 s/ENABLED/DISABLED/g" ${user_registry}
       exit 0
     else
       echo -e "[ -WARN- ] User $3 will be erased from the Operating System permenantly!"
@@ -191,7 +186,7 @@ if [ $1 = 'users' ]; then
           ssh -n compute${i} "userdel -f -r $3"
         fi
       done
-      sed -i "/$3/d" $user_registry
+      sed -i "/$3/d" ${user_registry}
       echo -e "[ -DONE- ] User $3 Deleted permenantly."
       exit 0
     fi 
@@ -361,7 +356,7 @@ if [ $1 = 'connect' ]; then
       #ssh -n compute${i} "echo '$user_passwd' | passwd $username --stdin >> /dev/null 2>&1"
       scp -r -q /home/$username/.ssh root@compute${i}:/home/$username/
       ssh -n compute${i} "chown -R $username:$username /home/$username >> /dev/null 2>&1"
-    done < $user_registry
+    done < ${user_registry}
   done
   echo -e "[ STEP 5 ] Users are ready."
   echo -e "[ -DONE- ] Connectivety check finished! \n[ -DONE- ] You need to run the command 'hpcmgr all' on the master node.\n[ -DONE- ] Exit now."
@@ -458,13 +453,14 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   if [ $? -ne 0 ]; then
     echo "y" | sacctmgr add account hpc_users >> ${logfile}
   fi
-  for k in $(seq 1 $HPC_USER_NUM )
+  while read hpc_user_row
   do
-    echo "y" | sacctmgr list user user${k} >> ${logfile} 2>&1
+    username=`echo -e $hpc_user_row | awk '{print $2}'`
+    sacctmgr list user ${username} | grep hpc_users >> ${logfile} 2>&1
     if [ $? -ne 0 ]; then
-      echo "y" | sacctmgr add user user${k} account=hpc_users >> ${logfile} 2>&1
+      echo "y" | sacctmgr add user ${username} account=hpc_users >> ${logfile} 2>&1
     fi
-  done
+  done < ${user_registry}
   echo -e "[ STEP 5 ] Cluster users are ready."
   echo -e "[ -DONE- ] HPC-NOW Cluster Status:\n"
   sinfo -N
