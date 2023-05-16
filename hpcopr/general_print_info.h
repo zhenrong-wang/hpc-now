@@ -17,5 +17,6 @@ void print_version(void);
 void print_tail(void);
 void print_about(void);
 int read_license(void);
+void print_usrmgr_info(void);
 
 #endif

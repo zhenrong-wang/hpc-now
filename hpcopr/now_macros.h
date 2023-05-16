@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0097"
+#define CORE_VERSION_CODE "0.2.0.0099"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -51,6 +51,7 @@
 #define FILENAME_SUFFIX_FULL "windows"
 
 #define GETTIMEOFDAY_FUNC mingw_gettimeofday
+#define GETPASS_FUNC getpass_win
 
 #elif __linux__
 #define PATH_SLASH "/"
@@ -92,6 +93,7 @@
 #define FILENAME_SUFFIX_FULL "linux"
 
 #define GETTIMEOFDAY_FUNC gettimeofday
+#define GETPASS_FUNC getpass
 
 #elif __APPLE__
 #define PATH_SLASH "/"
@@ -133,6 +135,7 @@
 #define FILENAME_SUFFIX_FULL "darwin"
 
 #define GETTIMEOFDAY_FUNC gettimeofday
+#define GETPASS_FUNC getpass
 
 #endif
 
@@ -140,6 +143,9 @@
 #define CMDLINE_LENGTH 2048
 #define CLUSTER_ID_LENGTH_MAX 24
 #define CLUSTER_ID_LENGTH_MIN 8
+#define USERNAME_LENGTH_MAX 16
+#define USERNAME_LENGTH_MIN 4
+#define USER_PASSWORD_LENGTH_MAX 21
 #define CLUSTER_ID_LENGTH_MAX_PLUS 25
 #define DIR_LENGTH 384
 #define FILENAME_LENGTH 512
@@ -191,6 +197,7 @@
 #define FATAL_RED_BOLD "\033[1;31m"
 #define WARN_YELLO_BOLD "\033[1;33m"
 #define HIGH_GREEN_BOLD "\033[1;32m"
+#define HIGH_CYAN_BOLD "\033[1;36m"
 #define GREY_LIGHT "\033[2;37m"
 #define GENERAL_BOLD "\033[1m"
 #define RESET_DISPLAY "\033[0m"

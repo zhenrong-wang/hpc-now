@@ -50,6 +50,9 @@ fi
 sed -i 's/#   StrictHostKeyChecking ask/StrictHostKeyChecking no/g' /etc/ssh/ssh_config
 echo -e "LogLevel QUIET" >> /etc/ssh/ssh_config
 cat /etc/now-pubkey.txt >> /root/.ssh/authorized_keys
+sed -i '/ClientAliveInterval/,+0d' /etc/ssh/sshd_config
+sed -i '/ClientAliveCountMax/,+0d' /etc/ssh/sshd_config
+echo -e "ClientAliveInterval 60\nClientAliveCountMax 3" >> /etc/ssh/sshd_config
 systemctl restart sshd
 systemctl start atd
 systemctl enable atd
@@ -368,45 +371,38 @@ echo -e "# $time_current Environment Module has been installed." >> ${logfile}
 
 ######### Install Desktop Env-NECESSARY- ##############
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
-if [ $centos_version -eq 7 ]; then
-  yum -y groupinstall "GNOME Desktop"
-  if [ -f /root/hostfile ]; then
-    wget ${url_utils}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26
-    rm -rf /usr/lib64/libstdc++.so.6
-    ln -s /usr/lib64/libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6
-  fi
-  systemctl disable firewalld
-  systemctl stop firewalld
-  echo -e "#! /bin/bash\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true" > /etc/g_ini.sh
-  chmod +x /etc/g_ini.sh
-  sed -i '/gini/d' /etc/profile
-  echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
-else
-  echo -e "# $time_current CENTOS VERSION $centos_version. Installing GUI now." >> ${logfile}
-  yum grouplist installed -q | grep "Server with GUI" >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    yum -y groupinstall "Server with GUI"
-  fi
-  systemctl enable gdm --now
-  systemctl disable firewalld
-  systemctl stop firewalld
-fi
-systemctl set-default graphical.target
-yum -y install tigervnc tigervnc-server xrdp
-sed -i 's/; (1 = ExtendedDesktopSize)/ (1 = ExtendedDesktopSize)/g' /etc/xrdp/xrdp.ini
-sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
-systemctl start xrdp
-systemctl enable xrdp
-
 if [ -f /root/hostfile ]; then
-  yum -y install remmina
-  yum -y install rpcbind flex
-  yum -y install GConf2
-  yum -y install cmake
-  yum -y install ibus
-  yum -y install libXScrnSaver
-  yum -y install ibus-pinyin
+  echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
+  if [ $centos_version -eq 7 ]; then
+    yum -y groupinstall "GNOME Desktop"
+    if [ -f /root/hostfile ]; then
+      wget ${url_utils}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26
+      rm -rf /usr/lib64/libstdc++.so.6
+      ln -s /usr/lib64/libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6
+    fi
+    systemctl disable firewalld
+    systemctl stop firewalld
+    echo -e "#! /bin/bash\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true" > /etc/g_ini.sh
+    chmod +x /etc/g_ini.sh
+    sed -i '/gini/d' /etc/profile
+    echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
+  else
+    echo -e "# $time_current CENTOS VERSION $centos_version. Installing GUI now." >> ${logfile}
+    yum grouplist installed -q | grep "Server with GUI" >> /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      yum -y groupinstall "Server with GUI"
+    fi
+    systemctl enable gdm --now
+    systemctl disable firewalld
+    systemctl stop firewalld
+  fi
+  systemctl set-default graphical.target
+  yum -y install tigervnc tigervnc-server xrdp
+  sed -i 's/; (1 = ExtendedDesktopSize)/ (1 = ExtendedDesktopSize)/g' /etc/xrdp/xrdp.ini
+  sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
+  systemctl start xrdp
+  systemctl enable xrdp
+  yum -y install rpcbind flex GConf2 cmake ibus libXScrnSaver ibus-pinyin
   if [ $cloud_flag = 'CLOUD_B' ]; then
     wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O /opt/cosbrowser.zip
     cd /opt && unzip -o cosbrowser.zip && rm -rf cosbrowser.zip
@@ -422,60 +418,56 @@ if [ -f /root/hostfile ]; then
       echo -e "alias oss='/opt/oss-browser-linux-x64/oss-browser'" >> /etc/profile
     fi
   fi
+  time_current=`date "+%Y-%m-%d %H:%M:%S"`
+  echo -e "# $time_current Desktop Environment and RDP has been installed." >> ${logfile}
 fi
 
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "# $time_current Desktop Environment and RDP has been installed." >> ${logfile}
-
 ####################### Download scripts & Desktop shortcuts ##########################
-mkdir -p /root/Desktop
-ln -s /hpc_apps /root/Desktop/
-ln -s /hpc_data/root_data /root/Desktop/
-wget ${url_utils}pics/app.png -O /opt/app.png
-wget ${url_utils}pics/logo.png -O /opt/logo.png
-
 if [ -f /root/hostfile ]; then
+  mkdir -p /root/Desktop
+  ln -s /hpc_apps /root/Desktop/
+  ln -s /hpc_data/root_data /root/Desktop/
+  wget ${url_utils}pics/app.png -O /opt/app.png
+  wget ${url_utils}pics/logo.png -O /opt/logo.png
   if [ $cloud_flag = 'CLOUD_A' ]; then
     wget ${url_utils}shortcuts/oss-.desktop -O /root/Desktop/oss-.desktop
   elif [ $cloud_flag = 'CLOUD_B' ]; then
     wget ${url_utils}shortcuts/cos.desktop -O /root/Desktop/cos.desktop
   fi
-fi
-
-for i in $( seq 1 $1 )
-do
-  mkdir -p /home/user${i}/Desktop
-  ln -s /hpc_apps /home/user${i}/Desktop/
-  ln -s /hpc_data/user${i}_data /home/user${i}/Desktop/
-  cp /root/Desktop/*.desktop /home/user${i}/Desktop
-  if [ $cloud_flag = 'CLOUD_A' ]; then
-    cp /root/.ossutilconfig /home/user${i}/
-    chown -R user${i}:user${i} /home/user${i}/.ossutilconfig
-  elif [ $cloud_flag = 'CLOUD_B' ]; then
-    cp /root/.cos.conf /home/user${i}/
-    chown -R user${i}:user${i} /home/user${i}/.cos.conf
-  elif [ $cloud_flag = 'CLOUD_C' ]; then
-    cp /root/.s3cfg /home/user${i}/
-    chown -R user${i}:user${i} /home/user${i}/.s3cfg
+  for i in $( seq 1 $1 )
+  do
+    mkdir -p /home/user${i}/Desktop
+    ln -s /hpc_apps /home/user${i}/Desktop/
+    ln -s /hpc_data/user${i}_data /home/user${i}/Desktop/
+    cp /root/Desktop/*.desktop /home/user${i}/Desktop
+    if [ $cloud_flag = 'CLOUD_A' ]; then
+      cp /root/.ossutilconfig /home/user${i}/
+      chown -R user${i}:user${i} /home/user${i}/.ossutilconfig
+    elif [ $cloud_flag = 'CLOUD_B' ]; then
+      cp /root/.cos.conf /home/user${i}/
+      chown -R user${i}:user${i} /home/user${i}/.cos.conf
+    elif [ $cloud_flag = 'CLOUD_C' ]; then
+      cp /root/.s3cfg /home/user${i}/
+      chown -R user${i}:user${i} /home/user${i}/.s3cfg
+    fi
+    chown -R user${i}:user${i} /home/user${i}/Desktop
+  done
+  
+  rm -rf /usr/share/backgrounds/*.png
+  rm -rf /usr/share/backgrounds/*.jpg
+  wget ${url_utils}pics/wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
+  cd /usr/share/backgrounds && unzip wallpapers.zip
+  if [ $centos_version -ne 7 ]; then
+    sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm/custom.conf
+    yum -y install gnome-tweaks gnome-extensions-app.x86_64
+    echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options centered\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/day.jpg" > /etc/g_ini.sh
+    chmod +x /etc/g_ini.sh
+    echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
   fi
-  chown -R user${i}:user${i} /home/user${i}/Desktop
-done
 
-#Set the wallpaper of HPC_NOW
-rm -rf /usr/share/backgrounds/*.png
-rm -rf /usr/share/backgrounds/*.jpg
-wget ${url_utils}pics/wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
-cd /usr/share/backgrounds && unzip wallpapers.zip
-if [ $centos_version -ne 7 ]; then
-  sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm/custom.conf
-  yum -y install gnome-tweaks gnome-extensions-app.x86_64
-  echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options centered\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/day.jpg" > /etc/g_ini.sh
-  chmod +x /etc/g_ini.sh
-  echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
-fi
-
-if [ ! -f /hpc_data/sbatch_sample.sh ]; then
+  if [ ! -f /hpc_data/sbatch_sample.sh ]; then
   wget ${url_utils}slurm/sbatch_sample.sh -O /hpc_data/sbatch_sample.sh
+  fi
 fi
 
 # Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
@@ -493,7 +485,7 @@ rm -rf /root/dun.gpg
 rm -rf /rpmbuild
 
 if [[ $3 = 'mpi' && -f /root/hostfile ]]; then
- ########################## build openmpi-4.1.2 ################################
+ # build openmpi-4.1.2 This has been deprecated.
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "# $time_current Started building OpenMPI-4.1.2." >> ${logfile}
   if [ ! -f /hpc_apps/ompi-4.1.2/bin/mpirun ]; then

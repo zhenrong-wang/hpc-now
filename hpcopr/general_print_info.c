@@ -35,8 +35,8 @@ void print_cluster_init_done(void){
 }
 
 void print_help(void){
-    printf(HIGH_GREEN_BOLD "[ -INFO- ] Usage: hpcopr command_name PARAM1 PARAM2 ...\n");
-    printf("| Commands:\n" RESET_DISPLAY);
+    printf(GENERAL_BOLD "[ -INFO- ] Usage: hpcopr " RESET_DISPLAY HIGH_GREEN_BOLD "Command" RESET_DISPLAY " PARAM1 PARAM2 ...\n");
+    printf(GENERAL_BOLD "| " RESET_DISPLAY HIGH_GREEN_BOLD "Commands:\n" RESET_DISPLAY);
     printf(GENERAL_BOLD "+ I  . Multi-Cluster Management:\n");
     printf("| * You DO NOT need to switch to a cluster first. *\n" RESET_DISPLAY);
     printf("|  " HIGH_GREEN_BOLD "envcheck" RESET_DISPLAY "    : Quickly check the running environment.\n");
@@ -120,7 +120,10 @@ void print_help(void){
     printf("|              : all     - Turn on the management and compute nodes of the cluster.\n");
     printf("|  " HIGH_GREEN_BOLD "destroy" RESET_DISPLAY "     : *DESTROY* the whole cluster - including all the resources & data.\n");
     printf("|                Specify 'force' as the second param to do force-destroy ( DANGER! ).\n");
-    printf(GENERAL_BOLD "+ VI . Others:\n" RESET_DISPLAY);
+    printf(GENERAL_BOLD "+ VI . Cluster User Management:\n");
+    printf("| * You need to switch to a specific cluster first. *\n" RESET_DISPLAY);
+    print_usrmgr_info();
+    printf(GENERAL_BOLD "+ VII. Others:\n" RESET_DISPLAY);
     printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       : About this software and HPC-NOW project.\n");
     printf("|  " HIGH_GREEN_BOLD "version" RESET_DISPLAY "     : Display the version info.\n");
     printf("|  " HIGH_GREEN_BOLD "license" RESET_DISPLAY "     : Read the terms and conditions of the GNU Public License - 2.0\n");
@@ -191,4 +194,22 @@ int read_license(void){
         }
     }
     return 0;
+}
+
+void print_usrmgr_info(void){
+    printf(GENERAL_BOLD "| Usage:" RESET_DISPLAY HIGH_GREEN_BOLD " hpcopr userman" RESET_DISPLAY HIGH_CYAN_BOLD " Option" RESET_DISPLAY GENERAL_BOLD " (Optional)" RESET_DISPLAY "PARAM1 " GENERAL_BOLD "(Optional)" RESET_DISPLAY "PARAM2\n");
+    printf(GENERAL_BOLD "| * The cluster must be in running state (minimal or all).\n" RESET_DISPLAY);
+    printf("|      " HIGH_CYAN_BOLD "list" RESET_DISPLAY "    : List all the current cluster users.\n");
+    printf("|      " HIGH_CYAN_BOLD "add" RESET_DISPLAY "     : Add a user to the cluster. By default, added users are enabled.\n");
+    printf("|         PARAM1   - Username string (A-Z | a-z | - , Length %d-%d)\n",USERNAME_LENGTH_MIN,USERNAME_LENGTH_MAX);
+    printf("|         PARAM2   - password string\n");
+    printf("|      " HIGH_CYAN_BOLD "delete" RESET_DISPLAY "  : Delete a user from the cluster.\n");
+    printf("|         PARAM1   - Username to be deleted\n");
+    printf("|      " HIGH_CYAN_BOLD "enable" RESET_DISPLAY "  : Enable a *disabled* user. Enabled users can run HPC workloads.\n");
+    printf("|         PARAM1   - Username to be enabled\n");
+    printf("|      " HIGH_CYAN_BOLD "disable" RESET_DISPLAY " : Disable a user. Disabled users still can access the cluster.\n");
+    printf("|         PARAM1   - Username to be enabled\n");
+    printf("|      " HIGH_CYAN_BOLD "passwd" RESET_DISPLAY "  : Change user's password.\n");
+    printf("|         PARAM1   - An existed username\n");
+    printf("|         PARAM2   - new password string\n");
 }

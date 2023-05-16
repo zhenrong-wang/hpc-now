@@ -581,15 +581,15 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     if(file_p==NULL){
         return -1;
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input your secrets key pair:\n");
-    keypair_temp=get_keypair_input("[ INPUT: ] Access key ID  : ");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your secrets key pair:\n");
+    keypair_temp=GETPASS_FUNC("[ INPUT: ] Access key ID  : ");
     strcpy(access_key,keypair_temp);
     reset_string(keypair_temp);
-    keypair_temp=get_keypair_input("[ INPUT: ] Access secrets : ");
+    keypair_temp=GETPASS_FUNC("[ INPUT: ] Access secrets : ");
     strcpy(secret_key,keypair_temp);
     reset_string(keypair_temp);
     if(strcmp(echo_flag,"echo")==0){
-        printf(WARN_YELLO_BOLD "\n|          Access key ID  : %s\n",access_key);
+        printf(GREY_LIGHT "\n|          Access key ID  : %s\n",access_key);
         printf("|          Access secrets : %s\n\n" RESET_DISPLAY,secret_key);
     }
     ak_length=strlen(access_key);
@@ -710,11 +710,11 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     }
     get_ak_sk(filename_temp2,crypto_keyfile,access_key_prev,secret_key_prev,cloud_flag_prev);
     if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input your new secrets key pair:\n");
-        keypair_temp=get_keypair_input("[ INPUT: ] Access key ID  : ");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your new secrets key pair:\n");
+        keypair_temp=GETPASS_FUNC("[ INPUT: ] Access key ID  : ");
         strcpy(access_key,keypair_temp);
         reset_string(keypair_temp);
-        keypair_temp=get_keypair_input("[ INPUT: ] Access secrets : ");
+        keypair_temp=GETPASS_FUNC("[ INPUT: ] Access secrets : ");
         strcpy(secret_key,keypair_temp);
         reset_string(keypair_temp);
     }
@@ -723,7 +723,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         strcpy(secret_key,cloud_sk);
     }
     if(strcmp(echo_flag,"echo")==0){
-        printf(WARN_YELLO_BOLD "\n|          Access key ID  : %s\n",access_key);
+        printf(GREY_LIGHT "\n|          Access key ID  : %s\n",access_key);
         printf("|          Access secrets : %s\n\n" RESET_DISPLAY,secret_key);
     }
     ak_length=strlen(access_key);
@@ -972,7 +972,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 sprintf(string_temp,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
             }
-            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The specified compute nodes have been deleted.\n");
+            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been deleted.\n");
             delete_decrypted_files(workdir,crypto_keyfile);
             return 0;
         }
@@ -1013,7 +1013,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         sprintf(string_temp,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The specified compute nodes have been deleted.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been deleted.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -1092,7 +1092,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         sprintf(string_temp,"compute%d",current_node_num+i+1);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The specified compute nodes have been added.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been added.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -1188,7 +1188,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 sprintf(string_temp,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
             }
-            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The specified compute nodes have been deleted.\n");
+            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been deleted.\n");
             return 0;
         }
     }
@@ -1222,7 +1222,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         sprintf(string_temp,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The specified compute nodes have been shut down.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been shut down.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -1329,7 +1329,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 sprintf(string_temp,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
             }
-            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The specified compute nodes have been turned on.\n");
+            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been turned on.\n");
             return 0;
         }
     }
@@ -1365,7 +1365,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         sprintf(string_temp,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The specified compute nodes have been turned on.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been turned on.\n");
     return 0;
 }
 
@@ -1508,7 +1508,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 sprintf(node_name_temp,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,node_name_temp,"start");
             }
-            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The compute nodes have been reconfigured.\n");
+            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The compute nodes have been reconfigured.\n");
             delete_decrypted_files(workdir,crypto_keyfile);
             return 0;
         }
@@ -1594,7 +1594,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         sprintf(node_name_temp,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,node_name_temp,"start");
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The compute nodes have been reconfigured.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The compute nodes have been reconfigured.\n");
     sprintf(cmdline,"%s %s%s*bak %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 0;
@@ -1673,7 +1673,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     delete_decrypted_files(workdir,crypto_keyfile);
     update_cluster_summary(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","start");
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The master node has been reconfigured.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The master node has been reconfigured.\n");
     return 0;
 }
 
@@ -1761,7 +1761,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
     update_cluster_summary(workdir,crypto_keyfile);
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! All the nodes of the current cluster have been shutdown.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! All the nodes of the current cluster have been shutdown.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -1865,7 +1865,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     if(strcmp(option,"all")==0){
         remote_exec(workdir,sshkeydir,"quick",1);
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The cluster is in the state of running.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The cluster is in the state of running.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -2130,7 +2130,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.s3cfg","root","put");
         sprintf(remote_commands,"echo -e \"export BUCKET=s3://%s\" >> /etc/profile",bucket_id);
     }
-    remote_exec_general(workdir,sshkey_folder,remote_commands,0);
+    remote_exec_general(workdir,sshkey_folder,"root",remote_commands,0);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
     update_cluster_summary(workdir,crypto_keyfile);

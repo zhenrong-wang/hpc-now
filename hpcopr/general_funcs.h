@@ -25,7 +25,7 @@ int folder_exist_or_not(char* foldername);
 int generate_random_passwd(char* password);
 int generate_random_db_passwd(char* password);
 int generate_random_string(char* random_string);
-char* get_keypair_input(char* prompt);
+char* getpass_win(char* prompt);
 int insert_lines(char* filename, char* keyword, char* insert_string);
 
 #endif

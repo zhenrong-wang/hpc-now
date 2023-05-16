@@ -492,7 +492,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
-        fprintf(file_p_2,"username: user%d %s\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
     }
     fclose(file_p);
     fclose(file_p_2);
@@ -1105,7 +1105,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
-        fprintf(file_p_2,"username: user%d %s\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
     }
     fclose(file_p);
     fclose(file_p_2);
@@ -1671,7 +1671,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
-        fprintf(file_p_2,"username: user%d %s\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
     }
     fclose(file_p);
     fclose(file_p_2);
