@@ -87,9 +87,9 @@ if [ $1 = 'users' ]; then
       echo -e "Usage: \n\thpcmgr users add your_user_name your_password\nPlease check your parameters. Exit now.\n"
       exit 3
     else
-      id $3
+      id $3 >> ${logfile} 2>&1
       if [ $? -eq 0 ]; then
-        sacctmgr list user $3 >> ${logfile} 2>&1
+        sacctmgr list user $3 | grep hpc_users >> ${logfile} 2>&1
         if [ $? -eq 0 ]; then
           echo -e "User $3 already exists in this cluster. Please specify another username. Exit now. \n"
           exit 11
