@@ -89,7 +89,7 @@ if [ $1 = 'users' ]; then
     else
       id $3
       if [ $? -eq 0 ]; then
-        sacctmgr list user | grep -w $3
+        sacctmgr list user $3 >> ${logfile} 2>&1
         if [ $? -eq 0 ]; then
           echo -e "User $3 already exists in this cluster. Please specify another username. Exit now. \n"
           exit 11
@@ -454,15 +454,15 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   fi
   
   echo -e "[ STEP 5 ] Checking cluster users ... "
-  sacctmgr list account | grep -w hpc_users >> ${logfile}
+  sacctmgr list account hpc_users >> ${logfile} 2>&1
   if [ $? -ne 0 ]; then
     echo "y" | sacctmgr add account hpc_users >> ${logfile}
   fi
   for k in $(seq 1 $HPC_USER_NUM )
   do
-    echo "y" | sacctmgr list user | grep user${k} >> ${logfile}
+    echo "y" | sacctmgr list user user${k} >> ${logfile} 2>&1
     if [ $? -ne 0 ]; then
-      echo "y" | sacctmgr add user user${k} account=hpc_users >> ${logfile}
+      echo "y" | sacctmgr add user user${k} account=hpc_users >> ${logfile} 2>&1
     fi
   done
   echo -e "[ STEP 5 ] Cluster users are ready."
