@@ -25,6 +25,7 @@
 
 extern char url_code_root_var[LOCATION_LENGTH];
 extern char url_shell_scripts_var[LOCATION_LENGTH];
+extern char url_initutils_root_var[LOCATION_LENGTH];
 extern int code_loc_flag_var;
 
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile){
@@ -40,7 +41,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char secret_file[FILENAME_LENGTH]="";
     char region_valid[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
+    char user_passwords[FILENAME_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
     char url_aws_root[LOCATION_LENGTH_EXTENDED]="";
     char access_key[AKSK_LENGTH]="";
@@ -78,9 +79,11 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     int cpu_core_num=0;
     int threads;
     FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
-    char md5sum[33]="";
+    char user_passwd_temp[PASSWORD_STRING_LENGTH]="";
+    char line_temp[LINE_LENGTH]="";
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
@@ -143,7 +146,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf("[ STEP 1 ] Creating initialization files now ...\n");
     sprintf(cmdline,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(secret_file,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     sprintf(region_valid,"%s%sregion_valid.tf",stackdir,PATH_SLASH);
     global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
@@ -481,7 +484,19 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
-    
+
+    file_p=fopen(filename_temp,"a");
+    sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    file_p_2=fopen(user_passwords,"w+");
+    for(i=0;i<hpc_user_num;i++){
+        reset_string(user_passwd_temp);
+        generate_random_passwd(user_passwd_temp);
+        fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
+    }
+    fclose(file_p);
+    fclose(file_p_2);
+
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
     global_replace(filename_temp,"MASTER_INST",master_inst);
@@ -489,6 +504,12 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    for(i=0;i<hpc_user_num;i++){
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        insert_lines(filename_temp,"master_private_ip",line_temp);
+    }
+    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -500,6 +521,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"CPU_CORE_NUM",string_temp);
     sprintf(string_temp,"%d",threads);
     global_replace(filename_temp,"THREADS_PER_CORE",string_temp);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"mount",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -598,7 +621,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             global_replace(filename_temp,"DEFAULT_ENDPOINT",string_temp);
             sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.s3cfg %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=s3://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=s3://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
     }
@@ -621,13 +644,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             global_replace(filename_temp,"DEFAULT_ENDPOINT",string_temp);
             sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.s3cfg %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=s3://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=s3://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
     }
-    get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s.tmp %s",now_crypto_exec,filename_temp,filename_temp,md5sum);
-    system(cmdline);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: s3:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -687,7 +707,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
@@ -705,7 +725,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char* error_log=OPERATION_ERROR_LOG;
     char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
+    char user_passwords[FILENAME_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
     char url_qcloud_root[LOCATION_LENGTH_EXTENDED];
     char access_key[AKSK_LENGTH]="";
@@ -737,9 +757,11 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char pubkey[LINE_LENGTH]="";
     char private_key_file[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
-    char md5sum[33]="";
+    char user_passwd_temp[PASSWORD_STRING_LENGTH]="";
+    char line_temp[LINE_LENGTH]="";
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
@@ -889,7 +911,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         return 2;
     }
 
-    sprintf(secret_file,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     file_p=fopen(conf_file,"r");
     for(i=0;i<3;i++){
@@ -1076,6 +1098,18 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
 
+    file_p=fopen(filename_temp,"a");
+    sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    file_p_2=fopen(user_passwords,"w+");
+    for(i=0;i<hpc_user_num;i++){
+        reset_string(user_passwd_temp);
+        generate_random_passwd(user_passwd_temp);
+        fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
+    }
+    fclose(file_p);
+    fclose(file_p_2);
+
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
     global_replace(filename_temp,"MASTER_INST",master_inst);
@@ -1085,6 +1119,12 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
     global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    for(i=0;i<hpc_user_num;i++){
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        insert_lines(filename_temp,"master_private_ip",line_temp);
+    }
+    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -1092,6 +1132,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"OS_IMAGE",os_image);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"mount",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -1177,14 +1219,11 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         global_replace(filename_temp,"BLANK_BUCKET_NAME",bucket_id);
         sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.cos.conf %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.cos.conf\" %s",private_key_file,master_address,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.cos.conf\" %s",private_key_file,master_address,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=cos://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=cos://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s.tmp %s",now_crypto_exec,filename_temp,filename_temp,md5sum);
-    system(cmdline);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: cos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -1244,7 +1283,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
@@ -1262,7 +1301,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char* error_log=OPERATION_ERROR_LOG;
     char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
+    char user_passwords[FILENAME_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
     char url_alicloud_root[LOCATION_LENGTH_EXTENDED]="";
     char access_key[AKSK_LENGTH]="";
@@ -1294,9 +1333,11 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char pubkey[LINE_LENGTH]="";
     char private_key_file[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
-    char md5sum[33]="";
+    char user_passwd_temp[PASSWORD_STRING_LENGTH]="";
+    char line_temp[LINE_LENGTH]="";
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
@@ -1445,7 +1486,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         system(cmdline);
         return 2;
     }
-    sprintf(secret_file,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     file_p=fopen(conf_file,"r");
     for(i=0;i<3;i++){
@@ -1623,6 +1664,17 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
+    file_p=fopen(filename_temp,"a");
+    sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    file_p_2=fopen(user_passwords,"w+");
+    for(i=0;i<hpc_user_num;i++){
+        reset_string(user_passwd_temp);
+        generate_random_passwd(user_passwd_temp);
+        fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
+    }
+    fclose(file_p);
+    fclose(file_p_2);
 
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -1633,6 +1685,12 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
     global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    for(i=0;i<hpc_user_num;i++){
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        insert_lines(filename_temp,"master_private_ip",line_temp);
+    }
+    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -1640,6 +1698,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"COMPUTE_INST",compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"OS_IMAGE",os_image);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"mount",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
@@ -1727,14 +1787,11 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         global_replace(filename_temp,"DEFAULT_REGION",region_id);
         sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.ossutilconfig %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.ossutilconfig\" %s",private_key_file,master_address,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.ossutilconfig\" %s",private_key_file,master_address,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=oss://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=oss://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s.tmp %s",now_crypto_exec,filename_temp,filename_temp,md5sum);
-    system(cmdline);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: oss:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -1794,7 +1851,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;

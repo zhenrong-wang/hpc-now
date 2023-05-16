@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0094"
+#define CORE_VERSION_CODE "0.2.0.0101"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -18,6 +18,7 @@
 #define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG "C:\\programdata\\hpc-now\\system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">nul 2>>C:\\programdata\\hpc-now\\system_command_error.log"
+#define SYSTEM_CMD_REDIRECT_NULL ">nul 2>&1"
 #define DESTROYED_DIR "c:\\programdata\\hpc-now\\.destroyed\\"
 #define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
 #define SSHKEY_DIR "C:\\hpc-now\\.now-ssh"
@@ -38,6 +39,7 @@
 #define START_BG_JOB "start /b"
 #define MKDIR_CMD "mkdir"
 #define EDITOR_CMD "notepad"
+#define CLEAR_SCREEN_CMD "cls"
 
 #define NOW_BINARY_DIR "c:\\programdata\\hpc-now\\bin\\"
 #define GENERAL_CONF_DIR "c:\\programdata\\hpc-now\\etc\\"
@@ -49,6 +51,7 @@
 #define FILENAME_SUFFIX_FULL "windows"
 
 #define GETTIMEOFDAY_FUNC mingw_gettimeofday
+#define GETPASS_FUNC getpass_win
 
 #elif __linux__
 #define PATH_SLASH "/"
@@ -57,6 +60,7 @@
 #define OPERATION_LOG_FILE "/usr/.hpc-now/.now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG "/usr/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/usr/.hpc-now/system_command_error.log"
+#define SYSTEM_CMD_REDIRECT_NULL ">>/dev/null 2>&1"
 #define DESTROYED_DIR "/usr/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/home/hpc-now/LICENSES"
 #define SSHKEY_DIR "/home/hpc-now/.now-ssh"
@@ -77,6 +81,7 @@
 #define START_BG_JOB ""
 #define MKDIR_CMD "mkdir -p"
 #define EDITOR_CMD "vi"
+#define CLEAR_SCREEN_CMD "clear"
 
 #define NOW_BINARY_DIR "/usr/.hpc-now/.bin/"
 #define GENERAL_CONF_DIR "/usr/.hpc-now/.etc/"
@@ -88,6 +93,7 @@
 #define FILENAME_SUFFIX_FULL "linux"
 
 #define GETTIMEOFDAY_FUNC gettimeofday
+#define GETPASS_FUNC getpass
 
 #elif __APPLE__
 #define PATH_SLASH "/"
@@ -96,6 +102,7 @@
 #define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG "/Applications/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/Applications/.hpc-now/system_command_error.log"
+#define SYSTEM_CMD_REDIRECT_NULL ">>/dev/null 2>&1"
 #define DESTROYED_DIR "/Applications/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/Users/hpc-now/LICENSES"
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
@@ -116,6 +123,7 @@
 #define START_BG_JOB ""
 #define MKDIR_CMD "mkdir -p"
 #define EDITOR_CMD "vi"
+#define CLEAR_SCREEN_CMD "clear"
 
 #define NOW_BINARY_DIR "/Applications/.hpc-now/.bin/"
 #define GENERAL_CONF_DIR "/Applications/.hpc-now/.etc/"
@@ -127,6 +135,7 @@
 #define FILENAME_SUFFIX_FULL "darwin"
 
 #define GETTIMEOFDAY_FUNC gettimeofday
+#define GETPASS_FUNC getpass
 
 #endif
 
@@ -134,6 +143,9 @@
 #define CMDLINE_LENGTH 2048
 #define CLUSTER_ID_LENGTH_MAX 24
 #define CLUSTER_ID_LENGTH_MIN 8
+#define USERNAME_LENGTH_MAX 16
+#define USERNAME_LENGTH_MIN 4
+#define USER_PASSWORD_LENGTH_MAX 21
 #define CLUSTER_ID_LENGTH_MAX_PLUS 25
 #define DIR_LENGTH 384
 #define FILENAME_LENGTH 512
@@ -177,13 +189,16 @@
 #define DEFAULT_URL_CODE_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/infra-as-code/"
 #define DEFAULT_URL_SHELL_SCRIPTS "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/scripts/"
 #define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-crypto/"
+#define DEFAULT_INITUTILS_REPO_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/"
 
-#define LOCATION_CONF_TOTAL_LINES 5
-#define LOCATION_LINES 4
+#define LOCATION_CONF_TOTAL_LINES 6
+#define LOCATION_LINES 5
 
 #define FATAL_RED_BOLD "\033[1;31m"
 #define WARN_YELLO_BOLD "\033[1;33m"
 #define HIGH_GREEN_BOLD "\033[1;32m"
+#define HIGH_CYAN_BOLD "\033[1;36m"
+#define GREY_LIGHT "\033[2;37m"
 #define GENERAL_BOLD "\033[1m"
 #define RESET_DISPLAY "\033[0m"
 

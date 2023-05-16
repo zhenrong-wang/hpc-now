@@ -35,6 +35,7 @@ char url_code_root_var[LOCATION_LENGTH]="";
 char url_tf_root_var[LOCATION_LENGTH]="";
 char url_shell_scripts_var[LOCATION_LENGTH]="";
 char url_now_crypto_var[LOCATION_LENGTH]="";
+char url_initutils_root_var[LOCATION_LENGTH]="";
 int tf_loc_flag_var=0;
 int code_loc_flag_var=0;
 int now_crypto_loc_flag_var=0;
@@ -75,6 +76,7 @@ int main(int argc, char* argv[]){
     char buffer2[64];
     char cloud_flag[16];
     int run_flag=0;
+    int usrmgr_check_flag=0;
     int current_cluster_flag=0;
     char workdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -159,6 +161,11 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"about")==0){
         print_about();
+        return 0;
+    }
+    
+    if(strcmp(argv[1],"version")==0){
+        print_version();
         return 0;
     }
 
@@ -277,7 +284,7 @@ int main(int argc, char* argv[]){
         return -4;
     }
     
-    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syserr")!=0&&strcmp(argv[1],"history")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0&&strcmp(argv[1],"rebuild")!=0&&strcmp(argv[1],"realtime")!=0){
+    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syserr")!=0&&strcmp(argv[1],"history")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0&&strcmp(argv[1],"rebuild")!=0&&strcmp(argv[1],"realtime")!=0&&strcmp(argv[1],"userman")!=0){
         print_help();
         return -6;
     }
@@ -563,7 +570,12 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     if(strcmp(argv[1],"vault")==0){
-        run_flag=get_vault_info(workdir,crypto_keyfile);
+        if(argc==2){
+            run_flag=get_vault_info(workdir,crypto_keyfile,"");
+        }
+        else{
+            run_flag=get_vault_info(workdir,crypto_keyfile,argv[2]);
+        }
         if(run_flag==-1){
             print_empty_cluster_info();
         }
@@ -613,7 +625,7 @@ int main(int argc, char* argv[]){
     }
 
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the key file. Have you switched to any cluster?\n");
         printf("|          Exit now.\n" RESET_DISPLAY);
@@ -838,11 +850,28 @@ int main(int argc, char* argv[]){
             system_cleanup();
             return 17;
         }
+        if(strcmp(argv[1],"userman")==0){
+            print_usrmgr_info();
+            print_tail();
+            system_cleanup();
+            return 17;
+        }
+    }
+
+    if(argc==3&&strcmp(argv[1],"userman")==0&&strcmp(argv[2],"list")==0){
+        run_flag=hpc_user_list(workdir,crypto_keyfile,0);
+        if(cluster_asleep_or_not(workdir)==0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The current cluster is not running.\n" RESET_DISPLAY);
+        }
+        print_tail();
+        write_log(current_cluster_name,operation_log,argv[2],run_flag);
+        system_cleanup();
+        return run_flag;
     }
 
     if(cluster_asleep_or_not(workdir)==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is in the state of hibernation. Please wake up\n");
-        printf("|          first. Command: hpcopr wakeup minimal|all . Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
+        printf("|          Command: hpcopr wakeup minimal|all. Exit now.\n" RESET_DISPLAY);
         print_tail();
         write_log(current_cluster_name,operation_log,argv[1],13);
         system_cleanup();
@@ -994,6 +1023,95 @@ int main(int argc, char* argv[]){
         write_log(current_cluster_name,operation_log,string_temp,run_flag);
         system_cleanup();
         return run_flag;
+    }
+
+    if(strcmp(argv[1],"userman")==0){
+        if(strcmp(argv[2],"add")!=0&&strcmp(argv[2],"delete")!=0&&strcmp(argv[2],"enable")!=0&&strcmp(argv[2],"disable")!=0&&strcmp(argv[2],"list")!=0&&strcmp(argv[2],"passwd")!=0){
+            print_usrmgr_info();
+            print_tail();
+            system_cleanup();
+            return -6;
+        }
+        usrmgr_check_flag=usrmgr_prereq_check(workdir,argv[2]);
+        if(usrmgr_check_flag==3){
+            print_tail();
+            system_cleanup();
+            return -7;
+        }
+        if(strcmp(argv[2],"list")==0){
+            printf("\n");
+            run_flag=hpc_user_list(workdir,crypto_keyfile,0);
+            print_tail();
+            write_log(current_cluster_name,operation_log,argv[2],run_flag);
+            system_cleanup();
+            return run_flag;
+        }
+        else if(strcmp(argv[2],"enable")==0||strcmp(argv[2],"disable")==0){
+            if(argc==3){
+                run_flag=hpc_user_enable_disable(workdir,SSHKEY_DIR,"",crypto_keyfile,argv[2]);
+            }
+            else{
+                run_flag=hpc_user_enable_disable(workdir,SSHKEY_DIR,argv[3],crypto_keyfile,argv[2]);
+            }
+            if(run_flag==0){
+                usrmgr_remote_exec(workdir,SSHKEY_DIR,usrmgr_check_flag);
+            }
+            print_tail();
+            write_log(current_cluster_name,operation_log,argv[2],run_flag);
+            system_cleanup();
+            return run_flag;
+        }
+        else if(strcmp(argv[2],"add")==0){
+            if(argc==3){
+                run_flag=hpc_user_add(workdir,SSHKEY_DIR,crypto_keyfile,"","");
+            }
+            else if(argc==4){
+                run_flag=hpc_user_add(workdir,SSHKEY_DIR,crypto_keyfile,argv[3],"");
+            }
+            else{
+                run_flag=hpc_user_add(workdir,SSHKEY_DIR,crypto_keyfile,argv[3],argv[4]);
+            }
+            if(run_flag==0){
+                usrmgr_remote_exec(workdir,SSHKEY_DIR,usrmgr_check_flag);
+            }
+            print_tail();
+            write_log(current_cluster_name,operation_log,argv[2],run_flag);
+            system_cleanup();
+            return run_flag;
+        }
+        else if(strcmp(argv[2],"delete")==0){
+            if(argc==3){
+                run_flag=hpc_user_delete(workdir,crypto_keyfile,SSHKEY_DIR,"");
+            }
+            else{
+                run_flag=hpc_user_delete(workdir,crypto_keyfile,SSHKEY_DIR,argv[3]);
+            }
+            if(run_flag==0){
+                usrmgr_remote_exec(workdir,SSHKEY_DIR,usrmgr_check_flag);
+            }
+            print_tail();
+            write_log(current_cluster_name,operation_log,argv[2],run_flag);
+            system_cleanup();
+            return run_flag;
+        }
+        else{
+            if(argc==3){
+                run_flag=hpc_user_setpasswd(workdir,SSHKEY_DIR,crypto_keyfile,"","");
+            }
+            else if(argc==4){
+                run_flag=hpc_user_setpasswd(workdir,SSHKEY_DIR,crypto_keyfile,argv[3],"");
+            }
+            else{
+                run_flag=hpc_user_setpasswd(workdir,SSHKEY_DIR,crypto_keyfile,argv[3],argv[4]);
+            }
+            if(run_flag==0){
+                usrmgr_remote_exec(workdir,SSHKEY_DIR,usrmgr_check_flag);
+            }
+            print_tail();
+            write_log(current_cluster_name,operation_log,argv[2],run_flag);
+            system_cleanup();
+            return run_flag;
+        }
     }
     system_cleanup();
     return 0;

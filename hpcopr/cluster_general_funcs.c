@@ -98,7 +98,10 @@ int decrypt_get_bucket_conf(char* workdir, char* crypto_keyfile, char* bucket_co
     return system(cmdline);
 }
 
-int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path){
+int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option){
+    if(strcmp(option,"put")!=0&&strcmp(option,"get")!=0){
+        return 1;
+    }
     char stackdir[DIR_LENGTH]="";
     char private_key[FILENAME_LENGTH]="";
     char remote_address[32]="";
@@ -114,7 +117,12 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
     fgetline(file_p,remote_address);
     fclose(file_p);
     sprintf(private_key,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
-    sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:%s %s",private_key,local_path,remote_address,remote_path,SYSTEM_CMD_REDIRECT);
+    if(strcmp(option,"put")==0){
+        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s %s@%s:%s %s",private_key,local_path,username,remote_address,remote_path,SYSTEM_CMD_REDIRECT);
+    }
+    else{
+        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s@%s:%s %s %s",private_key,username,remote_address,remote_path,local_path,SYSTEM_CMD_REDIRECT);
+    }
     system(cmdline);
     return 0;
 }
@@ -150,11 +158,11 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     fgetline(file_p,remote_address);
     fclose(file_p);
     sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\" %s",private_key,remote_address,exec_type,delay_minutes,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\" %s",private_key,remote_address,exec_type,delay_minutes,SYSTEM_CMD_REDIRECT);
     return system(cmdline);
 }
 
-int remote_exec_general(char* workdir, char* sshkey_folder, char* commands, int delay_minutes){
+int remote_exec_general(char* workdir, char* sshkey_folder, char* remote_user, char* commands, int delay_minutes){
     if(delay_minutes<0){
         return -1;
     }
@@ -174,10 +182,10 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* commands, int 
     fclose(file_p);
     sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     if(delay_minutes==0){
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"%s\" %s",private_key,remote_address,commands,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",private_key,remote_user,remote_address,commands,SYSTEM_CMD_REDIRECT);
     }
     else{
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"%s\" | at now + %d minutes\" %s",private_key,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",private_key,remote_user,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
     }
     return system(cmdline);
 }
@@ -289,7 +297,7 @@ int get_compute_node_num(char* currentstate_file, char* option){
     }
 }
 
-void decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum){
+int decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum){
     char filename_new[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     int i;
@@ -299,6 +307,10 @@ void decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum){
     if(file_exist_or_not(filename)==0){
         sprintf(cmdline,"%s decrypt %s %s %s",now_crypto_exec,filename,filename_new,md5sum);
         system(cmdline);
+        return 0;
+    }
+    else{
+        return -1;
     }
 }
 
@@ -356,6 +368,8 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     create_and_get_vaultdir(workdir,vaultdir);
     get_crypto_key(crypto_key_filename,md5sum);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
+    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
@@ -629,11 +643,11 @@ int wait_for_complete(char* workdir, char* option, char* errorlog, int silent_fl
     create_and_get_stackdir(workdir,stackdir);
     sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
     if(strcmp(option,"init")==0){
-        sprintf(cmdline,"%s %s%stf_prep.log | %s successfully | %s initialized! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,GREP_CMD,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s %s%stf_prep.log | %s successfully | %s initialized! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=1;
     }
     else{
-        sprintf(cmdline,"%s %s%stf_prep.log | %s complete! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s %s%stf_prep.log | %s complete! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=3;
     }
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
@@ -857,7 +871,7 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     find_and_get(filename_temp,"REGION_ID","","",1,"REGION_ID","","",' ',3,cloud_region);
     sprintf(filename_temp,"%s%scompute_template",stackdir,PATH_SLASH);
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,compute_config);
-    sprintf(filename_temp,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_vendor);
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
@@ -933,14 +947,23 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     return -1;
 }
 
-int get_vault_info(char* workdir, char* crypto_keyfile){
+int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
     char md5sum[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char single_line[LINE_LENGTH]="";
     char* crypto_exec=NOW_CRYPTO_EXEC;
     FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
     char filename_temp[FILENAME_LENGTH]="";
+    char username[32]="";
+    char password[32]="";
+    char enable_flag[16]="";
+    char header_string[64]="";
+    char tail_string[64]="";
+    char bucket_header[16]="";
+    char bucket_name[32]="";
+    int i=0;
     if(cluster_empty_or_not(workdir)==0){
         return -1;
     }
@@ -948,19 +971,69 @@ int get_vault_info(char* workdir, char* crypto_keyfile){
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
     decrypt_single_file(crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
+    decrypt_single_file(crypto_exec,filename_temp,md5sum);
+
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
     }
-    printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n");
-    while(fgetline(file_p,single_line)==0){
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    file_p_2=fopen(filename_temp,"r");
+    if(file_p_2==NULL){
+        fclose(file_p);
+        return -1;
+    }
+
+    printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n" RESET_DISPLAY);
+    while(fgetline(file_p,single_line)==0&&i<8){
         if(strlen(single_line)!=0){
-            printf("%s\n",single_line);
+            if(contain_or_not(single_line,"Address")==0){
+                get_seq_string(single_line,' ',3,bucket_header);
+                get_seq_string(single_line,' ',4,bucket_name);
+                printf(GENERAL_BOLD "| NetDisk Address: " RESET_DISPLAY "%s%s\n",bucket_header,bucket_name);
+                
+            }
+            else{
+                get_seq_string(single_line,':',1,header_string);
+                get_seq_string(single_line,':',2,tail_string);
+                if(contain_or_not(single_line,"Password")==0){
+                    if(strcmp(root_flag,"root")==0){
+                        printf(GENERAL_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
+                    }
+                }
+                else if(contain_or_not(single_line,"Key")==0){
+                    printf(GENERAL_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
+                }
+                else{
+                    printf(GENERAL_BOLD "| %s:" RESET_DISPLAY "%s\n",header_string,tail_string);
+                }
+            }
+        }
+        i++;
+    }
+    fclose(file_p);
+    printf(WARN_YELLO_BOLD "+---------------- CLUSTER USERS AND *PASSWORDS* -----------------+\n" RESET_DISPLAY);
+    while(fgetline(file_p_2,single_line)==0){
+        if(strlen(single_line)!=0){
+            get_seq_string(single_line,' ',2,username);
+            get_seq_string(single_line,' ',3,password);
+            get_seq_string(single_line,' ',4,enable_flag);
+            if(strcmp(enable_flag,"DISABLED")==0){
+                printf(GENERAL_BOLD "| Username: %s    Password: " RESET_DISPLAY GREY_LIGHT "%s " RESET_DISPLAY WARN_YELLO_BOLD "%s\n" RESET_DISPLAY,username,password,enable_flag);
+            }
+            else{
+                printf(GENERAL_BOLD "| Username: %s    Password: " RESET_DISPLAY GREY_LIGHT "%s " RESET_DISPLAY GENERAL_BOLD "%s\n" RESET_DISPLAY,username,password,enable_flag);
+            }
         }
     }
-    printf("+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n" RESET_DISPLAY);
-    fclose(file_p);
+    printf(WARN_YELLO_BOLD "+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n" RESET_DISPLAY);
+    fclose(file_p_2);
+    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 0;
@@ -1085,6 +1158,535 @@ int tail_f_for_windows(char* filename){
     }
     fclose(file_p);
     return 0;
+}
+
+int get_ucid(char* workdir, char* ucid_string){
+    char vaultdir[DIR_LENGTH]="";
+    char filename_ucid[FILENAME_LENGTH]="";
+    FILE* file_p=NULL;
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(filename_ucid,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
+    file_p=fopen(filename_ucid,"r");
+    if(file_p==NULL){
+        return -1;
+    }
+    fgetline(file_p,ucid_string);
+    fclose(file_p);
+    return 0;
+}
+
+int decrypt_user_passwords(char* workdir, char* crypto_keyfile){
+    char vaultdir[DIR_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    char filename_temp[FILENAME_LENGTH]="";
+    char* crypto_exec=NOW_CRYPTO_EXEC;
+    char md5sum[64]="";
+    get_crypto_key(crypto_keyfile,md5sum); 
+    sprintf(filename_temp,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        return -1;
+    }
+    decrypt_single_file(crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        return 1;
+    }
+    return 0;
+}
+
+void delete_decrypted_user_passwords(char* workdir){
+    char vaultdir[DIR_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    char filename_temp[FILENAME_LENGTH]="";
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+}
+
+void encrypt_and_delete_user_passwords(char* workdir, char* crypto_keyfile){
+    char vaultdir[DIR_LENGTH]="";
+    char md5sum[64]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    get_crypto_key(crypto_keyfile,md5sum);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+}
+
+int sync_user_passwords(char* workdir, char* sshkey_dir){
+    char vaultdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    return remote_copy(workdir,sshkey_dir,filename_temp,"/root/.cluster_secrets/user_secrets.txt","root","put");
+}
+
+int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
+    if(decrypt_flag==0){
+        if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
+            return -1;
+        }
+    }
+    char vaultdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char single_line[LINE_LENGTH_SHORT]="";
+    char username[USERNAME_LENGTH_MAX]="";
+    char enable_flag[16]="";
+    FILE* file_p=NULL;
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    file_p=fopen(filename_temp,"r");
+    while(fgetline(file_p,single_line)==0){
+        get_seq_string(single_line,' ',2,username);
+        get_seq_string(single_line,' ',4,enable_flag);
+        if(strcmp(enable_flag,"ENABLED")==0){
+            printf(HIGH_GREEN_BOLD "|          +- username: %s %s\n" RESET_DISPLAY,username,enable_flag);
+        }
+        else{
+            printf(WARN_YELLO_BOLD "|          +- username: %s %s\n" RESET_DISPLAY,username,enable_flag);
+        }
+    }
+    fclose(file_p);
+    if(decrypt_flag==0){
+        delete_decrypted_user_passwords(workdir);
+    }
+    return 0;
+}
+
+int username_check(char* user_registry, char* username_input){
+    if(strlen(username_input)<USERNAME_LENGTH_MIN||strlen(username_input)>USERNAME_LENGTH_MAX){
+        return -3;
+    }
+    int i;
+    char username_ext[128]="";
+    if(*(username_input)=='-'){
+        return 3;
+    }
+    for(i=0;i<strlen(username_input);i++){
+        if(*(username_input+i)=='A'||*(username_input+i)=='Z'||*(username_input+i)=='a'||*(username_input+i)=='z'||*(username_input+i)=='0'||*(username_input+i)=='9'||*(username_input+i)=='-'){
+            continue;
+        }
+        else if(*(username_input+i)>'A'&&*(username_input+i)<'Z'){
+            continue;
+        }
+        else if(*(username_input+i)>'a'&&*(username_input+i)<'z'){
+            continue;
+        }
+        else if(*(username_input+i)>'0'&&*(username_input+i)<'9'){
+            continue;
+        }
+        else{
+            return 5;
+        }
+    }
+    sprintf(username_ext," %s ",username_input);
+    if(find_multi_keys(user_registry,username_ext,"","","","")!=0){
+        return 7;
+    }
+    return 0;
+}
+
+int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* username, char* password){
+    if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
+        return -1;
+    }
+    char username_input[64]="";
+    char vaultdir[DIR_LENGTH]="";
+    char user_registry_file[FILENAME_LENGTH]="";
+    int username_check_flag=0;
+    char* password_temp=NULL;
+    char password_prompt[128]="";
+    char password_input[USER_PASSWORD_LENGTH_MAX]="";
+    char password_confirm[USER_PASSWORD_LENGTH_MAX]="";
+    char password_final[USER_PASSWORD_LENGTH_MAX]="";
+    char remote_commands[CMDLINE_LENGTH]="";
+    FILE* file_p=NULL;
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(user_registry_file)!=0){
+        return -1;
+    }
+    if(strlen(username)==0){
+        printf(GENERAL_BOLD"[ INPUT: ]" RESET_DISPLAY " Please input a *UNIQUE* username (A-Z | a-z | 0-9 | - , Length %d-%d)\n",USERNAME_LENGTH_MIN,USERNAME_LENGTH_MAX);
+        printf(GENERAL_BOLD"[ INPUT: ]" RESET_DISPLAY " Do *NOT* begin with '-' : ");
+        fflush(stdin);
+        scanf("%s",username_input);
+        getchar();
+    }
+    else{
+        strcpy(username_input,username);
+    }
+    username_check_flag=username_check(user_registry_file,username_input);
+    if(username_check_flag!=0){
+        if(username_check_flag==-3){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The length is out of range (%d - %d).\n" RESET_DISPLAY,USERNAME_LENGTH_MIN,USERNAME_LENGTH_MAX);
+            delete_decrypted_user_passwords(workdir);
+            return -3;
+        }
+        else if(username_check_flag==3){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Do *NOT* begin with '-' .\n" RESET_DISPLAY);
+            delete_decrypted_user_passwords(workdir);
+            return -3;
+        }
+        else if(username_check_flag==5){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Illegal character(s) found, only A-Z | a-z | - are valid.\n" RESET_DISPLAY);
+            delete_decrypted_user_passwords(workdir);
+            return -3;
+        }
+        else{
+            printf(FATAL_RED_BOLD "[ FATAL: ] Username duplicated. Current users:\n" RESET_DISPLAY);
+            hpc_user_list(workdir,crypto_keyfile,1);
+            delete_decrypted_user_passwords(workdir);
+            return -3;
+        }
+    }
+    printf(HIGH_GREEN_BOLD "|          Username: %s" RESET_DISPLAY "\n",username_input);
+    sprintf(password_prompt,"[ INPUT: ] Password (MaxLength %d): ",USER_PASSWORD_LENGTH_MAX);
+    if(strlen(password)==0){
+        password_temp=GETPASS_FUNC(password_prompt);
+        if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The password is too long.\n" RESET_DISPLAY);
+            delete_decrypted_user_passwords(workdir);
+            return -5;
+        }
+        strcpy(password_input,password_temp);
+        reset_string(password_temp);
+        password_temp=GETPASS_FUNC("|          Re-type the Password   : ");                            
+        if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "|" RESET_DISPLAY GREY_LIGHT "          %s" RESET_DISPLAY WARN_YELLO_BOLD " !=" RESET_DISPLAY GREY_LIGHT " %s \n" RESET_DISPLAY,password_input,password_temp);
+            delete_decrypted_user_passwords(workdir);
+            return -5;
+        }
+        strcpy(password_confirm,password_temp);
+        reset_string(password_temp);
+        if(strcmp(password_input,password_confirm)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "|" RESET_DISPLAY GREY_LIGHT "          %s" RESET_DISPLAY WARN_YELLO_BOLD " !=" RESET_DISPLAY GREY_LIGHT " %s \n" RESET_DISPLAY,password_input,password_confirm);
+            delete_decrypted_user_passwords(workdir);
+            return -5;
+        }
+        strcpy(password_final,password_input);
+    }
+    else{
+        if(strlen(password)>USER_PASSWORD_LENGTH_MAX){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The password is too long. Max Length: %d\n" RESET_DISPLAY,USER_PASSWORD_LENGTH_MAX);
+            delete_decrypted_user_passwords(workdir);
+            return -5;
+        }
+        strcpy(password_final,password);
+    }
+    sprintf(remote_commands,"hpcmgr users add %s %s >> /var/log/hpcmgr.log 2>&1",username_input,password_final);
+    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0)==0){
+        sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s | grep ENABLED >> /dev/null 2>&1",username_input);
+        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0)==0){
+            printf("[ -INFO- ] Updating the local user-info registry ...\n");
+            file_p=fopen(user_registry_file,"a");
+            fprintf(file_p,"username: %s %s ENABLED\n",username_input,password_final);
+            fclose(file_p);
+            printf("[ -DONE- ] The user %s has been added to your cluster successfully.\n",username_input);
+            encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
+            return 0;
+        }
+        else{
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to add the user %s to your cluster. Exit now.\n",username_input);
+            delete_decrypted_user_passwords(workdir);
+            return 1;
+        }
+    }
+    else{
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to the cluster. Please check the cluster status.\n");
+        delete_decrypted_user_passwords(workdir);
+        return 3;
+    }
+}
+
+int delete_user_from_registry(char* user_registry_file, char* username){
+    FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
+    char single_line[LINE_LENGTH_SHORT]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char username_temp[32]="";
+    sprintf(filename_temp,"%s.tmp.2",user_registry_file);
+    file_p_2=fopen(filename_temp,"w+");
+    if(file_p_2==NULL){
+        return -3;
+    }
+    file_p=fopen(user_registry_file,"r");
+    if(file_p==NULL){
+        fclose(file_p_2);
+        return -1;
+    }
+    while(fgetline(file_p,single_line)==0){
+        get_seq_string(single_line,' ',2,username_temp);
+        if(strcmp(username_temp,username)==0){
+            continue;
+        }
+        fprintf(file_p_2,"%s\n",single_line);
+    }
+    fclose(file_p);
+    fclose(file_p_2);
+    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,user_registry_file,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    return 0;
+}
+
+int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char* username){
+    if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
+        return -1;
+    }
+    char vaultdir[DIR_LENGTH]="";
+    char user_registry_file[FILENAME_LENGTH]="";
+    char remote_commands[CMDLINE_LENGTH]="";
+    char username_input[64]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    if(strlen(username)==0){
+        hpc_user_list(workdir,crypto_keyfile,1);
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify the username: ");
+        fflush(stdin);
+        scanf("%s",username_input);
+        getchar();
+    }
+    else{
+        strcpy(username_input,username);
+    }
+    if(strcmp(username_input,"root")==0||strcmp(username_input,"user1")==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected and cannot be deleted.\n" RESET_DISPLAY);
+        delete_decrypted_user_passwords(workdir);
+        return -3;
+    }
+    if(username_check(user_registry_file,username_input)!=7){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified user is not in the cluster.\n" RESET_DISPLAY);
+        hpc_user_list(workdir,crypto_keyfile,1);
+        delete_decrypted_user_passwords(workdir);
+        return -3;
+    }
+    sprintf(remote_commands,"echo y-e-s | hpcmgr users delete %s os",username_input);
+    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0)==0){
+        sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s >> /dev/null 2>&1",username_input);
+        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0)==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the user %s from your cluster. Exit now.\n" RESET_DISPLAY,username_input);
+            delete_decrypted_user_passwords(workdir);
+            return 1;
+        }
+        else{
+            delete_user_from_registry(user_registry_file,username_input);
+            encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully deleted user %s.\n",username_input);
+            return 0;
+        }
+    }
+    else{
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to the cluster. Please check the cluster status.\n" RESET_DISPLAY);
+        delete_decrypted_user_passwords(workdir);
+        return 3;
+    }
+}
+
+int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, char* crypto_keyfile, char* option){
+    if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
+        return -1;
+    }
+    char prev_keywords[16]="";
+    char new_keywords[16]="";
+    if(strcmp(option,"enable")==0){
+        strcpy(prev_keywords,"DISABLED");
+        strcpy(new_keywords,"ENABLED");
+    }
+    else if(strcmp(option,"disable")==0){
+        strcpy(prev_keywords,"ENABLED");
+        strcpy(new_keywords,"DISABLED");
+    }
+    else{
+        return -127;
+    }
+    char username_input[64]="";
+    char username_ext[128]="";
+    char vaultdir[DIR_LENGTH]="";
+    char user_registry_file[FILENAME_LENGTH]="";
+    char remote_commands[CMDLINE_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    if(strlen(username)==0){
+        hpc_user_list(workdir,crypto_keyfile,1);
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify the username: ");
+        fflush(stdin);
+        scanf("%s",username_input);
+        getchar();
+    }
+    else{
+        strcpy(username_input,username);
+    }
+    if(strcmp(username_input,"root")==0||strcmp(username_input,"user1")==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected, cannot be enabled/disabled.\n" RESET_DISPLAY);
+        delete_decrypted_user_passwords(workdir);
+        return -3;
+    }
+    if(username_check(user_registry_file,username_input)!=7){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid username. Valid cluster users:\n" RESET_DISPLAY);
+        hpc_user_list(workdir,crypto_keyfile,1);
+        delete_decrypted_user_passwords(workdir);
+        return -3;
+    }
+    sprintf(username_ext," %s ",username_input);
+    if(find_multi_keys(user_registry_file,username_ext,new_keywords,"","","")>0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The user %s is already %s. Exit now.\n" RESET_DISPLAY,username_input,new_keywords);
+        delete_decrypted_user_passwords(workdir);
+        return -5;
+    }
+    if(strcmp(option,"enable")==0){
+        sprintf(remote_commands,"hpcmgr users add %s >> /var/log/hpcmgr.log 2>&1",username_input);
+    }
+    else{
+        sprintf(remote_commands,"hpcmgr users delete %s >> /var/log/hpcmgr.log 2>&1",username_input);
+    }
+    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0)==0){
+        find_and_replace(user_registry_file,username_ext,"","","","",prev_keywords,new_keywords);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully %s the user %s.\n",new_keywords,username_input);
+        encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
+        return 0;
+    }
+    else{
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to the cluster. Please check the cluster status.\n" RESET_DISPLAY);
+        delete_decrypted_user_passwords(workdir);
+        return 3;
+    }
+}
+
+int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, char* username, char* password){
+    if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
+        return -1;
+    }
+    char vaultdir[DIR_LENGTH]="";
+    char user_registry_file[FILENAME_LENGTH]="";
+    char username_input[64]="";
+    char username_ext[128]="";
+    char* password_temp=NULL;
+    char password_prompt[128]="";
+    char password_prev[64]="";
+    char password_input[USER_PASSWORD_LENGTH_MAX]="";
+    char password_confirm[USER_PASSWORD_LENGTH_MAX]="";
+    char password_final[USER_PASSWORD_LENGTH_MAX]="";
+    char remote_commands[CMDLINE_LENGTH]="";
+
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    if(strlen(username)==0){
+        hpc_user_list(workdir,crypto_keyfile,1);
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify the username: ");
+        fflush(stdin);
+        scanf("%s",username_input);
+        getchar();
+    }
+    else{
+        strcpy(username_input,username);
+    }
+    if(strcmp(username_input,"root")==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Modifying root user password is not allowed.\n" RESET_DISPLAY);
+        delete_decrypted_user_passwords(workdir);
+        return -3;
+    }
+    if(username_check(user_registry_file,username_input)!=7){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid username. Valid cluster users:\n" RESET_DISPLAY);
+        hpc_user_list(workdir,crypto_keyfile,1);
+        delete_decrypted_user_passwords(workdir);
+        return -3;
+    }
+    printf(HIGH_GREEN_BOLD "|          Username: %s" RESET_DISPLAY " \n",username_input);
+    sprintf(password_prompt,"[ INPUT: ] Password (MaxLength %d): ",USER_PASSWORD_LENGTH_MAX);
+    if(strlen(password)==0){
+        password_temp=GETPASS_FUNC(password_prompt);
+        if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The password is too long.\n" RESET_DISPLAY);
+            delete_decrypted_user_passwords(workdir);
+            return -5;
+        }
+        strcpy(password_input,password_temp);
+        reset_string(password_temp);
+        password_temp=GETPASS_FUNC("|          Re-type the Password   : ");                            
+        if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "|" RESET_DISPLAY GREY_LIGHT "          %s" RESET_DISPLAY WARN_YELLO_BOLD " !=" RESET_DISPLAY GREY_LIGHT " %s \n" RESET_DISPLAY,password_input,password_temp);
+            delete_decrypted_user_passwords(workdir);
+            return -5;
+        }
+        strcpy(password_confirm,password_temp);
+        reset_string(password_temp);
+        if(strcmp(password_input,password_confirm)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "|" RESET_DISPLAY GREY_LIGHT "          %s" RESET_DISPLAY WARN_YELLO_BOLD " !=" RESET_DISPLAY GREY_LIGHT " %s \n" RESET_DISPLAY,password_input,password_confirm);
+            delete_decrypted_user_passwords(workdir);
+            return -5;
+        }
+        strcpy(password_final,password_input);
+    }
+    else{
+            if(strlen(password)>USER_PASSWORD_LENGTH_MAX){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The password is too long. Max Length: %d\n" RESET_DISPLAY,USER_PASSWORD_LENGTH_MAX);
+            delete_decrypted_user_passwords(workdir);
+            return -5;
+        }
+        strcpy(password_final,password);
+    }
+    sprintf(remote_commands,"echo \"%s\" | passwd %s --stdin >> /dev/null 2>&1",password_final,username_input);
+    if(remote_exec_general(workdir,ssheky_dir,"root",remote_commands,0)==0){
+        sprintf(username_ext," %s ",username_input);
+        find_and_get(user_registry_file,username_ext,"","",1,username_ext,"","",' ',3,password_prev);
+        find_and_replace(user_registry_file,username_ext,"","","","",password_prev,password_final);
+        sync_user_passwords(workdir,ssheky_dir);
+        encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully updated the password for user %s.\n",username_input);
+        return 0;
+    }
+    else{
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to the cluster. Please check the cluster status.\n" RESET_DISPLAY);
+        delete_decrypted_user_passwords(workdir);
+        return 3;
+    }
+}
+
+int usrmgr_prereq_check(char* workdir, char* option){
+    char confirm[64]="";
+    if(check_down_nodes(workdir)!=0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] There are down nodes. The user management efforts cannot take effect immediately.\n" RESET_DISPLAY);
+        if(strcmp(option,"list")==0){
+            return 1;
+        }
+        printf(WARN_YELLO_BOLD "|          After any user management operations, you *MUST* run the commands below:\n");
+        printf("|            1. hpcopr wakeup all\n");
+        printf("|            2. hpcopr ssh user1\n");
+        printf("|            3. sudo hpcmgr connect\n");
+        printf("|            4. sudo hpcmgr all\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "|          You can also exit now, run" RESET_DISPLAY HIGH_GREEN_BOLD " 'hpcopr wakeup all'" RESET_DISPLAY GENERAL_BOLD " and then manage the users.\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue? Only 'y-e-s' is accepted.\n");
+        printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
+        fflush(stdin);
+        scanf("%s",confirm);
+        getchar();
+        if(strcmp(confirm,"y-e-s")!=0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny the operation. Exit now.\n");
+            return 3;
+        }
+        else{
+            return 5;
+        }
+    }
+    return 0;
+}
+
+void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_flag){
+    if(prereq_check_flag==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote executing now ...\n");
+        remote_exec(workdir,sshkey_folder,"connect",1);
+        remote_exec(workdir,sshkey_folder,"all",2);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote execution commands sent.\n");
+    }
+    else{
+        printf(WARN_YELLO_BOLD "[ -WARN- ] You *MUST* run the commands above to update the cluster users.\n" RESET_DISPLAY);
+    }
 }
 
 /*int create_protection(char* workdir, int minutes){

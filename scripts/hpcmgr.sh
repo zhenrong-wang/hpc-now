@@ -10,107 +10,99 @@ CURRENT_USER=`whoami`
 if [ $CURRENT_USER != 'root' ]; then
   echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr'. "
   echo -e "           Please make sure you use either user1 with 'sudo' privilege, OR"
-  echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now.\n"
-  exit
+  echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now."
+  exit 1
 fi
-
-URL_INSTSCRIPTS_ROOT=https://now-codes-1308065454.cos.ap-nanjing.myqcloud.com/hpcmgr-install/
-
 #CRITICAL: Environment Variable $NODE_NUM and $NODE_CORES MUST be written to /etc/profile IN ADVANCE!
 source /etc/profile
+if [ ! -z $APPS_INSTALL_SCRIPTS_URL ]; then
+  URL_INSTSCRIPTS_ROOT=$APPS_INSTALL_SCRIPTS_URL
+fi
 rm -rf ~/.ssh/known_hosts
+user_registry=/root/.cluster_secrets/user_secrets.txt
 logfile='/var/log/hpcmgr.log'
 time1=$(date)
 
-echo -e "   /HPC->  Welcome to HPC_NOW hpcmgr!\n \\/ ->NOW  ${time1}\n"
-if [ -f ${logfile} ]; then
-  echo -e "   /HPC->  Welcome to HPC_NOW hpcmgr!\n \\/ ->NOW  ${time1}\n" >> ${logfile}
-fi
+echo -e "${time1}: HPC-NOW Cluster Manager task started." >> ${logfile}
 
-if [ ! -n "$1" ]; then
-  echo -e "[ FATAL: ] The first parameter is invalid. Valid parameters are:\n"
+function help_info() {
+  echo -e "[ FATAL: ] The command parameter is invalid. Valid parameters are:"
   echo -e "           quick   - quick config"
   echo -e "           master  - refresh only master node"
   echo -e "           connect - check cluster connectivity"
   echo -e "           all     - refresh the whole cluster"
   echo -e "           clear   - clear the hostfile_dead_nodes list"
-  echo -e "           users   - add, delete cluster users"
-  echo -e "           install - install software\n"
-  echo -e "[ -INFO- ] Please double check your input. Exit now.\n"
-  exit
+  echo -e "           install - install software"
+  echo -e "[ FATAL: ] Please double check your input. Exit now."
+}
+
+function node_invalid_info() {
+  echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
+  echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
+  echo -e "           Exit now."
+}
+
+if [ ! -n "$1" ]; then
+  help_info
+  exit 3
 fi
 
 if [ $1 != 'quick' ] && [ $1 != 'master' ] && [ $1 != 'all' ] && [ $1 != 'clear' ] && [ $1 != 'users' ] && [ $1 != 'connect' ] && [ $1 != 'install' ]; then
-  echo -e "[ FATAL: ] The first parameter is invalid. Valid parameters are:\n"
-  echo -e "           quick   - quick config"
-  echo -e "           master  - refresh only master node"
-  echo -e "           connect - check cluster connectivity"
-  echo -e "           all     - refresh the whole cluster"
-  echo -e "           clear   - clear the hostfile_dead_nodes list"
-  echo -e "           users   - add, delete cluster users"
-  echo -e "           install - install software\n"
-  echo -e "[ -INFO- ] Please double check your input. Exit now.\n"
-  exit
-fi
-
-if [ ! -f /var/log/hpcmgr.log ]; then
-  touch /var/log/hpcmgr.log
+  help_info
+  exit 3
 fi
 
 if [ $1 = 'clear' ]; then
   if [ ! -f /root/hostfile ]; then
-    echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
-    echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
-    echo -e "[ FATAL: ] Exit now."
-    exit
+    node_invalid_info
+    exit 5
   fi
   rm -rf /root/hostfile_dead_nodes && touch /root/hostfile_dead_nodes
   echo -e "[ -INFO- ] The hostfile_dead_nodes list had been emptied. Exit now."
   echo -e "[ -INFO- ] The hostfile_dead_nodes list had been emptied." >> ${logfile}
-  exit
+  exit 0
 fi
 
 ##### USER MANAGEMENT #####################
 if [ $1 = 'users' ]; then
   if [ ! -f /root/hostfile ]; then
-    echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
-    echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
-    echo -e "[ FATAL: ] Exit now."
-    exit
+    node_invalid_info
+    exit 5
   fi
   if [ ! -n "$2" ]; then
     echo -e "Usage: \n\thpcmgr users list\n\thpcmgr users add your_user_name your_password\n\thpcmgr users delete your_user_name\nPlease check your parameters. Exit now.\n"
-    exit
+    exit 3
   fi
   if [[ $2 != 'list' && $2 != 'add' && $2 != 'delete' ]]; then
     echo -e "Usage: \n\thpcmgr users list\n\thpcmgr users add your_user_name your_password\n\thpcmgr users delete your_user_name\nPlease check your parameters. Exit now.\n"
-    exit
+    exit 3
   fi
   if [ $2 = 'list' ]; then
     sacctmgr list user
-    exit
+    exit 0
   fi
   if [ $2 = 'add' ]; then
     if [ ! -n "$3" ]; then
       echo -e "Usage: \n\thpcmgr users add your_user_name your_password\nPlease check your parameters. Exit now.\n"
-      exit
+      exit 3
     else
-      id $3
+      id $3 >> ${logfile} 2>&1
       if [ $? -eq 0 ]; then
-        sacctmgr list user | grep -w $3
+        sacctmgr list user $3 | grep hpc_users >> ${logfile} 2>&1
         if [ $? -eq 0 ]; then
           echo -e "User $3 already exists in this cluster. Please specify another username. Exit now. \n"
-          exit
+          exit 11
         else
           echo -e "User $3 already exists in this OS but not in this cluster. Adding to the cluster now.\n"
           echo "y" | sacctmgr add user $3 account=hpc_users
-          exit
+          sed -i "/$3/,+0 s/DISABLED/ENABLED/g" ${user_registry}
+          exit 0
         fi
       else
-        useradd $3
+        useradd $3 -m
         if [ -n "$4" ]; then
           echo "$4" | passwd $3 --stdin > /dev/null 2>&1
-          echo "$4" > /root/.cluster_secrets/secret_$3.txt
+          echo -e "username: $3 $4 ENABLED" >> ${user_registry}
         else
           echo -e "Generate random string for password." 
           if [ $CENTOS_V -eq 7 ]; then
@@ -119,42 +111,31 @@ if [ $1 = 'users' ]; then
             openssl rand -base64 -out /root/.cluster_secrets/secret_$3.txt 8
           fi
           cat /root/.cluster_secrets/secret_$3.txt | passwd $3 --stdin > /dev/null 2>&1
+          echo -n "username: $3 " >> ${user_registry}
+          new_passwd=`cat /root/.cluster_secrets/secret_$3.txt`
+          echo -e "$new_passwd ENABLED" >> ${user_registry}
+          rm -rf /root/.cluster_secrets/secret_$3.txt
         fi
-        if [ ! -d /home/$3/.ssh ]; then
-          mkdir -p /home/$3/.ssh
-        fi
-        rm -rf /home/$3/.ssh/id_rsa.pub
-        rm -rf /home/$3/.ssh/id_rsa
-        rm -rf /home/$3/.ssh/authorized_keys
-        rm -rf /home/$3/.ssh/known_hosts
+        mkdir -p /home/$3/.ssh
+        rm -rf /home/$3/.ssh/*
         ssh-keygen -t rsa -N '' -f /home/$3/.ssh/id_rsa -q
         cat /home/$3/.ssh/id_rsa.pub >> /home/$3/.ssh/authorized_keys
+        cat /etc/now-pubkey.txt >> /home/$3/.ssh/authorized_keys
         chown -R $3:$3 /home/$3/.ssh
-        cp -r /home/user1/Desktop /home/$3/ && chown -R $3:$3 /home/$3
-        if [ ! -d /hpc_data/$3_data ]; then
-          mkdir -p /hpc_data/$3_data
-        fi
-        chmod -R 750 /hpc_data/$3_data && chown -R $3:$3 /hpc_data/$3_data && ln -s /hpc_data/$3_data /home/$3/Desktop/
-        ln -s /hpc_apps /home/$3/Desktop/
+        cp -r /home/user1/Desktop /home/$3/ && unlink /home/$3/Desktop/user1_data
+        mkdir -p /hpc_data/$3_data && chmod -R 750 /hpc_data/$3_data && chown -R $3:$3 /hpc_data/$3_data
+        ln -s /hpc_data/$3_data /home/$3/Desktop/
+        ln -s /hpc_apps /home/$3/Desktop/ >> /dev/null 2>&1
         for i in $(seq 1 $NODE_NUM )
         do
-          ssh compute${i} "useradd $3"
-          scp -q /root/.cluster_secrets/secret_$3.txt root@compute${i}:/root
-          ssh compute${i} "cat /root/secret_$3.txt | passwd $3 --stdin > /dev/null 2>&1"
-          ssh compute${i} "rm -rf /home/$3/.ssh"
-          ssh compute${i} "mkdir -p /home/$3/Desktop && ln -s /hpc_apps /home/$3/Desktop/ && ln -s /hpc_data/$3_data /home/$3/Desktop/"
-          scp -r -q /home/$3/.ssh root@compute${i}:/home/$3/
-          scp -q /home/$3/Desktop/*desktop root@compute${i}:/home/$3/Desktop/
-          ssh compute${i} "chown -R $3:$3 /home/$3"
-        done
-        if [ -f /root/self_defined_users.txt ]; then
-          cat /root/self_defined_users.txt | grep -w $3
-          if [ $? -ne 0 ]; then
-            echo -e "$3" >> /root/self_defined_users.txt
+          ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
+          if [ $? -eq 0 ]; then
+            ssh -n compute${i} "useradd $3 -m"
+            ssh -n compute${i} "rm -rf /home/$3/.ssh"
+            scp -r -q /home/$3/.ssh root@compute${i}:/home/$3/
+            ssh -n compute${i} "chown -R $3:$3 /home/$3"
           fi
-        else
-          echo -e "$3" >> /root/self_defined_users.txt
-        fi
+        done
         if [ -f /root/.cos.conf ]; then
           cp /root/.cos.conf /home/$3/ && chown -R $3:$3 /home/$3/.cos.conf
         fi
@@ -165,37 +146,49 @@ if [ $1 = 'users' ]; then
           cp /root/.s3cfg /home/$3/ && chown -R $3:$3 /home/$3/.s3cfg
         fi
         echo "y" | sacctmgr add user $3 account=hpc_users
-        exit
+        exit 0
       fi
     fi
   fi
   if [ $2 = 'delete' ]; then
     if [ ! -n "$3" ]; then
-      echo -e "Usage: \n\thpcmgr users delete your_user_name\n\thpcmgr users delete your_user_name os\nPlease check your parameters. Exit now.\n"
-      exit
+      echo -e "Usage: \n\thpcmgr users delete your_user_name\n\thpcmgr users delete your_user_name os\nPlease check your parameters. Exit now."
+      exit 3
     fi
-    if [[ -n "$3" && $3 = 'root' ]]; then
-      echo -e "ROOT USER cannot be deleted! Exit now. \n"
-      exit
+    if [[ $3 = 'root' || $3 = 'user1' ]]; then
+      echo -e "ROOT USER and User1 cannot be deleted! Exit now."
+      exit 13
     fi
-    getname=`sacctmgr list user | grep -w $3 | awk '{print $1}'`
-    if [ "$getname" != "$3" ]; then
-      echo -e "$3 is not in the cluster. Nothing deleted, exit now.\n"
-      exit
+    sacctmgr list user $3 | grep hpc_users >> /dev/null 2>&1
+    if [ ! -n "$4" ] || [ $4 != 'os' ]; then
+      if [ $? -ne 0 ]; then
+        echo -e "$3 is not in the cluster. Nothing deleted, exit now."
+        exit 15
+      fi
     fi
-    echo "y" | sacctmgr delete user $3
-    sed -i '/$3/d' /root/self_defined_users.txt
+    if [ $? -eq 0 ]; then
+      echo "y" | sacctmgr delete user $3
+    else
+      echo -e "$3 is not in the cluster. Nothing deleted, exit now."
+      exit 15
+    fi
     if [[ ! -n "$4" || $4 != "os" ]]; then
-      echo -e "User $3 has been deleted from the cluster, but still in the OS.\n"
-      exit
+      echo -e "User $3 has been deleted from the cluster, but still in the OS."
+      sed -i "/$3/,+0 s/ENABLED/DISABLED/g" ${user_registry}
+      exit 0
     else
       echo -e "[ -WARN- ] User $3 will be erased from the Operating System permenantly!"
-      userdel -f $3 && rm -rf /home/$3 && rm -rf /var/spool/mail/$3 && mv /hpc_data/$3_data /hpc_data/$3_data_deleted_user
+      userdel -f -r $3 && mv /hpc_data/${3}_data /hpc_data/${3}_data_deleted_user
       for i in $(seq 1 $NODE_NUM )
       do
-        ssh compute${i} "userdel -f $3 && rm -rf /home/$3 && rm -rf /var/spool/mail/$3"
+        ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
+        if [ $? -eq 0 ]; then
+          ssh -n compute${i} "userdel -f -r $3"
+        fi
       done
-      exit
+      sed -i "/$3/d" ${user_registry}
+      echo -e "[ -DONE- ] User $3 Deleted permenantly."
+      exit 0
     fi 
   fi
 fi
@@ -203,10 +196,8 @@ fi
 # quick mode - quickly restart all the services in master and compute nodes
 if [ $1 = 'quick' ]; then
   if [ ! -f /root/hostfile ]; then
-    echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
-    echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
-    echo -e "[ FATAL: ] Exit now."
-    exit
+    node_invalid_info
+    exit 3
   fi
   sacct >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
@@ -214,50 +205,42 @@ if [ $1 = 'quick' ]; then
     if [ $? -eq 0 ]; then
       echo -e "[ -WARN- ] There are still running tasks in current cluster. You need to cancel all the tasks first."
       echo -e "[ -WARN- ] Exit now.\n"
-      exit
+      exit 17
     fi
   fi  
   echo -e "[ -INFO- ] Welcome to the quick mode. All services will be restarted now."
   echo -e "[ -INFO- ] Please make sure you've already run the command 'hpcmgr all' "
   echo -e "[ STEP 1 ] Restarting services on the master node ..."
   mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged >> $logfile 2>&1
-#  echo -e "           Munge service restarted. Restarting slurm services ... "
   systemctl restart slurmdbd >> $logfile 2>&1
   for i in $(seq 1 2 )
   do
     sleep 1
   done
   systemctl restart slurmctld >> $logfile 2>&1
-#  echo -e "           Slurm services started. "
   systemctl status slurmdbd >> ${logfile}
   systemctl status slurmctld >> ${logfile}
   echo -e "[ STEP 2 ] Restarting services on the compute node(s) ..."
   for i in $( seq 1 $NODE_NUM )
   do
     ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged" >> $logfile 2>&1
-#    echo -e "           Compute node $i : Munge service restarted. Restarting slurm service ..."
     ssh compute${i} "systemctl restart slurmd" >> $logfile 2>&1
-#    echo -e "           Compute node $i : Slurm service restarted. Updating Node status ... "
     scontrol update NodeName=compute${i} State=DOWN Reason=hung_completing
     scontrol update NodeName=compute${i} State=RESUME
-#    echo -e "           Compute node $i : Slurm service and node status are resumed."
     echo -e "\nSlurmd Status of Node ${i}:" >> ${logfile}
     ssh compute${i} "systemctl status slurmd" >> ${logfile}
     echo -e "\n" >> ${logfile}
   done
   echo -e "[ -DONE- ] HPC-NOW Cluster Status:\n"
   sinfo -N
-  echo -e "" 
-  exit
+  exit 0
 fi
 
 ####### Check connectivities ###########################
 if [ $1 = 'connect' ]; then
   if [ ! -f /root/hostfile ]; then
-    echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
-    echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
-    echo -e "[ FATAL: ] Exit now."
-    exit
+    node_invalid_info
+    exit 3
   fi
   compute_passwd=`cat /root/.cluster_secrets/compute_passwd.txt`
   echo -e "[ STEP 1 ] Checking the network connection now ... "
@@ -360,43 +343,41 @@ if [ $1 = 'connect' ]; then
   else
     echo -e "[ FATAL: ] PLEASE MAKE SURE the /etc/hosts-clean exists.\n Exit now."
     echo -e "[ FATAL: ] PLEASE MAKE SURE the /etc/hosts-clean exists.\n Exit now." >> ${logfile}
-    exit
+    exit 31
   fi
   echo -e "[ STEP 5 ] Setting up users of compute nodes ... "
   for i in $(seq 1 $NODE_NUM )
   do
     scp -r -q /etc/munge/munge.key root@compute${i}:/etc/munge
-    for j in $(seq 1 $HPC_USER_NUM )
+    while read hpc_user_row
     do
-      ssh compute${i} "mkdir -p /root/.cluster_secrets"
-      scp -r -q /root/.cluster_secrets/secret_user${j}.txt root@compute${i}:/root/.cluster_secrets/
-      ssh compute${i} "cat /root/.cluster_secrets/secret_user${j}.txt | passwd user${j} --stdin > /dev/null 2>&1"
-      scp -r -q /home/user${j}/.ssh root@compute${i}:/home/user${j}/
-      ssh compute${i} "chown -R user${j}:user${j} /home/user${j}"
-    done
+      username=`echo -e $hpc_user_row | awk '{print $2}'`
+      #user_passwd=`echo -e $hpc_user_row | awk '{print $3}'`
+      #ssh -n compute${i} "echo '$user_passwd' | passwd $username --stdin >> /dev/null 2>&1"
+      scp -r -q /home/$username/.ssh root@compute${i}:/home/$username/
+      ssh -n compute${i} "chown -R $username:$username /home/$username >> /dev/null 2>&1"
+    done < ${user_registry}
   done
   echo -e "[ STEP 5 ] Users are ready."
-  echo -e "[ -DONE- ] Connectivety check finished! \n[ -DONE- ] You need to run the command 'hpcmgr all' on the master node to update the cluster.\n[ -DONE- ] Exit now.\n"
-  exit
+  echo -e "[ -DONE- ] Connectivety check finished! \n[ -DONE- ] You need to run the command 'hpcmgr all' on the master node.\n[ -DONE- ] Exit now."
+  exit 0
 fi
 # all mode: restart services on all nodes
 if [[ $1 = 'master' || $1 = 'all' ]]; then
   if [ ! -f /root/hostfile ]; then
-    echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
-    echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
-    echo -e "[ FATAL: ] Exit now."
-    exit
+    node_invalid_info
+    exit 3
   fi
   if [ $((NODE_NUM)) -lt $((1)) ]; then
     echo -e "[ FATAL: ] There is no compute nodes in the current cluster. You need to add at least 1 compute node to start the cluster.\n[ FATAL: ] Exit now.\n"
-    exit
+    exit 21
   fi 
   sacct >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
     sacct | grep running  >> /dev/null 2>&1
     if [ $? -eq 0 ]; then
       echo -e "[ -WARN- ] There are still running tasks in current cluster. You need to cancel all the tasks first.\n[ -WARN- ] Exit now.\n"
-      exit
+      exit 17
     fi
   fi
 # To make sure the munged is up
@@ -409,7 +390,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
     if [ $? -ne 0 ]; then
       echo -e "[ FATAL: ] FAILED to start munge daemon on Master Node! Please check the installation of munge.\nExit now."
       echo -e "[ FATAL: ] FAILED to start munge daemon on Master Node! Please check the installation of munge.\nExit now." >> ${logfile}
-      exit
+      exit 33
     fi
   fi
   echo -e "[ STEP 1 ] Authentication of the master node is OK."
@@ -422,7 +403,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
     if [ $? -ne 0 ]; then
       echo -e "[ FATAL: ] FAILED to start munge daemon on Compute${i} Node! Please check the installation of munge.\nExit now."
       echo -e "[ FATAL: ] FAILED to start munge daemon on Compute${i} Node! Please check the installation of munge.\nExit now." >> ${logfile}
-      exit
+      exit 33
     fi
   done
   echo -e "[ STEP 2 ] Authentication of Compute node(s) is OK."
@@ -439,13 +420,13 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   else
     echo -e "[ FATAL: ] SLURMDBD is not properly started. Exit now."
     echo -e "[ FATAL: ] SLURMDBD is not properly started.\n" >> ${logfile}
-    exit  
+    exit 33
   fi
   systemctl status slurmctld | grep "Active: failed" >> ${logfile}
   if [ $? -eq 0 ]; then
     echo -e "[ FATAL: ] SLURMCTLD is not properly started. Exit now."
     echo -e "[ FATAL: ] SLURMCTLD is not properly started.\n" >> ${logfile}
-    exit
+    exit 33
   fi
    
   if [ $1 = 'all' ]; then
@@ -468,24 +449,28 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   fi
   
   echo -e "[ STEP 5 ] Checking cluster users ... "
-  sacctmgr list account | grep -w hpc_users >> ${logfile}
+  sacctmgr list account hpc_users | grep -w hpc_users >> ${logfile} 2>&1
   if [ $? -ne 0 ]; then
     echo "y" | sacctmgr add account hpc_users >> ${logfile}
   fi
-  for k in $(seq 1 $HPC_USER_NUM )
+  while read hpc_user_row
   do
-    echo "y" | sacctmgr list user | grep user${k} >> ${logfile}
+    username=`echo -e $hpc_user_row | awk '{print $2}'`
+    sacctmgr list user ${username} | grep hpc_users >> ${logfile} 2>&1
     if [ $? -ne 0 ]; then
-      echo "y" | sacctmgr add user user${k} account=hpc_users >> ${logfile}
+      echo "y" | sacctmgr add user ${username} account=hpc_users >> ${logfile} 2>&1
     fi
-  done
+  done < ${user_registry}
   echo -e "[ STEP 5 ] Cluster users are ready."
   echo -e "[ -DONE- ] HPC-NOW Cluster Status:\n"
-  sinfo -N 
-  echo -e ""      
+  sinfo -N
 fi
 
 if [ $1 = 'install' ]; then
+  if [ -z $URL_INSTSCRIPTS_ROOT ]; then
+    echo -e "[ FATAL: ] Failed to connect to a valid appstore repo. Exit now."
+    exit 35
+  fi
   if [[ ! -n "$2" || $2 = 'list' ]]; then
     echo -e "[ -INFO- ] Usage: hpcmgr install software_to_be_installed"
     echo -e "[ -INFO- ] Please specify the software you'd like to build:\n"
@@ -527,8 +512,8 @@ if [ $1 = 'install' ]; then
     echo -e "\trar       - RAR for Linux (RECOMMENDED)" 
     echo -e "\tkswps     - WPS Office Suite for Linux (RECOMMENDED)" 
     echo -e "\tenvmod    - Environment Modules" 
-    echo -e "\tvscode    - Visual Studio Code\n" 
-    exit
+    echo -e "\tvscode    - Visual Studio Code" 
+    exit 0
   elif [[ -n $2 && $2 = 'of7' ]]; then
     curl -s ${URL_INSTSCRIPTS_ROOT}install_of7.sh | bash
   elif [[ -n $2 && $2 = 'of2112' ]]; then
