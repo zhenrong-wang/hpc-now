@@ -449,7 +449,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   fi
   
   echo -e "[ STEP 5 ] Checking cluster users ... "
-  sacctmgr list account hpc_users >> ${logfile} 2>&1
+  sacctmgr list account hpc_users | grep -w hpc_users >> ${logfile} 2>&1
   if [ $? -ne 0 ]; then
     echo "y" | sacctmgr add account hpc_users >> ${logfile}
   fi

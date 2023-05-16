@@ -1475,7 +1475,7 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
         else{
             delete_user_from_registry(user_registry_file,username_input);
             encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully deleted user %s.\n",username);
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully deleted user %s.\n",username_input);
             return 0;
         }
     }
