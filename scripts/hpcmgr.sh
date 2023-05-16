@@ -164,15 +164,18 @@ if [ $1 = 'users' ]; then
       echo -e "ROOT USER and User1 cannot be deleted! Exit now."
       exit 13
     fi
-    getname=`sacctmgr list user | grep -w $3 | awk '{print $1}'`
+    sacctmgr list user $3 >> /dev/null 2>&1
     if [ ! -n "$4" ] || [ $4 != 'os' ]; then
-      if [ "$getname" != "$3" ]; then
+      if [ $? -ne 0 ]; then
         echo -e "$3 is not in the cluster. Nothing deleted, exit now."
         exit 15
       fi
     fi
-    if [ "$getname" = "$3" ]; then
+    if [ $? -eq 0 ]; then
       echo "y" | sacctmgr delete user $3
+    else
+      echo -e "$3 is not in the cluster. Nothing deleted, exit now."
+      exit 15
     fi
     if [[ ! -n "$4" || $4 != "os" ]]; then
       echo -e "User $3 has been deleted from the cluster, but still in the OS."
