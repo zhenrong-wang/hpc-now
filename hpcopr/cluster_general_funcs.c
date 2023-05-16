@@ -158,7 +158,7 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     fgetline(file_p,remote_address);
     fclose(file_p);
     sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\" %s",private_key,remote_address,exec_type,delay_minutes,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\" %s",private_key,remote_address,exec_type,delay_minutes,SYSTEM_CMD_REDIRECT);
     return system(cmdline);
 }
 
@@ -182,10 +182,10 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* remote_user, c
     fclose(file_p);
     sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     if(delay_minutes==0){
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",private_key,remote_user,remote_address,commands,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",private_key,remote_user,remote_address,commands,SYSTEM_CMD_REDIRECT);
     }
     else{
-        sprintf(cmdline,"ssh -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",private_key,remote_user,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",private_key,remote_user,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
     }
     return system(cmdline);
 }
@@ -643,11 +643,11 @@ int wait_for_complete(char* workdir, char* option, char* errorlog, int silent_fl
     create_and_get_stackdir(workdir,stackdir);
     sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
     if(strcmp(option,"init")==0){
-        sprintf(cmdline,"%s %s%stf_prep.log | %s successfully | %s initialized! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,GREP_CMD,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s %s%stf_prep.log | %s successfully | %s initialized! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=1;
     }
     else{
-        sprintf(cmdline,"%s %s%stf_prep.log | %s complete! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s %s%stf_prep.log | %s complete! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=3;
     }
     while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
