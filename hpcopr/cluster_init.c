@@ -146,7 +146,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf("[ STEP 1 ] Creating initialization files now ...\n");
     sprintf(cmdline,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(secret_file,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     sprintf(region_valid,"%s%sregion_valid.tf",stackdir,PATH_SLASH);
     global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
@@ -911,7 +911,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         return 2;
     }
 
-    sprintf(secret_file,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     file_p=fopen(conf_file,"r");
     for(i=0;i<3;i++){
@@ -1486,7 +1486,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         system(cmdline);
         return 2;
     }
-    sprintf(secret_file,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     file_p=fopen(conf_file,"r");
     for(i=0;i<3;i++){

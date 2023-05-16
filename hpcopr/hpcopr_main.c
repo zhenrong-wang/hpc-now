@@ -625,7 +625,7 @@ int main(int argc, char* argv[]){
     }
 
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the key file. Have you switched to any cluster?\n");
         printf("|          Exit now.\n" RESET_DISPLAY);

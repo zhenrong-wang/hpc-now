@@ -621,7 +621,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s%s.secrets.txt %s",now_crypto_exec,filename_temp,new_vaultdir,PATH_SLASH,md5sum);
+    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s",now_crypto_exec,filename_temp,new_vaultdir,PATH_SLASH,md5sum);
     system(cmdline);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -678,7 +678,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     }
 
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp2,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    sprintf(filename_temp2,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp2)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently there is no secrets keypair. This working directory may be\n");
         printf("|          corrputed, which is very unusual. Please contact us via:\n");
@@ -778,7 +778,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         return 1;
     }
     get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s%s.secrets.txt %s",now_crypto_exec,filename_temp,vaultdir,PATH_SLASH,md5sum);
+    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s",now_crypto_exec,filename_temp,vaultdir,PATH_SLASH,md5sum);
     system(cmdline);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);

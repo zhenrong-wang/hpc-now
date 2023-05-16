@@ -871,7 +871,7 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     find_and_get(filename_temp,"REGION_ID","","",1,"REGION_ID","","",' ',3,cloud_region);
     sprintf(filename_temp,"%s%scompute_template",stackdir,PATH_SLASH);
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,compute_config);
-    sprintf(filename_temp,"%s%s.secrets.txt",vaultdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_vendor);
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
