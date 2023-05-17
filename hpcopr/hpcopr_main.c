@@ -391,7 +391,7 @@ int main(int argc, char* argv[]){
         if(argc<3){
             run_flag=cluster_empty_or_not(workdir);
         }
-        if(argc==3&&strcmp(argv[2],"force")!=0){
+        else if(argc==3&&strcmp(argv[2],"force")!=0){
             run_flag=cluster_empty_or_not(workdir);
         }
         else if(argc>3&&strcmp(argv[3],"force")!=0){
