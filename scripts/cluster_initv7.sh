@@ -406,8 +406,7 @@ if [ -f /root/hostfile ]; then
   if [ ! -f /root/xrdp-0.9.zip ]; then
     wget ${url_utils}xrdp-0.9.zip
   fi
-  unzip -o xrdp-0.9.zip && mv nasm.repo /etc/yum.repos.d/ -f
-  yum makecache && yum -y install nasm
+  unzip -o xrdp-0.9.zip && rpm -ivh nasm-2.16.rpm
   chmod +x /root/xrdp-0.9/bootstrap && chmod +x /root/xrdp-0.9/librfxcodec/src/nasm_lt.sh && chmod +x /root/xrdp-0.9/instfiles/pam.d/mkpamrules
   cd /root/xrdp-0.9/ && ./bootstrap && ./configure
   make -j$NUM_PROCESSORS && make install
