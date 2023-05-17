@@ -397,7 +397,25 @@ if [ -f /root/hostfile ]; then
     systemctl stop firewalld
   fi
   systemctl set-default graphical.target
-  yum -y install tigervnc tigervnc-server xrdp
+  yum -y install tigervnc tigervnc-server
+# yum -y install xrdp 
+# FATAL: xrdp-0.9.22 fails to work. We have to build xrdp from source.
+  yum -y install autoconf libtool automake pam-devel
+  cd /root
+  if [ ! -f /root/xrdp-0.9.zip ]; then
+    wget ${url_utils}xrdp-0.9.zip
+  fi
+  unzip -o xrdp-0.9.zip && mv nasm.repo /etc/yum.repos.d/ -f
+  yum makecache && yum -y install nasm
+  chmod +x /root/xrdp-0.9/bootstrap && chmod +x /root/xrdp-0.9/librfxcodec/src/nasm_lt.sh && chmod +x /root/xrdp-0.9/instfiles/pam.d/mkpamrules
+  cd /root/xrdp-0.9/ && ./bootstrap && ./configure
+  make -j$NUM_PROCESSORS && make install
+  rm -rf /root/xrdp-0.9*
+  /bin/cp /etc/xrdp/xrdp.ini /etc/xrdp/xrdp.ini.bkup
+  sed -i '/\[Xorg\]/,+7d' /etc/xrdp/xrdp.ini
+  sed -i '/\[vnc-any\]/,+7d' /etc/xrdp/xrdp.ini
+  sed -i '/\[neutrinordp-any\]/,+8d' /etc/xrdp/xrdp.ini
+# Building xrdp really takes time. Hope the xrdp can fix the usability problem ASAP.
   sed -i 's/; (1 = ExtendedDesktopSize)/ (1 = ExtendedDesktopSize)/g' /etc/xrdp/xrdp.ini
   sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
   systemctl start xrdp

@@ -378,6 +378,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
             getstate(temp_cluster_workdir,crypto_keyfile);
             graph(temp_cluster_workdir,crypto_keyfile,0);
             printf("|\n");
+            update_cluster_summary(temp_cluster_workdir,crypto_keyfile);
             delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             return 0;
         }
@@ -421,6 +422,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
         getstate(temp_cluster_workdir,crypto_keyfile);
         graph(temp_cluster_workdir,crypto_keyfile,0);
         printf("|\n");
+        update_cluster_summary(temp_cluster_workdir,crypto_keyfile);
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
     }
@@ -1670,8 +1672,8 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
-    delete_decrypted_files(workdir,crypto_keyfile);
     update_cluster_summary(workdir,crypto_keyfile);
+    delete_decrypted_files(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","start");
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The master node has been reconfigured.\n");
     return 0;
