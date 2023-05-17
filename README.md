@@ -121,8 +121,7 @@
 
 安装完之后，请您在命令提示符或者终端中输入 `gcc --version` 或者` clang --version` 来确认编译器正确安装。
 
-### 5. 如何构建
-
+### 5. 如何构建（针对开发者）
 
 - Step 1. git clone https://gitee.com/zhenrong-wang/hpc-now.git
 - Step 2. cd hpc-now
@@ -143,7 +142,9 @@
 
 ### 6. 如何安装
 
-构建完成后，请参考以下步骤安装。
+对于开发者，构建完成后，请参考以下步骤安装。
+
+对于一般用户，无需构建，请直接下载安装器。开发版的安装器下载链接请点击：[Microsoft Windows](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-win.exe) | [macOS](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-dwn.exe) | [GNU/Linux](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-lin.exe)
 
 #### Microsoft Windows 用户：
 
