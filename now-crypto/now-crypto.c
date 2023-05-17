@@ -16,9 +16,11 @@
 #include <string.h>
 #include <math.h>
 
+#define CRYPTO_VERSION "0.2.1"
+
 int file_encryption_decryption(char* option, char* orig_file, char* target_file, int encrypt_key){
     int real_key=((encrypt_key%1000*17+1301)%100+19)*17%1000;
-    int salt_key=real_key%31;
+    int salt_key=real_key%31+3;
     int origc='\0';
     int newc='\0';
     char ch='\0';
@@ -96,6 +98,7 @@ int md5convert(char* md5string){
 }
 
 int main(int argc,char *argv[]){
+    printf("Version: %s\n",CRYPTO_VERSION);
     int run_flag=0;
     if(argc!=5){
         printf("Error: Not Enough parameters.\n"); 
