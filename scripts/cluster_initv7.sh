@@ -411,6 +411,7 @@ if [ -f /root/hostfile ]; then
   cd /root/xrdp-0.9/ && ./bootstrap && ./configure
   make -j$NUM_PROCESSORS && make install
   rm -rf /root/xrdp-0.9*
+  rm -rf /root/nasm-2.16.rpm
   /bin/cp /etc/xrdp/xrdp.ini /etc/xrdp/xrdp.ini.bkup
   sed -i '/\[Xorg\]/,+7d' /etc/xrdp/xrdp.ini
   sed -i '/\[vnc-any\]/,+7d' /etc/xrdp/xrdp.ini
