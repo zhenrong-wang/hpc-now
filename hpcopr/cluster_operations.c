@@ -621,7 +621,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s",now_crypto_exec,filename_temp,new_vaultdir,PATH_SLASH,md5sum);
+    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,filename_temp,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -778,7 +778,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         return 1;
     }
     get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s",now_crypto_exec,filename_temp,vaultdir,PATH_SLASH,md5sum);
+    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,filename_temp,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -786,11 +786,11 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     sprintf(filename_temp,"%s%shpc_stack_base.tf.tmp",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
         sprintf(filename_temp2,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
-        sprintf(cmdline,"%s decrypt %s %s %s",now_crypto_exec,filename_temp,filename_temp2,md5sum);
+        sprintf(cmdline,"%s decrypt %s %s %s %s",now_crypto_exec,filename_temp,filename_temp2,md5sum,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         global_replace(filename_temp2,access_key_prev,access_key);
         global_replace(filename_temp2,secret_key_prev,secret_key);
-        sprintf(cmdline,"%s encrypt %s %s %s",now_crypto_exec,filename_temp2,filename_temp,md5sum);
+        sprintf(cmdline,"%s encrypt %s %s %s %s",now_crypto_exec,filename_temp2,filename_temp,md5sum,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally.\n");
