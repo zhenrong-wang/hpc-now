@@ -400,6 +400,7 @@ if [ -f /root/hostfile ]; then
   yum -y install tigervnc tigervnc-server
 # yum -y install xrdp 
 # FATAL: xrdp-0.9.22 fails to work. We have to build xrdp from source.
+  yum -y remove xrdp # For Amazon Machines, xrdp may have been installed. Here we need to remove it.s
   yum -y install autoconf libtool automake pam-devel
   cd /root
   if [ ! -f /root/xrdp-0.9.zip ]; then
