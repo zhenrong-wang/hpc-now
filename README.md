@@ -146,6 +146,8 @@
 
 对于一般用户，无需构建，请直接下载安装器。开发版的安装器下载链接请点击：[Microsoft Windows](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-win.exe) | [macOS](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-dwn.exe) | [GNU/Linux](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-lin.exe)
 
+注意：在安装之前，请确保您的安装器文件可执行。对于 macOS 和 GNU/Linux 用户，请使用 chmod +x 命令赋权。
+
 #### Microsoft Windows 用户：
 
 假设您在步骤 5 中构建的程序位于 C:\Users\ABC\hpc-now\build 目录中。
@@ -227,6 +229,8 @@
 - hpcopr init 此时，将创建默认的集群。该集群将内置 3 个 HPC 用户，并拥有 1 个计算节点。创建过程大约需要 7 分钟，在此期间，您仅需等待即可，无需任何操作。
 - hpcopr ssh user1 以 user1 的身份登录您的集群
 - hpcmgr install fftw3 尝试部署您的第一个 HPC 应用 - fftw3
+
+** 建议您使用 hpcopr vault 命令获取用户名和密码，并使用远程桌面连接（RDP）工具连接至您的集群，集群已经内置了用户友好和易于使用的桌面环境，您仅需要运行 gini 命令即可完成桌面环境的初始化。**
 
 您还可以退出 ssh 环境，并尝试运行 hpcopr 的其他命令，例如增加/删除节点、激活/注销用户、修改节点配置、集群休眠及唤醒等。
 
