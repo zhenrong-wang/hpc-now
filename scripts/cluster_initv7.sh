@@ -1,7 +1,10 @@
 #!/bin/bash
-# Originally created by HPC-Now Co. Ltd
-# Visit https://www.hpc-now.com for more information
-# This script initializes the master and compute node(s). Terraform templates run this scripts after creating the master and compute node(s).
+
+# This code is written and maintained by Zhenrong WANG
+# mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
+# The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+# This code is distributed under the license: GNU Public License - v2.0
+# Bug report: info@hpc-now.com
 
 #arg1: # of users to be created
 #arg2: db - whether reinstall mariadb or not
