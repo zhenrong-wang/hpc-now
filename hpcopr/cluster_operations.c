@@ -572,24 +572,28 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         }
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the cluster name %s.\n",real_cluster_name);
-    if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
 #ifdef _WIN32
     strcpy(filename_temp,"c:\\programdata\\secret.tmp.txt");
 #else
     strcpy(filename_temp,"/tmp/secret.tmp.txt");
 #endif
-    }
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
         return -1;
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your secrets key pair:\n");
-    keypair_temp=GETPASS_FUNC("[ INPUT: ] Access key ID  : ");
-    strcpy(access_key,keypair_temp);
-    reset_string(keypair_temp);
-    keypair_temp=GETPASS_FUNC("[ INPUT: ] Access secrets : ");
-    strcpy(secret_key,keypair_temp);
-    reset_string(keypair_temp);
+    if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your secrets key pair:\n");
+        keypair_temp=GETPASS_FUNC("[ INPUT: ] Access key ID  : ");
+        strcpy(access_key,keypair_temp);
+        reset_string(keypair_temp);
+        keypair_temp=GETPASS_FUNC("[ INPUT: ] Access secrets : ");
+        strcpy(secret_key,keypair_temp);
+        reset_string(keypair_temp);
+    }
+    else{
+        strcpy(access_key,cloud_ak);
+        strcpy(secret_key,cloud_sk);
+    }
     if(strcmp(echo_flag,"echo")==0){
         printf(GREY_LIGHT "\n|          Access key ID  : %s\n",access_key);
         printf("|          Access secrets : %s\n\n" RESET_DISPLAY,secret_key);
@@ -678,7 +682,6 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         printf("|          Please check the available disk space. Exit now.\n" RESET_DISPLAY);
         return -1;
     }
-
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp2,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp2)!=0){
@@ -775,7 +778,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     else{
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now.\n" RESET_DISPLAY);
         fclose(file_p);
-        sprintf(cmdline,"rm -rf %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 1;
     }

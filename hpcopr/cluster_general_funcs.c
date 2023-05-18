@@ -820,7 +820,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
         printf("|          Command: %s. Error log: %s\n" RESET_DISPLAY,execution_name,error_log);
     }
     wait_flag=wait_for_complete(workdir,execution_name,error_log,1);
-    if(file_empty_or_not(error_log)!=0||run_flag!=0||wait_flag!=0){
+    if(run_flag!=0||wait_flag!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,error_log);
         return -1;

@@ -17,7 +17,7 @@
 #include <string.h>
 #include <time.h>
 
-#define HPCMGR_VERSION "0.2.0.0013"
+#define HPCMGR_VERSION "0.2.0.0014"
 
 int env_ready_or_not(void){
   int mgr_flag=system("cat /etc/profile | grep HPCMGR_SCRIPT_URL= >> /dev/null 2>&1");
@@ -74,10 +74,10 @@ int main(int argc,char *argv[]){
   char* cmd_chmod="chmod +x /tmp/.thread-";
   char* cmd_base="/tmp/.thread-";
   char* cmd_dele="rm -rf /tmp/.thread-";
-  char final_cmd_dl[128];
-  char final_cmd_chmod[64];
-  char cmd_run[64];
-  char final_cmd_run[64]="";
+  char final_cmd_dl[256]="";
+  char final_cmd_chmod[128]="";
+  char cmd_run[64]="";
+  char final_cmd_run[128]="";
   char final_cmd_dele[64];
   char confirm[64];
   int param_number=argc-1;
@@ -115,17 +115,17 @@ int main(int argc,char *argv[]){
     param4_length=strlen(param4);
   }
   
-  for(i=0;i<63;i++){
+  for(i=0;i<127;i++){
     *(final_cmd_run+i)=' ';
   }
-  *(final_cmd_run+63)='\0';  
+  *(final_cmd_run+127)='\0';  
   base_length=strlen(cmd_run);
   
   for(i=0;i<base_length;i++){
     *(final_cmd_run+i)=*(cmd_run+i);
   }
 
-  if(param1_length!=0&&param1_length<8){
+  if(param1_length!=0&&param1_length<16){
     start=base_length+1;
     end=base_length+1+param1_length;
     for(i=start;i<end;i++){
@@ -133,7 +133,7 @@ int main(int argc,char *argv[]){
     }
   }
 
-  if(param2_length!=0&&param2_length<8){
+  if(param2_length!=0&&param2_length<16){
     start=base_length+1+param1_length+1;
     end=base_length+1+param1_length+1+param2_length;
     for(i=start;i<end;i++){
@@ -149,7 +149,7 @@ int main(int argc,char *argv[]){
     }
   }
 
-  if(param4_length!=0&&param4_length<16){
+  if(param4_length!=0&&param4_length<32){
     start=base_length+param1_length+1+param2_length+1+param3_length+2;
     end=base_length+param1_length+1+param2_length+1+param3_length+2+param4_length;
     for(i=start;i<end;i++){
@@ -186,7 +186,7 @@ int main(int argc,char *argv[]){
     system(final_cmd_dele);
     print_tail_hpcmgr();
     return 1;
-  }    
+  }
   system_run_flag=system(final_cmd_run);
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 3.\n");
