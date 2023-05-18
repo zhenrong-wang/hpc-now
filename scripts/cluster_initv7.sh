@@ -1,7 +1,10 @@
 #!/bin/bash
-# Originally created by HPC-Now Co. Ltd
-# Visit https://www.hpc-now.com for more information
-# This script initializes the master and compute node(s). Terraform templates run this scripts after creating the master and compute node(s).
+
+# This code is written and maintained by Zhenrong WANG
+# mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
+# The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+# This code is distributed under the license: GNU Public License - v2.0
+# Bug report: info@hpc-now.com
 
 #arg1: # of users to be created
 #arg2: db - whether reinstall mariadb or not
@@ -397,7 +400,26 @@ if [ -f /root/hostfile ]; then
     systemctl stop firewalld
   fi
   systemctl set-default graphical.target
-  yum -y install tigervnc tigervnc-server xrdp
+  yum -y install tigervnc tigervnc-server
+# yum -y install xrdp 
+# FATAL: xrdp-0.9.22 fails to work. We have to build xrdp from source.
+  yum -y remove xrdp # For Amazon Machines, xrdp may have been installed. Here we need to remove and rebuild.
+  yum -y install autoconf libtool automake pam-devel
+  cd /root
+  if [ ! -f /root/xrdp-0.9.zip ]; then
+    wget ${url_utils}xrdp-0.9.zip
+  fi
+  unzip -o xrdp-0.9.zip && rpm -ivh nasm-2.16.rpm
+  chmod +x /root/xrdp-0.9/bootstrap && chmod +x /root/xrdp-0.9/librfxcodec/src/nasm_lt.sh && chmod +x /root/xrdp-0.9/instfiles/pam.d/mkpamrules
+  cd /root/xrdp-0.9/ && ./bootstrap && ./configure
+  make -j$NUM_PROCESSORS && make install
+  rm -rf /root/xrdp-0.9*
+  rm -rf /root/nasm-2.16.rpm
+  /bin/cp /etc/xrdp/xrdp.ini /etc/xrdp/xrdp.ini.bkup
+  sed -i '/\[Xorg\]/,+7d' /etc/xrdp/xrdp.ini
+  sed -i '/\[vnc-any\]/,+7d' /etc/xrdp/xrdp.ini
+  sed -i '/\[neutrinordp-any\]/,+8d' /etc/xrdp/xrdp.ini
+# Building xrdp really takes time. Hope the xrdp can fix the usability problem ASAP.
   sed -i 's/; (1 = ExtendedDesktopSize)/ (1 = ExtendedDesktopSize)/g' /etc/xrdp/xrdp.ini
   sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
   systemctl start xrdp

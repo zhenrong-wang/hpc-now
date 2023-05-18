@@ -16,54 +16,72 @@
 #include <string.h>
 #include <math.h>
 
-int file_encryption(FILE* orig_file, FILE* target_file, int encrypt_key){
-    int real_key=((encrypt_key%1000*17+1301)%100+19)*7%100;
-    int salt_key=real_key%31;
-    int origc='\0';
-    int newc='\0';
-    int i=1,j=1;
-    if(orig_file==NULL||target_file==NULL ){
-        return 1;
-    }
-    origc=fgetc(orig_file);
-    while(origc!=EOF){
-        if(i%salt_key==0){
-            newc=origc+real_key+(i*j)%salt_key;
-            j++;
-        }
-        else{
-            newc=origc+real_key+i%salt_key;
-        }
-        i++;
-        fputc(newc,target_file);
-        origc=fgetc(orig_file);
-    }
-    return 0;
-}
+#define CRYPTO_VERSION "0.2.1"
 
-int file_decryption(FILE* orig_file, FILE* target_file, int encrypt_key){
-    int real_key=((encrypt_key%1000*17+1301)%100+19)*7%100;
-    int salt_key=real_key%31;
+int file_encryption_decryption(char* option, char* orig_file, char* target_file, int encrypt_key){
+    int real_key=((encrypt_key%1000*17+1301)%100+19)*17%1000;
+    int salt_key=real_key%31+3;
     int origc='\0';
     int newc='\0';
+    char ch='\0';
     int i=1,j=1;
-    if(orig_file==NULL||target_file==NULL ){
-        return 1;
+    if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
+        return -1;
     }
-    origc=fgetc(orig_file);
-    while(origc!=EOF){
+    FILE* file_p=fopen(orig_file,"r");
+    if(file_p==NULL){
+        return -3;
+    }
+    FILE* file_p_2=fopen(target_file,"w+");
+    if(file_p_2==NULL){
+        fclose(file_p);
+        return -5;
+    }
+    while(!feof(file_p)){
+        if(strcmp(option,"encrypt")==0){
+            origc=fgetc(file_p);
+        }
+        else{
+            fscanf(file_p,"%d%c",&origc,&ch);
+        }
         if(i%salt_key==0){
-            newc=origc-real_key-(i*j)%salt_key;
+            if(strcmp(option,"encrypt")==0){
+                newc=origc+real_key+(i*j)%salt_key;
+            }
+            else{
+                newc=origc-real_key-(i*j)%salt_key;
+            }
             j++;
         }
         else{
-            newc=origc-real_key-i%salt_key;
+            if(strcmp(option,"encrypt")==0){
+                newc=origc+real_key+i%salt_key;
+            }
+            else{
+                newc=origc-real_key-i%salt_key;
+            }
         }
         i++;
-        fputc(newc,target_file);
-        origc=fgetc(orig_file);
+        if(strcmp(option,"encrypt")==0){
+            if(i%33==0){
+                fprintf(file_p_2,"%d\n",newc);
+            }
+            else{
+                fprintf(file_p_2,"%d,",newc);
+            }
+        }
+        else{
+            if(newc!=-1){
+                fputc(newc,file_p_2);
+            }
+            else{
+                break;
+            }
+        }
     }
-  return 0;
+    fclose(file_p);
+    fclose(file_p_2);
+    return i;
 }
 
 int md5convert(char* md5string){
@@ -80,37 +98,31 @@ int md5convert(char* md5string){
 }
 
 int main(int argc,char *argv[]){
-    FILE* orig_file=NULL;
-    FILE* target_file=NULL;
+    printf("Version: %s\n",CRYPTO_VERSION);
+    int run_flag=0;
     if(argc!=5){
         printf("Error: Not Enough parameters.\n"); 
         return -1;
-    }
-    if(strcmp(argv[1],"encrypt")!=0&&strcmp(argv[1],"decrypt")!=0){
-        printf("Error: Option Error.\n");
-        return -2;
     }
     if(md5convert(argv[4])==-1){
         printf("Error: Not a valid crypto-key.\n");
         return -3;
     }
-    orig_file=fopen(argv[2],"r");
-    if(orig_file==NULL){
-        printf("Error: Cannot open original file.\n");
-        return -5;
+    run_flag=file_encryption_decryption(argv[1],argv[2],argv[3],md5convert(argv[4]));
+    if(run_flag==-1){
+        printf("Error: Option Error.\n");
+        return 5;
     }
-    target_file=fopen(argv[3],"w+");
-    if(target_file==NULL){
-        printf("Error: Cannot create target file.\n");
-        return -5;
+    else if(run_flag==-3){
+        printf("Error: Failed to open the original file.\n");
+        return 1;
     }
-    if(strcmp(argv[1],"encrypt")==0){
-        file_encryption(orig_file,target_file,md5convert(argv[4]));
+    else if(run_flag==-5){
+        printf("Error: Cannot create the target file.\n");
+        return 3;
     }
     else{
-        file_decryption(orig_file,target_file,md5convert(argv[4]));
+        printf("Done: %d Characters.\n",run_flag);
+        return 0; 
     }
-    fclose(orig_file);
-    fclose(target_file);
-    return 0; 
 }

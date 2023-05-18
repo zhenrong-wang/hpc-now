@@ -94,7 +94,7 @@ int decrypt_get_bucket_conf(char* workdir, char* crypto_keyfile, char* bucket_co
     create_and_get_vaultdir(workdir,vaultdir);
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(bucket_conf,"%s%sbucket.conf",vaultdir,PATH_SLASH);
-    sprintf(cmdline,"%s decrypt %s%sbucket.conf.tmp %s%sbucket.conf %s",NOW_CRYPTO_EXEC,vaultdir,PATH_SLASH,vaultdir,PATH_SLASH,md5sum);
+    sprintf(cmdline,"%s decrypt %s%sbucket.conf.tmp %s%sbucket.conf %s %s",NOW_CRYPTO_EXEC,vaultdir,PATH_SLASH,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     return system(cmdline);
 }
 
@@ -206,7 +206,7 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key. Exit now.\n" RESET_DISPLAY);
         return -1;
     }
-    sprintf(cmdline,"%s decrypt %s %s.dat %s", now_crypto_exec, secret_file, secret_file, md5);
+    sprintf(cmdline,"%s decrypt %s %s.dat %s %s", now_crypto_exec, secret_file, secret_file, md5,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(decrypted_file_name,"%s.dat",secret_file);
     decrypted_file=fopen(decrypted_file_name,"r");
@@ -305,7 +305,7 @@ int decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum){
         *(filename_new+i)=*(filename+i);
     }
     if(file_exist_or_not(filename)==0){
-        sprintf(cmdline,"%s decrypt %s %s %s",now_crypto_exec,filename,filename_new,md5sum);
+        sprintf(cmdline,"%s decrypt %s %s %s %s",now_crypto_exec,filename,filename_new,md5sum,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 0;
     }
@@ -349,7 +349,7 @@ int decrypt_files(char* workdir, char* crypto_key_filename){
 void encrypt_and_delete(char* now_crypto_exec, char* filename, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
     if(file_exist_or_not(filename)==0){
-        sprintf(cmdline,"%s encrypt %s %s.tmp %s",now_crypto_exec,filename,filename,md5sum);
+        sprintf(cmdline,"%s encrypt %s %s.tmp %s %s",now_crypto_exec,filename,filename,md5sum,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT);
         system(cmdline);
