@@ -608,6 +608,8 @@ int archive_log(char* logarchive, char* logfile){
     }
     fclose(file_p_2);
     fclose(file_p);
+    file_p_2=fopen(logfile,"w+");
+    fclose(file_p_2);
     return 0;
 }
 
@@ -643,10 +645,18 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, int s
         //sprintf(cmdline,"%s %s | %s successfully | %s initialized! %s",CAT_FILE_CMD,tf_realtime_log,GREP_CMD,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=1;
     }
-    else{
-        strcpy(findkey,"complete!");
+    else if(strcmp(option,"apply")==0){
+        strcpy(findkey,"Apply complete!");
         //sprintf(cmdline,"%s %s | %s complete! %s",CAT_FILE_CMD,tf_realtime_log,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=3;
+    }
+    else if(strcmp(option,"destroy")==0){
+        strcpy(findkey,"Destroy complete!");
+        total_minutes=3;
+    }
+    else{
+        printf(FATAL_RED_BOLD "[ FATAL: ] TF_OPTION_NOT_SUPPORTED.\n" RESET_DISPLAY);
+        return -127;
     }
     while(find_multi_keys(tf_realtime_log,findkey,"","","","")<1&&i<MAXIMUM_WAIT_TIME){
         if(silent_flag!=0){
