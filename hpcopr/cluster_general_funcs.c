@@ -632,25 +632,23 @@ void update_compute_template(char* stackdir, char* cloud_flag){
     single_file_to_running(filename_temp,cloud_flag);
 }
 
-int wait_for_complete(char* workdir, char* option, char* errorlog, int silent_flag){
-    char cmdline[CMDLINE_LENGTH]="";
-    char stackdir[DIR_LENGTH]="";
-    char logdir[DIR_LENGTH]="";
+int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, int silent_flag){
+//    char cmdline[CMDLINE_LENGTH]="";
     int i=0;
     int total_minutes=0;
     char* annimation="\\|/-";
-
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
+    char findkey[32]="";
     if(strcmp(option,"init")==0){
-        sprintf(cmdline,"%s %s%stf_prep.log | %s successfully | %s initialized! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
+        strcpy(findkey,"successfully initialized!");
+        //sprintf(cmdline,"%s %s | %s successfully | %s initialized! %s",CAT_FILE_CMD,tf_realtime_log,GREP_CMD,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=1;
     }
     else{
-        sprintf(cmdline,"%s %s%stf_prep.log | %s complete! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
+        strcpy(findkey,"complete!");
+        //sprintf(cmdline,"%s %s | %s complete! %s",CAT_FILE_CMD,tf_realtime_log,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=3;
     }
-    while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
+    while(find_multi_keys(tf_realtime_log,findkey,"","","","")<1&&i<MAXIMUM_WAIT_TIME){
         if(silent_flag!=0){
             fflush(stdin);
             printf("[ -WAIT- ] This may need %d min(s). %d sec(s) passed ... (%c)\r",total_minutes,i,*(annimation+i%4));
@@ -660,14 +658,14 @@ int wait_for_complete(char* workdir, char* option, char* errorlog, int silent_fl
         sleep(1);
         if(file_empty_or_not(errorlog)>0){
             if(silent_flag!=0){
-                printf("\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_ERROR.\n" RESET_DISPLAY);
             }
             return 127;
         }
     }
     if(i==MAXIMUM_WAIT_TIME){
         if(silent_flag!=0){
-            printf("\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_TIMEOUT.\n" RESET_DISPLAY);
         }
         return 1;
     }
@@ -805,7 +803,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     char tf_realtime_log[FILENAME_LENGTH];
     char tf_realtime_log_archive[FILENAME_LENGTH];
     char tf_error_log_archive[FILENAME_LENGTH];
-    int wait_flag=0;
+
     create_and_get_stackdir(workdir,stackdir);
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_realtime_log_archive,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
@@ -818,8 +816,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
         printf(WARN_YELLO_BOLD "[ -INFO- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
         printf("|          Command: %s. Error log: %s\n" RESET_DISPLAY,execution_name,error_log);
     }
-    wait_flag=wait_for_complete(workdir,execution_name,error_log,1);
-    if(wait_flag!=0){
+    if(wait_for_complete(tf_realtime_log,execution_name,error_log,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,error_log);
         return -1;

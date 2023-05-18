@@ -1606,9 +1606,8 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     }
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     if(find_multi_keys(filename_temp,"running","","","","")==0&&find_multi_keys(filename_temp,"Running","","","","")==0&&find_multi_keys(filename_temp,"RUNNING","","","","")==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Currently the cluster is in the state of hibernation. No node is running.\n");
-        printf("|          If you'd like to make it ready for running, please run 'wakeup' command.\n");
-        printf("|          Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
+        printf("|          Command: hpcopr wakeup minimal|all. Exit now.\n" RESET_DISPLAY);
         return 1;
     }
     decrypt_files(workdir,crypto_keyfile);
