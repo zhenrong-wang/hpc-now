@@ -27,7 +27,7 @@
 
 -  **installer**  ：HPC-NOW 服务的安装器。主要负责服务的安装、卸载、更新三项工作。该安装器被设计为必须由管理员权限执行。
 -  **hpcopr**     ：意即 HPC Operator，是 HPC-NOW 的核心程序，也是用户需要执行的主程序。为了确保安全性和隔离性，该程序被设计为必须由专属 OS 用户 "hpc-now" 执行，其他用户，即使是管理员用户或者根用户也无法执行。由 hpcopr 管理基础设施代码，并调用 Terraform 对云资源进行全生命周期管理。
--  **now-crypto** ：辅助程序，主要作用是简单的文件加密和解密，以确保敏感信息不以明文形式存放。请注意，该程序是**伪**加解密程序，通过偏移字符的方式对文本信息进行随机修改，您的密文文件仍需要妥善保管。一旦密文文件泄露，他人可能通过穷举得到您的文本偏移量，从而反向偏移得到原文。
+-  **now-crypto** ：核心程序，主要作用是文本文件加密和解密，以确保敏感信息不以明文形式存放。请注意，该程序通过偏移字符的方式对文本信息进行随机修改，您的密文文件仍需要妥善保管。
 -  **hpcmgr**    ：强大的集群内管理工具，包括集群的连接、SLURM 服务的启动、以及 HPC 软件包的自动化编译安装等。
 -  **infra-as-code** ：模板文件是 IaC（基础设施及代码）的核心要素，我们已经针对 AWS、阿里云、腾讯云 三家公有云厂商制作了专用的资源模板。
 -  **scripts**    ：启动脚本包含了集群各个节点启动过程的编排，包括各类必要组件的自动化安装。
@@ -109,7 +109,7 @@
 - license ：阅读程序的 License，本程序使用 GNU Public License 作为主要 License。其余开源组件的 License 将在后续包含进来
 - repair ： 快速修复 hpcopr，包括检查运行环境和核心组件
 
-### 4. 构建环境需求
+### 4. 构建环境需求（针对开发者）
 
 为了更方便的获取代码和管理分支，请使用 [git](https://git-scm.com/)。关于如何在不同的操作系统环境中安装 git，请参考公开教程。
 
@@ -135,7 +135,7 @@
 
 - hpcopr-win.exe | hpcopr-lin.exe | hpcopr-dwn.exe ：如上所述，该组件是 HPC-NOW 的最核心组件。
 - installer-win.exe | installer-lin.exe | installer-dwn.exe：如上所述，该组件是安装器，您后续需要该安装器来在您的本地环境中安装、更新、卸载 HPC-NOW 服务。
-- now-crypto-win.exe | now-crypto-lin.exe | now-crypto-dwn.exe：如上所述，该组件是 _**伪**_ 对称加密和解密程序。是 HPC-NOW 服务的依赖组件。
+- now-crypto-win.exe | now-crypto-lin.exe | now-crypto-dwn.exe：如上所述，该组件是 HPC-NOW 服务的核心依赖组件。
 - libgfuncs.a：如上所述，该组件后续无用，可自行删除和丢弃。
 - hpcmgr.exe：该程序是一个非常轻量化的 hpcmgr 本地程序，您可以在创建好的任意集群中，将该组件放置在 /usr/bin 目录下。用于替换默认的 hpcmgr.exe 。**一般情况下不需要进行该操作。**
 
