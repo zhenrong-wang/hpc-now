@@ -56,7 +56,7 @@ int switch_to_cluster(char* target_cluster_name){
     }
     fprintf(file_p,"%s",target_cluster_name);
     fclose(file_p);
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully switched to the cluster " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY ".\n",target_cluster_name);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully switched to the cluster " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",target_cluster_name);
     return 0;
 }
 
@@ -1930,13 +1930,13 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         return 1;
     }
     if(strcmp(option,"mc")==0){
-        printf("|          * Will rebuild the master and compute nodes.\n");
+        printf("|          * Will rebuild the " WARN_YELLO_BOLD "master" RESET_DISPLAY " and " WARN_YELLO_BOLD "compute" RESET_DISPLAY " nodes.\n");
     }
     else if(strcmp(option,"mcdb")==0){
-        printf("|          * Will rebuild the master, compute and mariadb nodes.\n");
+        printf("|          * Will rebuild the " WARN_YELLO_BOLD "master" RESET_DISPLAY ", " WARN_YELLO_BOLD "compute" RESET_DISPLAY " and " WARN_YELLO_BOLD "mariadb" RESET_DISPLAY " nodes.\n");
     }
     else{
-        printf("|          * Will try to rebuild all the cluster nodes.\n");
+        printf("|          * Will try to rebuild " WARN_YELLO_BOLD "all" RESET_DISPLAY " the cluster nodes.\n");
     }
     create_and_get_stackdir(workdir,stackdir);
     sprintf(cmdline,"%s %s%stmp %s && %s %s%stmp%s* %s",MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);

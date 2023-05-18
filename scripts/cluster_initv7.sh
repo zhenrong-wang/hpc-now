@@ -170,7 +170,7 @@ elif [ $cloud_flag = 'CLOUD_A' ]; then
 else
   yum -y install epel-release # epel release is really slow for China region
 fi
-yum -y makecache
+# yum -y makecache # make cache needs time. Let's skip it.
 yum -y install gtk2 gtk2-devel python python3 gcc-c++ gcc-gfortran htop sshpass
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Utils installed." >> ${logfile}
