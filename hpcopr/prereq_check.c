@@ -594,7 +594,7 @@ int check_and_install_prerequisitions(int repair_flag){
         fclose(file_p);
     }    
 #ifdef _WIN32
-    if(system("set PATH | findstr C:\\hpc-now")!=0){
+    if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
         sprintf(cmdline,"setx PATH C:\\WINDOWS\\system32;C:\\hpc-now\\;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\ %s",SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
