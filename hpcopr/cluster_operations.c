@@ -45,7 +45,7 @@ int switch_to_cluster(char* target_cluster_name){
     }
     if(show_current_cluster(temp_workdir,temp_cluster_name,0)==0){
         if(strcmp(temp_cluster_name,target_cluster_name)==0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster %s now. No need to switch.\n",target_cluster_name);
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " now. No need to switch.\n",target_cluster_name);
             return 1;
         }
     }
