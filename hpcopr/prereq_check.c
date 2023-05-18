@@ -594,8 +594,10 @@ int check_and_install_prerequisitions(int repair_flag){
         fclose(file_p);
     }    
 #ifdef _WIN32
-    sprintf(cmdline,"setx PATH C:\\WINDOWS\\system32;C:\\hpc-now\\;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\ %s",SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
+        sprintf(cmdline,"setx PATH C:\\WINDOWS\\system32;C:\\hpc-now\\;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\ %s",SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
     sprintf(cmdline,"del /f /q %%homepath%%\\.ssh\\known_hosts* >nul 2>&1");
 #elif __linux__
     if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ > /dev/null 2>&1")!=0){
@@ -603,14 +605,12 @@ int check_and_install_prerequisitions(int repair_flag){
         system(cmdline);
     }
     sprintf(cmdline,"rm -rf /home/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
-    system(cmdline);
 #elif __APPLE__
     if(system("cat /Users/hpc-now/.bashrc | grep PATH=/Users/hpc-now/.bin/ > /dev/null 2>&1")!=0){
         strcpy(cmdline,"export PATH=/Users/hpc-now/.bin/:$PATH >> /Users/hpc-now/.bashrc");
         system(cmdline);
     }
     sprintf(cmdline,"rm -rf /Users/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
-    system(cmdline);
 #endif
     system(cmdline);
     if(repair_flag==1){
