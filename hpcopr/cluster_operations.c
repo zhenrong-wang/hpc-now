@@ -28,109 +28,6 @@
 extern char url_code_root_var[LOCATION_LENGTH];
 extern int code_loc_flag_var;
 
-void get_workdir(char* cluster_workdir, char* cluster_name){
-    sprintf(cluster_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,PATH_SLASH);
-}
-
-int create_cluster_registry(void){
-    FILE* file_p=NULL;
-    if(file_exist_or_not(ALL_CLUSTER_REGISTRY)==0){
-        return 0;
-    }
-    file_p=fopen(ALL_CLUSTER_REGISTRY,"w+");
-    if(file_p==NULL){
-        return 1;
-    }
-    else{
-        fclose(file_p);
-        return 0;
-    }
-}
-
-/*  
- * If silent_flag==1, verbose. Will tell the user which cluster is active
- * If silent_flag==0, silent. Will print nothing
- * If silent_flag== other_number, Will only show the warning
- */
-
-int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag){
-    FILE* file_p=NULL;
-    if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)==0){
-        if(silent_flag!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Currently you are not operating any cluster.\n" RESET_DISPLAY);
-        }
-        return 1;
-    }
-    else{
-        file_p=fopen(CURRENT_CLUSTER_INDICATOR,"r");
-        fscanf(file_p,"%s",current_cluster_name);
-        if(silent_flag==1){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Current cluster: %s\n",current_cluster_name);
-        }
-        fclose(file_p);
-        get_workdir(cluster_workdir,current_cluster_name);
-        return 0;
-    }
-}
-
-int current_cluster_or_not(char* current_indicator, char* cluster_name){
-    char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    FILE* file_p=fopen(current_indicator,"r");
-    if(file_p==NULL){
-        return 1;
-    }
-    fscanf(file_p,"%s",current_cluster_name);
-    if(strcmp(current_cluster_name,cluster_name)!=0){
-        fclose(file_p);
-        return -1;
-    }
-    fclose(file_p);
-    return 0;
-}
-
-int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
-    int i, name_flag;
-    char real_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
-    if(strlen(cluster_name)==0){
-        generate_random_string(cluster_name_output);
-        name_flag=-1;
-    }
-    for(i=0;i<strlen(cluster_name);i++){
-        if(*(cluster_name+i)=='-'||*(cluster_name+i)=='0'||*(cluster_name+i)=='9'){
-            continue;
-        }
-        if(*(cluster_name+i)>'0'&&*(cluster_name+i)<'9'){
-            continue;
-        }
-        if(*(cluster_name+i)<'A'||*(cluster_name+i)>'z'){
-            return 127;
-        }
-        else if(*(cluster_name+i)>'Z'&&*(cluster_name+i)<'a'){
-            return 127;
-        }
-    }
-    if(strlen(cluster_name)<CLUSTER_ID_LENGTH_MIN){
-        sprintf(cluster_name_output,"%s-hpcnow",cluster_name);
-        name_flag=1;
-    }
-    else if(strlen(cluster_name)>CLUSTER_ID_LENGTH_MAX){
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_name_output+i)=*(cluster_name+i);
-        }
-        *(cluster_name_output+CLUSTER_ID_LENGTH_MAX)='\0'; //THIS SHOULD BE SECURE.
-        name_flag=2;
-    }
-    else{
-        strcpy(cluster_name_output,cluster_name);
-        name_flag=0;
-    }
-    sprintf(real_cluster_name_with_prefix,"< cluster name: %s >",cluster_name_output);
-    if(find_multi_keys(ALL_CLUSTER_REGISTRY,real_cluster_name_with_prefix,"","","","")>0){
-        return -127;
-    }
-    return name_flag;
-}
-
 int exit_current_cluster(void){
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
@@ -159,7 +56,7 @@ int switch_to_cluster(char* target_cluster_name){
     }
     fprintf(file_p,"%s",target_cluster_name);
     fclose(file_p);
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully switched to the cluster %s.\n",target_cluster_name);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully switched to the cluster " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY ".\n",target_cluster_name);
     return 0;
 }
 

@@ -12,7 +12,6 @@
 int get_usage(char* usage_logfile);
 int get_history(char* operation_logfile);
 int get_syserrlog(char* system_errlog);
-int system_cleanup(void);
 int write_log(char* workdir, char* operation_logfile, char* operation, int runflag);
 
 #endif

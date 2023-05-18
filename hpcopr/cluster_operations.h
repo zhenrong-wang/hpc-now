@@ -9,24 +9,12 @@
 #ifndef CLUSTER_OPERATIONS_H
 #define CLUSTER_OPERATIONS_H
 
-int create_cluster_registry(void);
-int current_cluster_or_not(char* current_indicator, char* cluster_name);
-int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output);
+int exit_current_cluster(void);
 int switch_to_cluster(char* target_cluster_name);
 int add_to_cluster_registry(char* new_cluster_name);
 int delete_from_cluster_registry(char* deleted_cluster_name);
 int list_all_cluster_names(void);
-void get_workdir(char* cluster_workdir, char* cluster_name);
 int glance_clusters(char* target_cluster_name, char* crypto_keyfile);
-
-/*  
- * If silent_flag==1, verbose. Will tell the user which cluster is active
- * If silent_flag==0, silent. Will print nothing
- * If silent_flag== other_number, Will only show the warning
- */
-
-int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag);
-int exit_current_cluster(void);
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile);
 int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_flag);
 int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* echo_flag);

@@ -170,9 +170,9 @@ int main(int argc, char* argv[]){
     }
 
     if(check_internet()!=0){
-        print_tail();
         write_log("NULL",operation_log,"INTERNET_FAILED",-3);
-        system_cleanup();
+        check_and_cleanup("");
+        print_tail();
         return -3;
     }
 
@@ -198,26 +198,26 @@ int main(int argc, char* argv[]){
         run_flag=check_and_install_prerequisitions(1);
         if(run_flag==3){
             write_log("NULL",operation_log,"PREREQ_FAILED",-4);
+            check_and_cleanup("");
             print_tail();
-            system_cleanup();
             return -4;
         }
         else if(run_flag!=0){
+            check_and_cleanup("");
             print_tail();
-            system_cleanup();
             return -4;
         }
         else{
+            check_and_cleanup("");
             print_tail();
-            system_cleanup();
             return 0;
         }
     }
 
     if(strcmp(argv[1],"envcheck")==0){
         run_flag=check_and_install_prerequisitions(0);
+        check_and_cleanup("");
         print_tail();
-        system_cleanup();
         if(run_flag!=0){
             return -4;
         }
@@ -226,8 +226,8 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"configloc")==0){
         run_flag=configure_locations();
+        check_and_cleanup("");
         print_tail();
-        system_cleanup();
         if(run_flag!=0){
             return -5;
         }
@@ -239,22 +239,22 @@ int main(int argc, char* argv[]){
         if(run_flag==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The locations have been reset to the default.\n");
             show_locations();
+            check_and_cleanup("");
             print_tail();
-            system_cleanup();
             return 0;
         }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Internal error, failed to reset the locations.\n" RESET_DISPLAY);
+            check_and_cleanup("");
             print_tail();
-            system_cleanup();
             return -5;
         }
     }
 
     if(strcmp(argv[1],"showloc")==0){
         run_flag=show_locations();
+        check_and_cleanup("");
         print_tail();
-        system_cleanup();
         if(run_flag!=0){
             return -127;
         }
@@ -263,8 +263,8 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"showmd5")==0){
         run_flag=show_vers_md5vars();
+        check_and_cleanup("");
         print_tail();
-        system_cleanup();
         if(run_flag!=0){
             return -127;
         }
@@ -274,13 +274,13 @@ int main(int argc, char* argv[]){
     run_flag=check_and_install_prerequisitions(0);
     if(run_flag==3){
         write_log("NULL",operation_log,"PREREQ_FAILED",-4);
+        check_and_cleanup("");
         print_tail();
-        system_cleanup();
         return -4;
     }
     else if(run_flag!=0){
+        check_and_cleanup("");
         print_tail();
-        system_cleanup();
         return -4;
     }
     
@@ -293,9 +293,9 @@ int main(int argc, char* argv[]){
         show_current_cluster(workdir,current_cluster_name,2);
         if(argc==2){
             run_flag=create_new_cluster(crypto_keyfile,"","","","");
-            print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
-            system_cleanup();
+            check_and_cleanup("");
+            print_tail();
             if(run_flag==-1){
                 return -127;
             }
@@ -311,9 +311,9 @@ int main(int argc, char* argv[]){
             else{
                 run_flag=create_new_cluster(crypto_keyfile,argv[2],"","","");
             }
-            print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
-            system_cleanup();
+            check_and_cleanup("");
+            print_tail();
             return run_flag;
         }
         else if(argc==4){
@@ -323,9 +323,9 @@ int main(int argc, char* argv[]){
             else{
                 run_flag=create_new_cluster(crypto_keyfile,argv[2],"","","");
             }
-            print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
-            system_cleanup();
+            check_and_cleanup("");
+            print_tail();
             return run_flag;
         }
         else if(argc==5){
@@ -335,9 +335,9 @@ int main(int argc, char* argv[]){
             else{
                 run_flag=create_new_cluster(crypto_keyfile,argv[2],argv[3],argv[4],"");
             }
-            print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
-            system_cleanup();
+            check_and_cleanup("");
+            print_tail();
             return run_flag;
         }
         else{
@@ -347,18 +347,18 @@ int main(int argc, char* argv[]){
             else{
                 run_flag=create_new_cluster(crypto_keyfile,argv[2],argv[3],argv[4],"");
             }
-            print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
-            system_cleanup();
+            check_and_cleanup("");
+            print_tail();
             return run_flag;
         }
     }
     if(strcmp(argv[1],"ls-clusters")==0){
         show_current_cluster(workdir,current_cluster_name,2);
         run_flag=list_all_cluster_names();
-        print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     if(strcmp(argv[1],"glance")==0){
@@ -375,17 +375,17 @@ int main(int argc, char* argv[]){
         else if(run_flag==-1){
             printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is not in the registry.\n" RESET_DISPLAY,argv[2]);
         }
-        print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     if(strcmp(argv[1],"refresh")==0){
         if(show_current_cluster(workdir,current_cluster_name,2)==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] Please swith to a cluster first, or specify one to refresh:\n" RESET_DISPLAY);
             list_all_cluster_names();
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -9;
         }
         if(argc<3){
@@ -403,12 +403,13 @@ int main(int argc, char* argv[]){
         if(run_flag==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster cannot be refreshed (either in init progress or empty).\n");
             printf("|          Please run 'hpcopr glance all' to check. Exit now.\n" RESET_DISPLAY);
-            print_tail();
             write_log("NULL",operation_log,argv[1],-9);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return -9;
         }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
             return -1;
         }
@@ -451,47 +452,47 @@ int main(int argc, char* argv[]){
         else if(run_flag==0){
             printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The cluster was successfully refreshed.\n");
         }
-        print_tail();
         write_log(argv[2],operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     if(strcmp(argv[1],"exit-current")==0){
         current_cluster_flag=show_current_cluster(workdir,current_cluster_name,2);
         if(current_cluster_flag!=0){
-            print_tail();
             write_log("NULL",operation_log,argv[1],current_cluster_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return current_cluster_flag;
         }
         if(exit_current_cluster()==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exit the current cluster %s.\n",current_cluster_name);
         }
-        print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
 
     if(strcmp(argv[1],"usage")==0){
         run_flag=get_usage(usage_log);
-        print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     if(strcmp(argv[1],"history")==0){
         run_flag=get_history(operation_log);
-        print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     if(strcmp(argv[1],"syserr")==0){
         run_flag=get_syserrlog(syserror_log);
-        print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
 
@@ -500,46 +501,46 @@ int main(int argc, char* argv[]){
         if(argc==2){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify which cluster to switch to.\n" RESET_DISPLAY);
             run_flag=list_all_cluster_names();
-            print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
-            system_cleanup();
+            check_and_cleanup("");
+            print_tail();
             return run_flag;
         }
         run_flag=switch_to_cluster(argv[2]);
+        check_and_cleanup("");
         print_tail();
-        system_cleanup();
         return run_flag;
     }
     if(strcmp(argv[1],"remove")==0){
         if(argc==2){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify which cluster to be removed.\n" RESET_DISPLAY);
             run_flag=list_all_cluster_names();
-            print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
         else{
             run_flag=remove_cluster(argv[2],crypto_keyfile);
-            print_tail();
             write_log("NULL",operation_log,argv[1],run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
     }
     if(current_cluster_flag==1){
         run_flag=list_all_cluster_names();
-        print_tail();
         write_log("NULL",operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     
     if(strcmp(argv[1],"realtime")==0){
         real_time_log(workdir);
         write_log(current_cluster_name,operation_log,argv[1],0);
+        check_and_cleanup(workdir);
         print_tail();
-        system_cleanup();
         return 0;
     }
 
@@ -552,9 +553,9 @@ int main(int argc, char* argv[]){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * Graph NOT updated !\n" RESET_DISPLAY,current_cluster_name);
             }
             run_flag=graph(workdir,crypto_keyfile,0);
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
         decrypt_files(workdir,crypto_keyfile);
@@ -565,8 +566,8 @@ int main(int argc, char* argv[]){
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
+        check_and_cleanup(workdir);
         print_tail();
-        system_cleanup();
         return run_flag;
     }
     if(strcmp(argv[1],"vault")==0){
@@ -579,14 +580,15 @@ int main(int argc, char* argv[]){
         if(run_flag==-1){
             print_empty_cluster_info();
         }
-        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
 
     if(strcmp(argv[1],"new-keypair")==0){
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
             return -1;
         }
@@ -614,13 +616,13 @@ int main(int argc, char* argv[]){
         }
         if(run_flag!=0){
             write_log(current_cluster_name,operation_log,"new keypair",-1);
-            system_cleanup();
+            check_and_cleanup(workdir);
             print_tail();
             return -1;
         }
         write_log(current_cluster_name,operation_log,"new keypair",0);
+        check_and_cleanup(workdir);
         print_tail();
-        system_cleanup();
         return 0;
     }
 
@@ -629,46 +631,47 @@ int main(int argc, char* argv[]){
     if(get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the key file. Have you switched to any cluster?\n");
         printf("|          Exit now.\n" RESET_DISPLAY);
-        print_tail();
         write_log(current_cluster_name,operation_log,"KEY_CHECK_FAILED",5);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return 5;
     }
     if(check_pslock(workdir)==1){
         printf(FATAL_RED_BOLD "[ FATAL: ] Another process is operating this cluster, please wait and retry.\n");
         printf("|          Exit now.\n" RESET_DISPLAY);
-        print_tail();
         write_log(current_cluster_name,operation_log,"PROCESS_LOCKED",7);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return 7;
     }
     if(strcmp(argv[1],"get-conf")==0){
         if(cluster_empty_or_not(workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
             printf("|          this operation is not allowed. Exit now.\n" RESET_DISPLAY);
-            print_tail();
             write_log(current_cluster_name,operation_log,"CLUSTER_NOT_EMPTY",23);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 23;
         }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
             return -1;
         }
         run_flag=get_default_conf(workdir,crypto_keyfile,1);
         if(run_flag==1||run_flag==127){
             printf(FATAL_RED_BOLD "[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.\n" RESET_DISPLAY);
-            print_tail();
             write_log(current_cluster_name,operation_log,"INTERNAL_ERROR",31);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 31;
         }
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The default configuration file has been downloaded to the local place.\n");
             printf("|          You can init directly, or edit it before init. Exit now.\n");
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],0);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 0;
         }
     }
@@ -676,12 +679,13 @@ int main(int argc, char* argv[]){
         if(cluster_empty_or_not(workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
             printf("|          this operation is not allowed. Exit now.\n" RESET_DISPLAY);
-            print_tail();
             write_log(current_cluster_name,operation_log,"CLUSTER_NOT_EMPTY",23);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 23;
         }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
             return -1;
         }
@@ -689,63 +693,63 @@ int main(int argc, char* argv[]){
         if(run_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] No configuration file found. Please run the command 'hpcopr get-conf' first.\n");
             printf("|          Exit now.\n" RESET_DISPLAY);
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],-1);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 1;
         }
         else{
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],0);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 0;
         }
     }
     if(strcmp(argv[1],"init")==0){
         if(cluster_empty_or_not(workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster has already been initialized. Exit now.\n" RESET_DISPLAY);
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -1;
         }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -1;
         }
         if(strcmp(cloud_flag,"CLOUD_C")==0){
             run_flag=aws_cluster_init(current_cluster_name,workdir,crypto_keyfile);
             write_log(current_cluster_name,operation_log,argv[1],run_flag);
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return run_flag;
         }
         else if(strcmp(cloud_flag,"CLOUD_B")==0){
             run_flag=qcloud_cluster_init(current_cluster_name,workdir,crypto_keyfile);
             write_log(current_cluster_name,operation_log,argv[1],run_flag);
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return run_flag;
         }
         else if(strcmp(cloud_flag,"CLOUD_A")==0){
             run_flag=alicloud_cluster_init(current_cluster_name,workdir,crypto_keyfile);
             write_log(current_cluster_name,operation_log,argv[1],run_flag);
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return run_flag;
         }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now.\n" RESET_DISPLAY);
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -127;
         }
     }
     if(cluster_empty_or_not(workdir)==0){
         print_empty_cluster_info();
-        print_tail();
         write_log(current_cluster_name,operation_log,"EMPTY_CLUSTER",11);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return 11;
     }
 
@@ -764,61 +768,61 @@ int main(int argc, char* argv[]){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Please specify 'mc', 'mcdb', or 'all' as the second parameter.\n");
                 printf("|          Run 'hpcopr help' for more details. Exit now.\n" RESET_DISPLAY);
             }
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Please specify 'mc', 'mcdb', or 'all' as the second parameter.\n");
             printf("|          Run 'hpcopr help' for more details. Exit now.\n" RESET_DISPLAY);
-            print_tail();
-            system_cleanup();
+            check_and_cleanup(workdir);
             write_log(current_cluster_name,operation_log,argv[1],13);
+            print_tail();
             return 13;
         }
     }
 
     if(strcmp(argv[1],"sleep")==0){
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -1;
         }
         run_flag=cluster_sleep(workdir,crypto_keyfile);
-        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     if(strcmp(argv[1],"wakeup")==0){
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -1;
         }
         if(argc==2){
             run_flag=cluster_wakeup(workdir,crypto_keyfile,"minimal");
             sprintf(string_temp,"%s default",argv[1]);
-            print_tail();
             write_log(current_cluster_name,operation_log,string_temp,run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
         else{
             run_flag=cluster_wakeup(workdir,crypto_keyfile,argv[2]);
             sprintf(string_temp,"%s %s",argv[1],argv[2]);
-            print_tail();
             write_log(current_cluster_name,operation_log,string_temp,run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
     }
     if(argc==3&&strcmp(argv[1],"destroy")==0&&strcmp(argv[2],"force")==0){
         run_flag=cluster_destroy(workdir,crypto_keyfile,0);
-        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
 
@@ -827,9 +831,9 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Available configuration list:\n|\n");
             if(check_reconfigure_list(workdir)!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Internal error. Please submit an issue to the community. Exit now.\n" RESET_DISPLAY);
-                print_tail();
                 write_log(current_cluster_name,operation_log,argv[1],-1);
-                system_cleanup();
+                check_and_cleanup(workdir);
+                print_tail();
                 return -17;
             }
             if(strcmp(argv[1],"reconfc")==0&&check_down_nodes(workdir)!=0&&strcmp(cloud_flag,"CLOUD_B")==0){
@@ -838,22 +842,22 @@ int main(int argc, char* argv[]){
             if(strcmp(argv[1],"reconfm")==0&&cluster_asleep_or_not(workdir)==0){
                 printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You needd to wake up the cluster before reconfiguring the master node.\n" RESET_DISPLAY);
             }
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],17);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 17;
         }
         if(strcmp(argv[1],"ssh")==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify to login with which user. Exit now.\n" RESET_DISPLAY);
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],17);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 17;
         }
         if(strcmp(argv[1],"userman")==0){
             print_usrmgr_info();
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return 17;
         }
     }
@@ -863,101 +867,102 @@ int main(int argc, char* argv[]){
         if(cluster_asleep_or_not(workdir)==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] The current cluster is not running.\n" RESET_DISPLAY);
         }
-        print_tail();
         write_log(current_cluster_name,operation_log,argv[2],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
 
     if(cluster_asleep_or_not(workdir)==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
         printf("|          Command: hpcopr wakeup minimal|all. Exit now.\n" RESET_DISPLAY);
-        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],13);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return 13;
     }
 
     if(argc>2&&strcmp(argv[1],"ssh")==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Trying to ssh to the cluster as %s, may fail if the username doesn't exist.\n",argv[2]);
         run_flag=cluster_ssh(workdir,argv[2]);
-        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
 
     if(strcmp(argv[1],"destroy")==0&&cluster_empty_or_not(workdir)==1){
         run_flag=cluster_destroy(workdir,crypto_keyfile,1);
-        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     if(strcmp(argv[1],"delc")==0){
         if(argc==2){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a number or 'all' as the second parameter.\n");
             printf("|          Exit now.\n" RESET_DISPLAY);
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],17);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 17;
         }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -1;
         }
         run_flag=delete_compute_node(workdir,crypto_keyfile,argv[2]);
-        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     if(strcmp(argv[1],"addc")==0){
         if(check_down_nodes(workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to turn all compute node(s) on before adding new nodes.\n");
             printf("|          Exit now.\n" RESET_DISPLAY);
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return 1;
         }
         if(argc==2){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a number (range: 1-%d) as the second parameter.\n",MAXIMUM_ADD_NODE_NUMBER);
             printf("|          Exit now.\n" RESET_DISPLAY);
             write_log(current_cluster_name,operation_log,argv[1],17);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 17;
         }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -1;
         }
         run_flag=add_compute_node(workdir,crypto_keyfile,argv[2]);
-        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     if(strcmp(argv[1],"shutdownc")==0){
         if(argc==2){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify either 'all' or a number as the second parameter.\n");
             printf("|          Exit now.\n" RESET_DISPLAY);
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[1],17);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 17;
         }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -1;
         }
         run_flag=shutdown_compute_nodes(workdir,crypto_keyfile,argv[2]);
-        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     if(strcmp(argv[1],"turnonc")==0){
@@ -965,18 +970,19 @@ int main(int argc, char* argv[]){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify either 'all' or a number as the second parameter.\n");
             printf("|          Exit now.\n" RESET_DISPLAY);
             write_log(current_cluster_name,operation_log,argv[1],17);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return 17;
         }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -1;
         }
         run_flag=turn_on_compute_nodes(workdir,crypto_keyfile,argv[2]);
-        print_tail();
         write_log(current_cluster_name,operation_log,argv[1],run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
     if(strcmp(argv[1],"reconfc")==0){
@@ -984,66 +990,66 @@ int main(int argc, char* argv[]){
             if(check_down_nodes(workdir)!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] You need to turn all compute node(s) on before reconfiguring them.\n");
                 printf("|          Exit now.\n" RESET_DISPLAY);
+                check_and_cleanup(workdir);
                 print_tail();
-                system_cleanup();
                 return 1;
             }
         }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -1;
         }
         if(argc==3){
             run_flag=reconfigure_compute_node(workdir,crypto_keyfile,argv[2],"");
             sprintf(string_temp,"%s %s",argv[1],argv[2]);
-            print_tail();
             write_log(current_cluster_name,operation_log,string_temp,run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
         else{
             run_flag=reconfigure_compute_node(workdir,crypto_keyfile,argv[2],argv[3]);
             sprintf(string_temp,"%s %s %s",argv[1],argv[2],argv[3]);
-            print_tail();
             write_log(current_cluster_name,operation_log,string_temp,run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
     }
     if(strcmp(argv[1],"reconfm")==0){
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -1;
         }
         run_flag=reconfigure_master_node(workdir,crypto_keyfile,argv[2]);
         sprintf(string_temp,"%s %s",argv[1],argv[2]);
-        print_tail();
         write_log(current_cluster_name,operation_log,string_temp,run_flag);
-        system_cleanup();
+        check_and_cleanup(workdir);
+        print_tail();
         return run_flag;
     }
 
     if(strcmp(argv[1],"userman")==0){
         if(strcmp(argv[2],"add")!=0&&strcmp(argv[2],"delete")!=0&&strcmp(argv[2],"enable")!=0&&strcmp(argv[2],"disable")!=0&&strcmp(argv[2],"list")!=0&&strcmp(argv[2],"passwd")!=0){
             print_usrmgr_info();
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -6;
         }
         usrmgr_check_flag=usrmgr_prereq_check(workdir,argv[2]);
         if(usrmgr_check_flag==3){
+            check_and_cleanup(workdir);
             print_tail();
-            system_cleanup();
             return -7;
         }
         if(strcmp(argv[2],"list")==0){
             printf("\n");
             run_flag=hpc_user_list(workdir,crypto_keyfile,0);
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[2],run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
         else if(strcmp(argv[2],"enable")==0||strcmp(argv[2],"disable")==0){
@@ -1056,9 +1062,9 @@ int main(int argc, char* argv[]){
             if(run_flag==0){
                 usrmgr_remote_exec(workdir,SSHKEY_DIR,usrmgr_check_flag);
             }
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[2],run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
         else if(strcmp(argv[2],"add")==0){
@@ -1074,9 +1080,9 @@ int main(int argc, char* argv[]){
             if(run_flag==0){
                 usrmgr_remote_exec(workdir,SSHKEY_DIR,usrmgr_check_flag);
             }
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[2],run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
         else if(strcmp(argv[2],"delete")==0){
@@ -1089,9 +1095,9 @@ int main(int argc, char* argv[]){
             if(run_flag==0){
                 usrmgr_remote_exec(workdir,SSHKEY_DIR,usrmgr_check_flag);
             }
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[2],run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
         else{
@@ -1107,12 +1113,13 @@ int main(int argc, char* argv[]){
             if(run_flag==0){
                 usrmgr_remote_exec(workdir,SSHKEY_DIR,usrmgr_check_flag);
             }
-            print_tail();
             write_log(current_cluster_name,operation_log,argv[2],run_flag);
-            system_cleanup();
+            check_and_cleanup(workdir);
+            print_tail();
             return run_flag;
         }
     }
-    system_cleanup();
-    return 0;
+    check_and_cleanup(workdir);
+    print_tail();
+    return 127;
 }

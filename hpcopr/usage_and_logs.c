@@ -120,28 +120,6 @@ int get_syserrlog(char* syserror_logfile){
     return 0;
 }
 
-int system_cleanup(void){
-#ifdef _WIN32
-    FILE* file_p=NULL;
-    char cmdline[CMDLINE_LENGTH]="";
-    char appdata_dir[DIR_LENGTH]="";
-    system("echo %APPDATA% > c:\\programdata\\appdata.txt.tmp");
-    file_p=fopen("c:\\programdata\\appdata.txt.tmp","r");
-    fscanf(file_p,"%s",appdata_dir);
-    fclose(file_p);
-    system("del /f /s /q c:\\programdata\\appdata.txt.tmp > nul 2>&1");
-    
-    sprintf(cmdline,"del /f /s /q %s\\Microsoft\\Windows\\Recent\\* > nul 2>&1",appdata_dir);
-    system(cmdline);
-    sprintf(cmdline,"rd /q /s %s\\Microsoft\\Windows\\Recent\\ > nul 2>&1",appdata_dir);
-    system(cmdline);
-    return 0;
-#else
-    //Keep it here for further use. 
-    return 0;
-#endif
-}
-
 int write_log(char* workdir, char* operation_logfile, char* operation, int runflag){
     time_t current_time_long;
     struct tm* time_p=NULL;
