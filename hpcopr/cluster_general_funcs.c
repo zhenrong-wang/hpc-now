@@ -21,6 +21,7 @@
 #include "general_funcs.h"
 #include "time_process.h"
 #include "cluster_general_funcs.h"
+#include "general_print_info.h"
 
 int get_crypto_key(char* crypto_key_filename, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
@@ -661,7 +662,7 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, int s
     while(find_multi_keys(tf_realtime_log,findkey,"","","","")<1&&i<MAXIMUM_WAIT_TIME){
         if(silent_flag!=0){
             fflush(stdin);
-            printf("[ -WAIT- ] This may need %d min(s). %d sec(s) passed ... (%c)\r",total_minutes,i,*(annimation+i%4));
+            printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " This may need %d min(s). %d sec(s) passed ... (%c)\r",total_minutes,i,*(annimation+i%4));
             fflush(stdout);
         }
         i++;
@@ -823,7 +824,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,error_log);
     system(cmdline);
     if(silent_flag!=0){
-        printf(WARN_YELLO_BOLD "[ -INFO- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
         printf("|          Command: %s. Error log: %s\n" RESET_DISPLAY,execution_name,error_log);
     }
     if(wait_for_complete(tf_realtime_log,execution_name,error_log,1)!=0){
@@ -1047,8 +1048,8 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
 
 int confirm_to_operate_cluster(char* current_cluster_name){
     char doubleconfirm[64]="";
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster %s now, which may affect\n",current_cluster_name);
-    printf("|          the resources|data|jobs. Please input 'y-e-s' to continue.\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster" HIGH_GREEN_BOLD " %s" RESET_DISPLAY " now, which may affect\n",current_cluster_name);
+    printf("|          the " GENERAL_BOLD "resources|data|jobs" GENERAL_BOLD ". Please input 'y-e-s' to continue.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
@@ -1825,11 +1826,11 @@ int check_and_cleanup(char* prev_workdir){
     system(cmdline);
     sprintf(cmdline,"rd /q /s %s\\Microsoft\\Windows\\Recent\\ > nul 2>&1",appdata_dir);
     system(cmdline);
-    return 0;
 #else
     //Keep it here for further use. 
-    return 0;
 #endif
+    print_tail();
+    return 0;
 }
 
 /*int create_protection(char* workdir, int minutes){

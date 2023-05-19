@@ -325,7 +325,11 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
     }
 }
 
-int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
+int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_flag){
+    if(strlen(target_cluster_name)<CLUSTER_ID_LENGTH_MIN||strlen(target_cluster_name)>CLUSTER_ID_LENGTH_MAX){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified name %s is invalid.\n" RESET_DISPLAY,target_cluster_name);
+        return -1;
+    }
     char cluster_workdir[DIR_LENGTH]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char doubleconfirm[64]="";
@@ -342,51 +346,57 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     get_workdir(cluster_workdir,target_cluster_name);
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_archive_log,"%s%slog%stf_prep.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
-    if(cluster_empty_or_not(cluster_workdir)!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is *NOT* empty!\n" RESET_DISPLAY);
-        glance_clusters(target_cluster_name,crypto_keyfile);
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? This operation is *NOT* recoverable!\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to continuie: " );
-        fflush(stdin);
-        scanf("%s",doubleconfirm);
-        if(strcmp(doubleconfirm,"y-e-s")==0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
-            printf("|          absolutely *NOT* recoverable!\n" RESET_DISPLAY);
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+    if(strcmp(force_flag,"force")==0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Removing the specified cluster *WITHOUT* state or resource check.\n" RESET_DISPLAY);
+    }
+    else{
+        if(cluster_empty_or_not(cluster_workdir)!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is *NOT* empty!\n" RESET_DISPLAY);
+            glance_clusters(target_cluster_name,crypto_keyfile);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? This operation is *NOT* recoverable!\n" RESET_DISPLAY);
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to continuie: " );
             fflush(stdin);
             scanf("%s",doubleconfirm);
-            if(strcmp(doubleconfirm,target_cluster_name)==0){
-                if(cluster_destroy(cluster_workdir,crypto_keyfile,0)!=0){
-                    delete_decrypted_files(cluster_workdir,crypto_keyfile);
+            getchar();
+            if(strcmp(doubleconfirm,"y-e-s")==0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
+                printf("|          absolutely *NOT* recoverable!\n" RESET_DISPLAY);
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+                fflush(stdin);
+                scanf("%s",doubleconfirm);
+                getchar();
+                if(strcmp(doubleconfirm,target_cluster_name)!=0){
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
+                    printf("|          Nothing changed.\n");
                     return 1;
                 }
-                archive_log(log_trash,tf_archive_log);
-                archive_log(log_trash,tf_realtime_log);
             }
             else{
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
                 printf("|          Nothing changed.\n");
                 return 1;
             }
         }
         else{
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
-            printf("|          Nothing changed.\n");
-            return 1;
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster is empty. This operation will remove all the related files\n");
+            printf("|          from your system and registry. Would you like to continue?\n");
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to continuie: ");
+            fflush(stdin);
+            scanf("%s",doubleconfirm);
+            getchar();
+            if(strcmp(doubleconfirm,"y-e-s")!=0){
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+                printf("|          Nothing changed.\n");
+                return 1;
+            }
         }
     }
-    else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster is empty. This operation will remove all the related files\n");
-        printf("|          from your system and registry. Would you like to continue?\n");
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to continuie: ");
-        fflush(stdin);
-        scanf("%s",doubleconfirm);
-        if(strcmp(doubleconfirm,"y-e-s")!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
-            printf("|          Nothing changed.\n");
-            return 1;
-        }
+    if(cluster_destroy(cluster_workdir,crypto_keyfile,"force")!=0){
+        delete_decrypted_files(cluster_workdir,crypto_keyfile);
+        return 1;
     }
+    archive_log(log_trash,tf_archive_log);
+    archive_log(log_trash,tf_realtime_log);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing all the related files ...\n");
     sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,cluster_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -700,7 +710,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     return 0;
 }
 
-int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
+int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
     char doubleconfirm[32]="";
     char cmdline[LINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -718,19 +728,22 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
-    fflush(stdin);
-    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    scanf("%s",doubleconfirm);
-    getchar();
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
-        printf("|          Nothing changed.\n");
-        return 1;
+    if(strcmp(force_flag,"force")==0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Destroying the current cluster *WITHOUT* confirmation.\n" RESET_DISPLAY);
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster operation started ...\n");
+        printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n" RESET_DISPLAY);
+        fflush(stdin);
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+        scanf("%s",doubleconfirm);
+        getchar();
+        if(strcmp(doubleconfirm,"y-e-s")!=0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+            printf("|          Nothing changed.\n");
+            return 1;
+        }
     }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster operation started ...\n");
     create_and_get_vaultdir(workdir,vaultdir);
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
@@ -1703,10 +1716,10 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     getstate(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(filename_temp,"all");
     if(strcmp(option,"all")==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " ALL MODE: Turning on all the nodes of the current cluster.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY HIGH_CYAN_BOLD " ALL MODE:" RESET_DISPLAY " Turning on all the nodes of the current cluster.\n");
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " MINIMAL MODE: Turning on the management nodes of the current cluster.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY HIGH_CYAN_BOLD " MINIMAL MODE:" RESET_DISPLAY " Turning on the management nodes of the current cluster.\n");
     }
     node_file_to_running(stackdir,"master",cloud_flag);
     node_file_to_running(stackdir,"database",cloud_flag);
@@ -1900,6 +1913,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         return -1;
     }
     char stackdir[DIR_LENGTH]="";
+    char vaultdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char remote_commands[128]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -2034,9 +2048,14 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     remote_exec_general(workdir,sshkey_folder,"root",remote_commands,0);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
-    update_cluster_summary(workdir,crypto_keyfile);
+    create_and_get_vaultdir(workdir,vaultdir);
+    decrypt_user_passwords(workdir,crypto_keyfile);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/.cluster_secrets/user_secrets.txt","root","put");
+    delete_decrypted_user_passwords(workdir);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
+    update_cluster_summary(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The rebuild process may need 7 minutes. Please do not operate\n");
     printf("|          this cluster during the period. Exit now.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
