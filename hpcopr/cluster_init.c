@@ -567,7 +567,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             system(cmdline);
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back. Please check the errolog for details.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
+            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog err archive" RESET_DISPLAY " for details.\n");
             return -1;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -1177,7 +1178,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
             system(cmdline);
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back. Please check the errolog for details.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
+            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog err archive" RESET_DISPLAY " for details.\n");
             return -1;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -1744,7 +1746,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
             system(cmdline);
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back. Please check the errolog for details.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
+            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog err archive" RESET_DISPLAY " for details.\n");
             return -1;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");

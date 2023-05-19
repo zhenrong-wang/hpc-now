@@ -185,12 +185,12 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"repair")==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Entering repair mode. All the locations will be reset to default,\n");
         printf("|          and all the core components will be replaced by the default ones.\n");
-        printf("|          Would you like to continue? Only 'y-e-s' is accepted to confirm.\n");
+        printf("|          Would you like to continue? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm.\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
         if(strcmp(doubleconfirm,"y-e-s")!=0){
-            printf("\n[ -INFO- ] Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+            printf("\n[ -INFO- ] Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to continue. You chose to deny this operation.\n");
             printf("|          Nothing changed. Exit now.\n");
             print_tail();
             return 0;
@@ -527,7 +527,7 @@ int main(int argc, char* argv[]){
         }
         else{
             if(cluster_name_check_and_fix(argv[3],string_temp)!=-127){
-                printf(FATAL_RED_BOLD "[ -INFO- ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid" RESET_DISPLAY ".\n",argv[3]);
+                printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid" RESET_DISPLAY ".\n",argv[3]);
                 list_all_cluster_names();
                 check_and_cleanup(workdir);
                 return -6;

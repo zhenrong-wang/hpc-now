@@ -825,7 +825,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     system(cmdline);
     if(silent_flag!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
-        printf("|          Command: %s. " RESET_DISPLAY HIGH_GREEN_BOLD "View log: hpcopr viewlog std|err\n" RESET_DISPLAY,execution_name);
+        printf("|          Command: %s. View log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr viewlog std|err\n" RESET_DISPLAY,execution_name);
     }
     if(wait_for_complete(tf_realtime_log,execution_name,error_log,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
@@ -1049,13 +1049,13 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
 int confirm_to_operate_cluster(char* current_cluster_name){
     char doubleconfirm[64]="";
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster" HIGH_GREEN_BOLD " %s" RESET_DISPLAY " now, which may affect\n",current_cluster_name);
-    printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input 'y-e-s' to continue.\n");
+    printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " to continue.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
     getchar();
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to continue. You chose to deny this operation.\n");
         printf("|          Nothing changed. Exit now.\n");
         return 1;
     }
@@ -1668,7 +1668,7 @@ int usrmgr_prereq_check(char* workdir, char* option){
         printf("|            3. sudo hpcmgr connect\n");
         printf("|            4. sudo hpcmgr all\n" RESET_DISPLAY);
         printf(GENERAL_BOLD "|          You can also exit now, run" RESET_DISPLAY HIGH_GREEN_BOLD " 'hpcopr wakeup all'" RESET_DISPLAY GENERAL_BOLD " and then manage the users.\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue? Only 'y-e-s' is accepted.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted.\n");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
         scanf("%s",confirm);
