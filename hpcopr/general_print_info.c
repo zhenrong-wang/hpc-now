@@ -54,10 +54,11 @@ void print_help(void){
     printf("|  " HIGH_GREEN_BOLD "refresh" RESET_DISPLAY "     : NONE|TARGET_CLUSTER_NAME NONE|force\n");
     printf("|                Refresh the target cluster without any resource modifications.\n");
     printf("|                  Specify a cluster name. NONE refers to the current cluster.\n");
-    printf("|                  Specify 'force' as the last param to do force-refresh ( DANGER! ).\n");
+    printf("|                  Specify 'force' as the 3rd param to do force-refresh " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
     printf("|  " HIGH_GREEN_BOLD "exit-current" RESET_DISPLAY ": Exit the current cluster.\n");
-    printf("|  " HIGH_GREEN_BOLD "remove" RESET_DISPLAY "      : TARGET_CLUSTER_NAME\n");
+    printf("|  " HIGH_GREEN_BOLD "remove" RESET_DISPLAY "      : TARGET_CLUSTER_NAME NONE|force\n");
     printf("|                Completely remove a cluster from the OS and registry.\n");
+    printf("|                  Specify 'force' as the 3rd param to do force-refresh " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
     printf(GENERAL_BOLD "+ II. Global Management:\n");
     printf("| * You DO NOT need to switch to a cluster first. *\n" RESET_DISPLAY);
     printf("|  " HIGH_GREEN_BOLD "help" RESET_DISPLAY "        : Show this page and the information here.\n");
@@ -122,7 +123,7 @@ void print_help(void){
     printf("|              : minimal - Turn on the management nodes of the cluster.\n");
     printf("|              : all     - Turn on the management and compute nodes of the cluster.\n");
     printf("|  " HIGH_GREEN_BOLD "destroy" RESET_DISPLAY "     : *DESTROY* the whole cluster - including all the resources & data.\n");
-    printf("|                Specify 'force' as the second param to do force-destroy ( DANGER! ).\n");
+    printf("|                Specify 'force' as the 2nd param to do force-destroy " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
     printf(GENERAL_BOLD "+ VI . Cluster User Management:\n");
     printf("| * You need to switch to a specific cluster first. *\n" RESET_DISPLAY);
     print_usrmgr_info();
