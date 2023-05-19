@@ -2062,18 +2062,54 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     return 0;
 }
 
-void real_time_log(char* workdir){
-    char real_time_log[FILENAME_LENGTH]="";
-#ifndef _WIN32
+void view_run_log(char* workdir, char* stream, char* option){
+    char logfile[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-#endif
-    sprintf(real_time_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
-#ifdef _WIN32
-    if(tail_f_for_windows(real_time_log)==1){
-        printf("[ -INFO- ] Time is up. Please run this command again.\n");
+    char real_option[16]="";
+    char real_stream[16]="";
+    if(strcmp(stream,"std")!=0&&strcmp(stream,"err")!=0){
+        strcpy(real_stream,"std");
     }
+    else{
+        strcpy(real_stream,stream);
+    }
+    if(strcmp(option,"realtime")!=0&&strcmp(option,"archive")!=0){
+        strcpy(real_option,"realtime");
+        if(strcmp(real_stream,"std")==0){
+            sprintf(logfile,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
+        }
+        else{
+            strcpy(logfile,OPERATION_ERROR_LOG);
+        }
+    }
+    else if(strcmp(option,"realtime")==0){
+        if(strcmp(real_stream,"std")==0){
+            sprintf(logfile,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
+        }
+        else{
+            strcpy(logfile,OPERATION_ERROR_LOG);
+        }
+    }
+    else{
+        if(strcmp(real_stream,"std")==0){
+            sprintf(logfile,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
+        }
+        else{
+            sprintf(logfile,"%s.archive",OPERATION_ERROR_LOG);
+        }
+    }
+    if(strcmp(real_option,"realtime")==0){
+#ifdef _WIN32
+        if(tail_f_for_windows(logfile)==1){
+            printf("[ -INFO- ] Time is up. Please run this command again.\n");
+        }
 #else
-    sprintf(cmdline,"tail -f %s",real_time_log);
-    system(cmdline);
+        sprintf(cmdline,"tail -f %s",logfile);
+        system(cmdline);
 #endif
+    }
+    else{
+        sprintf(cmdline,"%s %s",CAT_FILE_CMD,logfile);
+        system(cmdline);
+    }
 }

@@ -94,7 +94,12 @@ void print_help(void){
     printf("|         root     - Display with root password. By default, the root password\n");
     printf("|                    is hidden.\n");
     printf("|  " HIGH_GREEN_BOLD "graph" RESET_DISPLAY "       : Display the cluster map including all the nodes and status.\n");
-    printf("|  " HIGH_GREEN_BOLD "realtime" RESET_DISPLAY "    : Stream out the real-time cluster operation process log.\n");
+    printf("|  " HIGH_GREEN_BOLD "viewlog" RESET_DISPLAY " (Optional)STREAM_NAME (Optional)VIEW_OPTION.\n");
+    printf("|              : View the operation log of the current cluster.\n");
+    printf("|        STREAM_NAME  - std(default) | err . std: normal output. err: error output.\n");
+    printf("|        VIEW_OPTION  - realtime(default) | archive .\n");
+    printf("|                       realtime: view the output of the current on-going operation.\n");
+    printf("|                       archive : view the output for the historical operations.\n");
     printf(GENERAL_BOLD "+ V  . Cluster Operation:\n");
     printf("| * You need to switch to a specific cluster first. *\n" RESET_DISPLAY);
     printf("|  " HIGH_GREEN_BOLD "delc" RESET_DISPLAY "        : Delete specified compute nodes:\n");

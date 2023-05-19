@@ -825,7 +825,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     system(cmdline);
     if(silent_flag!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
-        printf("|          Command: %s. Error log: %s\n" RESET_DISPLAY,execution_name,error_log);
+        printf("|          Command: %s. " RESET_DISPLAY HIGH_GREEN_BOLD "View log: hpcopr viewlog std|err\n" RESET_DISPLAY,execution_name);
     }
     if(wait_for_complete(tf_realtime_log,execution_name,error_log,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
@@ -1158,7 +1158,7 @@ int tail_f_for_windows(char* filename){
         if((ch=fgetc(file_p))!=EOF){
             putchar(ch);
         }
-        if((current_time-start_time)>30){
+        if((current_time-start_time)>15){
             fclose(file_p);
             return 1;
         }

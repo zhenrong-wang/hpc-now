@@ -273,7 +273,7 @@ int main(int argc, char* argv[]){
         return -4;
     }
     
-    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syserr")!=0&&strcmp(argv[1],"history")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0&&strcmp(argv[1],"rebuild")!=0&&strcmp(argv[1],"realtime")!=0&&strcmp(argv[1],"userman")!=0){
+    if(strcmp(argv[1],"new-cluster")!=0&&strcmp(argv[1],"ls-clusters")!=0&&strcmp(argv[1],"switch")!=0&&strcmp(argv[1],"glance")!=0&&strcmp(argv[1],"exit-current")!=0&&strcmp(argv[1],"refresh")!=0&&strcmp(argv[1],"remove")!=0&&strcmp(argv[1],"usage")!=0&&strcmp(argv[1],"syserr")!=0&&strcmp(argv[1],"history")!=0&&strcmp(argv[1],"new-keypair")!=0&&strcmp(argv[1],"init")!=0&&strcmp(argv[1],"get-conf")!=0&&strcmp(argv[1],"edit-conf")!=0&&strcmp(argv[1],"vault")!=0&&strcmp(argv[1],"graph")!=0&&strcmp(argv[1],"delc")!=0&&strcmp(argv[1],"addc")!=0&&strcmp(argv[1],"shutdownc")!=0&&strcmp(argv[1],"turnonc")!=0&&strcmp(argv[1],"reconfc")!=0&&strcmp(argv[1],"reconfm")!=0&&strcmp(argv[1],"sleep")!=0&&strcmp(argv[1],"wakeup")!=0&&strcmp(argv[1],"destroy")!=0&&strcmp(argv[1],"ssh")!=0&&strcmp(argv[1],"rebuild")!=0&&strcmp(argv[1],"viewlog")!=0&&strcmp(argv[1],"userman")!=0){
         print_help();
         return -6;
     }
@@ -553,8 +553,16 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     
-    if(strcmp(argv[1],"realtime")==0){
-        real_time_log(workdir);
+    if(strcmp(argv[1],"viewlog")==0){
+        if(argc==2){
+            view_run_log(workdir,"","");
+        }
+        else if(argc==3){
+            view_run_log(workdir,argv[2],"");
+        }
+        else{
+            view_run_log(workdir,argv[2],argv[3]);
+        }
         write_log(current_cluster_name,operation_log,argv[1],0);
         check_and_cleanup(workdir);
         return 0;
