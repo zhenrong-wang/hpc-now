@@ -2083,6 +2083,7 @@ void view_run_log(char* workdir, char* stream, char* option){
         }
     }
     else if(strcmp(option,"realtime")==0){
+        strcpy(real_option,option);
         if(strcmp(real_stream,"std")==0){
             sprintf(logfile,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
         }
@@ -2091,6 +2092,7 @@ void view_run_log(char* workdir, char* stream, char* option){
         }
     }
     else{
+        strcpy(real_option,option);
         if(strcmp(real_stream,"std")==0){
             sprintf(logfile,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
         }
