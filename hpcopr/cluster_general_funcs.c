@@ -1049,7 +1049,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
 int confirm_to_operate_cluster(char* current_cluster_name){
     char doubleconfirm[64]="";
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster" HIGH_GREEN_BOLD " %s" RESET_DISPLAY " now, which may affect\n",current_cluster_name);
-    printf("|          the " GENERAL_BOLD "resources|data|jobs" GENERAL_BOLD ". Please input 'y-e-s' to continue.\n");
+    printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input 'y-e-s' to continue.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
