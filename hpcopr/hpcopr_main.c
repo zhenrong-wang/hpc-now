@@ -777,23 +777,6 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
 
-    if(current_cluster_flag==1){
-        run_flag=list_all_cluster_names();
-        if(run_flag==-1){
-            write_operation_log("NULL",operation_log,argv[1],"FILE_I/O_ERROR",127);
-            check_and_cleanup("");
-            return 127;
-        }
-        else if(run_flag==1){
-            write_operation_log("NULL",operation_log,argv[1],"EMPTY_REGISTRY",33);
-            check_and_cleanup("");
-            return 33;
-        }
-        write_operation_log("NULL",operation_log,argv[1],"NOT_OPERATING_CLUSTERS",25);
-        check_and_cleanup("");
-        return 25;
-    }
-    
     if(strcmp(argv[1],"viewlog")==0){
         if(argc==2){
             view_run_log(workdir,"","","");
@@ -810,6 +793,23 @@ int main(int argc, char* argv[]){
         write_operation_log(current_cluster_name,operation_log,argv[1],argv[2],0);
         check_and_cleanup(workdir);
         return 0;
+    }
+
+    if(current_cluster_flag==1){
+        run_flag=list_all_cluster_names();
+        if(run_flag==-1){
+            write_operation_log("NULL",operation_log,argv[1],"FILE_I/O_ERROR",127);
+            check_and_cleanup("");
+            return 127;
+        }
+        else if(run_flag==1){
+            write_operation_log("NULL",operation_log,argv[1],"EMPTY_REGISTRY",33);
+            check_and_cleanup("");
+            return 33;
+        }
+        write_operation_log("NULL",operation_log,argv[1],"NOT_OPERATING_CLUSTERS",25);
+        check_and_cleanup("");
+        return 25;
     }
 
     if(strcmp(argv[1],"graph")==0){

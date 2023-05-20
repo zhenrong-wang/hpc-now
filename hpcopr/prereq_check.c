@@ -629,19 +629,43 @@ int check_and_install_prerequisitions(int repair_flag){
 
 int command_name_check(char* command_name_input, char* command_prompt){
     int i;
-    int diff_prev=abs(strcmp(command_name_input,commands[0]));
+    int j;
+    int diff_prev=1024;
     int diff_current=0;
+    int compare_length=0;
+    int length_flag=0;
     for(i=0;i<COMMAND_NUM;i++){
         if(strcmp(command_name_input,commands[i])==0){
             return 0;
         }
         else{
-            diff_current=abs(strcmp(command_name_input,commands[i]));
+            diff_current=0;
+            if(strlen(commands[i])<strlen(command_name_input)){
+                compare_length=strlen(commands[i]);
+                length_flag=1;
+            }
+            else{
+                compare_length=strlen(command_name_input);
+                length_flag=-1;
+            }
+            for(j=0;j<compare_length;j++){
+                diff_current+=abs(*(command_name_input+j)-*(commands[i]+j));
+            }
+//            printf("%d,----%d,,,%d,,,%s\n",length_flag,compare_length,diff_current,commands[i]);
+            if(diff_current==0&&compare_length<3){
+                if(length_flag==-1){
+                    diff_current=abs(*(commands[i]+compare_length)-'m');
+                }
+                else{
+                    diff_current=abs(*(command_name_input+compare_length)-'m');
+                }
+            }
+//            printf("%d,%d,%s,%s\n",diff_current,diff_prev,command_name_input,command_prompt);
             if(diff_current<diff_prev){
                 strcpy(command_prompt,commands[i]);
                 diff_prev=diff_current;
             }
         }
     }
-    return diff_prev;
+    return 1;
 }
