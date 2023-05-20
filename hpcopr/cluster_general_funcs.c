@@ -1153,12 +1153,13 @@ int tail_f_for_windows(char* filename){
         return -1;
     }
     fseek(file_p,-1,SEEK_END);
+    printf(WARN_YELLO_BOLD "[ -INFO- ] MAXIMUM DURATION: 30s.\n" RESET_DISPLAY);
     while(1){
         time(&current_time);
         if((ch=fgetc(file_p))!=EOF){
             putchar(ch);
         }
-        if((current_time-start_time)>15){
+        if((current_time-start_time)>30){
             fclose(file_p);
             return 1;
         }

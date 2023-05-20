@@ -2108,7 +2108,7 @@ void view_run_log(char* workdir, char* stream, char* option){
     if(strcmp(real_option,"realtime")==0){
 #ifdef _WIN32
         if(tail_f_for_windows(logfile)==1){
-            printf("[ -INFO- ] Time is up. Please run this command again.\n");
+            printf(WARN_YELLO_BOLD "[ -INFO- ] Time is up. Please run this command again.\n" RESET_DISPLAY);
         }
 #else
         sprintf(cmdline,"tail -f %s",logfile);
