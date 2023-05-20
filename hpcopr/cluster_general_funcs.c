@@ -972,7 +972,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
     char bucket_name[32]="";
     int i=0;
     if(cluster_empty_or_not(workdir)==0){
-        return -1;
+        return 1;
     }
     get_crypto_key(crypto_keyfile,md5sum);
     create_and_get_vaultdir(workdir,vaultdir);

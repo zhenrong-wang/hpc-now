@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "now_macros.h"
 #include "general_funcs.h"
@@ -35,6 +36,8 @@ extern char md5_qcloud_tf_var[64];
 extern char md5_qcloud_tf_zip_var[64];
 extern char md5_aws_tf_var[64];
 extern char md5_aws_tf_zip_var[64];
+
+extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
 
 int check_internet(void){
     char cmdline[CMDLINE_LENGTH]="";
@@ -165,7 +168,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        . Checking and repairing the location configuration file now ...\n");
         if(reset_locations()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return -3;
         }
         printf("|        v All the locations has been reset to the default ones.\n");
     }
@@ -186,7 +189,7 @@ int check_and_install_prerequisitions(int repair_flag){
         if(strcmp(doubleconfirm,"y-e-s")==0){
             if(reset_locations()!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now.\n" RESET_DISPLAY);
-                return 2;
+                return -3;
             }
             get_locations();
         }
@@ -199,12 +202,12 @@ int check_and_install_prerequisitions(int repair_flag){
             getchar();
             if(strcmp(doubleconfirm,"y-e-s")!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
-                return 2;
+                return 1;
             }
             else{
                 if(configure_locations()!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure the locations. Exit now.\n" RESET_DISPLAY);
-                    return 2;
+                    return 5;
                 }
             }
         }
@@ -214,7 +217,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        . Checking and repairing the versions and md5sums ...\n");
         if(reset_vers_md5_vars()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return 7;
         }
         printf("|        v Versions and md5sums been repaired.\n");
         printf("|        . Checking and repairing the key directories and files ...\n");
@@ -229,12 +232,12 @@ int check_and_install_prerequisitions(int repair_flag){
         }
         if(reset_vers_md5_vars()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return 7;
         }
         if(get_vers_md5_vars()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure versions and md5sums of core components.\n");
             printf("|          Please check the format of md5 files. Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return 7;
         }
     }
     if(folder_exist_or_not(DESTROYED_DIR)!=0){
@@ -622,4 +625,23 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Running environment successfully checked.\n");
     }
     return 0;
+}
+
+int command_name_check(char* command_name_input, char* command_prompt){
+    int i;
+    int diff_prev=abs(strcmp(command_name_input,commands[0]));
+    int diff_current=0;
+    for(i=0;i<COMMAND_NUM;i++){
+        if(strcmp(command_name_input,commands[i])==0){
+            return 0;
+        }
+        else{
+            diff_current=abs(strcmp(command_name_input,commands[i]));
+            if(diff_current<diff_prev){
+                strcpy(command_prompt,commands[i]);
+                diff_prev=diff_current;
+            }
+        }
+    }
+    return diff_prev;
 }

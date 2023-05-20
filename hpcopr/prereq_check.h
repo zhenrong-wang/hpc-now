@@ -13,5 +13,6 @@ int check_internet(void);
 int file_validity_check(char* filename, int repair_flag, char* target_md5);
 int check_current_user(void);
 int check_and_install_prerequisitions(int repair_flag);
+int command_name_check(char* command_name_input, char* command_prompt);
 
 #endif

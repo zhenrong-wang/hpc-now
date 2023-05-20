@@ -184,14 +184,10 @@ void print_about(void){
 
 int read_license(void){
     char cmdline[CMDLINE_LENGTH]="";
-    if(file_exist_or_not("c:\\hpc-now\\LICENSES\\GPL-2")==0){
-#ifdef __APPLE__
-        sprintf(cmdline,"more /Users/hpc-now/LICENSES/GPL-2");
-#elif _WIN32
-        sprintf(cmdline,"more c:\\hpc-now\\LICENSES\\GPL-2");
-#elif __linux__
-        sprintf(cmdline,"more /home/hpc-now/LICENSES/GPL-2");
-#endif
+    char filename_temp[FILENAME_LENGTH]="";
+    sprintf(filename_temp,"%s%sGPL-2",NOW_LIC_DIR,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)==0){
+        sprintf(cmdline,"more %s",filename_temp);
         system(cmdline);
         return 0;
     }

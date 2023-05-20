@@ -46,7 +46,7 @@ int switch_to_cluster(char* target_cluster_name){
     if(show_current_cluster(temp_workdir,temp_cluster_name,0)==0){
         if(strcmp(temp_cluster_name,target_cluster_name)==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " now. No need to switch.\n",target_cluster_name);
-            return 1;
+            return 3;
         }
     }
     file_p=fopen(current_cluster,"w+");
@@ -204,7 +204,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     fclose(file_p);
     if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
-        return -1;
+        return 3;
     }
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
@@ -257,7 +257,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
                 if(strcmp(doubleconfirm,"y-e-s")!=0){
                     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
                     printf("|          Nothing changed.\n");
-                    return 13;
+                    return -13;
                 }
             }
             else{
@@ -269,7 +269,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
             decrypt_files(temp_cluster_workdir,crypto_keyfile);
             if(terraform_execution(TERRAFORM_EXEC,"apply",temp_cluster_workdir,crypto_keyfile,OPERATION_ERROR_LOG,1)!=0){
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
-                return 5;
+                return -5;
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
             getstate(temp_cluster_workdir,crypto_keyfile);
@@ -306,7 +306,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
         }
          else{
             if(check_pslock(temp_cluster_workdir)!=0){
-                return -3;
+                return 3;
             }
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Refreshing the target cluster %s now ...\n",temp_cluster_name);
@@ -321,14 +321,14 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
         printf("|\n");
         update_cluster_summary(temp_cluster_workdir,crypto_keyfile);
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
-        return 0;
+        return 2;
     }
 }
 
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_flag){
     if(strlen(target_cluster_name)<CLUSTER_ID_LENGTH_MIN||strlen(target_cluster_name)>CLUSTER_ID_LENGTH_MAX){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified name %s is invalid.\n" RESET_DISPLAY,target_cluster_name);
-        return -1;
+        return 1;
     }
     char cluster_workdir[DIR_LENGTH]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
@@ -341,7 +341,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
     if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is not in the registry.\n" RESET_DISPLAY,target_cluster_name);
         list_all_cluster_names();
-        return 1;
+        return 3;
     }
     get_workdir(cluster_workdir,target_cluster_name);
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
@@ -368,13 +368,13 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
                 if(strcmp(doubleconfirm,target_cluster_name)!=0){
                     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
                     printf("|          Nothing changed.\n");
-                    return 1;
+                    return 5;
                 }
             }
             else{
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
                 printf("|          Nothing changed.\n");
-                return 1;
+                return 5;
             }
         }
         else{
@@ -387,13 +387,13 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
             if(strcmp(doubleconfirm,"y-e-s")!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
                 printf("|          Nothing changed.\n");
-                return 1;
+                return 5;
             }
         }
     }
     if(cluster_destroy(cluster_workdir,crypto_keyfile,"force")!=0){
         delete_decrypted_files(cluster_workdir,crypto_keyfile);
-        return 1;
+        return 7;
     }
     archive_log(log_trash,tf_archive_log);
     archive_log(log_trash,tf_realtime_log);
@@ -595,7 +595,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently there is no secrets keypair. This working directory may be\n");
         printf("|          corrputed, which is very unusual. Please contact us via:\n");
         printf("|          info@hpc-now.com for troubleshooting. Exit now.\n" RESET_DISPLAY);
-        return -1;
+        return -3;
     }
     printf(GENERAL_BOLD "\n");
     printf("|*                                C A U T I O N !                                  \n");
@@ -649,7 +649,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("|          Current Vendor: AliCloud (HPC-NOW code: CLOUD_A).\n");
             printf("|          Please rotate a keypair from an AliCloud account.\n");
             printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
-            return 1;
+            return 3;
         }
         fprintf(file_p,"%s\n%s\nCLOUD_A",access_key,secret_key);
         fclose(file_p);
@@ -663,7 +663,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("|          Current Vendor: TencentCloud (HPC-NOW code: CLOUD_B).\n");
             printf("|          Please rotate a keypair from an TencentCloud account.\n");
             printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
-            return 1;
+            return 3;
         }
         fprintf(file_p,"%s\n%s\nCLOUD_B",access_key,secret_key);
         fclose(file_p);
@@ -677,7 +677,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("|          Current Vendor: Amazon Web Services (HPC-NOW code: CLOUD_C).\n");
             printf("|          Please rotate a keypair from an Amazon Web Services account.\n");
             printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
-            return 1;
+            return 3;
         }
         fprintf(file_p,"%s\n%s\nCLOUD_C",access_key,secret_key);
         fclose(file_p);
@@ -687,7 +687,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         fclose(file_p);
         sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        return 1;
+        return 3;
     }
     get_crypto_key(crypto_keyfile,md5sum);
     sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,filename_temp,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
@@ -1796,7 +1796,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_workdir[DIR_LENGTH]="";
     if(show_current_cluster(temp_workdir,temp_cluster_name,0)!=0){
-        return -127;
+        return 127;
     }
     char cloud_flag[32]="";
     char doubleconfirm[64]="";
@@ -2067,10 +2067,9 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     return 0;
 }
 
-void view_run_log(char* workdir, char* stream, char* option){
+void view_run_log(char* workdir, char* stream, char* run_option, char* view_option){
     char logfile[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    char real_option[16]="";
     char real_stream[16]="";
     if(strcmp(stream,"std")!=0&&strcmp(stream,"err")!=0){
         strcpy(real_stream,"std");
@@ -2078,8 +2077,7 @@ void view_run_log(char* workdir, char* stream, char* option){
     else{
         strcpy(real_stream,stream);
     }
-    if(strcmp(option,"realtime")!=0&&strcmp(option,"archive")!=0){
-        strcpy(real_option,"realtime");
+    if(strcmp(run_option,"realtime")!=0&&strcmp(run_option,"archive")!=0){
         if(strcmp(real_stream,"std")==0){
             sprintf(logfile,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
         }
@@ -2087,8 +2085,7 @@ void view_run_log(char* workdir, char* stream, char* option){
             strcpy(logfile,OPERATION_ERROR_LOG);
         }
     }
-    else if(strcmp(option,"realtime")==0){
-        strcpy(real_option,option);
+    else if(strcmp(run_option,"realtime")==0){
         if(strcmp(real_stream,"std")==0){
             sprintf(logfile,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
         }
@@ -2097,7 +2094,6 @@ void view_run_log(char* workdir, char* stream, char* option){
         }
     }
     else{
-        strcpy(real_option,option);
         if(strcmp(real_stream,"std")==0){
             sprintf(logfile,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
         }
@@ -2105,7 +2101,11 @@ void view_run_log(char* workdir, char* stream, char* option){
             sprintf(logfile,"%s.archive",OPERATION_ERROR_LOG);
         }
     }
-    if(strcmp(real_option,"realtime")==0){
+    if(strcmp(view_option,"print")==0){
+        sprintf(cmdline,"%s %s",CAT_FILE_CMD,logfile);
+        system(cmdline);
+    }
+    else{
 #ifdef _WIN32
         if(tail_f_for_windows(logfile)==1){
             printf(WARN_YELLO_BOLD "[ -INFO- ] Time is up. Please run this command again.\n" RESET_DISPLAY);
@@ -2114,9 +2114,5 @@ void view_run_log(char* workdir, char* stream, char* option){
         sprintf(cmdline,"tail -f %s",logfile);
         system(cmdline);
 #endif
-    }
-    else{
-        sprintf(cmdline,"%s %s",CAT_FILE_CMD,logfile);
-        system(cmdline);
     }
 }
