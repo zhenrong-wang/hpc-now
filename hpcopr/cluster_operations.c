@@ -1491,8 +1491,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
     if(compute_node_down_num!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Please turn on all the compute nodes, log on to the master\n");
-        printf("|          node, and run: sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Please turn on all the cluster nodes, log on to the master\n");
+        printf("|          node, and run: " HIGH_GREEN_BOLD "sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY WARN_YELLO_BOLD "\n" RESET_DISPLAY);
     }
     else{
         if(reinit_flag==0){
