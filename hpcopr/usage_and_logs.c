@@ -19,8 +19,9 @@
 #include "general_funcs.h"
 #include "usage_and_logs.h"
 
-int view_system_logs(char* logfile, char* view_option){
+int view_system_logs(char* logfile, char* view_option, char* export_dest){
     char cmdline[CMDLINE_LENGTH]="";
+    int run_flag;
     if(file_exist_or_not(logfile)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the specified log. Either you haven't init your first\n");
         printf("|          cluster, or there are internal errors. Exit now.\n" RESET_DISPLAY);
@@ -28,18 +29,31 @@ int view_system_logs(char* logfile, char* view_option){
     }
     sprintf(cmdline,"%s %s %s.tmp %s",COPY_FILE_CMD,logfile,logfile,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
-    if(strcmp(view_option,"more")==0){
+    if(strcmp(view_option,"read")==0){
         sprintf(cmdline,"more %s.tmp",logfile);
     }
     else{
         sprintf(cmdline,"%s %s.tmp",CAT_FILE_CMD,logfile);
     }
     system(cmdline);
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " You can use '" HIGH_GREEN_BOLD ">" RESET_DISPLAY "' to store the latest logs to a file.\n");
-    printf("|          Example: " HIGH_GREEN_BOLD "hpcopr history > hpcopr_hist.csv" RESET_DISPLAY " CSV is highly recommended.\n");
-    printf("|          Example: " HIGH_GREEN_BOLD "hpcopr usage > hpcopr_usg.csv" RESET_DISPLAY " CSV is highly recommended.\n");
-    printf("|          Example: " HIGH_GREEN_BOLD "hpcopr syserr > hpcopr_syserr.txt" RESET_DISPLAY "\n");
-    return 0;
+    if(strlen(export_dest)==0){
+        printf(GENERAL_BOLD "\n[ -DONE- ]" RESET_DISPLAY " You can also export the latest logs to a file.\n");
+        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr history ~/hpcopr_history.csv" RESET_DISPLAY " .\n");
+        return 0;
+    }
+    else{
+        sprintf(cmdline,"%s %s %s %s",COPY_FILE_CMD,logfile,export_dest,SYSTEM_CMD_REDIRECT);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            printf(FATAL_RED_BOLD "\n[ FATAL: ] Failed to export the log to " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " .\n",export_dest);
+            printf("|          Please check the path. Exit now.\n" RESET_DISPLAY);
+            return 1;
+        }
+        else{
+            printf(GENERAL_BOLD "\n[ -DONE- ] The latest log has been successfully exported to " HIGH_GREEN_BOLD "%s"  RESET_DISPLAY" .\n",export_dest);
+            return 0;
+        }
+    }
 }
 
 int write_operation_log(char* cluster_name, char* operation_logfile, char* operation, char* description, int runflag){

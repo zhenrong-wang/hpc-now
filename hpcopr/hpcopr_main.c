@@ -179,7 +179,7 @@ int main(int argc, char* argv[]){
     }
 
     if(argc==1){
-        print_help();
+        print_help("");
         return 0;
     }
 
@@ -190,7 +190,12 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"help")==0){
-        print_help();
+        if(argc==2){
+            print_help("");
+        }
+        else{
+            print_help(argv[2]);
+        }
         return 0;
     }
 
@@ -599,10 +604,18 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"usage")==0){
         if(argc==2){
-            run_flag=view_system_logs(usage_log,"");
+            run_flag=view_system_logs(usage_log,"","");
+        }
+        else if(argc==3){
+            if(strcmp(argv[2],"read")!=0&&strcmp(argv[2],"print")!=0){
+                run_flag=view_system_logs(usage_log,"",argv[2]);
+            }
+            else{
+                run_flag=view_system_logs(usage_log,argv[2],"");
+            }
         }
         else{
-            run_flag=view_system_logs(usage_log,argv[2]);
+            run_flag=view_system_logs(usage_log,argv[2],argv[3]);
         }
         if(run_flag==-1){
             write_operation_log("NULL",operation_log,argv[1],"FILE_I/O_ERROR",127);
@@ -615,10 +628,18 @@ int main(int argc, char* argv[]){
     }
     if(strcmp(argv[1],"history")==0){
         if(argc==2){
-            run_flag=view_system_logs(operation_log,"");
+            run_flag=view_system_logs(operation_log,"","");
+        }
+        else if(argc==3){
+            if(strcmp(argv[2],"read")!=0&&strcmp(argv[2],"print")!=0){
+                run_flag=view_system_logs(operation_log,"",argv[2]);
+            }
+            else{
+                run_flag=view_system_logs(operation_log,argv[2],"");
+            }
         }
         else{
-            run_flag=view_system_logs(operation_log,argv[2]);
+            run_flag=view_system_logs(operation_log,argv[2],argv[3]);
         }
         if(run_flag==-1){
             write_operation_log("NULL",operation_log,argv[1],"FILE_I/O_ERROR",127);
@@ -632,10 +653,18 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"syserr")==0){
         if(argc==2){
-            run_flag=view_system_logs(syserror_log,"");
+            run_flag=view_system_logs(syserror_log,"","");
+        }
+        else if(argc==3){
+            if(strcmp(argv[2],"read")!=0&&strcmp(argv[2],"print")!=0){
+                run_flag=view_system_logs(syserror_log,"",argv[2]);
+            }
+            else{
+                run_flag=view_system_logs(syserror_log,argv[2],"");
+            }
         }
         else{
-            run_flag=view_system_logs(syserror_log,argv[2]);
+            run_flag=view_system_logs(syserror_log,argv[2],argv[3]);
         }
         if(run_flag==-1){
             write_operation_log("NULL",operation_log,argv[1],"FILE_I/O_ERROR",127);
@@ -880,16 +909,16 @@ int main(int argc, char* argv[]){
             run_flag=rotate_new_keypair(workdir,"","",crypto_keyfile,argv[2]);
         }
         else if(argc==4){
-            if(strcmp(argv[2],"echo")==0){
+            if(strcmp(argv[3],"echo")==0){
                 run_flag=rotate_new_keypair(workdir,"","",crypto_keyfile,"echo");
             }
             else{
-                run_flag=rotate_new_keypair(workdir,argv[2],argv[3],crypto_keyfile,"echo");
+                run_flag=rotate_new_keypair(workdir,argv[2],argv[3],crypto_keyfile,"");
             }
         }
         else{
-            if(strcmp(argv[2],"echo")==0){
-                run_flag=rotate_new_keypair(workdir,argv[3],argv[4],crypto_keyfile,"echo");
+            if(strcmp(argv[4],"echo")==0){
+                run_flag=rotate_new_keypair(workdir,argv[2],argv[3],crypto_keyfile,"echo");
             }
             else{
                 run_flag=rotate_new_keypair(workdir,argv[2],argv[3],crypto_keyfile,"");
@@ -1161,7 +1190,7 @@ int main(int argc, char* argv[]){
             return 5;
         }
         if(strcmp(argv[1],"userman")==0){
-            print_usrmgr_info();
+            print_usrmgr_info("");
             write_operation_log(current_cluster_name,operation_log,argv[1],"TOO_FEW_PARAM",5);
             check_and_cleanup(workdir);
             return 5;
@@ -1192,10 +1221,15 @@ int main(int argc, char* argv[]){
 
     if(cluster_asleep_or_not(workdir)==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
-        printf("|          Command: hpcopr wakeup minimal|all. Exit now.\n" RESET_DISPLAY);
-        write_operation_log(current_cluster_name,operation_log,argv[1],"CLUSTER_IS_ASLEEP",13);
+        if(strcmp(argv[1],"addc")==0){
+            printf("|          Command: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY);
+        }
+        else{
+            printf("|          Command: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup minimal | all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY);
+        }
+        write_operation_log(current_cluster_name,operation_log,argv[1],"CLUSTER_IS_ASLEEP",43);
         check_and_cleanup(workdir);
-        return 13;
+        return 43;
     }
     
     if(strcmp(argv[1],"delc")==0){
@@ -1309,7 +1343,7 @@ int main(int argc, char* argv[]){
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
             write_operation_log(current_cluster_name,operation_log,argv[1],"USER_DENIED",3);
             check_and_cleanup(workdir);
-            return -1;
+            return 3;
         }
         run_flag=reconfigure_master_node(workdir,crypto_keyfile,argv[2]);
         sprintf(string_temp,"%s %s",argv[1],argv[2]);
@@ -1320,15 +1354,16 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"userman")==0){
         if(strcmp(argv[2],"add")!=0&&strcmp(argv[2],"delete")!=0&&strcmp(argv[2],"enable")!=0&&strcmp(argv[2],"disable")!=0&&strcmp(argv[2],"list")!=0&&strcmp(argv[2],"passwd")!=0){
-            print_usrmgr_info();
+            print_usrmgr_info("");
+            write_operation_log(current_cluster_name,operation_log,argv[1],"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
-            return -6;
+            return 9;
         }
         usrmgr_check_flag=usrmgr_prereq_check(workdir,argv[2]);
         if(usrmgr_check_flag==3){
             check_and_cleanup(workdir);
-            write_operation_log(current_cluster_name,operation_log,"INTERNAL","USERMAN_PREREQ_CHECK_FAILED",run_flag);
-            return -7;
+            write_operation_log(current_cluster_name,operation_log,"INTERNAL","USERMAN_PREREQ_CHECK_FAILED",77);
+            return 77;
         }
         if(strcmp(argv[2],"list")==0){
             printf("\n");
@@ -1400,6 +1435,7 @@ int main(int argc, char* argv[]){
             return run_flag;
         }
     }
-    check_and_cleanup(workdir);
-    return 127;
+    write_operation_log(NULL,operation_log,argv[2],"FATAL_ABNORMAL",run_flag);
+    check_and_cleanup("");
+    return 123;
 }
