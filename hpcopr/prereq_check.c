@@ -654,16 +654,14 @@ int command_name_check(char* command_name_input, char* command_prompt){
             }
             diff_current+=abs(*(command_name_input+j)-*(commands[i]+j));  
         }
+        if(*(command_name_input+j+1)==*(commands[i]+j+1)){
+            equal_flag++;
+        }
 //        printf("%s,%d,%d,%d,%d\n",commands[i],equal_flag,closest,diff_current,diff_prev);
         if(equal_flag>equal_flag_prev&&diff_current<diff_prev){
             closest=i;
             equal_flag_prev=equal_flag;
-            if(equal_flag_prev>2){
-                diff_prev=0;
-            }
-            else{
-                diff_prev=diff_current;
-            }
+            diff_prev=diff_current;
             continue;
         }
     }

@@ -858,16 +858,21 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"viewlog")==0){
         if(argc==2){
-            view_run_log(workdir,"","","");
+            run_flag=view_run_log(workdir,"","","");
         }
         else if(argc==3){
-            view_run_log(workdir,argv[2],"","");
+            run_flag=view_run_log(workdir,argv[2],"","");
         }
         else if(argc==4){
-            view_run_log(workdir,argv[2],argv[3],"");
+            run_flag=view_run_log(workdir,argv[2],argv[3],"");
         }
         else{
-            view_run_log(workdir,argv[2],argv[3],argv[4]);
+            run_flag=view_run_log(workdir,argv[2],argv[3],argv[4]);
+        }
+        if(run_flag==-1){
+            write_operation_log(current_cluster_name,operation_log,argv[1],"FILE_I/O_ERROR",127);
+            check_and_cleanup(current_cluster_name);
+            return 127;
         }
         write_operation_log(current_cluster_name,operation_log,argv[1],argv[2],0);
         check_and_cleanup(workdir);

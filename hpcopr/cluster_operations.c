@@ -2067,7 +2067,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     return 0;
 }
 
-void view_run_log(char* workdir, char* stream, char* run_option, char* view_option){
+int view_run_log(char* workdir, char* stream, char* run_option, char* view_option){
     char logfile[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char real_stream[16]="";
@@ -2101,9 +2101,13 @@ void view_run_log(char* workdir, char* stream, char* run_option, char* view_opti
             sprintf(logfile,"%s.archive",OPERATION_ERROR_LOG);
         }
     }
+    if(file_exist_or_not(logfile)!=0){
+        return -1;
+    }
     if(strcmp(view_option,"print")==0){
         sprintf(cmdline,"%s %s",CAT_FILE_CMD,logfile);
         system(cmdline);
+        return 0;
     }
     else{
 #ifdef _WIN32
@@ -2114,5 +2118,6 @@ void view_run_log(char* workdir, char* stream, char* run_option, char* view_opti
         sprintf(cmdline,"tail -f %s",logfile);
         system(cmdline);
 #endif
+        return 0;
     }
 }
