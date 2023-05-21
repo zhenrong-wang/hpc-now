@@ -635,19 +635,19 @@ int main(int argc, char* argv[]){
         current_cluster_flag=show_current_cluster(workdir,current_cluster_name,2);
         if(current_cluster_flag!=0){
             write_operation_log("NULL",operation_log,argv[1],"NOT_OPERATING_CLUSTERS",25);
-            check_and_cleanup(workdir);
+            check_and_cleanup("");
             return 25;
         }
         if(exit_current_cluster()==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exit the current cluster %s.\n",current_cluster_name);
             write_operation_log(current_cluster_name,operation_log,argv[1],"SUCCEEDED",0);
-            check_and_cleanup(workdir);
+            check_and_cleanup("");
             return 0;
         }
         else{
             printf(FATAL_RED_BOLD "[ -INFO- ] Failed to exit the current cluster %s.\n" RESET_DISPLAY,current_cluster_name);
             write_operation_log(current_cluster_name,operation_log,argv[1],"OPERATION_FAILED",35);
-            check_and_cleanup(workdir);
+            check_and_cleanup("");
             return 35;
         }
     }

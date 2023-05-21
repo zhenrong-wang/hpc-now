@@ -630,9 +630,9 @@ int check_and_install_prerequisitions(int repair_flag){
 int command_name_check(char* command_name_input, char* command_prompt){
     int i;
     int j;
-    int diff_prev=1024;
     int diff_current=0;
-    int equal_flag=0;
+    int diff_prev=1024;
+    int equal_flag;
     int equal_flag_prev=0;
     int compare_length=0;
     int closest=0;
@@ -640,39 +640,31 @@ int command_name_check(char* command_name_input, char* command_prompt){
         if(strcmp(command_name_input,commands[i])==0){
             return 0;
         }
+        diff_current=0;
+        equal_flag=0;
+        if(strlen(commands[i])<strlen(command_name_input)){
+            compare_length=strlen(commands[i]);
+        }
         else{
-            diff_current=0;
-            if(strlen(commands[i])<strlen(command_name_input)){
-                compare_length=strlen(commands[i]);
+            compare_length=strlen(command_name_input);
+        }
+        for(j=0;j<compare_length-1;j++){
+            if(*(command_name_input+j)==*(commands[i]+j)&&*(command_name_input+j+1)==*(commands[i]+j+1)){
+                equal_flag++;
+            }
+            diff_current+=abs(*(command_name_input+j)-*(commands[i]+j));  
+        }
+//        printf("%s,%d,%d,%d,%d\n",commands[i],equal_flag,closest,diff_current,diff_prev);
+        if(equal_flag>equal_flag_prev&&diff_current<diff_prev){
+            closest=i;
+            equal_flag_prev=equal_flag;
+            if(equal_flag_prev>2){
+                diff_prev=0;
             }
             else{
-                compare_length=strlen(command_name_input);
-            }
-            equal_flag=0;
-            for(j=0;j<compare_length;j++){
-                if(*(command_name_input+j)==*(commands[i]+j)){
-                    equal_flag++;
-                    continue;
-                }
-                diff_current+=abs(*(command_name_input+j)-*(commands[i]+j));  
-            }
-//           printf("%s,%d,\n",commands[i],equal_flag);
-            if(equal_flag>2){
-                closest=i;
-                equal_flag_prev=equal_flag;
-                diff_prev=0;
-                continue;
-            }
-            if(equal_flag>equal_flag_prev){
-                equal_flag_prev=equal_flag;
                 diff_prev=diff_current;
-                closest=i;
-                continue;
             }
-            if(diff_current<diff_prev){
-                diff_prev=diff_current;
-                closest=i;
-            }
+            continue;
         }
     }
     strcpy(command_prompt,commands[closest]);
