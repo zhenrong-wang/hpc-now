@@ -963,6 +963,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
     char filename_temp[FILENAME_LENGTH]="";
+    char unique_cluster_id[32]="";
     char username[32]="";
     char password[32]="";
     char enable_flag[16]="";
@@ -986,6 +987,10 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
     if(file_p==NULL){
         return -1;
     }
+    if(get_ucid(workdir,unique_cluster_id)==-1){
+        fclose(file_p);
+        return -1;
+    }
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(filename_temp,"r");
     if(file_p_2==NULL){
@@ -994,24 +999,29 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
     }
 
     printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n" RESET_DISPLAY);
-    while(fgetline(file_p,single_line)==0&&i<8){
+    printf(GENERAL_BOLD "| Unique Cluster ID: " RESET_DISPLAY "%s\n",unique_cluster_id);
+    printf(WARN_YELLO_BOLD "+-------------- CLUSTER PORTAL AND *CREDENTIALS* ----------------+\n" RESET_DISPLAY);
+    fgetline(file_p,single_line);
+    while(fgetline(file_p,single_line)==0&&i<7){
         if(strlen(single_line)!=0){
             if(contain_or_not(single_line,"Address")==0){
                 get_seq_string(single_line,' ',3,bucket_header);
                 get_seq_string(single_line,' ',4,bucket_name);
                 printf(GENERAL_BOLD "| NetDisk Address: " RESET_DISPLAY "%s%s\n",bucket_header,bucket_name);
-                
             }
             else{
                 get_seq_string(single_line,':',1,header_string);
                 get_seq_string(single_line,':',2,tail_string);
                 if(contain_or_not(single_line,"Password")==0){
                     if(strcmp(root_flag,"root")==0){
-                        printf(GENERAL_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
+                        printf(FATAL_RED_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
                     }
                 }
                 else if(contain_or_not(single_line,"Key")==0){
                     printf(GENERAL_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
+                }
+                else if(contain_or_not(single_line,"Master Node IP")==0&&strlen(tail_string)<7){
+                    printf(GENERAL_BOLD "| %s:" RESET_DISPLAY WARN_YELLO_BOLD " NOT_RUNNING\n" RESET_DISPLAY,header_string);
                 }
                 else{
                     printf(GENERAL_BOLD "| %s:" RESET_DISPLAY "%s\n",header_string,tail_string);
