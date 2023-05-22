@@ -669,25 +669,29 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto.exe /grant hpc-now:F /t > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
 #elif __linux__
-    sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
-    system(cmdline1);
     system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
     if(file_exist_or_not("/home/hpc-now/LICENSES/GPL-2")!=0){
         sprintf(cmdline1,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
         system(cmdline1);
     }
     system("chown -R hpc-now:hpc-now /usr/.hpc-now/.bin >> /dev/null 2>&1");
+    system("chmod -R 700 /home/hpc-now/ >> /dev/null 2>&1");
+    system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
+    sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    system(cmdline1);
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
 #elif __APPLE__
-    sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
-    system(cmdline1);
     system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
     if(file_exist_or_not("/Users/hpc-now/LICENSES/GPL-2")!=0){
         sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/LICENSES/GPL-2",URL_LICENSE);
         system(cmdline1);
     }
     system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.bin >> /dev/null 2>&1");
+    system("chmod -R 700 /Users/hpc-now/ >> /dev/null 2>&1");
+    system("chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
+    sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    system(cmdline1);
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
 #endif
