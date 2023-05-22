@@ -62,6 +62,18 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
 int usrmgr_prereq_check(char* workdir, char* option);
 void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_flag);
 
+void get_workdir(char* cluster_workdir, char* cluster_name);
+int create_cluster_registry(void);
+/*  
+ * If silent_flag==1, verbose. Will tell the user which cluster is active
+ * If silent_flag==0, silent. Will print nothing
+ * If silent_flag== other_number, Will only show the warning
+ */
+int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag);
+int current_cluster_or_not(char* current_indicator, char* cluster_name);
+int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output);
+int check_and_cleanup(char* prev_workdir);
+
 //int create_protection(char* workdir, int minutes);
 //int check_protection(char* workdir);
 //int delete_protection(char* workdir);

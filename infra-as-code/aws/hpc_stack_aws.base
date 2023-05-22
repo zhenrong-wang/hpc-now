@@ -69,12 +69,12 @@ variable "database_acct_passwd" {
 // cn-northwest-1 & cn-north-1
 variable "centos7cn" {
   type = list(string)
-  default = ["ami-0a82540eb34dc198a", "ami-0fa5d1b0525c24789"]
+  default = ["ami-0ee38a9c5b0041790", "ami-07b25971c84bdb99c"]
 }
 
 variable "centoss9cn" {
   type = list(string)
-  default = ["ami-0c05d3ac21c731fe7", "ami-0500471e9279f267f"]
+  default = ["ami-07d77cc6035050dd4", "ami-0e574877e2ad223ae"]
 }
 
 // us-east-1 & us-east-2

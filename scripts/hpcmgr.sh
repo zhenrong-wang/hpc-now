@@ -225,6 +225,11 @@ if [ $1 = 'quick' ]; then
   echo -e "[ STEP 2 ] Restarting services on the compute node(s) ..."
   for i in $( seq 1 $NODE_NUM )
   do
+    ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
+    if [ $? -ne 0 ]; then
+      echo -e "\n Node ${i} is unreachable." >> ${logfile}
+      continue
+    fi
     ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged" >> $logfile 2>&1
     ssh compute${i} "systemctl restart slurmd" >> $logfile 2>&1
     scontrol update NodeName=compute${i} State=DOWN Reason=hung_completing

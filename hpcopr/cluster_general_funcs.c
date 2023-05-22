@@ -21,6 +21,7 @@
 #include "general_funcs.h"
 #include "time_process.h"
 #include "cluster_general_funcs.h"
+#include "general_print_info.h"
 
 int get_crypto_key(char* crypto_key_filename, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
@@ -608,6 +609,8 @@ int archive_log(char* logarchive, char* logfile){
     }
     fclose(file_p_2);
     fclose(file_p);
+    file_p_2=fopen(logfile,"w+");
+    fclose(file_p_2);
     return 0;
 }
 
@@ -632,42 +635,48 @@ void update_compute_template(char* stackdir, char* cloud_flag){
     single_file_to_running(filename_temp,cloud_flag);
 }
 
-int wait_for_complete(char* workdir, char* option, char* errorlog, int silent_flag){
-    char cmdline[CMDLINE_LENGTH]="";
-    char stackdir[DIR_LENGTH]="";
-    char logdir[DIR_LENGTH]="";
+int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, int silent_flag){
+//    char cmdline[CMDLINE_LENGTH]="";
     int i=0;
     int total_minutes=0;
     char* annimation="\\|/-";
-
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
+    char findkey[32]="";
     if(strcmp(option,"init")==0){
-        sprintf(cmdline,"%s %s%stf_prep.log | %s successfully | %s initialized! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
+        strcpy(findkey,"successfully initialized!");
+        //sprintf(cmdline,"%s %s | %s successfully | %s initialized! %s",CAT_FILE_CMD,tf_realtime_log,GREP_CMD,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=1;
     }
-    else{
-        sprintf(cmdline,"%s %s%stf_prep.log | %s complete! %s",CAT_FILE_CMD,logdir,PATH_SLASH,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
+    else if(strcmp(option,"apply")==0){
+        strcpy(findkey,"Apply complete!");
+        //sprintf(cmdline,"%s %s | %s complete! %s",CAT_FILE_CMD,tf_realtime_log,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=3;
     }
-    while(system(cmdline)!=0&&i<MAXIMUM_WAIT_TIME){
+    else if(strcmp(option,"destroy")==0){
+        strcpy(findkey,"Destroy complete!");
+        total_minutes=3;
+    }
+    else{
+        printf(FATAL_RED_BOLD "[ FATAL: ] TF_OPTION_NOT_SUPPORTED.\n" RESET_DISPLAY);
+        return -127;
+    }
+    while(find_multi_keys(tf_realtime_log,findkey,"","","","")<1&&i<MAXIMUM_WAIT_TIME){
         if(silent_flag!=0){
             fflush(stdin);
-            printf("[ -WAIT- ] This may need %d min(s). %d sec(s) passed ... (%c)\r",total_minutes,i,*(annimation+i%4));
+            printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " This may need %d min(s). %d sec(s) passed ... (%c)\r",total_minutes,i,*(annimation+i%4));
             fflush(stdout);
         }
         i++;
         sleep(1);
         if(file_empty_or_not(errorlog)>0){
             if(silent_flag!=0){
-                printf("\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_ERROR.\n" RESET_DISPLAY);
             }
             return 127;
         }
     }
     if(i==MAXIMUM_WAIT_TIME){
         if(silent_flag!=0){
-            printf("\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_TIMEOUT.\n" RESET_DISPLAY);
         }
         return 1;
     }
@@ -805,8 +814,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     char tf_realtime_log[FILENAME_LENGTH];
     char tf_realtime_log_archive[FILENAME_LENGTH];
     char tf_error_log_archive[FILENAME_LENGTH];
-    int run_flag=0;
-    int wait_flag=0;
+
     create_and_get_stackdir(workdir,stackdir);
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_realtime_log_archive,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
@@ -814,13 +822,12 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     archive_log(tf_realtime_log_archive,tf_realtime_log);
     archive_log(tf_error_log_archive,error_log);
     sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,error_log);
-    run_flag=system(cmdline);
+    system(cmdline);
     if(silent_flag!=0){
-        printf(WARN_YELLO_BOLD "[ -INFO- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
-        printf("|          Command: %s. Error log: %s\n" RESET_DISPLAY,execution_name,error_log);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
+        printf("|          Command: %s. View log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr viewlog std|err\n" RESET_DISPLAY,execution_name);
     }
-    wait_flag=wait_for_complete(workdir,execution_name,error_log,1);
-    if(file_empty_or_not(error_log)!=0||run_flag!=0||wait_flag!=0){
+    if(wait_for_complete(tf_realtime_log,execution_name,error_log,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,error_log);
         return -1;
@@ -956,6 +963,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
     char filename_temp[FILENAME_LENGTH]="";
+    char unique_cluster_id[32]="";
     char username[32]="";
     char password[32]="";
     char enable_flag[16]="";
@@ -965,7 +973,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
     char bucket_name[32]="";
     int i=0;
     if(cluster_empty_or_not(workdir)==0){
-        return -1;
+        return 1;
     }
     get_crypto_key(crypto_keyfile,md5sum);
     create_and_get_vaultdir(workdir,vaultdir);
@@ -979,6 +987,10 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
     if(file_p==NULL){
         return -1;
     }
+    if(get_ucid(workdir,unique_cluster_id)==-1){
+        fclose(file_p);
+        return -1;
+    }
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(filename_temp,"r");
     if(file_p_2==NULL){
@@ -987,24 +999,29 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
     }
 
     printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n" RESET_DISPLAY);
-    while(fgetline(file_p,single_line)==0&&i<8){
+    printf(GENERAL_BOLD "| Unique Cluster ID: " RESET_DISPLAY "%s\n",unique_cluster_id);
+    printf(WARN_YELLO_BOLD "+-------------- CLUSTER PORTAL AND *CREDENTIALS* ----------------+\n" RESET_DISPLAY);
+    fgetline(file_p,single_line);
+    while(fgetline(file_p,single_line)==0&&i<7){
         if(strlen(single_line)!=0){
             if(contain_or_not(single_line,"Address")==0){
                 get_seq_string(single_line,' ',3,bucket_header);
                 get_seq_string(single_line,' ',4,bucket_name);
                 printf(GENERAL_BOLD "| NetDisk Address: " RESET_DISPLAY "%s%s\n",bucket_header,bucket_name);
-                
             }
             else{
                 get_seq_string(single_line,':',1,header_string);
                 get_seq_string(single_line,':',2,tail_string);
                 if(contain_or_not(single_line,"Password")==0){
                     if(strcmp(root_flag,"root")==0){
-                        printf(GENERAL_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
+                        printf(FATAL_RED_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
                     }
                 }
                 else if(contain_or_not(single_line,"Key")==0){
                     printf(GENERAL_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
+                }
+                else if(contain_or_not(single_line,"Master Node IP")==0&&strlen(tail_string)<7){
+                    printf(GENERAL_BOLD "| %s:" RESET_DISPLAY WARN_YELLO_BOLD " NOT_RUNNING\n" RESET_DISPLAY,header_string);
                 }
                 else{
                     printf(GENERAL_BOLD "| %s:" RESET_DISPLAY "%s\n",header_string,tail_string);
@@ -1041,14 +1058,14 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
 
 int confirm_to_operate_cluster(char* current_cluster_name){
     char doubleconfirm[64]="";
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster %s now, which may affect\n",current_cluster_name);
-    printf("|          the resources|data|jobs. Please input 'y-e-s' to continue.\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster" HIGH_GREEN_BOLD " %s" RESET_DISPLAY " now, which may affect\n",current_cluster_name);
+    printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " to continue.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
     getchar();
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to continue. You chose to deny this operation.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to continue. You chose to deny this operation.\n");
         printf("|          Nothing changed. Exit now.\n");
         return 1;
     }
@@ -1146,6 +1163,7 @@ int tail_f_for_windows(char* filename){
         return -1;
     }
     fseek(file_p,-1,SEEK_END);
+    printf(WARN_YELLO_BOLD "[ -INFO- ] MAXIMUM DURATION: 30s.\n" RESET_DISPLAY);
     while(1){
         time(&current_time);
         if((ch=fgetc(file_p))!=EOF){
@@ -1661,7 +1679,7 @@ int usrmgr_prereq_check(char* workdir, char* option){
         printf("|            3. sudo hpcmgr connect\n");
         printf("|            4. sudo hpcmgr all\n" RESET_DISPLAY);
         printf(GENERAL_BOLD "|          You can also exit now, run" RESET_DISPLAY HIGH_GREEN_BOLD " 'hpcopr wakeup all'" RESET_DISPLAY GENERAL_BOLD " and then manage the users.\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue? Only 'y-e-s' is accepted.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted.\n");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
         scanf("%s",confirm);
@@ -1687,6 +1705,143 @@ void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_fla
     else{
         printf(WARN_YELLO_BOLD "[ -WARN- ] You *MUST* run the commands above to update the cluster users.\n" RESET_DISPLAY);
     }
+}
+
+void get_workdir(char* cluster_workdir, char* cluster_name){
+    sprintf(cluster_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,PATH_SLASH);
+}
+
+int create_cluster_registry(void){
+    FILE* file_p=NULL;
+    if(file_exist_or_not(ALL_CLUSTER_REGISTRY)==0){
+        return 0;
+    }
+    file_p=fopen(ALL_CLUSTER_REGISTRY,"w+");
+    if(file_p==NULL){
+        return 1;
+    }
+    else{
+        fclose(file_p);
+        return 0;
+    }
+}
+
+/*  
+ * If silent_flag==1, verbose. Will tell the user which cluster is active
+ * If silent_flag==0, silent. Will print nothing
+ * If silent_flag== other_number, Will only show the warning
+ */
+
+int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag){
+    FILE* file_p=NULL;
+    if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)==0){
+        if(silent_flag!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Currently you are not operating any cluster.\n" RESET_DISPLAY);
+        }
+        return 1;
+    }
+    else{
+        file_p=fopen(CURRENT_CLUSTER_INDICATOR,"r");
+        fscanf(file_p,"%s",current_cluster_name);
+        if(silent_flag==1){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Current cluster:" HIGH_GREEN_BOLD " %s" RESET_DISPLAY ".\n",current_cluster_name);
+        }
+        fclose(file_p);
+        get_workdir(cluster_workdir,current_cluster_name);
+        return 0;
+    }
+}
+
+int current_cluster_or_not(char* current_indicator, char* cluster_name){
+    char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    FILE* file_p=fopen(current_indicator,"r");
+    if(file_p==NULL){
+        return 1;
+    }
+    fscanf(file_p,"%s",current_cluster_name);
+    if(strcmp(current_cluster_name,cluster_name)!=0){
+        fclose(file_p);
+        return -1;
+    }
+    fclose(file_p);
+    return 0;
+}
+
+int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
+    int i, name_flag;
+    char real_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
+    if(strlen(cluster_name)==0){
+        generate_random_string(cluster_name_output);
+        name_flag=-1;
+    }
+    for(i=0;i<strlen(cluster_name);i++){
+        if(*(cluster_name+i)=='-'||*(cluster_name+i)=='0'||*(cluster_name+i)=='9'){
+            continue;
+        }
+        if(*(cluster_name+i)>'0'&&*(cluster_name+i)<'9'){
+            continue;
+        }
+        if(*(cluster_name+i)<'A'||*(cluster_name+i)>'z'){
+            return 127;
+        }
+        else if(*(cluster_name+i)>'Z'&&*(cluster_name+i)<'a'){
+            return 127;
+        }
+    }
+    if(strlen(cluster_name)<CLUSTER_ID_LENGTH_MIN){
+        sprintf(cluster_name_output,"%s-hpcnow",cluster_name);
+        name_flag=1;
+    }
+    else if(strlen(cluster_name)>CLUSTER_ID_LENGTH_MAX){
+        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
+            *(cluster_name_output+i)=*(cluster_name+i);
+        }
+        *(cluster_name_output+CLUSTER_ID_LENGTH_MAX)='\0'; //THIS SHOULD BE SECURE.
+        name_flag=2;
+    }
+    else{
+        strcpy(cluster_name_output,cluster_name);
+        name_flag=0;
+    }
+    sprintf(real_cluster_name_with_prefix,"< cluster name: %s >",cluster_name_output);
+    if(find_multi_keys(ALL_CLUSTER_REGISTRY,real_cluster_name_with_prefix,"","","","")>0){
+        return -127;
+    }
+    return name_flag;
+}
+
+int check_and_cleanup(char* prev_workdir){
+    char current_workdir[DIR_LENGTH]="";
+    char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    if(strlen(prev_workdir)!=0){
+        if(show_current_cluster(current_workdir,current_cluster_name,0)==1){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Another hpcopr thread exited the current cluster.\n" RESET_DISPLAY);
+        }
+        else{
+            if(strcmp(current_workdir,prev_workdir)!=0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The active cluster has been switched to" RESET_DISPLAY HIGH_CYAN_BOLD " %s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,current_cluster_name);
+            }
+        }
+    }
+#ifdef _WIN32
+    FILE* file_p=NULL;
+    char cmdline[CMDLINE_LENGTH]="";
+    char appdata_dir[DIR_LENGTH]="";
+    system("echo %APPDATA% > c:\\programdata\\appdata.txt.tmp");
+    file_p=fopen("c:\\programdata\\appdata.txt.tmp","r");
+    fscanf(file_p,"%s",appdata_dir);
+    fclose(file_p);
+    system("del /f /s /q c:\\programdata\\appdata.txt.tmp > nul 2>&1");
+    
+    sprintf(cmdline,"del /f /s /q %s\\Microsoft\\Windows\\Recent\\* > nul 2>&1",appdata_dir);
+    system(cmdline);
+    sprintf(cmdline,"rd /q /s %s\\Microsoft\\Windows\\Recent\\ > nul 2>&1",appdata_dir);
+    system(cmdline);
+#else
+    //Keep it here for further use. 
+#endif
+    print_tail();
+    return 0;
 }
 
 /*int create_protection(char* workdir, int minutes){

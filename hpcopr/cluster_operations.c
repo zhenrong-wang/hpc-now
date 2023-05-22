@@ -28,109 +28,6 @@
 extern char url_code_root_var[LOCATION_LENGTH];
 extern int code_loc_flag_var;
 
-void get_workdir(char* cluster_workdir, char* cluster_name){
-    sprintf(cluster_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,PATH_SLASH);
-}
-
-int create_cluster_registry(void){
-    FILE* file_p=NULL;
-    if(file_exist_or_not(ALL_CLUSTER_REGISTRY)==0){
-        return 0;
-    }
-    file_p=fopen(ALL_CLUSTER_REGISTRY,"w+");
-    if(file_p==NULL){
-        return 1;
-    }
-    else{
-        fclose(file_p);
-        return 0;
-    }
-}
-
-/*  
- * If silent_flag==1, verbose. Will tell the user which cluster is active
- * If silent_flag==0, silent. Will print nothing
- * If silent_flag== other_number, Will only show the warning
- */
-
-int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag){
-    FILE* file_p=NULL;
-    if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)==0){
-        if(silent_flag!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Currently you are not operating any cluster.\n" RESET_DISPLAY);
-        }
-        return 1;
-    }
-    else{
-        file_p=fopen(CURRENT_CLUSTER_INDICATOR,"r");
-        fscanf(file_p,"%s",current_cluster_name);
-        if(silent_flag==1){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Current cluster: %s\n",current_cluster_name);
-        }
-        fclose(file_p);
-        get_workdir(cluster_workdir,current_cluster_name);
-        return 0;
-    }
-}
-
-int current_cluster_or_not(char* current_indicator, char* cluster_name){
-    char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    FILE* file_p=fopen(current_indicator,"r");
-    if(file_p==NULL){
-        return 1;
-    }
-    fscanf(file_p,"%s",current_cluster_name);
-    if(strcmp(current_cluster_name,cluster_name)!=0){
-        fclose(file_p);
-        return -1;
-    }
-    fclose(file_p);
-    return 0;
-}
-
-int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
-    int i, name_flag;
-    char real_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
-    if(strlen(cluster_name)==0){
-        generate_random_string(cluster_name_output);
-        name_flag=-1;
-    }
-    for(i=0;i<strlen(cluster_name);i++){
-        if(*(cluster_name+i)=='-'||*(cluster_name+i)=='0'||*(cluster_name+i)=='9'){
-            continue;
-        }
-        if(*(cluster_name+i)>'0'&&*(cluster_name+i)<'9'){
-            continue;
-        }
-        if(*(cluster_name+i)<'A'||*(cluster_name+i)>'z'){
-            return 127;
-        }
-        else if(*(cluster_name+i)>'Z'&&*(cluster_name+i)<'a'){
-            return 127;
-        }
-    }
-    if(strlen(cluster_name)<CLUSTER_ID_LENGTH_MIN){
-        sprintf(cluster_name_output,"%s-hpcnow",cluster_name);
-        name_flag=1;
-    }
-    else if(strlen(cluster_name)>CLUSTER_ID_LENGTH_MAX){
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_name_output+i)=*(cluster_name+i);
-        }
-        *(cluster_name_output+CLUSTER_ID_LENGTH_MAX)='\0'; //THIS SHOULD BE SECURE.
-        name_flag=2;
-    }
-    else{
-        strcpy(cluster_name_output,cluster_name);
-        name_flag=0;
-    }
-    sprintf(real_cluster_name_with_prefix,"< cluster name: %s >",cluster_name_output);
-    if(find_multi_keys(ALL_CLUSTER_REGISTRY,real_cluster_name_with_prefix,"","","","")>0){
-        return -127;
-    }
-    return name_flag;
-}
-
 int exit_current_cluster(void){
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
@@ -148,8 +45,8 @@ int switch_to_cluster(char* target_cluster_name){
     }
     if(show_current_cluster(temp_workdir,temp_cluster_name,0)==0){
         if(strcmp(temp_cluster_name,target_cluster_name)==0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster %s now. No need to switch.\n",target_cluster_name);
-            return 1;
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " now. No need to switch.\n",target_cluster_name);
+            return 3;
         }
     }
     file_p=fopen(current_cluster,"w+");
@@ -159,7 +56,7 @@ int switch_to_cluster(char* target_cluster_name){
     }
     fprintf(file_p,"%s",target_cluster_name);
     fclose(file_p);
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully switched to the cluster %s.\n",target_cluster_name);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully switched to the cluster " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",target_cluster_name);
     return 0;
 }
 
@@ -307,7 +204,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     fclose(file_p);
     if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
-        return -1;
+        return 3;
     }
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
@@ -353,14 +250,14 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
                 printf("|*   PLEASE MAKE SURE CURRENTLY THE CLUSTER IS *NOT* IN A OPERATION PROGRESS !     \n");
                 printf("|*                                                                                 \n");
                 printf("|*                                C A U T I O N !                                  \n");
-                printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
+                printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
                 scanf("%s",doubleconfirm);
                 getchar();
                 if(strcmp(doubleconfirm,"y-e-s")!=0){
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
                     printf("|          Nothing changed.\n");
-                    return 13;
+                    return -13;
                 }
             }
             else{
@@ -372,7 +269,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
             decrypt_files(temp_cluster_workdir,crypto_keyfile);
             if(terraform_execution(TERRAFORM_EXEC,"apply",temp_cluster_workdir,crypto_keyfile,OPERATION_ERROR_LOG,1)!=0){
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
-                return 5;
+                return -5;
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
             getstate(temp_cluster_workdir,crypto_keyfile);
@@ -397,19 +294,19 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
             printf("|*   PLEASE MAKE SURE CURRENTLY THE CLUSTER IS *NOT* IN A OPERATION PROGRESS !     \n");
             printf("|*                                                                                 \n");
             printf("|*                                C A U T I O N !                                  \n");
-            printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
+            printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
             scanf("%s",doubleconfirm);
             getchar();
             if(strcmp(doubleconfirm,"y-e-s")!=0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
                 printf("|          Nothing changed.\n");
                 return 13;
             }
         }
          else{
             if(check_pslock(temp_cluster_workdir)!=0){
-                return -3;
+                return 3;
             }
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Refreshing the target cluster %s now ...\n",temp_cluster_name);
@@ -424,11 +321,15 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
         printf("|\n");
         update_cluster_summary(temp_cluster_workdir,crypto_keyfile);
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
-        return 0;
+        return 2;
     }
 }
 
-int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
+int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_flag){
+    if(strlen(target_cluster_name)<CLUSTER_ID_LENGTH_MIN||strlen(target_cluster_name)>CLUSTER_ID_LENGTH_MAX){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified name %s is invalid.\n" RESET_DISPLAY,target_cluster_name);
+        return 1;
+    }
     char cluster_workdir[DIR_LENGTH]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char doubleconfirm[64]="";
@@ -440,56 +341,62 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile){
     if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is not in the registry.\n" RESET_DISPLAY,target_cluster_name);
         list_all_cluster_names();
-        return 1;
+        return 3;
     }
     get_workdir(cluster_workdir,target_cluster_name);
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_archive_log,"%s%slog%stf_prep.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
-    if(cluster_empty_or_not(cluster_workdir)!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is *NOT* empty!\n" RESET_DISPLAY);
-        glance_clusters(target_cluster_name,crypto_keyfile);
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? This operation is *NOT* recoverable!\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to continuie: " );
-        fflush(stdin);
-        scanf("%s",doubleconfirm);
-        if(strcmp(doubleconfirm,"y-e-s")==0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
-            printf("|          absolutely *NOT* recoverable!\n" RESET_DISPLAY);
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+    if(strcmp(force_flag,"force")==0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Removing the specified cluster *WITHOUT* state or resource check.\n" RESET_DISPLAY);
+    }
+    else{
+        if(cluster_empty_or_not(cluster_workdir)!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is *NOT* empty!\n" RESET_DISPLAY);
+            glance_clusters(target_cluster_name,crypto_keyfile);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? This operation is *NOT* recoverable!\n" RESET_DISPLAY);
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to continuie: " );
             fflush(stdin);
             scanf("%s",doubleconfirm);
-            if(strcmp(doubleconfirm,target_cluster_name)==0){
-                if(cluster_destroy(cluster_workdir,crypto_keyfile,0)!=0){
-                    delete_decrypted_files(cluster_workdir,crypto_keyfile);
-                    return 1;
+            getchar();
+            if(strcmp(doubleconfirm,"y-e-s")==0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
+                printf("|          absolutely *NOT* recoverable!\n" RESET_DISPLAY);
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+                fflush(stdin);
+                scanf("%s",doubleconfirm);
+                getchar();
+                if(strcmp(doubleconfirm,target_cluster_name)!=0){
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
+                    printf("|          Nothing changed.\n");
+                    return 5;
                 }
-                archive_log(log_trash,tf_archive_log);
-                archive_log(log_trash,tf_realtime_log);
             }
             else{
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
                 printf("|          Nothing changed.\n");
-                return 1;
+                return 5;
             }
         }
         else{
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
-            printf("|          Nothing changed.\n");
-            return 1;
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster is empty. This operation will remove all the related files\n");
+            printf("|          from your system and registry. Would you like to continue?\n");
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to continuie: ");
+            fflush(stdin);
+            scanf("%s",doubleconfirm);
+            getchar();
+            if(strcmp(doubleconfirm,"y-e-s")!=0){
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
+                printf("|          Nothing changed.\n");
+                return 5;
+            }
         }
     }
-    else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster is empty. This operation will remove all the related files\n");
-        printf("|          from your system and registry. Would you like to continue?\n");
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to continuie: ");
-        fflush(stdin);
-        scanf("%s",doubleconfirm);
-        if(strcmp(doubleconfirm,"y-e-s")!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
-            printf("|          Nothing changed.\n");
-            return 1;
-        }
+    if(cluster_destroy(cluster_workdir,crypto_keyfile,"force")!=0){
+        delete_decrypted_files(cluster_workdir,crypto_keyfile);
+        return 7;
     }
+    archive_log(log_trash,tf_archive_log);
+    archive_log(log_trash,tf_realtime_log);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing all the related files ...\n");
     sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,cluster_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -562,34 +469,38 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     }
     else if(cluster_name_check_flag==-1){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to use the random string %s as a cluster name? \n",real_cluster_name);
-        printf("|          Only 'y-e-s' is accepted as a confirmation. \n" RESET_DISPLAY);
+        printf("|          Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted as a confirmation. \n" RESET_DISPLAY);
         fflush(stdin);
         scanf("%s",doubleconfirm);
         if(strcmp(doubleconfirm,"y-e-s")!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
             printf("|          Nothing changed.\n");
             return 3;
         }
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the cluster name %s.\n",real_cluster_name);
-    if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
 #ifdef _WIN32
     strcpy(filename_temp,"c:\\programdata\\secret.tmp.txt");
 #else
     strcpy(filename_temp,"/tmp/secret.tmp.txt");
 #endif
-    }
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
         return -1;
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your secrets key pair:\n");
-    keypair_temp=GETPASS_FUNC("[ INPUT: ] Access key ID  : ");
-    strcpy(access_key,keypair_temp);
-    reset_string(keypair_temp);
-    keypair_temp=GETPASS_FUNC("[ INPUT: ] Access secrets : ");
-    strcpy(secret_key,keypair_temp);
-    reset_string(keypair_temp);
+    if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your secrets key pair:\n");
+        keypair_temp=GETPASS_FUNC("[ INPUT: ] Access key ID  : ");
+        strcpy(access_key,keypair_temp);
+        reset_string(keypair_temp);
+        keypair_temp=GETPASS_FUNC("[ INPUT: ] Access secrets : ");
+        strcpy(secret_key,keypair_temp);
+        reset_string(keypair_temp);
+    }
+    else{
+        strcpy(access_key,cloud_ak);
+        strcpy(secret_key,cloud_sk);
+    }
     if(strcmp(echo_flag,"echo")==0){
         printf(GREY_LIGHT "\n|          Access key ID  : %s\n",access_key);
         printf("|          Access secrets : %s\n\n" RESET_DISPLAY,secret_key);
@@ -678,14 +589,13 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         printf("|          Please check the available disk space. Exit now.\n" RESET_DISPLAY);
         return -1;
     }
-
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp2,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp2)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently there is no secrets keypair. This working directory may be\n");
         printf("|          corrputed, which is very unusual. Please contact us via:\n");
         printf("|          info@hpc-now.com for troubleshooting. Exit now.\n" RESET_DISPLAY);
-        return -1;
+        return -3;
     }
     printf(GENERAL_BOLD "\n");
     printf("|*                                C A U T I O N !                                  \n");
@@ -701,12 +611,12 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n" RESET_DISPLAY);
+    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n" RESET_DISPLAY);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
     getchar();
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
         return 1;
     }
@@ -739,7 +649,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("|          Current Vendor: AliCloud (HPC-NOW code: CLOUD_A).\n");
             printf("|          Please rotate a keypair from an AliCloud account.\n");
             printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
-            return 1;
+            return 3;
         }
         fprintf(file_p,"%s\n%s\nCLOUD_A",access_key,secret_key);
         fclose(file_p);
@@ -753,7 +663,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("|          Current Vendor: TencentCloud (HPC-NOW code: CLOUD_B).\n");
             printf("|          Please rotate a keypair from an TencentCloud account.\n");
             printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
-            return 1;
+            return 3;
         }
         fprintf(file_p,"%s\n%s\nCLOUD_B",access_key,secret_key);
         fclose(file_p);
@@ -767,7 +677,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("|          Current Vendor: Amazon Web Services (HPC-NOW code: CLOUD_C).\n");
             printf("|          Please rotate a keypair from an Amazon Web Services account.\n");
             printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
-            return 1;
+            return 3;
         }
         fprintf(file_p,"%s\n%s\nCLOUD_C",access_key,secret_key);
         fclose(file_p);
@@ -775,9 +685,9 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     else{
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now.\n" RESET_DISPLAY);
         fclose(file_p);
-        sprintf(cmdline,"rm -rf %s %s",filename_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        return 1;
+        return 3;
     }
     get_crypto_key(crypto_keyfile,md5sum);
     sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,filename_temp,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
@@ -800,7 +710,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     return 0;
 }
 
-int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
+int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
     char doubleconfirm[32]="";
     char cmdline[LINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -818,19 +728,22 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, int force_flag){
     printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
-    fflush(stdin);
-    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    scanf("%s",doubleconfirm);
-    getchar();
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
-        printf("|          Nothing changed.\n");
-        return 1;
+    if(strcmp(force_flag,"force")==0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Destroying the current cluster *WITHOUT* confirmation.\n" RESET_DISPLAY);
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster operation started ...\n");
+        printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to double confirm this operation:\n" RESET_DISPLAY);
+        fflush(stdin);
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+        scanf("%s",doubleconfirm);
+        getchar();
+        if(strcmp(doubleconfirm,"y-e-s")!=0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
+            printf("|          Nothing changed.\n");
+            return 1;
+        }
     }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster operation started ...\n");
     create_and_get_vaultdir(workdir,vaultdir);
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
@@ -928,7 +841,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         if(del_num>compute_node_num){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified a number larger than the quantity of compute nodes.\n");
             printf("           Do you mean deleting *ALL* the compute nodes?\n");
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm:  ");
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm:  ");
             fflush(stdin);
             scanf("%s",string_temp);
             getchar();
@@ -1149,7 +1062,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         if(down_num>compute_node_num){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified a number larger than the quantity of compute nodes.\n");
             printf("           Do you mean shutting down *ALL* the compute nodes?\n");
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm:  ");
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm:  ");
             fflush(stdin);
             scanf("%s",string_temp);
             getchar();
@@ -1289,7 +1202,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         if(on_num+compute_node_num_on>compute_node_num){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified a number larger than the number of currently down nodes.\n");
             printf("           Do you mean turning on *ALL* the compute nodes?\n");
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm:  ");
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm:  ");
             fflush(stdin);
             scanf("%s",string_temp);
             getchar();
@@ -1578,8 +1491,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
     if(compute_node_down_num!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Please turn on all the compute nodes, log on to the master\n");
-        printf("|          node, and run: sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Please turn on all the cluster nodes, log on to the master\n");
+        printf("|          node, and run: " HIGH_GREEN_BOLD "sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY WARN_YELLO_BOLD "\n" RESET_DISPLAY);
     }
     else{
         if(reinit_flag==0){
@@ -1706,9 +1619,8 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     }
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     if(find_multi_keys(filename_temp,"running","","","","")==0&&find_multi_keys(filename_temp,"Running","","","","")==0&&find_multi_keys(filename_temp,"RUNNING","","","","")==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Currently the cluster is in the state of hibernation. No node is running.\n");
-        printf("|          If you'd like to make it ready for running, please run 'wakeup' command.\n");
-        printf("|          Exit now.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
+        printf("|          Command: hpcopr wakeup minimal|all. Exit now.\n" RESET_DISPLAY);
         return 1;
     }
     decrypt_files(workdir,crypto_keyfile);
@@ -1763,7 +1675,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
     update_cluster_summary(workdir,crypto_keyfile);
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! All the nodes of the current cluster have been shutdown.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! All the nodes of have been shutdown.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -1804,10 +1716,10 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     getstate(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(filename_temp,"all");
     if(strcmp(option,"all")==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " ALL MODE: Turning on all the nodes of the current cluster.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY HIGH_CYAN_BOLD " ALL MODE:" RESET_DISPLAY " Turning on all the nodes of the current cluster.\n");
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " MINIMAL MODE: Turning on the management nodes of the current cluster.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY HIGH_CYAN_BOLD " MINIMAL MODE:" RESET_DISPLAY " Turning on the management nodes of the current cluster.\n");
     }
     node_file_to_running(stackdir,"master",cloud_flag);
     node_file_to_running(stackdir,"database",cloud_flag);
@@ -1867,7 +1779,12 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     if(strcmp(option,"all")==0){
         remote_exec(workdir,sshkeydir,"quick",1);
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The cluster is in the state of running.\n");
+    if(strcmp(option,"all")==0){
+        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The cluster is in the state of " HIGH_CYAN_BOLD "full" RESET_DISPLAY " running.\n");
+    }
+    else{
+        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The cluster is in the state of " HIGH_CYAN_BOLD "minimal" RESET_DISPLAY " running.\n");
+    }
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -1879,7 +1796,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_workdir[DIR_LENGTH]="";
     if(show_current_cluster(temp_workdir,temp_cluster_name,0)!=0){
-        return -127;
+        return 127;
     }
     char cloud_flag[32]="";
     char doubleconfirm[64]="";
@@ -1953,13 +1870,13 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     find_and_replace(filename_temp,"CLUSTER_ID","","","","","hpcnow",temp_cluster_name);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Default configuration file has been downloaded.\n");
     if(edit_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to edit it now? Input 'y-e-s' to confirm:\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to edit it now? Input " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " to confirm:\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
         getchar();
         if(strcmp(doubleconfirm,"y-e-s")!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
             return 3;
         }
     }
@@ -1978,7 +1895,7 @@ int edit_configuration_file(char* workdir, char* crypto_keyfile){
     sprintf(filename_temp,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster configuration file not found. Would you like to get one?\n");
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm: ");
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm: ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
         getchar();
@@ -2001,6 +1918,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         return -1;
     }
     char stackdir[DIR_LENGTH]="";
+    char vaultdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char remote_commands[128]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -2021,23 +1939,23 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     printf("|*   AND RE-INIT ! Usually we do not recommend users to do this operation.   \n");
     printf("|*                                                                           \n");
     printf("|*                                C A U T I O N !                            \n");
-    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
+    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
     getchar();
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
         return 1;
     }
     if(strcmp(option,"mc")==0){
-        printf("|          * Will rebuild the master and compute nodes.\n");
+        printf("|          * Will rebuild the " WARN_YELLO_BOLD "master" RESET_DISPLAY " and " WARN_YELLO_BOLD "compute" RESET_DISPLAY " nodes.\n");
     }
     else if(strcmp(option,"mcdb")==0){
-        printf("|          * Will rebuild the master, compute and mariadb nodes.\n");
+        printf("|          * Will rebuild the " WARN_YELLO_BOLD "master" RESET_DISPLAY ", " WARN_YELLO_BOLD "compute" RESET_DISPLAY " and " WARN_YELLO_BOLD "mariadb" RESET_DISPLAY " nodes.\n");
     }
     else{
-        printf("|          * Will try to rebuild all the cluster nodes.\n");
+        printf("|          * Will try to rebuild " WARN_YELLO_BOLD "all" RESET_DISPLAY " the cluster nodes.\n");
     }
     create_and_get_stackdir(workdir,stackdir);
     sprintf(cmdline,"%s %s%stmp %s && %s %s%stmp%s* %s",MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -2135,27 +2053,71 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     remote_exec_general(workdir,sshkey_folder,"root",remote_commands,0);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
-    update_cluster_summary(workdir,crypto_keyfile);
+    create_and_get_vaultdir(workdir,vaultdir);
+    decrypt_user_passwords(workdir,crypto_keyfile);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/.cluster_secrets/user_secrets.txt","root","put");
+    delete_decrypted_user_passwords(workdir);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
+    update_cluster_summary(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The rebuild process may need 7 minutes. Please do not operate\n");
     printf("|          this cluster during the period. Exit now.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
 
-void real_time_log(char* workdir){
-    char real_time_log[FILENAME_LENGTH]="";
-#ifndef _WIN32
+int view_run_log(char* workdir, char* stream, char* run_option, char* view_option){
+    char logfile[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-#endif
-    sprintf(real_time_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
-#ifdef _WIN32
-    if(tail_f_for_windows(real_time_log)==1){
-        printf("[ -INFO- ] Time is up. Please run this command again.\n");
+    char real_stream[16]="";
+    if(strcmp(stream,"std")!=0&&strcmp(stream,"err")!=0){
+        strcpy(real_stream,"std");
     }
+    else{
+        strcpy(real_stream,stream);
+    }
+    if(strcmp(run_option,"realtime")!=0&&strcmp(run_option,"archive")!=0){
+        if(strcmp(real_stream,"std")==0){
+            sprintf(logfile,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
+        }
+        else{
+            strcpy(logfile,OPERATION_ERROR_LOG);
+        }
+    }
+    else if(strcmp(run_option,"realtime")==0){
+        if(strcmp(real_stream,"std")==0){
+            sprintf(logfile,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
+        }
+        else{
+            strcpy(logfile,OPERATION_ERROR_LOG);
+        }
+    }
+    else{
+        if(strcmp(real_stream,"std")==0){
+            sprintf(logfile,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
+        }
+        else{
+            sprintf(logfile,"%s.archive",OPERATION_ERROR_LOG);
+        }
+    }
+    if(file_exist_or_not(logfile)!=0){
+        return -1;
+    }
+    if(strcmp(view_option,"print")==0){
+        sprintf(cmdline,"%s %s",CAT_FILE_CMD,logfile);
+        system(cmdline);
+        return 0;
+    }
+    else{
+#ifdef _WIN32
+        if(tail_f_for_windows(logfile)==1){
+            printf(WARN_YELLO_BOLD "[ -INFO- ] Time is up. Please run this command again.\n" RESET_DISPLAY);
+        }
 #else
-    sprintf(cmdline,"tail -f %s",real_time_log);
-    system(cmdline);
+        sprintf(cmdline,"tail -f %s",logfile);
+        system(cmdline);
 #endif
+        return 0;
+    }
 }

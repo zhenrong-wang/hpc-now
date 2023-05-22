@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "now_macros.h"
 #include "general_funcs.h"
@@ -35,6 +36,8 @@ extern char md5_qcloud_tf_var[64];
 extern char md5_qcloud_tf_zip_var[64];
 extern char md5_aws_tf_var[64];
 extern char md5_aws_tf_zip_var[64];
+
+extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
 
 int check_internet(void){
     char cmdline[CMDLINE_LENGTH]="";
@@ -165,7 +168,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        . Checking and repairing the location configuration file now ...\n");
         if(reset_locations()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return -3;
         }
         printf("|        v All the locations has been reset to the default ones.\n");
     }
@@ -177,7 +180,7 @@ int check_and_install_prerequisitions(int repair_flag){
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Location configuration format incorrect.\n");
         }
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to use the default settings? Only 'y-e-s' is accepted\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to use the default settings? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted\n");
         printf("|          to confirm. \n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         fflush(stdin);
@@ -186,25 +189,25 @@ int check_and_install_prerequisitions(int repair_flag){
         if(strcmp(doubleconfirm,"y-e-s")==0){
             if(reset_locations()!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now.\n" RESET_DISPLAY);
-                return 2;
+                return -3;
             }
             get_locations();
         }
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will not use the default settings. Would you like to configure now?\n");
-            printf("|          Only 'y-e-s' is accepted to confirm.\n");
+            printf("|          Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm.\n");
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
             fflush(stdin);
             scanf("%s",doubleconfirm);
             getchar();
             if(strcmp(doubleconfirm,"y-e-s")!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
-                return 2;
+                return 1;
             }
             else{
                 if(configure_locations()!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure the locations. Exit now.\n" RESET_DISPLAY);
-                    return 2;
+                    return 5;
                 }
             }
         }
@@ -214,7 +217,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        . Checking and repairing the versions and md5sums ...\n");
         if(reset_vers_md5_vars()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return 7;
         }
         printf("|        v Versions and md5sums been repaired.\n");
         printf("|        . Checking and repairing the key directories and files ...\n");
@@ -229,12 +232,12 @@ int check_and_install_prerequisitions(int repair_flag){
         }
         if(reset_vers_md5_vars()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums. Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return 7;
         }
         if(get_vers_md5_vars()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure versions and md5sums of core components.\n");
             printf("|          Please check the format of md5 files. Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return 7;
         }
     }
     if(folder_exist_or_not(DESTROYED_DIR)!=0){
@@ -622,4 +625,46 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Running environment successfully checked.\n");
     }
     return 0;
+}
+
+int command_name_check(char* command_name_input, char* command_prompt){
+    int i;
+    int j;
+    int diff_current=0;
+    int diff_prev=1024;
+    int equal_flag;
+    int equal_flag_prev=0;
+    int compare_length=0;
+    int closest=0;
+    for(i=0;i<COMMAND_NUM;i++){
+        if(strcmp(command_name_input,commands[i])==0){
+            return 0;
+        }
+        diff_current=0;
+        equal_flag=0;
+        if(strlen(commands[i])<strlen(command_name_input)){
+            compare_length=strlen(commands[i]);
+        }
+        else{
+            compare_length=strlen(command_name_input);
+        }
+        for(j=0;j<compare_length-1;j++){
+            if(*(command_name_input+j)==*(commands[i]+j)&&*(command_name_input+j+1)==*(commands[i]+j+1)){
+                equal_flag++;
+            }
+            diff_current+=abs(*(command_name_input+j)-*(commands[i]+j));  
+        }
+        if(*(command_name_input+j+1)==*(commands[i]+j+1)){
+            equal_flag++;
+        }
+//        printf("%s,%d,%d,%d,%d\n",commands[i],equal_flag,closest,diff_current,diff_prev);
+        if(equal_flag>equal_flag_prev&&diff_current<diff_prev){
+            closest=i;
+            equal_flag_prev=equal_flag;
+            diff_prev=diff_current;
+            continue;
+        }
+    }
+    strcpy(command_prompt,commands[closest]);
+    return 200+closest;
 }

@@ -9,10 +9,7 @@
 #ifndef USAGE_AND_LOGS_H
 #define USAGE_AND_LOGS_H
 
-int get_usage(char* usage_logfile);
-int get_history(char* operation_logfile);
-int get_syserrlog(char* system_errlog);
-int system_cleanup(void);
-int write_log(char* workdir, char* operation_logfile, char* operation, int runflag);
+int view_system_logs(char* logfile, char* view_option, char* export_path);
+int write_operation_log(char* cluster_name, char* operation_logfile, char* operation, char* description, int runflag);
 
 #endif

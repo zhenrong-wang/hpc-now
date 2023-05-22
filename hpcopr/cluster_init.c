@@ -153,7 +153,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log,0)!=0){
         sprintf(cmdline,"%s %s%sregion_valid.tf %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        return -1;
+        return 1;
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,0)!=0){
         global_replace(region_valid,"cn-northwest-1","us-east-1");
@@ -162,7 +162,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             printf("|          valid keypair. Exit now.\n" RESET_DISPLAY);
             sprintf(cmdline,"%s %s%sregion_valid.tf %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            return -1;
+            return 1;
         }
         region_valid_flag=1;
     }
@@ -315,19 +315,19 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("|          If you'd like to use NOW Cluster in other AWS regions,\n");
         printf("|          Please contact info@hpc-now.com\n\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
-        return -1;
+        return 3;
     }
     if(contain_or_not(zone_id,region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
-        return -1;
+        return 3;
     }
     if(strcmp(region_id,"cn-northwest-1")==0){
         if(region_valid_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return 4;
         }
         strcpy(region_flag,"cn_regions");
         sprintf(os_image,"%scn.0",os_image_raw);
@@ -339,7 +339,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return 4;
         }
         strcpy(region_flag,"cn_regions");
         sprintf(os_image,"%scn.1",os_image_raw);
@@ -351,7 +351,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return 4;
         }
         strcpy(region_flag,"global_regions");
         sprintf(os_image,"%sglobal.0",os_image_raw);
@@ -363,7 +363,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now.\n" RESET_DISPLAY);
-            return -1;
+            return 4;
         }
         strcpy(region_flag,"global_regions");
         sprintf(os_image,"%sglobal.1",os_image_raw);
@@ -553,7 +553,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(cmdline,"%s %s%shpc_stack.compute %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log,0)!=0){
-        return -1;
+        return 5;
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back and exit now ...\n");
@@ -567,11 +567,13 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             system(cmdline);
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back. Please check the errolog for details.\n");
-            return -1;
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
+            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog err archive" RESET_DISPLAY " for details.\n");
+            return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
-        return -1;
+        delete_decrypted_files(workdir,crypto_keyfile);
+        return 9;
     }
     sprintf(cmdline,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -980,7 +982,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     if(contain_or_not(zone_id,region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
-        return -1;
+        return 3;
     }
     sprintf(filename_temp,"%s%sdb_passwords.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
@@ -1163,7 +1165,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sprintf(cmdline,"%s %s%shpc_stack.compute %s && %s %s%sNAS_Zones_QCloud.txt %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log,0)!=0){
-        return -1;
+        return 5;
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back and exit now ...\n");
@@ -1177,12 +1179,13 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
             system(cmdline);
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back. Please check the errolog for details.\n");
-            return -1;
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
+            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog err archive" RESET_DISPLAY " for details.\n");
+            return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
-        return -1;
+        return 9;
     }
     sprintf(cmdline,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);   
     system(cmdline);
@@ -1552,7 +1555,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     if(contain_or_not(zone_id,region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
-        return -1;
+        return 3;
     }
     sprintf(filename_temp,"%s%sdb_passwords.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
@@ -1730,7 +1733,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(cmdline,"%s %s%shpc_stack.compute %s && %s %s%sNAS_Zones_ALI.txt %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,error_log,0)!=0){
-        return -1;
+        return 5;
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,error_log,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back and exit now ...\n");
@@ -1744,11 +1747,13 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
             system(cmdline);
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back. Please check the errolog for details.\n");
-            return -1;
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
+            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog err archive" RESET_DISPLAY " for details.\n");
+            return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
-        return -1;
+        delete_decrypted_files(workdir,crypto_keyfile);
+        return 9;
     }
     sprintf(cmdline,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
