@@ -236,7 +236,6 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
     }
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_cluster_workdir[DIR_LENGTH]="";
-    char doubleconfirm[64]="";
     if(strlen(target_cluster_name)==0){
         if(show_current_cluster(temp_cluster_workdir,temp_cluster_name,0)==1){
             return 1;
@@ -249,16 +248,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
                 printf("|*   YOU ARE REFRESHING THE CLUSTER *WITHOUT* CHECKING OPERATION LOCK STATUS !     \n");
                 printf("|*   PLEASE MAKE SURE CURRENTLY THE CLUSTER IS *NOT* IN A OPERATION PROGRESS !     \n");
                 printf("|*                                                                                 \n");
-                printf("|*                                C A U T I O N !                                  \n");
-                printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
-                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-                scanf("%s",doubleconfirm);
-                getchar();
-                if(strcmp(doubleconfirm,"y-e-s")!=0){
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
-                    printf("|          Nothing changed.\n");
-                    return -13;
-                }
+                printf("|*                                C A U T I O N !                                  \n\n");
             }
             else{
                 if(check_pslock(temp_cluster_workdir)!=0){
@@ -293,16 +283,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
             printf("|*   YOU ARE REFRESHING THE CLUSTER *WITHOUT* CHECKING OPERATION LOCK STATUS !     \n");
             printf("|*   PLEASE MAKE SURE CURRENTLY THE CLUSTER IS *NOT* IN A OPERATION PROGRESS !     \n");
             printf("|*                                                                                 \n");
-            printf("|*                                C A U T I O N !                                  \n");
-            printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-            scanf("%s",doubleconfirm);
-            getchar();
-            if(strcmp(doubleconfirm,"y-e-s")!=0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
-                printf("|          Nothing changed.\n");
-                return 13;
-            }
+            printf("|*                                C A U T I O N !                                  \n\n");
         }
          else{
             if(check_pslock(temp_cluster_workdir)!=0){

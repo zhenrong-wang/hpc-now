@@ -800,7 +800,7 @@ int main(int argc, char* argv[]){
                 return 41;
             }
             write_operation_log(argv[2],operation_log,argv[1],"SUCCEEDED",0);
-            check_and_cleanup(workdir);
+            check_and_cleanup("");
             return 0;
         }
     }
