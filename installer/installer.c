@@ -487,7 +487,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.bin >> /dev/null 2>&1");
     system("chown hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
     system("chmod -R 711 /Users/hpc-now/ >> /dev/null 2>&1");
-    sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
@@ -678,7 +678,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
 #elif __APPLE__
-    sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
     if(file_exist_or_not("/Users/hpc-now/LICENSES/GPL-2")!=0){
