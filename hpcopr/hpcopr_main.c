@@ -98,9 +98,11 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
 };
 
 /*
+
 -127 USER_CHECK_ERROR
 -125 KEY_FOLDER_ERROR
 -123 INTERNET_CHECK_FAILED
+
 1 NOT_A_VALID_COMMAND
 3 USER_DENIED
 5 LACK_PARAMS
@@ -145,6 +147,48 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
 123 FATAL_ABNORMAL
 125 FATAL_INTERNAL_ERROR
 127 File I/O Error
+
+SPECIAL RETURN VALUES: when the command_input is wrong.
+
+envcheck     ---- 1839 
+new-cluster  ---- 2145 
+ls-clusters  ---- 2153 
+switch       ---- 1658 
+glance       ---- 1618 
+refresh      ---- 1751 
+exit-current ---- 2258 
+remove       ---- 1654 
+help         ---- 1425 
+usage        ---- 1533 
+history      ---- 1786 
+syserr       ---- 1680 
+ssh          ---- 1334 
+configloc    ---- 1948 
+showloc      ---- 1767 
+resetloc     ---- 1865 
+showmd5      ---- 1711 
+new-keypair  ---- 2132 
+get-conf     ---- 1787 
+edit-conf    ---- 1889 
+init         ---- 1436 
+rebuild      ---- 1743 
+vault        ---- 1556 
+graph        ---- 1530 
+viewlog      ---- 1765 
+delc         ---- 1408 
+addc         ---- 1396 
+shutdownc    ---- 1991 
+turnonc      ---- 1777 
+reconfc      ---- 1736 
+reconfm      ---- 1746 
+sleep        ---- 1537 
+wakeup       ---- 1653 
+destroy      ---- 1778 
+userman      ---- 1763 
+about        ---- 1539 
+version      ---- 1774 
+license      ---- 1739 
+repair       ---- 1643 
 */
 
 int main(int argc, char* argv[]){
@@ -153,6 +197,7 @@ int main(int argc, char* argv[]){
     char buffer1[64];
     char buffer2[64];
     char cloud_flag[16];
+    int command_flag=0;
     int run_flag=0;
     int usrmgr_check_flag=0;
     int current_cluster_flag=0;
@@ -232,11 +277,12 @@ int main(int argc, char* argv[]){
         print_help("");
         return 0;
     }
-
-    if(command_name_check(argv[1],command_name_prompt)!=0){
+    
+    command_flag=command_name_check(argv[1],command_name_prompt);
+    if(command_flag!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid Command. Do you mean " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " ?\n" RESET_DISPLAY,command_name_prompt);
         print_tail();
-        return 1;
+        return command_flag;
     }
 
     if(strcmp(argv[1],"help")==0){

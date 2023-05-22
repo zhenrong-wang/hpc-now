@@ -635,6 +635,7 @@ int command_name_check(char* command_name_input, char* command_prompt){
     int equal_flag;
     int equal_flag_prev=0;
     int compare_length=0;
+    int return_sum=0;
     int closest=0;
     for(i=0;i<COMMAND_NUM;i++){
         if(strcmp(command_name_input,commands[i])==0){
@@ -666,5 +667,8 @@ int command_name_check(char* command_name_input, char* command_prompt){
         }
     }
     strcpy(command_prompt,commands[closest]);
-    return 1;
+    for(i=0;i<strlen(command_prompt);i++){
+        return_sum+=*(command_prompt+i);
+    }
+    return return_sum+1000;
 }
