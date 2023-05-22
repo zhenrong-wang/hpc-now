@@ -98,11 +98,6 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
 };
 
 /*
-
--127 USER_CHECK_ERROR
--125 KEY_FOLDER_ERROR
--123 INTERNET_CHECK_FAILED
-
 1 NOT_A_VALID_COMMAND
 3 USER_DENIED
 5 LACK_PARAMS
@@ -144,51 +139,18 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
 75 TF_ROLLBACK_FAILED
 77 USERMAN PREREQ_CHECK_FAILED
 
+
+117 USER_CHECK_ERROR
+119 KEY_FOLDER_ERROR
+121 INTERNET_CHECK_FAILED
 123 FATAL_ABNORMAL
 125 FATAL_INTERNAL_ERROR
 127 File I/O Error
 
 SPECIAL RETURN VALUES: when the command_input is wrong.
 
-envcheck     ---- 1839 
-new-cluster  ---- 2145 
-ls-clusters  ---- 2153 
-switch       ---- 1658 
-glance       ---- 1618 
-refresh      ---- 1751 
-exit-current ---- 2258 
-remove       ---- 1654 
-help         ---- 1425 
-usage        ---- 1533 
-history      ---- 1786 
-syserr       ---- 1680 
-ssh          ---- 1334 
-configloc    ---- 1948 
-showloc      ---- 1767 
-resetloc     ---- 1865 
-showmd5      ---- 1711 
-new-keypair  ---- 2132 
-get-conf     ---- 1787 
-edit-conf    ---- 1889 
-init         ---- 1436 
-rebuild      ---- 1743 
-vault        ---- 1556 
-graph        ---- 1530 
-viewlog      ---- 1765 
-delc         ---- 1408 
-addc         ---- 1396 
-shutdownc    ---- 1991 
-turnonc      ---- 1777 
-reconfc      ---- 1736 
-reconfm      ---- 1746 
-sleep        ---- 1537 
-wakeup       ---- 1653 
-destroy      ---- 1778 
-userman      ---- 1763 
-about        ---- 1539 
-version      ---- 1774 
-license      ---- 1739 
-repair       ---- 1643 
+200~255: command_check_prompt_index
+
 */
 
 int main(int argc, char* argv[]){
@@ -222,7 +184,7 @@ int main(int argc, char* argv[]){
         printf("|          2. hpcopr ls-clusters   (You will see all the clusters)\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         print_tail();
-        return -127;
+        return 117;
     }
 #else
     if(check_current_user()!=0){
@@ -232,7 +194,7 @@ int main(int argc, char* argv[]){
         printf("|          2. hpcopr ls-clusters   (You will see all the clusters)\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         print_tail();
-        return -127;
+        return 117;
     }
 #endif
 
@@ -243,7 +205,7 @@ int main(int argc, char* argv[]){
         printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         print_tail();
-        return -125;
+        return 119;
     }
 #elif __APPLE__
     if(folder_exist_or_not("/Applications/.hpc-now/")!=0){
@@ -254,7 +216,7 @@ int main(int argc, char* argv[]){
         printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         print_tail();
-        return -125;
+        return 119;
     }
 #elif __linux__
     if(folder_exist_or_not("/usr/.hpc-now/")!=0){
@@ -265,7 +227,7 @@ int main(int argc, char* argv[]){
         printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         print_tail();
-        return -125;
+        return 119;
     }
 #endif
     if(folder_exist_or_not(GENERAL_CONF_DIR)!=0){
@@ -306,9 +268,9 @@ int main(int argc, char* argv[]){
     }
 
     if(check_internet()!=0){
-        write_operation_log("NULL",operation_log,"NULL","INTERNET_CHECK_FAILED",-123);
+        write_operation_log("NULL",operation_log,"NULL","INTERNET_CHECK_FAILED",121);
         check_and_cleanup("");
-        return -123;
+        return 121;
     }
 
     if(strcmp(argv[1],"license")==0){
@@ -1077,7 +1039,7 @@ int main(int argc, char* argv[]){
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
             write_operation_log(current_cluster_name,operation_log,argv[1],"USER_DENIED",3);
             check_and_cleanup(workdir);
-            return -1;
+            return 3;
         }
         run_flag=get_default_conf(workdir,crypto_keyfile,1);
         if(run_flag==1||run_flag==127){
@@ -1270,9 +1232,9 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Available configuration list:\n|\n");
             if(check_reconfigure_list(workdir)!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Internal error. Please submit an issue to the community. Exit now.\n" RESET_DISPLAY);
-                write_operation_log(current_cluster_name,operation_log,argv[1],"INTERNAL_ERROR",-1);
+                write_operation_log(current_cluster_name,operation_log,argv[1],"FATAL_INTERNAL_ERROR",125);
                 check_and_cleanup(workdir);
-                return -17;
+                return 125;
             }
             if(strcmp(argv[1],"reconfc")==0&&check_down_nodes(workdir)!=0&&strcmp(cloud_flag,"CLOUD_B")==0){
                 printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You need to turn on all the compute nodes first.\n" RESET_DISPLAY);
