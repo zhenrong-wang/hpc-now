@@ -444,7 +444,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     system("chown -R hpc-now:hpc-now /home/hpc-now/ >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /usr/.hpc-now/.bin >> /dev/null 2>&1");
     system("chown hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
-    system("chmod 700 /home/hpc-now/ >> /dev/null 2>&1");
+    system("chmod 711 /home/hpc-now/ >> /dev/null 2>&1");
+    sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          You *MUST* run 'sudo passwd hpc-now' command to set a password.\n");
@@ -484,7 +486,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     system("chown -R hpc-now:hpc-now /Users/hpc-now/ >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.bin >> /dev/null 2>&1");
     system("chown hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
-    system("chmod 700 /Users/hpc-now/ >> /dev/null 2>&1");
+    system("chmod 711 /Users/hpc-now/ >> /dev/null 2>&1");
+    sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          You *MUST* run 'sudo dscl . -passwd /Users/hpc-now PASSWORD' command\n");
@@ -532,6 +536,7 @@ int uninstall_services(void){
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
     system("net user hpc-now /delete > nul 2>&1");
 #elif __APPLE__
+    system("unlink /usr/local/bin/hpcopr >> /dev/null 2>&1");
     system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
     system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
@@ -539,6 +544,7 @@ int uninstall_services(void){
     system("rm -rf /Users/hpc-now >> /dev/null 2>&1");
     system("ps -ax | grep hpc-now | cut -c 1-6 | xargs kill -9 >> /dev/null 2>&1");
 #elif __linux__
+    system("unlink /usr/local/bin/hpcopr >> /dev/null 2>&1");
     system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
     system("userdel -f -r hpc-now >> /dev/null 2>&1");
@@ -661,6 +667,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto.exe /grant hpc-now:F /t > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
 #elif __linux__
+    sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    system(cmdline1);
     system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
     if(file_exist_or_not("/home/hpc-now/LICENSES/GPL-2")!=0){
         sprintf(cmdline1,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
@@ -670,6 +678,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
 #elif __APPLE__
+    sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    system(cmdline1);
     system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
     if(file_exist_or_not("/Users/hpc-now/LICENSES/GPL-2")!=0){
         sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/LICENSES/GPL-2",URL_LICENSE);
