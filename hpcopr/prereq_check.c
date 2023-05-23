@@ -259,7 +259,7 @@ int check_and_install_prerequisitions(int repair_flag){
     strcpy(dirname_temp,TF_LOCAL_PLUGINS);
     sprintf(filename_temp_zip,"%sterraform_%s_linux_amd64.zip",dirname_temp,terraform_version_var);
 #elif __APPLE__
-    strcpy(dirname_temp,"/Users/hpc-now/.terraform.d/");
+    strcpy(dirname_temp,TF_LOCAL_PLUGINS);
     sprintf(filename_temp_zip,"%sterraform_%s_darwin_amd64.zip",dirname_temp,terraform_version_var);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
