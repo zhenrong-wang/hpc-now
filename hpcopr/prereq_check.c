@@ -301,9 +301,9 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
         sprintf(cmdline,"tar zxf %s -C c:\\programdata\\hpc-now\\bin\\ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
 #elif __linux__
-        sprintf(cmdline,"unzip -o -q %s -d /usr/.hpc-now/.bin/ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"unzip -o -q '%s' -d /usr/.hpc-now/.bin/ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
-        sprintf(cmdline,"unzip -o -q %s -d /Applications/.hpc-now/.bin/ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"unzip -o -q '%s' -d /Applications/.hpc-now/.bin/ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
 #endif
 //        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
