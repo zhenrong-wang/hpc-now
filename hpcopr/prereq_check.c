@@ -406,9 +406,9 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
     sprintf(filename_temp_zip,"%s/terraform-provider-alicloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
 #elif __APPLE__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/aliyun/alicloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,ali_plugin_version);
+    sprintf(dirname_temp,"%splugins/registry.terraform.io/aliyun/alicloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,ali_plugin_version);
     sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-alicloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
+    sprintf(filename_temp_zip,"%sterraform-provider-alicloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
     printf("# %s\n# %s\n# %s\n\n",dirname_temp,filename_temp,filename_temp_zip);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
