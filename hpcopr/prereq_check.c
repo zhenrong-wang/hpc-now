@@ -58,13 +58,11 @@ int check_internet(void){
 int file_validity_check(char* filename, int repair_flag, char* target_md5){
     char md5sum[64]="";
     if(file_exist_or_not(filename)!=0){
-        printf("HERE!\n");
         return 1;
     }
     else{
         if(repair_flag==1){
             get_crypto_key(filename,md5sum);
-            printf("%s ---- %s\n",md5sum,target_md5);
             if(strcmp(md5sum,target_md5)!=0){
                 return 1;
             }
@@ -468,9 +466,9 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
     sprintf(filename_temp_zip,"%s/terraform-provider-tencentcloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
 #elif __APPLE__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,qcloud_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-tencentcloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
+    sprintf(dirname_temp,"%splugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,qcloud_plugin_version);
+    sprintf(filename_temp,"%sterraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
+    sprintf(filename_temp_zip,"%sterraform-provider-tencentcloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
         sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
@@ -528,9 +526,9 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
     sprintf(filename_temp_zip,"%s/terraform-provider-aws_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
 #elif __APPLE__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/aws/%s/darwin_amd64/",TF_LOCAL_PLUGINS,aws_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-aws_%s_x5_darwin_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
+    sprintf(dirname_temp,"%splugins/registry.terraform.io/hashicorp/aws/%s/darwin_amd64/",TF_LOCAL_PLUGINS,aws_plugin_version);
+    sprintf(filename_temp,"%sterraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
+    sprintf(filename_temp_zip,"%sterraform-provider-aws_%s_x5_darwin_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
         sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
@@ -622,10 +620,10 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf("|        v Environment variables have been repaired.\n");
         printf("|        v SSH files have been repaired. \n");
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Running environment successfully check and repaired.\n");
+        printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully check and repaired.\n" RESET_DISPLAY);
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Running environment successfully checked.\n");
+        printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked.\n" RESET_DISPLAY);
     }
     return 0;
 }
