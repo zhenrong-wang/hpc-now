@@ -278,7 +278,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __linux__
                 sprintf(cmdline,"/bin/cp %s/tf-linux/terraform_%s_linux_amd64.zip %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform_%s_darwin_amd64.zip %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform_%s_darwin_amd64.zip '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #endif
             }
             else{
@@ -287,7 +287,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __linux__
                 sprintf(cmdline,"curl %stf-linux/terraform_%s_linux_amd64.zip -o %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform_%s_darwin_amd64.zip -o %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-darwin/terraform_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #endif
             }
             flag=system(cmdline);
@@ -425,7 +425,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __linux__
                 sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-alicloud_%s_linux_amd64.zip %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #endif
             }
             else{
@@ -434,7 +434,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __linux__
                 sprintf(cmdline,"curl %stf-linux/terraform-provider-alicloud_%s_linux_amd64.zip -o %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip -o %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #endif
             }
 //            printf("%s,,,,,\"\n",cmdline);
@@ -486,7 +486,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __linux__
                 sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip %s",url_tf_root_var,qcloud_plugin_version,filename_temp);
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp);
 #endif
             }
             else{
@@ -495,7 +495,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __linux__
                 sprintf(cmdline,"curl %stf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip -o %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip -o %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #endif
             }
             flag=system(cmdline);
@@ -546,7 +546,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __linux__
                 sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-aws_%s_linux_amd64.zip %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-aws_%s_darwin_amd64.zip %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-aws_%s_darwin_amd64.zip '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #endif
             }
             else{
@@ -555,7 +555,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __linux__
                 sprintf(cmdline,"curl %stf-linux/terraform-provider-aws_%s_linux_amd64.zip -o %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-aws_%s_darwin_amd64.zip -o %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-aws_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #endif
             }
             flag=system(cmdline);
