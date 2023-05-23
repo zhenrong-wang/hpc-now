@@ -30,7 +30,7 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     char buffer[256]="";
 #endif
 #ifdef __APPLE__
-    sprintf(cmdline,"md5 %s | awk '{print $4}' > /tmp/md5.txt.tmp",crypto_key_filename);
+    sprintf(cmdline,"md5 %s | awk -F'=' '{print $2}' | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif __linux__
     sprintf(cmdline,"md5sum %s | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif _WIN32
