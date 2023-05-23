@@ -448,7 +448,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
         sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"unzip -o -q %s -d %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
         flag=system(cmdline);
         if(flag!=0){
@@ -508,7 +508,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
         sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"unzip -o -q %s -d %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
         flag=system(cmdline);
         if(flag!=0){
@@ -568,7 +568,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
         sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"unzip -o -q %s -d %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
         flag=system(cmdline);
         if(flag!=0){
