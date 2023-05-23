@@ -461,9 +461,11 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the cluster name %s.\n",real_cluster_name);
 #ifdef _WIN32
-    strcpy(filename_temp,"c:\\programdata\\secret.tmp.txt");
-#else
-    strcpy(filename_temp,"/tmp/secret.tmp.txt");
+    strcpy(filename_temp,"c:\\programdata\\hpc-now\\secret.tmp.txt");
+#elif __linux__
+    strcpy(filename_temp,"/home/hpc-now/.secret.tmp.txt");
+#elif __APPLE__
+    strcpy(filename_temp,"/Users/hpc-now/.secret.tmp.txt");
 #endif
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
@@ -555,14 +557,11 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     char md5sum[33]="";
 
 #ifdef _WIN32
-    if(folder_exist_or_not("c:\\programdata\\hpc-now")==0){
-        strcpy(filename_temp,"c:\\programdata\\hpc-now\\secret.tmp.txt");
-    }
-    else{
-        strcpy(filename_temp,"c:\\programdata\\secret.tmp.txt");
-    }
-#else
-    strcpy(filename_temp,"/tmp/secret.tmp.txt");
+    strcpy(filename_temp,"c:\\programdata\\hpc-now\\secret.tmp.txt");
+#elif __linux__
+    strcpy(filename_temp,"/home/hpc-now/.secret.tmp.txt");
+#elif __APPLE__
+    strcpy(filename_temp,"/Users/hpc-now/.secret.tmp.txt");
 #endif
     FILE* file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
