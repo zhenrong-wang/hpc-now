@@ -274,18 +274,18 @@ int check_and_install_prerequisitions(int repair_flag){
             printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform_%s_windows_amd64.zip %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                sprintf(cmdline,"copy /y %s\\tf-win\\terraform_%s_windows_amd64.zip \"%s\"",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform_%s_linux_amd64.zip %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform_%s_linux_amd64.zip '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __APPLE__
                 sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform_%s_darwin_amd64.zip '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #endif
             }
             else{
 #ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform_%s_windows_amd64.zip -o %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-win/terraform_%s_windows_amd64.zip -o \"%s\"",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform_%s_linux_amd64.zip -o %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-linux/terraform_%s_linux_amd64.zip -o '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __APPLE__
                 sprintf(cmdline,"curl %stf-darwin/terraform_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #endif
@@ -299,7 +299,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }
 //        printf("%s,,,,,\"\n",cmdline);
 #ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C c:\\programdata\\hpc-now\\bin\\ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"tar zxf \"%s\" -C c:\\programdata\\hpc-now\\bin\\ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
 #elif __linux__
         sprintf(cmdline,"unzip -o -q '%s' -d /usr/.hpc-now/.bin/ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
@@ -420,18 +420,18 @@ int check_and_install_prerequisitions(int repair_flag){
         if(file_check_flag==1){
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-alicloud_%s_windows_amd64.zip %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-alicloud_%s_windows_amd64.zip \"%s\"",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-alicloud_%s_linux_amd64.zip %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-alicloud_%s_linux_amd64.zip '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #elif __APPLE__
                 sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #endif
             }
             else{
 #ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform-provider-alicloud_%s_windows_amd64.zip -o %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-win/terraform-provider-alicloud_%s_windows_amd64.zip -o \"%s\"",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-alicloud_%s_linux_amd64.zip -o %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-linux/terraform-provider-alicloud_%s_linux_amd64.zip -o '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #elif __APPLE__
                 sprintf(cmdline,"curl %stf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #endif
@@ -445,7 +445,7 @@ int check_and_install_prerequisitions(int repair_flag){
             }
         }
 #ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"tar zxf \"%s\" -C \"%s\" %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
         sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
@@ -476,23 +476,23 @@ int check_and_install_prerequisitions(int repair_flag){
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_qcloud_tf_var);
     if(file_check_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Downloading/Copying the cloud Terraform providers (2/3) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
+        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_qcloud_tf_zip_var);
         if(file_check_flag==1){
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-tencentcloud_%s_windows_amd64.zip %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-tencentcloud_%s_windows_amd64.zip \"%s\"",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #elif __APPLE__
                 sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp);
 #endif
             }
             else{
 #ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform-provider-tencentcloud_%s_windows_amd64.zip -o %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-win/terraform-provider-tencentcloud_%s_windows_amd64.zip -o \"%s\"",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip -o %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip -o '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #elif __APPLE__
                 sprintf(cmdline,"curl %stf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #endif
@@ -505,7 +505,7 @@ int check_and_install_prerequisitions(int repair_flag){
             }
         }
 #ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"tar zxf \"%s\" -C \"%s\" %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
         sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
@@ -536,23 +536,23 @@ int check_and_install_prerequisitions(int repair_flag){
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_aws_tf_var);
     if(file_check_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Downloading/Copying the cloud Terraform providers (3/3) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
+        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_aws_tf_zip_var);
         if(file_check_flag==1){
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-aws_%s_windows_amd64.zip %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-aws_%s_windows_amd64.zip \"%s\"",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-aws_%s_linux_amd64.zip %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-aws_%s_linux_amd64.zip '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #elif __APPLE__
                 sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-aws_%s_darwin_amd64.zip '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #endif
             }
             else{
 #ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform-provider-aws_%s_windows_amd64.zip -o %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-win/terraform-provider-aws_%s_windows_amd64.zip -o \"%s\"",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-aws_%s_linux_amd64.zip -o %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-linux/terraform-provider-aws_%s_linux_amd64.zip -o '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #elif __APPLE__
                 sprintf(cmdline,"curl %stf-darwin/terraform-provider-aws_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #endif
@@ -565,7 +565,7 @@ int check_and_install_prerequisitions(int repair_flag){
             }
         }
 #ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"tar zxf \"%s\" -C \"%s\" %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
         sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
