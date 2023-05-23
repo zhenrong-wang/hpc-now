@@ -64,7 +64,7 @@ int file_validity_check(char* filename, int repair_flag, char* target_md5){
     else{
         if(repair_flag==1){
             get_crypto_key(filename,md5sum);
-            printf("%s ---- %s\n",md5,target_md5);
+            printf("%s ---- %s\n",md5sum,target_md5);
             if(strcmp(md5sum,target_md5)!=0){
                 return 1;
             }
