@@ -241,7 +241,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
     if(folder_exist_or_not(DESTROYED_DIR)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     else{
@@ -249,7 +249,7 @@ int check_and_install_prerequisitions(int repair_flag){
         system(cmdline);
     }
     if(folder_exist_or_not(NOW_BINARY_DIR)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 #ifdef _WIN32
@@ -263,11 +263,7 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp_zip,"%sterraform_%s_darwin_amd64.zip",dirname_temp,terraform_version_var);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
-#ifdef _WIN32
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"%s '%s' %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
-#endif
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     file_check_flag=file_validity_check(tf_exec,force_repair_flag,md5_tf_exec_var);
@@ -413,7 +409,7 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp_zip,"%sterraform-provider-alicloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_ali_tf_var);
@@ -474,7 +470,7 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp_zip,"%sterraform-provider-tencentcloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_qcloud_tf_var);
@@ -534,7 +530,7 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp_zip,"%sterraform-provider-aws_%s_x5_darwin_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_aws_tf_var);
@@ -586,7 +582,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 
     if(folder_exist_or_not(sshkey_dir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,sshkey_dir,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,sshkey_dir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 #ifdef _WIN32
