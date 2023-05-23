@@ -441,6 +441,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
     sprintf(cmdline1,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
     system(cmdline1);
+    system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /home/hpc-now/ >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /usr/.hpc-now/.bin >> /dev/null 2>&1");
     system("chown hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
@@ -484,6 +485,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
     sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/LICENSES/GPL-2",URL_LICENSE);
     system(cmdline1);
+    system("mkdir -p '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chmod -R 755 '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chown -R hpc-now:hpc-now '/Library/Application Support/io.terraform' >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Users/hpc-now/ >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.bin >> /dev/null 2>&1");
     system("chown hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
@@ -556,6 +558,12 @@ int uninstall_services(void){
 #ifdef _WIN32
     printf("|          There are still remaining files for the specific user 'hpc-now'.\n");
     printf("|          Please mannually delete the folder C:\\Users\\hpc-now-* after reboot.\n");
+#elif __linux__
+    printf("|          There are still remaining files for reinstall. You can run the command: \n");
+    printf("|          " HIGH_GREEN_BOLD "sudo rm -rf /usr/share/terraform" RESET_DISPLAY " to erase them.\n");
+#elif __APPLE__
+    printf("|          There are still remaining files for reinstall. You can run the command: \n");
+    printf("|          " HIGH_GREEN_BOLD "sudo rm -rf '/Library/Application Support/io.terraform'" RESET_DISPLAY " to erase them.\n");
 #endif
     return 0;
 }
@@ -679,6 +687,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     system("chmod 711 /home/hpc-now >> /dev/null 2>&1 && chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
     sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
+    system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
 #elif __APPLE__
@@ -692,6 +701,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     system("chmod 711 /Users/hpc-now >> /dev/null 2>&1 && chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
     sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
+    system("mkdir -p '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chmod -R 755 '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chown -R hpc-now:hpc-now '/Library/Application Support/io.terraform' >> /dev/null 2>&1");
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
 #endif
