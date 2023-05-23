@@ -668,10 +668,15 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, int s
         i++;
         sleep(1);
         if(file_empty_or_not(errorlog)>0){
-            if(silent_flag!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_ERROR.\n" RESET_DISPLAY);
+            if(find_multi_keys(errorlog,"Warning:","","","","")>0){
+                find_and_replace(errorlog,"Warning:","","","","","Warning:","warning:");
             }
-            return 127;
+            else{
+                if(silent_flag!=0){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_ERROR.\n" RESET_DISPLAY);
+                }
+                return 127;
+            }
         }
     }
     if(i==MAXIMUM_WAIT_TIME){
