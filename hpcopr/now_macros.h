@@ -109,7 +109,7 @@
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
 #define OPERATION_ERROR_LOG "/Users/hpc-now/hpc-now.err.log"
 #define HPC_NOW_ROOT_DIR "/Applications/.hpc-now/"
-#define TF_LOCAL_PLUGINS "'/Library/Application Support/io.terraform/'"
+#define TF_LOCAL_PLUGINS "/Library/Application Support/io.terraform/"
 
 #define NOW_CRYPTO_EXEC "/Applications/.hpc-now/.bin/now-crypto.exe"
 #define TERRAFORM_EXEC "/Applications/.hpc-now/.bin/terraform"
