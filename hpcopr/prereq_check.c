@@ -263,7 +263,11 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp_zip,"%sterraform_%s_darwin_amd64.zip",dirname_temp,terraform_version_var);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
+#ifdef _WIN32
         sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+#else
+        sprintf(cmdline,"%s '%s' %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+#endif
         system(cmdline);
     }
     file_check_flag=file_validity_check(tf_exec,force_repair_flag,md5_tf_exec_var);
