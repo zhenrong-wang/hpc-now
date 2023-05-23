@@ -30,7 +30,7 @@ int generate_sshkey(char* sshkey_folder, char* pubkey);
 int update_cluster_summary(char* workdir, char* crypto_keyfile);
 int archive_log(char* logarchive, char* logfile);
 void update_compute_template(char* stackdir, char* cloud_flag);
-int wait_for_complete(char* workdir, char* option, char* errorlog, int silent_flag);
+int wait_for_complete(char* workdir, char* option, char* errorlog, char* errlog_archive, int silent_flag);
 int graph(char* workdir, char* crypto_keyfile, int graph_level);
 int cluster_empty_or_not(char* workdir);
 int cluster_asleep_or_not(char* workdir);

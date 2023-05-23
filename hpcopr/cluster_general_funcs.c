@@ -635,7 +635,7 @@ void update_compute_template(char* stackdir, char* cloud_flag){
     single_file_to_running(filename_temp,cloud_flag);
 }
 
-int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, int silent_flag){
+int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, char* errlog_archive, int silent_flag){
 //    char cmdline[CMDLINE_LENGTH]="";
     int i=0;
     int total_minutes=0;
@@ -669,7 +669,7 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, int s
         sleep(1);
         if(file_empty_or_not(errorlog)>0){
             if(find_multi_keys(errorlog,"Warning:","","","","")>0){
-                find_and_replace(errorlog,"Warning:","","","","","Warning:","warning:");
+                archive_log(errlog_archive,errorlog);
             }
             else{
                 if(silent_flag!=0){
@@ -832,7 +832,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
         printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
         printf("|          Command: %s. View log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr viewlog std|err\n" RESET_DISPLAY,execution_name);
     }
-    if(wait_for_complete(tf_realtime_log,execution_name,error_log,1)!=0){
+    if(wait_for_complete(tf_realtime_log,execution_name,error_log,tf_realtime_log_archive,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,error_log);
         return -1;
