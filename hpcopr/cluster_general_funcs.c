@@ -813,6 +813,14 @@ int cluster_asleep_or_not(char* workdir){
     }
 }
 
+int cluster_full_running_or_not(char* workdir){
+    char stackdir[DIR_LENGTH]="";
+    create_and_get_stackdir(workdir,stackdir);
+    char filename_temp[FILENAME_LENGTH]="";
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    return get_compute_node_num(filename_temp,"down");
+}
+
 int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log, int silent_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";

@@ -118,6 +118,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
 33 EMPTY REGISTRY
 35 Failed to exit current
 37 NO_NEED_TO_SWITCH
+38 NO_NEED_TO_WAKEUP
 39 NOT_IN_THE_REGISTRY
 41 DESTROY_ERROR
 43 CLUSTER_ASLEEP
@@ -1198,6 +1199,12 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"sleep")==0){
+        if(cluster_asleep_or_not(workdir)==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is " RESET_DISPLAY HIGH_CYAN_BOLD "not running" RESET_DISPLAY FATAL_RED_BOLD ". No need to hibernate.\n" RESET_DISPLAY);
+            write_operation_log(current_cluster_name,operation_log,argv[1],"CLUSTER_ASLEEP",43);
+            check_and_cleanup(workdir);
+            return 43;
+        }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
             write_operation_log(current_cluster_name,operation_log,argv[1],"USER_DENIED",3);
             check_and_cleanup(workdir);
@@ -1209,6 +1216,28 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     if(strcmp(argv[1],"wakeup")==0){
+        if(cluster_full_running_or_not(workdir)==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "fully running" RESET_DISPLAY FATAL_RED_BOLD ". No need to wake up.\n" RESET_DISPLAY);
+            write_operation_log(current_cluster_name,operation_log,argv[1],"RUNNING_STATE",38);
+            check_and_cleanup(workdir);
+            return 38;
+        }
+        if(cluster_asleep_or_not(workdir)!=0){
+            if(argc==2){
+                printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "minimal running" RESET_DISPLAY FATAL_RED_BOLD ". Please try\n" RESET_DISPLAY);
+                printf(FATAL_RED_BOLD "|          " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup all" RESET_DISPLAY FATAL_RED_BOLD " to wake up the whole cluster.\n" RESET_DISPLAY);
+                write_operation_log(current_cluster_name,operation_log,argv[1],"RUNNING_STATE",38);
+                check_and_cleanup(workdir);
+                return 38;
+            }
+            else if(strcmp(argv[2],"all")!=0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "minimal running" RESET_DISPLAY FATAL_RED_BOLD ". Please try \n" RESET_DISPLAY);
+                printf(FATAL_RED_BOLD "|          " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup all" RESET_DISPLAY FATAL_RED_BOLD " to wake up the whole cluster.\n" RESET_DISPLAY);
+                write_operation_log(current_cluster_name,operation_log,argv[1],"RUNNING_STATE",38);
+                check_and_cleanup(workdir);
+                return 38;
+            }
+        }
         if(confirm_to_operate_cluster(current_cluster_name)!=0){
             write_operation_log(current_cluster_name,operation_log,argv[1],"USER_DENIED",3);
             check_and_cleanup(workdir);

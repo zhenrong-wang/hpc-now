@@ -34,6 +34,7 @@ int wait_for_complete(char* workdir, char* option, char* errorlog, char* errlog_
 int graph(char* workdir, char* crypto_keyfile, int graph_level);
 int cluster_empty_or_not(char* workdir);
 int cluster_asleep_or_not(char* workdir);
+int cluster_full_running_or_not(char* workdir);
 int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log, int silent_flag);
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
 int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag);

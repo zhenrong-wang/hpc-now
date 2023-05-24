@@ -1691,6 +1691,9 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
         return -1;
     }
+    if(strcmp(option,"minimal")==0&&cluster_asleep_or_not(workdir)!=0){
+        return 3;
+    }
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
