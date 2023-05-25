@@ -694,7 +694,8 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
     char doubleconfirm[32]="";
     char cmdline[LINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char string_temp[LINE_LENGTH];
+    char string_temp[LINE_LENGTH_SHORT];
+    char dot_terraform[FILENAME_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
     char* error_log=OPERATION_ERROR_LOG;
     char stackdir[DIR_LENGTH]="";
@@ -727,31 +728,40 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
     create_and_get_vaultdir(workdir,vaultdir);
     decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
-    if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log,1)!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (1/2)...\n" RESET_DISPLAY);
-        sleep(2);
+    sprintf(dot_terraform,"%s%s.terraform",stackdir,PATH_SLASH);
+    if(folder_exist_or_not(dot_terraform)==0){
         if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log,1)!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (2/2)...\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (1/2)...\n" RESET_DISPLAY);
             sleep(2);
             if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log,1)!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to destroy your cluster. This usually caused by either Terraform or\n");
-                printf("|          the providers developed and maintained by cloud service providers.\n");
-                printf("|          You *MUST* manually destroy the remaining cloud resources of this cluster.\n");
-                printf("|          Exit now.\n" RESET_DISPLAY);
-                delete_decrypted_files(workdir,crypto_keyfile);
-                return -1;
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (2/2)...\n" RESET_DISPLAY);
+                sleep(2);
+                if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,error_log,1)!=0){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to destroy your cluster. This usually caused by either Terraform or\n");
+                    printf("|          the providers developed and maintained by cloud service providers.\n");
+                    printf("|          You *MUST* manually destroy the remaining cloud resources of this cluster.\n");
+                    printf("|          Exit now.\n" RESET_DISPLAY);
+                    delete_decrypted_files(workdir,crypto_keyfile);
+                    return -1;
+                }
             }
         }
+        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The whole cluster has been destroyed successfully.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Upating the usage records ...\n");
+        sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+        compute_node_num=get_compute_node_num(filename_temp,"all");
+        update_usage_summary(workdir,crypto_keyfile,"master","stop");
+        update_usage_summary(workdir,crypto_keyfile,"database","stop");
+        update_usage_summary(workdir,crypto_keyfile,"natgw","stop");
+        for(i=0;i<compute_node_num;i++){
+            sprintf(string_temp,"compute%d",i+1);
+            update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
+        }
     }
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
-    compute_node_num=get_compute_node_num(filename_temp,"all");
-    update_usage_summary(workdir,crypto_keyfile,"master","stop");
-    update_usage_summary(workdir,crypto_keyfile,"database","stop");
-    update_usage_summary(workdir,crypto_keyfile,"natgw","stop");
-    for(i=0;i<compute_node_num;i++){
-        sprintf(string_temp,"compute%d",i+1);
-        update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
+    else{
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has " WARN_YELLO_BOLD "not been initialized" RESET_DISPLAY ". No need to destroy.\n");
     }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Deleting all the related local files and folders ...\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -771,7 +781,6 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
     system(cmdline);
     sprintf(cmdline,"%s %s%sconf%stf_prep.conf %s%sconf%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,workdir,PATH_SLASH,PATH_SLASH,workdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The whole cluster has been destroyed successfully.\n");
     return 0;
 }
 
