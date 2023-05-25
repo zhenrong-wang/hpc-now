@@ -180,7 +180,7 @@ int check_and_install_prerequisitions(int repair_flag){
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Location configuration format incorrect.\n");
         }
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to use the default settings? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to use the default settings? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted\n");
         printf("|          to confirm. \n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         fflush(stdin);
@@ -195,7 +195,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will not use the default settings. Would you like to configure now?\n");
-            printf("|          Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm.\n");
+            printf("|          Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm.\n");
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
             fflush(stdin);
             scanf("%s",doubleconfirm);

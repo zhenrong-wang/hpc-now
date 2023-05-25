@@ -1072,13 +1072,13 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
 int confirm_to_operate_cluster(char* current_cluster_name){
     char doubleconfirm[64]="";
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster" HIGH_GREEN_BOLD " %s" RESET_DISPLAY " now, which may affect\n",current_cluster_name);
-    printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " to continue.\n");
+    printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to continue.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
     getchar();
     if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to continue. You chose to deny this operation.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continue. You chose to deny this operation.\n");
         printf("|          Nothing changed. Exit now.\n");
         return 1;
     }
@@ -1692,7 +1692,7 @@ int usrmgr_prereq_check(char* workdir, char* option){
         printf("|            3. sudo hpcmgr connect\n");
         printf("|            4. sudo hpcmgr all\n" RESET_DISPLAY);
         printf(GENERAL_BOLD "|          You can also exit now, run" RESET_DISPLAY HIGH_GREEN_BOLD " 'hpcopr wakeup all'" RESET_DISPLAY GENERAL_BOLD " and then manage the users.\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted.\n");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
         scanf("%s",confirm);

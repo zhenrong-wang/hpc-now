@@ -283,12 +283,12 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"repair")==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Entering repair mode. All the locations will be reset to default,\n");
         printf("|          and all the core components will be replaced by the default ones.\n");
-        printf("|          Would you like to continue? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm.\n");
+        printf("|          Would you like to continue? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm.\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
         if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-            printf("\n[ -INFO- ] Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to continue. You chose to deny this operation.\n");
+            printf("\n[ -INFO- ] Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continue. You chose to deny this operation.\n");
             printf("|          Nothing changed. Exit now.\n");
             write_operation_log("NULL",operation_log,argv[1],"USER_DENIED",3);
             print_tail();

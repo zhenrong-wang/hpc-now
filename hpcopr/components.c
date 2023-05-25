@@ -472,13 +472,13 @@ int configure_locations(void){
     printf("|*   THE DEFAULT LOCATIONS IF YOUR LOCATIONS FAIL TO WORK PROPERLY!                \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
+    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
     fflush(stdin);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
     getchar();
     if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
         return 1;
     }
