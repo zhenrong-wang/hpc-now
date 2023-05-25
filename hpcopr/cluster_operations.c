@@ -339,7 +339,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
             fflush(stdin);
             scanf("%s",doubleconfirm);
             getchar();
-            if(strcmp(doubleconfirm,"y-e-s")==0){
+            if(strcmp(doubleconfirm,CONFIRM_STRING)==0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
                 printf("|          absolutely *NOT* recoverable!\n" RESET_DISPLAY);
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
@@ -365,7 +365,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
             fflush(stdin);
             scanf("%s",doubleconfirm);
             getchar();
-            if(strcmp(doubleconfirm,"y-e-s")!=0){
+            if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
                 printf("|          Nothing changed.\n");
                 return 5;
@@ -453,7 +453,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         printf("|          Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted as a confirmation. \n" RESET_DISPLAY);
         fflush(stdin);
         scanf("%s",doubleconfirm);
-        if(strcmp(doubleconfirm,"y-e-s")!=0){
+        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
             printf("|          Nothing changed.\n");
             return 3;
@@ -595,7 +595,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
     getchar();
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
+    if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
         return 1;
@@ -717,7 +717,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         scanf("%s",doubleconfirm);
         getchar();
-        if(strcmp(doubleconfirm,"y-e-s")!=0){
+        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
             printf("|          Nothing changed.\n");
             return 1;
@@ -825,7 +825,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             fflush(stdin);
             scanf("%s",string_temp);
             getchar();
-            if(strcmp(string_temp,"y-e-s")!=0){
+            if(strcmp(string_temp,CONFIRM_STRING)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
                 return 1;
             }
@@ -1046,7 +1046,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             fflush(stdin);
             scanf("%s",string_temp);
             getchar();
-            if(strcmp(string_temp,"y-e-s")!=0){
+            if(strcmp(string_temp,CONFIRM_STRING)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
                 return 1;
             }
@@ -1186,7 +1186,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
             fflush(stdin);
             scanf("%s",string_temp);
             getchar();
-            if(strcmp(string_temp,"y-e-s")!=0){
+            if(strcmp(string_temp,CONFIRM_STRING)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
                 return 1;
             }
@@ -1858,7 +1858,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
         fflush(stdin);
         scanf("%s",doubleconfirm);
         getchar();
-        if(strcmp(doubleconfirm,"y-e-s")!=0){
+        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
             return 3;
         }
@@ -1882,7 +1882,7 @@ int edit_configuration_file(char* workdir, char* crypto_keyfile){
         fflush(stdin);
         scanf("%s",doubleconfirm);
         getchar();
-        if(strcmp(doubleconfirm,"y-e-s")!=0){
+        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
             return 1;
         }
         get_default_conf(workdir,crypto_keyfile,0);
@@ -1926,7 +1926,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
     getchar();
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
+    if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
         return 1;

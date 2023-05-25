@@ -1077,7 +1077,7 @@ int confirm_to_operate_cluster(char* current_cluster_name){
     fflush(stdin);
     scanf("%s",doubleconfirm);
     getchar();
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
+    if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to continue. You chose to deny this operation.\n");
         printf("|          Nothing changed. Exit now.\n");
         return 1;
@@ -1697,7 +1697,7 @@ int usrmgr_prereq_check(char* workdir, char* option){
         fflush(stdin);
         scanf("%s",confirm);
         getchar();
-        if(strcmp(confirm,"y-e-s")!=0){
+        if(strcmp(confirm,CONFIRM_STRING)!=0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny the operation. Exit now.\n");
             return 3;
         }

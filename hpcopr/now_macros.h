@@ -141,6 +141,8 @@
 
 #endif
 
+#define CONFIRM_STRING "y-e-s"
+
 /* Usually you don't need to modify the macros in this section.*/
 #define CMDLINE_LENGTH 2048
 #define CLUSTER_ID_LENGTH_MAX 24

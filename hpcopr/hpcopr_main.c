@@ -287,7 +287,7 @@ int main(int argc, char* argv[]){
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
-        if(strcmp(doubleconfirm,"y-e-s")!=0){
+        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
             printf("\n[ -INFO- ] Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to continue. You chose to deny this operation.\n");
             printf("|          Nothing changed. Exit now.\n");
             write_operation_log("NULL",operation_log,argv[1],"USER_DENIED",3);
