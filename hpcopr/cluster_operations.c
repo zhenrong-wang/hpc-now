@@ -415,12 +415,6 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return -1;
     }
     fclose(file_p);
-    file_p=fopen(current_cluster,"w+");
-    if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create the current cluster indicator. Exit now.\n" RESET_DISPLAY);
-        return -1;
-    }
-    fclose(file_p);
     if(strlen(cluster_name)==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the cluster name (A-Z | a-z | 0-9 | - , maximum length %d):\n",CLUSTER_ID_LENGTH_MAX);
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
