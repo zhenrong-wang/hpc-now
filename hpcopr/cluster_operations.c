@@ -404,7 +404,6 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     int ak_length,sk_length;
     char* cluster_registry=ALL_CLUSTER_REGISTRY;
-    char* current_cluster=CURRENT_CLUSTER_INDICATOR;
     char doubleconfirm[64]="";
     if(file_exist_or_not(crypto_keyfile)!=0){
         return -1;
