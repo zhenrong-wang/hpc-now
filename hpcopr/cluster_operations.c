@@ -120,9 +120,6 @@ int list_all_cluster_names(int header_flag){
     if(header_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " List of all the clusters:\n");
     }
-    else{
-        printf("\n");
-    }
     while(fgetline(file_p,registry_line)!=1){
         if(strlen(registry_line)!=0){
             if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){

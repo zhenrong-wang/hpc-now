@@ -512,7 +512,7 @@ int main(int argc, char* argv[]){
         }
         else{
             if(command_flag==-5){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Please swith to a cluster, or specify by the last param '-c=':\n" RESET_DISPLAY);
+                printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c=" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Use the command " HIGH_GREEN_BOLD "hpcopr glance all" RESET_DISPLAY " to glance all the clusters.\n");
                 list_all_cluster_names(1);
                 write_operation_log("NULL",operation_log,argv[1],"NOT_OPERATING_CLUSTERS",25);
@@ -527,7 +527,7 @@ int main(int argc, char* argv[]){
             return 127;
         }
         else if(run_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please swith to a cluster, or specify by the last param '-c='.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c=" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
             write_operation_log("NULL",operation_log,argv[1],"NOT_OPERATING_CLUSTERS",25);
             check_and_cleanup("");
             return 25;
@@ -545,7 +545,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"refresh")==0){
         if(command_flag==-5){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please swith to a cluster, or specify by the last param '-c=':\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c=" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
             list_all_cluster_names(1);
             write_operation_log("NULL",operation_log,argv[1],"NOT_OPERATING_CLUSTERS",25);
             check_and_cleanup("");
@@ -599,7 +599,7 @@ int main(int argc, char* argv[]){
             return 127;
         }
         else if(run_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please swith to a cluster, or specify by the last param '-c=':\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c=" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
             list_all_cluster_names(1);
             write_operation_log("NULL",operation_log,argv[1],"NOT_OPERATING_CLUSTERS",25);
             check_and_cleanup(workdir);
@@ -791,7 +791,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"remove")==0){
         if(command_flag==-5){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please swith to a cluster, or specify by the last param '-c=':\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c=" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
             list_all_cluster_names(1);
             write_operation_log("NULL",operation_log,argv[1],"NOT_OPERATING_CLUSTERS",25);
             check_and_cleanup("");
@@ -829,7 +829,7 @@ int main(int argc, char* argv[]){
     }
 
     if(command_flag==-5){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Please swith to a cluster, or specify by the last param '-c=':\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c=" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
         list_all_cluster_names(1);
         write_operation_log("NULL",operation_log,argv[1],"NOT_OPERATING_CLUSTERS",25);
         check_and_cleanup("");
@@ -838,10 +838,16 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"ssh")==0){
         if(argc==2){
-            printf(GENERAL_BOLD "[ -INFO- ] Usage: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr ssh USER_NAME (Optional)CLUSTER_NAME" RESET_DISPLAY GENERAL_BOLD "\n");
+            printf(GENERAL_BOLD "[ -INFO- ] Usage: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr ssh USER_NAME (Optional)-c=CLUSTER_NAME" RESET_DISPLAY GENERAL_BOLD "\n");
             printf("|          A blank CLUSTER_NAME refers to the current cluster.\n" RESET_DISPLAY);
             write_operation_log("NULL",operation_log,argv[1],"TOO_FEW_PARAMS",5);
             check_and_cleanup("");
+            return 5;
+        }
+        else if(argc==3&&command_flag==2){
+            printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify to login as which user. Exit now.\n" RESET_DISPLAY);
+            write_operation_log(cluster_name,operation_log,argv[1],"TOO_FEW_PARAM",5);
+            check_and_cleanup(workdir);
             return 5;
         }
         else{
@@ -1240,11 +1246,11 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
 
-    if(argc==2){
+    if(argc==2||(argc==3&&command_flag==2)){
         if(strcmp(argv[1],"reconfc")==0||strcmp(argv[1],"reconfm")==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Available configuration list:\n|\n");
             if(check_reconfigure_list(workdir)!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Internal error. Please submit an issue to the community. Exit now.\n" RESET_DISPLAY);
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the list. Have you inited this cluster?\n" RESET_DISPLAY);
                 write_operation_log(cluster_name,operation_log,argv[1],"FATAL_INTERNAL_ERROR",125);
                 check_and_cleanup(workdir);
                 return 125;
@@ -1255,12 +1261,6 @@ int main(int argc, char* argv[]){
             if(strcmp(argv[1],"reconfm")==0&&cluster_asleep_or_not(workdir)==0){
                 printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You need to wake up the cluster first.\n" RESET_DISPLAY);
             }
-            write_operation_log(cluster_name,operation_log,argv[1],"TOO_FEW_PARAM",5);
-            check_and_cleanup(workdir);
-            return 5;
-        }
-        if(strcmp(argv[1],"ssh")==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify to login with which user. Exit now.\n" RESET_DISPLAY);
             write_operation_log(cluster_name,operation_log,argv[1],"TOO_FEW_PARAM",5);
             check_and_cleanup(workdir);
             return 5;
