@@ -773,9 +773,14 @@ int cluster_empty_or_not(char* workdir){
     char statefile[FILENAME_LENGTH]="";
     char templatefile[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
+    char dot_terraform[FILENAME_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(templatefile,"%s%scompute_template",stackdir,PATH_SLASH);
+    sprintf(dot_terraform,"%s%s.terraform",stackdir,PATH_SLASH);
+    if(folder_exist_or_not(dot_terraform)!=0){
+        return 0;
+    }
     if(file_exist_or_not(statefile)!=0&&file_exist_or_not(templatefile)!=0){
         return 0;
     }
@@ -1071,7 +1076,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
 
 int confirm_to_operate_cluster(char* current_cluster_name){
     char doubleconfirm[64]="";
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster" HIGH_GREEN_BOLD " %s" RESET_DISPLAY " now, which may affect\n",current_cluster_name);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster" HIGH_CYAN_BOLD " %s" RESET_DISPLAY " now, which may affect\n",current_cluster_name);
     printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to continue.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
@@ -1828,11 +1833,11 @@ int check_and_cleanup(char* prev_workdir){
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(strlen(prev_workdir)!=0){
         if(show_current_cluster(current_workdir,current_cluster_name,0)==1){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Another hpcopr thread exited the current cluster.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "\n[ -WARN- ] Currently there is no switched cluster.\n" RESET_DISPLAY);
         }
         else{
             if(strcmp(current_workdir,prev_workdir)!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] The active cluster has been switched to" RESET_DISPLAY HIGH_CYAN_BOLD " %s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,current_cluster_name);
+                printf(WARN_YELLO_BOLD "\n[ -WARN- ] The switched cluster is" RESET_DISPLAY HIGH_CYAN_BOLD " %s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,current_cluster_name);
             }
         }
     }

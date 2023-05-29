@@ -40,7 +40,7 @@ int switch_to_cluster(char* target_cluster_name){
     char temp_workdir[DIR_LENGTH]="";
     FILE* file_p=NULL;
     if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name is not in the registry. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is not in the registry.\n" RESET_DISPLAY, temp_cluster_name);
         return 1;
     }
     if(show_current_cluster(temp_workdir,temp_cluster_name,0)==0){
@@ -104,7 +104,7 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     return system(cmdline);
 }
 
-int list_all_cluster_names(void){
+int list_all_cluster_names(int header_flag){
     FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
     char registry_line[LINE_LENGTH_SHORT]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
@@ -117,19 +117,24 @@ int list_all_cluster_names(void){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The registry is empty. Please create one to operate.\n");
         return 1;
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " List of all the clusters:\n");
+    if(header_flag==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " List of all the clusters:\n");
+    }
+    else{
+        printf("\n");
+    }
     while(fgetline(file_p,registry_line)!=1){
         if(strlen(registry_line)!=0){
             if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
-                printf("|          %s\n",registry_line);
+                printf(GENERAL_BOLD "|  ------  %s\n" RESET_DISPLAY,registry_line);
             }
             else{
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
-                    printf(HIGH_GREEN_BOLD "|  active: %s\n" RESET_DISPLAY,registry_line);
+                    printf(HIGH_GREEN_BOLD "|  switch: %s\n" RESET_DISPLAY,registry_line);
                 }
                 else{
-                    printf("|          %s\n",registry_line);
+                    printf(GENERAL_BOLD "|  ------  %s\n" RESET_DISPLAY,registry_line);
                 }
             }
         }
@@ -155,12 +160,12 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         }
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
         if(check_pslock(temp_cluster_workdir)!=0){
-            printf(HIGH_GREEN_BOLD "|  active: <> %s | %s | * OPERATION-IN-PROGRESS *\n" RESET_DISPLAY,temp_cluster_name,cloud_flag);
+            printf(HIGH_GREEN_BOLD "|  switch: <> %s | %s | * OPERATION-IN-PROGRESS *\n" RESET_DISPLAY,temp_cluster_name,cloud_flag);
             fclose(file_p);
             return 0;
         }
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
-        printf(HIGH_GREEN_BOLD "|  active: <> %s | ",temp_cluster_name);
+        printf(HIGH_GREEN_BOLD "|  switch: <> %s | ",temp_cluster_name);
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
             printf("%s | * EMPTY CLUSTER *\n" RESET_DISPLAY,cloud_flag);
         }
@@ -176,10 +181,10 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 get_cloud_flag(temp_cluster_workdir,cloud_flag);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
-                    printf(HIGH_GREEN_BOLD "|  active: <> %s | ",temp_cluster_name);
+                    printf(HIGH_GREEN_BOLD "|  switch: <> %s | ",temp_cluster_name);
                 }
                 else{
-                    printf(GENERAL_BOLD "|          <> %s | ",temp_cluster_name);
+                    printf(GENERAL_BOLD "|  ------  <> %s | ",temp_cluster_name);
                 }
                 if(check_pslock(temp_cluster_workdir)!=0){
                     printf("%s | * OPERATION-IN-PROGRESS *\n" RESET_DISPLAY,cloud_flag);
@@ -210,10 +215,10 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         get_workdir(temp_cluster_workdir,target_cluster_name);
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
         if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
-            printf(HIGH_GREEN_BOLD "|  active: <> %s | ",temp_cluster_name);
+            printf(HIGH_GREEN_BOLD "|  switch: <> %s | ",temp_cluster_name);
         }
         else{
-            printf(GENERAL_BOLD "|          <> %s | ",temp_cluster_name);
+            printf(GENERAL_BOLD "|  ------  <> %s | ",temp_cluster_name);
         }
         if(check_pslock(temp_cluster_workdir)!=0){
             printf("%s | * OPERATION-IN-PROGRESS * \n" RESET_DISPLAY,cloud_flag);
@@ -321,7 +326,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
     sprintf(log_trash,"%s%slog_trashbin.txt",HPC_NOW_ROOT_DIR,PATH_SLASH);
     if(cluster_name_check_and_fix(target_cluster_name,temp_cluster_name)!=-127){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is not in the registry.\n" RESET_DISPLAY,target_cluster_name);
-        list_all_cluster_names();
+        list_all_cluster_names(1);
         return 3;
     }
     get_workdir(cluster_workdir,target_cluster_name);

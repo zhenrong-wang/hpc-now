@@ -668,3 +668,43 @@ int command_name_check(char* command_name_input, char* command_prompt){
     strcpy(command_prompt,commands[closest]);
     return 200+closest;
 }
+
+int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name){
+    int command_flag=0;
+    char last_param[128]="";
+    char temp_cluster_name[128]="";
+    if(argc<2){
+        strcpy(command_name_prompt,"");
+        strcpy(workdir,"");
+        strcpy(cluster_name,"");
+        return -1;
+    }
+    command_flag=command_name_check(argv[1],command_name_prompt);
+    if(command_flag!=0){
+        strcpy(workdir,"");
+        strcpy(cluster_name,"");
+        return command_flag;
+    }
+    strcpy(last_param,argv[argc-1]);
+    if(strlen(last_param)>2&&*(last_param+0)=='-'&&*(last_param+1)=='c'&&*(last_param+2)=='='){
+        get_seq_string(last_param,'=',2,temp_cluster_name);
+        if(cluster_name_check_and_fix(temp_cluster_name,cluster_name)!=-127){
+            strcpy(workdir,"");
+            return -3;
+        }
+        else{
+            get_workdir(workdir,cluster_name);
+            return 2;
+        }
+    }
+    else{
+        if(show_current_cluster(workdir,cluster_name,0)!=0){
+            strcpy(workdir,"");
+            strcpy(cluster_name,"");
+            return -5;
+        }
+        else{
+            return 0;
+        }
+    }
+}
