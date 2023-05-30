@@ -4,8 +4,8 @@
 :: Bug report: info@hpc-now.com
 
 @echo off
-for /f tokens^=2^ delims^=^" %a in  ('findstr CORE_VERSION_CODE .\\hpcopr\\now_macros.h') do set hpcopr_version_code=%a
-for /f tokens^=2^ delims^=^" %a in  ('findstr INSTALLER_VERSION_CODE .\\installer\\installer.h') do set installer_version_code=%a
+for /f tokens^=2^ delims^=^" %%a in  ('findstr CORE_VERSION_CODE .\\hpcopr\\now_macros.h') do set hpcopr_version_code=%%a
+for /f tokens^=2^ delims^=^" %%a in  ('findstr INSTALLER_VERSION_CODE .\\installer\\installer.h') do set installer_version_code=%%a
 :help
 if "%~1"=="" (
 	echo [ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command.
