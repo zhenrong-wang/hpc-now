@@ -34,11 +34,11 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
 #elif __linux__
     sprintf(cmdline,"md5sum '%s' | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif _WIN32
-    sprintf(cmdline,"certutil -hashfile \"%s\" md5 > md5.txt.tmp",crypto_key_filename);
+    sprintf(cmdline,"certutil -hashfile \"%s\" md5 > c:\\programdata\\hpc-now\\md5.txt.tmp",crypto_key_filename);
 #endif
     system(cmdline);
 #ifdef _WIN32
-    md5_tmp=fopen("md5.txt.tmp","r");
+    md5_tmp=fopen("c:\\programdata\\hpc-now\\md5.txt.tmp","r");
 #else
     md5_tmp=fopen("/tmp/md5.txt.tmp","r");
 #endif
@@ -51,7 +51,7 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     fgetline(md5_tmp,md5sum);
     fclose(md5_tmp);
 #ifdef _WIN32
-    sprintf(cmdline,"del /f /q md5.txt.tmp %s",SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"del /f /q c:\\programdata\\hpc-now\\md5.txt.tmp %s",SYSTEM_CMD_REDIRECT);
 #else
     sprintf(cmdline,"rm -rf /tmp/md5.txt.tmp %s",SYSTEM_CMD_REDIRECT);
 #endif
