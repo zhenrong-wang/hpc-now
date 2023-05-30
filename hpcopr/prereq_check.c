@@ -619,7 +619,7 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf("|        v Environment variables have been repaired.\n");
         printf("|        v SSH files have been repaired. \n");
-        printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully check and repaired." RESET_DISPLAY "\n");
+        printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked and repaired." RESET_DISPLAY "\n");
     }
     else{
         printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked." RESET_DISPLAY "\n");

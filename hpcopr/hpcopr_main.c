@@ -922,6 +922,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 49;
         }
+        printf("\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         write_operation_log(cluster_name,operation_log,argv[1],"SUCCEEDED",0);
         check_and_cleanup(workdir);
@@ -1276,7 +1277,12 @@ int main(int argc, char* argv[]){
     if(argc>3&&strcmp(argv[1],"userman")==0&&strcmp(argv[2],"list")==0){
         run_flag=hpc_user_list(workdir,crypto_keyfile,0);
         if(cluster_asleep_or_not(workdir)==0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] The current cluster is not running.\n" RESET_DISPLAY);
+            if(command_flag==2){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is not running.\n" RESET_DISPLAY);
+            }
+            else{
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The switched cluster is not running.\n" RESET_DISPLAY);
+            }
         }
         write_operation_log(cluster_name,operation_log,argv[2],"",run_flag);
         check_and_cleanup(workdir);
@@ -1296,7 +1302,12 @@ int main(int argc, char* argv[]){
     }
 
     if(cluster_asleep_or_not(workdir)==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
+        if(command_flag==2){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not running. Please wake up first\n" RESET_DISPLAY);
+        }
+        else{
+            printf(FATAL_RED_BOLD "[ FATAL: ] The switched cluster is not running. Please wake up first\n" RESET_DISPLAY);
+        }
         if(strcmp(argv[1],"addc")==0){
             printf("|          Command: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY);
         }

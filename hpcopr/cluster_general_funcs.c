@@ -1833,11 +1833,11 @@ int check_and_cleanup(char* prev_workdir){
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(strlen(prev_workdir)!=0){
         if(show_current_cluster(current_workdir,current_cluster_name,0)==1){
-            printf(WARN_YELLO_BOLD "\n[ -WARN- ] Currently there is no switched cluster.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no switched cluster.\n" RESET_DISPLAY);
         }
         else{
             if(strcmp(current_workdir,prev_workdir)!=0){
-                printf(WARN_YELLO_BOLD "\n[ -WARN- ] The switched cluster is" RESET_DISPLAY HIGH_CYAN_BOLD " %s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,current_cluster_name);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The switched cluster is" RESET_DISPLAY HIGH_CYAN_BOLD " %s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,current_cluster_name);
             }
         }
     }
