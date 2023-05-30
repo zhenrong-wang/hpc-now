@@ -123,7 +123,7 @@ int list_all_cluster_names(int header_flag){
     while(fgetline(file_p,registry_line)!=1){
         if(strlen(registry_line)!=0){
             if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
-                printf(GENERAL_BOLD "|  ------  %s\n" RESET_DISPLAY,registry_line);
+                printf(RESET_DISPLAY "|        : %s\n" RESET_DISPLAY,registry_line);
             }
             else{
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
@@ -131,7 +131,7 @@ int list_all_cluster_names(int header_flag){
                     printf(HIGH_GREEN_BOLD "|  switch: %s\n" RESET_DISPLAY,registry_line);
                 }
                 else{
-                    printf(GENERAL_BOLD "|  ------  %s\n" RESET_DISPLAY,registry_line);
+                    printf(RESET_DISPLAY "|        : %s\n" RESET_DISPLAY,registry_line);
                 }
             }
         }
@@ -181,7 +181,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                     printf(HIGH_GREEN_BOLD "|  switch: <> %s | ",temp_cluster_name);
                 }
                 else{
-                    printf(GENERAL_BOLD "|  ------  <> %s | ",temp_cluster_name);
+                    printf(RESET_DISPLAY "|        : <> %s | ",temp_cluster_name);
                 }
                 if(check_pslock(temp_cluster_workdir)!=0){
                     printf("%s | * OPERATION-IN-PROGRESS *\n" RESET_DISPLAY,cloud_flag);
@@ -215,7 +215,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             printf(HIGH_GREEN_BOLD "|  switch: <> %s | ",temp_cluster_name);
         }
         else{
-            printf(GENERAL_BOLD "|  ------  <> %s | ",temp_cluster_name);
+            printf(RESET_DISPLAY "|        : <> %s | ",temp_cluster_name);
         }
         if(check_pslock(temp_cluster_workdir)!=0){
             printf("%s | * OPERATION-IN-PROGRESS * \n" RESET_DISPLAY,cloud_flag);
