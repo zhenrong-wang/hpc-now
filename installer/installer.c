@@ -208,9 +208,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking and cleaning up current environment ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
-    system("icacls c:\\hpc-now\\* /remove Administrators > nul 2>&1");
+    system("takeown /f c:\\hpc-now\\* /r /d y > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now\\* /remove Administrators:F > nul 2>&1");
+    system("takeown /f  c:\\programdata\\hpc-now\\* /r /d y > nul 2>&1");
     system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
@@ -390,9 +390,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
         printf("|          location of hpcopr executable, please make sure the location \n");
         printf("|          is correct. Rolling back and exit now.\n" RESET_DISPLAY);
         system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
-        system("icacls c:\\hpc-now\\* /remove Administrators > nul 2>&1");
-        system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
-        system("icacls c:\\programdata\\hpc-now\\* /remove Administrators > nul 2>&1");
+        system("takeown /f c:\\hpc-now\\* /r /d y > nul 2>&1");
+        system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+        system("takeown /f  c:\\programdata\\hpc-now\\* /r /d y > nul 2>&1");
         system("rd /s /q c:\\hpc-now > nul 2>&1");
         system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
         system("net user hpc-now /delete > nul 2>&1");
@@ -537,9 +537,9 @@ int uninstall_services(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
-    system("icacls c:\\hpc-now\\* /remove Administrators > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now\\* /remove Administrators > nul 2>&1");
+    system("takeown /f c:\\hpc-now\\* /r /d y > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+    system("takeown /f  c:\\programdata\\hpc-now\\* /r /d y > nul 2>&1");
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
     system("net user hpc-now /delete > nul 2>&1");
@@ -610,9 +610,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UPDATING THE SERVICES NOW ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
-    system("icacls c:\\hpc-now\\* /remove Administrators > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now\\* /remove Administrators > nul 2>&1");
+    system("takeown /f c:\\hpc-now\\* /r /d y > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+    system("takeown /f  c:\\programdata\\hpc-now\\* /r /d y > nul 2>&1");
 #endif
     if(hpcopr_loc_flag==-1){
         if(strlen(hpcopr_ver)==0){
