@@ -1273,7 +1273,7 @@ int main(int argc, char* argv[]){
         }
     }
 
-    if(argc==3&&strcmp(argv[1],"userman")==0&&strcmp(argv[2],"list")==0){
+    if(argc>3&&strcmp(argv[1],"userman")==0&&strcmp(argv[2],"list")==0){
         run_flag=hpc_user_list(workdir,crypto_keyfile,0);
         if(cluster_asleep_or_not(workdir)==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] The current cluster is not running.\n" RESET_DISPLAY);
@@ -1442,7 +1442,6 @@ int main(int argc, char* argv[]){
             return 77;
         }
         if(strcmp(argv[2],"list")==0){
-            printf("\n");
             run_flag=hpc_user_list(workdir,crypto_keyfile,0);
             write_operation_log(cluster_name,operation_log,argv[2],"",run_flag);
             check_and_cleanup(workdir);
