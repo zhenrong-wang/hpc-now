@@ -585,10 +585,6 @@ int check_and_install_prerequisitions(int repair_flag){
         sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,sshkey_dir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-#ifdef _WIN32
-    sprintf(cmdline,"attrib +h +s +r %s",sshkey_dir);
-    system(cmdline);
-#endif  
     if(file_exist_or_not(usage_logfile)!=0){
         file_p=fopen(usage_logfile,"w+");
         fprintf(file_p,"UCID,CLOUD_VENDOR,NODE_NAME,vCPU,START_DATE,START_TIME,STOP_DATE,STOP_TIME,RUNNING_HOURS,CPUxHOURS,CPU_MODEL,CLOUD_REGION\n");

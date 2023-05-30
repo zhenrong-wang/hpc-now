@@ -208,7 +208,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking and cleaning up current environment ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+    system("icacls c:\\hpc-now\\* /remove Administrators > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now\\* /remove Administrators:F > nul 2>&1");
     system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
@@ -222,6 +224,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating and configuring the running directory ...\n");
     system("mkdir c:\\hpc-now > nul 2>&1");
     system("mkdir c:\\hpc-now\\LICENSES > nul 2>&1");
+    system("mkdir c:\\hpc-now\\.now-ssh\\ > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\ > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\bin\\ > nul 2>&1");
@@ -387,7 +390,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
         printf("|          location of hpcopr executable, please make sure the location \n");
         printf("|          is correct. Rolling back and exit now.\n" RESET_DISPLAY);
         system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+        system("icacls c:\\hpc-now\\* /remove Administrators > nul 2>&1");
         system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
+        system("icacls c:\\programdata\\hpc-now\\* /remove Administrators > nul 2>&1");
         system("rd /s /q c:\\hpc-now > nul 2>&1");
         system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
         system("net user hpc-now /delete > nul 2>&1");
@@ -395,9 +400,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     }
     sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
     system(cmdline1);
+    system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
     system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
+    system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created with initial password: nowadmin2023~\n");
     printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:\n");
@@ -530,7 +537,9 @@ int uninstall_services(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+    system("icacls c:\\hpc-now\\* /remove Administrators > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now\\* /remove Administrators > nul 2>&1");
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
     system("net user hpc-now /delete > nul 2>&1");
@@ -601,7 +610,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UPDATING THE SERVICES NOW ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+    system("icacls c:\\hpc-now\\* /remove Administrators > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now\\* /remove Administrators > nul 2>&1");
 #endif
     if(hpcopr_loc_flag==-1){
         if(strlen(hpcopr_ver)==0){
@@ -647,7 +658,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf("|          3. Your device is connected to the internet.\n");
         printf("|          4. Currently there is no 'hpcopr' thread(s) running.\n" RESET_DISPLAY);
 #ifdef _WIN32
+        system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
         system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
+        system("icacls c:\\programdata\\hpc-now\\* /deny Administrators:F > nul 2>&1");
         system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
 #endif
         return 1;
@@ -659,8 +672,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
         system(cmdline1);
     }
+    system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
     system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto.exe /grant hpc-now:F /t > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
 #elif __linux__
     system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");

@@ -531,10 +531,6 @@ int generate_sshkey(char* sshkey_folder, char* pubkey){
         sprintf(cmdline,"%s %s %s",MKDIR_CMD,sshkey_folder,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-#ifdef _WIN32
-    sprintf(cmdline,"attrib +h +s +r %s",sshkey_folder);
-    system(cmdline);
-#endif
     sprintf(filename_temp,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     sprintf(filename_temp2,"%s%snow-cluster-login.pub",sshkey_folder,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0&&file_exist_or_not(filename_temp2)==0){
