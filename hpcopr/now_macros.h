@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0117"
+#define CORE_VERSION_CODE "0.2.0.0127"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -66,6 +66,7 @@
 #define SSHKEY_DIR "/home/hpc-now/.now-ssh"
 #define OPERATION_ERROR_LOG "/home/hpc-now/hpc-now.err.log"
 #define HPC_NOW_ROOT_DIR "/usr/.hpc-now/"
+#define TF_LOCAL_PLUGINS "/usr/share/terraform/"
 
 #define NOW_CRYPTO_EXEC "/usr/.hpc-now/.bin/now-crypto.exe"
 #define TERRAFORM_EXEC "/usr/.hpc-now/.bin/terraform"
@@ -108,6 +109,7 @@
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
 #define OPERATION_ERROR_LOG "/Users/hpc-now/hpc-now.err.log"
 #define HPC_NOW_ROOT_DIR "/Applications/.hpc-now/"
+#define TF_LOCAL_PLUGINS "/Library/Application Support/io.terraform/"
 
 #define NOW_CRYPTO_EXEC "/Applications/.hpc-now/.bin/now-crypto.exe"
 #define TERRAFORM_EXEC "/Applications/.hpc-now/.bin/terraform"
@@ -138,6 +140,8 @@
 #define GETPASS_FUNC getpass
 
 #endif
+
+#define CONFIRM_STRING "y-e-s"
 
 /* Usually you don't need to modify the macros in this section.*/
 #define CMDLINE_LENGTH 2048

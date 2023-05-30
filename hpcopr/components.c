@@ -472,18 +472,18 @@ int configure_locations(void){
     printf("|*   THE DEFAULT LOCATIONS IF YOUR LOCATIONS FAIL TO WORK PROPERLY!                \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
+    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
     fflush(stdin);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
     getchar();
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
+    if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
         return 1;
     }
     printf("[ LOC1/5 ] Please specify the root location of the terraform binary and providers. \n");
-    printf("|          You can input 'defaut' to use default location below: \n");
+    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_TF_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
@@ -499,7 +499,7 @@ int configure_locations(void){
         }
     }
     printf("[ LOC2/5 ] Please specify the root location of the terraform templates. \n");
-    printf("|          You can input 'defaut' to use default location below: \n");
+    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_CODE_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
@@ -515,7 +515,7 @@ int configure_locations(void){
         }
     }
     printf("[ LOC3/5 ] Please specify the root location of the *online* shell scripts.\n");
-    printf("|          You can input 'defaut' to use default location below: \n");
+    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
@@ -534,7 +534,7 @@ int configure_locations(void){
         }
     }
     printf("[ LOC4/5 ] Please input the root location of the now-crypto binary.\n");
-    printf("|          You can input 'defaut' to use default location below: \n");
+    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_NOW_CRYPTO);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
@@ -550,7 +550,7 @@ int configure_locations(void){
         }
     }
     printf("[ LOC5/5 ] Please specify the location of the *online* repo for utils and apps.\n");
-    printf("|          You can input 'defaut' to use default location below: \n");
+    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);

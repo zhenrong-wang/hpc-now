@@ -180,13 +180,13 @@ int check_and_install_prerequisitions(int repair_flag){
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Location configuration format incorrect.\n");
         }
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to use the default settings? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to use the default settings? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted\n");
         printf("|          to confirm. \n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         fflush(stdin);
         scanf("%s",doubleconfirm);
         getchar();
-        if(strcmp(doubleconfirm,"y-e-s")==0){
+        if(strcmp(doubleconfirm,CONFIRM_STRING)==0){
             if(reset_locations()!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now.\n" RESET_DISPLAY);
                 return -3;
@@ -195,12 +195,12 @@ int check_and_install_prerequisitions(int repair_flag){
         }
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will not use the default settings. Would you like to configure now?\n");
-            printf("|          Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm.\n");
+            printf("|          Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm.\n");
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
             fflush(stdin);
             scanf("%s",doubleconfirm);
             getchar();
-            if(strcmp(doubleconfirm,"y-e-s")!=0){
+            if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
                 return 1;
             }
@@ -241,7 +241,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
     if(folder_exist_or_not(DESTROYED_DIR)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     else{
@@ -249,21 +249,21 @@ int check_and_install_prerequisitions(int repair_flag){
         system(cmdline);
     }
     if(folder_exist_or_not(NOW_BINARY_DIR)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 #ifdef _WIN32
     sprintf(dirname_temp,"%s\\terraform.d\\",appdata_dir);
     sprintf(filename_temp_zip,"%s\\terraform_%s_windows_amd64.zip",dirname_temp,terraform_version_var);
 #elif __linux__
-    strcpy(dirname_temp,"/home/hpc-now/.terraform.d/");
+    strcpy(dirname_temp,TF_LOCAL_PLUGINS);
     sprintf(filename_temp_zip,"%sterraform_%s_linux_amd64.zip",dirname_temp,terraform_version_var);
 #elif __APPLE__
-    strcpy(dirname_temp,"/Users/hpc-now/.terraform.d/");
+    strcpy(dirname_temp,TF_LOCAL_PLUGINS);
     sprintf(filename_temp_zip,"%sterraform_%s_darwin_amd64.zip",dirname_temp,terraform_version_var);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     file_check_flag=file_validity_check(tf_exec,force_repair_flag,md5_tf_exec_var);
@@ -276,18 +276,18 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
                 sprintf(cmdline,"copy /y %s\\tf-win\\terraform_%s_windows_amd64.zip %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform_%s_linux_amd64.zip %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform_%s_linux_amd64.zip '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform_%s_darwin_amd64.zip %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform_%s_darwin_amd64.zip '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #endif
             }
             else{
 #ifdef _WIN32
                 sprintf(cmdline,"curl %stf-win/terraform_%s_windows_amd64.zip -o %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform_%s_linux_amd64.zip -o %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-linux/terraform_%s_linux_amd64.zip -o '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform_%s_darwin_amd64.zip -o %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-darwin/terraform_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #endif
             }
             flag=system(cmdline);
@@ -301,9 +301,9 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
         sprintf(cmdline,"tar zxf %s -C c:\\programdata\\hpc-now\\bin\\ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
 #elif __linux__
-        sprintf(cmdline,"unzip -o -q %s -d /usr/.hpc-now/.bin/ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"unzip -o -q '%s' -d /usr/.hpc-now/.bin/ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
-        sprintf(cmdline,"unzip -o -q %s -d /Applications/.hpc-now/.bin/ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"unzip -o -q '%s' -d /Applications/.hpc-now/.bin/ %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
 #endif
 //        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
@@ -374,7 +374,7 @@ int check_and_install_prerequisitions(int repair_flag){
         file_p=fopen("/home/hpc-now/.terraformrc","w+");
         fprintf(file_p,"privider_installation {\n");
         fprintf(file_p,"  filesystem_mirror {\n");
-        fprintf(file_p,"    path    = \"/home/hpc-now/.terraform.d/plugins\"\n");
+        fprintf(file_p,"    path    = \"%splugins\"\n",TF_LOCAL_PLUGINS);
         fprintf(file_p,"    include = [\"registry.terraform.io/*/*\"]\n");
         fprintf(file_p,"  }\n}\n");
         fclose(file_p);
@@ -384,7 +384,7 @@ int check_and_install_prerequisitions(int repair_flag){
         file_p=fopen("/Users/hpc-now/.terraformrc","w+");
         fprintf(file_p,"privider_installation {\n");
         fprintf(file_p,"  filesystem_mirror {\n");
-        fprintf(file_p,"    path    = \"/Users/hpc-now/.terraform.d/plugins\"\n");
+        fprintf(file_p,"    path    = \"%splugins\"\n",TF_LOCAL_PLUGINS);
         fprintf(file_p,"    include = [\"registry.terraform.io/*/*\"]\n");
         fprintf(file_p,"  }\n}\n");
         fclose(file_p);
@@ -400,16 +400,16 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s\\terraform-provider-alicloud_v%s.exe",dirname_temp,ali_plugin_version);
     sprintf(filename_temp_zip,"%s\\terraform.d\\terraform-provider-alicloud_%s_windows_amd64.zip",appdata_dir,ali_plugin_version);
 #elif __linux__
-    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/aliyun/alicloud/%s/linux_amd64/",ali_plugin_version);
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/aliyun/alicloud/%s/linux_amd64/",TF_LOCAL_PLUGINS,ali_plugin_version);
     sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
-    sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform-provider-alicloud_%s_linux_amd64.zip",ali_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-alicloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
 #elif __APPLE__
-    sprintf(dirname_temp,"/Users/hpc-now/.terraform.d/plugins/registry.terraform.io/aliyun/alicloud/%s/darwin_amd64/",ali_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
-    sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform-provider-alicloud_%s_darwin_amd64.zip",ali_plugin_version);
+    sprintf(dirname_temp,"%splugins/registry.terraform.io/aliyun/alicloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,ali_plugin_version);
+    sprintf(filename_temp,"%sterraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
+    sprintf(filename_temp_zip,"%sterraform-provider-alicloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_ali_tf_var);
@@ -422,18 +422,18 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
                 sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-alicloud_%s_windows_amd64.zip %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-alicloud_%s_linux_amd64.zip %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-alicloud_%s_linux_amd64.zip '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #endif
             }
             else{
 #ifdef _WIN32
                 sprintf(cmdline,"curl %stf-win/terraform-provider-alicloud_%s_windows_amd64.zip -o %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-alicloud_%s_linux_amd64.zip -o %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-linux/terraform-provider-alicloud_%s_linux_amd64.zip -o '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip -o %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
 #endif
             }
 //            printf("%s,,,,,\"\n",cmdline);
@@ -447,7 +447,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
         sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"unzip -o -q %s -d %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
         flag=system(cmdline);
         if(flag!=0){
@@ -461,40 +461,40 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s\\terraform-provider-tencentcloud_v%s.exe",dirname_temp,qcloud_plugin_version);
     sprintf(filename_temp_zip,"%s\\terraform.d\\terraform-provider-tencentcloud_%s_windows_amd64.zip",appdata_dir,qcloud_plugin_version);
 #elif __linux__
-    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/linux_amd64/",qcloud_plugin_version);
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/linux_amd64/",TF_LOCAL_PLUGINS,qcloud_plugin_version);
     sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
-    sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform-provider-tencentcloud_%s_linux_amd64.zip",qcloud_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-tencentcloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
 #elif __APPLE__
-    sprintf(dirname_temp,"/Users/hpc-now/.terraform.d/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/darwin_amd64/",qcloud_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
-    sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform-provider-tencentcloud_%s_darwin_amd64.zip",qcloud_plugin_version);
+    sprintf(dirname_temp,"%splugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,qcloud_plugin_version);
+    sprintf(filename_temp,"%sterraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
+    sprintf(filename_temp_zip,"%sterraform-provider-tencentcloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_qcloud_tf_var);
     if(file_check_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Downloading/Copying the cloud Terraform providers (2/3) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
+        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_qcloud_tf_zip_var);
         if(file_check_flag==1){
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
                 sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-tencentcloud_%s_windows_amd64.zip %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip %s",url_tf_root_var,qcloud_plugin_version,filename_temp);
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp);
 #endif
             }
             else{
 #ifdef _WIN32
                 sprintf(cmdline,"curl %stf-win/terraform-provider-tencentcloud_%s_windows_amd64.zip -o %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip -o %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip -o '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip -o %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
 #endif
             }
             flag=system(cmdline);
@@ -507,7 +507,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
         sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"unzip -o -q %s -d %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
         flag=system(cmdline);
         if(flag!=0){
@@ -521,40 +521,40 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s\\terraform-provider-aws_v%s_x5.exe",dirname_temp,aws_plugin_version);
     sprintf(filename_temp_zip,"%s\\terraform.d\\terraform-provider-aws_%s_windows_amd64.zip",appdata_dir,aws_plugin_version);
 #elif __linux__
-    sprintf(dirname_temp,"/home/hpc-now/.terraform.d/plugins/registry.terraform.io/hashicorp/aws/%s/linux_amd64/",aws_plugin_version);
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/aws/%s/linux_amd64/",TF_LOCAL_PLUGINS,aws_plugin_version);
     sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
-    sprintf(filename_temp_zip,"/home/hpc-now/.terraform.d/terraform-provider-aws_%s_linux_amd64.zip",aws_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-aws_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
 #elif __APPLE__
-    sprintf(dirname_temp,"/Users/hpc-now/.terraform.d/plugins/registry.terraform.io/hashicorp/aws/%s/darwin_amd64/",aws_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
-    sprintf(filename_temp_zip,"/Users/hpc-now/.terraform.d/terraform-provider-aws_%s_x5_darwin_amd64.zip",aws_plugin_version);
+    sprintf(dirname_temp,"%splugins/registry.terraform.io/hashicorp/aws/%s/darwin_amd64/",TF_LOCAL_PLUGINS,aws_plugin_version);
+    sprintf(filename_temp,"%sterraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
+    sprintf(filename_temp_zip,"%sterraform-provider-aws_%s_x5_darwin_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_aws_tf_var);
     if(file_check_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Downloading/Copying the cloud Terraform providers (3/3) ...\n");
-        printf("           Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
+        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode.\n\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_aws_tf_zip_var);
         if(file_check_flag==1){
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
                 sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-aws_%s_windows_amd64.zip %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-aws_%s_linux_amd64.zip %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-aws_%s_linux_amd64.zip '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-aws_%s_darwin_amd64.zip %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-aws_%s_darwin_amd64.zip '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #endif
             }
             else{
 #ifdef _WIN32
                 sprintf(cmdline,"curl %stf-win/terraform-provider-aws_%s_windows_amd64.zip -o %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-aws_%s_linux_amd64.zip -o %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-linux/terraform-provider-aws_%s_linux_amd64.zip -o '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-aws_%s_darwin_amd64.zip -o %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-aws_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
 #endif
             }
             flag=system(cmdline);
@@ -567,7 +567,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #ifdef _WIN32
         sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #else
-        sprintf(cmdline,"unzip -o -q %s -d %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
 #endif
         flag=system(cmdline);
         if(flag!=0){
@@ -582,7 +582,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 
     if(folder_exist_or_not(sshkey_dir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,sshkey_dir,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,sshkey_dir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 #ifdef _WIN32
@@ -619,10 +619,10 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf("|        v Environment variables have been repaired.\n");
         printf("|        v SSH files have been repaired. \n");
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Running environment successfully check and repaired.\n");
+        printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully check and repaired." RESET_DISPLAY "\n");
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Running environment successfully checked.\n");
+        printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked." RESET_DISPLAY "\n");
     }
     return 0;
 }
@@ -667,4 +667,44 @@ int command_name_check(char* command_name_input, char* command_prompt){
     }
     strcpy(command_prompt,commands[closest]);
     return 200+closest;
+}
+
+int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name){
+    int command_flag=0;
+    char last_param[128]="";
+    char temp_cluster_name[128]="";
+    if(argc<2){
+        strcpy(command_name_prompt,"");
+        strcpy(workdir,"");
+        strcpy(cluster_name,"");
+        return -1;
+    }
+    command_flag=command_name_check(argv[1],command_name_prompt);
+    if(command_flag!=0){
+        strcpy(workdir,"");
+        strcpy(cluster_name,"");
+        return command_flag;
+    }
+    strcpy(last_param,argv[argc-1]);
+    if(strlen(last_param)>2&&*(last_param+0)=='-'&&*(last_param+1)=='c'&&*(last_param+2)=='='){
+        get_seq_string(last_param,'=',2,temp_cluster_name);
+        if(cluster_name_check_and_fix(temp_cluster_name,cluster_name)!=-127){
+            strcpy(workdir,"");
+            return -3;
+        }
+        else{
+            get_workdir(workdir,cluster_name);
+            return 2;
+        }
+    }
+    else{
+        if(show_current_cluster(workdir,cluster_name,0)!=0){
+            strcpy(workdir,"");
+            strcpy(cluster_name,"");
+            return -5;
+        }
+        else{
+            return 0;
+        }
+    }
 }

@@ -30,11 +30,11 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     char buffer[256]="";
 #endif
 #ifdef __APPLE__
-    sprintf(cmdline,"md5 %s | awk '{print $4}' > /tmp/md5.txt.tmp",crypto_key_filename);
+    sprintf(cmdline,"md5 '%s' | awk '{print $NF}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif __linux__
-    sprintf(cmdline,"md5sum %s | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
+    sprintf(cmdline,"md5sum '%s' | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif _WIN32
-    sprintf(cmdline,"certutil -hashfile %s md5 > md5.txt.tmp",crypto_key_filename);
+    sprintf(cmdline,"certutil -hashfile \"%s\" md5 > md5.txt.tmp",crypto_key_filename);
 #endif
     system(cmdline);
 #ifdef _WIN32
@@ -635,7 +635,7 @@ void update_compute_template(char* stackdir, char* cloud_flag){
     single_file_to_running(filename_temp,cloud_flag);
 }
 
-int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, int silent_flag){
+int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, char* errlog_archive, int silent_flag){
 //    char cmdline[CMDLINE_LENGTH]="";
     int i=0;
     int total_minutes=0;
@@ -668,10 +668,15 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, int s
         i++;
         sleep(1);
         if(file_empty_or_not(errorlog)>0){
-            if(silent_flag!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_ERROR.\n" RESET_DISPLAY);
+            if(find_multi_keys(errorlog,"Warning:","","","","")>0){
+                archive_log(errlog_archive,errorlog);
             }
-            return 127;
+            else{
+                if(silent_flag!=0){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_ERROR.\n" RESET_DISPLAY);
+                }
+                return 127;
+            }
         }
     }
     if(i==MAXIMUM_WAIT_TIME){
@@ -768,9 +773,14 @@ int cluster_empty_or_not(char* workdir){
     char statefile[FILENAME_LENGTH]="";
     char templatefile[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
+    char dot_terraform[FILENAME_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(templatefile,"%s%scompute_template",stackdir,PATH_SLASH);
+    sprintf(dot_terraform,"%s%s.terraform",stackdir,PATH_SLASH);
+    if(folder_exist_or_not(dot_terraform)!=0){
+        return 0;
+    }
     if(file_exist_or_not(statefile)!=0&&file_exist_or_not(templatefile)!=0){
         return 0;
     }
@@ -808,6 +818,14 @@ int cluster_asleep_or_not(char* workdir){
     }
 }
 
+int cluster_full_running_or_not(char* workdir){
+    char stackdir[DIR_LENGTH]="";
+    create_and_get_stackdir(workdir,stackdir);
+    char filename_temp[FILENAME_LENGTH]="";
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    return get_compute_node_num(filename_temp,"down");
+}
+
 int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log, int silent_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
@@ -827,7 +845,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
         printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
         printf("|          Command: %s. View log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr viewlog std|err\n" RESET_DISPLAY,execution_name);
     }
-    if(wait_for_complete(tf_realtime_log,execution_name,error_log,1)!=0){
+    if(wait_for_complete(tf_realtime_log,execution_name,error_log,tf_error_log_archive,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,error_log);
         return -1;
@@ -1058,14 +1076,14 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
 
 int confirm_to_operate_cluster(char* current_cluster_name){
     char doubleconfirm[64]="";
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster" HIGH_GREEN_BOLD " %s" RESET_DISPLAY " now, which may affect\n",current_cluster_name);
-    printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " to continue.\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster" HIGH_CYAN_BOLD " %s" RESET_DISPLAY " now, which may affect\n",current_cluster_name);
+    printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to continue.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%s",doubleconfirm);
     getchar();
-    if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to continue. You chose to deny this operation.\n");
+    if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continue. You chose to deny this operation.\n");
         printf("|          Nothing changed. Exit now.\n");
         return 1;
     }
@@ -1298,7 +1316,7 @@ int username_check(char* user_registry, char* username_input){
             return 5;
         }
     }
-    sprintf(username_ext," %s ",username_input);
+    sprintf(username_ext,"username: %s ",username_input);
     if(find_multi_keys(user_registry,username_ext,"","","","")!=0){
         return 7;
     }
@@ -1679,12 +1697,12 @@ int usrmgr_prereq_check(char* workdir, char* option){
         printf("|            3. sudo hpcmgr connect\n");
         printf("|            4. sudo hpcmgr all\n" RESET_DISPLAY);
         printf(GENERAL_BOLD "|          You can also exit now, run" RESET_DISPLAY HIGH_GREEN_BOLD " 'hpcopr wakeup all'" RESET_DISPLAY GENERAL_BOLD " and then manage the users.\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted.\n");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
         scanf("%s",confirm);
         getchar();
-        if(strcmp(confirm,"y-e-s")!=0){
+        if(strcmp(confirm,CONFIRM_STRING)!=0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny the operation. Exit now.\n");
             return 3;
         }
@@ -1815,11 +1833,11 @@ int check_and_cleanup(char* prev_workdir){
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(strlen(prev_workdir)!=0){
         if(show_current_cluster(current_workdir,current_cluster_name,0)==1){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Another hpcopr thread exited the current cluster.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "\n[ -WARN- ] Currently there is no switched cluster.\n" RESET_DISPLAY);
         }
         else{
             if(strcmp(current_workdir,prev_workdir)!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] The active cluster has been switched to" RESET_DISPLAY HIGH_CYAN_BOLD " %s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,current_cluster_name);
+                printf(WARN_YELLO_BOLD "\n[ -WARN- ] The switched cluster is" RESET_DISPLAY HIGH_CYAN_BOLD " %s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,current_cluster_name);
             }
         }
     }
