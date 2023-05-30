@@ -1316,7 +1316,7 @@ int username_check(char* user_registry, char* username_input){
             return 5;
         }
     }
-    sprintf(username_ext," %s ",username_input);
+    sprintf(username_ext,"username: %s ",username_input);
     if(find_multi_keys(user_registry,username_ext,"","","","")!=0){
         return 7;
     }

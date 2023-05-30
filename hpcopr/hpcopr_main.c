@@ -1449,7 +1449,7 @@ int main(int argc, char* argv[]){
             return run_flag;
         }
         else if(strcmp(argv[2],"enable")==0||strcmp(argv[2],"disable")==0){
-            if(argc==3){
+            if(argc==3||(argc==4&&command_flag==2)){
                 run_flag=hpc_user_enable_disable(workdir,SSHKEY_DIR,"",crypto_keyfile,argv[2]);
             }
             else{
@@ -1463,10 +1463,10 @@ int main(int argc, char* argv[]){
             return run_flag;
         }
         else if(strcmp(argv[2],"add")==0){
-            if(argc==3){
+            if(argc==3||(argc==4&&command_flag==2)){
                 run_flag=hpc_user_add(workdir,SSHKEY_DIR,crypto_keyfile,"","");
             }
-            else if(argc==4){
+            else if(argc==4||(argc==5&&command_flag==2)){
                 run_flag=hpc_user_add(workdir,SSHKEY_DIR,crypto_keyfile,argv[3],"");
             }
             else{
