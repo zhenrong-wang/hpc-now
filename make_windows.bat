@@ -4,6 +4,8 @@
 :: Bug report: info@hpc-now.com
 
 @echo off
+for /f tokens^=2^ delims^=^" %a in  ('findstr CORE_VERSION_CODE .\\hpcopr\\now_macros.h') do set hpcopr_version_code=%a
+for /f tokens^=2^ delims^=^" %a in  ('findstr INSTALLER_VERSION_CODE .\\installer\\installer.h') do set installer_version_code=%a
 :help
 if "%~1"=="" (
 	echo [ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command.
@@ -19,11 +21,11 @@ if "%~1"=="" (
 	echo [ -INFO- ] Deleting previously built binaries ^(if exist^)...
 	del /s /q /f .\build\*
 	echo [ -INFO- ] Bulding new binaries with the gcc ...
-	gcc .\hpcopr\*.c -Wall -o .\build\hpcopr-win.exe
+	gcc .\hpcopr\*.c -Wall -o .\build\hpcopr-win-%hpcopr_version_code%.exe
 	gcc -c .\hpcopr\general_funcs.c -o .\installer\gfuncs.o
 	del /f /s /q .\installer\libgfuncs.a
 	ar -rc .\installer\libgfuncs.a .\installer\gfuncs.o
-	gcc .\installer\installer.c .\installer\libgfuncs.a -Wall -o .\build\installer-win.exe
+	gcc .\installer\installer.c .\installer\libgfuncs.a -Wall -o .\build\installer-win-%installer_version_code%.exe
 	move /y .\installer\libgfuncs.a .\build\libgfuncs.a
 	del /f /s /q .\installer\gfuncs.o
 	gcc .\now-crypto\now-crypto.c -Wall -o .\build\now-crypto-win.exe

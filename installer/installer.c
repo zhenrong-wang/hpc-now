@@ -337,11 +337,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     if(hpcopr_loc_flag==-1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the main program 'hpcopr' from the default URL.\n");
 #ifdef _WIN32
-        sprintf(cmdline1,"curl -s %shpcopr-win.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+        sprintf(cmdline1,"curl -s %shpcopr-win-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,CORE_VERSION_CODE,HPCOPR_EXEC);
 #elif __linux__
-        sprintf(cmdline1,"curl -s %shpcopr-lin.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+        sprintf(cmdline1,"curl -s %shpcopr-lin-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,CORE_VERSION_CODE,HPCOPR_EXEC);
 #elif __APPLE__
-        sprintf(cmdline1,"curl -s %shpcopr-dwn.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+        sprintf(cmdline1,"curl -s %shpcopr-dwn-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,CORE_VERSION_CODE,HPCOPR_EXEC);
 #endif
     }
     else if(hpcopr_loc_flag==0){
@@ -611,11 +611,11 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     if(hpcopr_loc_flag==-1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the main program 'hpcopr' from the default URL.\n");
 #ifdef _WIN32
-        sprintf(cmdline1,"curl -s %shpcopr-win.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+        sprintf(cmdline1,"curl -s %shpcopr-win-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,CORE_VERSION_CODE,HPCOPR_EXEC);
 #elif __linux__
-        sprintf(cmdline1,"curl -s %shpcopr-lin.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+        sprintf(cmdline1,"curl -s %shpcopr-lin-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,CORE_VERSION_CODE,HPCOPR_EXEC);
 #elif __APPLE__
-        sprintf(cmdline1,"curl -s %shpcopr-dwn.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
+        sprintf(cmdline1,"curl -s %shpcopr-dwn-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,CORE_VERSION_CODE,HPCOPR_EXEC);
 #endif
     }
     else if(hpcopr_loc_flag==0){
