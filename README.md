@@ -144,7 +144,7 @@
 
 对于开发者，构建完成后，请参考以下步骤安装。
 
-对于一般用户，无需构建，请直接下载安装器。开发版的安装器下载链接请点击：[Microsoft Windows](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-win.exe) | [macOS](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-dwn.exe) | [GNU/Linux](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-lin.exe)
+对于一般用户，无需构建，请直接下载安装器。开发版的安装器下载链接请点击：[Microsoft Windows](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-win-0.2.0.0117.exe) | [macOS](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-dwn-0.2.0.0117.exe) | [GNU/Linux](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-lin-0.2.0.0117.exe)
 
 注意：在安装之前，请确保您的安装器文件可执行。对于 macOS 和 GNU/Linux 用户，请使用 chmod +x 命令赋权。
 
