@@ -209,7 +209,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
     system("takeown /f c:\\hpc-now /r /d y > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
     system("takeown /f  c:\\programdata\\hpc-now /r /d y > nul 2>&1");
     system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
     system("rd /s /q c:\\hpc-now > nul 2>&1");
@@ -391,7 +391,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
         printf("|          is correct. Rolling back and exit now.\n" RESET_DISPLAY);
         system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
         system("takeown /f c:\\hpc-now /r /d y > nul 2>&1");
-        system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+        system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
         system("takeown /f  c:\\programdata\\hpc-now /r /d y > nul 2>&1");
         system("rd /s /q c:\\hpc-now > nul 2>&1");
         system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
@@ -539,7 +539,7 @@ int uninstall_services(void){
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
     system("takeown /f c:\\hpc-now /r /d y > nul 2>&1");
     system("icacls c:\\hpc-now\\* /grant Administrators:F > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
     system("takeown /f  c:\\programdata\\hpc-now /r /d y > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now\\* /grant Administrators:F > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
@@ -616,7 +616,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
     system("takeown /f c:\\hpc-now\\hpcopr.exe /d y > nul 2>&1");
     system("icacls c:\\hpc-now\\hpcopr.exe /grant Administrators:F > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
     system("takeown /f c:\\programdata\\hpc-now\\bin\\now-crypto.exe /d y > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now\\bin\\now-crypto.exe /grant Administrators:F > nul 2>&1");
 #endif
