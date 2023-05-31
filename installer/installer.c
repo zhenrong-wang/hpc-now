@@ -79,19 +79,23 @@ void print_help_installer(void){
     printf("|        update           : Update the hpcopr to the latest or your own version.\n");
     printf("|        uninstall        : Remove the HPC-NOW services and all relevant data.\n");
     printf("|        help             : Show this information.\n");
+    printf("|        version          : Show the version code of this installer.\n");
+    printf("|        verlist          : Show the available version list of hpcopr.\n");
     printf("|       * You MUST specify one of the general options above.\n");
     printf("| advanced_option (for developers, optional):\n");
     printf("|        skiplic=y|n      : Whether to skip reading the license terms.\n");
     printf("|                             y - agree and skip reading the terms.\n");
     printf("|                             n - default option, you can decide to accept.\n");
     printf("|                                   Will exit if you don't accept the terms.\n");
-    printf("|        hpcopr=LOC       * Only valid for install or update option.\n");
+    printf("|        hpcoprloc=LOC    * Only valid for install or update option.\n");
     printf("|                         : Provide your own location of hpcopr, both URL and local\n");
     printf("|                           filesystem path are accepted. You should guarantee that\n");
     printf("|                           the location points to a valid hpcopr executable.\n");
-    printf("|        crypto=LOC       * Only valid for install or update option.\n");
+    printf("|        cryptoloc=LOC       * Only valid for install or update option.\n");
     printf("|                         : Provide your own location of now-crypto.exe, similar to\n");
     printf("|                           the hpcoprloc= parameter above.\n");
+    printf("|        hpcoprver=VERS   * Only valid when hpcoprloc is absent.\n");
+    printf("|                         : Specify the version code of hpcopr, i.e. 0.2.0.0128\n");
     printf("|       * You can specify any or all of the advanced options above.\n");
     printf("\n");
     printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com" GENERAL_BOLD " <> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
@@ -161,7 +165,7 @@ int license_confirmation(void){
 // 3. Create the crypto key file for further encryption and decryption
 // 4. Manage the folder permissions
 
-int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, char* now_crypto_loc){
+int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int crypto_loc_flag, char* now_crypto_loc){
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
@@ -204,7 +208,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking and cleaning up current environment ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+    system("takeown /f c:\\hpc-now /r /d y > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+    system("takeown /f  c:\\programdata\\hpc-now /r /d y > nul 2>&1");
     system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
@@ -218,6 +224,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating and configuring the running directory ...\n");
     system("mkdir c:\\hpc-now > nul 2>&1");
     system("mkdir c:\\hpc-now\\LICENSES > nul 2>&1");
+    system("mkdir c:\\hpc-now\\.now-ssh\\ > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\ > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\bin\\ > nul 2>&1");
@@ -335,48 +342,39 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
 #endif
     if(hpcopr_loc_flag==-1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the main program 'hpcopr' from the default URL.\n");
-#ifdef _WIN32
-        sprintf(cmdline1,"curl -s %shpcopr-win.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
-#elif __linux__
-        sprintf(cmdline1,"curl -s %shpcopr-lin.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
-#elif __APPLE__
-        sprintf(cmdline1,"curl -s %shpcopr-dwn.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
-#endif
+        if(strlen(hpcopr_ver)==0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the latest 'hpcopr' from the default URL.\n");
+            sprintf(cmdline1,"curl -s %shpcopr-%s-latest.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,HPCOPR_EXEC);
+        }
+        else{
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the %s version 'hpcopr' from the default repo.\n",hpcopr_ver);
+            printf(WARN_YELLO_BOLD "[ -INFO- ] MAY FAIL IF %s IS NOT A VALID VERSION CODE!\n" RESET_DISPLAY,hpcopr_ver);
+            sprintf(cmdline1,"curl -s %shpcopr-%s-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,hpcopr_ver,HPCOPR_EXEC);
+        }
     }
     else if(hpcopr_loc_flag==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the main program 'hpcopr' from the specified URL.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the main program 'hpcopr' from the specified URL:\n");
+        printf("|       -> %s\n",hpcopr_loc);
         sprintf(cmdline1,"curl -s %s -o %s",hpcopr_loc,HPCOPR_EXEC);
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the main program 'hpcopr' from %s.\n",hpcopr_loc);
-#ifdef _WIN32
-        sprintf(cmdline1,"copy /y %s %s > nul 2>&1 ",hpcopr_loc,HPCOPR_EXEC);
-#else
-        sprintf(cmdline1,"/bin/cp %s %s >> /dev/null 2>&1 ",hpcopr_loc,HPCOPR_EXEC);
-#endif
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the main program 'hpcopr' from local place:\n");
+        printf("|       -> %s\n",hpcopr_loc);
+        sprintf(cmdline1,"%s %s %s %s ",COPY_FILE_CMD,hpcopr_loc,HPCOPR_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
     if(crypto_loc_flag==-1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto.exe' from the default URL.\n");
-#ifdef _WIN32
-        sprintf(cmdline2,"curl -s %snow-crypto-win.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
-#elif __linux__
-        sprintf(cmdline2,"curl -s %snow-crypto-lin.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
-#elif __APPLE__
-        sprintf(cmdline2,"curl -s %snow-crypto-dwn.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
-#endif
+        sprintf(cmdline2,"curl -s %snow-crypto-%s.exe -o %s",DEFAULT_URL_NOW_CRYPTO,FILENAME_SUFFIX_SHORT,NOW_CRYPTO_EXEC);
     }
     else if(crypto_loc_flag==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto.exe' from the specified URL.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto.exe' from the specified URL:\n");
+        printf("|       -> %s\n",now_crypto_loc);
         sprintf(cmdline2,"curl -s %s -o %s",now_crypto_loc,NOW_CRYPTO_EXEC);
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the component 'now-crypto.exe' from %s.\n",now_crypto_loc);
-#ifdef _WIN32
-        sprintf(cmdline2,"copy /y %s %s > nul 2>&1 ",now_crypto_loc,NOW_CRYPTO_EXEC);
-#else
-        sprintf(cmdline2,"/bin/cp %s %s >> /dev/null 2>&1 ",now_crypto_loc,NOW_CRYPTO_EXEC);
-#endif
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the component 'now-crypto.exe' from local place:\n");
+        printf("|       -> %s\n",now_crypto_loc);
+        sprintf(cmdline2,"%s %s %s %s",COPY_FILE_CMD,now_crypto_loc,NOW_CRYPTO_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
     run_flag1=system(cmdline1);
     run_flag2=system(cmdline2);
@@ -392,7 +390,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
         printf("|          location of hpcopr executable, please make sure the location \n");
         printf("|          is correct. Rolling back and exit now.\n" RESET_DISPLAY);
         system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
-        system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
+        system("takeown /f c:\\hpc-now /r /d y > nul 2>&1");
+        system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+        system("takeown /f  c:\\programdata\\hpc-now /r /d y > nul 2>&1");
         system("rd /s /q c:\\hpc-now > nul 2>&1");
         system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
         system("net user hpc-now /delete > nul 2>&1");
@@ -400,9 +400,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag,
     }
     sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
     system(cmdline1);
+    system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
     system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
+    system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created with initial password: nowadmin2023~\n");
     printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:\n");
@@ -535,7 +537,13 @@ int uninstall_services(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
+    system("takeown /f c:\\hpc-now /r /d y > nul 2>&1");
+    system("icacls c:\\hpc-now\\* /grant Administrators:F > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+    system("takeown /f  c:\\programdata\\hpc-now /r /d y > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now\\* /grant Administrators:F > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
+    system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
     system("net user hpc-now /delete > nul 2>&1");
@@ -568,7 +576,7 @@ int uninstall_services(void){
     return 0;
 }
 
-int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, char* now_crypto_loc){
+int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int crypto_loc_flag, char* now_crypto_loc){
     char doubleconfirm[128]="";
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
@@ -606,51 +614,46 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UPDATING THE SERVICES NOW ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
+    system("takeown /f c:\\hpc-now\\hpcopr.exe /d y > nul 2>&1");
+    system("icacls c:\\hpc-now\\hpcopr.exe /grant Administrators:F > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /remove Administrators:F > nul 2>&1");
+    system("takeown /f c:\\programdata\\hpc-now\\bin\\now-crypto.exe /d y > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now\\bin\\now-crypto.exe /grant Administrators:F > nul 2>&1");
 #endif
     if(hpcopr_loc_flag==-1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the main program 'hpcopr' from the default URL.\n");
-#ifdef _WIN32
-        sprintf(cmdline1,"curl -s %shpcopr-win.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
-#elif __linux__
-        sprintf(cmdline1,"curl -s %shpcopr-lin.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
-#elif __APPLE__
-        sprintf(cmdline1,"curl -s %shpcopr-dwn.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,HPCOPR_EXEC);
-#endif
+        if(strlen(hpcopr_ver)==0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the latest 'hpcopr' from the default URL.\n");
+            sprintf(cmdline1,"curl -s %shpcopr-%s-latest.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,HPCOPR_EXEC);
+        }
+        else{
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the %s version 'hpcopr' from the default repo.\n",hpcopr_ver);
+            printf(WARN_YELLO_BOLD "[ -INFO- ] MAY FAIL IF %s IS NOT A VALID VERSION CODE!\n" RESET_DISPLAY,hpcopr_ver);
+            sprintf(cmdline1,"curl -s %shpcopr-%s-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,hpcopr_ver,HPCOPR_EXEC);
+        }
     }
     else if(hpcopr_loc_flag==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the main program 'hpcopr' from the specified URL.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the main program 'hpcopr' from the specified URL:\n");
+        printf("|       -> %s\n",hpcopr_loc);
         sprintf(cmdline1,"curl -s %s -o %s",hpcopr_loc,HPCOPR_EXEC);
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the main program 'hpcopr' from %s.\n",hpcopr_loc);
-#ifdef _WIN32
-        sprintf(cmdline1,"copy /y %s %s > nul 2>&1 ",hpcopr_loc,HPCOPR_EXEC);
-#else
-        sprintf(cmdline1,"/bin/cp %s %s >> /dev/null 2>&1 ",hpcopr_loc,HPCOPR_EXEC);
-#endif
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the main program 'hpcopr' from local place:\n");
+        printf("|       -> %s\n",hpcopr_loc);
+        sprintf(cmdline1,"%s %s %s %s ",COPY_FILE_CMD,hpcopr_loc,HPCOPR_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
     if(crypto_loc_flag==-1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto.exe' from the default URL.\n");
-#ifdef _WIN32
-        sprintf(cmdline2,"curl -s %snow-crypto-win.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
-#elif __linux__
-        sprintf(cmdline2,"curl -s %snow-crypto-lin.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
-#elif __APPLE__
-        sprintf(cmdline2,"curl -s %snow-crypto-dwn.exe -o %s",DEFAULT_URL_NOW_CRYPTO,NOW_CRYPTO_EXEC);
-#endif
+        sprintf(cmdline2,"curl -s %snow-crypto-%s.exe -o %s",DEFAULT_URL_NOW_CRYPTO,FILENAME_SUFFIX_SHORT,NOW_CRYPTO_EXEC);
     }
     else if(crypto_loc_flag==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto.exe' from the specified URL.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto.exe' from the specified URL:\n");
+        printf("|       -> %s\n",now_crypto_loc);
         sprintf(cmdline2,"curl -s %s -o %s",now_crypto_loc,NOW_CRYPTO_EXEC);
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the component 'now-crypto.exe' from %s.\n",now_crypto_loc);
-#ifdef _WIN32
-        sprintf(cmdline2,"copy /y %s %s > nul 2>&1 ",now_crypto_loc,NOW_CRYPTO_EXEC);
-#else
-        sprintf(cmdline2,"/bin/cp %s %s >> /dev/null 2>&1 ",now_crypto_loc,NOW_CRYPTO_EXEC);
-#endif
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the component 'now-crypto.exe' from local place:\n");
+        printf("|       -> %s\n",now_crypto_loc);
+        sprintf(cmdline2,"%s %s %s %s",COPY_FILE_CMD,now_crypto_loc,NOW_CRYPTO_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
     run_flag1=system(cmdline1);
     run_flag2=system(cmdline2);
@@ -661,7 +664,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
         printf("|          3. Your device is connected to the internet.\n");
         printf("|          4. Currently there is no 'hpcopr' thread(s) running.\n" RESET_DISPLAY);
 #ifdef _WIN32
+        system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
         system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
+        system("icacls c:\\programdata\\hpc-now\\* /deny Administrators:F > nul 2>&1");
         system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
 #endif
         return 1;
@@ -673,8 +678,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, int crypto_loc_flag, 
         sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
         system(cmdline1);
     }
+    system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
     system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto.exe /grant hpc-now:F /t > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
 #elif __linux__
     system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
@@ -736,7 +743,7 @@ int split_parameter(char* param, char* param_head, char* param_tail){
         i++;
     }
     *(param_head_temp+i)='\0';
-    if(strcmp(param_head_temp,"hpcoprloc")!=0&&strcmp(param_head_temp,"cryptoloc")!=0&&strcmp(param_head_temp,"skiplic")!=0){
+    if(strcmp(param_head_temp,"hpcoprloc")!=0&&strcmp(param_head_temp,"cryptoloc")!=0&&strcmp(param_head_temp,"skiplic")!=0&&strcmp(param_head_temp,"hpcoprver")!=0){
         return -1;
     }
     if(strcmp(param_head_temp,"skiplic")==0){
@@ -762,8 +769,37 @@ int split_parameter(char* param, char* param_head, char* param_tail){
     if(strcmp(param_head_temp,"hpcoprloc")==0){
         return 2;
     }
-    else{
+    else if(strcmp(param_head_temp,"cryptoloc")==0){
         return 4;
+    }
+    else{
+        return 6;
+    }
+}
+
+int get_valid_verlist(void){
+    char cmdline[CMDLINE_LENGTH]="";
+    sprintf(cmdline,"curl -s %sverlist.txt",DEFAULT_URL_HPCOPR_LATEST);
+    return system(cmdline);
+}
+
+int version_valid(char* hpcopr_ver){
+    char cmdline[CMDLINE_LENGTH]="";
+    char ver_ext[256]="";
+    sprintf(cmdline,"curl -s %sverlist.txt -o verlist.tmp",DEFAULT_URL_HPCOPR_LATEST);
+    if(system(cmdline)!=0){
+        return -1;
+    }
+    sprintf(ver_ext,"< %s >",hpcopr_ver);
+    if(find_multi_keys("verlist.tmp",ver_ext,"","","","")>0){
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,"verlist.tmp",SYSTEM_CMD_REDIRECT_NULL);
+        system(cmdline);
+        return 0;
+    }
+    else{
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,"verlist.tmp",SYSTEM_CMD_REDIRECT_NULL);
+        system(cmdline);
+        return 1;
     }
 }
 
@@ -776,8 +812,9 @@ int main(int argc, char* argv[]){
     int skip_lic_flag=1;
     char hpcopr_loc[LOCATION_LENGTH]="";
     char now_crypto_loc[LOCATION_LENGTH]="";
+    char hpcopr_ver[256]="";
     char advanced_option_head[12]="";
-    char advanced_option_tail[512]="";
+    char advanced_option_tail[256]="";
     print_header_installer();
     if(check_current_user_root()!=0){
         return -1;
@@ -792,8 +829,21 @@ int main(int argc, char* argv[]){
     }
     if(strcmp(argv[1],"help")==0){
         print_help_installer();
-        return 1;
+        return 0;
     }
+
+    if(strcmp(argv[1],"version")==0){
+        printf(HIGH_GREEN_BOLD "Version: %s\n" RESET_DISPLAY,INSTALLER_VERSION_CODE);
+        print_tail_installer();
+        return 0;
+    }
+
+    if(strcmp(argv[1],"verlist")==0){
+        run_flag=get_valid_verlist();
+        print_tail_installer();
+        return run_flag;
+    }
+
     if(strcmp(argv[1],"uninstall")==0){
         if(argc>2&&split_parameter(argv[2],advanced_option_head,advanced_option_tail)==10){
             skip_lic_flag=0;
@@ -813,8 +863,8 @@ int main(int argc, char* argv[]){
         print_help_installer();
         return 1;
     }
-    if(argc>5){
-        max_argc=5;
+    if(argc>6){
+        max_argc=6;
     }
     else{
         max_argc=argc;
@@ -831,6 +881,28 @@ int main(int argc, char* argv[]){
             crypto_loc_flag=valid_loc_format_or_not(advanced_option_tail);
             strcpy(now_crypto_loc,advanced_option_tail);
         }
+        else if(split_parameter(argv[i],advanced_option_head,advanced_option_tail)==6){
+            strcpy(hpcopr_ver,advanced_option_tail);
+        }
+    }
+    if(hpcopr_loc_flag!=-1){
+        strcpy(hpcopr_ver,"");
+    }
+    else{
+        if(strlen(hpcopr_ver)!=0){
+            run_flag=version_valid(hpcopr_ver);
+            if(run_flag==-1){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a tmp file. Please check the disk space." RESET_DISPLAY "\n");
+                print_tail_installer();
+                return -1;
+            }
+            else if(run_flag==1){
+                printf(FATAL_RED_BOLD "[ FATAL: ] The specified version code %s is invalid." RESET_DISPLAY "\n",hpcopr_ver);
+                get_valid_verlist();
+                print_tail_installer();
+                return 13;
+            }
+        }
     }
     if(skip_lic_flag==1){
         if(license_confirmation()!=0){
@@ -839,12 +911,12 @@ int main(int argc, char* argv[]){
         }
     }
     if(strcmp(argv[1],"update")==0){
-        run_flag=update_services(hpcopr_loc_flag,hpcopr_loc,crypto_loc_flag,now_crypto_loc);
+        run_flag=update_services(hpcopr_loc_flag,hpcopr_loc,hpcopr_ver,crypto_loc_flag,now_crypto_loc);
         print_tail_installer();
         return run_flag;
     }
     if(strcmp(argv[1],"install")==0){
-        run_flag=install_services(hpcopr_loc_flag,hpcopr_loc,crypto_loc_flag,now_crypto_loc);
+        run_flag=install_services(hpcopr_loc_flag,hpcopr_loc,hpcopr_ver,crypto_loc_flag,now_crypto_loc);
         print_tail_installer();
         return run_flag;
     }

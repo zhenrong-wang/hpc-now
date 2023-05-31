@@ -34,11 +34,11 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
 #elif __linux__
     sprintf(cmdline,"md5sum '%s' | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif _WIN32
-    sprintf(cmdline,"certutil -hashfile \"%s\" md5 > md5.txt.tmp",crypto_key_filename);
+    sprintf(cmdline,"certutil -hashfile \"%s\" md5 > c:\\programdata\\hpc-now\\md5.txt.tmp",crypto_key_filename);
 #endif
     system(cmdline);
 #ifdef _WIN32
-    md5_tmp=fopen("md5.txt.tmp","r");
+    md5_tmp=fopen("c:\\programdata\\hpc-now\\md5.txt.tmp","r");
 #else
     md5_tmp=fopen("/tmp/md5.txt.tmp","r");
 #endif
@@ -51,7 +51,7 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     fgetline(md5_tmp,md5sum);
     fclose(md5_tmp);
 #ifdef _WIN32
-    sprintf(cmdline,"del /f /q md5.txt.tmp %s",SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"del /f /q c:\\programdata\\hpc-now\\md5.txt.tmp %s",SYSTEM_CMD_REDIRECT);
 #else
     sprintf(cmdline,"rm -rf /tmp/md5.txt.tmp %s",SYSTEM_CMD_REDIRECT);
 #endif
@@ -531,10 +531,6 @@ int generate_sshkey(char* sshkey_folder, char* pubkey){
         sprintf(cmdline,"%s %s %s",MKDIR_CMD,sshkey_folder,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-#ifdef _WIN32
-    sprintf(cmdline,"attrib +h +s +r %s",sshkey_folder);
-    system(cmdline);
-#endif
     sprintf(filename_temp,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     sprintf(filename_temp2,"%s%snow-cluster-login.pub",sshkey_folder,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0&&file_exist_or_not(filename_temp2)==0){
@@ -1833,11 +1829,11 @@ int check_and_cleanup(char* prev_workdir){
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(strlen(prev_workdir)!=0){
         if(show_current_cluster(current_workdir,current_cluster_name,0)==1){
-            printf(WARN_YELLO_BOLD "\n[ -WARN- ] Currently there is no switched cluster.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no switched cluster.\n" RESET_DISPLAY);
         }
         else{
             if(strcmp(current_workdir,prev_workdir)!=0){
-                printf(WARN_YELLO_BOLD "\n[ -WARN- ] The switched cluster is" RESET_DISPLAY HIGH_CYAN_BOLD " %s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,current_cluster_name);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The switched cluster is" RESET_DISPLAY HIGH_CYAN_BOLD " %s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,current_cluster_name);
             }
         }
     }

@@ -828,6 +828,31 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
+    if(strcmp(argv[1],"viewlog")==0){
+        if(argc==2||(argc==3&&command_flag==2)){
+            run_flag=view_run_log(workdir,"","","");
+        }
+        else if(argc==3||(argc==4&&command_flag==2)){
+            run_flag=view_run_log(workdir,argv[2],"","");
+        }
+        else if(argc==4||(argc==5&&command_flag==2)){
+            run_flag=view_run_log(workdir,argv[2],argv[3],"");
+        }
+        else{
+            run_flag=view_run_log(workdir,argv[2],argv[3],argv[4]);
+        }
+        if(run_flag==-1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the log. Have you specified or switched to a cluster?\n" RESET_DISPLAY );
+            list_all_cluster_names(1);
+            write_operation_log(cluster_name,operation_log,argv[1],"FILE_I/O_ERROR",127);
+            check_and_cleanup("");
+            return 127;
+        }
+        write_operation_log(cluster_name,operation_log,argv[1],argv[2],0);
+        check_and_cleanup(workdir);
+        return 0;
+    }
+
     if(command_flag==-5){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c=" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
         list_all_cluster_names(1);
@@ -870,30 +895,6 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
 
-    if(strcmp(argv[1],"viewlog")==0){
-        if(argc==2||(argc==3&&command_flag==2)){
-            run_flag=view_run_log(workdir,"","","");
-        }
-        else if(argc==3||(argc==4&&command_flag==2)){
-            run_flag=view_run_log(workdir,argv[2],"","");
-        }
-        else if(argc==4||(argc==5&&command_flag==2)){
-            run_flag=view_run_log(workdir,argv[2],argv[3],"");
-        }
-        else{
-            run_flag=view_run_log(workdir,argv[2],argv[3],argv[4]);
-        }
-        if(run_flag==-1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the logs of cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ".\n" RESET_DISPLAY,cluster_name);
-            write_operation_log(cluster_name,operation_log,argv[1],"FILE_I/O_ERROR",127);
-            check_and_cleanup(cluster_name);
-            return 127;
-        }
-        write_operation_log(cluster_name,operation_log,argv[1],argv[2],0);
-        check_and_cleanup(workdir);
-        return 0;
-    }
-
     if(strcmp(argv[1],"graph")==0){
         if(check_pslock(workdir)!=0){
             if(cluster_empty_or_not(workdir)!=0){
@@ -922,6 +923,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 49;
         }
+        printf("\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         write_operation_log(cluster_name,operation_log,argv[1],"SUCCEEDED",0);
         check_and_cleanup(workdir);
@@ -1273,10 +1275,15 @@ int main(int argc, char* argv[]){
         }
     }
 
-    if(argc==3&&strcmp(argv[1],"userman")==0&&strcmp(argv[2],"list")==0){
+    if(argc>3&&strcmp(argv[1],"userman")==0&&strcmp(argv[2],"list")==0){
         run_flag=hpc_user_list(workdir,crypto_keyfile,0);
         if(cluster_asleep_or_not(workdir)==0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] The current cluster is not running.\n" RESET_DISPLAY);
+            if(command_flag==2){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is not running.\n" RESET_DISPLAY);
+            }
+            else{
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The switched cluster is not running.\n" RESET_DISPLAY);
+            }
         }
         write_operation_log(cluster_name,operation_log,argv[2],"",run_flag);
         check_and_cleanup(workdir);
@@ -1296,7 +1303,12 @@ int main(int argc, char* argv[]){
     }
 
     if(cluster_asleep_or_not(workdir)==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
+        if(command_flag==2){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not running. Please wake up first\n" RESET_DISPLAY);
+        }
+        else{
+            printf(FATAL_RED_BOLD "[ FATAL: ] The switched cluster is not running. Please wake up first\n" RESET_DISPLAY);
+        }
         if(strcmp(argv[1],"addc")==0){
             printf("|          Command: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY);
         }
@@ -1442,7 +1454,6 @@ int main(int argc, char* argv[]){
             return 77;
         }
         if(strcmp(argv[2],"list")==0){
-            printf("\n");
             run_flag=hpc_user_list(workdir,crypto_keyfile,0);
             write_operation_log(cluster_name,operation_log,argv[2],"",run_flag);
             check_and_cleanup(workdir);
