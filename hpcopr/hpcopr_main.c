@@ -828,6 +828,31 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
+    if(strcmp(argv[1],"viewlog")==0){
+        if(argc==2||(argc==3&&command_flag==2)){
+            run_flag=view_run_log(workdir,"","","");
+        }
+        else if(argc==3||(argc==4&&command_flag==2)){
+            run_flag=view_run_log(workdir,argv[2],"","");
+        }
+        else if(argc==4||(argc==5&&command_flag==2)){
+            run_flag=view_run_log(workdir,argv[2],argv[3],"");
+        }
+        else{
+            run_flag=view_run_log(workdir,argv[2],argv[3],argv[4]);
+        }
+        if(run_flag==-1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the log. Have you specified or switched to a cluster?\n" RESET_DISPLAY );
+            list_all_cluster_names(1);
+            write_operation_log(cluster_name,operation_log,argv[1],"FILE_I/O_ERROR",127);
+            check_and_cleanup("");
+            return 127;
+        }
+        write_operation_log(cluster_name,operation_log,argv[1],argv[2],0);
+        check_and_cleanup(workdir);
+        return 0;
+    }
+
     if(command_flag==-5){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c=" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
         list_all_cluster_names(1);
@@ -868,30 +893,6 @@ int main(int argc, char* argv[]){
         }
         check_and_cleanup(workdir);
         return run_flag;
-    }
-
-    if(strcmp(argv[1],"viewlog")==0){
-        if(argc==2||(argc==3&&command_flag==2)){
-            run_flag=view_run_log(workdir,"","","");
-        }
-        else if(argc==3||(argc==4&&command_flag==2)){
-            run_flag=view_run_log(workdir,argv[2],"","");
-        }
-        else if(argc==4||(argc==5&&command_flag==2)){
-            run_flag=view_run_log(workdir,argv[2],argv[3],"");
-        }
-        else{
-            run_flag=view_run_log(workdir,argv[2],argv[3],argv[4]);
-        }
-        if(run_flag==-1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the logs of cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ".\n" RESET_DISPLAY,cluster_name);
-            write_operation_log(cluster_name,operation_log,argv[1],"FILE_I/O_ERROR",127);
-            check_and_cleanup(cluster_name);
-            return 127;
-        }
-        write_operation_log(cluster_name,operation_log,argv[1],argv[2],0);
-        check_and_cleanup(workdir);
-        return 0;
     }
 
     if(strcmp(argv[1],"graph")==0){
