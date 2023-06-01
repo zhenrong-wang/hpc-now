@@ -24,6 +24,7 @@
 #define SSHKEY_DIR "C:\\hpc-now\\.now-ssh"
 #define OPERATION_ERROR_LOG "c:\\hpc-now\\hpc-now.err.log"
 #define HPC_NOW_ROOT_DIR "c:\\programdata\\hpc-now\\"
+#define TF_LOCAL_PLUGINS "c:\\programdata\\hpc-now-tf\\"
 
 #define NOW_CRYPTO_EXEC "c:\\programdata\\hpc-now\\bin\\now-crypto.exe"
 #define TERRAFORM_EXEC "c:\\programdata\\hpc-now\\bin\\terraform.exe"
