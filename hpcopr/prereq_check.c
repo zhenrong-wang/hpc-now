@@ -601,9 +601,22 @@ int check_and_install_prerequisitions(int repair_flag){
         fclose(file_p);
     }    
 #ifdef _WIN32
-    if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
-        sprintf(cmdline,"setx PATH C:\\WINDOWS\\system32;C:\\hpc-now\\;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\ %s",SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    if(system("$env > c:\\programdata\\hpc-now\\null 2>&1")!=0){
+        system("del /f /s /q c:\\programdata\\hpc-now\\null > nul 2>&1");
+        if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
+            sprintf(cmdline,"setx PATH C:\\WINDOWS\\system32;C:\\hpc-now\\;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\ %s",SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            sprintf(cmdline,"set PATH=%%PATH%%;C:\\hpc-now\\ %s",SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+        }
+    }
+    else{
+        if(system("$env:PATH | findstr C:\\hpc-now > $null 2>&1")!=0){
+            sprintf(cmdline,"setx PATH C:\\WINDOWS\\system32;C:\\hpc-now\\;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\ > $null 2>&1",SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            strcpy(cmdline,"$env:PATH += \";C:\\hpc-now\\\" > $null 2>&1");
+            system(cmdline);
+        }
     }
     sprintf(cmdline,"del /f /q %s\\known_hosts* >nul 2>&1",dotssh_dir);
 #elif __linux__
