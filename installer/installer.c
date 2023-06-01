@@ -586,8 +586,8 @@ int uninstall_services(void){
 #endif
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been deleted from this OS and device.\n");
 #ifdef _WIN32
-    printf("|          There are still remaining files for the specific user 'hpc-now'.\n");
-    printf("|          Please mannually delete the folder C:\\Users\\hpc-now-* after reboot.\n");
+    printf("|          There might still be remaining files for the specific user 'hpc-now'.\n");
+    printf("|          Please mannually delete the folder C:\\Users\\hpc-now* after reboot.\n");
 #elif __linux__
     printf("|          There are still remaining files for reinstall. You can run the command: \n");
     printf("|          " HIGH_GREEN_BOLD "sudo rm -rf /usr/share/terraform" RESET_DISPLAY " to erase them.\n");
