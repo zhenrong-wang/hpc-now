@@ -602,8 +602,6 @@ int check_and_install_prerequisitions(int repair_flag){
     }    
 #ifdef _WIN32
     if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
-        sprintf(cmdline,"set PATH=\%PATH\%;C:\\hpc-now\\ %s",SYSTEM_CMD_REDIRECT);
-        system(cmdline);
         sprintf(cmdline,"setx PATH C:\\hpc-now\\ %s",SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
