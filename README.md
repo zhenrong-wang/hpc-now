@@ -81,7 +81,7 @@
 - graph：绘制当前集群的配置和拓扑图
 - viewlog：以滚动方式显示集群当前的实时操作过程（例如正在创建的资源等）
 
-##### 3.5 集群操作：注意，以下所有命令都将要求您先切换至某一个集群。
+##### 3.5 集群操作：
 
 - delc ：删除若干个（指定数字作为命令参数）或所有（指定 'all' 作为命令参数）计算节点
 - addc ：添加若干个（指定数字作为命令参数）计算节点
@@ -147,7 +147,7 @@
 
 对于开发者，构建完成后，请参考以下步骤安装。
 
-对于一般用户，无需构建，请直接下载安装器。开发版的安装器下载链接请点击：[Microsoft Windows](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-win-0.2.0.0119.exe) | [macOS](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-dwn-0.2.0.0119.exe) | [GNU/Linux](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-lin-0.2.0.0119.exe)
+对于一般用户，无需构建，请直接下载安装器。开发版的安装器下载链接请点击：[Microsoft Windows](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-win-0.2.0.0120.exe) | [macOS](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-dwn-0.2.0.0120.exe) | [GNU/Linux](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-lin-0.2.0.0120.exe)
 
 注意：在安装之前，请确保您的安装器文件可执行。对于 macOS 和 GNU/Linux 用户，请使用 chmod +x 命令赋权。
 
