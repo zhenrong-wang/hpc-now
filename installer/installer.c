@@ -536,6 +536,27 @@ int uninstall_services(void){
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
 #ifdef _WIN32
+    system("tasklist /FI \"USERNAME eq hpc-now\" > c:\\programdata\\hpc-now-tasks.txt.tmp 2>nul");
+    FILE* file_p=fopen("c:\\programdata\\hpc-now-tasks.txt.tmp","r");
+    char line_buffer[256]="";
+    char pid[8]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    if(file_p==NULL){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to creat/get the tasklist of hpc-now.\n" RESET_DISPLAY);
+    }
+    else{
+        fgetline(file_p,line_buffer);
+        fgetline(file_p,line_buffer);
+        fgetline(file_p,line_buffer);
+        while(!feof(file_p)){
+            fgetline(file_p,line_buffer);
+            get_seq_string(line_buffer,' ',2,pid);
+            sprintf(cmdline,"taskkill /pid %s > nul 2>&1",pid);
+            system(cmdline);
+        }
+        fclose(file_p);
+        system("del /f /s /q c:\\programdata\\hpc-now-tasks.txt.tmp > nul 2>&1");
+    }
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
     system("takeown /f c:\\hpc-now /r /d y > nul 2>&1");
     system("icacls c:\\hpc-now\\* /grant Administrators:F > nul 2>&1");
@@ -544,23 +565,24 @@ int uninstall_services(void){
     system("icacls c:\\programdata\\hpc-now\\* /grant Administrators:F > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
     system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
+    system("net user hpc-now /delete > nul 2>&1");
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
-    system("net user hpc-now /delete > nul 2>&1");
+    system("rd /s /q c:\\users\\hpc-now > nul 2>&1");
 #elif __APPLE__
+    system("ps -ax | grep hpc-now | cut -c 1-6 | xargs kill -9 >> /dev/null 2>&1");
     system("unlink /usr/local/bin/hpcopr >> /dev/null 2>&1");
     system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
     system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
     system("dscl . -delete /Groups/hpc-now >> /dev/null 2>&1");
     system("rm -rf /Users/hpc-now >> /dev/null 2>&1");
-    system("ps -ax | grep hpc-now | cut -c 1-6 | xargs kill -9 >> /dev/null 2>&1");
 #elif __linux__
+    system("ps -aux | grep hpc-now | cut -c 9-16 | xargs kill -9 >> /dev/null 2>&1");
     system("unlink /usr/local/bin/hpcopr >> /dev/null 2>&1");
     system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
     system("userdel -f -r hpc-now >> /dev/null 2>&1");
-    system("ps -aux | grep hpc-now | cut -c 9-16 | xargs kill -9 >> /dev/null 2>&1");
 #endif
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been deleted from this OS and device.\n");
 #ifdef _WIN32
