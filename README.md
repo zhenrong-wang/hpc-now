@@ -172,10 +172,12 @@
 - 此时会弹出一个新的 powershell 窗口，请在**新的窗口**中运行：
     - c:\hpc-now\hpcopr envcheck
 
-此时，hpcopr 将开始下载必要的组件并部署在您的系统之中，部件的总大小约 150 MB；该过程视您的网络情况而定，可能需要 1 ~ 5 分钟。如您看到如下回显，则说明 hpcopr 已经可以运行。请您关闭此 powershell 窗口，回到原来的窗口中重新运行：
+此时，hpcopr 将开始下载必要的组件并部署在您的系统之中，部件的总大小约 150 MB；该过程视您的网络情况而定，可能需要 1 ~ 5 分钟。如您看到如下回显，则说明 hpcopr 已经可以运行。**请您关闭此 powershell 窗口**，回到**原来的窗口**中重新运行：
 - runas /profile /savecred /user:mymachine\hpc-now powershell
 
-此时您可以运行 hpcopr 的任何命令。
+此后，您可以在 powershell 新窗口中运行 hpcopr 的任何命令。
+
+请务必在运行 hpcopr 之前首先通过上述 runas 命令调出以 **hpc-now** 用户身份运行的 powershell 窗口。该步骤至关重要，否则您将无权运行 hpcopr 命令。
 
 [ -INFO- ] Running environment successfully checked.
 
