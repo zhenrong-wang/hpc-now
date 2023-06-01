@@ -36,11 +36,14 @@
 
 如前所述，**hpcopr** 是您操作和管理 Cloud HPC 集群的核心界面。 **hpcopr** 目前以命令行的形式提供多种功能。您可以运行 `hpcopr help` 命令查看详细的帮助信息，主要如下：
 
- **`hpcopr command_name PARAM1 PARAM2 ... `** 
+ **`hpcopr command_name PARAM1 PARAM2 ... -c=CLUSTER_NAME`** 
+
+##### 3.0 快速环境检查
+
+- envcheck ：快速检查和修复 hpcopr 的运行环境，强烈建议首次运行 hpcopr 时运行该命令
 
 ##### 3.1 多集群管理
 
-- envcheck ：快速检查和修复 hpcopr 的运行环境，强烈建议首次运行 hpcopr 时运行该命令
 - new-cluster ：创建集群。您需要输入 AWS | 阿里云 | 腾讯云 的访问密钥对。关于如何获取访问密钥，请参考各家云厂商的文档
 - ls-clusters : 列出当前的所有集群
 - switch ：切换集群，您需要提供目标集群的名字作为命令参数
@@ -55,6 +58,7 @@
 - usage ：以文本方式查看集群的用量统计，该命令同样会将最新的用量统计导出到您的工作目录中
 - history ：以文本方式查看 hpcopr 的命令运行历史记录
 - syserr ：以文本方式查看系统命令的报警和错误，一般用于故障排查
+- ssh ： 免密 SSH 登录至您的当前集群
 
 ###### 开发者选项：仅面向开发者，涉及到较为复杂的技术细节。具体文档将在后续补齐
 
@@ -63,7 +67,7 @@
 - showloc：查看目前所使用的 Terraform 相关包的位置
 - resetloc：将上述位置重置为默认位置
 
-##### 3.3 集群初始化：注意，以下所有命令都将要求您先切换至某一个集群。
+##### 3.3 集群初始化：
 
 - get-conf ：获取默认的集群创建配置，如有需要，您可以编辑并保存
 - edit-conf：获取并编辑集群的创建配置
@@ -71,14 +75,13 @@
 - new-keypair ：建议您定期或不定期轮换云访问密钥对，您可以用该命令轮换当前集群所使用的密钥对
 - rebuild ：您可以重新构建集群的某些节点，适用于个别节点初始化失败的情况
 
-##### 3.4 单集群管理：注意，以下所有命令都将要求您先切换至某一个集群。
+##### 3.4 单集群管理：
 
-- ssh ： 免密 SSH 登录至您的当前集群
 - vault ：查看当前集群的敏感信息，包括 master 节点的登录方式
 - graph：绘制当前集群的配置和拓扑图
-- realtime：以滚动方式显示集群当前的实时操作过程（例如正在创建的资源等）
+- viewlog：以滚动方式显示集群当前的实时操作过程（例如正在创建的资源等）
 
-##### 3.5 集群操作：注意，以下所有命令都将要求您先切换至某一个集群。
+##### 3.5 集群操作：
 
 - delc ：删除若干个（指定数字作为命令参数）或所有（指定 'all' 作为命令参数）计算节点
 - addc ：添加若干个（指定数字作为命令参数）计算节点
@@ -90,7 +93,7 @@
 - wakeup ：唤醒整个集群（all参数）或者只唤醒集群的管理节点（minimal参数）（计算节点仍保持关闭）
 - destroy：永久销毁整个集群。销毁之后，您可以再次运行 init 命令创建，但是您之前的所有节点和数据已经全部销毁
 
-##### 3.6 用户管理：注意，以下所有命令都将要求您先切换至某一个集群。
+##### 3.6 用户管理：
 
 注意：用户管理功能要求您的集群处于（最小或完整）运行状态。
 
@@ -103,7 +106,7 @@
 - userman disable：注销一个已经活跃用户，处于 disabled 的用户仍然可以登录集群，但是无法提交超算任务。该命令最多可以携带一个字符串作为参数，用户指定用户名
 - userman passwd ：重置用户的密码。该命令最多可以携带两个字符串作为参数，用于指定用户名（已存在）和新的密码字符串
 
-##### 3.7 其他功能：注意，以下命令不要求您切换到任何集群。
+##### 3.7 其他功能：
 
 - about ：关于本程序
 - license ：阅读程序的 License，本程序使用 GNU Public License 作为主要 License。其余开源组件的 License 将在后续包含进来
@@ -144,8 +147,7 @@
 
 对于开发者，构建完成后，请参考以下步骤安装。
 
-<<<<<<< development
-对于一般用户，无需构建，请直接下载安装器。开发版的安装器下载链接请点击：[Microsoft Windows](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-win-0.2.0.0119.exe) | [macOS](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-dwn-0.2.0.0119.exe) | [GNU/Linux](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-lin-0.2.0.0119.exe)
+对于一般用户，无需构建，请直接下载安装器。开发版的安装器下载链接请点击：[Microsoft Windows](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-win-0.2.0.0120.exe) | [macOS](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-dwn-0.2.0.0120.exe) | [GNU/Linux](https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/installer-dev/installer-lin-0.2.0.0120.exe)
 
 注意：在安装之前，请确保您的安装器文件可执行。对于 macOS 和 GNU/Linux 用户，请使用 chmod +x 命令赋权。
 
@@ -164,15 +166,22 @@
     - 同样的，如您想要使用自行构建的 now-crypto-lin.exe，可参考如上方式添加 cryptoloc=now-crypto-lin.exe 参数。
     - 如您想跳过 License 阅读（不建议），可添加 skiplic=y 参数。
 - 此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户，其初始密码为 nowadmin2023~
-- 现在，按下键盘上的 Ctrl + Alt + Delete 组合按键，点击 “ 切换用户 ” ，请切换至用户 hpc-now，输入初始密码之后，需要按照要求更改登陆密码
-- 切换到 hpc-now 用户之后，您同样需要启动 命令提示符，但是此时您**无需**以管理员身份运行，**请务必直接单击图标**
-- 依次运行如下两条命令：
-    - cd c:\hpc-now
-    - hpcopr envcheck
+- 完成之后，请依次输入以下命令：
+- net user hpc-now YOUR_COMPLEX_PASSWORD
+- runas /profile /savecred /user:mymachine\hpc-now powershell
+- 此时会弹出一个新的 powershell 窗口，请在**新的窗口**中运行：
+    - c:\hpc-now\hpcopr envcheck
 
-此时，hpcopr 将开始下载必要的组件并部署在您的系统之中，部件的总大小约 150 MB；该过程视您的网络情况而定，可能需要 1 ~ 5 分钟。如您看到如下回显，则说明 hpcopr 已经可以运行。您可以跳至步骤 7 。
+此时，hpcopr 将开始下载必要的组件并部署在您的系统之中，部件的总大小约 150 MB；该过程视您的网络情况而定，可能需要 1 ~ 5 分钟。如您看到如下回显，则说明 hpcopr 已经可以运行。
 
 [ -INFO- ] Running environment successfully checked.
+
+**请您关闭此 powershell 窗口**，回到**原来的窗口**中重新运行：
+- runas /profile /savecred /user:mymachine\hpc-now powershell
+
+此后，您可以在 powershell 新窗口中运行 hpcopr 的任何命令。
+
+请务必在运行 hpcopr 之前首先通过上述 runas 命令调出以 **hpc-now** 用户身份运行的 powershell 窗口。该步骤至关重要，否则您将无权运行 hpcopr 命令。
 
 #### GNU/Linux 用户：
 
