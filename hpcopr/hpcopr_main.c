@@ -1275,7 +1275,7 @@ int main(int argc, char* argv[]){
         }
     }
 
-    if(argc>3&&strcmp(argv[1],"userman")==0&&strcmp(argv[2],"list")==0){
+    if(argc>2&&strcmp(argv[1],"userman")==0&&strcmp(argv[2],"list")==0){
         run_flag=hpc_user_list(workdir,crypto_keyfile,0);
         if(cluster_asleep_or_not(workdir)==0){
             if(command_flag==2){
