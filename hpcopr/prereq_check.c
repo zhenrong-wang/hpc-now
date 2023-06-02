@@ -601,10 +601,6 @@ int check_and_install_prerequisitions(int repair_flag){
         fclose(file_p);
     }    
 #ifdef _WIN32
-    if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
-        sprintf(cmdline,"setx PATH C:\\hpc-now\\ %s",SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
     sprintf(cmdline,"del /f /q %s\\known_hosts* >nul 2>&1",dotssh_dir);
 #elif __linux__
     if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ > /dev/null 2>&1")!=0){

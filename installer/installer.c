@@ -405,6 +405,10 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
     system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
+    if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
+        sprintf(cmdline1,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
+        system(cmdline1);
+    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created with initial password: nowadmin2023~\n");
     printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:\n");
@@ -705,6 +709,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto.exe /grant hpc-now:F /t > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
+    if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
+        sprintf(cmdline1,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
+        system(cmdline1);
+    }
 #elif __linux__
     system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
     if(file_exist_or_not("/home/hpc-now/LICENSES/GPL-2")!=0){
