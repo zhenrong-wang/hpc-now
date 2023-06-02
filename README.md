@@ -190,13 +190,16 @@
         - sudo ./installer-lin.exe install （建议一般用户）
     - 同样的，如您想要使用自行构建的 now-crypto-lin.exe，可参考如上方式添加 cryptoloc=now-crypto-lin.exe 参数。
     - 如您想跳过 License 阅读（不建议），可添加 skiplic=y 参数。
-    此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户。您需要运行如下命令来为 hpc-now 用户创建密码：
+    此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户。
+
+**hpcopr 全面支持 sudo 。如果您当前用户拥有 sudo 权限，您也可以无需设置 hpc-now 的密码，直接使用 sudo -u hpc-now 作为前缀，来执行 hpcopr 的所有命令而无需 su hpc-now 切换用户，使用更加简单。例如：sudo -u hpc-now hpcopr envcheck 。我们建议您使用 sudo 模式运行 hpcopr。**
+
+**如您不使用 sudo 模式**，则需要按照以下步骤为 hpc-now 用户设置密码并手动切换用户：
 - sudo passwd hpc-now
 - 创建完成后，请依次运行如下命令：
 - su hpc-now （请输入刚刚设置好的密码）
 - cd ~
 - hpcopr envcheck
-- **注**：hpcopr 全面支持 sudo 。如果您当前用户拥有 sudo 权限，您也可以无需设置 hpc-now 的密码，直接使用 sudo -u hpc-now 作为前缀，来执行 hpcopr 的所有命令而无需 su hpc-now 切换用户，使用更加简单。例如：sudo -u hpc-now hpcopr envcheck 
 
 此时，hpcopr 将开始下载必要的组件并部署在您的系统之中，部件的总大小约 150 MB；该过程视您的网络情况而定，可能需要 1 ~ 5 分钟。如您看到如下回显，则说明 hpcopr 已经可以运行。
 
@@ -214,13 +217,15 @@
         - sudo ./installer-dwn.exe install （建议一般用户）
     - 同样的，如您想要使用自行构建的 now-crypto-dwn.exe，可参考如上方式添加 cryptoloc=now-crypto-dwn.exe 参数。
     - 如您想跳过 License 阅读（不建议），可添加 skiplic=y 参数。
-    此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户。您需要运行如下命令来为 hpc-now 用户创建密码：
+    此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户。
+
+**hpcopr 全面支持 sudo 。如果您当前用户拥有 sudo 权限，您也可以无需设置 hpc-now 的密码，直接使用 sudo -u hpc-now 作为前缀，来执行 hpcopr 的所有命令而无需 su hpc-now 切换用户，使用更加简单。例如：sudo -u hpc-now hpcopr envcheck 。我们建议您使用 sudo 模式运行 hpcopr。**
+
+**如您不使用 sudo 模式**，则需要按照以下步骤为 hpc-now 用户设置密码并手动切换用户：
 - sudo dscl . -passwd /Users/hpc-now **mycomplexpasswd** （请将加粗字体替换成为您的自定义密码！）
-- 创建完成后，请依次运行如下命令：
 - su hpc-now （请输入刚刚设置好的密码）
 - cd ~
 - hpcopr envcheck
-- **注**：hpcopr 全面支持 sudo 。如果您当前用户拥有 sudo 权限，您也可以无需设置 hpc-now 的密码，直接使用 sudo -u hpc-now 作为前缀，来执行 hpcopr 的所有命令而无需 su hpc-now 切换用户，使用更加简单。例如：sudo -u hpc-now hpcopr envcheck 
 
 此时，hpcopr 将开始下载必要的组件并部署在您的系统之中，部件的总大小约 150 MB；该过程视您的网络情况而定，可能需要 1 ~ 5 分钟。如您看到如下回显，则说明 hpcopr 已经可以运行。
 
