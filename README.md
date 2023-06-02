@@ -110,6 +110,7 @@
 
 - about ：关于本程序
 - license ：阅读程序的 License，本程序使用 GNU Public License 作为主要 License。其余开源组件的 License 将在后续包含进来
+- version : 查看当前版本号
 - repair ： 快速修复 hpcopr，包括检查运行环境和核心组件
 
 ### 4. 构建环境需求（针对开发者）
