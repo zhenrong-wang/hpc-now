@@ -177,21 +177,24 @@ int main(int argc, char* argv[]){
 
 #ifdef _WIN32
     if(check_current_user()!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] You *MUST* switch to the user 'hpc-now' to operate cloud clusters.\n");
-        printf("|          Please switch to the user 'hpc-now' by ctrl+alt+delete and then:\n");
-        printf("|          1. Run CMD by typing cmd in the Windows Search box\n");
-        printf("|          2. hpcopr ls-clusters   (You will see all the clusters)\n");
-        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] You *MUST* run hpcopr as the OS user 'hpc-now'.\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "|          Please follow the steps below:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "|          1. run the command " RESET_DISPLAY HIGH_GREEN_BOLD "runas /savecred /user:mymachine\\hpc-now cmd\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "|          2. run the " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY GENERAL_BOLD " commands in the *new* CMD window\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         print_tail();
         return 117;
     }
 #else
     if(check_current_user()!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] You *MUST* switch to the user 'hpc-now' to operate cloud clusters.\n");
-        printf("|          Please run the commands below:\n");
-        printf("|          1. su hpc-now   (You will be asked to input password without echo)\n");
-        printf("|          2. hpcopr ls-clusters   (You will see all the clusters)\n");
-        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] You *MUST* run hpcopr as the OS user 'hpc-now'.\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "|          Please follow the instructions below:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "|     <> SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
+        printf(GENERAL_BOLD "|          run the hpcopr as " RESET_DISPLAY HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "|     <> USER-MODE (for both *non-sudoers* and *sudoers*): \n" RESET_DISPLAY );
+        printf(GENERAL_BOLD "|          1. " RESET_DISPLAY HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY " (The password of 'hpc-now' is needed)\n");
+        printf(GENERAL_BOLD "|          2. run the " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY GENERAL_BOLD " commands, i.e. " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr glance all" RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         print_tail();
         return 117;
     }

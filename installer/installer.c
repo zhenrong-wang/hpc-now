@@ -62,16 +62,16 @@ void print_help_installer(void){
 #ifdef _WIN32
     printf("| Usage: Open a command prompt window *WITH* the Administrator Role.\n");
     printf("|        Type the command using either ways below:\n");
-    printf("|        <> ABSOLUTE_PATH general_option advanced_option(s)\n");
+    printf("|     <> ABSOLUTE_PATH general_option advanced_option(s)\n");
     printf("|         -> Example 1: C:\\Users\\ABC\\installer.exe install skiplic=n\n");
-    printf("|        <> RELATIVE_PATH general_option advanced_options\n");
+    printf("|     <> RELATIVE_PATH general_option advanced_options\n");
     printf("|         -> Example 2: .\\installer.exe install cryptoloc=.\\now-crypto.exe\n");
 #else
     printf("| Usage: Open a Terminal.\n");
     printf("|        Type the command using either ways below:\n");
-    printf("|        <> sudo ABSOLUTE_PATH general_option advanced_option(s)\n");
+    printf("|     <> sudo ABSOLUTE_PATH general_option advanced_option(s)\n");
     printf("|         -> Example 1: sudo /home/ABC/installer.exe install skiplic=n\n");
-    printf("|        <> sudo RELATIVE_PATH general_option advanced_option(s)\n");
+    printf("|     <> sudo RELATIVE_PATH general_option advanced_option(s)\n");
     printf("|         -> Example 2: sudo ./installer.exe install cryptoloc=./now-crypto.exe\n");
 #endif
     printf("| general_option:\n");
@@ -81,7 +81,7 @@ void print_help_installer(void){
     printf("|        help             : Show this information.\n");
     printf("|        version          : Show the version code of this installer.\n");
     printf("|        verlist          : Show the available version list of hpcopr.\n");
-    printf("|       * You MUST specify one of the general options above.\n");
+    printf(GENERAL_BOLD "|        * You MUST specify one of the general options above.\n" RESET_DISPLAY);
     printf("| advanced_option (for developers, optional):\n");
     printf("|        skiplic=y|n      : Whether to skip reading the license terms.\n");
     printf("|                             y - agree and skip reading the terms.\n");
@@ -96,7 +96,7 @@ void print_help_installer(void){
     printf("|                           the hpcoprloc= parameter above.\n");
     printf("|        hpcoprver=VERS   * Only valid when hpcoprloc is absent.\n");
     printf("|                         : Specify the version code of hpcopr, i.e. 0.2.0.0128\n");
-    printf("|       * You can specify any or all of the advanced options above.\n");
+    printf(GENERAL_BOLD "|        * You can specify any or all of the advanced options above.\n" RESET_DISPLAY);
 }
 
 /*
@@ -455,10 +455,10 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          Please follow the steps below:\n");
-    printf(HIGH_CYAN_BOLD "|   <> sudo-mode (simple and fast): \n" RESET_DISPLAY );
+    printf(HIGH_CYAN_BOLD "|     <> SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("|          " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr envcheck\n" RESET_DISPLAY);
     printf("|          * You will be required to input the password for the current sudoer.\n");
-    printf(GENERAL_BOLD "|   <> user-mode (a little bit more steps): \n" RESET_DISPLAY);
+    printf(GENERAL_BOLD "|     <> USER-MODE (a little bit more steps): \n" RESET_DISPLAY);
     printf("|          1. " HIGH_GREEN_BOLD "sudo password hpc-now\n" RESET_DISPLAY);
     printf("|          * You will be required to set a password without echo.\n");
     printf("|          2. " HIGH_GREEN_BOLD "su hpc-now\n" RESET_DISPLAY);
@@ -505,10 +505,10 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          Please follow the steps below:\n");
-    printf(HIGH_CYAN_BOLD "|   <> sudo-mode (simple and fast): \n" RESET_DISPLAY );
+    printf(HIGH_CYAN_BOLD "|     <> SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("|          " HIGH_GREEN_BOLD "cd /Applications && sudo -u hpc-now hpcopr envcheck\n" RESET_DISPLAY);
     printf("|          * You will be required to input the password for the current sudoer.\n");
-    printf(GENERAL_BOLD "|   <> user-mode (a little bit more steps): \n" RESET_DISPLAY);
+    printf(GENERAL_BOLD "|     <> USER-MODE (a little bit more steps): \n" RESET_DISPLAY);
     printf("|          1. " HIGH_GREEN_BOLD "sudo dscl . -passwd /Users/hpc-now YOUR_COMPLEX_PASSWORD\n" RESET_DISPLAY);
     printf("|          2. " HIGH_GREEN_BOLD "su hpc-now\n" RESET_DISPLAY);
     printf("|          * You will be required to input the password set just now.\n");
@@ -692,6 +692,12 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     run_flag1=system(cmdline1);
     run_flag2=system(cmdline2);
     if(run_flag1!=0||run_flag2!=0){
+        if(run_flag1!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'hpcopr'.\n" RESET_DISPLAY);
+        }
+        if(run_flag2!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'now-crypto.exe'.\n" RESET_DISPLAY);
+        }
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to update the HPC-NOW services. Please check and make sure:\n");
         printf("|          1. The HPC-NOW Services have been installed previously.\n");
         printf("|          2. The specified location (if specified) is correct.\n");
