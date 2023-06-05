@@ -1846,7 +1846,8 @@ int check_and_cleanup(char* prev_workdir){
     fscanf(file_p,"%s",appdata_dir);
     fclose(file_p);
     system("del /f /s /q c:\\programdata\\appdata.txt.tmp > nul 2>&1");
-    
+    system("icacls C:\\programdata\\hpc-now\\workdir /deny Administrators:F /T > nul 2>&1");
+    system("icacls C:\\programdata\\hpc-now\\etc /deny Administrators:F /T > nul 2>&1");
     sprintf(cmdline,"del /f /s /q %s\\Microsoft\\Windows\\Recent\\* > nul 2>&1",appdata_dir);
     system(cmdline);
     sprintf(cmdline,"rd /q /s %s\\Microsoft\\Windows\\Recent\\ > nul 2>&1",appdata_dir);

@@ -110,6 +110,7 @@
 
 - about ：关于本程序
 - license ：阅读程序的 License，本程序使用 GNU Public License 作为主要 License。其余开源组件的 License 将在后续包含进来
+- version : 查看当前版本号
 - repair ： 快速修复 hpcopr，包括检查运行环境和核心组件
 
 ### 4. 构建环境需求（针对开发者）
@@ -167,21 +168,16 @@
     - 如您想跳过 License 阅读（不建议），可添加 skiplic=y 参数。
 - 此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户，其初始密码为 nowadmin2023~
 - 完成之后，请依次输入以下命令：
-- net user hpc-now YOUR_COMPLEX_PASSWORD
+- net user hpc-now YOUR_COMPLEX_PASSWORD 请为 hpc-now 用户设置具备一定复杂度的密码
 - runas /profile /savecred /user:mymachine\hpc-now powershell
 - 此时会弹出一个新的 powershell 窗口，请在**新的窗口**中运行：
-    - c:\hpc-now\hpcopr envcheck
+    - hpcopr envcheck
 
 此时，hpcopr 将开始下载必要的组件并部署在您的系统之中，部件的总大小约 150 MB；该过程视您的网络情况而定，可能需要 1 ~ 5 分钟。如您看到如下回显，则说明 hpcopr 已经可以运行。
 
 [ -INFO- ] Running environment successfully checked.
 
-**请您关闭此 powershell 窗口**，回到**原来的窗口**中重新运行：
-- runas /profile /savecred /user:mymachine\hpc-now powershell
-
-此后，您可以在 powershell 新窗口中运行 hpcopr 的任何命令。
-
-请务必在运行 hpcopr 之前首先通过上述 runas 命令调出以 **hpc-now** 用户身份运行的 powershell 窗口。该步骤至关重要，否则您将无权运行 hpcopr 命令。
+后续，请务必在运行 hpcopr 之前首先通过上述 runas 命令调出以 **hpc-now** 用户身份运行的 powershell 窗口。该步骤至关重要，否则您将无权运行 hpcopr 命令。
 
 #### GNU/Linux 用户：
 
@@ -195,7 +191,11 @@
         - sudo ./installer-lin.exe install （建议一般用户）
     - 同样的，如您想要使用自行构建的 now-crypto-lin.exe，可参考如上方式添加 cryptoloc=now-crypto-lin.exe 参数。
     - 如您想跳过 License 阅读（不建议），可添加 skiplic=y 参数。
-    此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户。您需要运行如下命令来为 hpc-now 用户创建密码：
+    此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户。
+
+**hpcopr 全面支持 sudo 。如果您当前用户拥有 sudo 权限，您也可以无需设置 hpc-now 的密码，直接使用 sudo -u hpc-now 作为前缀，来执行 hpcopr 的所有命令而无需 su hpc-now 切换用户，使用更加简单。例如：sudo -u hpc-now hpcopr envcheck 。我们建议您使用 sudo 模式运行 hpcopr。**
+
+**如您不使用 sudo 模式**，则需要按照以下步骤为 hpc-now 用户设置密码并手动切换用户：
 - sudo passwd hpc-now
 - 创建完成后，请依次运行如下命令：
 - su hpc-now （请输入刚刚设置好的密码）
@@ -218,9 +218,12 @@
         - sudo ./installer-dwn.exe install （建议一般用户）
     - 同样的，如您想要使用自行构建的 now-crypto-dwn.exe，可参考如上方式添加 cryptoloc=now-crypto-dwn.exe 参数。
     - 如您想跳过 License 阅读（不建议），可添加 skiplic=y 参数。
-    此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户。您需要运行如下命令来为 hpc-now 用户创建密码：
+    此时，安装器将开始安装过程。安装过程将在几秒内完成。在该过程中，您的操作系统新增了名为 hpc-now 的用户。
+
+**hpcopr 全面支持 sudo 。如果您当前用户拥有 sudo 权限，您也可以无需设置 hpc-now 的密码，直接使用 sudo -u hpc-now 作为前缀，来执行 hpcopr 的所有命令而无需 su hpc-now 切换用户，使用更加简单。例如：sudo -u hpc-now hpcopr envcheck 。我们建议您使用 sudo 模式运行 hpcopr。**
+
+**如您不使用 sudo 模式**，则需要按照以下步骤为 hpc-now 用户设置密码并手动切换用户：
 - sudo dscl . -passwd /Users/hpc-now **mycomplexpasswd** （请将加粗字体替换成为您的自定义密码！）
-- 创建完成后，请依次运行如下命令：
 - su hpc-now （请输入刚刚设置好的密码）
 - cd ~
 - hpcopr envcheck
