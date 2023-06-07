@@ -53,7 +53,7 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     if(file_p==NULL){
         return -1;
     }
-    int i;
+    int i,j;
     char header[16]="";
     char tail[64]="";
     char default_region[32]="";
@@ -83,9 +83,25 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
             strcpy(real_zone,tail);
         }
         else if(strcmp(header,"--nn")==0){
+            for(j=0;j<strlen(tail);j++){
+                if(*(tail+j)<'0'||*(tail+j)>'9'){
+                    fclose(file_p);
+                    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,tf_prep_conf,SYSTEM_CMD_REDIRECT);
+                    system(cmdline);
+                    return 1;
+                }
+            }
             strcpy(real_node_num_string,tail);
         }
         else if(strcmp(header,"--un")==0){
+            for(j=0;j<strlen(tail);j++){
+                if(*(tail+j)<'0'||*(tail+j)>'9'){
+                    fclose(file_p);
+                    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,tf_prep_conf,SYSTEM_CMD_REDIRECT);
+                    system(cmdline);
+                    return 1;
+                }
+            }
             strcpy(real_user_num_string,tail);
         }
         else if(strcmp(header,"--mi")==0){
@@ -95,10 +111,14 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
             strcpy(real_compute_inst,tail);
         }
         else if(strcmp(header,"--os")==0){
-            strcpy(real_os_image,tail);
+            if(strcmp(tail,"centoss9")==0||strcmp(tail,"centos7")==0){
+                strcpy(real_os_image,tail);
+            }
         }
         else if(strcmp(header,"--ht")==0){
-            strcpy(real_ht_flag,tail);
+            if(strcmp(tail,"ON")==0||strcmp(tail,"OFF")==0){
+                strcpy(real_ht_flag,tail);
+            }
         }
         else{
             continue;

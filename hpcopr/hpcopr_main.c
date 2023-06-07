@@ -1109,12 +1109,19 @@ int main(int argc, char* argv[]){
             return 125;
         }
         else if(run_flag==-1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a configuration file. Exit now.\n" RESET_DISPLAY);
             write_operation_log("NULL",operation_log,argv[1],"FILE_I/O_ERROR",127);
             check_and_cleanup(workdir);
             return 127;
         }
+        else if(run_flag==1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for the --nn and/or --un. Exit now.\n" RESET_DISPLAY);
+            write_operation_log(cluster_name,operation_log,argv[1],"INVALID_PARAMS",9);
+            check_and_cleanup(workdir);
+            return 9;
+        }
         else if(run_flag==-3){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file found. Omitted the specified params.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file found. Omitted all the specified params.\n" RESET_DISPLAY);
         }
         else{
             printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file not found. Using the specified or default params.\n" RESET_DISPLAY);
