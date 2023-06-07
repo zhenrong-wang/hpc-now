@@ -1788,7 +1788,7 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag){
     char url_aws_root[LOCATION_LENGTH_EXTENDED]="";
     char url_alicloud_root[LOCATION_LENGTH_EXTENDED]="";
     char url_qcloud_root[LOCATION_LENGTH_EXTENDED]="";
-    char confdir[DIR_LENGTH]="";
+    char confdir[DIR_LENGTH+4]="";
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
 
@@ -1804,7 +1804,8 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag){
         sprintf(url_alicloud_root,"%salicloud/",url_code_root_var);
     }
     get_cloud_flag(workdir,cloud_flag);
-    sprintf(cmdline,"%s %s%sconf %s",MKDIR_CMD,workdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
+    sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
