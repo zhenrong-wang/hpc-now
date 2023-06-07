@@ -29,8 +29,9 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
 int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_config);
 int cluster_sleep(char* workdir, char* crypto_keyfile);
 int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option);
-int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag);
-int edit_configuration_file(char* workdir, char* crypto_keyfile);
+int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag);
+int edit_configuration_file(char* cluster_name, char* crypto_keyfile);
+int remove_conf(char* cluster_name);
 int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option);
 int view_run_log(char* workdir, char* stream, char* run_option, char* view_option);
 

@@ -90,8 +90,13 @@ void print_help(char* plain_flag){
         printf("|  get-conf    : Get the default configuration file to edit and build a customized\n");
         printf("|                HPC cluster later (using the 'init' command).\n");
         printf("|  edit-conf   : Edit and save the default configuration file *before* init.\n");
+        printf("|  rm-conf     : Remove the configuration file *before* init.\n");
         printf("|  init        : Initialize a new cluster. If the configuration file is absent,\n");
         printf("|                the command will generate a default configuration file.\n");
+        printf("|      (Optional)--advanced_param=\n");
+        printf("|        --r=REGION_ID | --az=AZ_ID | --nn=COMPUTE_NODE_NUM | --un=HPC_USER_NUM\n");
+        printf("|        --mi=MASTER_CONFIG | --ci=COMPUTE_CONFIG | --os=OS_IMAGE\n");
+        printf("|        --ht=ON/OFF (Hyperthread option, only valid for AWS)\n");
         printf("|  rebuild     : Rebuild the nodes *without* destroying the cluster's storage.\n");
         printf("|        REBUILD_OPTION\n");
         printf("|          mc   - Only rebuild the master and all the compute node(s).\n");
@@ -211,8 +216,13 @@ void print_help(char* plain_flag){
         printf("|  " HIGH_GREEN_BOLD "get-conf" RESET_DISPLAY "    : Get the default configuration file to edit and build a customized\n");
         printf("|                HPC cluster later (using the 'init' command).\n");
         printf("|  " HIGH_GREEN_BOLD "edit-conf" RESET_DISPLAY "   : Edit and save the default configuration file *before* init.\n");
+        printf("|  " HIGH_GREEN_BOLD "rm-conf" RESET_DISPLAY "     : Remove the configuration file *before* init.\n");
         printf("|  " HIGH_GREEN_BOLD "init" RESET_DISPLAY "        : Initialize a new cluster. If the configuration file is absent,\n");
         printf("|                the command will generate a default configuration file.\n");
+        printf("|      (Optional)--advanced_param=\n");
+        printf("|        --r=REGION_ID | --az=AZ_ID | --nn=COMPUTE_NODE_NUM | --un=HPC_USER_NUM\n");
+        printf("|        --mi=MASTER_CONFIG | --ci=COMPUTE_CONFIG | --os=OS_IMAGE\n");
+        printf("|        --ht=ON/OFF (Hyperthread option, only valid for AWS)\n");
         printf("|  " HIGH_GREEN_BOLD "rebuild" RESET_DISPLAY "     : Rebuild the nodes *without* destroying the cluster's storage.\n");
         printf("|      REBUILD_OPTION\n");
         printf("|        mc   - Only rebuild the master and all the compute node(s).\n");

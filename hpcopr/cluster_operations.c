@@ -697,8 +697,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
     char vaultdir[DIR_LENGTH]="";
     int i;
     int compute_node_num=0;
-    printf(GENERAL_BOLD "\n");
-    printf("|*                                C A U T I O N !                                  \n");
+    printf(GENERAL_BOLD "|*                                C A U T I O N !                                  \n");
     printf("|*                                                                                 \n");
     printf("|*   YOU ARE DELETING THE WHOLE CLUSTER - INCLUDING ALL THE NODES AND *DATA*!      \n");
     printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
@@ -776,6 +775,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
     system(cmdline);
     sprintf(cmdline,"%s %s%sconf%stf_prep.conf %s%sconf%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,workdir,PATH_SLASH,PATH_SLASH,workdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been destroyed successfully.\n");
     return 0;
 }
 
@@ -1776,14 +1776,11 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     return 0;
 }
 
-int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
+int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag){
+    char workdir[DIR_LENGTH]="";
+    get_workdir(workdir,cluster_name);
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
-    }
-    char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    char temp_workdir[DIR_LENGTH]="";
-    if(show_current_cluster(temp_workdir,temp_cluster_name,0)!=0){
-        return 127;
     }
     char cloud_flag[32]="";
     char doubleconfirm[64]="";
@@ -1854,7 +1851,7 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
         return 1;
     }
     sprintf(filename_temp,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    find_and_replace(filename_temp,"CLUSTER_ID","","","","","hpcnow",temp_cluster_name);
+    find_and_replace(filename_temp,"CLUSTER_ID","","","","","hpcnow",cluster_name);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Default configuration file has been downloaded.\n");
     if(edit_flag!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to edit it now? Input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to confirm:\n");
@@ -1872,7 +1869,9 @@ int get_default_conf(char* workdir, char* crypto_keyfile, int edit_flag){
     return 0;
 }
 
-int edit_configuration_file(char* workdir, char* crypto_keyfile){
+int edit_configuration_file(char* cluster_name, char* crypto_keyfile){
+    char workdir[DIR_LENGTH]="";
+    get_workdir(workdir,cluster_name);
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
     }
@@ -1889,12 +1888,31 @@ int edit_configuration_file(char* workdir, char* crypto_keyfile){
         if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
             return 1;
         }
-        get_default_conf(workdir,crypto_keyfile,0);
+        get_default_conf(cluster_name,crypto_keyfile,0);
         return 0;
     }
     sprintf(cmdline,"%s %s",EDITOR_CMD,filename_temp);
     system(cmdline);
     return 0;
+}
+
+int remove_conf(char* cluster_name){
+    char workdir[DIR_LENGTH]="";
+    get_workdir(workdir,cluster_name);
+    if(cluster_empty_or_not(workdir)!=0){
+        return -1;
+    }
+    char filename_temp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    sprintf(filename_temp,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        return 1;
+    }
+    else{
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        return 0;
+    }
 }
 
 int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){

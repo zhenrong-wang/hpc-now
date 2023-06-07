@@ -76,6 +76,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "new-keypair",
     "get-conf",
     "edit-conf",
+    "rm-conf",
     "init",
     "rebuild",
     "vault",
@@ -1037,7 +1038,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=get_default_conf(workdir,crypto_keyfile,1);
+        run_flag=get_default_conf(cluster_name,crypto_keyfile,1);
         if(run_flag==1||run_flag==127){
             printf(FATAL_RED_BOLD "[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.\n" RESET_DISPLAY);
             write_operation_log(cluster_name,operation_log,argv[1],"INTERNAL_ERROR",125);
@@ -1052,7 +1053,7 @@ int main(int argc, char* argv[]){
             return 0;
         }
     }
-    if(strcmp(argv[1],"edit-conf")==0){
+    if(strcmp(argv[1],"edit-conf")==0||strcmp(argv[1],"rm-conf")==0){
         if(cluster_empty_or_not(workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
             printf("|          this operation is not allowed. Exit now.\n" RESET_DISPLAY);
@@ -1065,20 +1066,29 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=edit_configuration_file(workdir,crypto_keyfile);
+        if(strcmp(argv[1],"edit-conf")==0){
+            run_flag=edit_configuration_file(cluster_name,crypto_keyfile);
+        }
+        else{
+            run_flag=remove_conf(cluster_name);
+        }
         if(run_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] No configuration file found. Please run the command 'hpcopr get-conf' first.\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] No configuration file found. You can run " WARN_YELLO_BOLD "hpcopr get-conf" RESET_DISPLAY FATAL_RED_BOLD " first.\n");
             printf("|          Exit now.\n" RESET_DISPLAY);
             write_operation_log(cluster_name,operation_log,argv[1],"NO_CONFIG_FILE",55);
             check_and_cleanup(workdir);
             return 55;
         }
         else{
+            if(strcmp(argv[1],"rm-conf")==0){
+                printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The previous configuration file has been deleted.\n");
+            }
             write_operation_log(cluster_name,operation_log,argv[1],"SUCCEEDED",0);
             check_and_cleanup(workdir);
             return 0;
         }
     }
+
     if(strcmp(argv[1],"init")==0){
         if(cluster_empty_or_not(workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster has already been initialized. Exit now.\n" RESET_DISPLAY);
@@ -1090,6 +1100,24 @@ int main(int argc, char* argv[]){
             write_operation_log(cluster_name,operation_log,argv[1],"USER_DENIED",3);
             check_and_cleanup(workdir);
             return 3;
+        }
+        run_flag=cluster_init_conf(cluster_name,argc,argv);
+        if(run_flag==-5){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid cloud vendor. Exit now.\n" RESET_DISPLAY);
+            write_operation_log(cluster_name,operation_log,argv[1],"FATAL_INTERNAL_ERROR",125);
+            check_and_cleanup(workdir);
+            return 125;
+        }
+        else if(run_flag==-1){
+            write_operation_log("NULL",operation_log,argv[1],"FILE_I/O_ERROR",127);
+            check_and_cleanup(workdir);
+            return 127;
+        }
+        else if(run_flag==-3){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file found. Omitted the specified params.\n" RESET_DISPLAY);
+        }
+        else{
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file not found. Using the specified or default params.\n" RESET_DISPLAY);
         }
         if(strcmp(cloud_flag,"CLOUD_C")==0){
             run_flag=aws_cluster_init(cluster_name,workdir,crypto_keyfile);

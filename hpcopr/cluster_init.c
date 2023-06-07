@@ -28,6 +28,142 @@ extern char url_shell_scripts_var[LOCATION_LENGTH];
 extern char url_initutils_root_var[LOCATION_LENGTH];
 extern int code_loc_flag_var;
 
+/*
+ * 
+ *
+ */
+int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
+//    char* region_id, char* zone_id, char* node_num, char* hpc_user_num, char* master_inst, char* compute_inst, char* os_image, char* ht_flag
+    char cloud_flag[16]="";
+    char workdir[DIR_LENGTH]="";
+    get_workdir(workdir,cluster_name);
+    get_cloud_flag(workdir,cloud_flag);
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+        return -5;
+    }
+    char tf_prep_conf[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    sprintf(cmdline,"%s %s%sconf %s",MKDIR_CMD,workdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(tf_prep_conf,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
+    if(file_exist_or_not(tf_prep_conf)==0){
+        return -3; // If the conf file already exists, exit.
+    }
+    FILE* file_p=fopen(tf_prep_conf,"w+");
+    if(file_p==NULL){
+        return -1;
+    }
+    int i;
+    char header[16]="";
+    char tail[64]="";
+    char default_region[32]="";
+    char real_region[32]="";
+    char default_zone[36]="";
+    char real_zone[36]="";
+    int default_node_num=1;
+    char real_node_num_string[16]="";
+    int default_user_num=3;
+    char real_user_num_string[16]="";
+    char* default_master_inst="a8c16g";
+    char real_master_inst[16]="";
+    char* default_compute_inst="a4c8g";
+    char real_compute_inst[16]="";
+    char* default_os_image="centoss9";
+    char real_os_image[16]="";
+    char* default_ht_flag="ON";
+    char real_ht_flag[16]="";
+
+    for(i=2;i<argc;i++){
+        get_seq_string(argv[i],'=',1,header);
+        get_seq_string(argv[i],'=',2,tail);
+        if(strcmp(header,"--r")==0){
+            strcpy(real_region,tail);
+        }
+        else if(strcmp(header,"--az")==0){
+            strcpy(real_zone,tail);
+        }
+        else if(strcmp(header,"--nn")==0){
+            strcpy(real_node_num_string,tail);
+        }
+        else if(strcmp(header,"--un")==0){
+            strcpy(real_user_num_string,tail);
+        }
+        else if(strcmp(header,"--mi")==0){
+            strcpy(real_master_inst,tail);
+        }
+        else if(strcmp(header,"--ci")==0){
+            strcpy(real_compute_inst,tail);
+        }
+        else if(strcmp(header,"--os")==0){
+            strcpy(real_os_image,tail);
+        }
+        else if(strcmp(header,"--ht")==0){
+            strcpy(real_ht_flag,tail);
+        }
+        else{
+            continue;
+        }
+    }
+    if(strcmp(cloud_flag,"CLOUD_A")==0){
+        strcpy(default_region,"cn-hangzhou");
+        strcpy(default_zone,"cn-hangzhou-j");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_B")==0){
+        strcpy(default_region,"ap-guangzhou");
+        strcpy(default_zone,"ap-guangzhou-6");
+    }
+    else{
+        strcpy(default_region,"cn-northwest-1");
+        strcpy(default_zone,"cn-northwest-1a");
+    }
+    if(strlen(real_region)==0){
+        strcpy(real_region,default_region);
+    }
+    if(strlen(real_zone)==0){
+        strcpy(real_zone,default_zone);
+    }
+    if(strlen(real_node_num_string)==0){
+        sprintf(real_node_num_string,"%d",default_node_num);
+    }
+    if(strlen(real_user_num_string)==0){
+        sprintf(real_user_num_string,"%d",default_user_num);
+    }
+    if(strlen(real_master_inst)==0){
+        strcpy(real_master_inst,default_master_inst);
+    }
+    if(strlen(real_compute_inst)==0){
+        strcpy(real_compute_inst,default_compute_inst);
+    }
+    if(strlen(real_os_image)==0){
+        strcpy(real_os_image,default_os_image);
+    }
+    if(strlen(real_ht_flag)==0){
+        strcpy(real_ht_flag,default_ht_flag);
+    }
+    fprintf(file_p,"#IMPORTANT: THERE *MUST* BE 22 CHARACTERs (including spaces) BEFORE THE VALUE OF PARAMETERS.\n");
+    fprintf(file_p,"#FOR EXAMPLE        : PARAMETER_VALUE (*WITHOUT* ANY SPACE OR OTHER CHARACTORS AFTER THE PARAMETER_VALUE!)\n");
+    fprintf(file_p,"#                   : |<---THIS IS THE STANDARD START POINT! YOU NEED TO *ABSOLUTELY* ALIGN WITH THIS LINE.\n");
+    fprintf(file_p,"CLUSTER_ID          : %s\n",cluster_name);
+    fprintf(file_p,"REGION_ID           : %s\n",real_region);
+    fprintf(file_p,"ZONE_ID             : %s\n",real_zone);
+    fprintf(file_p,"NODE_NUM            : %s\n",real_node_num_string);
+    fprintf(file_p,"HPC_USER_NUM        : %s\n",real_user_num_string);
+    fprintf(file_p,"master_init_param   : db skip\n");
+    fprintf(file_p,"master_passwd       : *AUTOGEN*\n");
+    fprintf(file_p,"compute_passwd      : *AUTOGEN*\n");
+    fprintf(file_p,"master_inst         : %s\n",real_master_inst);
+    if(strcmp(cloud_flag,"CLOUD_A")==0||strcmp(cloud_flag,"CLOUD_B")==0){
+        fprintf(file_p,"master_bandwidth    : 50\n");
+    }
+    fprintf(file_p,"compute_inst        : %s\n",real_compute_inst);
+    fprintf(file_p,"os_image            : %s\n",real_os_image);
+    if(strcmp(cloud_flag,"CLOUD_C")==0){
+        fprintf(file_p,"hyperthreading      : %s\n",real_ht_flag);
+    }
+    fclose(file_p);
+    return 0;
+}
+
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile){
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";

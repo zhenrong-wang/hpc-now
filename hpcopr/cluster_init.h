@@ -9,6 +9,8 @@
 #ifndef CLUSTER_INIT_H
 #define CLUSTER_INIT_H
 
+int cluster_init_conf(char* cluster_name, int argc, char* argv[]);
+
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 
 int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
