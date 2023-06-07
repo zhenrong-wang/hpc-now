@@ -1788,7 +1788,7 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag){
     char url_aws_root[LOCATION_LENGTH_EXTENDED]="";
     char url_alicloud_root[LOCATION_LENGTH_EXTENDED]="";
     char url_qcloud_root[LOCATION_LENGTH_EXTENDED]="";
-    char confdir[DIR_LENGTH+4]="";
+    char confdir[DIR_LENGTH+16]="";
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
 
