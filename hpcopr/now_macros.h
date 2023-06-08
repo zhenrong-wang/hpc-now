@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0134"
+#define CORE_VERSION_CODE "0.2.0.0136"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -162,6 +162,7 @@
 #define CONF_STRING_LENTH 64
 #define COMMAND_NUM 40
 #define COMMAND_STRING_LENGTH_MAX 16
+#define CONF_LINE_NUM 12
 
 /* Usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"

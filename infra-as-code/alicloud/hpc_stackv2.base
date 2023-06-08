@@ -164,7 +164,7 @@ data "alicloud_images" "centoss9" {
 }
 
 resource "alicloud_resource_manager_resource_group" "resource_group" {
-  resource_group_name = "RG_NAME"
+  resource_group_name = "rg_RG_NAME"
   display_name = "RG_DISPLAY_NAME"
 }
 

@@ -11,6 +11,8 @@
 
 int cluster_init_conf(char* cluster_name, int argc, char* argv[]);
 
+int get_tf_prep_conf(char* workdir, char* cluster_id, char* region_id, char* zone_id, int* node_num, int* hpc_user_num, char* master_init_param, char* master_passwd, char* compute_passwd, char* master_inst, char* master_bandwidth, char* compute_inst, char* os_image_raw, char* ht_flag);
+
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 
 int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
