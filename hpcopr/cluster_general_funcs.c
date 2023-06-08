@@ -822,28 +822,30 @@ int cluster_full_running_or_not(char* workdir){
     return get_compute_node_num(filename_temp,"down");
 }
 
-int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log, int silent_flag){
+int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, int silent_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char tf_realtime_log[FILENAME_LENGTH];
     char tf_realtime_log_archive[FILENAME_LENGTH];
+    char tf_error_log[FILENAME_LENGTH];
     char tf_error_log_archive[FILENAME_LENGTH];
 
     create_and_get_stackdir(workdir,stackdir);
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_realtime_log_archive,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(tf_error_log_archive,"%s.archive",error_log);
+    sprintf(tf_error_log,"%s%slog%stf_prep.err.log",workdir,PATH_SLASH,PATH_SLASH);
+    sprintf(tf_error_log_archive,"%s%slog%stf_prep.err.log.archive",workdir,PATH_SLASH,PATH_SLASH);
     archive_log(tf_realtime_log_archive,tf_realtime_log);
-    archive_log(tf_error_log_archive,error_log);
-    sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,error_log);
+    archive_log(tf_error_log_archive,tf_error_log);
+    sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
     system(cmdline);
     if(silent_flag!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
         printf("|          Command: %s. View log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr viewlog std|err\n" RESET_DISPLAY,execution_name);
     }
-    if(wait_for_complete(tf_realtime_log,execution_name,error_log,tf_error_log_archive,1)!=0){
+    if(wait_for_complete(tf_realtime_log,execution_name,tf_error_log,tf_error_log_archive,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
-        archive_log(tf_error_log_archive,error_log);
+        archive_log(tf_error_log_archive,tf_error_log);
         return -1;
     }
     return 0;
@@ -1723,6 +1725,24 @@ void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_fla
 
 void get_workdir(char* cluster_workdir, char* cluster_name){
     sprintf(cluster_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,PATH_SLASH);
+}
+
+int get_cluster_name(char* cluster_name, char* cluster_workdir){
+    char* path_seprator_str=PATH_SLASH;
+    char path_seprator=path_seprator_str[0];
+    int i=0;
+    char dir_buffer[128]="";
+    while(i<16){
+        i++;
+        get_seq_string(cluster_workdir,path_seprator,i,dir_buffer);
+        if(strlen(dir_buffer)==0){
+            return 0;
+        }
+        else{
+            strcpy(cluster_name,dir_buffer);
+        }
+    }
+    return 1;
 }
 
 int create_cluster_registry(void){

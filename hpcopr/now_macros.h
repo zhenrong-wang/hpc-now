@@ -22,7 +22,6 @@
 #define DESTROYED_DIR "c:\\programdata\\hpc-now\\.destroyed\\"
 #define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
 #define SSHKEY_DIR "C:\\hpc-now\\.now-ssh"
-#define OPERATION_ERROR_LOG "c:\\hpc-now\\hpc-now.err.log"
 #define HPC_NOW_ROOT_DIR "c:\\programdata\\hpc-now\\"
 #define TF_LOCAL_PLUGINS "c:\\programdata\\hpc-now-tf\\"
 
@@ -65,7 +64,6 @@
 #define DESTROYED_DIR "/usr/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/home/hpc-now/LICENSES"
 #define SSHKEY_DIR "/home/hpc-now/.now-ssh"
-#define OPERATION_ERROR_LOG "/home/hpc-now/hpc-now.err.log"
 #define HPC_NOW_ROOT_DIR "/usr/.hpc-now/"
 #define TF_LOCAL_PLUGINS "/usr/share/terraform/"
 
@@ -108,7 +106,6 @@
 #define DESTROYED_DIR "/Applications/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/Users/hpc-now/LICENSES"
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
-#define OPERATION_ERROR_LOG "/Users/hpc-now/hpc-now.err.log"
 #define HPC_NOW_ROOT_DIR "/Applications/.hpc-now/"
 #define TF_LOCAL_PLUGINS "/Library/Application Support/io.terraform/"
 

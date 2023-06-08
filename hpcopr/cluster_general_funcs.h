@@ -35,7 +35,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level);
 int cluster_empty_or_not(char* workdir);
 int cluster_asleep_or_not(char* workdir);
 int cluster_full_running_or_not(char* workdir);
-int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, char* error_log, int silent_flag);
+int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, int silent_flag);
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
 int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag);
 int check_pslock(char* workdir);
@@ -64,6 +64,7 @@ int usrmgr_prereq_check(char* workdir, char* option);
 void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_flag);
 
 void get_workdir(char* cluster_workdir, char* cluster_name);
+int get_cluster_name(char* cluster_name, char* cluster_workdir);
 int create_cluster_registry(void);
 /*  
  * If silent_flag==1, verbose. Will tell the user which cluster is active
