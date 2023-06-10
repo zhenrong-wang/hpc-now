@@ -407,6 +407,20 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
         sprintf(cmdline1,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
         system(cmdline1);
     }
+    if(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
+        system("msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn");
+    }
+    int i=0;
+    while(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
+        printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
+        fflush(stdout);
+        i++;
+        sleep(1);
+        if(i==120){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
+            break;
+        }
+    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created with initial password: nowadmin2023~\n");
     printf("|          Please follow the steps below:\n");
@@ -726,6 +740,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
         sprintf(cmdline1,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
         system(cmdline1);
+    }
+    if(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
+        system("msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn");
     }
 #elif __linux__
     system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");

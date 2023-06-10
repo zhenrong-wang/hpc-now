@@ -501,7 +501,7 @@ int main(int argc, char* argv[]){
         return 21;
     }
     else if(command_flag==-5){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Currently no cluster specified or switched.\n" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Currently no cluster specified or switched" RESET_DISPLAY ".\n");
     }
     else if(command_flag==2){
         printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Using the " HIGH_CYAN_BOLD "specified" RESET_DISPLAY " cluster name " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_name);

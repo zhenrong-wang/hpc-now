@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0136"
+#define CORE_VERSION_CODE "0.2.0.0137"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -53,6 +53,11 @@
 #define GETTIMEOFDAY_FUNC mingw_gettimeofday
 #define GETPASS_FUNC getpass_win
 
+// The urls below are permenant and fast to visit. Use them directly.
+#define URL_COSCMD "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-windows.exe"
+#define URL_OSSUTIL "https://gosspublic.alicdn.com/ossutil/1.7.16/ossutil-v1.7.16-windows-amd64.zip"
+#define URL_S3CLI "https://awscli.amazonaws.com/AWSCLIV2.msi"
+
 #elif __linux__
 #define PATH_SLASH "/"
 #define CRYPTO_KEY_FILE "/usr/.hpc-now/.now_crypto_seed.lock"
@@ -95,6 +100,11 @@
 #define GETTIMEOFDAY_FUNC gettimeofday
 #define GETPASS_FUNC getpass
 
+// The urls below are permenant and fast to visit. Use them directly.
+#define URL_COSCMD "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-linux"
+#define URL_OSSUTIL "https://gosspublic.alicdn.com/ossutil/1.7.16/ossutil-v1.7.16-linux-amd64.zip"
+#define URL_S3CLI "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+
 #elif __APPLE__
 #define PATH_SLASH "/"
 #define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock"
@@ -136,6 +146,11 @@
 
 #define GETTIMEOFDAY_FUNC gettimeofday
 #define GETPASS_FUNC getpass
+
+// The urls below are permenant and fast to visit. Use them directly.
+#define URL_COSCMD "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-mac"
+#define URL_OSSUTIL "https://gosspublic.alicdn.com/ossutil/1.7.16/ossutil-v1.7.16-mac-amd64.zip"
+#define URL_S3CLI "https://awscli.amazonaws.com/AWSCLIV2.pkg"
 
 #endif
 
