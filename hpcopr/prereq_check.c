@@ -217,31 +217,33 @@ awscli:
                 return 1;
             }
         }
-        FILE* file_p=fopen("/tmp/choices.xml","w+");
-        if(file_p==NULL){
-            if(silent_flag!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] File I/O error. Failed to create tmp files.\n" RESET_DISPLAY);
+        if(system("/Applications/aws-cli/aws --version")!=0){
+            FILE* file_p=fopen("/tmp/choices.xml","w+");
+            if(file_p==NULL){
+                if(silent_flag!=0){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] File I/O error. Failed to create tmp files.\n" RESET_DISPLAY);
+                }
+                return -1;
             }
-            return -1;
-        }
-        fprintf(file_p,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        fprintf(file_p,"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
-        fprintf(file_p,"<plist version=\"1.0\">\n");
-        fprintf(file_p,"  <array>\n    <dict>\n      <key>choiceAttribute</key>\n      <string>customLocation</string>\n      <key>attributeSetting</key>\n");
-        fprintf(file_p,"      <string>/Applications/</string>\n      <key>choiceIdentifier</key>\n      <string>default</string>\n");
-        fprintf(file_p,"    </dict>\n  </array>\n</plist>\n");
-        fclose(file_p);
-        sprintf(cmdline,"installer -pkg '%s' -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml %s &",filename_temp_zip,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        int i=0;
-        while(file_exist_or_not("/Applications/aws-cli/aws")!=0||file_exist_or_not("/Applications/aws-cli/aws_completer")!=0){
-            printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
-            fflush(stdout);
-            i++;
-            sleep(1);
-            if(i==120){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
-                break;
+            fprintf(file_p,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            fprintf(file_p,"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
+            fprintf(file_p,"<plist version=\"1.0\">\n");
+            fprintf(file_p,"  <array>\n    <dict>\n      <key>choiceAttribute</key>\n      <string>customLocation</string>\n      <key>attributeSetting</key>\n");
+            fprintf(file_p,"      <string>/Applications/</string>\n      <key>choiceIdentifier</key>\n      <string>default</string>\n");
+            fprintf(file_p,"    </dict>\n  </array>\n</plist>\n");
+            fclose(file_p);
+            sprintf(cmdline,"installer -pkg '%s' -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml %s &",filename_temp_zip,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            int i=0;
+            while(file_exist_or_not("/Applications/aws-cli/aws")!=0||file_exist_or_not("/Applications/aws-cli/aws_completer")!=0){
+                printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
+                fflush(stdout);
+                i++;
+                sleep(1);
+                if(i==120){
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
+                    break;
+                }
             }
         }
         sprintf(cmdline,"/bin/cp -r /Applications/aws-cli %s",NOW_BINARY_DIR);
@@ -252,7 +254,7 @@ awscli:
         system(cmdline);
     }
 #elif _WIN32
-    if(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
+    if(system("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe > nul 2>&1")!=0){
         if(silent_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Please run the installer update to fix this issue.\n" RESET_DISPLAY);
         }
