@@ -242,9 +242,10 @@ awscli:
                 sleep(1);
                 if(i==120){
                     printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
-                    break;
+                    return 1;
                 }
             }
+            printf("\n");
         }
         sprintf(cmdline,"/bin/cp -r /Applications/aws-cli %s",NOW_BINARY_DIR);
         system(cmdline);
