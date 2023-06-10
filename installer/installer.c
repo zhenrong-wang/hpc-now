@@ -473,7 +473,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     printf("|          " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr envcheck\n" RESET_DISPLAY);
     printf("|          * You will be required to input the password for the current sudoer.\n");
     printf(GENERAL_BOLD "|     <> USER-MODE (a little bit more steps): \n" RESET_DISPLAY);
-    printf("|          1. " HIGH_GREEN_BOLD "sudo password hpc-now\n" RESET_DISPLAY);
+    printf("|          1. " HIGH_GREEN_BOLD "sudo passwd hpc-now\n" RESET_DISPLAY);
     printf("|          * You will be required to set a password without echo.\n");
     printf("|          2. " HIGH_GREEN_BOLD "su hpc-now\n" RESET_DISPLAY);
     printf("|          * You will be required to input the password set just now.\n");
