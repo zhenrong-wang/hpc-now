@@ -217,7 +217,7 @@ awscli:
                 return 1;
             }
         }
-        if(system("/Applications/aws-cli/aws --version")!=0){
+        if(system("/Applications/aws-cli/aws --version >> /dev/null 2>&1")!=0){
             FILE* file_p=fopen("/tmp/choices.xml","w+");
             if(file_p==NULL){
                 if(silent_flag!=0){
@@ -254,7 +254,7 @@ awscli:
         system(cmdline);
     }
 #elif _WIN32
-    if(system("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe > nul 2>&1")!=0){
+    if(system("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe --version > nul 2>&1")!=0){
         if(silent_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Please run the installer update to fix this issue.\n" RESET_DISPLAY);
         }
