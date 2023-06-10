@@ -123,7 +123,11 @@ int install_bucket_clis(int silent_flag){
     sprintf(filename_temp_zip,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         if(file_exist_or_not(filename_temp_zip)!=0){
+#ifdef _WIN32
             sprintf(cmdline,"curl %s -o %s",URL_OSSUTIL,filename_temp_zip);
+#else
+            sprintf(cmdline,"curl %s -o '%s'",URL_OSSUTIL,filename_temp_zip);
+#endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
                     printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 1/3.\n" RESET_DISPLAY);
@@ -137,14 +141,14 @@ int install_bucket_clis(int silent_flag){
         sprintf(cmdline,"%s %s%sossutil-v1.7.16-windows-amd64%sossutil64.exe %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
 #elif __linux__   
-        sprintf(cmdline,"unzip -q %s -d %s",filename_temp_zip,NOW_BINARY_DIR);
+        sprintf(cmdline,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
         sprintf(cmdline,"%s %s%sossutil-v1.7.16-linux-amd64%sossutil64 %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(cmdline,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
 #elif __APPLE__
-        sprintf(cmdline,"unzip -q %s -d %s",filename_temp_zip,NOW_BINARY_DIR);
+        sprintf(cmdline,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
         sprintf(cmdline,"%s %s%sossutil-v1.7.16-mac-amd64%sossutilmac64 %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
@@ -183,7 +187,7 @@ awscli:
     sprintf(filename_temp_zip,"%s%sawscliv2.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         if(file_exist_or_not(filename_temp_zip)!=0){
-            sprintf(cmdline,"curl %s -o %s",URL_S3CLI,filename_temp_zip);
+            sprintf(cmdline,"curl %s -o '%s'",URL_S3CLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
                     printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/3.\n" RESET_DISPLAY);
@@ -191,7 +195,7 @@ awscli:
                 return 1;
             }
         }
-        sprintf(cmdline,"unzip -q -o %s -d /tmp",filename_temp_zip);
+        sprintf(cmdline,"unzip -q -o '%s' -d /tmp",filename_temp_zip);
         system(cmdline);
         sprintf(cmdline,"/tmp/aws/install -i %s%sawscli -b %s %s",NOW_BINARY_DIR,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
@@ -200,7 +204,7 @@ awscli:
     sprintf(filename_temp_zip,"%s%sAWSCLIV2.pkg",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         if(file_exist_or_not(filename_temp_zip)!=0){
-            sprintf(cmdline,"curl %s -o %s",URL_S3CLI,filename_temp_zip);
+            sprintf(cmdline,"curl %s -o '%s'",URL_S3CLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
                     printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/3.\n" RESET_DISPLAY);
@@ -222,7 +226,7 @@ awscli:
         fprintf(file_p,"      <string>%s</string>\n      <key>choiceIdentifier</key>\n      <string>default</string>\n",NOW_BINARY_DIR);
         fprintf(file_p,"    </dict>\n  </array>\n</plist>\n");
         fclose(file_p);
-        sprintf(cmdline,"installer -pkg %s -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml",filename_temp_zip);
+        sprintf(cmdline,"installer -pkg '%s' -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml",filename_temp_zip);
         system(cmdline);
         sprintf(cmdline,"ln -s %s%saws-cli%saws %s%saws %s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
