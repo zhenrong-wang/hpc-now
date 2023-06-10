@@ -150,7 +150,9 @@ int install_bucket_clis(int silent_flag){
         system(cmdline);
         sprintf(cmdline,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
-#endif  
+#endif
+        sprintf(cmdline,"%s %s%sossutil-v1.* %s",DELETE_FOLDER_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);  
     }
 
 coscmd:
