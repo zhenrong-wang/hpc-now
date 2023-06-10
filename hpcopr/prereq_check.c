@@ -223,10 +223,12 @@ awscli:
         fprintf(file_p,"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
         fprintf(file_p,"<plist version=\"1.0\">\n");
         fprintf(file_p,"  <array>\n    <dict>\n      <key>choiceAttribute</key>\n      <string>customLocation</string>\n      <key>attributeSetting</key>\n");
-        fprintf(file_p,"      <string>%s</string>\n      <key>choiceIdentifier</key>\n      <string>default</string>\n",NOW_BINARY_DIR);
+        fprintf(file_p,"      <string>/Applications/</string>\n      <key>choiceIdentifier</key>\n      <string>default</string>\n");
         fprintf(file_p,"    </dict>\n  </array>\n</plist>\n");
         fclose(file_p);
         sprintf(cmdline,"installer -pkg '%s' -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml",filename_temp_zip);
+        system(cmdline);
+        sprintf(cmdline,"/bin/cp -r /Applications/aws-cli %s",NOW_BINARY_DIR);
         system(cmdline);
         sprintf(cmdline,"ln -s %s%saws-cli%saws %s%saws %s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
