@@ -726,7 +726,6 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #endif
         return 1;
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been updated to your device and OS.\n");
 #ifdef _WIN32
     system("mkdir c:\\hpc-now\\LICENSES > nul 2>&1");
     if(file_exist_or_not("C:\\hpc-now\\LICENSES\\GPL-2")!=0){
@@ -744,6 +743,17 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     if(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
         system("msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn");
+    }
+    int i=0;
+    while(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
+        printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
+        fflush(stdout);
+        i++;
+        sleep(1);
+        if(i==120){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
+            break;
+        }
     }
 #elif __linux__
     system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
@@ -774,6 +784,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
 #endif
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been updated to your device and OS.\n");
     return 0;
 }
 
