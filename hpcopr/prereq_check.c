@@ -226,7 +226,7 @@ awscli:
         fprintf(file_p,"      <string>/Applications/</string>\n      <key>choiceIdentifier</key>\n      <string>default</string>\n");
         fprintf(file_p,"    </dict>\n  </array>\n</plist>\n");
         fclose(file_p);
-        sprintf(cmdline,"installer -pkg '%s' -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml",filename_temp_zip);
+        sprintf(cmdline,"installer -pkg '%s' -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(cmdline,"/bin/cp -r /Applications/aws-cli %s",NOW_BINARY_DIR);
         system(cmdline);
