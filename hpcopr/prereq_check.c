@@ -118,7 +118,7 @@ int install_bucket_clis(int silent_flag){
     char filename_temp_zip[FILENAME_LENGTH]="";
     
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking & installing the dataman components: 1/3 ...\n");
+        printf("|        . Checking & installing the dataman components: 1/3 ...\n");
     }
     sprintf(filename_temp,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
     sprintf(filename_temp_zip,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
@@ -160,10 +160,13 @@ int install_bucket_clis(int silent_flag){
         sprintf(cmdline,"%s %s%sossutil-v1.* %s",DELETE_FOLDER_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);  
     }
+    if(silent_flag!=0){
+        printf("|        v Installed the dataman components: 1/3 .\n");
+    }
 
 coscmd:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking & installing the dataman components: 2/3 ...\n");
+        printf("|        . Checking & installing the dataman components: 2/3 ...\n");
     }
     sprintf(filename_temp,"%s%scoscmd.exe",NOW_BINARY_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
@@ -180,10 +183,13 @@ coscmd:
         system(cmdline);
 #endif
     }
+    if(silent_flag!=0){
+        printf("|        v Installed the dataman components: 2/3 .\n");
+    }
 
 awscli: 
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking & installing the dataman components: 3/3 ...\n");
+        printf("|        . Checking & installing the dataman components: 3/3 ...\n");
     }
     sprintf(filename_temp,"%s%saws",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef __linux__
@@ -262,6 +268,9 @@ awscli:
         return 1;
     }
 #endif
+    if(silent_flag!=0){
+        printf("|        v Installed the dataman components: 3/3 .\n");
+    }
     return 0;
 }
 
@@ -740,7 +749,6 @@ int check_and_install_prerequisitions(int repair_flag){
 
     if(repair_flag==1){
         printf("|        v The Terraform Providers have been repaired.\n");
-        printf("|        . Checking and repairing the key folders and environment variables ... \n");
     }
 
     flag=install_bucket_clis(force_repair_flag);
@@ -757,7 +765,10 @@ int check_and_install_prerequisitions(int repair_flag){
         fclose(file_p);
         file_p=fopen(operation_logfile,"w+");
         fclose(file_p);
-    }    
+    }
+    if(repair_flag==1){
+        printf("|        . Checking and repairing the key folders and environment variables ... \n");
+    }
 #ifdef _WIN32
     sprintf(cmdline,"del /f /q %s\\known_hosts* >nul 2>&1",dotssh_dir);
 #elif __linux__
