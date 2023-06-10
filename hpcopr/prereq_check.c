@@ -120,7 +120,7 @@ int install_bucket_clis(int silent_flag){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking & installing the dataman components: 1/3 ...\n");
     }
     sprintf(filename_temp,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
-    sprintf(filename_temp_zip,"%s%soss.zip",PATH_SLASH);
+    sprintf(filename_temp_zip,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         if(file_exist_or_not(filename_temp_zip)!=0){
             sprintf(cmdline,"curl %s -o %s",URL_OSSUTIL,filename_temp_zip);
@@ -171,13 +171,14 @@ coscmd:
         system(cmdline);
 #endif
     }
+
 awscli: 
     if(silent_flag!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking & installing the dataman components: 3/3 ...\n");
     }
     sprintf(filename_temp,"%s%saws",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef __linux__
-    sprintf(filename_temp_zip,"%s%sawscliv2.zip",NOW_BINARY_DIR,PATH_SLASH);
+    sprintf(filename_temp_zip,"%s%sawscliv2.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         if(file_exist_or_not(filename_temp_zip)!=0){
             sprintf(cmdline,"curl %s -o %s",URL_S3CLI,filename_temp_zip);
@@ -194,7 +195,7 @@ awscli:
         system(cmdline);
     }
 #elif __APPLE__
-    sprintf(filename_temp_zip,"%s%sAWSCLIV2.pkg",NOW_BINARY_DIR,PATH_SLASH);
+    sprintf(filename_temp_zip,"%s%sAWSCLIV2.pkg",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         if(file_exist_or_not(filename_temp_zip)!=0){
             sprintf(cmdline,"curl %s -o %s",URL_S3CLI,filename_temp_zip);
