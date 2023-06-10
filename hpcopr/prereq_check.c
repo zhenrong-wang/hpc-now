@@ -122,6 +122,7 @@ int install_bucket_clis(int silent_flag){
     sprintf(filename_temp,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
     sprintf(filename_temp_zip,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Dataman component 1 not found. Downloading and installing ...\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             sprintf(cmdline,"curl %s -o %s",URL_OSSUTIL,filename_temp_zip);
@@ -165,6 +166,7 @@ coscmd:
     }
     sprintf(filename_temp,"%s%scoscmd.exe",NOW_BINARY_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Dataman component 2 not found. Downloading and installing ...\n");
         sprintf(cmdline,"curl %s -o %s",URL_COSCMD,filename_temp);
         if(system(cmdline)!=0){
             if(silent_flag!=0){
@@ -186,6 +188,7 @@ awscli:
 #ifdef __linux__
     sprintf(filename_temp_zip,"%s%sawscliv2.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Dataman component 3 not found. Downloading and installing ...\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
             sprintf(cmdline,"curl %s -o '%s'",URL_S3CLI,filename_temp_zip);
             if(system(cmdline)!=0){
@@ -203,6 +206,7 @@ awscli:
 #elif __APPLE__
     sprintf(filename_temp_zip,"%s%sAWSCLIV2.pkg",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Dataman component 3 not found. Downloading and installing ...\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
             sprintf(cmdline,"curl %s -o '%s'",URL_S3CLI,filename_temp_zip);
             if(system(cmdline)!=0){
@@ -226,8 +230,19 @@ awscli:
         fprintf(file_p,"      <string>/Applications/</string>\n      <key>choiceIdentifier</key>\n      <string>default</string>\n");
         fprintf(file_p,"    </dict>\n  </array>\n</plist>\n");
         fclose(file_p);
-        sprintf(cmdline,"installer -pkg '%s' -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml %s",filename_temp_zip,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"installer -pkg '%s' -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml %s &",filename_temp_zip,SYSTEM_CMD_REDIRECT);
         system(cmdline);
+        int i=0;
+        while(file_exist_or_not("/Applications/aws-cli/aws")!=0||file_exist_or_not("/Applications/aws-cli/aws_completer")!=0){
+            printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
+            fflush(stdout);
+            i++;
+            sleep(1);
+            if(i==120){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
+                break;
+            }
+        }
         sprintf(cmdline,"/bin/cp -r /Applications/aws-cli %s",NOW_BINARY_DIR);
         system(cmdline);
         sprintf(cmdline,"ln -s %s%saws-cli%saws %s%saws %s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
