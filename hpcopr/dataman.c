@@ -139,9 +139,6 @@ int rf_flag_parser(const char* rf_flag, const char* cloud_flag, char* real_rflag
         strcpy(real_rflag,"");
         strcpy(real_fflag,"--force");
     }
-    if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
-        strcpy(real_fflag,"");
-    }
     return 0;
 }
 
@@ -163,6 +160,9 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         return -1;
     }
     rf_flag_parser(rf_flag,cloud_flag,real_rflag,real_fflag);
+    if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
+        strcpy(real_fflag,"");
+    }
     path_flag1=bucket_path_check(source_path,real_source_path,hpc_user);
     path_flag2=bucket_path_check(target_path,real_target_path,hpc_user);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
@@ -228,6 +228,9 @@ int bucket_rm(char* workdir, char* hpc_user, char* remote_path, char* rf_flag, c
         return -1;
     }
     rf_flag_parser(rf_flag,cloud_flag,real_rflag,real_fflag);
+    if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
+        strcpy(real_fflag,"");
+    }
     bucket_path_check(remote_path,real_remote_path,hpc_user);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s rm %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
@@ -285,6 +288,9 @@ int bucket_ls(char* workdir, char* hpc_user, char* remote_path, char* rf_flag, c
         return -1;
     }
     rf_flag_parser(rf_flag,cloud_flag,real_rflag,real_fflag);
+    if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
+        strcpy(real_fflag,"");
+    }
     bucket_path_check(remote_path,real_remote_path,hpc_user);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s ls %s%s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path);
@@ -553,10 +559,10 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* buck
     }
     else{
         if(strcmp(cmd_type,"rdownload")==0){
-            sprintf(remote_commands,"s3cmd get %s %s%s %s",real_rf_flag,bucket_address,real_bucket_path,real_remote_path);
+            sprintf(remote_commands,"s3cmd get %s %s %s%s %s",real_rflag,real_fflag,bucket_address,real_bucket_path,real_remote_path);
         }
         else{
-            sprintf(remote_commands,"s3cmd put %s %s %s%s",real_rf_flag,real_remote_path,bucket_address,real_bucket_path);
+            sprintf(remote_commands,"s3cmd put %s %s %s %s%s",real_rflag,real_fflag,real_remote_path,bucket_address,real_bucket_path);
         }
     }
 //    printf("%s ---\n",remote_commands);
