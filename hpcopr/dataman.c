@@ -565,7 +565,7 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* buck
             sprintf(remote_commands,"s3cmd put %s %s%s %s %s",real_remote_path,bucket_address,real_bucket_path,real_rflag,real_fflag);
         }
     }
-    printf("%s ---\n",remote_commands);
+//    printf("%s ---\n",remote_commands);
     run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,0,1);
     if(run_flag!=0){
         return 1;
