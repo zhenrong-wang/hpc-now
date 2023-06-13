@@ -48,8 +48,8 @@ int check_internet(void){
     sprintf(cmdline,"ping -c 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT);
 #endif
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
-        printf("|          or check your internet connectivity and retry later.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please either check your DNS\n");
+        printf("|          service or check your internet connectivity and retry later.\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return 1;
     }

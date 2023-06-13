@@ -24,6 +24,6 @@ int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_p
 int direct_rm_ls_mkdir(char* workdir, char* hpc_user, char* sshkey_dir, char* remote_path, char* rf_flag, char* cmd_type);
 int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char* remote_path, char* cmd_type);
 
-int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* bucket_path, char* remote_path, char* rf_flag, char* cloud_flag, char* cmd_type);
+int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* bucket_path, char* remote_path, char* rf_flag, char* cloud_flag, char* cmd_type, char* crypto_keyfile);
 
 #endif

@@ -1264,43 +1264,45 @@ int main(int argc, char* argv[]){
             run_flag=direct_file_operations(workdir,argv[2],SSHKEY_DIR,string_temp,argv[3]);
         }
         else if(strcmp(argv[3],"rupload")==0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Data operation started ...\n\n");
             if(direct_path_check(argv[4],string_temp,argv[2])==1){
                 sprintf(string_temp,"--home:%s",argv[4]);
             }
             else{
                 strcpy(string_temp,argv[4]);
             }
-            if(direct_path_check(argv[5],string_temp2,argv[2])==1){
+            if(bucket_path_check(argv[5],string_temp2,argv[2])==1){
                 sprintf(string_temp2,"--b:%s",argv[5]);
             }
             else{
                 strcpy(string_temp2,argv[5]);
             }
             if(argc==6||(argc==7&&command_flag==2)){
-                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,"",cloud_flag,argv[3]);
+                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,"",cloud_flag,argv[3],crypto_keyfile);
             }
             else{
-                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,argv[6],cloud_flag,argv[3]);
+                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,argv[6],cloud_flag,argv[3],crypto_keyfile);
             }
         }
         else{
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Data operation started ...\n\n");
             if(direct_path_check(argv[5],string_temp,argv[2])==1){
                 sprintf(string_temp,"--home:%s",argv[5]);
             }
             else{
                 strcpy(string_temp,argv[5]);
             }
-            if(direct_path_check(argv[4],string_temp2,argv[4])==1){
+            if(bucket_path_check(argv[4],string_temp2,argv[4])==1){
                 sprintf(string_temp2,"--b:%s",argv[4]);
             }
             else{
                 strcpy(string_temp2,argv[4]);
             }
             if(argc==6||(argc==7&&command_flag==2)){
-                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,"",cloud_flag,argv[3]);
+                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,"",cloud_flag,argv[3],crypto_keyfile);
             }
             else{
-                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,argv[6],cloud_flag,argv[3]);
+                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,argv[6],cloud_flag,argv[3],crypto_keyfile);
             }
         }
         if(run_flag==0){

@@ -48,7 +48,7 @@ int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, c
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%svault%sbucket_info.txt",workdir,PATH_SLASH,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
-    int i;
+    int i=0;
     if(file_p==NULL){
         return -1;
     }
@@ -504,7 +504,7 @@ int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char
     }
 }
 
-int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* bucket_path, char* remote_path, char* rf_flag, char* cloud_flag, char* cmd_type){
+int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* bucket_path, char* remote_path, char* rf_flag, char* cloud_flag, char* cmd_type, char* crypto_keyfile){
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
         return -3;
     }
@@ -518,7 +518,14 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* buck
     char real_remote_path[DIR_LENGTH]="";
     char remote_commands[CMDLINE_LENGTH]="";
     char real_rf_flag[4]="";
-
+    char bucket_address[32]="";
+    char region_id[32]="";
+    char bucket_ak[128]="";
+    char bucket_sk[128]="";
+    if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
+//        printf("\n%d\n",get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk));
+        return -1;
+    }
     if(bucket_path_check(bucket_path,real_bucket_path,hpc_user)==1||direct_path_check(remote_path,real_remote_path,hpc_user)==1){
         return -7;
     }
@@ -530,10 +537,10 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* buck
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"rdownload")==0){
-            sprintf(remote_commands,"ossutil cp $BUCKET%s %s %s %s",real_bucket_path,real_remote_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"ossutil cp %s%s %s %s %s",bucket_address,real_bucket_path,real_remote_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"ossutil cp %s $BUCKET%s %s %s",real_remote_path,real_bucket_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"ossutil cp %s %s%s %s %s",real_remote_path,bucket_address,real_bucket_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
@@ -546,12 +553,13 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* buck
     }
     else{
         if(strcmp(cmd_type,"rdownload")==0){
-            sprintf(remote_commands,"s3cmd get %s $BUCKET%s %s",rf_flag,real_bucket_path,real_remote_path);
+            sprintf(remote_commands,"s3cmd get %s %s%s %s",real_rf_flag,bucket_address,real_bucket_path,real_remote_path);
         }
         else{
-            sprintf(remote_commands,"s3cmd put %s %s $BUCKET%s",rf_flag,real_remote_path,real_bucket_path);
+            sprintf(remote_commands,"s3cmd put %s %s %s%s",real_rf_flag,real_remote_path,bucket_address,real_bucket_path);
         }
     }
+//    printf("%s ---\n",remote_commands);
     run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,0,1);
     if(run_flag!=0){
         return 1;
