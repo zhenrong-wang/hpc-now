@@ -881,7 +881,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             graph(workdir,crypto_keyfile,0);
             get_latest_hosts(stackdir,filename_temp);
             printf("|\n");
-            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
+            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
@@ -922,7 +922,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     for(i=1;i<compute_node_num+1;i++){
@@ -1000,7 +1000,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
     remote_exec(workdir,sshkey_dir,"connect",7);
     remote_exec(workdir,sshkey_dir,"all",8);
     for(i=0;i<add_number;i++){
@@ -1413,7 +1413,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
             get_latest_hosts(stackdir,filename_temp);
-            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
+            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
             for(i=1;i<compute_node_num+1;i++){
@@ -1486,7 +1486,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
     if(compute_node_down_num!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Please turn on all the cluster nodes, log on to the master\n");
         printf("|          node, and run: " HIGH_GREEN_BOLD "sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY WARN_YELLO_BOLD "\n" RESET_DISPLAY);
@@ -1578,7 +1578,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         sleep(1);
     }
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put");
+    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     update_cluster_summary(workdir,crypto_keyfile);
@@ -2052,24 +2052,24 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     printf("|\n");
     decrypt_get_bucket_conf(workdir,crypto_keyfile,bucket_conf);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
-        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.ossutilconfig","root","put");
+        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.ossutilconfig","root","put","",0);
         sprintf(remote_commands,"echo -e \"export BUCKET=oss://%s\" >> /etc/profile",bucket_id);
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.cos.conf","root","put");
+        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.cos.conf","root","put","",0);
         sprintf(remote_commands,"echo -e \"export BUCKET=cos://%s\" >> /etc/profile",bucket_id);
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.s3cfg","root","put");
+        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.s3cfg","root","put","",0);
         sprintf(remote_commands,"echo -e \"export BUCKET=s3://%s\" >> /etc/profile",bucket_id);
     }
-    remote_exec_general(workdir,sshkey_folder,"root",remote_commands,0);
+    remote_exec_general(workdir,sshkey_folder,"root",remote_commands,0,0);
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
     create_and_get_vaultdir(workdir,vaultdir);
     decrypt_user_passwords(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/.cluster_secrets/user_secrets.txt","root","put");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/.cluster_secrets/user_secrets.txt","root","put","",0);
     delete_decrypted_user_passwords(workdir);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);

@@ -99,15 +99,23 @@ int decrypt_get_bucket_conf(char* workdir, char* crypto_keyfile, char* bucket_co
     return system(cmdline);
 }
 
-int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option){
+int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option, char* recursive_flag, int silent_flag){
     if(strcmp(option,"put")!=0&&strcmp(option,"get")!=0){
         return 1;
+    }
+    char real_recursive_flag[4]="";
+    if(strcmp(recursive_flag,"-r")!=0){
+        strcpy(real_recursive_flag,"");
+    }
+    else{
+        strcpy(real_recursive_flag,"-r");
     }
     char stackdir[DIR_LENGTH]="";
     char private_key[FILENAME_LENGTH]="";
     char remote_address[32]="";
     char currentstate[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     FILE* file_p=NULL;
     create_and_get_stackdir(workdir,stackdir);
     sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -117,15 +125,81 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
     }
     fgetline(file_p,remote_address);
     fclose(file_p);
-    sprintf(private_key,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
-    if(strcmp(option,"put")==0){
-        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s %s@%s:%s %s",private_key,local_path,username,remote_address,remote_path,SYSTEM_CMD_REDIRECT);
+    if(strcmp(username,"root")==0){
+        sprintf(private_key,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
     }
     else{
-        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s@%s:%s %s %s",private_key,username,remote_address,remote_path,local_path,SYSTEM_CMD_REDIRECT);
+        get_cluster_name(cluster_name,workdir);
+        sprintf(private_key,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,username);
+        if(file_exist_or_not(private_key)!=0){
+            return -3;
+        }
     }
+    if(strcmp(option,"put")==0){
+        if(silent_flag==0){
+            sprintf(cmdline,"scp %s -o StrictHostKeyChecking=no -i %s %s %s@%s:%s %s",real_recursive_flag,private_key,local_path,username,remote_address,remote_path,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"scp %s -o StrictHostKeyChecking=no -i %s %s %s@%s:%s",real_recursive_flag,private_key,local_path,username,remote_address,remote_path);
+        }
+    }
+    else{
+        if(silent_flag==0){
+            sprintf(cmdline,"scp %s -o StrictHostKeyChecking=no -i %s %s@%s:%s %s %s",real_recursive_flag,private_key,username,remote_address,remote_path,local_path,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"scp %s -o StrictHostKeyChecking=no -i %s %s@%s:%s %s",real_recursive_flag,private_key,username,remote_address,remote_path,local_path);
+        }
+    }
+    if(system(cmdline)!=0){
+        return 3;
+    }
+    else{
+        return 0;
+    }
+}
+
+int get_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
+    char sshkey_subdir[DIR_LENGTH]="";
+    char ssh_privkey[FILENAME_LENGTH]="";
+    char ssh_privkey_remote[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char workdir[DIR_LENGTH];
+    sprintf(sshkey_subdir,"%s%s.%s",sshkey_dir,PATH_SLASH,cluster_name);
+    if(folder_exist_or_not(sshkey_subdir)!=0){
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,sshkey_subdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    sprintf(ssh_privkey,"%s%s%s.key",sshkey_subdir,PATH_SLASH,user_name);
+    get_workdir(workdir,cluster_name);
+    sprintf(ssh_privkey_remote,"/home/%s/.ssh/id_rsa",user_name);
+    if(remote_copy(workdir,sshkey_dir,ssh_privkey,ssh_privkey_remote,"root","get","",0)!=0){
+        return 1;
+    }
+    else{
+#ifdef _WIN32
+        sprintf(cmdline,"takeown /f %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"icacls %s /c /t /inheritance:d %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"icacls %s /c /t /remove:g Users %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"icacls %s /c /t /remove:g \"Authenticated Users\" %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+#else
+        sprintf(cmdline,"chmod 600 %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+#endif
+        return 0;
+    }
+}
+
+void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
+    char user_privkey[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    sprintf(user_privkey,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,cluster_name);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,user_privkey,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    return 0;
 }
 
 void create_and_get_vaultdir(char* workdir, char* vaultdir){
@@ -163,7 +237,7 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     return system(cmdline);
 }
 
-int remote_exec_general(char* workdir, char* sshkey_folder, char* remote_user, char* commands, int delay_minutes){
+int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char* commands, int delay_minutes, int silent_flag){
     if(delay_minutes<0){
         return -1;
     }
@@ -172,6 +246,7 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* remote_user, c
     char private_key[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char remote_address[32]="";
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     FILE* file_p=NULL;
     create_and_get_stackdir(workdir,stackdir);
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -181,12 +256,31 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* remote_user, c
     }
     fgetline(file_p,remote_address);
     fclose(file_p);
-    sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    if(delay_minutes==0){
-        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",private_key,remote_user,remote_address,commands,SYSTEM_CMD_REDIRECT);
+    if(strcmp(username,"root")==0){
+        sprintf(private_key,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
     }
     else{
-        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",private_key,remote_user,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
+        get_cluster_name(cluster_name,workdir);
+        sprintf(private_key,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,username);
+        if(file_exist_or_not(private_key)!=0){
+            return -3;
+        }
+    }
+    if(delay_minutes==0){
+        if(silent_flag==0){
+            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",private_key,username,remote_address,commands,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",private_key,username,remote_address,commands);
+        }
+    }
+    else{
+        if(silent_flag==0){
+            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",private_key,username,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\"",private_key,username,remote_address,commands,delay_minutes);
+        }
     }
     return system(cmdline);
 }
@@ -373,6 +467,8 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
+    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
@@ -1102,6 +1198,7 @@ int cluster_ssh(char* workdir, char* username){
     char master_address[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char private_sshkey[FILENAME_LENGTH]="";
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     FILE* file_p=NULL;
     create_and_get_stackdir(workdir,stackdir);
     sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -1111,12 +1208,17 @@ int cluster_ssh(char* workdir, char* username){
     file_p=fopen(statefile,"r");
     fgetline(file_p,master_address);
     fclose(file_p);
-    sprintf(private_sshkey,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
-    if(strlen(username)==0){
-        sprintf(cmdline,"ssh -i %s root@%s",private_sshkey,master_address);
+    if(strcmp(username,"root")==0||strlen(username)==0){
+        sprintf(private_sshkey,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
+        sprintf(cmdline,"ssh -i %s -o StrictHostKeyChecking=no root@%s",private_sshkey,master_address);
     }
     else{
-        sprintf(cmdline,"ssh -i %s %s@%s",private_sshkey,username,master_address);
+        get_cluster_name(cluster_name,workdir);
+        sprintf(private_sshkey,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,username);
+        if(file_exist_or_not(private_sshkey)!=0){
+            return -3;
+        }
+        sprintf(cmdline,"ssh -i %s -o StrictHostKeyChecking=no %s@%s",private_sshkey,username,master_address);
     }
     return system(cmdline);
 }
@@ -1253,7 +1355,7 @@ int sync_user_passwords(char* workdir, char* sshkey_dir){
     char filename_temp[FILENAME_LENGTH]="";
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    return remote_copy(workdir,sshkey_dir,filename_temp,"/root/.cluster_secrets/user_secrets.txt","root","put");
+    return remote_copy(workdir,sshkey_dir,filename_temp,"/root/.cluster_secrets/user_secrets.txt","root","put","",0);
 }
 
 int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
@@ -1286,6 +1388,20 @@ int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
         delete_decrypted_user_passwords(workdir);
     }
     return 0;
+}
+
+int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir){
+    if(strcmp(user_name,"root")==0||strcmp(user_name,"user1")==0){
+        return 0;
+    }
+    char user_sshkey[FILENAME_LENGTH]="";
+    sprintf(user_sshkey,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,user_name);
+    if(file_exist_or_not(user_sshkey)!=0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
 }
 
 int username_check(char* user_registry, char* username_input){
@@ -1335,6 +1451,7 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
     char password_confirm[USER_PASSWORD_LENGTH_MAX]="";
     char password_final[USER_PASSWORD_LENGTH_MAX]="";
     char remote_commands[CMDLINE_LENGTH]="";
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     FILE* file_p=NULL;
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
@@ -1412,13 +1529,15 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
         strcpy(password_final,password);
     }
     sprintf(remote_commands,"hpcmgr users add %s %s >> /var/log/hpcmgr.log 2>&1",username_input,password_final);
-    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0)==0){
+    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
         sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s | grep ENABLED >> /dev/null 2>&1",username_input);
-        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0)==0){
+        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
             printf("[ -INFO- ] Updating the local user-info registry ...\n");
             file_p=fopen(user_registry_file,"a");
             fprintf(file_p,"username: %s %s ENABLED\n",username_input,password_final);
             fclose(file_p);
+            get_cluster_name(cluster_name,workdir);
+            get_user_sshkey(cluster_name,username_input,sshkey_dir);
             printf("[ -DONE- ] The user %s has been added to your cluster successfully.\n",username_input);
             encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
             return 0;
@@ -1475,6 +1594,7 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
     char user_registry_file[FILENAME_LENGTH]="";
     char remote_commands[CMDLINE_LENGTH]="";
     char username_input[64]="";
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(strlen(username)==0){
@@ -1499,9 +1619,9 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
         return -3;
     }
     sprintf(remote_commands,"echo y-e-s | hpcmgr users delete %s os",username_input);
-    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0)==0){
+    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
         sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s >> /dev/null 2>&1",username_input);
-        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0)==0){
+        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the user %s from your cluster. Exit now.\n" RESET_DISPLAY,username_input);
             delete_decrypted_user_passwords(workdir);
             return 1;
@@ -1509,6 +1629,8 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
         else{
             delete_user_from_registry(user_registry_file,username_input);
             encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
+            get_cluster_name(cluster_name,workdir);
+            delete_user_sshkey(cluster_name,username_input,sshkey_dir);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully deleted user %s.\n",username_input);
             return 0;
         }
@@ -1577,7 +1699,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
     else{
         sprintf(remote_commands,"hpcmgr users delete %s >> /var/log/hpcmgr.log 2>&1",username_input);
     }
-    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0)==0){
+    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
         find_and_replace(user_registry_file,username_ext,"","","","",prev_keywords,new_keywords);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully %s the user %s.\n",new_keywords,username_input);
         encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
@@ -1666,7 +1788,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
         strcpy(password_final,password);
     }
     sprintf(remote_commands,"echo \"%s\" | passwd %s --stdin >> /dev/null 2>&1",password_final,username_input);
-    if(remote_exec_general(workdir,ssheky_dir,"root",remote_commands,0)==0){
+    if(remote_exec_general(workdir,ssheky_dir,"root",remote_commands,0,0)==0){
         sprintf(username_ext," %s ",username_input);
         find_and_get(user_registry_file,username_ext,"","",1,username_ext,"","",' ',3,password_prev);
         find_and_replace(user_registry_file,username_ext,"","","","",password_prev,password_final);

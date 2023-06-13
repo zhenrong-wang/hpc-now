@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #ifdef _WIN32
 #include "..\\hpcopr\\now_macros.h"
@@ -407,6 +408,21 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
         sprintf(cmdline1,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
         system(cmdline1);
     }
+    if(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
+        system("start /b msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn");
+    }
+    int i=0;
+    while(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
+        printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
+        fflush(stdout);
+        i++;
+        sleep(1);
+        if(i==120){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
+            break;
+        }
+    }
+    printf("\n");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created with initial password: nowadmin2023~\n");
     printf("|          Please follow the steps below:\n");
@@ -459,7 +475,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     printf("|          " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr envcheck\n" RESET_DISPLAY);
     printf("|          * You will be required to input the password for the current sudoer.\n");
     printf(GENERAL_BOLD "|     <> USER-MODE (a little bit more steps): \n" RESET_DISPLAY);
-    printf("|          1. " HIGH_GREEN_BOLD "sudo password hpc-now\n" RESET_DISPLAY);
+    printf("|          1. " HIGH_GREEN_BOLD "sudo passwd hpc-now\n" RESET_DISPLAY);
     printf("|          * You will be required to set a password without echo.\n");
     printf("|          2. " HIGH_GREEN_BOLD "su hpc-now\n" RESET_DISPLAY);
     printf("|          * You will be required to input the password set just now.\n");
@@ -711,7 +727,6 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #endif
         return 1;
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been updated to your device and OS.\n");
 #ifdef _WIN32
     system("mkdir c:\\hpc-now\\LICENSES > nul 2>&1");
     if(file_exist_or_not("C:\\hpc-now\\LICENSES\\GPL-2")!=0){
@@ -727,6 +742,21 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         sprintf(cmdline1,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
         system(cmdline1);
     }
+    if(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
+        system("start /b msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn");
+    }
+    int i=0;
+    while(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
+        printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
+        fflush(stdout);
+        i++;
+        sleep(1);
+        if(i==120){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
+            break;
+        }
+    }
+    printf("\n");
 #elif __linux__
     system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
     if(file_exist_or_not("/home/hpc-now/LICENSES/GPL-2")!=0){
@@ -756,6 +786,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
 #endif
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been updated to your device and OS.\n");
     return 0;
 }
 

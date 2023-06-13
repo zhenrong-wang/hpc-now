@@ -18,5 +18,6 @@ void print_tail(void);
 void print_about(void);
 int read_license(void);
 void print_usrmgr_info(char* plain_flag);
+void print_dataman_info(char* plain_flag);
 
 #endif

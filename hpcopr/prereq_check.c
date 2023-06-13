@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <unistd.h>
 
 #include "now_macros.h"
 #include "general_funcs.h"
@@ -47,8 +48,8 @@ int check_internet(void){
     sprintf(cmdline,"ping -c 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT);
 #endif
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
-        printf("|          or check your internet connectivity and retry later.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please either check your DNS\n");
+        printf("|          service or check your internet connectivity and retry later.\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return 1;
     }
@@ -109,6 +110,168 @@ int check_current_user(void){
         return 0;
     }
 #endif
+}
+
+int install_bucket_clis(int silent_flag){
+    char cmdline[CMDLINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp_zip[FILENAME_LENGTH]="";
+    
+    if(silent_flag!=0){
+        printf("|        . Checking & installing the dataman components: 1/3 ...\n");
+    }
+    sprintf(filename_temp,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
+    sprintf(filename_temp_zip,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        printf("|          Dataman component 1 not found. Downloading and installing ...\n");
+        if(file_exist_or_not(filename_temp_zip)!=0){
+#ifdef _WIN32
+            sprintf(cmdline,"curl %s -o %s",URL_OSSUTIL,filename_temp_zip);
+#else
+            sprintf(cmdline,"curl %s -o '%s'",URL_OSSUTIL,filename_temp_zip);
+#endif
+            if(system(cmdline)!=0){
+                if(silent_flag!=0){
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 1/3.\n" RESET_DISPLAY);
+                }
+                goto coscli;
+            }
+        }
+#ifdef _WIN32
+        sprintf(cmdline,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%sossutil-v1.7.16-windows-amd64%sossutil64.exe %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+#elif __linux__   
+        sprintf(cmdline,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%sossutil-v1.7.16-linux-amd64%sossutil64 %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+        system(cmdline);
+#elif __APPLE__
+        sprintf(cmdline,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%sossutil-v1.7.16-mac-amd64%sossutilmac64 %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+        system(cmdline);
+#endif
+        sprintf(cmdline,"%s %s%sossutil-v1.* %s",DELETE_FOLDER_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);  
+    }
+    if(silent_flag!=0){
+        printf("|        v Installed the dataman components: 1/3 .\n");
+    }
+
+coscli:
+    if(silent_flag!=0){
+        printf("|        . Checking & installing the dataman components: 2/3 ...\n");
+    }
+    sprintf(filename_temp,"%s%scoscli.exe",NOW_BINARY_DIR,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        printf("|          Dataman component 2 not found. Downloading and installing ...\n");
+        sprintf(cmdline,"curl %s -o %s",URL_COSCLI,filename_temp);
+        if(system(cmdline)!=0){
+            if(silent_flag!=0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/3.\n" RESET_DISPLAY);
+            }
+            goto awscli;
+        }
+#ifndef _WIN32
+        sprintf(cmdline,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+        system(cmdline);
+#endif
+    }
+    if(silent_flag!=0){
+        printf("|        v Installed the dataman components: 2/3 .\n");
+    }
+
+awscli: 
+    if(silent_flag!=0){
+        printf("|        . Checking & installing the dataman components: 3/3 ...\n");
+    }
+    sprintf(filename_temp,"%s%saws",NOW_BINARY_DIR,PATH_SLASH);
+#ifdef __linux__
+    sprintf(filename_temp_zip,"%s%sawscliv2.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        printf("|          Dataman component 3 not found. Downloading and installing ...\n");
+        if(file_exist_or_not(filename_temp_zip)!=0){
+            sprintf(cmdline,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
+            if(system(cmdline)!=0){
+                if(silent_flag!=0){
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/3.\n" RESET_DISPLAY);
+                }
+                return 1;
+            }
+        }
+        sprintf(cmdline,"unzip -q -o '%s' -d /tmp",filename_temp_zip);
+        system(cmdline);
+        sprintf(cmdline,"/tmp/aws/install -i %s%sawscli -b %s %s",NOW_BINARY_DIR,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+#elif __APPLE__
+    sprintf(filename_temp_zip,"%s%sAWSCLIV2.pkg",TF_LOCAL_PLUGINS,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Dataman component 3 not found. Downloading and installing ...\n");
+        if(file_exist_or_not(filename_temp_zip)!=0){
+            sprintf(cmdline,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
+            if(system(cmdline)!=0){
+                if(silent_flag!=0){
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/3.\n" RESET_DISPLAY);
+                }
+                return 1;
+            }
+        }
+        if(system("/Applications/aws-cli/aws --version >> /dev/null 2>&1")!=0){
+            FILE* file_p=fopen("/tmp/choices.xml","w+");
+            if(file_p==NULL){
+                if(silent_flag!=0){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] File I/O error. Failed to create tmp files.\n" RESET_DISPLAY);
+                }
+                return -1;
+            }
+            fprintf(file_p,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            fprintf(file_p,"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
+            fprintf(file_p,"<plist version=\"1.0\">\n");
+            fprintf(file_p,"  <array>\n    <dict>\n      <key>choiceAttribute</key>\n      <string>customLocation</string>\n      <key>attributeSetting</key>\n");
+            fprintf(file_p,"      <string>/Applications/</string>\n      <key>choiceIdentifier</key>\n      <string>default</string>\n");
+            fprintf(file_p,"    </dict>\n  </array>\n</plist>\n");
+            fclose(file_p);
+            sprintf(cmdline,"installer -pkg '%s' -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml %s &",filename_temp_zip,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            int i=0;
+            while(file_exist_or_not("/Applications/aws-cli/aws")!=0||file_exist_or_not("/Applications/aws-cli/aws_completer")!=0){
+                printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
+                fflush(stdout);
+                i++;
+                sleep(1);
+                if(i==120){
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
+                    return 1;
+                }
+            }
+            printf("\n");
+        }
+        sprintf(cmdline,"/bin/cp -r /Applications/aws-cli %s",NOW_BINARY_DIR);
+        system(cmdline);
+        sprintf(cmdline,"ln -s %s%saws-cli%saws %s%saws %s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"ln -s %s%saws-cli%saws_completer %s%saws_completer %s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+#elif _WIN32
+    if(system("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe --version > nul 2>&1")!=0){
+        if(silent_flag!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please run the installer update to fix this issue.\n" RESET_DISPLAY);
+        }
+        return 1;
+    }
+#endif
+    if(silent_flag!=0){
+        printf("|        v Installed the dataman components: 3/3 .\n");
+    }
+    return 0;
 }
 
 int check_and_install_prerequisitions(int repair_flag){
@@ -586,9 +749,12 @@ int check_and_install_prerequisitions(int repair_flag){
 
     if(repair_flag==1){
         printf("|        v The Terraform Providers have been repaired.\n");
-        printf("|        . Checking and repairing the key folders and environment variables ... \n");
     }
 
+    flag=install_bucket_clis(force_repair_flag);
+    if(flag!=0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] IMPORTANT! The dataman services may not work properly." RESET_DISPLAY);
+    }
     if(folder_exist_or_not(sshkey_dir)!=0){
         sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,sshkey_dir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
@@ -599,16 +765,30 @@ int check_and_install_prerequisitions(int repair_flag){
         fclose(file_p);
         file_p=fopen(operation_logfile,"w+");
         fclose(file_p);
-    }    
+    }
+    if(repair_flag==1){
+        printf("|        . Checking and repairing the key folders and environment variables ... \n");
+    }
 #ifdef _WIN32
+    sprintf(filename_temp,"c:\\users\\%s\\.cos.yaml",home_path);
+    if(file_exist_or_not(filename_temp)!=0){
+        sprintf(cmdline,"type nul > %s",filename_temp);
+        system(cmdline);
+    }
     sprintf(cmdline,"del /f /q %s\\known_hosts* >nul 2>&1",dotssh_dir);
 #elif __linux__
+    if(file_exist_or_not("/home/hpc-now/.cos.yaml")!=0){
+        system("echo \"\" > /home/hpc-now/.cos.yaml");
+    }
     if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ > /dev/null 2>&1")!=0){
         strcpy(cmdline,"export PATH=/home/hpc-now/.bin/:$PATH >> /home/hpc-now/.bashrc");
         system(cmdline);
     }
     sprintf(cmdline,"rm -rf /home/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
+    if(file_exist_or_not("/Users/hpc-now/.cos.yaml")!=0){
+        system("echo \"\" > /Users/hpc-now/.cos.yaml");
+    }
     if(system("cat /Users/hpc-now/.bashrc | grep PATH=/Users/hpc-now/.bin/ > /dev/null 2>&1")!=0){
         strcpy(cmdline,"export PATH=/Users/hpc-now/.bin/:$PATH >> /Users/hpc-now/.bashrc");
         system(cmdline);
