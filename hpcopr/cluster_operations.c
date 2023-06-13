@@ -1573,7 +1573,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
-        printf("[ -WAIT- ] Still need to wait %d seconds for remote execution ... \r",GENERAL_SLEEP_TIME-i);
+        printf("[ -WAIT- ] Wait %d seconds for remote execution ... \r",GENERAL_SLEEP_TIME-i);
         fflush(stdout);
         sleep(1);
     }
