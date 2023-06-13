@@ -536,10 +536,10 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* buck
         return -7;
     }
     if(rf_flag_parser(rf_flag,cloud_flag,real_rflag,real_fflag)==1){
-        strcpy(real_rflag,"");
+        strcpy(real_rf_flag,"");
     }
     else{
-        strcpy(real_rflag,rf_flag);
+        strcpy(real_rf_flag,rf_flag);
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"rdownload")==0){
@@ -559,13 +559,13 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* buck
     }
     else{
         if(strcmp(cmd_type,"rdownload")==0){
-            sprintf(remote_commands,"s3cmd get %s %s %s%s %s",real_rflag,real_fflag,bucket_address,real_bucket_path,real_remote_path);
+            sprintf(remote_commands,"s3cmd get %s%s %s %s %s",bucket_address,real_bucket_path,real_remote_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"s3cmd put %s %s %s %s%s",real_rflag,real_fflag,real_remote_path,bucket_address,real_bucket_path);
+            sprintf(remote_commands,"s3cmd put %s %s%s %s %s",real_remote_path,bucket_address,real_bucket_path,real_rflag,real_fflag);
         }
     }
-//    printf("%s ---\n",remote_commands);
+    printf("%s ---\n",remote_commands);
     run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,0,1);
     if(run_flag!=0){
         return 1;
