@@ -22,9 +22,9 @@
 
 void print_empty_cluster_info(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " It seems the cluster is empty. You can either:\n");
-    printf("|          a) Run 'hpcopr init' to create a *default* cluster directly. OR\n");
-    printf("|          b) Run 'hpcopr get-conf' -> 'hpcopr edit-conf' -> 'hpcopr init' \n");
-    printf("|          Exit now.\n");
+    printf("|          a) Run 'hpcopr init' to create a *default* cluster directly.\n");
+    printf("|          b) Run 'hpcopr init' with init options. i.e. --r=region_id .\n");
+    printf("|          c) Run 'hpcopr edit-conf' -> 'hpcopr init' (not recommended).\n");
 }
 
 void print_cluster_init_done(void){
@@ -38,9 +38,9 @@ void print_help(char* plain_flag){
     if(strcmp(plain_flag,"plain")==0){
         printf("[ -INFO- ] Usage: hpcopr Command PARAM1 PARAM2 ... (Optional)-c=CLUSTER_NAME\n");
         printf("| Commands:\n");
-        printf("+ 0  . Get-Started:\n");
+        printf("+ 0    . Get-Started:\n");
         printf("|  envcheck    : Quickly check the running environment.\n");
-        printf("+ I  . Multi-Cluster Management:\n");
+        printf("+ I    . Multi-Cluster Management:\n");
         printf("|  new-cluster : Create a new cluster to initialize.\n");
         printf("|      (Optional)CLUSTER_NAME (Optional)AK (Optional)SK (Optional)ECHO_FLAG\n");
         printf("|        CLUSTER_NAME - A-Z | a-z | 0-9 | - , %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
@@ -59,7 +59,7 @@ void print_help(char* plain_flag){
         printf("|  remove      : Completely remove a cluster from the OS and registry.\n");
         printf("|      (Optional)force\n");
         printf("|        Specify 'force' as the 2nd param to do force-remove ( DANGER! ).\n");
-        printf("+ II. Global Management:\n");
+        printf("+ II   . Global Management:\n");
         printf("|  help        : Show this page and the information here.\n");
         printf("|      (Optional)plain - Show this page in plain text (for redirecting to a file).\n");
         printf("|  usage       : View and/or export the usage history.\n");
@@ -80,7 +80,7 @@ void print_help(char* plain_flag){
         printf("|  showloc     : Show the current configured locations.\n");
         printf("|  showmd5     : Show the md5sum values of core components.\n");
         printf("|  resetloc    : Reset to the default locations.\n");
-        printf("+ III. Cluster Initialization: \n");
+        printf("+ III  . Cluster Initialization: \n");
         printf("|  new-keypair : *Rotate* a new keypair for an existing cluster. The new keypair\n");
         printf("|                should be valid and comes from the same cloud vendor.\n");
         printf("|      (Optional)AK (Optional)SK (Optional)ECHO_FLAG\n");
@@ -102,7 +102,7 @@ void print_help(char* plain_flag){
         printf("|          mc   - Only rebuild the master and all the compute node(s).\n");
         printf("|          mcdb - All the nodes above + database node.\n");
         printf("|          all  - All the nodes above + nat node.\n");
-        printf("+ IV . Cluster Management:\n");
+        printf("+ IV   . Cluster Management:\n");
         printf("|  vault       : Check the sensitive information of the current cluster.\n");
         printf("|        (Optional)ROOT_FLAG\n");
         printf("|          root  - Display with root password. By default, the root password is hidden.\n");
@@ -151,9 +151,11 @@ void print_help(char* plain_flag){
         printf("|  destroy     : *DESTROY* the whole cluster - including all the resources & data.\n");
         printf("|      (Optional)force\n");
         printf("|           Specify 'force' as the 2nd param to do force-destroy ( DANGER! ).\n");
-        printf("+ VI . Cluster User Management:\n");
+        printf("+ VI   . Cluster User Management:\n");
         print_usrmgr_info("plain");
-        printf("+ VII. Others:\n");
+        printf("+ VII  . Cluster Data Management:\n");
+        print_dataman_info("plain");
+        printf("+ VIII . Others:\n");
         printf("|  about       : About this software and HPC-NOW project.\n");
         printf("|  version     : Display the version info.\n");
         printf("|  license     : Read the terms and conditions of the GNU Public License - 2.0\n");
@@ -164,9 +166,9 @@ void print_help(char* plain_flag){
     else{
         printf(GENERAL_BOLD "[ -INFO- ] Usage: hpcopr " RESET_DISPLAY HIGH_GREEN_BOLD "Command" RESET_DISPLAY " PARAM1 PARAM2 ... (Optional)-c=CLUSTER_NAME\n");
         printf(GENERAL_BOLD "| " RESET_DISPLAY HIGH_GREEN_BOLD "Commands:\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "+ 0  . Get-Started:\n");
+        printf(GENERAL_BOLD "+ 0   . Get-Started:\n");
         printf("|  " HIGH_GREEN_BOLD "envcheck" RESET_DISPLAY "    : Quickly check the running environment.\n");
-        printf(GENERAL_BOLD "+ I  . Multi-Cluster Management:\n");
+        printf(GENERAL_BOLD "+ I   . Multi-Cluster Management:\n");
         printf("|  " HIGH_GREEN_BOLD "new-cluster" RESET_DISPLAY " : Create a new cluster to initialize.\n");
         printf("|      (Optional)CLUSTER_NAME (Optional)AK (Optional)SK (Optional)ECHO_FLAG\n");
         printf("|        CLUSTER_NAME - A-Z | a-z | 0-9 | - , %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
@@ -185,7 +187,7 @@ void print_help(char* plain_flag){
         printf("|  " HIGH_GREEN_BOLD "remove" RESET_DISPLAY "      : Completely remove a cluster from the OS and registry.\n");
         printf("|      (Optional)force\n");
         printf("|        Specify 'force' as the 2nd param to do force-remove " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
-        printf(GENERAL_BOLD "+ II. Global Management:\n");
+        printf(GENERAL_BOLD "+ II  . Global Management:\n");
         printf("|  " HIGH_GREEN_BOLD "help" RESET_DISPLAY "        : Show this page and the information here.\n");
         printf("|      (Optional)plain - Show this page in plain text (for redirecting to a file).\n");
         printf("|  " HIGH_GREEN_BOLD "usage" RESET_DISPLAY "       : View and/or export the usage history.\n");
@@ -206,7 +208,7 @@ void print_help(char* plain_flag){
         printf("|  " HIGH_GREEN_BOLD "showloc" RESET_DISPLAY "     : Show the current configured locations.\n");
         printf("|  " HIGH_GREEN_BOLD "showmd5" RESET_DISPLAY "     : Show the md5sum values of core components.\n");
         printf("|  " HIGH_GREEN_BOLD "resetloc" RESET_DISPLAY "    : Reset to the default locations.\n");
-        printf(GENERAL_BOLD "+ III. Cluster Initialization: \n");
+        printf(GENERAL_BOLD "+ III . Cluster Initialization: \n");
         printf("|  " HIGH_GREEN_BOLD "new-keypair" RESET_DISPLAY " : *Rotate* a new keypair for an existing cluster. The new keypair\n");
         printf("|                should be valid and comes from the same cloud vendor.\n");
         printf("|      (Optional)AK (Optional)SK (Optional)ECHO_FLAG\n");
@@ -242,7 +244,7 @@ void print_help(char* plain_flag){
         printf("|        VIEW_OPTION - stream(default) | print.\n");
         printf("|                      stream: refresh the latest lines.\n");
         printf("|                      print : print out all the lines.\n");
-        printf(GENERAL_BOLD "+ V  . Cluster Operation:\n");
+        printf(GENERAL_BOLD "+ V   . Cluster Operation:\n");
         printf("|  " HIGH_GREEN_BOLD "delc" RESET_DISPLAY "        : Delete specified compute nodes:\n");
         printf("|        all     - Delete *ALL* the compute nodes, you can run 'hpcopr addc' to\n");
         printf("|                  add compute nodes later.\n");
@@ -277,9 +279,11 @@ void print_help(char* plain_flag){
         printf("|  " HIGH_GREEN_BOLD "destroy" RESET_DISPLAY "     : *DESTROY* the whole cluster - including all the resources & data.\n");
         printf("|      (Optional)force\n");
         printf("|        Specify 'force' as the 2nd param to do force-destroy " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
-        printf(GENERAL_BOLD "+ VI . Cluster User Management:\n");
+        printf(GENERAL_BOLD "+ VI  . Cluster User Management:\n" RESET_DISPLAY);
         print_usrmgr_info("");
-        printf(GENERAL_BOLD "+ VII. Others:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ VII . Cluster Data Management:\n" RESET_DISPLAY);
+        print_dataman_info("");
+        printf(GENERAL_BOLD "+ VIII. Others:\n" RESET_DISPLAY);
         printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       : About this software and HPC-NOW project.\n");
         printf("|  " HIGH_GREEN_BOLD "version" RESET_DISPLAY "     : Display the version info.\n");
         printf("|  " HIGH_GREEN_BOLD "license" RESET_DISPLAY "     : Read the terms and conditions of the GNU Public License - 2.0\n");
@@ -383,5 +387,72 @@ void print_usrmgr_info(char* plain_flag){
         printf("|        " HIGH_CYAN_BOLD "passwd" RESET_DISPLAY "  : Change user's password.\n");
         printf("|          USERMAN_PARAM1   - An existed username\n");
         printf("|          USERMAN_PARAM2   - new password string\n");
+    }
+}
+
+void print_dataman_info(char* plain_flag){
+    if(strcmp(plain_flag,"plain")==0){
+        printf("| Usage: hpcopr dataman USER Option PATH1 (Optional)PATH2 (Optional)FLAG\n");
+        printf("| A valid USER is required, i.e. root, user1, user2, foo ...\n");
+        printf("| Bucket Operations: Transfer and manage data with the bucket.\n");
+        printf("|        upload  : Upload a local file or folder to the bucket path.\n");
+        printf("|        download: Download a bucket object(file or folder) to the local path.\n");
+        printf("|        copy    : Copy a bucket object to another folder/path.\n");
+        printf("|        list    : Show the object list of a specified folder/path.\n");
+        printf("|        delete  : Delete an object (file or folder) of the bucket.\n");
+        printf("|        rename  : Rename an existed object (file or folder) in the bucket.\n");
+        printf("|    use --b: as the prefix for bucket paths, i.e. --b:foo/foo.\n");
+        printf("|    use -r, -rf or -f as a FLAG to activate recursive or force.\n");
+        printf("|    Example: hpcopr dataman user1 copy --b:foo --b:foo2 -f -c=foo-cluster\n");
+        printf("| Direct Operations: Transfer and manage data in the cluster storage.\n");
+        printf("| * The cluster must be in running state (minimal or all). *\n");
+        printf("|        cp      : Remote copy between local and the cluster storage.\n");
+        printf("|        mv      : Move the remote files/folders in the cluster storage.\n");
+        printf("|        ls      : List the files/folders in the cluster storage.\n");
+        printf("|        rm      : Remove the files/folders in the cluster storage.\n");
+        printf("|        mkdir   : Make a directory in the cluster storage.\n");
+        printf("|        cat     : Print out a remote plain text file.\n");
+        printf("|     more|less  : Read a remote file.\n");
+        printf("|        tail    : Streaming out a remote file dynamically.\n");
+        printf("|       rupload  : Upload a *remote* file or folder to the bucket path.\n");
+        printf("|       rdownload: Download a bucket object(file or folder) to the *remote* path.\n");
+        printf("|    use --home: to specify the $HOME prefix.\n");
+        printf("|    use --data: to specify the /hpc_data/user_data prefix.\n");
+        printf("|    use --apps: to specify the /hpc_apps/ prefix, only for root or user1.\n");
+        printf("|    use --/:    to specify the / prefix, only for root or user1.\n");
+        printf("|    use -r, -rf or -f as a FLAG to activate recursive or force.\n");
+        printf("|    Example: hpcopr dataman user1 cp ~/foo --home:foo -r -c=foo-cluster\n");
+    }
+    else{
+        printf(GENERAL_BOLD "| Usage:" RESET_DISPLAY HIGH_GREEN_BOLD " hpcopr dataman USER" RESET_DISPLAY HIGH_CYAN_BOLD " Option " RESET_DISPLAY GENERAL_BOLD "PATH1 (Optional)" RESET_DISPLAY "PATH2 " GENERAL_BOLD "(Optional)" RESET_DISPLAY "FLAG\n");
+        printf(GENERAL_BOLD "| A valid USER is required, i.e. root, user1, user2, foo ...\n");
+        printf("| Bucket Operations: Transfer and manage data with the bucket.\n" RESET_DISPLAY);
+        printf("|        " HIGH_CYAN_BOLD "upload" RESET_DISPLAY "  : Upload a local file or folder to the bucket path.\n");
+        printf("|        " HIGH_CYAN_BOLD "download" RESET_DISPLAY ": Download a bucket object(file or folder) to the local path.\n");
+        printf("|        " HIGH_CYAN_BOLD "copy" RESET_DISPLAY "    : Copy a bucket object to another folder/path.\n");
+        printf("|        " HIGH_CYAN_BOLD "list" RESET_DISPLAY "    : Show the object list of a specified folder/path.\n");
+        printf("|        " HIGH_CYAN_BOLD "delete" RESET_DISPLAY "  : Delete an object (file or folder) of the bucket.\n");
+        printf("|        " HIGH_CYAN_BOLD "rename" RESET_DISPLAY "  : Rename an existed object (file or folder) in the bucket.\n");
+        printf("|    use --b: as the prefix for bucket paths, i.e. --b:foo/foo.\n");
+        printf("|    use -r, -rf or -f as a FLAG to activate recursive or force.\n");
+        printf("|    Example: " HIGH_GREEN_BOLD "hpcopr dataman user1 copy --b:foo --b:foo2 -f -c=foo-cluster\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "| Direct Operations: Transfer and manage data in the cluster storage.\n");
+        printf("| * The cluster must be in running state (minimal or all). *\n" RESET_DISPLAY);
+        printf("|        " HIGH_CYAN_BOLD "cp" RESET_DISPLAY "      : Remote copy between local and the cluster storage.\n");
+        printf("|        " HIGH_CYAN_BOLD "mv" RESET_DISPLAY "      : Move the remote files/folders in the cluster storage.\n");
+        printf("|        " HIGH_CYAN_BOLD "ls" RESET_DISPLAY "      : List the files/folders in the cluster storage.\n");
+        printf("|        " HIGH_CYAN_BOLD "rm" RESET_DISPLAY "      : Remove the files/folders in the cluster storage.\n");
+        printf("|        " HIGH_CYAN_BOLD "mkdir" RESET_DISPLAY "   : Make a directory in the cluster storage.\n");
+        printf("|        " HIGH_CYAN_BOLD "cat" RESET_DISPLAY "     : Print out a remote plain text file.\n");
+        printf("|     " HIGH_CYAN_BOLD "more|less" RESET_DISPLAY "  : Read a remote file.\n");
+        printf("|        " HIGH_CYAN_BOLD "tail" RESET_DISPLAY "    : Streaming out a remote file dynamically.\n");
+        printf("|       " HIGH_CYAN_BOLD "rupload" RESET_DISPLAY "  : Upload a *remote* file or folder to the bucket path.\n");
+        printf("|       " HIGH_CYAN_BOLD "rdownload" RESET_DISPLAY ": Download a bucket object(file or folder) to the *remote* path.\n");
+        printf("|    use --home: to specify the $HOME prefix.\n");
+        printf("|    use --data: to specify the /hpc_data/user_data prefix.\n");
+        printf("|    use --apps: to specify the /hpc_apps/ prefix, only for root or user1.\n");
+        printf("|    use --/:    to specify the / prefix, only for root or user1.\n");
+        printf("|    use -r, -rf or -f as a FLAG to activate recursive or force.\n");
+        printf("| Example: " HIGH_GREEN_BOLD "hpcopr dataman user1 cp ~/foo --home:foo -r -c=foo-cluster\n" RESET_DISPLAY);
     }
 }

@@ -123,11 +123,11 @@ if [ $1 = 'users' ]; then
         ssh-keygen -t rsa -N '' -f /home/$3/.ssh/id_rsa -q
         cat /home/$3/.ssh/id_rsa.pub >> /home/$3/.ssh/authorized_keys
         cat /etc/now-pubkey.txt >> /home/$3/.ssh/authorized_keys
-        chown -R $3:$3 /home/$3/.ssh
         cp -r /home/user1/Desktop /home/$3/ && unlink /home/$3/Desktop/user1_data
         mkdir -p /hpc_data/$3_data && chmod -R 750 /hpc_data/$3_data && chown -R $3:$3 /hpc_data/$3_data
         ln -s /hpc_data/$3_data /home/$3/Desktop/
         ln -s /hpc_apps /home/$3/Desktop/ >> /dev/null 2>&1
+        chown -R $3:$3 /home/$3
         for i in $(seq 1 $NODE_NUM )
         do
           ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1

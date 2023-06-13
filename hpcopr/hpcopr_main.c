@@ -30,6 +30,7 @@
 #include "prereq_check.h"
 #include "time_process.h"
 #include "usage_and_logs.h"
+#include "dataman.h"
 
 char url_code_root_var[LOCATION_LENGTH]="";
 char url_tf_root_var[LOCATION_LENGTH]="";
@@ -92,17 +93,38 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "wakeup",
     "destroy",
     "userman",
+    "dataman",
     "about",
     "version",
     "license",
     "repair"
 };
 
+char dataman_commands[DATAMAN_COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
+    "upload",
+    "rupload",
+    "download",
+    "rdownload",
+    "copy",
+    "list",
+    "delete",
+    "rename",
+    "cp",
+    "mv",
+    "ls",
+    "rm",
+    "mkdir",
+    "cat",
+    "more",
+    "less",
+    "tail"
+};
+
 /*
 1 NOT_A_VALID_COMMAND
 3 USER_DENIED
 5 LACK_PARAMS
-7 MISSING_KEY_FILE
+7 MISSING_CLOUD_FLAG_FILE
 9 PARAM_FORMAT_ERROR
 
 11 Prereq - Components Download and install failed
@@ -113,7 +135,9 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
 21 CLUSTER_NAME_CHECK_FAILED
 23 INVALID_KEYPAIR
 25 Not Operating Clusters
+26 INVALID_USER_NAME
 27 EMPTY_CLUSTER_OR_IN_PROGRESS
+28 DATAMAN_FAILED
 29 OPERATION_IN_PROGRESS
 31 REFRESHING FAILED
 33 EMPTY REGISTRY
@@ -158,20 +182,18 @@ SPECIAL RETURN VALUES: when the command_input is wrong.
 int main(int argc, char* argv[]){
     char* crypto_keyfile=CRYPTO_KEY_FILE;
     char command_name_prompt[128]="";
-    char buffer1[64]="";
-    char buffer2[64]="";
     char cloud_flag[16]="";
     int command_flag=0;
     int run_flag=0;
+    int temp_flag1,temp_flag2;
     int usrmgr_check_flag=0;
     char workdir[DIR_LENGTH]="";
-    char vaultdir[DIR_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX]="";
-    char filename_temp[FILENAME_LENGTH]="";
     char* usage_log=USAGE_LOG_FILE;
     char* operation_log=OPERATION_LOG_FILE;
     char* syserror_log=SYSTEM_CMD_ERROR_LOG;
-    char string_temp[128]="";
+    char string_temp[256]="";
+    char string_temp2[256]="";
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     print_header();
@@ -511,8 +533,8 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"glance")==0){
-        if(argc>2&&strcmp(argv[2],"all")==0){
-            run_flag=glance_clusters("all",crypto_keyfile);
+        if(argc>2&&(strcmp(argv[2],"all")==0||strcmp(argv[2],"ALL")==0||strcmp(argv[2],"All")==0)){
+            run_flag=glance_clusters(argv[2],crypto_keyfile);
         }
         else{
             if(command_flag==-5){
@@ -886,7 +908,14 @@ int main(int argc, char* argv[]){
                 check_and_cleanup(workdir);
                 return 43;
             }
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Trying to ssh " HIGH_GREEN_BOLD "%s@%s" RESET_DISPLAY ", may fail if the username is invalid.\n",argv[2],cluster_name);
+            if(user_name_quick_check(cluster_name,argv[2],SSHKEY_DIR)!=0){
+                printf(FATAL_RED_BOLD "\n[ FATAL: ] The specified name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Current users:\n" RESET_DISPLAY,argv[2]);
+                hpc_user_list(workdir,crypto_keyfile,0);
+                write_operation_log("NULL",operation_log,argv[1],"INVALID_HPC_USER_NAME",26);
+                check_and_cleanup("");
+                return 26;
+            }
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Trying to ssh " HIGH_GREEN_BOLD "%s@%s" RESET_DISPLAY ".\n",argv[2],cluster_name);
             run_flag=cluster_ssh(workdir,argv[2]);
             if(run_flag==-1){
                 write_operation_log(cluster_name,operation_log,argv[1],"FILE_I/O_ERROR",127);
@@ -1009,15 +1038,285 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
-    if(get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_flag)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the key file. Have you switched to any cluster?\n");
+    if(get_cloud_flag(workdir,cloud_flag)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag. Have you switched to any cluster?\n");
         printf("|          Exit now.\n" RESET_DISPLAY);
-        write_operation_log(cluster_name,operation_log,"INTERNAL","KEY_CHECK_FAILED",7);
+        write_operation_log(cluster_name,operation_log,"INTERNAL","CLOUD_FLAG_CHECK_FAILED",7);
         check_and_cleanup(workdir);
         return 7;
     }
+
+    if(strcmp(argv[1],"dataman")==0){
+        if(cluster_empty_or_not(workdir)==0){
+            print_empty_cluster_info();
+            write_operation_log(cluster_name,operation_log,argv[1],"CLUSTER_EMPTY",49);
+            check_and_cleanup(workdir);
+            return 49;
+        }
+        if(argc<5||(argc==5&&command_flag==2)){
+            printf(FATAL_RED_BOLD "\n[ FATAL: ] Param format incorrect. Reference: \n\n" RESET_DISPLAY);
+            print_dataman_info("");
+            write_operation_log("NULL",operation_log,argv[1],"TOO_FEW_PARAMS",5);
+            check_and_cleanup("");
+            return 5;
+        }
+        if(user_name_quick_check(cluster_name,argv[2],SSHKEY_DIR)!=0){
+            printf(FATAL_RED_BOLD "\n[ FATAL: ] The specified name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Current users:\n" RESET_DISPLAY,argv[2]);
+            hpc_user_list(workdir,crypto_keyfile,0);
+            write_operation_log("NULL",operation_log,argv[1],"INVALID_HPC_USER_NAME",26);
+            check_and_cleanup("");
+            return 26;
+        }
+        int i=0;
+        while(strcmp(argv[3],dataman_commands[i])!=0){
+            i++;
+            if(i==DATAMAN_COMMAND_NUM){
+                break;
+            }
+        }
+        if(i==DATAMAN_COMMAND_NUM){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The data manager option " RESET_DISPLAY WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Reference:\n\n" RESET_DISPLAY,argv[3]);
+            print_dataman_info("");
+            write_operation_log(cluster_name,operation_log,argv[1],"INVALID_PARAMS",9);
+            check_and_cleanup(workdir);
+            return 9;
+        }
+        if(strcmp(argv[3],"upload")==0||strcmp(argv[3],"download")==0||strcmp(argv[3],"copy")==0||strcmp(argv[3],"rename")==0||strcmp(argv[3],"rdownload")==0||strcmp(argv[3],"rupload")==0){
+            if(argc==5||(argc==6&&command_flag==2)){
+                printf(FATAL_RED_BOLD "[ FATAL: ] A target path is requied. i.e. " RESET_DISPLAY WARN_YELLO_BOLD "--b:foo" RESET_DISPLAY FATAL_RED_BOLD " or " RESET_DISPLAY WARN_YELLO_BOLD "/home/hpc-now/\n" RESET_DISPLAY);
+                write_operation_log("NULL",operation_log,argv[1],"TOO_FEW_PARAMS",5);
+                check_and_cleanup("");
+                return 5;
+            }
+        }
+        if(strcmp(argv[3],"upload")!=0&&strcmp(argv[3],"download")!=0&&strcmp(argv[3],"copy")!=0&&strcmp(argv[3],"list")!=0&&strcmp(argv[3],"delete")!=0&&strcmp(argv[3],"rename")!=0){
+            if(cluster_asleep_or_not(workdir)==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] You need to wake up the cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " first.\n" RESET_DISPLAY,cluster_name);
+                write_operation_log(cluster_name,operation_log,argv[1],"CLUSTER_ASLEEP",43);
+                check_and_cleanup(workdir);
+                return 43;
+            }
+            if(strcmp(argv[3],"mv")==0||strcmp(argv[3],"cp")==0||strcmp(argv[3],"rupload")==0||strcmp(argv[3],"rdownload")==0){
+                if(argc==5||(argc==6&&command_flag==2)){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] A target path is requied. i.e. " RESET_DISPLAY WARN_YELLO_BOLD "--home:foo" RESET_DISPLAY FATAL_RED_BOLD " or " RESET_DISPLAY WARN_YELLO_BOLD "/home/hpc-now/\n" RESET_DISPLAY);
+                    write_operation_log("NULL",operation_log,argv[1],"TOO_FEW_PARAMS",5);
+                    check_and_cleanup("");
+                    return 5;
+                }
+            }
+        }
+
+        if(strcmp(argv[3],"upload")==0){
+            if(bucket_path_check(argv[4],string_temp,argv[2])==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] The local path cannot start with --b: .\n" RESET_DISPLAY);
+                write_operation_log(cluster_name,operation_log,argv[1],"INVALID_PARAMS",9);
+                check_and_cleanup(workdir);
+                return 9;
+            }
+            if(bucket_path_check(argv[5],string_temp,argv[2])!=0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] The remote path must start with --b: .\n" RESET_DISPLAY);
+                write_operation_log(cluster_name,operation_log,argv[1],"INVALID_PARAMS",9);
+                check_and_cleanup(workdir);
+                return 9;
+            }
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Data operation started ...\n\n");
+            if(argc==6||(argc==7&&command_flag==2)){
+                run_flag=bucket_cp(workdir,argv[2],argv[4],argv[5],"",crypto_keyfile,cloud_flag);
+            }
+            else{
+                run_flag=bucket_cp(workdir,argv[2],argv[4],argv[5],argv[6],crypto_keyfile,cloud_flag);
+            }
+        }
+        else if(strcmp(argv[3],"download")==0){
+            if(bucket_path_check(argv[4],string_temp,argv[2])!=0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] The remote path must start with --b: .\n" RESET_DISPLAY);
+                write_operation_log(cluster_name,operation_log,argv[1],"INVALID_PARAMS",9);
+                check_and_cleanup(workdir);
+                return 9;
+            }
+            if(bucket_path_check(argv[5],string_temp,argv[2])==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] The local path cannot start with --b: .\n" RESET_DISPLAY);
+                write_operation_log(cluster_name,operation_log,argv[1],"INVALID_PARAMS",9);
+                check_and_cleanup(workdir);
+                return 9;
+            }
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Data operation started ...\n\n");
+            if(argc==6||(argc==7&&command_flag==2)){
+                run_flag=bucket_cp(workdir,argv[2],argv[4],argv[5],"",crypto_keyfile,cloud_flag);
+            }
+            else{
+                run_flag=bucket_cp(workdir,argv[2],argv[4],argv[5],argv[6],crypto_keyfile,cloud_flag);
+            }
+        }
+        else if(strcmp(argv[3],"copy")==0||strcmp(argv[3],"rename")==0){
+            temp_flag1=bucket_path_check(argv[4],string_temp,argv[2]);
+            temp_flag2=bucket_path_check(argv[5],string_temp,argv[2]);
+            if(temp_flag1!=temp_flag2){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Both paths should start with or without --b: .\n" RESET_DISPLAY);
+                write_operation_log(cluster_name,operation_log,argv[1],"INVALID_PARAMS",9);
+                check_and_cleanup(workdir);
+                return 9;
+            }
+            if(temp_flag1==1){
+                sprintf(string_temp,"--b:%s",argv[4]);
+                sprintf(string_temp2,"--b:%s",argv[5]);
+            }
+            else{
+                strcpy(string_temp,argv[4]);
+                strcpy(string_temp2,argv[5]);
+            }
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Data operation started ...\n\n");
+            if(argc==6||(argc==7&&command_flag==2)){
+                if(strcmp(argv[3],"copy")==0){
+                    run_flag=bucket_cp(workdir,argv[2],string_temp,string_temp2,"",crypto_keyfile,cloud_flag);
+                }
+                else{
+                    run_flag=bucket_mv(workdir,argv[2],string_temp,string_temp2,"",crypto_keyfile,cloud_flag);
+                }
+            }
+            else{
+                if(strcmp(argv[3],"copy")==0){
+                    run_flag=bucket_cp(workdir,argv[2],string_temp,string_temp2,argv[6],crypto_keyfile,cloud_flag);
+                }
+                else{
+                    run_flag=bucket_mv(workdir,argv[2],string_temp,string_temp2,argv[6],crypto_keyfile,cloud_flag);
+                }
+            }
+        }
+        else if(strcmp(argv[3],"list")==0){
+            printf("\n");
+            if(bucket_path_check(argv[4],string_temp,argv[2])!=0){
+                sprintf(string_temp,"--b:%s",argv[4]);
+            }
+            else{
+                strcpy(string_temp,argv[4]);
+            }
+            if(argc==5||(argc==6&&command_flag==2)){
+                run_flag=bucket_ls(workdir,argv[2],string_temp,"",crypto_keyfile,cloud_flag);
+            }
+            else{
+                run_flag=bucket_ls(workdir,argv[2],string_temp,argv[5],crypto_keyfile,cloud_flag);
+            }
+        }
+        else if(strcmp(argv[3],"delete")==0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Data operation started ...\n\n");
+            if(bucket_path_check(argv[4],string_temp,argv[2])!=0){
+                sprintf(string_temp,"--b:%s",argv[4]);
+            }
+            else{
+                strcpy(string_temp,argv[4]);
+            }
+            if(argc==5||(argc==6&&command_flag==2)){
+                run_flag=bucket_rm(workdir,argv[2],string_temp,"",crypto_keyfile,cloud_flag);
+            }
+            else{
+                run_flag=bucket_rm(workdir,argv[2],string_temp,argv[5],crypto_keyfile,cloud_flag);
+            }
+        }
+        else if(strcmp(argv[3],"cp")==0||strcmp(argv[3],"mv")==0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Data operation started ...\n\n");
+            temp_flag1=direct_path_check(argv[4],string_temp,argv[2]);
+            temp_flag2=direct_path_check(argv[5],string_temp2,argv[2]);
+            if(temp_flag1==temp_flag2){
+                if(temp_flag1==1){
+                    sprintf(string_temp,"--home:%s",argv[4]);
+                    sprintf(string_temp2,"--home:%s",argv[4]);
+                }
+                else{
+                    strcpy(string_temp,argv[4]);
+                    strcpy(string_temp2,argv[5]);
+                }
+            }
+            else{
+                strcpy(string_temp,argv[4]);
+                strcpy(string_temp2,argv[5]);
+            }
+            if(argc==6||(argc==7&&command_flag==2)){
+                run_flag=direct_cp_mv(workdir,argv[2],SSHKEY_DIR,string_temp,string_temp2,"",argv[3]);
+            }
+            else{
+                run_flag=direct_cp_mv(workdir,argv[2],SSHKEY_DIR,string_temp,string_temp2,argv[6],argv[3]);
+            }
+        }
+        else if(strcmp(argv[3],"rm")==0||strcmp(argv[3],"ls")==0||strcmp(argv[3],"mkdir")==0){
+            if(direct_path_check(argv[4],string_temp,argv[2])==1){
+                sprintf(string_temp,"--home:%s",argv[4]);
+            }
+            else{
+                strcpy(string_temp,argv[4]);
+            }
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Data operation started ...\n\n");
+            if(argc==5||(argc==6&&command_flag==2)){
+                run_flag=direct_rm_ls_mkdir(workdir,argv[2],SSHKEY_DIR,string_temp,"",argv[3]);
+            }
+            else{
+                run_flag=direct_rm_ls_mkdir(workdir,argv[2],SSHKEY_DIR,string_temp,argv[5],argv[3]);
+            }
+        }
+        else if(strcmp(argv[3],"rupload")!=0&&strcmp(argv[3],"rdownload")!=0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Data operation started ...\n\n");
+            if(direct_path_check(argv[4],string_temp,argv[2])==1){
+                sprintf(string_temp,"--home:%s",argv[4]);
+            }
+            else{
+                strcpy(string_temp,argv[4]);
+            }
+            run_flag=direct_file_operations(workdir,argv[2],SSHKEY_DIR,string_temp,argv[3]);
+        }
+        else if(strcmp(argv[3],"rupload")==0){
+            if(direct_path_check(argv[4],string_temp,argv[2])==1){
+                sprintf(string_temp,"--home:%s",argv[4]);
+            }
+            else{
+                strcpy(string_temp,argv[4]);
+            }
+            if(direct_path_check(argv[5],string_temp2,argv[2])==1){
+                sprintf(string_temp2,"--b:%s",argv[5]);
+            }
+            else{
+                strcpy(string_temp2,argv[5]);
+            }
+            if(argc==6||(argc==7&&command_flag==2)){
+                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,"",cloud_flag,argv[3]);
+            }
+            else{
+                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,argv[6],cloud_flag,argv[3]);
+            }
+        }
+        else{
+            if(direct_path_check(argv[5],string_temp,argv[2])==1){
+                sprintf(string_temp,"--home:%s",argv[5]);
+            }
+            else{
+                strcpy(string_temp,argv[5]);
+            }
+            if(direct_path_check(argv[4],string_temp2,argv[4])==1){
+                sprintf(string_temp2,"--b:%s",argv[4]);
+            }
+            else{
+                strcpy(string_temp2,argv[4]);
+            }
+            if(argc==6||(argc==7&&command_flag==2)){
+                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,"",cloud_flag,argv[3]);
+            }
+            else{
+                run_flag=remote_bucket_cp(workdir,argv[2],SSHKEY_DIR,string_temp2,string_temp,argv[6],cloud_flag,argv[3]);
+            }
+        }
+        if(run_flag==0){
+            write_operation_log(cluster_name,operation_log,argv[1],"SUCCEEDED",0);
+            check_and_cleanup(workdir);
+            return 0;
+        }
+        else{
+            printf(WARN_YELLO_BOLD "\n[ -WARN- ] Data operation failed or canceled. Check the console output above.\n");
+            printf("|      <>  Command: %s | Cluster: %s | User: %s\n" RESET_DISPLAY,argv[3],cluster_name,argv[2]);
+            write_operation_log(cluster_name,operation_log,argv[1],"DATAMAN_OPERATION_FAILED",28);
+            check_and_cleanup(workdir);
+            return 28;
+        }
+    }
+
     if(check_pslock(workdir)==1){
         printf(FATAL_RED_BOLD "[ FATAL: ] Another process is operating this cluster, please wait and retry.\n");
         printf("|          Exit now.\n" RESET_DISPLAY);

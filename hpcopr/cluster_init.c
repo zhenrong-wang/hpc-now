@@ -298,6 +298,27 @@ int get_tf_prep_conf(char* conf_file, char* cluster_id, char* region_id, char* z
     }
 }
 
+int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bucket_sk, char* bucket_info_file, char* cloud_flag){
+    FILE* file_p=fopen(bucket_info_file,"w+");
+    if(file_p==NULL){
+        return -1;
+    }
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+        return -3;
+    }
+    if(strcmp(cloud_flag,"CLOUD_A")==0){
+        fprintf(file_p,"BUCKET: oss://%s\nREGION: %s\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
+    }
+    else if(strcmp(cloud_flag,"CLOUD_B")==0){
+        fprintf(file_p,"BUCKET: cos://%s\nREGION: %s\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
+    }
+    else{
+        fprintf(file_p,"BUCKET: s3://%s\nREGION: %s\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
+    }
+    fclose(file_p);
+    return 0;
+}
+
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile){
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -890,6 +911,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             system(cmdline);
         }
     }
+    sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
+    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: s3:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -945,7 +968,13 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
+    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    for(i=0;i<hpc_user_num;i++){
+        sprintf(string_temp,"user%d",i+1);
+        get_user_sshkey(cluster_id,string_temp,sshkey_folder);
+    }
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
@@ -1419,6 +1448,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=cos://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
+    sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
+    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: cos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -1474,7 +1505,13 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
+    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    for(i=0;i<hpc_user_num;i++){
+        sprintf(string_temp,"user%d",i+1);
+        get_user_sshkey(cluster_id,string_temp,sshkey_folder);
+    }
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
@@ -1944,6 +1981,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=oss://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
+    sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
+    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: oss:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -1999,7 +2038,13 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
+    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    for(i=0;i<hpc_user_num;i++){
+        sprintf(string_temp,"user%d",i+1);
+        get_user_sshkey(cluster_id,string_temp,sshkey_folder);
+    }
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
