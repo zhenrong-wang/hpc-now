@@ -127,6 +127,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char real_trans_keyfile[FILENAME_LENGTH]="";
     char real_export_file[FILENAME_LENGTH_EXT]="";
     char real_export_folder[FILENAME_LENGTH_EXT]="";
+    char export_filename[1024]="";
     char user_line_buffer[256]="";
     char real_user_list[1024]="";
     char md5sum_current[64]="";
@@ -344,29 +345,29 @@ next_user:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Generating a now-cluster file ...\n");
 
     if(strlen(real_export_folder)>0){
-        sprintf(filename_temp,"%s%s%s-%s-%s.now",real_export_folder,PATH_SLASH,cluster_name,current_date,current_time);
+        sprintf(export_filename,"%s%s%s-%s-%s.now",real_export_folder,PATH_SLASH,cluster_name,current_date,current_time);
     }
     else if(strlen(real_export_file)>0){
-        strcpy(filename_temp,real_export_file);
+        strcpy(export_filename,real_export_file);
     }
     else{
 #ifdef _WIN32
-        sprintf(filename_temp,"C:\\hpc-now\\%s-%s-%s.now",cluster_name,current_date,current_time);
+        sprintf(export_filename,"C:\\hpc-now\\%s-%s-%s.now",cluster_name,current_date,current_time);
 #elif __linux__
-        sprintf(filename_temp,"/home/hpc-now/%s-%s-%s.now",cluster_name,current_date,current_time);
+        sprintf(export_filename,"/home/hpc-now/%s-%s-%s.now",cluster_name,current_date,current_time);
 #elif __APPLE__
-        sprintf(filename_temp,"/Users/hpc-now/%s-%s-%s.now",cluster_name,current_date,current_time);
+        sprintf(export_filename,"/Users/hpc-now/%s-%s-%s.now",cluster_name,current_date,current_time);
 #else
-        sprintf(filename_temp,"%s-%s-%s.now",cluster_name,current_date,current_time); 
+        sprintf(export_filename,"%s-%s-%s.now",cluster_name,current_date,current_time); 
 #endif        
     }
-    sprintf(cmdline,"tar -zcf %s %s %s %s",filename_temp,tmp_root,cluster_name_flag_tmp,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"tar -zcf %s %s %s %s",export_filename,tmp_root,cluster_name_flag_tmp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,tmp_root,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,cluster_name_flag_tmp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    if(file_exist_or_not(filename_temp)!=0){
+    if(file_exist_or_not(export_filename)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to export the cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " .\n" RESET_DISPLAY,cluster_name);
         return 1;
     }
@@ -384,7 +385,7 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     char filename_temp_2[FILENAME_LENGTH]="";
     char cluster_name_buffer[256]="";
     char tmp_top_dir[DIR_LENGTH]="";
-    char tmp_workdir[DIR_LENGTH]="";
+    char tmp_workdir[DIR_LENGTH_EXT]="";
     char cmdline[CMDLINE_LENGTH]="";
     char tmp_import_root[DIR_LENGTH]="";
     char workdir[DIR_LENGTH]="";
