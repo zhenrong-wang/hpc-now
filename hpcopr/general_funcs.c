@@ -769,6 +769,7 @@ int insert_lines(char* filename, char* keyword, char* insert_string){
 
 int local_path_parser(char* path_string, char* path_final){
 #ifdef _WIN32
+    strcpy(path_final,path_string);
     return 0;
 #endif
     int i;

@@ -204,6 +204,23 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
     }
 }
 
+void activate_sshkey(char* ssh_privkey){
+    char cmdline[CMDLINE_LENGTH]="";
+#ifdef _WIN32
+        sprintf(cmdline,"takeown /f %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"icacls %s /c /t /inheritance:d %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"icacls %s /c /t /remove:g Users %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"icacls %s /c /t /remove:g \"Authenticated Users\" %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+#else
+        sprintf(cmdline,"chmod 600 %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+#endif
+}
+
 int get_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
     char sshkey_subdir[DIR_LENGTH]="";
     char ssh_privkey[FILENAME_LENGTH]="";
@@ -227,19 +244,7 @@ int get_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
         return 1;
     }
     else{
-#ifdef _WIN32
-        sprintf(cmdline,"takeown /f %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        sprintf(cmdline,"icacls %s /c /t /inheritance:d %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        sprintf(cmdline,"icacls %s /c /t /remove:g Users %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        sprintf(cmdline,"icacls %s /c /t /remove:g \"Authenticated Users\" %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-#else
-        sprintf(cmdline,"chmod 600 %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-#endif
+        activate_sshkey(ssh_privkey);
         return 0;
     }
 }

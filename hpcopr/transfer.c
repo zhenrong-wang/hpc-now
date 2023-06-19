@@ -386,13 +386,18 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     char cluster_name_buffer[128]="";
     char tmp_top_dir[DIR_LENGTH_SHORT]="";
     char tmp_workdir[DIR_LENGTH_EXT]="";
+    char username_temp[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char tmp_import_root[DIR_LENGTH]="";
+    char cluster_sshkey_dir[DIR_LENGTH];
     char workdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char doubleconfirm[64]="";
     char md5sum[64]="";
     int update_flag=0;
+    FILE* file_p=NULL;
+    char user_line_buffer[256]="";
+    int admin_flag=0;
 
     local_path_parser(zip_file,filename_temp);
     if(strlen(filename_temp)==0||file_empty_or_not(filename_temp)<1){
@@ -403,7 +408,7 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
         getchar();
         local_path_parser(filename_temp,filename_temp_2);
         if(strlen(filename_temp_2)==0||file_empty_or_not(filename_temp_2)<1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the now-cluster file " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY ,filename_temp);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the now-cluster file " RESET_DISPLAY WARN_YELLO_BOLD "%s " RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY ,filename_temp_2);
             return -3;
         }
         else{
@@ -480,9 +485,7 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     system(cmdline);
     sprintf(cmdline,"%s %s%s.%s %s",DELETE_FOLDER_CMD,SSHKEY_DIR,PATH_SLASH,cluster_name_buffer,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,workdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(cmdline,"%s %s%sexport%s.%s %s%s",MOVE_FILE_CMD,tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer,SSHKEY_DIR,PATH_SLASH);
+    sprintf(cmdline,"%s %s%sexport%s.%s %s%s %s",MOVE_FILE_CMD,tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer,SSHKEY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(tmp_workdir,"%s%sexport%s%s",tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer);
     sprintf(filename_temp,"%s%svault%sbucket_info.txt.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
@@ -493,13 +496,45 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sstack%sterraform.tfstate.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
-    sprintf(cmdline,"%s %s%s* %s %s",MOVE_FILE_CMD,tmp_workdir,PATH_SLASH,workdir,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s %s%sworkdir%s %s",MOVE_FILE_CMD,tmp_workdir,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     if(update_flag==0){
         add_to_cluster_registry(cluster_name_buffer,"imported");
     }
+    
+    sprintf(cluster_sshkey_dir,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,cluster_name_buffer);
+    sprintf(filename_temp,"%s%sroot.key",cluster_sshkey_dir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)==0){
+        activate_sshkey(filename_temp);
+        admin_flag=1;
+    }
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to import the specified cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " ." RESET_DISPLAY "\n",cluster_name_buffer);
+        return 1;
+    }
+    file_p=fopen(filename_temp,"r");
+    while(!feof(file_p)){
+        fgetline(file_p,user_line_buffer);
+        get_seq_string(user_line_buffer,' ',2,username_temp);
+        sprintf(filename_temp_2,"%s%s.key",cluster_sshkey_dir,PATH_SLASH);
+        activate_sshkey(filename_temp_2);
+    }
     delete_decrypted_files(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster %s has been imported.\n",cluster_name_buffer);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Import Summary :\n");
+    printf(GENERAL_BOLD "|         " RESET_DISPLAY " Cluster Name   : %s\n",cluster_name_buffer);
+    printf(GENERAL_BOLD "|         " RESET_DISPLAY " User List      : \n");
+    hpc_user_list(workdir,crypto_keyfile,1);
+    if(admin_flag==1){
+        printf(GENERAL_BOLD "|         " RESET_DISPLAY " Admin Privilege : YES \n");
+    }
+    else{
+        printf(GENERAL_BOLD "|         " RESET_DISPLAY " Admin Privilege : NO \n");
+    }
+    printf(GENERAL_BOLD "|         " RESET_DISPLAY " Node Topology   : \n");
+    graph(workdir,crypto_keyfile,0);
     sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 0;

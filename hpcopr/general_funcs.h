@@ -19,7 +19,7 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
 int find_multi_keys(char* filename, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5);
 int calc_str_num(char* line, char split_ch);
 int get_seq_string(char* line, char split_ch, int string_seq, char* get_string);
-int get_seq_string_general(char* line, char split_ch, int start, int end, char* get_string);
+//int get_seq_string_general(char* line, char split_ch, int start, int end, char* get_string);
 int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char* get_string);
 int file_exist_or_not(char* filename);
 int file_empty_or_not(char* filename);
