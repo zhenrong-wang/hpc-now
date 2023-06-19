@@ -218,7 +218,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exporting to the file " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",real_export_file);
         }
         else{
-            printf(WARN_YELLO_BOLD "[ -WARN- ] The specified export path is invalid. Using the default one.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The specified export path %s is invalid. Using the default one.\n" RESET_DISPLAY,filename_temp);
         }
     }
 
@@ -373,7 +373,7 @@ next_user:
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " with the key file:\n",cluster_name);
-        printf("|          " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",real_trans_keyfile);
+        printf("|          " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " to the file " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",real_trans_keyfile,export_filename);
         return 0;
     }
 }

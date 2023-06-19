@@ -268,6 +268,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
     char cluster_workdir[DIR_LENGTH]="";
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
+    char cloud_secrets[FILENAME_LENGTH]="";
     char log_trash[FILENAME_LENGTH]="";
     char tf_realtime_log[FILENAME_LENGTH]="";
     char tf_archive_log[FILENAME_LENGTH]="";
@@ -285,51 +286,57 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
     sprintf(tf_archive_log,"%s%slog%stf_prep.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_realtime_err_log,"%s%slog%stf_prep.err.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_archive_err_log,"%s%slog%stf_prep.err.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
+    sprintf(cloud_secrets,"%s%svault%s.secrets.key",cluster_workdir,PATH_SLASH,PATH_SLASH);
+    if(file_empty_or_not(cloud_secrets)<1){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing the " HIGH_CYAN_BOLD "*imported*" RESET_DISPLAY " cluster from local client ...\n");
+        goto remove_files;
+    }
     if(strcmp(force_flag,"force")==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Removing the specified cluster *WITHOUT* state or resource check.\n" RESET_DISPLAY);
+        goto destroy_cluster;
     }
-    else{
-        if(cluster_empty_or_not(cluster_workdir)!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is *NOT* empty!\n" RESET_DISPLAY);
-            glance_clusters(target_cluster_name,crypto_keyfile);
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? This operation is *NOT* recoverable!\n" RESET_DISPLAY);
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: " );
+    if(cluster_empty_or_not(cluster_workdir)!=0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is *NOT* empty!\n" RESET_DISPLAY);
+        glance_clusters(target_cluster_name,crypto_keyfile);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? This operation is *NOT* recoverable!\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: " );
+        fflush(stdin);
+        scanf("%s",doubleconfirm);
+        getchar();
+        if(strcmp(doubleconfirm,CONFIRM_STRING)==0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
+            printf("|          absolutely *NOT* recoverable!\n" RESET_DISPLAY);
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
             fflush(stdin);
             scanf("%s",doubleconfirm);
             getchar();
-            if(strcmp(doubleconfirm,CONFIRM_STRING)==0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
-                printf("|          absolutely *NOT* recoverable!\n" RESET_DISPLAY);
-                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-                fflush(stdin);
-                scanf("%s",doubleconfirm);
-                getchar();
-                if(strcmp(doubleconfirm,target_cluster_name)!=0){
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
-                    printf("|          Nothing changed.\n");
-                    return 5;
-                }
-            }
-            else{
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
+            if(strcmp(doubleconfirm,target_cluster_name)!=0){
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
                 printf("|          Nothing changed.\n");
                 return 5;
             }
         }
         else{
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster is empty. This operation will remove all the related files\n");
-            printf("|          from your system and registry. Would you like to continue?\n");
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: ");
-            fflush(stdin);
-            scanf("%s",doubleconfirm);
-            getchar();
-            if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
-                printf("|          Nothing changed.\n");
-                return 5;
-            }
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
+            printf("|          Nothing changed.\n");
+            return 5;
         }
     }
+    else{
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster is empty. This operation will remove all the related files\n");
+        printf("|          from your system and registry. Would you like to continue?\n");
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: ");
+        fflush(stdin);
+        scanf("%s",doubleconfirm);
+        getchar();
+        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
+            printf("|          Nothing changed.\n");
+            return 5;
+        }
+    }
+    
+destroy_cluster:
     if(cluster_destroy(cluster_workdir,crypto_keyfile,"force")!=0){
         delete_decrypted_files(cluster_workdir,crypto_keyfile);
         return 7;
@@ -350,6 +357,8 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
     fprintf(file_p,"\n\n###### %s ###### err_realtime ######\n\n",target_cluster_name);
     fclose(file_p);
     archive_log(log_trash,tf_realtime_err_log);
+
+remove_files:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing all the related files ...\n");
     sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,cluster_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
