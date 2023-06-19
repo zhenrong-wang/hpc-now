@@ -133,6 +133,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char md5sum_current[64]="";
     char md5sum_trans[64]="";
     char user_list_buffer[1024]="";
+    char real_admin_flag[8]="";
     int i=0;
     int user1_flag=0;
     int export_user_num=0;
@@ -164,7 +165,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     if(strcmp(user_list_buffer,"ALL")==0||strcmp(user_list_buffer,"all")==0||strcmp(user_list_buffer,"All")==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Exporting *ALL* users of cluster %s . NOT RECOMMENDED!\n" RESET_DISPLAY,cluster_name);
         strcpy(real_user_list,"all");
-        strcpy(admin_flag,"admin");
+        strcpy(real_admin_flag,"admin");
         user1_flag=1;
     }
     else{
@@ -172,6 +173,12 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         if(export_user_num==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The specified user list is invalid. Exit now.\n" RESET_DISPLAY);
             return -1;
+        }
+        if(user1_flag==1&&strcmp(admin_flag,"admin")==0){
+            strcpy(real_admin_flag,"admin");
+        }
+        else{
+            strcpy(real_admin_flag,"");
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster: %s . Exporting users below:\n",cluster_name);
         printf(GENERAL_BOLD "|          %s\n" RESET_DISPLAY,real_user_list);
@@ -294,22 +301,20 @@ next_user:
         }while(strlen(username_temp)!=0);
         fclose(file_p_tmp);
     }
-    if(strcmp(admin_flag,"admin")==0){
-        if(user1_flag==1){
-            sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",current_vaultdir,PATH_SLASH);
-            if(decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_current)==0){
-                sprintf(cmdline,"%s %s%sCLUSTER_SUMMARY.txt %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-                system(cmdline);
-            }
-            else{
-                printf(WARN_YELLO_BOLD "[ -WARN- ] The admin file is missing. Root privilege is disabled.\n" RESET_DISPLAY);
-            }
-            sprintf(cmdline,"%s %s%sroot.key %s%s %s",COPY_FILE_CMD,current_sshdir,PATH_SLASH,tmp_sshdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    if(strcmp(real_admin_flag,"admin")==0){
+        sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",current_vaultdir,PATH_SLASH);
+        if(decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_current)==0){
+            sprintf(cmdline,"%s %s%sCLUSTER_SUMMARY.txt %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
         else{
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Skip exporting root privilege. --admin flag needs user1 in the list.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The admin file is missing. Root/Admin privilege is disabled.\n" RESET_DISPLAY);
         }
+        sprintf(cmdline,"%s %s%sroot.key %s%s %s",COPY_FILE_CMD,current_sshdir,PATH_SLASH,tmp_sshdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    else{
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Not exporting Root/Admin privilege.\n" RESET_DISPLAY);
     }
     sprintf(cmdline,"%s %s%scloud_flag.flg %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -372,8 +377,16 @@ next_user:
         return 1;
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " with the key file:\n",cluster_name);
-        printf("|          " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " to the file " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",real_trans_keyfile,export_filename);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",cluster_name);
+        printf(GENERAL_BOLD "|       +- Key File" RESET_DISPLAY "       : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",real_trans_keyfile);
+        printf(GENERAL_BOLD "|       +- Exported File" RESET_DISPLAY "  : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",export_filename);
+        printf(GENERAL_BOLD "|       +- User List" RESET_DISPLAY "      : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",user_list_buffer);
+        if(strcmp(real_admin_flag,"admin")==0){
+            printf(GENERAL_BOLD "|       +- Admin Privilege" RESET_DISPLAY ": " HIGH_CYAN_BOLD "YES" RESET_DISPLAY " .\n");
+        }
+        else{
+            printf(GENERAL_BOLD "|       +- Admin Privilege" RESET_DISPLAY ": " HIGH_CYAN_BOLD "NO" RESET_DISPLAY " .\n");
+        }
         return 0;
     }
 }
@@ -524,16 +537,16 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     delete_decrypted_files(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster %s has been imported.\n",cluster_name_buffer);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Import Summary :\n");
-    printf(GENERAL_BOLD "|         " RESET_DISPLAY " Cluster Name   : %s\n",cluster_name_buffer);
+    printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Cluster Name   : %s\n",cluster_name_buffer);
     printf(GENERAL_BOLD "|         " RESET_DISPLAY " User List      : \n");
     hpc_user_list(workdir,crypto_keyfile,1);
     if(admin_flag==1){
-        printf(GENERAL_BOLD "|         " RESET_DISPLAY " Admin Privilege : YES \n");
+        printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Admin Privilege : YES \n");
     }
     else{
-        printf(GENERAL_BOLD "|         " RESET_DISPLAY " Admin Privilege : NO \n");
+        printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Admin Privilege : NO \n");
     }
-    printf(GENERAL_BOLD "|         " RESET_DISPLAY " Node Topology   : \n");
+    printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Node Topology   : \n");
     graph(workdir,crypto_keyfile,0);
     sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
     system(cmdline);
