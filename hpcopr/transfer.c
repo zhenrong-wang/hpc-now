@@ -383,7 +383,7 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     char real_keyfile[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp_2[FILENAME_LENGTH]="";
-    char cluster_name_buffer[256]="";
+    char cluster_name_buffer[128]="";
     char tmp_top_dir[DIR_LENGTH]="";
     char tmp_workdir[DIR_LENGTH_EXT]="";
     char cmdline[CMDLINE_LENGTH]="";
