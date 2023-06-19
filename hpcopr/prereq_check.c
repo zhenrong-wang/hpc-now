@@ -261,7 +261,7 @@ awscli:
         system(cmdline);
     }
 #elif _WIN32
-    if(system("'C:\\\"Program Files\"\\Amazon\\AWSCLIV2\\aws.exe' --version > nul 2>&1")!=0){
+    if(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
         if(silent_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Please run the installer update to fix this issue.\n" RESET_DISPLAY);
         }
