@@ -25,8 +25,9 @@ elif [ "$1" = "build" ]; then
     rm -rf ./installer/libgfuncs.a
     ar -rc ./installer/libgfuncs.a ./installer/gfuncs.o
     rm -rf ./installer/gfuncs.o
-    gcc ./installer/installer.c -Wall -lm ./installer/libgfuncs.a -o ./build/installer-lin-${installer_version_code}.exe
+    gcc ./installer/installer.c -Wall ./installer/libgfuncs.a -lm -o ./build/installer-lin-${installer_version_code}.exe
     gcc ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto-lin.exe
+    gcc ./now-crypto/now-crypto-v2.c -Wall -lm -o ./build/now-crypto-v2-lin.exe
     gcc ./hpcmgr/hpcmgr.c -Wall -lm -o ./build/hpcmgr.exe
     chmod +x ./build/*
     mv ./installer/libgfuncs.a ./build/

@@ -23,6 +23,23 @@
 #include "cluster_general_funcs.h"
 #include "general_print_info.h"
 
+int add_to_cluster_registry(char* new_cluster_name, char* import_flag){
+    char* cluster_registry=ALL_CLUSTER_REGISTRY;
+    FILE* file_p=fopen(cluster_registry,"a+");
+    if(file_p==NULL){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open/write to the cluster registry. Exit now." RESET_DISPLAY);
+        return -1;
+    }
+    if(strcmp(import_flag,"imported")==0){
+        fprintf(file_p,"< cluster name: %s > <imported>\n",new_cluster_name);
+    }
+    else{
+        fprintf(file_p,"< cluster name: %s >\n",new_cluster_name);
+    }
+    fclose(file_p);
+    return 0;
+}
+
 int get_crypto_key(char* crypto_key_filename, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
     FILE* md5_tmp=NULL;
@@ -172,7 +189,12 @@ int get_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
     }
     sprintf(ssh_privkey,"%s%s%s.key",sshkey_subdir,PATH_SLASH,user_name);
     get_workdir(workdir,cluster_name);
-    sprintf(ssh_privkey_remote,"/home/%s/.ssh/id_rsa",user_name);
+    if(strcmp(user_name,"root")==0){
+        sprintf(ssh_privkey_remote,"/root/.ssh/id_rsa");
+    }
+    else{
+        sprintf(ssh_privkey_remote,"/home/%s/.ssh/id_rsa",user_name);
+    }
     if(remote_copy(workdir,sshkey_dir,ssh_privkey,ssh_privkey_remote,"root","get","",0)!=0){
         return 1;
     }
@@ -401,8 +423,18 @@ int decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum){
     }
     if(file_exist_or_not(filename)==0){
         sprintf(cmdline,"%s decrypt %s %s %s %s",now_crypto_exec,filename,filename_new,md5sum,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        return 0;
+        return system(cmdline);
+    }
+    else{
+        return -1;
+    }
+}
+
+int decrypt_single_file_general(char* now_crypto_exec, char* source_file, char* target_file, char* md5sum){
+    char cmdline[CMDLINE_LENGTH]="";
+    if(file_exist_or_not(source_file)==0){
+        sprintf(cmdline,"%s decrypt %s %s %s %s",now_crypto_exec,source_file,target_file,md5sum,SYSTEM_CMD_REDIRECT);
+        return system(cmdline);
     }
     else{
         return -1;
@@ -789,6 +821,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
 /*    if(getstate(workdir,crypto_keyfile)!=0){
         return -1;
     }*/
+    char cluster_name[64]="";
     char master_address[32]="";
     char master_status[16]="";
     char master_config[16]="";
@@ -806,6 +839,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     int node_num=0;
     int running_node_num=0;
     create_and_get_stackdir(workdir,stackdir);
+    get_cluster_name(cluster_name,workdir);
     sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
     if(file_exist_or_not(compute_template)!=0||file_exist_or_not(currentstate)!=0||get_cloud_flag(workdir,cloud_flag)==-1){
@@ -844,18 +878,18 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     fclose(file_p);
     if(graph_level==1){
         if(strlen(ht_status)!=0){
-            printf("%s | %s %s %s | %d/%d | %s | %s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
+            printf("%s | %s | %s %s %s | %d/%d | %s | %s\n",cluster_name,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
         }
         else{
-            printf("%s | %s %s %s | %d/%d | %s \n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
+            printf("%s | %s | %s %s %s | %d/%d | %s \n",cluster_name,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
         }
     }
     else if(graph_level==2){
         if(strlen(ht_status)!=0){
-            printf("%s,%s,%s,%s,%d,%d,%s,%s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
+            printf("%s,%s,%s,%s,%s,%d,%d,%s,%s\n",cluster_name,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
         }
         else{
-            printf("%s,%s,%s,%s,%d,%d,%s\n",cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
+            printf("%s,%s,%s,%s,%s,%d,%d,%s\n",cluster_name,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
         }
     }
     return 0;
@@ -937,7 +971,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     system(cmdline);
     if(silent_flag!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
-        printf("|          Command: %s. View log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr viewlog std|err\n" RESET_DISPLAY,execution_name);
+        printf("|          Command: %s. View log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr viewlog --std\n" RESET_DISPLAY,execution_name);
     }
     if(wait_for_complete(tf_realtime_log,execution_name,tf_error_log,tf_error_log_archive,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
@@ -955,8 +989,6 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     char filename_temp[FILENAME_LENGTH]="";
     char cluster_id[32]="";
     char cloud_region[16]="";
-    char buffer1[128]="";
-    char buffer2[128]="";
     char cloud_vendor[16]="";
     char unique_cluster_id[64]="";
     char current_date[32]="";
@@ -990,8 +1022,7 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     find_and_get(filename_temp,"REGION_ID","","",1,"REGION_ID","","",' ',3,cloud_region);
     sprintf(filename_temp,"%s%scompute_template",stackdir,PATH_SLASH);
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,compute_config);
-    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
-    get_ak_sk(filename_temp,crypto_keyfile,buffer1,buffer2,cloud_vendor);
+    get_cloud_flag(workdir,cloud_vendor);
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
@@ -1066,99 +1097,120 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     return -1;
 }
 
-int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag){
-    char md5sum[64]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    char vaultdir[DIR_LENGTH]="";
-    char single_line[LINE_LENGTH]="";
-    char* crypto_exec=NOW_CRYPTO_EXEC;
-    FILE* file_p=NULL;
-    FILE* file_p_2=NULL;
-    char filename_temp[FILENAME_LENGTH]="";
-    char unique_cluster_id[32]="";
-    char username[32]="";
-    char password[32]="";
-    char enable_flag[16]="";
-    char header_string[64]="";
-    char tail_string[64]="";
-    char bucket_header[16]="";
-    char bucket_name[32]="";
-    int i=0;
+int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bucket_flag, char* root_flag){
     if(cluster_empty_or_not(workdir)==0){
         return 1;
     }
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char real_username[USERNAME_LENGTH_MAX]="";
+    if(strlen(username)>0){
+        get_cluster_name(cluster_name,workdir);
+        if(user_name_quick_check(cluster_name,username,SSHKEY_DIR)!=0){
+            printf(WARN_YELLO_BOLD "\n[ -WARN- ] The specified username '%s' is invalid or unauthorized.\n" RESET_DISPLAY,username);
+            strcpy(real_username,"");
+        }
+        else{
+            strcpy(real_username,username);
+        }
+    }
+    else{
+        strcpy(real_username,"");
+    }
+    int rootflag, bucketflag;
+    if(strcmp(bucket_flag,"bucket")==0){
+        bucketflag=1;
+    }
+    if(strcmp(root_flag,"root")==0){
+        rootflag=1;
+    }
+    char md5sum[64]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char vaultdir[DIR_LENGTH]="";
+    char stackdir[DIR_LENGTH]="";
+    char single_line[LINE_LENGTH]="";
+    FILE* file_p=NULL;
+    char filename_temp[FILENAME_LENGTH]="";
+    char unique_cluster_id[32]="";
+    char username_temp[32]="";
+    char password[32]="";
+    char enable_flag[16]="";
+    char master_address[32]="";
+    char root_password[PASSWORD_STRING_LENGTH]="";
+    char bucket_address[32]="";
+    char bucket_ak[128]="";
+    char bucket_sk[128]="";
+    char region_id[32]="";
+
     get_crypto_key(crypto_keyfile,md5sum);
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
-    decrypt_single_file(crypto_exec,filename_temp,md5sum);
-    sprintf(filename_temp,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
-    decrypt_single_file(crypto_exec,filename_temp,md5sum);
-
-    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"r");
-    if(file_p==NULL){
+    create_and_get_stackdir(workdir,stackdir);
+    if(get_ucid(workdir,unique_cluster_id)!=0){
         return -1;
     }
-    if(get_ucid(workdir,unique_cluster_id)==-1){
+    if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
+        return -3;
+    }
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        return -5;
+    }
+    else{
+        file_p=fopen(filename_temp,"r");
+        fgetline(file_p,master_address);
         fclose(file_p);
-        return -1;
     }
-    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    file_p_2=fopen(filename_temp,"r");
-    if(file_p_2==NULL){
-        fclose(file_p);
-        return -1;
-    }
-
     printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n" RESET_DISPLAY);
     printf(GENERAL_BOLD "| Unique Cluster ID: " RESET_DISPLAY "%s\n",unique_cluster_id);
     printf(WARN_YELLO_BOLD "+-------------- CLUSTER PORTAL AND *CREDENTIALS* ----------------+\n" RESET_DISPLAY);
-    fgetline(file_p,single_line);
-    while(fgetline(file_p,single_line)==0&&i<7){
-        if(strlen(single_line)!=0){
-            if(contain_or_not(single_line,"Address")==0){
-                get_seq_string(single_line,' ',3,bucket_header);
-                get_seq_string(single_line,' ',4,bucket_name);
-                printf(GENERAL_BOLD "| NetDisk Address: " RESET_DISPLAY "%s%s\n",bucket_header,bucket_name);
-            }
-            else{
-                get_seq_string(single_line,':',1,header_string);
-                get_seq_string(single_line,':',2,tail_string);
-                if(contain_or_not(single_line,"Password")==0){
-                    if(strcmp(root_flag,"root")==0){
-                        printf(FATAL_RED_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
-                    }
-                }
-                else if(contain_or_not(single_line,"Key")==0){
-                    printf(GENERAL_BOLD "| %s:" RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,header_string,tail_string);
-                }
-                else if(contain_or_not(single_line,"Master Node IP")==0&&strlen(tail_string)<7){
-                    printf(GENERAL_BOLD "| %s:" RESET_DISPLAY WARN_YELLO_BOLD " NOT_RUNNING\n" RESET_DISPLAY,header_string);
-                }
-                else{
-                    printf(GENERAL_BOLD "| %s:" RESET_DISPLAY "%s\n",header_string,tail_string);
-                }
-            }
-        }
-        i++;
+    if(strlen(master_address)<7){
+        printf(GENERAL_BOLD "| Cluster IP Address: " RESET_DISPLAY WARN_YELLO_BOLD "NOT_RUNNING\n" RESET_DISPLAY);
     }
-    fclose(file_p);
+    else{
+        printf(GENERAL_BOLD "| Cluster IP Address: " RESET_DISPLAY "%s\n",master_address);
+    }
+    printf(GENERAL_BOLD "| Bucket Address:" RESET_DISPLAY " %s\n",bucket_address);
+    printf(GENERAL_BOLD "| Cloud Region: " RESET_DISPLAY "%s\n",region_id);
+    if(bucketflag==1){
+        printf(GENERAL_BOLD "| Bucket AccessKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_ak);
+        printf(GENERAL_BOLD "| Bucket SecretKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_sk);
+    }
     printf(WARN_YELLO_BOLD "+---------------- CLUSTER USERS AND *PASSWORDS* -----------------+\n" RESET_DISPLAY);
-    while(fgetline(file_p_2,single_line)==0){
+    if(rootflag==1){
+        sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
+        decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+        sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
+        if(file_exist_or_not(filename_temp)!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] You are not an operator or administrator.\n" RESET_DISPLAY);
+        }
+        else{
+            find_and_get(filename_temp,"Master Node Root Password:","","",1,"Master Node Root Password:","","",':',2,root_password);
+            printf(FATAL_RED_BOLD "| Root Password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " ! DO NOT DISCLOSE TO ANYONE !\n" RESET_DISPLAY,root_password);
+        }
+    }
+    
+    sprintf(filename_temp,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        return -7;
+    }
+    file_p=fopen(filename_temp,"r");
+    while(fgetline(file_p,single_line)==0){
         if(strlen(single_line)!=0){
-            get_seq_string(single_line,' ',2,username);
+            get_seq_string(single_line,' ',2,username_temp);
             get_seq_string(single_line,' ',3,password);
             get_seq_string(single_line,' ',4,enable_flag);
-            if(strcmp(enable_flag,"DISABLED")==0){
-                printf(GENERAL_BOLD "| Username: %s    Password: " RESET_DISPLAY GREY_LIGHT "%s " RESET_DISPLAY WARN_YELLO_BOLD "%s\n" RESET_DISPLAY,username,password,enable_flag);
-            }
-            else{
-                printf(GENERAL_BOLD "| Username: %s    Password: " RESET_DISPLAY GREY_LIGHT "%s " RESET_DISPLAY GENERAL_BOLD "%s\n" RESET_DISPLAY,username,password,enable_flag);
+            if(strlen(real_username)==0||strcmp(real_username,username_temp)==0){
+                if(strcmp(enable_flag,"DISABLED")==0){
+                    printf(GENERAL_BOLD "| Username: %s    Password: " RESET_DISPLAY GREY_LIGHT "%s " RESET_DISPLAY WARN_YELLO_BOLD "%s\n" RESET_DISPLAY,username_temp,password,enable_flag);
+                }
+                else{
+                    printf(GENERAL_BOLD "| Username: %s    Password: " RESET_DISPLAY GREY_LIGHT "%s " RESET_DISPLAY GENERAL_BOLD "%s\n" RESET_DISPLAY,username_temp,password,enable_flag);
+                }
             }
         }
     }
     printf(WARN_YELLO_BOLD "+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n" RESET_DISPLAY);
-    fclose(file_p_2);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -1208,7 +1260,7 @@ int cluster_ssh(char* workdir, char* username){
     file_p=fopen(statefile,"r");
     fgetline(file_p,master_address);
     fclose(file_p);
-    if(strcmp(username,"root")==0||strlen(username)==0){
+    if(strlen(username)==0){
         sprintf(private_sshkey,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
         sprintf(cmdline,"ssh -i %s -o StrictHostKeyChecking=no root@%s",private_sshkey,master_address);
     }
@@ -1253,21 +1305,87 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag){
     return 0;
 }
 
+int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, char* region_id, char* bucket_ak, char* bucket_sk){
+    char cmdline[CMDLINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char md5sum[64]="";
+    char line_buffer[128]="";
+    char header[16]="";
+    char tail[64]="";
+    sprintf(filename_temp,"%s%svault%sbucket_info.txt.tmp",workdir,PATH_SLASH,PATH_SLASH);
+    get_crypto_key(crypto_keyfile,md5sum);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%svault%sbucket_info.txt",workdir,PATH_SLASH,PATH_SLASH);
+    FILE* file_p=fopen(filename_temp,"r");
+    int i=0;
+    if(file_p==NULL){
+        return -1;
+    }
+    while(!feof(file_p)){
+        fgetline(file_p,line_buffer);
+        get_seq_string(line_buffer,' ',1,header);
+        get_seq_string(line_buffer,' ',2,tail);
+        if(strcmp(header,"BUCKET:")==0){
+            strcpy(bucket_address,tail);
+            i++;
+        }
+        else if(strcmp(header,"REGION:")==0){
+            strcpy(region_id,tail);
+            i++;
+        }
+        else if(strcmp(header,"BUCKET_AK:")==0){
+            strcpy(bucket_ak,tail);
+            i++;
+        }
+        else if(strcmp(header,"BUCKET_SK:")==0){
+            strcpy(bucket_sk,tail);
+            i++;
+        }
+        else{
+            continue;
+        }
+    }
+    fclose(file_p);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    if(i!=4){
+        strcpy(bucket_address,"");
+        strcpy(region_id,"");
+        strcpy(bucket_ak,"");
+        strcpy(bucket_sk,"");
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
 int get_cluster_bucket_id(char* workdir, char* crypto_keyfile, char* bucket_id){
     char vaultdir[DIR_LENGTH]="";
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
+    char bucket_ak[128]="";
+    char bucket_sk[128]="";
+    char bucket_region[32]="";
+    char bucket_address[32]="";
     char filename_temp[FILENAME_LENGTH]="";
     char md5sum[64]="";
     create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(filename_temp,"%s%sbucket_info.txt.tmp",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)==0){
+        if(get_bucket_info(workdir,crypto_keyfile,bucket_address,bucket_region,bucket_ak,bucket_sk)==0){
+            if(get_seq_string(bucket_address,'/',2,bucket_id)==0){
+                return 0;
+            }
+        }
+    }
     get_crypto_key(crypto_keyfile,md5sum);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         return -1;
     }
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_id);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     return 0;
 }
 
@@ -1391,8 +1509,19 @@ int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
 }
 
 int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir){
-    if(strcmp(user_name,"root")==0||strcmp(user_name,"user1")==0){
-        return 0;
+    char workdir[DIR_LENGTH]="";
+    char vaultdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    get_workdir(workdir,cluster_name);
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
+    if(strcmp(user_name,"root")==0){
+        if(file_exist_or_not(filename_temp)==0){
+            return 0;
+        }
+        else{
+            return 2;
+        }
     }
     char user_sshkey[FILENAME_LENGTH]="";
     sprintf(user_sshkey,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,user_name);
@@ -1804,19 +1933,19 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
     }
 }
 
-int usrmgr_prereq_check(char* workdir, char* option){
+int usrmgr_prereq_check(char* workdir){
     char confirm[64]="";
+    if(cluster_asleep_or_not(workdir)==0){
+        return -1;
+    }
     if(check_down_nodes(workdir)!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] There are down nodes. The user management efforts cannot take effect immediately.\n" RESET_DISPLAY);
-        if(strcmp(option,"list")==0){
-            return 1;
-        }
         printf(WARN_YELLO_BOLD "|          After any user management operations, you *MUST* run the commands below:\n");
-        printf("|            1. hpcopr wakeup all\n");
-        printf("|            2. hpcopr ssh user1\n");
+        printf("|            1. hpcopr wakeup --all\n");
+        printf("|            2. hpcopr ssh -u user1\n");
         printf("|            3. sudo hpcmgr connect\n");
         printf("|            4. sudo hpcmgr all\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "|          You can also exit now, run" RESET_DISPLAY HIGH_GREEN_BOLD " 'hpcopr wakeup all'" RESET_DISPLAY GENERAL_BOLD " and then manage the users.\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "|          You can also exit now, run" RESET_DISPLAY HIGH_GREEN_BOLD " 'hpcopr wakeup --all'" RESET_DISPLAY GENERAL_BOLD " and then manage the users.\n" RESET_DISPLAY);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted.\n");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
@@ -1923,12 +2052,14 @@ int current_cluster_or_not(char* current_indicator, char* cluster_name){
     return 0;
 }
 
-int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
-    int i, name_flag;
-    char real_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
-    if(strlen(cluster_name)==0){
-        generate_random_string(cluster_name_output);
-        name_flag=-1;
+int cluster_name_check(char* cluster_name){
+    char cluster_name_ext[64]="";
+    int i;
+    if(*(cluster_name+0)=='-'){
+        return -1;
+    }
+    if(strlen(cluster_name)<CLUSTER_ID_LENGTH_MIN||strlen(cluster_name)>CLUSTER_ID_LENGTH_MAX){
+        return -3;
     }
     for(i=0;i<strlen(cluster_name);i++){
         if(*(cluster_name+i)=='-'||*(cluster_name+i)=='0'||*(cluster_name+i)=='9'){
@@ -1938,32 +2069,22 @@ int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output){
             continue;
         }
         if(*(cluster_name+i)<'A'||*(cluster_name+i)>'z'){
-            return 127;
+            return -5;
         }
         else if(*(cluster_name+i)>'Z'&&*(cluster_name+i)<'a'){
-            return 127;
+            return -5;
+        }
+        else{
+            continue;
         }
     }
-    if(strlen(cluster_name)<CLUSTER_ID_LENGTH_MIN){
-        sprintf(cluster_name_output,"%s-hpcnow",cluster_name);
-        name_flag=1;
-    }
-    else if(strlen(cluster_name)>CLUSTER_ID_LENGTH_MAX){
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_name_output+i)=*(cluster_name+i);
-        }
-        *(cluster_name_output+CLUSTER_ID_LENGTH_MAX)='\0'; //THIS SHOULD BE SECURE.
-        name_flag=2;
-    }
-    else{
-        strcpy(cluster_name_output,cluster_name);
-        name_flag=0;
-    }
-    sprintf(real_cluster_name_with_prefix,"< cluster name: %s >",cluster_name_output);
-    if(find_multi_keys(ALL_CLUSTER_REGISTRY,real_cluster_name_with_prefix,"","","","")>0){
+    sprintf(cluster_name_ext,"< cluster name: %s >",cluster_name);
+    if(find_multi_keys(ALL_CLUSTER_REGISTRY,cluster_name_ext,"","","","")>0){
         return -127;
     }
-    return name_flag;
+    else{
+        return 0;
+    }
 }
 
 int check_and_cleanup(char* prev_workdir){
@@ -1975,7 +2096,7 @@ int check_and_cleanup(char* prev_workdir){
         }
         else{
             if(strcmp(current_workdir,prev_workdir)!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] The switched cluster is" RESET_DISPLAY HIGH_CYAN_BOLD " %s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,current_cluster_name);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The switched cluster is" RESET_DISPLAY HIGH_GREEN_BOLD " %s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,current_cluster_name);
             }
         }
     }

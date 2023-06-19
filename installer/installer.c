@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
 
 #ifdef _WIN32
 #include "..\\hpcopr\\now_macros.h"
@@ -64,16 +65,16 @@ void print_help_installer(void){
     printf("| Usage: Open a command prompt window *WITH* the Administrator Role.\n");
     printf("|        Type the command using either ways below:\n");
     printf("|     <> ABSOLUTE_PATH general_option advanced_option(s)\n");
-    printf("|         -> Example 1: C:\\Users\\ABC\\installer.exe install skiplic=n\n");
+    printf("|         -> Example 1: C:\\Users\\ABC\\installer.exe install --accept\n");
     printf("|     <> RELATIVE_PATH general_option advanced_options\n");
-    printf("|         -> Example 2: .\\installer.exe install cryptoloc=.\\now-crypto.exe\n");
+    printf("|         -> Example 2: .\\installer.exe install --cloc .\\now-crypto.exe\n");
 #else
     printf("| Usage: Open a Terminal.\n");
     printf("|        Type the command using either ways below:\n");
     printf("|     <> sudo ABSOLUTE_PATH general_option advanced_option(s)\n");
-    printf("|         -> Example 1: sudo /home/ABC/installer.exe install skiplic=n\n");
+    printf("|         -> Example 1: sudo /home/ABC/installer.exe install --accept\n");
     printf("|     <> sudo RELATIVE_PATH general_option advanced_option(s)\n");
-    printf("|         -> Example 2: sudo ./installer.exe install cryptoloc=./now-crypto.exe\n");
+    printf("|         -> Example 2: sudo ./installer.exe install --cloc ./now-crypto.exe\n");
 #endif
     printf("| general_option:\n");
     printf("|        install          : Install or repair the HPC-NOW Services on your device.\n");
@@ -84,18 +85,15 @@ void print_help_installer(void){
     printf("|        verlist          : Show the available version list of hpcopr.\n");
     printf(GENERAL_BOLD "|        * You MUST specify one of the general options above.\n" RESET_DISPLAY);
     printf("| advanced_option (for developers, optional):\n");
-    printf("|        skiplic=y|n      : Whether to skip reading the license terms.\n");
-    printf("|                             y - agree and skip reading the terms.\n");
-    printf("|                             n - default option, you can decide to accept.\n");
-    printf("|                                   Will exit if you don't accept the terms.\n");
-    printf("|        hpcoprloc=LOC    * Only valid for install or update option.\n");
+    printf("|        --accept         : accept the license terms and skip reading them.\n");
+    printf("|        --hloc LOC   * Only valid for install or update option.\n");
     printf("|                         : Provide your own location of hpcopr, both URL and local\n");
     printf("|                           filesystem path are accepted. You should guarantee that\n");
     printf("|                           the location points to a valid hpcopr executable.\n");
-    printf("|        cryptoloc=LOC       * Only valid for install or update option.\n");
+    printf("|        --cloc LOC   * Only valid for install or update option.\n");
     printf("|                         : Provide your own location of now-crypto.exe, similar to\n");
-    printf("|                           the hpcoprloc= parameter above.\n");
-    printf("|        hpcoprver=VERS   * Only valid when hpcoprloc is absent.\n");
+    printf("|                           the --hloc parameter above.\n");
+    printf("|        --hver VER   * Only valid when hpcoprloc is absent.\n");
     printf("|                         : Specify the version code of hpcopr, i.e. 0.2.0.0128\n");
     printf(GENERAL_BOLD "|        * You can specify any or all of the advanced options above.\n" RESET_DISPLAY);
 }
@@ -649,7 +647,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     printf(GENERAL_BOLD "|*                                C A U T I O N !                                  \n");
     printf("|*                                                                                 \n");
     printf("|*     YOU ARE UPDATING THE HPC-NOW SERVICES. THE CURRENT hpcopr BINARY WILL BE    \n");
-    printf("|*     REPLACED. IF YOU UPDATE WITH THE hpcoprloc= and/or cryptoloc=, PLEASE MAKE  \n");
+    printf("|*     REPLACED. IF YOU UPDATE WITH THE --hloc AND/ORr --cloc OPTIONS, PLEASE MAKE  \n");
     printf("|*     SURE THE LOCATION(S) POINT(S) TO VALID EXECUTABLE(S).                       \n");
     printf("|*                                                                                 \n");
     printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
@@ -718,7 +716,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf("|          1. The HPC-NOW Services have been installed previously.\n");
         printf("|          2. The specified location (if specified) is correct.\n");
         printf("|          3. Your device is connected to the internet.\n");
-        printf("|          4. Currently there is no 'hpcopr' thread(s) running.\n" RESET_DISPLAY);
+        printf("|          4. Currently there is no 'hpcopr' thread(s) running.\n");
+        printf("[ FATAL: ] Please check and retry.\n" RESET_DISPLAY);
 #ifdef _WIN32
         system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
         system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
@@ -805,53 +804,6 @@ int valid_loc_format_or_not(char* loc_string){
     return 1;
 }
 
-int split_parameter(char* param, char* param_head, char* param_tail){
-    int param_length=strlen(param);
-    char param_head_temp[32]="";
-    char param_tail_temp[LOCATION_LENGTH]="";
-    int i=0,j=0;
-    if(param_length<9){
-        return -1;
-    }
-    while(*(param+i)!='='&&i<10){
-        *(param_head_temp+i)=*(param+i);
-        i++;
-    }
-    *(param_head_temp+i)='\0';
-    if(strcmp(param_head_temp,"hpcoprloc")!=0&&strcmp(param_head_temp,"cryptoloc")!=0&&strcmp(param_head_temp,"skiplic")!=0&&strcmp(param_head_temp,"hpcoprver")!=0){
-        return -1;
-    }
-    if(strcmp(param_head_temp,"skiplic")==0){
-        if(strcmp(param,"skiplic=y")==0){
-            return 10;
-        }
-        else if(strcmp(param,"skiplic=n")==0){
-            return 12;
-        }
-        else{
-            return -1;
-        }
-    }
-    strcpy(param_head,param_head_temp);
-    i++;
-    do{
-        *(param_tail_temp+j)=*(param+i);
-        i++;
-        j++;
-    }while(i<param_length);
-    *(param_tail_temp+j)='\0';
-    strcpy(param_tail,param_tail_temp);
-    if(strcmp(param_head_temp,"hpcoprloc")==0){
-        return 2;
-    }
-    else if(strcmp(param_head_temp,"cryptoloc")==0){
-        return 4;
-    }
-    else{
-        return 6;
-    }
-}
-
 int get_valid_verlist(void){
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(cmdline,"curl -s %sverlist.txt",DEFAULT_URL_HPCOPR_LATEST);
@@ -880,16 +832,11 @@ int version_valid(char* hpcopr_ver){
 
 int main(int argc, char* argv[]){
     int run_flag=0;
-    int i;
-    int max_argc=0;
     int hpcopr_loc_flag=-1;
     int crypto_loc_flag=-1;
-    int skip_lic_flag=1;
     char hpcopr_loc[LOCATION_LENGTH]="";
     char now_crypto_loc[LOCATION_LENGTH]="";
     char hpcopr_ver[256]="";
-    char advanced_option_head[12]="";
-    char advanced_option_tail[256]="";
     print_header_installer();
     if(check_current_user_root()!=0){
         return -1;
@@ -923,10 +870,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"uninstall")==0){
-        if(argc>2&&split_parameter(argv[2],advanced_option_head,advanced_option_tail)==10){
-            skip_lic_flag=0;
-        }
-        if(skip_lic_flag==1){
+        if(cmd_flag_check(argc,argv,"--accept")!=0){
             run_flag=license_confirmation();
         }
         if(run_flag!=0){
@@ -943,28 +887,13 @@ int main(int argc, char* argv[]){
         print_tail_installer();
         return 1;
     }
-    if(argc>6){
-        max_argc=6;
-    }
-    else{
-        max_argc=argc;
-    }
-    for(i=2;i<max_argc;i++){
-        if(split_parameter(argv[i],advanced_option_head,advanced_option_tail)==10){
-            skip_lic_flag=0;
-        }
-        else if(split_parameter(argv[i],advanced_option_head,advanced_option_tail)==2){
-            hpcopr_loc_flag=valid_loc_format_or_not(advanced_option_tail);
-            strcpy(hpcopr_loc,advanced_option_tail);
-        }
-        else if(split_parameter(argv[i],advanced_option_head,advanced_option_tail)==4){
-            crypto_loc_flag=valid_loc_format_or_not(advanced_option_tail);
-            strcpy(now_crypto_loc,advanced_option_tail);
-        }
-        else if(split_parameter(argv[i],advanced_option_head,advanced_option_tail)==6){
-            strcpy(hpcopr_ver,advanced_option_tail);
-        }
-    }
+
+    cmd_keyword_check(argc,argv,"--hloc",hpcopr_loc);
+    cmd_keyword_check(argc,argv,"--cloc",now_crypto_loc);
+    cmd_keyword_check(argc,argv,"--hver",hpcopr_ver);
+    hpcopr_loc_flag=valid_loc_format_or_not(hpcopr_loc);
+    crypto_loc_flag=valid_loc_format_or_not(now_crypto_loc);
+
     if(hpcopr_loc_flag!=-1){
         strcpy(hpcopr_ver,"");
     }
@@ -984,7 +913,7 @@ int main(int argc, char* argv[]){
             }
         }
     }
-    if(skip_lic_flag==1){
+    if(cmd_flag_check(argc,argv,"--accept")!=0){
         if(license_confirmation()!=0){
             print_tail_installer();
             return 1;

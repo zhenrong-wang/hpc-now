@@ -96,6 +96,8 @@ echo -e "source /etc/profile" >> /root/.bashrc
 if [ -f /root/hostfile ]; then
   mkdir -p /hpc_data/root_data
   chmod -R 750 /hpc_data/root_data
+  mkdir -p /hpc_data/public
+  chmod -R 777 /hpc_data/public
 fi
 ########## Spread .ssh keys ###################
 echo -e "# $time_current Spawning ssh keys." >> ${logfile}

@@ -9,6 +9,7 @@
 #ifndef CLUSTER_GENERAL_FUNCS_H
 #define CLUSTER_GENERAL_FUNCS_H
 
+int add_to_cluster_registry(char* new_cluster_name, char* import_flag);
 int get_crypto_key(char* crypto_key_filename, char* md5sum);
 void create_and_get_stackdir(char* workdir, char* stackdir);
 void get_latest_hosts(char* stackdir, char* hostfile_latest);
@@ -24,6 +25,7 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
 int get_cpu_num(const char* vm_model);
 int get_compute_node_num(char* currentstate_file, char* option);
 int decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum);
+int decrypt_single_file_general(char* now_crypto_exec, char* source_file, char* target_file, char* md5sum);
 int decrypt_files(char* workdir, char* crypto_key_filename);
 void encrypt_and_delete(char* now_crypto_exec, char* filename, char* md5sum);
 int delete_decrypted_files(char* workdir, char* crypto_key_filename);
@@ -39,7 +41,7 @@ int cluster_asleep_or_not(char* workdir);
 int cluster_full_running_or_not(char* workdir);
 int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, int silent_flag);
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
-int get_vault_info(char* workdir, char* crypto_keyfile, char* root_flag);
+int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bucket_flag, char* root_flag);
 int check_pslock(char* workdir);
 int confirm_to_operate_cluster(char* current_cluster_name);
 int check_down_nodes(char* workdir);
@@ -47,6 +49,7 @@ int cluster_ssh(char* workdir, char* username);
 int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
 void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);
+int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, char* region_id, char* bucket_ak, char* bucket_sk);
 int get_cluster_bucket_id(char* workdir, char* crypto_keyfilke, char* bucket_id);
 int tail_f_for_windows(char* filename);
 int get_ucid(char* workdir, char* ucid_string);
@@ -63,7 +66,7 @@ int delete_user_from_registry(char* user_registry_file, char* username);
 int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char* username);
 int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, char* crypto_keyfile, char* option);
 int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, char* username, char* password);
-int usrmgr_prereq_check(char* workdir, char* option);
+int usrmgr_prereq_check(char* workdir);
 void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_flag);
 
 void get_workdir(char* cluster_workdir, char* cluster_name);
@@ -76,7 +79,7 @@ int create_cluster_registry(void);
  */
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag);
 int current_cluster_or_not(char* current_indicator, char* cluster_name);
-int cluster_name_check_and_fix(char* cluster_name, char* cluster_name_output);
+int cluster_name_check(char* cluster_name);
 int check_and_cleanup(char* prev_workdir);
 
 //int create_protection(char* workdir, int minutes);

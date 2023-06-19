@@ -15,6 +15,6 @@ int check_current_user(void);
 int install_bucket_clis(int silent_flag);
 int check_and_install_prerequisitions(int repair_flag);
 int command_name_check(char* command_name_input, char* command_prompt);
-int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name);
+int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name, char* invalid_cluster_name);
 
 #endif

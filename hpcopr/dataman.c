@@ -36,115 +36,41 @@ void unset_aws_bucket_envs(void){
 #endif
 }
 
-int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, char* region_id, char* bucket_ak, char* bucket_sk){
-    char cmdline[CMDLINE_LENGTH]="";
-    char filename_temp[FILENAME_LENGTH]="";
-    char md5sum[64]="";
-    char line_buffer[128]="";
-    char header[16]="";
-    char tail[64]="";
-    sprintf(filename_temp,"%s%svault%sbucket_info.txt.tmp",workdir,PATH_SLASH,PATH_SLASH);
-    get_crypto_key(crypto_keyfile,md5sum);
-    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
-    sprintf(filename_temp,"%s%svault%sbucket_info.txt",workdir,PATH_SLASH,PATH_SLASH);
-    FILE* file_p=fopen(filename_temp,"r");
-    int i=0;
-    if(file_p==NULL){
-        return -1;
-    }
-    while(!feof(file_p)){
-        fgetline(file_p,line_buffer);
-        get_seq_string(line_buffer,' ',1,header);
-        get_seq_string(line_buffer,' ',2,tail);
-        if(strcmp(header,"BUCKET:")==0){
-            strcpy(bucket_address,tail);
-            i++;
-        }
-        else if(strcmp(header,"REGION:")==0){
-            strcpy(region_id,tail);
-            i++;
-        }
-        else if(strcmp(header,"BUCKET_AK:")==0){
-            strcpy(bucket_ak,tail);
-            i++;
-        }
-        else if(strcmp(header,"BUCKET_SK:")==0){
-            strcpy(bucket_sk,tail);
-            i++;
-        }
-        else{
-            continue;
-        }
-    }
-    fclose(file_p);
-    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    if(i!=4){
-        strcpy(bucket_address,"");
-        strcpy(region_id,"");
-        strcpy(bucket_ak,"");
-        strcpy(bucket_sk,"");
-        return 1;
-    }
-    else{
-        return 0;
-    }
-}
-
-int bucket_path_check(char* path_string, char* real_path, char* hpc_user){
-    char header[16]="";
-    char tail[DIR_LENGTH]="";
-    get_seq_string(path_string,':',1,header);
-    get_seq_string(path_string,':',2,tail);
-    if(strcmp(header,"--b")!=0){
-        strcpy(real_path,path_string);
-        return 1;
-    }
-    else{
+void bucket_path_check(char* path_string, char* hpc_user, char* real_path){
+    if(*(path_string+0)!='/'){
         if(strcmp(hpc_user,"root")==0){
-            if(*(tail+0)!='/'){
-                sprintf(real_path,"/%s",tail);
-            }
-            else{
-                sprintf(real_path,"%s",tail);
-            }
+            sprintf(real_path,"/%s",path_string);
         }
         else{
-            if(*(tail+0)!='/'){
-                sprintf(real_path,"/%s/%s",hpc_user,tail);
-            }
-            else{
-                sprintf(real_path,"/%s%s",hpc_user,tail);
-            }
+            sprintf(real_path,"/%s/%s",hpc_user,path_string);
         }
-        return 0;
-    }
-}
-
-int rf_flag_parser(const char* rf_flag, const char* cloud_flag, char* real_rflag, char* real_fflag){
-    if(strcmp(rf_flag,"-r")!=0&&strcmp(rf_flag,"-rf")!=0&&strcmp(rf_flag,"-f")!=0){
-        strcpy(real_rflag,"");
-        strcpy(real_fflag,"");
-        return 1;
-    }
-    else if(strcmp(rf_flag,"-r")==0){
-        strcpy(real_rflag,"--recursive");
-        strcpy(real_fflag,"");
-    }
-    else if(strcmp(rf_flag,"-rf")==0){
-        strcpy(real_rflag,"--recursive");
-        strcpy(real_fflag,"--force");
     }
     else{
-        strcpy(real_rflag,"");
-        strcpy(real_fflag,"--force");
+        sprintf(real_path,"/%s%s",hpc_user,path_string);
     }
-    return 0;
 }
 
-int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_path, char* rf_flag, char* crypto_keyfile, char* cloud_flag){
+void rf_flag_parser(const char* rflag, const char* fflag, char* real_rflag, char* real_fflag){
+    if(strcmp(rflag,"recursive")!=0){
+        strcpy(real_rflag,"");
+    }
+    else{
+        strcpy(real_rflag,"--recursive");
+    }
+    if(strcmp(fflag,"force")!=0){
+        strcpy(real_fflag,"");
+    }
+    else{
+        strcpy(real_fflag,"--force");
+    }
+}
+
+int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_path, char* rflag, char* fflag, char* crypto_keyfile, char* cloud_flag, char* cmd_type){
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
         return -3;
+    }
+    if(strcmp(cmd_type,"put")!=0&&strcmp(cmd_type,"get")!=0&&strcmp(cmd_type,"copy")!=0){
+        return -5;
     }
     char bucket_address[64]="";
     char region_id[32]="";
@@ -152,24 +78,33 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
     char bucket_sk[128]="";
     char real_rflag[16]="";
     char real_fflag[16]="";
-    int path_flag1,path_flag2;
     char real_source_path[DIR_LENGTH]="";
     char real_target_path[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
         return -1;
     }
-    rf_flag_parser(rf_flag,cloud_flag,real_rflag,real_fflag);
+    rf_flag_parser(rflag,fflag,real_rflag,real_fflag);
     if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
         strcpy(real_fflag,"");
     }
-    path_flag1=bucket_path_check(source_path,real_source_path,hpc_user);
-    path_flag2=bucket_path_check(target_path,real_target_path,hpc_user);
+    if(strcmp(cmd_type,"put")==0){
+        local_path_parser(source_path,real_source_path);
+        bucket_path_check(target_path,hpc_user,real_target_path);
+    }
+    else if(strcmp(cmd_type,"get")==0){
+        bucket_path_check(source_path,hpc_user,real_source_path);
+        local_path_parser(target_path,real_target_path);
+    }
+    else{
+        bucket_path_check(source_path,hpc_user,real_source_path);
+        bucket_path_check(target_path,hpc_user,real_target_path);
+    }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
-        if(path_flag1==path_flag2){
+        if(strcmp(cmd_type,"copy")==0){
             sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
-        else if(path_flag1==1&&path_flag2==0){
+        else if(strcmp(cmd_type,"put")==0){
             sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s cp %s %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else{
@@ -177,10 +112,10 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        if(path_flag1==path_flag2){
+        if(strcmp(cmd_type,"copy")==0){
             sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s cp %s%s %s%s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
-        else if(path_flag1==1&&path_flag2==0){
+        else if(strcmp(cmd_type,"put")==0){
             sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s cp %s %s%s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else{
@@ -188,10 +123,10 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         }
     }
     else{
-        if(path_flag1==path_flag2){
+        if(strcmp(cmd_type,"copy")==0){
             sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 cp %s%s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
-        else if(path_flag1==1&&path_flag2==0){
+        else if(strcmp(cmd_type,"put")==0){
             sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 cp %s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else{
@@ -212,9 +147,12 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
     }
 }
 
-int bucket_rm(char* workdir, char* hpc_user, char* remote_path, char* rf_flag, char* crypto_keyfile, char* cloud_flag){
+int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, char* fflag, char* crypto_keyfile, char* cloud_flag, char* cmd_type){
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
         return -3;
+    }
+    if(strcmp(cmd_type,"delete")!=0&&strcmp(cmd_type,"list")!=0){
+        return -5;
     }
     char bucket_address[64]="";
     char region_id[32]="";
@@ -227,19 +165,34 @@ int bucket_rm(char* workdir, char* hpc_user, char* remote_path, char* rf_flag, c
     if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
         return -1;
     }
-    rf_flag_parser(rf_flag,cloud_flag,real_rflag,real_fflag);
+    rf_flag_parser(rflag,fflag,real_rflag,real_fflag);
     if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
         strcpy(real_fflag,"");
     }
-    bucket_path_check(remote_path,real_remote_path,hpc_user);
+    bucket_path_check(remote_path,hpc_user,real_remote_path);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
-        sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s rm %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
+        if(strcmp(cmd_type,"delete")==0){
+            sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s rm %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
+        }
+        else{
+            sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s ls %s%s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path);
+        }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s rm %s%s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
+        if(strcmp(cmd_type,"delete")==0){
+            sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s rm %s%s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
+        }
+        else{
+            sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s ls %s%s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag);
+        }
     }
     else{
-        sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 rm %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag);
+        if(strcmp(cmd_type,"delete")==0){
+            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 rm %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag);
+        }
+        else{
+            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 ls %s%s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag);
+        }
     }
     if(system(cmdline)!=0){
         if(strcmp(cloud_flag,"CLOUD_C")==0){
@@ -255,73 +208,19 @@ int bucket_rm(char* workdir, char* hpc_user, char* remote_path, char* rf_flag, c
     }
 }
 
-int bucket_mv(char* workdir, char* hpc_user, char* prev_path, char* new_path, char* rf_flag, char* crypto_keyfile, char* cloud_flag){
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
-        return -3;
-    }
-    char real_prev_path[DIR_LENGTH]="";
-    char real_new_path[DIR_LENGTH]="";
-    bucket_path_check(prev_path,real_prev_path,hpc_user);
-    bucket_path_check(new_path,real_new_path,hpc_user);
-    if(bucket_cp(workdir,hpc_user,real_prev_path,real_new_path,rf_flag,crypto_keyfile,cloud_flag)!=0){
-        return 1;
-    }
-    if(bucket_rm(workdir,hpc_user,real_prev_path,"-rf",crypto_keyfile,cloud_flag)!=0){
-        return 3;
-    }
-    return 0;
-}
-
-int bucket_ls(char* workdir, char* hpc_user, char* remote_path, char* rf_flag, char* crypto_keyfile, char* cloud_flag){
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
-        return -3;
-    }
-    char bucket_address[64]="";
-    char region_id[32]="";
-    char bucket_ak[128]="";
-    char bucket_sk[128]="";
-    char real_rflag[16]="";
-    char real_fflag[16]="";
-    char real_remote_path[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
-        return -1;
-    }
-    rf_flag_parser(rf_flag,cloud_flag,real_rflag,real_fflag);
-    if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
-        strcpy(real_fflag,"");
-    }
-    bucket_path_check(remote_path,real_remote_path,hpc_user);
-    if(strcmp(cloud_flag,"CLOUD_A")==0){
-        sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s ls %s%s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path);
-    }
-    else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s ls %s%s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag);
-    }
-    else{
-        sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 ls %s%s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag);
-    }
-    if(system(cmdline)!=0){
-        if(strcmp(cloud_flag,"CLOUD_C")==0){
-            unset_aws_bucket_envs();
-        }
-        return 1;
-    }
-    else{
-        if(strcmp(cloud_flag,"CLOUD_C")==0){
-            unset_aws_bucket_envs();
-        }
-        return 0;
-    }
-    return 0;
-}
-
-int direct_path_check(char* path_string, char* real_path, char* hpc_user){
-    char header[32]="";
+int direct_path_check(char* path_string, char* hpc_user, char* real_path){
+    char header[256]="";
     char tail[DIR_LENGTH]="";
-    get_seq_string(path_string,':',1,header);
-    get_seq_string(path_string,':',2,tail);
-    if(strcmp(header,"--home")==0){
+    int i=0;
+    int j;
+    while(*(path_string+i)!='/'&&i<strlen(path_string)){
+        *(header+i)=*(path_string+i);
+        i++;
+    }
+    for(j=i;j<strlen(path_string);j++){
+        *(tail+j-i)=*(path_string+j);
+    }
+    if(strcmp(header,"@h")==0){
         if(strcmp(hpc_user,"root")==0){
             sprintf(real_path,"/root/%s",tail);
         }
@@ -330,7 +229,7 @@ int direct_path_check(char* path_string, char* real_path, char* hpc_user){
         }
         return 0;
     }
-    else if(strcmp(header,"--data")==0){
+    else if(strcmp(header,"@d")==0){
         if(strcmp(hpc_user,"root")==0){
             sprintf(real_path,"/hpc_data/%s",tail);
         }
@@ -339,7 +238,7 @@ int direct_path_check(char* path_string, char* real_path, char* hpc_user){
         }
         return 0;
     }
-    else if(strcmp(header,"--apps")==0){
+    else if(strcmp(header,"@a")==0){
         if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
             sprintf(real_path,"/hpc_apps/%s",tail);
         }
@@ -348,7 +247,11 @@ int direct_path_check(char* path_string, char* real_path, char* hpc_user){
         }
         return 0;
     }
-    else if(strcmp(header,"--/")==0){
+    else if(strcmp(header,"@p")==0){
+        sprintf(real_path,"/hpc_data/public/%s",tail);
+        return 0;
+    }
+    else if(strcmp(header,"@R")==0){
         if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
             sprintf(real_path,"/%s",tail);
         }
@@ -363,7 +266,7 @@ int direct_path_check(char* path_string, char* real_path, char* hpc_user){
     }
 }
 
-int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_path, char* target_path, char* rf_flag, char* cmd_type){
+int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_path, char* target_path, char* recursive_flag, char* force_flag, char* cmd_type){
     if(strcmp(cmd_type,"mv")!=0&&strcmp(cmd_type,"cp")!=0){
         return -1;
     }
@@ -375,7 +278,7 @@ int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_p
     char remote_commands[CMDLINE_LENGTH]="";
 
     if(strcmp(cmd_type,"mv")==0){
-        if(strcmp(rf_flag,"-f")==0){
+        if(strcmp(force_flag,"force")==0){
             strcpy(real_rf_flag,"-f");
         }
         else{
@@ -383,22 +286,41 @@ int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_p
         }
     }
     else{
-        if(strcmp(rf_flag,"-r")==0||strcmp(rf_flag,"-f")||strcmp(rf_flag,"-rf")==0){
-            strcpy(real_rf_flag,rf_flag);
+        if(strcmp(force_flag,"force")==0&&strcmp(recursive_flag,"recursive")==0){
+            strcpy(real_rf_flag,"-rf");
         }
-        else{
+        else if(strcmp(force_flag,"force")!=0&&strcmp(recursive_flag,"recursive")!=0){
             strcpy(real_rf_flag,"");
         }
+        else if(strcmp(force_flag,"force")==0&&strcmp(recursive_flag,"recursive")!=0){
+            strcpy(real_rf_flag,"-f");
+        }
+        else{
+            strcpy(real_rf_flag,"-r");
+        }
     }
-    path_flag1=direct_path_check(source_path,real_source_path,hpc_user);
-    path_flag2=direct_path_check(target_path,real_target_path,hpc_user);
+    path_flag1=direct_path_check(source_path,hpc_user,real_source_path);
+    path_flag2=direct_path_check(target_path,hpc_user,real_target_path);
     if(strcmp(cmd_type,"mv")==0){
         if(path_flag1==path_flag2){
-            if(strcmp(hpc_user,"user1")==0||strcmp(hpc_user,"root")==0){
-                sprintf(remote_commands,"sudo mv %s %s %s &",real_source_path,real_target_path,real_rf_flag);
+            if(path_flag1==0){
+                if(strcmp(hpc_user,"user1")==0||strcmp(hpc_user,"root")==0){
+                    sprintf(remote_commands,"sudo mv %s %s %s &",real_source_path,real_target_path,real_rf_flag);
+                }
+                else{
+                    sprintf(remote_commands,"mv %s %s %s &",real_source_path,real_target_path,real_rf_flag);
+                }
             }
             else{
-                sprintf(remote_commands,"mv %s %s %s &",real_source_path,real_target_path,real_rf_flag);
+                if(strcmp(hpc_user,"user1")==0){
+                    sprintf(remote_commands,"sudo mv /home/user1/%s /home/user1/%s %s &",real_source_path,real_target_path,real_rf_flag);
+                }
+                else if(strcmp(hpc_user,"root")==0){
+                    sprintf(remote_commands,"mv /root/%s /root/%s %s &",real_source_path,real_target_path,real_rf_flag);
+                }
+                else{
+                    sprintf(remote_commands,"mv /home/%s/%s /home/%s/%s %s &",hpc_user,real_source_path,hpc_user,real_target_path,real_rf_flag);
+                }
             }
             run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,0,1);
         }
@@ -431,7 +353,7 @@ int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_p
     }
 }
 
-int direct_rm_ls_mkdir(char* workdir, char* hpc_user, char* sshkey_dir, char* remote_path, char* rf_flag, char* cmd_type){
+int direct_rm_ls_mkdir(char* workdir, char* hpc_user, char* sshkey_dir, char* remote_path, char* force_flag, char* recursive_flag, char* cmd_type){
     if(strcmp(cmd_type,"rm")!=0&&strcmp(cmd_type,"ls")!=0&&strcmp(cmd_type,"mkdir")!=0){
         return -1;
     }
@@ -439,12 +361,25 @@ int direct_rm_ls_mkdir(char* workdir, char* hpc_user, char* sshkey_dir, char* re
     char real_remote_path[DIR_LENGTH]="";
     char real_rf_flag[4]="";
     char remote_commands[CMDLINE_LENGTH]="";
-    direct_path_check(remote_path,real_remote_path,hpc_user);
-    if(strcmp(rf_flag,"-r")!=0&&strcmp(rf_flag,"-f")!=0&&strcmp(rf_flag,"-rf")!=0){
+    if(direct_path_check(remote_path,hpc_user,real_remote_path)!=0){
+        if(strcmp(hpc_user,"root")==0){
+            sprintf(real_remote_path,"/root/%s",remote_path);
+        }
+        else{
+            sprintf(real_remote_path,"/home/%s/%s",hpc_user,remote_path);
+        }
+    }
+    if(strcmp(force_flag,"force")==0&&strcmp(recursive_flag,"recursive")==0){
+        strcpy(real_rf_flag,"-rf");
+    }
+    else if(strcmp(force_flag,"force")!=0&&strcmp(recursive_flag,"recursive")!=0){
         strcpy(real_rf_flag,"");
     }
+    else if(strcmp(force_flag,"force")==0&&strcmp(recursive_flag,"recursive")!=0){
+        strcpy(real_rf_flag,"-f");
+    }
     else{
-        strcpy(real_rf_flag,rf_flag);
+        strcpy(real_rf_flag,"-r");
     }
     if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
         if(strcmp(cmd_type,"rm")==0){
@@ -484,7 +419,7 @@ int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char
     int run_flag=0;
     char real_remote_path[DIR_LENGTH]="";
     char remote_commands[CMDLINE_LENGTH]="";
-    direct_path_check(remote_path,real_remote_path,hpc_user);
+    direct_path_check(remote_path,hpc_user,real_remote_path);
     if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
         if(strcmp(cmd_type,"tail")!=0){
             sprintf(remote_commands,"sudo %s %s",cmd_type,real_remote_path);
@@ -510,18 +445,18 @@ int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char
     }
 }
 
-int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* bucket_path, char* remote_path, char* rf_flag, char* cloud_flag, char* cmd_type, char* crypto_keyfile){
+int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* source_path, char* dest_path, char* rflag, char* fflag, char* cloud_flag, char* crypto_keyfile, char* cmd_type){
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
         return -3;
     }
-    if(strcmp(cmd_type,"rdownload")!=0&&strcmp(cmd_type,"rupload")!=0){
+    if(strcmp(cmd_type,"rput")!=0&&strcmp(cmd_type,"rget")!=0){
         return -5;
     }
     int run_flag=0;
     char real_rflag[16]="";
     char real_fflag[16]="";
-    char real_bucket_path[DIR_LENGTH]="";
-    char real_remote_path[DIR_LENGTH]="";
+    char real_source_path[DIR_LENGTH]="";
+    char real_dest_path[DIR_LENGTH]="";
     char remote_commands[CMDLINE_LENGTH]="";
     char real_rf_flag[4]="";
     char bucket_address[32]="";
@@ -532,37 +467,49 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* buck
 //        printf("\n%d\n",get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk));
         return -1;
     }
-    if(bucket_path_check(bucket_path,real_bucket_path,hpc_user)==1||direct_path_check(remote_path,real_remote_path,hpc_user)==1){
-        return -7;
-    }
-    if(rf_flag_parser(rf_flag,cloud_flag,real_rflag,real_fflag)==1){
-        strcpy(real_rf_flag,"");
+    if(strcmp(cmd_type,"rput")==0){
+        direct_path_check(source_path,hpc_user,real_source_path);
+        bucket_path_check(dest_path,hpc_user,real_dest_path);
     }
     else{
-        strcpy(real_rf_flag,rf_flag);
+        bucket_path_check(source_path,hpc_user,real_source_path);
+        direct_path_check(dest_path,hpc_user,real_dest_path);
+    }
+    rf_flag_parser(rflag,fflag,real_rflag,real_fflag);
+    if(strlen(real_rflag)!=0&&strlen(real_fflag)!=0){
+        strcpy(real_rf_flag,"-rf");
+    }
+    else if(strlen(real_rflag)!=0&&strlen(real_fflag)==0){
+        strcpy(real_rf_flag,"-r");
+    }
+    else if(strlen(real_rflag)==0&&strlen(real_fflag)!=0){
+        strcpy(real_rf_flag,"-f");
+    }
+    else{
+        strcpy(real_rf_flag,"");
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
-        if(strcmp(cmd_type,"rdownload")==0){
-            sprintf(remote_commands,"ossutil cp %s%s %s %s %s",bucket_address,real_bucket_path,real_remote_path,real_rflag,real_fflag);
+        if(strcmp(cmd_type,"rget")==0){
+            sprintf(remote_commands,"ossutil cp %s%s %s %s %s",bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"ossutil cp %s %s%s %s %s",real_remote_path,bucket_address,real_bucket_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"ossutil cp %s %s%s %s %s",real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        if(strcmp(cmd_type,"rdownload")==0){
-            sprintf(remote_commands,"coscmd download %s %s %s",real_rf_flag,real_bucket_path,real_remote_path);
+        if(strcmp(cmd_type,"rget")==0){
+            sprintf(remote_commands,"coscmd download %s %s %s",real_rf_flag,real_source_path,real_dest_path);
         }
         else{
-            sprintf(remote_commands,"coscmd upload %s %s %s",real_rf_flag,real_remote_path,real_bucket_path);
+            sprintf(remote_commands,"coscmd upload %s %s %s",real_rf_flag,real_source_path,real_dest_path);
         }
     }
     else{
-        if(strcmp(cmd_type,"rdownload")==0){
-            sprintf(remote_commands,"s3cmd get %s%s %s %s %s",bucket_address,real_bucket_path,real_remote_path,real_rflag,real_fflag);
+        if(strcmp(cmd_type,"rget")==0){
+            sprintf(remote_commands,"s3cmd get %s%s %s %s %s",bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"s3cmd put %s %s%s %s %s",real_remote_path,bucket_address,real_bucket_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"s3cmd put %s %s%s %s %s",real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
 //    printf("%s ---\n",remote_commands);

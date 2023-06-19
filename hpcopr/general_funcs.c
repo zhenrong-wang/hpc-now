@@ -26,6 +26,73 @@
 #include "now_macros.h"
 #include "general_funcs.h"
 
+char command_flags[CMD_FLAG_NUM][16]={
+    "--all",
+    "--list",
+    "--force",
+    "--recursive",
+    "-r",
+    "-rf",
+    "-f",
+    "--print",
+    "--read",
+    "--std",
+    "--err",
+    "--this",
+    "--hist",
+    "--mc",
+    "--mcdb",
+    "--bkey",
+    "--rkey",
+    "--admin",
+    "--accept"
+};
+
+char command_keywords[CMD_KWDS_NUM][16]={
+    "-c",
+    "-u",
+    "-p",
+    "--s",
+    "--d",
+    "--t",
+    "--cmd",
+    "--dcmd",
+    "--ucmd",
+    "--level",
+    "--cname",
+    "--ak",
+    "--sk",
+    "--echo",
+    "--ul",
+    "--key",
+    "--rg",
+    "--az",
+    "--nn",
+    "--un",
+    "--mi",
+    "--ci",
+    "--os",
+    "--ht",
+    "--conf",
+    "--hloc",
+    "--cloc",
+    "--hver",
+};
+
+int string_to_positive_num(char* string){
+    int i,sum=0;
+    int length=strlen(string);
+    for(i=0;i<length;i++){
+        if(*(string+i)<'0'||*(string+i)>'9'){
+            return -1;
+        }
+    }
+    for(i=0;i<length;i++){
+        sum+=(*(string+i)-'0')*pow(10,length-i-1);
+    }
+    return sum;
+}
+
 void reset_string(char* orig_string){
     int length=strlen(orig_string);
     int i;
@@ -698,4 +765,102 @@ int insert_lines(char* filename, char* keyword, char* insert_string){
     sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
+}
+
+int local_path_parser(char* path_string, char* path_final){
+#ifdef _WIN32
+    return 0;
+#endif
+    int i;
+    char path_temp[DIR_LENGTH]="";
+    if(strlen(path_string)==0){
+        strcpy(path_final,"");
+        return 0;
+    }
+    if(*(path_string+0)=='~'){
+        for(i=1;i<strlen(path_string);i++){
+            *(path_temp+i-1)=*(path_string+i);
+        }
+#ifdef __linux__
+//        printf("%s       %s    ppppp\n",path_temp,path_final);
+        sprintf(path_final,"/home/hpc-now%s",path_temp);
+//        printf("%s       %s    ppppp\n",path_temp,path_final);
+#elif __APPLE__
+        sprintf(path_final,"/Users/hpc-now%s",path_temp);
+#else
+        strcpy(path_final,path_string);
+        return 1;
+#endif
+    }
+    else{
+        strcpy(path_final,path_string);
+    }
+    return 0;
+}
+
+int file_creation_test(char* filename){
+    char cmdline[CMDLINE_LENGTH]="";
+    if(strlen(filename)==0){
+        return -1;
+    }
+    if(file_exist_or_not(filename)==0){
+        return 1;
+    }
+    FILE* file_p=fopen(filename,"w+");
+    if(file_p==NULL){
+        return 3;
+    }
+    fclose(file_p);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    return 0;
+}
+
+int cmd_flg_or_not(char* argv){
+    int i;
+    for(i=0;i<CMD_FLAG_NUM;i++){
+        if(strcmp(argv,command_flags[i])==0){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int cmd_key_or_not(char* argv){
+    int i;
+    for(i=0;i<CMD_KWDS_NUM;i++){
+        if(strcmp(argv,command_keywords[i])==0){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int cmd_flag_check(int argc, char** argv, char* flag_string){
+    int i;
+    for(i=2;i<argc;i++){
+        if(strcmp(argv[i],flag_string)==0){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string){
+    int i,j;
+    for(i=2;i<argc-1;i++){
+        if(strcmp(argv[i],key_word)==0){
+            j=i+1;
+            if(cmd_flg_or_not(argv[j])!=0&&cmd_key_or_not(argv[j])!=0){
+                strcpy(kwd_string,argv[j]);
+                return 0;
+            }
+            else{
+                strcpy(kwd_string,"");
+                return 1;
+            }
+        }
+    }
+    strcpy(kwd_string,"");
+    return 1;
 }

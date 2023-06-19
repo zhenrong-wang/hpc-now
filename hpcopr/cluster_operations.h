@@ -11,7 +11,6 @@
 
 int exit_current_cluster(void);
 int switch_to_cluster(char* target_cluster_name);
-int add_to_cluster_registry(char* new_cluster_name);
 int delete_from_cluster_registry(char* deleted_cluster_name);
 int list_all_cluster_names(int header_flag);
 int glance_clusters(char* target_cluster_name, char* crypto_keyfile);

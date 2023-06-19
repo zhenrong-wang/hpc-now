@@ -38,9 +38,9 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
     system(cmdline);
     if(strlen(export_dest)==0){
         printf(GENERAL_BOLD "\n[ -DONE- ]" RESET_DISPLAY " You can also export the latest logs to a file.\n");
-        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr history history.csv" RESET_DISPLAY " .\n");
-        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr usage usage.csv" RESET_DISPLAY " .\n");
-        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr syserr syserr.txt" RESET_DISPLAY " .\n");
+        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr history --d history.csv" RESET_DISPLAY " .\n");
+        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr usage --d usage.csv" RESET_DISPLAY " .\n");
+        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr syserr --d syserr.txt" RESET_DISPLAY " .\n");
         return 0;
     }
     else{
@@ -58,18 +58,28 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
     }
 }
 
-int write_operation_log(char* cluster_name, char* operation_logfile, char* operation, char* description, int runflag){
+int write_operation_log(char* cluster_name, char* operation_logfile, int argc, char** argv, char* description, int runflag){
     time_t current_time_long;
     struct tm* time_p=NULL;
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
+    char cmdline[CMDLINE_LENGTH]="";
+    int i,j,k=0;
+    for(i=0;i<argc;i++){
+        for(j=0;j<strlen(argv[i]);j++){
+            *(cmdline+k)=*(argv[i]+j);
+            k++;
+        }
+        *(cmdline+k)=' ';
+        k++;
+    }
     FILE* file_p=fopen(operation_logfile,"a+");
     if(file_p==NULL){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to write operation log to the records. The cluster operation may\n");
         printf("|          not be affected, but will not be recorded to your system.\n" RESET_DISPLAY);
         return -1;
     }
-    fprintf(file_p,"%d-%d-%d,%d:%d:%d,%s,%s,%s,%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,cluster_name,operation,description,runflag);
+    fprintf(file_p,"%d-%d-%d,%d:%d:%d,%s,%s,%s,%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,cluster_name,cmdline,description,runflag);
     fclose(file_p);
     return 0;
 }
