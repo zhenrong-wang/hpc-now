@@ -204,21 +204,53 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
     }
 }
 
-void activate_sshkey(char* ssh_privkey){
+int activate_sshkey(char* ssh_privkey){
+    if(file_exist_or_not(ssh_privkey)!=0){
+        return -1;
+    }
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-        sprintf(cmdline,"takeown /f %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        sprintf(cmdline,"icacls %s /c /t /inheritance:d %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        sprintf(cmdline,"icacls %s /c /t /remove:g Users %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        sprintf(cmdline,"icacls %s /c /t /remove:g \"Authenticated Users\" %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    FILE* file_p=NULL;
+    char group_and_user[64]="";
+    char line_seq_buffer[256]="";
+    char line_seq_buffer2[128]="";
+    char line_buffer[512]="";
+    sprintf(cmdline,"takeown /f %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"icacls %s /c /t /inheritance:d %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"icacls %s /c /t /remove:g Users %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"icacls %s /c /t /remove:g \"Authenticated Users\" %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"icacls %s /c /t /remove:g Administrators %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"icacls %s > c:\\programdata\\hpc-now\\perm.txt",ssh_privkey);
+    system(cmdline);
+    file_p=fopen("c:\\programdata\\hpc-now\\perm.txt","r");
+    if(file_p==NULL){
+        return -3;
+    }
+    while(!feof(file_p)){
+        fgetline(file_p,line_buffer);
+        get_seq_string(line_buffer,' ',2,line_seq_buffer);
+        get_seq_string(line_seq_buffer,'\\',2,line_seq_buffer2);
+        get_seq_string(line_seq_buffer2,':',1,group_and_user);
+        if(strcmp(group_and_user,"hpc-now")!=0&&strlen(group_and_user)!=0){
+            sprintf(cmdline,"icacls %s /c /t /remove %s %s",ssh_privkey,group_and_user,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+        }
+    }
+    fclose(file_p);
+    sprintf(cmdline,"%s c:\\programdata\\hpc-now\\perm.txt %s",DELETE_FILE_CMD,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
 #else
-        sprintf(cmdline,"chmod 600 %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    sprintf(cmdline,"chown -R hpc-now:hpc-now %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(cmdline,"chmod 600 %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
 #endif
+    return 0;
 }
 
 int get_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){

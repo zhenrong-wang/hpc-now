@@ -377,7 +377,7 @@ next_user:
         return 1;
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",cluster_name);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n\n",cluster_name);
         printf(GENERAL_BOLD "|       +- Key File" RESET_DISPLAY "       : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",real_trans_keyfile);
         printf(GENERAL_BOLD "|       +- Exported File" RESET_DISPLAY "  : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",export_filename);
         printf(GENERAL_BOLD "|       +- User List" RESET_DISPLAY "      : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",user_list_buffer);
@@ -414,7 +414,7 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
 
     local_path_parser(zip_file,filename_temp);
     if(strlen(filename_temp)==0||file_empty_or_not(filename_temp)<1){
-        printf("[ -INFO- ] Please input the path of the now-cluster file.\n");
+        printf("[ -INFO- ] Please input the path of the now-cluster file. i.e. ~/import.now, d:\\import.now\n");
         printf("[ INPUT: ] ");
         fflush(stdin);
         scanf("%s",filename_temp);
@@ -431,10 +431,10 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     else{
         strcpy(real_zipfile,filename_temp);
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the specified zip file: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",real_zipfile);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the specified now-cluster file: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",real_zipfile);
     local_path_parser(trans_keyfile,filename_temp);
     if(strlen(filename_temp)==0||file_empty_or_not(filename_temp)<1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the path of the import key file.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the path of the import key file. i.e. ~/import.key, d:\\import.key\n");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY );
         fflush(stdin);
         scanf("%s",filename_temp);
@@ -477,7 +477,7 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
         }
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " has already been imported to this environment.\n",cluster_name_buffer);
-            printf("|          Would you like to replace it? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY "is accepted to continue.\n");
+            printf("|          Would you like to replace it? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continue.\n");
             printf("[ INPUT: ] ");
             fflush(stdin);
             scanf("%s",doubleconfirm);
@@ -531,11 +531,11 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     while(!feof(file_p)){
         fgetline(file_p,user_line_buffer);
         get_seq_string(user_line_buffer,' ',2,username_temp);
-        sprintf(filename_temp_2,"%s%s.key",cluster_sshkey_dir,PATH_SLASH);
+        sprintf(filename_temp_2,"%s%s%s.key",cluster_sshkey_dir,PATH_SLASH,username_temp);
         activate_sshkey(filename_temp_2);
     }
     delete_decrypted_files(workdir,crypto_keyfile);
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster %s has been imported.\n",cluster_name_buffer);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster %s has been imported.\n\n",cluster_name_buffer);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Import Summary :\n");
     printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Cluster Name   : %s\n",cluster_name_buffer);
     printf(GENERAL_BOLD "|         " RESET_DISPLAY " User List      : \n");
