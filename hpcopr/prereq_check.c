@@ -261,7 +261,7 @@ awscli:
         system(cmdline);
     }
 #elif _WIN32
-    if(system("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe --version > nul 2>&1")!=0){
+    if(system("'C:\\\"Program Files\"\\Amazon\\AWSCLIV2\\aws.exe' --version > nul 2>&1")!=0){
         if(silent_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Please run the installer update to fix this issue.\n" RESET_DISPLAY);
         }
@@ -753,7 +753,7 @@ int check_and_install_prerequisitions(int repair_flag){
 
     flag=install_bucket_clis(force_repair_flag);
     if(flag!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] IMPORTANT! The dataman services may not work properly." RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] IMPORTANT! The dataman services may not work properly.\n" RESET_DISPLAY);
     }
     if(folder_exist_or_not(sshkey_dir)!=0){
         sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,sshkey_dir,SYSTEM_CMD_REDIRECT);
