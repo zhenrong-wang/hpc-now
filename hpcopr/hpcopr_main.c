@@ -1644,7 +1644,6 @@ int main(int argc, char* argv[]){
         cmd_keyword_check(argc,argv,"--conf",string_temp);
         cmd_keyword_check(argc,argv,"--ht",string_temp2);
         run_flag=reconfigure_compute_node(workdir,crypto_keyfile,string_temp,string_temp2);
-        sprintf(string_temp2,"%s %s",argv[1],string_temp);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;
@@ -1657,7 +1656,6 @@ int main(int argc, char* argv[]){
         }
         cmd_keyword_check(argc,argv,"--conf",string_temp);
         run_flag=reconfigure_master_node(workdir,crypto_keyfile,string_temp);
-        sprintf(string_temp,"%s %s",argv[1],string_temp);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;

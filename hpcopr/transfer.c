@@ -22,7 +22,7 @@ int get_cluster_name_import(char* cluster_name_output, char* tmp_top_output, cha
     char dir_win[DIR_LENGTH]="";
     char dir_lin[DIR_LENGTH]="";
     char dir_dwn[DIR_LENGTH]="";
-    char dir_top[DIR_LENGTH]="";
+    char dir_top[DIR_LENGTH_EXT]="";
     char cluster_name_buffer[512]="";
     char cluster_name_flag_header[1024]="";
     FILE* file_p=NULL;
@@ -112,9 +112,9 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char current_vaultdir[DIR_LENGTH]="";
     char current_sshdir[DIR_LENGTH]="";
     char tmp_root[DIR_LENGTH]="";
-    char tmp_stackdir[DIR_LENGTH]="";
-    char tmp_vaultdir[DIR_LENGTH]="";
-    char tmp_sshdir[DIR_LENGTH]="";
+    char tmp_stackdir[DIR_LENGTH_EXT]="";
+    char tmp_vaultdir[DIR_LENGTH_EXT]="";
+    char tmp_sshdir[DIR_LENGTH_EXT]="";
     char cmdline[CMDLINE_LENGTH]="";
     char source_file[FILENAME_LENGTH]="";
     char target_file[FILENAME_LENGTH]="";
@@ -125,8 +125,8 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char username_temp[USERNAME_LENGTH_MAX]="";
     char username_temp_2[USERNAME_LENGTH_MAX]="";
     char real_trans_keyfile[FILENAME_LENGTH]="";
-    char real_export_file[FILENAME_LENGTH]="";
-    char real_export_folder[FILENAME_LENGTH]="";
+    char real_export_file[FILENAME_LENGTH_EXT]="";
+    char real_export_folder[FILENAME_LENGTH_EXT]="";
     char user_line_buffer[256]="";
     char real_user_list[1024]="";
     char md5sum_current[64]="";
