@@ -9,6 +9,7 @@
 #ifndef CLUSTER_GENERAL_FUNCS_H
 #define CLUSTER_GENERAL_FUNCS_H
 
+int cluster_role_detect(char* workdir, char* cluster_role);
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag);
 int get_crypto_key(char* crypto_key_filename, char* md5sum);
 void create_and_get_stackdir(char* workdir, char* stackdir);

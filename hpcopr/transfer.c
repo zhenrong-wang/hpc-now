@@ -163,6 +163,8 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     if(strcmp(user_list_buffer,"ALL")==0||strcmp(user_list_buffer,"all")==0||strcmp(user_list_buffer,"All")==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Exporting *ALL* users of cluster %s . NOT RECOMMENDED!\n" RESET_DISPLAY,cluster_name);
         strcpy(real_user_list,"all");
+        strcpy(admin_flag,"admin");
+        user1_flag=1;
     }
     else{
         export_user_num=user_list_check(cluster_name,user_list_buffer,real_user_list,&user1_flag);
@@ -291,8 +293,8 @@ next_user:
         }while(strlen(username_temp)!=0);
         fclose(file_p_tmp);
     }
-    if(strcmp(admin_flag,"admin")==0||strcmp(real_user_list,"all")==0){
-        if(strcmp(real_user_list,"all")==0||user1_flag==1){
+    if(strcmp(admin_flag,"admin")==0){
+        if(user1_flag==1){
             sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",current_vaultdir,PATH_SLASH);
             if(decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_current)==0){
                 sprintf(cmdline,"%s %s%sCLUSTER_SUMMARY.txt %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);

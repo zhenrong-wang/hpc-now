@@ -224,6 +224,7 @@ int main(int argc, char* argv[]){
     char string_temp2[256]="";
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
+    char cluster_role[8]="";
     print_header();
 
 #ifdef _WIN32
@@ -288,7 +289,7 @@ int main(int argc, char* argv[]){
         system(cmdline);
     }
 
-    command_flag=command_parser(argc,argv,command_name_prompt,workdir,cluster_name,invalid_cluster_name);
+    command_flag=command_parser(argc,argv,command_name_prompt,workdir,cluster_name,cluster_role,invalid_cluster_name);
     if(command_flag==-1){
         print_help("all");
         return 0;

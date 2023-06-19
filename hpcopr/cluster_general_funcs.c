@@ -23,6 +23,34 @@
 #include "cluster_general_funcs.h"
 #include "general_print_info.h"
 
+int cluster_role_detect(char* workdir, char* cluster_role){
+    char vaultdir[DIR_LENGTH]="";
+    char cloud_secret_file[FILENAME_LENGTH]="";
+    char cluster_summary[FILENAME_LENGTH]="";
+    char user_passwords[FILENAME_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    if(cluster_empty_or_not(workdir)==0){
+        return -1;
+    }
+    sprintf(cloud_secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    sprintf(cluster_summary,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
+    sprintf(user_passwords,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
+    if(file_empty_or_not(cloud_secret_file)>1){
+        strcpy(cluster_role,"opr");
+        return 0;
+    }
+    if(file_empty_or_not(cluster_summary)>1){
+        strcpy(cluster_role,"admin");
+        return 0;
+    }
+    if(file_empty_or_not(cluster_summary)>1){
+        strcpy(cluster_role,"user");
+        return 0;
+    }
+    strcpy(cluster_role,"invalid");
+    return 1;
+}
+
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag){
     char* cluster_registry=ALL_CLUSTER_REGISTRY;
     FILE* file_p=fopen(cluster_registry,"a+");
@@ -1260,18 +1288,12 @@ int cluster_ssh(char* workdir, char* username){
     file_p=fopen(statefile,"r");
     fgetline(file_p,master_address);
     fclose(file_p);
-    if(strlen(username)==0){
-        sprintf(private_sshkey,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
-        sprintf(cmdline,"ssh -i %s -o StrictHostKeyChecking=no root@%s",private_sshkey,master_address);
+    get_cluster_name(cluster_name,workdir);
+    sprintf(private_sshkey,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,username);
+    if(file_exist_or_not(private_sshkey)!=0){
+        return -3;
     }
-    else{
-        get_cluster_name(cluster_name,workdir);
-        sprintf(private_sshkey,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,username);
-        if(file_exist_or_not(private_sshkey)!=0){
-            return -3;
-        }
-        sprintf(cmdline,"ssh -i %s -o StrictHostKeyChecking=no %s@%s",private_sshkey,username,master_address);
-    }
+    sprintf(cmdline,"ssh -i %s -o StrictHostKeyChecking=no %s@%s",private_sshkey,username,master_address);
     return system(cmdline);
 }
 

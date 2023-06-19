@@ -849,13 +849,14 @@ int command_name_check(char* command_name_input, char* command_prompt){
     return 200+closest;
 }
 
-int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name, char* invalid_cluster_name){
+int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name, char* cluster_role, char* invalid_cluster_name){
     int command_flag=0;
     char temp_cluster_name[128]="";
     if(argc<2){
         strcpy(command_name_prompt,"");
         strcpy(workdir,"");
         strcpy(cluster_name,"");
+        strcpy(cluster_role,"");
         return -1;
     }
     command_flag=command_name_check(argv[1],command_name_prompt);
@@ -863,18 +864,21 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
         strcpy(workdir,"");
         strcpy(cluster_name,"");
         strcpy(invalid_cluster_name,"");
+        strcpy(cluster_role,"");
         return command_flag;
     }
     if(cmd_keyword_check(argc,argv,"-c",temp_cluster_name)==0){
         if(cluster_name_check(temp_cluster_name)!=-127){
             strcpy(workdir,"");
             strcpy(invalid_cluster_name,temp_cluster_name);
+            strcpy(cluster_role,"");
             return -3;
         }
         else{
             strcpy(cluster_name,temp_cluster_name);
             get_workdir(workdir,cluster_name);
             strcpy(invalid_cluster_name,"");
+            cluster_role_detect(workdir,cluster_role);
             return 2;
         }
     }
@@ -883,9 +887,11 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
             strcpy(workdir,"");
             strcpy(cluster_name,"");
             strcpy(invalid_cluster_name,"");
+            strcpy(cluster_role,"");
             return -5;
         }
         else{
+            cluster_role_detect(workdir,cluster_role);
             return 0;
         }
     }
