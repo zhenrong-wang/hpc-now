@@ -323,8 +323,6 @@ next_user:
     system(cmdline);
     sprintf(cmdline,"%s %s%scurrentstate %s%s %s",COPY_FILE_CMD,current_stackdir,PATH_SLASH,tmp_stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%scompute_template %s%s %s",COPY_FILE_CMD,current_stackdir,PATH_SLASH,tmp_stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
     sprintf(filename_temp,"%s%sterraform.tfstate",tmp_stackdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
@@ -555,15 +553,13 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     return 0;
 }
 
-int update_cluster_status(char* cluster_name, char* currentstate, char* compute_template){
+int update_cluster_status(char* cluster_name, char* currentstate){
     char workdir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     get_workdir(workdir,cluster_name);
     create_and_get_stackdir(workdir,stackdir);
     sprintf(cmdline,"%s %s %s%scurrentstate %s",COPY_FILE_CMD,currentstate,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(cmdline,"%s %s %s%scompute_template %s",COPY_FILE_CMD,compute_template,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 0;
 }

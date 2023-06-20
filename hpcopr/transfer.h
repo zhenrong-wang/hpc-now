@@ -13,6 +13,6 @@ int get_cluster_name_import(char* cluster_name_output, char* tmp_top_output, cha
 int user_list_check(char* cluster_name, char* user_list_read, char* user_list_final, int* user1_flag);
 int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* crypto_keyfile, char* trans_keyfile, char* export_target_file);
 int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile);
-int update_cluster_status(char* cluster_name, char* currentstate, char* compute_template);
+int update_cluster_status(char* cluster_name, char* currentstate);
 
 #endif

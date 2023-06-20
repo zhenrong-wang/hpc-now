@@ -949,17 +949,15 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
 
 int cluster_empty_or_not(char* workdir){
     char statefile[FILENAME_LENGTH]="";
-    char templatefile[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char dot_terraform[FILENAME_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
-    sprintf(templatefile,"%s%scompute_template",stackdir,PATH_SLASH);
     sprintf(dot_terraform,"%s%s.terraform",stackdir,PATH_SLASH);
     if(folder_exist_or_not(dot_terraform)!=0){
         return 0;
     }
-    if(file_empty_or_not(statefile)<1&&file_empty_or_not(templatefile)<1){
+    if(file_empty_or_not(statefile)<1){
         return 0;
     }
     else{
