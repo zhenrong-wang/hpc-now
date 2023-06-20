@@ -75,7 +75,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "export,gen,CNAME",
     "import,gen,NULL",
     "exit-current,gen,NULL",
-    "remove,opr,CNAME",
+    "remove,gen,CNAME",
     "help,gen,NULL",
     "usage,gen,NULL",
     "history,gen,NULL",
