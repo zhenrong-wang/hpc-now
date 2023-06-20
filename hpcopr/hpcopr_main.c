@@ -57,50 +57,58 @@ char md5_qcloud_tf_zip_var[64]="";
 char md5_aws_tf_var[64]="";
 char md5_aws_tf_zip_var[64]="";
 
+/*
+ * GEN: GENERAL COMMANDS
+ * opr: ONLY Operator can execute
+ * ADMIN: ONLY Operator and Admin can execute
+ * 
+ * CNAME: cluster_name is a must
+ * UNAME: user_name is must
+ */
 char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
-    "envcheck",
-    "new-cluster",
-    "ls-clusters",
-    "switch",
-    "glance",
-    "refresh",
-    "export",
-    "import",
-    "exit-current",
-    "remove",
-    "help",
-    "usage",
-    "history",
-    "syserr",
-    "ssh",
-    "configloc",
-    "showloc",
-    "resetloc",
-    "showmd5",
-    "new-keypair",
-    "get-conf",
-    "edit-conf",
-    "rm-conf",
-    "init",
-    "rebuild",
-    "vault",
-    "graph",
-    "viewlog",
-    "delc",
-    "addc",
-    "shutdownc",
-    "turnonc",
-    "reconfc",
-    "reconfm",
-    "sleep",
-    "wakeup",
-    "destroy",
-    "userman",
-    "dataman",
-    "about",
-    "version",
-    "license",
-    "repair"
+    "envcheckc,gen,NULL",
+    "new-cluster,gen,NULL",
+    "ls-clusters,gen,NULL",
+    "switch,gen,NULL",
+    "glance,gen,NULL",
+    "refresh,gen,CNAME",
+    "export,gen,CNAME",
+    "import,gen,NULL",
+    "exit-current,gen,NULL",
+    "remove,opr,CNAME",
+    "help,gen,NULL",
+    "usage,gen,NULL",
+    "history,gen,NULL",
+    "syserr,gen,NULL",
+    "ssh,gen,UNAME",
+    "configloc,gen,NULL",
+    "showloc,gen,NULL",
+    "resetloc,gen,NULL",
+    "showmd5,gen,NULL",
+    "new-keypair,opr,CNAME",
+    "get-conf,opr,CNAME",
+    "edit-conf,opr,CNAME",
+    "rm-conf,opr,CNAME",
+    "init,opr,CNAME",
+    "rebuild,opr,CNAME",
+    "vault,gen,CNAME",
+    "graph,gen,CNAME",
+    "viewlog,opr,CNAME",
+    "delc,opr,CNAME",
+    "addc,opr,CNAME",
+    "shutdownc,opr,CNAME",
+    "turnonc,opr,CNAME",
+    "reconfc,opr,CNAME",
+    "reconfm,opr,CNAME",
+    "sleep,opr,CNAME",
+    "wakeup,opr,CNAME",
+    "destroy,opr,CNAME",
+    "userman,admin,CNAME",
+    "dataman,gen,UNAME",
+    "about,gen,NULL",
+    "version,gen,NULL",
+    "license,gen,NULL",
+    "repair,gen,NULL"
 };
 
 char dataman_commands[DATAMAN_COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
@@ -194,7 +202,6 @@ int main(int argc, char* argv[]){
     int usrmgr_check_flag=0;
     char workdir[DIR_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX]="";
-    char invalid_cluster_name[128]="";
     char new_cluster_name[128]="";
     char cloud_ak[128]="";
     char cloud_sk[128]="";
@@ -222,6 +229,7 @@ int main(int argc, char* argv[]){
     char* syserror_log=SYSTEM_CMD_ERROR_LOG;
     char string_temp[256]="";
     char string_temp2[256]="";
+    char string_temp3[256]="";
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char cluster_role[8]="";
@@ -289,7 +297,7 @@ int main(int argc, char* argv[]){
         system(cmdline);
     }
 
-    command_flag=command_parser(argc,argv,command_name_prompt,workdir,cluster_name,cluster_role,invalid_cluster_name);
+    command_flag=command_parser(argc,argv,command_name_prompt,workdir,cluster_name,user_name,cluster_role);
     if(command_flag==-1){
         print_help("all");
         return 0;
@@ -299,13 +307,24 @@ int main(int argc, char* argv[]){
         print_tail();
         return command_flag;
     }
-    
+    else if(command_flag==-3){
+        check_and_cleanup("");
+        return 5;
+    }
+    else if(command_flag==-5){
+        check_and_cleanup(workdir);
+        return 5;
+    }
+    else if(command_flag==1){
+        check_and_cleanup(workdir);
+        return 5;
+    }
     if(strcmp(argv[1],"help")==0){
         if(cmd_keyword_check(argc,argv,"--cmd",string_temp)!=0){
             print_help("all");
         }
         else{
-            if(command_name_check(string_temp,command_name_prompt)>199){
+            if(command_name_check(string_temp,command_name_prompt,string_temp2,string_temp3)>199){
                 printf(FATAL_RED_BOLD "[ FATAL: ] The specified command name is incorrect. Did you mean " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " ?\n" RESET_DISPLAY,command_name_prompt);
                 write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
                 check_and_cleanup("");
@@ -529,32 +548,13 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    if(command_flag==-3){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid.\n" RESET_DISPLAY,invalid_cluster_name);
-        list_all_cluster_names(1);
-        write_operation_log("NULL",operation_log,argc,argv,"CLUSTER_NAME_CHECK_FAILED",21);
-        check_and_cleanup("");
-        return 21;
-    }
-    else if(command_flag==-5){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Currently no cluster specified or switched" RESET_DISPLAY ".\n");
-    }
-    else if(command_flag==2){
-        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Using the " HIGH_CYAN_BOLD "specified" RESET_DISPLAY " cluster name " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_name);
-    }
-    else{
-        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Using the " HIGH_CYAN_BOLD "switched" RESET_DISPLAY " cluster name " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_name);
-    }
-
     if(strcmp(argv[1],"glance")==0){
         if(cmd_flag_check(argc,argv,"--all")==0){
             run_flag=glance_clusters("all",crypto_keyfile);
         }
         else{
-            if(command_flag==-5){
+            if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Use the command " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY " to glance all the clusters.\n");
-                list_all_cluster_names(1);
                 write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
                 check_and_cleanup(workdir);
                 return 25;
@@ -584,13 +584,6 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"refresh")==0){
-        if(command_flag==-5){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to one.\n" RESET_DISPLAY);
-            list_all_cluster_names(1);
-            write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
-            check_and_cleanup("");
-            return 25;
-        }
         if(cmd_flag_check(argc,argv,"--force")==0){
             run_flag=refresh_cluster(cluster_name,crypto_keyfile,"force");
         }
@@ -615,20 +608,14 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"exit-current")==0){
-        if(command_flag==-5){
-            printf(FATAL_RED_BOLD "[ FATAL: ] No switched cluster to be exited.\n" RESET_DISPLAY);
-            write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
-            check_and_cleanup("");
-            return 25;
-        }
         if(exit_current_cluster()==0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exited the current cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_name);
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exited the switched cluster. You can switch to one later.\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
             check_and_cleanup("");
             return 0;
         }
         else{
-            printf(FATAL_RED_BOLD "[ -INFO- ] Failed to exit the current cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ".\n" RESET_DISPLAY,cluster_name);
+            printf(FATAL_RED_BOLD "[ -INFO- ] Failed to exit the switched cluster. Please retry later.\n" RESET_DISPLAY);
             write_operation_log(cluster_name,operation_log,argc,argv,"OPERATION_FAILED",35);
             check_and_cleanup("");
             return 35;
@@ -711,11 +698,10 @@ int main(int argc, char* argv[]){
             check_and_cleanup("");
             return 0;
         }
-        if(command_flag==-5){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c " RESET_DISPLAY FATAL_RED_BOLD ".\n" RESET_DISPLAY);
-            list_all_cluster_names(1);
+        if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
             write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
-            check_and_cleanup("");
+            check_and_cleanup(workdir);
             return 25;
         }
         run_flag=switch_to_cluster(cluster_name);
@@ -741,13 +727,6 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"remove")==0){
-        if(command_flag==-5){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to one.\n" RESET_DISPLAY);
-            list_all_cluster_names(1);
-            write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
-            check_and_cleanup("");
-            return 25;
-        }
         if(cmd_flag_check(argc,argv,"--force")==0){
             run_flag=remove_cluster(cluster_name,crypto_keyfile,"force");
         }
@@ -810,30 +789,7 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    if(command_flag==-5){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to one.\n" RESET_DISPLAY);
-        list_all_cluster_names(1);
-        write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
-        check_and_cleanup("");
-        return 25;
-    }
-
     if(strcmp(argv[1],"ssh")==0){
-        if(cmd_keyword_check(argc,argv,"-u",user_name)!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid user name to ssh to the cluster.\n");
-            hpc_user_list(workdir,crypto_keyfile,0);
-            printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-            fflush(stdin);
-            scanf("%s",user_name);
-            getchar();
-        }
-        if(user_name_quick_check(cluster_name,user_name,SSHKEY_DIR)!=0){
-            printf(FATAL_RED_BOLD "\n[ FATAL: ] The user name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid or unauthorized. Current users:\n" RESET_DISPLAY,argv[2]);
-            hpc_user_list(workdir,crypto_keyfile,0);
-            write_operation_log("NULL",operation_log,argc,argv,"INVALID_HPC_USER_NAME",26);
-            check_and_cleanup("");
-            return 26;
-        }
         if(cluster_asleep_or_not(workdir)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to wake up the cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " first.\n" RESET_DISPLAY,cluster_name);
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
@@ -1029,21 +985,6 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 9;
         }
-        if(cmd_keyword_check(argc,argv,"-u",user_name)!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid user name to use the data manager.\n");
-            hpc_user_list(workdir,crypto_keyfile,0);
-            printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-            fflush(stdin);
-            scanf("%s",user_name);
-            getchar();
-        }
-        if(user_name_quick_check(cluster_name,user_name,SSHKEY_DIR)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The user name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid or unauthorized. Current users:\n" RESET_DISPLAY,user_name);
-            hpc_user_list(workdir,crypto_keyfile,0);
-            write_operation_log("NULL",operation_log,argc,argv,"INVALID_HPC_USER_NAME",26);
-            check_and_cleanup("");
-            return 26;
-        }
         if(strcmp(data_cmd,"put")!=0&&strcmp(data_cmd,"get")!=0&&strcmp(data_cmd,"copy")!=0&&strcmp(data_cmd,"list")!=0&&strcmp(data_cmd,"delete")!=0&&strcmp(data_cmd,"move")!=0){
             if(cluster_asleep_or_not(workdir)==0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] You need to wake up the cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " first.\n" RESET_DISPLAY,cluster_name);
@@ -1085,34 +1026,12 @@ int main(int argc, char* argv[]){
         }
         if(strcmp(data_cmd,"put")==0||strcmp(data_cmd,"get")==0||strcmp(data_cmd,"copy")==0||strcmp(data_cmd,"move")==0||strcmp(data_cmd,"delete")==0||strcmp(data_cmd,"list")==0||strcmp(data_cmd,"cp")==0||strcmp(data_cmd,"mv")==0||strcmp(data_cmd,"rput")==0||strcmp(data_cmd,"rget")==0||strcmp(data_cmd,"rm")==0){
             if(strcmp(data_cmd,"list")!=0&&cmd_flag_check(argc,argv,"--force")!=0&&cmd_flag_check(argc,argv,"-rf")!=0&&cmd_flag_check(argc,argv,"-f")!=0){
-                /*printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to do force operation (if applicable) ? y|n.\n");
-                printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-                fflush(stdin);
-                scanf("%s",string_temp);
-                getchar();
-                if(strcmp(string_temp,"y")==0||strcmp(string_temp,"Y")==0){
-                    strcpy(force_flag_string,"force");
-                }
-                else{
-                    strcpy(force_flag_string,"");
-                }*/
                 printf(GENERAL_BOLD "[ -INFO- ] You may need --force or -f flag to do force operation.\n" RESET_DISPLAY );
             }
             else{
                 strcpy(force_flag_string,"force");
             }
             if(strcmp(data_cmd,"mv")!=0&&cmd_flag_check(argc,argv,"--recursive")!=0&&cmd_flag_check(argc,argv,"-rf")!=0&&cmd_flag_check(argc,argv,"-r")!=0){
-/*              printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to do recursive operation (if applicable) ? y|n.\n");
-                printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-                fflush(stdin);
-                scanf("%s",string_temp);
-                getchar();
-                if(strcmp(string_temp,"y")==0||strcmp(string_temp,"Y")==0){
-                    strcpy(recursive_flag,"recursive");
-                }
-                else{
-                    strcpy(recursive_flag,"");
-                }*/
                 printf(GENERAL_BOLD "[ -INFO- ] You may need --recursive or -r flag when operating folders.\n" RESET_DISPLAY );
             }
             else{

@@ -45,7 +45,8 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--bkey",
     "--rkey",
     "--admin",
-    "--accept"
+    "--accept",
+    "--i"
 };
 
 char command_keywords[CMD_KWDS_NUM][16]={
@@ -91,6 +92,36 @@ int string_to_positive_num(char* string){
         sum+=(*(string+i)-'0')*pow(10,length-i-1);
     }
     return sum;
+}
+
+
+int get_key_value(char* filename, char* key, char ch, char* value){
+    char line_buffer[LINE_LENGTH_SHORT]="";
+    char head[128]="";
+    char tail[256]="";
+    FILE* file_p=fopen(filename,"r");
+    if(file_p==NULL){
+        strcpy(value,"");
+        return -1;
+    }
+    if(strlen(key)==0||ch=='\0'){
+        fclose(file_p);
+        strcpy(value,"");
+        return -3;
+    }
+    while(!feof(file_p)){
+        fgetline(file_p,line_buffer);
+        get_seq_string(line_buffer,ch,1,head);
+        get_seq_string(line_buffer,ch,2,tail);
+        if(strcmp(key,head)==0){
+            fclose(file_p);
+            strcpy(value,tail);
+            return 0;
+        }
+    }
+    fclose(file_p);
+    strcpy(value,"");
+    return 1;
 }
 
 void reset_string(char* orig_string){
@@ -863,5 +894,15 @@ int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string){
         }
     }
     strcpy(kwd_string,"");
+    return 1;
+}
+
+int include_string_or_not(int cmd_c, char** cmds, char* string){
+    int i;
+    for(i=0;i<cmd_c;i++){
+        if(strcmp(cmds[i],string)==0){
+            return 0;
+        }
+    }
     return 1;
 }

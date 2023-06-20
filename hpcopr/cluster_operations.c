@@ -28,12 +28,6 @@
 extern char url_code_root_var[LOCATION_LENGTH];
 extern int code_loc_flag_var;
 
-int exit_current_cluster(void){
-    char cmdline[CMDLINE_LENGTH]="";
-    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
-    return system(cmdline);
-}
-
 int switch_to_cluster(char* target_cluster_name){
     char* current_cluster=CURRENT_CLUSTER_INDICATOR;
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
@@ -57,68 +51,6 @@ int switch_to_cluster(char* target_cluster_name){
     fprintf(file_p,"%s",target_cluster_name);
     fclose(file_p);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully switched to the cluster " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",target_cluster_name);
-    return 0;
-}
-
-int delete_from_cluster_registry(char* deleted_cluster_name){
-    char* cluster_registry=ALL_CLUSTER_REGISTRY;
-    char deleted_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
-    char filename_temp[FILENAME_LENGTH]="";
-    char temp_line[LINE_LENGTH_SHORT]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    FILE* file_p=NULL;
-    FILE* file_p_tmp=NULL;
-    sprintf(deleted_cluster_name_with_prefix,"< cluster name: %s >",deleted_cluster_name);
-    sprintf(filename_temp,"%s.tmp",cluster_registry);
-    file_p=fopen(cluster_registry,"r");
-    file_p_tmp=fopen(filename_temp,"w+");
-    while(!feof(file_p)){
-        fgetline(file_p,temp_line);
-        if(contain_or_not(temp_line,deleted_cluster_name_with_prefix)!=0){
-            fprintf(file_p_tmp,"%s\n",temp_line);
-        }
-    }
-    fclose(file_p);
-    fclose(file_p_tmp);
-    if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,deleted_cluster_name)==0){
-        exit_current_cluster();
-    }
-    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,cluster_registry,SYSTEM_CMD_REDIRECT);
-    return system(cmdline);
-}
-
-int list_all_cluster_names(int header_flag){
-    FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
-    char registry_line[LINE_LENGTH_SHORT]="";
-    char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-//    int getline_flag=0;
-    if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the registry. Please repair the HPC-NOW services.\n" RESET_DISPLAY);
-        return -1;
-    }
-    if(file_empty_or_not(ALL_CLUSTER_REGISTRY)==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The registry is empty. Please create one to operate.\n");
-        return 1;
-    }
-    if(header_flag==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " List of all the clusters:\n");
-    }
-    while(fgetline(file_p,registry_line)!=1){
-        if(strlen(registry_line)!=0){
-            if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
-                printf(RESET_DISPLAY "|        : %s\n" RESET_DISPLAY,registry_line);
-            }
-            else{
-                get_seq_string(registry_line,' ',4,temp_cluster_name);
-                if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
-                    printf(HIGH_GREEN_BOLD "|  switch: %s\n" RESET_DISPLAY,registry_line);
-                }
-                else{
-                    printf(RESET_DISPLAY "|        : %s\n" RESET_DISPLAY,registry_line);
-                }
-            }
-        }
-    }
     return 0;
 }
 
@@ -262,7 +194,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
 
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_flag){
     if(strlen(target_cluster_name)<CLUSTER_ID_LENGTH_MIN||strlen(target_cluster_name)>CLUSTER_ID_LENGTH_MAX){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified name %s is invalid.\n" RESET_DISPLAY,target_cluster_name);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is invalid.\n" RESET_DISPLAY,target_cluster_name);
         return 1;
     }
     char cluster_workdir[DIR_LENGTH]="";
@@ -335,7 +267,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
             return 5;
         }
     }
-    
+
 destroy_cluster:
     if(cluster_destroy(cluster_workdir,crypto_keyfile,"force")!=0){
         delete_decrypted_files(cluster_workdir,crypto_keyfile);

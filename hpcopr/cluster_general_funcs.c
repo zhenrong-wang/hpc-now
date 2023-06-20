@@ -155,21 +155,11 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
     else{
         strcpy(real_recursive_flag,"-r");
     }
-    char stackdir[DIR_LENGTH]="";
     char private_key[FILENAME_LENGTH]="";
     char remote_address[32]="";
-    char currentstate[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    FILE* file_p=NULL;
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
-    file_p=fopen(currentstate,"r");
-    if(file_p==NULL){
-        return -1;
-    }
-    fgetline(file_p,remote_address);
-    fclose(file_p);
+    get_state_value(workdir,"master_public_ip:",remote_address);
     if(strcmp(username,"root")==0){
         sprintf(private_key,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
     }
@@ -306,19 +296,9 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
         return -1;
     }
     char cmdline[CMDLINE_LENGTH]="";
-    char stackdir[DIR_LENGTH]="";
     char private_key[FILENAME_LENGTH]="";
-    char filename_temp[FILENAME_LENGTH]="";
     char remote_address[32]="";
-    FILE* file_p=NULL;
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"r");
-    if(file_p==NULL){
-        return 1;
-    }
-    fgetline(file_p,remote_address);
-    fclose(file_p);
+    get_state_value(workdir,"master_public_ip:",remote_address);
     sprintf(private_key,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\" %s",private_key,remote_address,exec_type,delay_minutes,SYSTEM_CMD_REDIRECT);
     return system(cmdline);
@@ -329,20 +309,10 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char
         return -1;
     }
     char cmdline[CMDLINE_LENGTH]="";
-    char stackdir[DIR_LENGTH]="";
     char private_key[FILENAME_LENGTH]="";
-    char filename_temp[FILENAME_LENGTH]="";
     char remote_address[32]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    FILE* file_p=NULL;
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"r");
-    if(file_p==NULL){
-        return 1;
-    }
-    fgetline(file_p,remote_address);
-    fclose(file_p);
+    get_state_value(workdir,"master_public_ip:",remote_address);
     if(strcmp(username,"root")==0){
         sprintf(private_key,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
     }
@@ -443,40 +413,18 @@ int check_pslock(char* workdir){
     }
 }
 
-int get_compute_node_num(char* currentstate_file, char* option){
-    if(strcmp(option,"all")!=0&&strcmp(option,"on")!=0&&strcmp(option,"down")!=0){
-        return -1;
-    }
-    FILE* file_p=fopen(currentstate_file,"r");
-    if(file_p==NULL){
-        return -1;
-    }
-    char buffer[64]="";
-    int i,node_num=0;
-    int node_num_on=0;
-    for(i=0;i<4;i++){
-        if(fgetline(file_p,buffer)!=0){
-            fclose(file_p);
-            return 0;
-        }
-    }
-    while(fgetline(file_p,buffer)==0&&strlen(buffer)!=0){
-        fgetline(file_p,buffer);
-        node_num++;
-        if(strcmp(buffer,"running")==0||strcmp(buffer,"Running")==0||strcmp(buffer,"RUNNING")==0){
-            node_num_on++;
-        }
-    }
-    fclose(file_p);
+int get_compute_node_num(char* statefile, char* option){
+    char get_num[4]="";
     if(strcmp(option,"all")==0){
-        return node_num;
+        get_key_value(statefile,"total_compute_nodes:",' ',get_num); 
     }
     else if(strcmp(option,"on")==0){
-        return node_num_on;
+        get_key_value(statefile,"running_compute_nodes:",' ',get_num); 
     }
     else{
-        return node_num-node_num_on;
+        get_key_value(statefile,"down_compute_nodes:",' ',get_num); 
     }
+    return string_to_positive_num(get_num);
 }
 
 int decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum){
@@ -590,128 +538,174 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     return 0;
 }
 
+/*
+ * Key words for currentstate:
+ * master_config:
+ * compute_confit:
+ * ht_flag:
+ * master_public_ip:
+ * master_private_ip:
+ * master_status:
+ * database_status:
+ * compute%d_private_ip:
+ * compute%d_status:
+ * total_compute_nodes:
+ * running_compute_nodes:
+ * down_compute_nodes:
+ */
 int getstate(char* workdir, char* crypto_filename){
+    char cloud_flag[16]="";
+    get_cloud_flag(workdir,cloud_flag);
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+        return -3;
+    }
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
-    char cloud_flag[16]="";
-    char filename_tfstate[FILENAME_LENGTH]="";
-    char filename_currentstate[FILENAME_LENGTH]="";
-    char filename_hostfile[FILENAME_LENGTH]="";
+    char tfstate[FILENAME_LENGTH]="";
+    char compute_template[FILENAME_LENGTH]="";
+    char master_tf[FILENAME_LENGTH]="";
+    char statefile[FILENAME_LENGTH]="";
+    char hostfile[FILENAME_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char master_config[16]="";
+    char compute_config[16]="";
+    char ht_flag[16]="";
     char string_temp[64]="";
     char string_temp2[64]="";
+    char md5sum[64]="";
     int node_num_gs;
+    int node_num_on_gs=0;
     int i;
     FILE* file_p_tfstate=NULL;
-    FILE* file_p_currentstate=NULL;
+    FILE* file_p_statefile=NULL;
     FILE* file_p_hostfile=NULL;
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_tfstate,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    file_p_tfstate=fopen(filename_tfstate,"r");
-    if(file_p_tfstate==NULL){
+    get_crypto_key(crypto_filename,md5sum);
+    sprintf(tfstate,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
+    if(file_exist_or_not(tfstate)!=0){
+        sprintf(filename_temp,"%s%sterraform.tfstate.tmp",stackdir,PATH_SLASH);
+        if(decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum)!=0){
+            return -1;
+        }
+        if(file_exist_or_not(tfstate)!=0){
+            return -1;
+        }
+    }
+    sprintf(master_tf,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
+    if(file_exist_or_not(master_tf)!=0){
+        sprintf(filename_temp,"%s%shpc_stack_master.tf.tmp",stackdir,PATH_SLASH);
+        if(decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum)!=0){
+            return -1;
+        }
+        if(file_exist_or_not(master_tf)!=0){
+            return -1;
+        }
+    }
+    sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
+    if(file_exist_or_not(compute_template)!=0){
         return -1;
     }
-    sprintf(filename_currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
-    file_p_currentstate=fopen(filename_currentstate,"w+");
-    if(file_p_currentstate==NULL){
+    file_p_tfstate=fopen(tfstate,"r");
+    sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
+    file_p_statefile=fopen(statefile,"w+");
+    if(file_p_statefile==NULL){
         fclose(file_p_tfstate);
         return -1;
     }
-    get_cloud_flag(workdir,cloud_flag);
-    sprintf(filename_hostfile,"%s%shostfile_latest",stackdir,PATH_SLASH);
-    file_p_hostfile=fopen(filename_hostfile,"w+");
+    sprintf(hostfile,"%s%shostfile_latest",stackdir,PATH_SLASH);
+    file_p_hostfile=fopen(hostfile,"w+");
+    if(file_p_hostfile==NULL){
+        fclose(file_p_tfstate);
+        fclose(file_p_statefile);
+        return -1;
+    }
+    find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
+    find_and_get(compute_template,"instance_type","","",1,"instance_type","","",'.',3,compute_config);
+    if(find_multi_keys(compute_template,"cpu_threads_per_core = 1","","","","")!=0){
+        strcpy(ht_flag,"htoff");
+    }
+    else{
+        strcpy(ht_flag,"hton");
+    }
+    fprintf(file_p_statefile,"---GENERATED AND MAINTAINED BY HPC-NOW SERVICES INTERNALLY---\n");
+    fprintf(file_p_statefile,"master_config: %s\ncompute_config: %s\nht_flag: %s\n",master_config,compute_config,ht_flag);
     if(strcmp(cloud_flag,"CLOUD_A")==0||strcmp(cloud_flag,"CLOUD_B")==0){
-        node_num_gs=find_multi_keys(filename_tfstate,"\"instance_name\": \"compute","","","","");
-        find_and_get(filename_tfstate,"\"instance_name\": \"master","","",50,"public_ip","","",'\"',4,string_temp);
-        fprintf(file_p_currentstate,"%s\n",string_temp);
-        reset_string(string_temp);
-        find_and_get(filename_tfstate,"\"instance_name\": \"master","","",50,"private_ip","","",'\"',4,string_temp);
-        fprintf(file_p_currentstate,"%s\n",string_temp);
+        node_num_gs=find_multi_keys(tfstate,"\"instance_name\": \"compute","","","","");
+        find_and_get(tfstate,"\"instance_name\": \"master","","",50,"public_ip","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
+        find_and_get(tfstate,"\"instance_name\": \"master","","",50,"private_ip","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
         fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
-        reset_string(string_temp);
         if(strcmp(cloud_flag,"CLOUD_B")==0){
-            find_and_get(filename_tfstate,"\"instance_name\": \"master","","",50,"instance_status","","",'\"',4,string_temp);
-            fprintf(file_p_currentstate,"%s\n",string_temp);
-            reset_string(string_temp);
-            find_and_get(filename_tfstate,"\"instance_name\": \"database","","",50,"instance_status","","",'\"',4,string_temp);
-            fprintf(file_p_currentstate,"%s\n",string_temp);
-            reset_string(string_temp);
+            find_and_get(tfstate,"\"instance_name\": \"master","","",50,"instance_status","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"master_status: %s\n",string_temp);
+            find_and_get(tfstate,"\"instance_name\": \"database","","",50,"instance_status","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"database_status: %s\n",string_temp);
         }
-        else if(strcmp(cloud_flag,"CLOUD_A")==0){
-            find_and_get(filename_tfstate,"\"instance_name\": \"master","","",90,"\"status\":","","",'\"',4,string_temp);
-            fprintf(file_p_currentstate,"%s\n",string_temp);
-            reset_string(string_temp);
-            find_and_get(filename_tfstate,"\"instance_name\": \"database","","",90,"\"status\":","","",'\"',4,string_temp);
-            fprintf(file_p_currentstate,"%s\n",string_temp);
-            reset_string(string_temp);
+        else{
+            find_and_get(tfstate,"\"instance_name\": \"master","","",90,"\"status\":","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"master_status: %s\n",string_temp);
+            find_and_get(tfstate,"\"instance_name\": \"database","","",90,"\"status\":","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"database_status: %s\n",string_temp);
         }
         for(i=0;i<node_num_gs;i++){
             sprintf(string_temp2,"\"instance_name\": \"compute%d",i+1);
-            find_and_get(filename_tfstate,string_temp2,"","",50,"private_ip","","",'\"',4,string_temp);
-            fprintf(file_p_currentstate,"%s\n",string_temp);
+            find_and_get(tfstate,string_temp2,"","",50,"private_ip","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
             fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
-            reset_string(string_temp);
             if(strcmp(cloud_flag,"CLOUD_B")==0){
-                find_and_get(filename_tfstate,string_temp2,"","",30,"instance_status","","",'\"',4,string_temp);
-                if(i!=node_num_gs-1){
-                    fprintf(file_p_currentstate,"%s\n",string_temp);
-                }
-                else{
-                    fprintf(file_p_currentstate,"%s",string_temp);
-                }
-                reset_string(string_temp);
-            }
-            else if(strcmp(cloud_flag,"CLOUD_A")==0){
-                find_and_get(filename_tfstate,string_temp2,"","",90,"\"status\":","","",'\"',4,string_temp);
-                if(i!=node_num_gs-1){
-                    fprintf(file_p_currentstate,"%s\n",string_temp);
-                }
-                else{
-                    fprintf(file_p_currentstate,"%s",string_temp);
-                }
-                reset_string(string_temp);
-            }
-            reset_string(string_temp2);
-        }
-    }
-    else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        node_num_gs=find_multi_keys(filename_tfstate,"\"name\": \"compute","","","","");
-        find_and_get(filename_tfstate,"\"name\": \"master","","",90,"\"public_ip\"","","",'\"',4,string_temp);
-        fprintf(file_p_currentstate,"%s\n",string_temp);
-        reset_string(string_temp);
-        find_and_get(filename_tfstate,"\"name\": \"master","","",90,"\"private_ip\"","","",'\"',4,string_temp);
-        fprintf(file_p_currentstate,"%s\n",string_temp);
-        fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
-        reset_string(string_temp);
-        find_and_get(filename_tfstate,"\"name\": \"m_state","","",30,"\"state\":","","",'\"',4,string_temp);
-        fprintf(file_p_currentstate,"%s\n",string_temp);
-        reset_string(string_temp);
-        find_and_get(filename_tfstate,"\"name\": \"db_state","","",30,"\"state\":","","",'\"',4,string_temp);
-        fprintf(file_p_currentstate,"%s\n",string_temp);
-        reset_string(string_temp);
-        for(i=0;i<node_num_gs;i++){
-            sprintf(string_temp2,"\"name\": \"compute%d",i+1);
-            find_and_get(filename_tfstate,string_temp2,"","",90,"private_ip","","",'\"',4,string_temp);
-            fprintf(file_p_currentstate,"%s\n",string_temp);
-            fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
-            reset_string(string_temp);
-            reset_string(string_temp2);
-            sprintf(string_temp2,"\"name\": \"comp%d",i+1);
-            find_and_get(filename_tfstate,string_temp2,"","",30,"\"state\":","","",'\"',4,string_temp);
-            if(i!=node_num_gs-1){
-                fprintf(file_p_currentstate,"%s\n",string_temp);
+                find_and_get(tfstate,string_temp2,"","",30,"instance_status","","",'\"',4,string_temp);
+                fprintf(file_p_statefile,"compute%d_status: %s\n",i+1,string_temp);
             }
             else{
-                fprintf(file_p_currentstate,"%s",string_temp);
+                find_and_get(tfstate,string_temp2,"","",90,"\"status\":","","",'\"',4,string_temp);
+                fprintf(file_p_statefile,"compute%d_status: %s\n",i+1,string_temp);
             }
-            reset_string(string_temp);
-            reset_string(string_temp2);
+            if(strcmp(string_temp,"RUNNING")==0||strcmp(string_temp,"running")==0||strcmp(string_temp,"Running")==0){
+                node_num_on_gs++;
+            }
         }
     }
-    fclose(file_p_currentstate);
+    else{
+        node_num_gs=find_multi_keys(tfstate,"\"name\": \"compute","","","","");
+        find_and_get(tfstate,"\"name\": \"master","","",90,"\"public_ip\"","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"master","","",90,"\"private_ip\"","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
+        fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"m_state","","",30,"\"state\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_status: %s\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"db_state","","",30,"\"state\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"database_status: %s\n",string_temp);
+        for(i=0;i<node_num_gs;i++){
+            sprintf(string_temp2,"\"name\": \"compute%d",i+1);
+            find_and_get(tfstate,string_temp2,"","",90,"private_ip","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
+            fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
+            sprintf(string_temp2,"\"name\": \"comp%d",i+1);
+            find_and_get(tfstate,string_temp2,"","",30,"\"state\":","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"compute%d_status: %s\n",i+1,string_temp);
+            if(strcmp(string_temp,"RUNNING")==0||strcmp(string_temp,"running")==0||strcmp(string_temp,"Running")==0){
+                node_num_on_gs++;
+            }
+        }
+    }
+    fprintf(file_p_statefile,"total_compute_nodes: %d\n",node_num_gs);
+    fprintf(file_p_statefile,"running_compute_nodes: %d\n",node_num_on_gs);
+    fprintf(file_p_statefile,"down_compute_nodes: %d\n",node_num_gs-node_num_on_gs);
+    fclose(file_p_statefile);
     fclose(file_p_hostfile);
     fclose(file_p_tfstate);
     return 0;
+}
+
+int get_state_value(char* workdir, char* key, char* value){
+    char stackdir[DIR_LENGTH]="";
+    char statefile[FILENAME_LENGTH]="";
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
+    return get_key_value(statefile,key,' ',value);
 }
 
 int generate_sshkey(char* sshkey_folder, char* pubkey){
@@ -746,25 +740,19 @@ int generate_sshkey(char* sshkey_folder, char* pubkey){
 
 int update_cluster_summary(char* workdir, char* crypto_keyfile){
     char cmdline[CMDLINE_LENGTH]="";
-    char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char md5sum[33]="";
     char master_address[32]="";
-    char master_address_prev[16]="";
+    char master_address_prev[32]="";
     char filename_temp[FILENAME_LENGTH]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
-    FILE* file_p=NULL;
     get_crypto_key(crypto_keyfile,md5sum);
-    create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
     decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     find_and_get(filename_temp,"Master","Node","IP:",1,"Master","Node","IP:",' ',4,master_address_prev);
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"r");
-    fgetline(file_p,master_address);
-    fclose(file_p);
+    get_state_value(workdir,"master_public_ip:",master_address);
     if(strcmp(master_address,master_address_prev)!=0){
         sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
         global_replace(filename_temp,master_address_prev,master_address);
@@ -772,8 +760,8 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
     }
     else{
         sprintf(cmdline,"%s %s%sCLUSTER_SUMMARY.txt %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
     }
-    system(cmdline);
     return 0;
 }
 
@@ -892,55 +880,54 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char master_config[16]="";
     char db_status[16]="";
     char cloud_flag[16]="";
+    char string_temp[32]="";
     char compute_address[32]="";
     char compute_status[16]="";
     char compute_config[16]="";
-    char line_buffer[32]="";
-    char currentstate[FILENAME_LENGTH]="";
+    char statefile[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
-    char master_tf[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char ht_status[16]="";
     int node_num=0;
+    char node_num_string[4]="";
     int running_node_num=0;
+    char running_node_num_string[4]="";
+    int i;
     create_and_get_stackdir(workdir,stackdir);
     get_cluster_name(cluster_name,workdir);
-    sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
+    sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
-    if(file_exist_or_not(compute_template)!=0||file_exist_or_not(currentstate)!=0||get_cloud_flag(workdir,cloud_flag)==-1){
+    if(file_exist_or_not(compute_template)!=0||file_exist_or_not(statefile)!=0||get_cloud_flag(workdir,cloud_flag)==-1){
         return 1;
     }
-    FILE* file_p=fopen(currentstate,"r");
-    fgetline(file_p,master_address);
-    fgetline(file_p,line_buffer);
-    fgetline(file_p,master_status);
-    fgetline(file_p,db_status);
-    find_and_get(compute_template,"instance_type","","",1,"instance_type","","",'.',3,compute_config);
-    if(find_multi_keys(compute_template,"cpu_threads_per_core = 1","","","","")!=0){
-        strcpy(ht_status,"*HT-OFF*");
-    }
-    sprintf(master_tf,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
-    find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
+    get_key_value(statefile,"master_public_ip:",' ',master_address);
+    get_key_value(statefile,"master_status:",' ',master_status);
+    get_key_value(statefile,"database_status:",' ',db_status);
+    get_key_value(statefile,"master_config:",' ',master_config);
+    get_key_value(statefile,"compute_config:",' ',compute_config);
+    get_key_value(statefile,"ht_flag:",' ',ht_status);
+    get_key_value(statefile,"total_compute_nodes:",' ',node_num_string);
+    node_num=string_to_positive_num(node_num_string);
+    get_key_value(statefile,"running_compute_nodes:",' ',running_node_num_string);
+    running_node_num=string_to_positive_num(running_node_num_string);
     if(graph_level==0){
         printf(HIGH_GREEN_BOLD "|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
         printf("|            +-db(%s)\n" RESET_DISPLAY,db_status);
     }
-    while(fgetline(file_p,compute_address)==0){
-        fgetline(file_p,compute_status);
-        node_num++;
-        if(strcmp(compute_status,"running")==0||strcmp(compute_status,"Running")==0||strcmp(compute_status,"RUNNING")==0){
-            running_node_num++;
-        }
+    for(i=0;i<node_num;i++){
+        sprintf(string_temp,"compute%d_private_ip:",i+1);
+        get_key_value(statefile,string_temp,' ',compute_address);
+        sprintf(string_temp,"compute%d_status:",i+1);
+        get_key_value(statefile,string_temp,' ',compute_status);
         if(graph_level==0){
             if(strlen(ht_status)!=0){
-                printf(HIGH_GREEN_BOLD "|              +-compute%d(%s,%s,%s,%s)\n" RESET_DISPLAY,node_num,compute_address,compute_status,compute_config,ht_status);
+                printf(HIGH_GREEN_BOLD "|              +-compute%d(%s,%s,%s,%s)\n" RESET_DISPLAY,i+1,compute_address,compute_status,compute_config,ht_status);
             }
             else{
-                printf(HIGH_GREEN_BOLD "|              +-compute%d(%s,%s,%s)\n" RESET_DISPLAY,node_num,compute_address,compute_status,compute_config);
+                printf(HIGH_GREEN_BOLD "|              +-compute%d(%s,%s,%s)\n" RESET_DISPLAY,i+1,compute_address,compute_status,compute_config);
             }
         }
     }
-    fclose(file_p);
     if(graph_level==1){
         if(strlen(ht_status)!=0){
             printf("%s | %s | %s %s %s | %d/%d | %s | %s\n",cluster_name,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
@@ -972,10 +959,7 @@ int cluster_empty_or_not(char* workdir){
     if(folder_exist_or_not(dot_terraform)!=0){
         return 0;
     }
-    if(file_exist_or_not(statefile)!=0&&file_exist_or_not(templatefile)!=0){
-        return 0;
-    }
-    else if(file_empty_or_not(statefile)==0&&file_empty_or_not(templatefile)==0){
+    if(file_empty_or_not(statefile)<1&&file_empty_or_not(templatefile)<1){
         return 0;
     }
     else{
@@ -984,23 +968,8 @@ int cluster_empty_or_not(char* workdir){
 }
 
 int cluster_asleep_or_not(char* workdir){
-    char stackdir[DIR_LENGTH]="";
     char master_state[32]="";
-    char buffer[32]="";
-    int i;
-    create_and_get_stackdir(workdir,stackdir);
-    FILE* file_p=NULL;
-    char filename_temp[FILENAME_LENGTH]="";
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"r");
-    if(file_p==NULL){
-        return -1;
-    }
-    for(i=0;i<2;i++){
-        fgetline(file_p,buffer);
-    }
-    fgetline(file_p,master_state);
-    fclose(file_p);
+    get_state_value(workdir,"master_status:",master_state);
     if(strcmp(master_state,"running")!=0&&strcmp(master_state,"Running")!=0&&strcmp(master_state,"RUNNING")!=0){
         return 0;
     }
@@ -1215,15 +1184,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
         return -3;
     }
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        return -5;
-    }
-    else{
-        file_p=fopen(filename_temp,"r");
-        fgetline(file_p,master_address);
-        fclose(file_p);
-    }
+    get_state_value(workdir,"master_public_ip:",master_address);
     printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n" RESET_DISPLAY);
     printf(GENERAL_BOLD "| Unique Cluster ID: " RESET_DISPLAY "%s\n",unique_cluster_id);
     printf(WARN_YELLO_BOLD "+-------------- CLUSTER PORTAL AND *CREDENTIALS* ----------------+\n" RESET_DISPLAY);
@@ -1310,21 +1271,11 @@ int check_down_nodes(char* workdir){
 }
 
 int cluster_ssh(char* workdir, char* username){
-    char stackdir[DIR_LENGTH]="";
-    char statefile[FILENAME_LENGTH];
     char master_address[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char private_sshkey[FILENAME_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    FILE* file_p=NULL;
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
-    if(file_exist_or_not(statefile)!=0){
-        return -1;
-    }
-    file_p=fopen(statefile,"r");
-    fgetline(file_p,master_address);
-    fclose(file_p);
+    get_state_value(workdir,"master_public_ip:",master_address);
     get_cluster_name(cluster_name,workdir);
     sprintf(private_sshkey,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,username);
     if(file_exist_or_not(private_sshkey)!=0){
@@ -2179,6 +2130,76 @@ int check_and_cleanup(char* prev_workdir){
 #endif
     print_tail();
     return 0;
+}
+
+int list_all_cluster_names(int header_flag){
+    FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
+    char registry_line[LINE_LENGTH_SHORT]="";
+    char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+//    int getline_flag=0;
+    if(file_p==NULL){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the registry. Please repair the HPC-NOW services.\n" RESET_DISPLAY);
+        return -1;
+    }
+    if(file_empty_or_not(ALL_CLUSTER_REGISTRY)==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The registry is empty. Please create one to operate.\n");
+        fclose(file_p);
+        return 1;
+    }
+    if(header_flag==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " List of all the clusters:\n");
+    }
+    while(fgetline(file_p,registry_line)!=1){
+        if(strlen(registry_line)!=0){
+            if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
+                printf(RESET_DISPLAY "|        : %s\n" RESET_DISPLAY,registry_line);
+            }
+            else{
+                get_seq_string(registry_line,' ',4,temp_cluster_name);
+                if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
+                    printf(HIGH_GREEN_BOLD "|  switch: %s\n" RESET_DISPLAY,registry_line);
+                }
+                else{
+                    printf(RESET_DISPLAY "|        : %s\n" RESET_DISPLAY,registry_line);
+                }
+            }
+        }
+    }
+    fclose(file_p);
+    return 0;
+}
+
+int exit_current_cluster(void){
+    char cmdline[CMDLINE_LENGTH]="";
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
+    return system(cmdline);
+}
+
+int delete_from_cluster_registry(char* deleted_cluster_name){
+    char* cluster_registry=ALL_CLUSTER_REGISTRY;
+    char deleted_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char temp_line[LINE_LENGTH_SHORT]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    FILE* file_p=NULL;
+    FILE* file_p_tmp=NULL;
+    sprintf(deleted_cluster_name_with_prefix,"< cluster name: %s >",deleted_cluster_name);
+    sprintf(filename_temp,"%s.tmp",cluster_registry);
+    file_p=fopen(cluster_registry,"r");
+    file_p_tmp=fopen(filename_temp,"w+");
+    while(!feof(file_p)){
+        fgetline(file_p,temp_line);
+        if(contain_or_not(temp_line,deleted_cluster_name_with_prefix)!=0){
+            fprintf(file_p_tmp,"%s\n",temp_line);
+        }
+    }
+    fclose(file_p);
+    fclose(file_p_tmp);
+    if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,deleted_cluster_name)==0){
+        exit_current_cluster();
+    }
+    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,cluster_registry,SYSTEM_CMD_REDIRECT);
+    return system(cmdline);
 }
 
 /*int create_protection(char* workdir, int minutes){

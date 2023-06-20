@@ -286,7 +286,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
@@ -354,7 +353,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
     printf("[ START: ] Start initializing the cluster ...\n");
     if(folder_exist_or_not(stackdir)!=0){
@@ -823,9 +821,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         }
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     }
-    file_p=fopen(currentstate,"r");
-    fgetline(file_p,master_address);
-    fclose(file_p);
+    get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(private_key_file,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     if(strcmp(region_flag,"cn_regions")==0){
         if(code_loc_flag_var==1){
@@ -948,7 +944,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
@@ -1008,7 +1003,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
     printf("[ START: ] Start initializing the cluster ...\n");
     if(folder_exist_or_not(stackdir)!=0){
@@ -1385,9 +1379,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sleep(1);
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
-    file_p=fopen(currentstate,"r");
-    fgetline(file_p,master_address);
-    fclose(file_p);
+    get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(private_key_file,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     if(code_loc_flag_var==1){
         sprintf(cmdline,"%s %s%scos.conf %s%sbucket.conf %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -1486,7 +1478,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
@@ -1546,7 +1537,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
     printf("[ START: ] Start initializing the cluster ...\n");
     if(folder_exist_or_not(stackdir)!=0){
@@ -1920,9 +1910,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     find_and_get(filename_temp,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    file_p=fopen(currentstate,"r");
-    fgetline(file_p,master_address);
-    fclose(file_p);
+    get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(private_key_file,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     if(code_loc_flag_var==1){
         sprintf(cmdline,"%s %s%s.ossutilconfig %s%sbucket.conf %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);

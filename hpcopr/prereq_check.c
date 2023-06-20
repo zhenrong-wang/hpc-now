@@ -807,7 +807,7 @@ int check_and_install_prerequisitions(int repair_flag){
     return 0;
 }
 
-int command_name_check(char* command_name_input, char* command_prompt){
+int command_name_check(char* command_name_input, char* command_prompt, char* role_flag, char* cu_flag){
     int i;
     int j;
     int diff_current=0;
@@ -815,26 +815,30 @@ int command_name_check(char* command_name_input, char* command_prompt){
     int equal_flag;
     int equal_flag_prev=0;
     int compare_length=0;
+    char command_temp[32]="";
     int closest=0;
     for(i=0;i<COMMAND_NUM;i++){
-        if(strcmp(command_name_input,commands[i])==0){
+        get_seq_string(commands[i],',',1,command_temp);
+        if(strcmp(command_name_input,command_temp)==0){
+            get_seq_string(commands[i],',',2,role_flag);
+            get_seq_string(commands[i],',',3,cu_flag);
             return 0;
         }
         diff_current=0;
         equal_flag=0;
-        if(strlen(commands[i])<strlen(command_name_input)){
-            compare_length=strlen(commands[i]);
+        if(strlen(command_temp)<strlen(command_name_input)){
+            compare_length=strlen(command_temp);
         }
         else{
             compare_length=strlen(command_name_input);
         }
         for(j=0;j<compare_length-1;j++){
-            if(*(command_name_input+j)==*(commands[i]+j)&&*(command_name_input+j+1)==*(commands[i]+j+1)){
+            if(*(command_name_input+j)==*(command_temp+j)&&*(command_name_input+j+1)==*(command_temp+j+1)){
                 equal_flag++;
             }
-            diff_current+=abs(*(command_name_input+j)-*(commands[i]+j));  
+            diff_current+=abs(*(command_name_input+j)-*(command_temp+j));  
         }
-        if(*(command_name_input+j+1)==*(commands[i]+j+1)){
+        if(*(command_name_input+j+1)==*(command_temp+j+1)){
             equal_flag++;
         }
 //        printf("%s,%d,%d,%d,%d\n",commands[i],equal_flag,closest,diff_current,diff_prev);
@@ -845,54 +849,116 @@ int command_name_check(char* command_name_input, char* command_prompt){
             continue;
         }
     }
-    strcpy(command_prompt,commands[closest]);
+    get_seq_string(commands[closest],',',1,command_temp);
+    strcpy(role_flag,"");
+    strcpy(cu_flag,"");
+    strcpy(command_prompt,command_temp);
     return 200+closest;
 }
 
-int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name, char* cluster_role, char* invalid_cluster_name){
+int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name, char* user_name, char* cluster_role){
     int command_flag=0;
+    char temp_cluster_name_specified[128]="";
+    int flag1,flag2;
+    char temp_cluster_name_switched[128]="";
     char temp_cluster_name[128]="";
+    char temp_workdir[DIR_LENGTH]="";
+    char string_temp[128]="";
+    char cluster_name_source[16]="";
     if(argc<2){
-        strcpy(command_name_prompt,"");
-        strcpy(workdir,"");
-        strcpy(cluster_name,"");
-        strcpy(cluster_role,"");
         return -1;
     }
-    command_flag=command_name_check(argv[1],command_name_prompt);
+    char role_flag[16]="";
+    char cu_flag[16]="";
+    int interactive_flag=cmd_flag_check(argc,argv,"--i");
+    command_flag=command_name_check(argv[1],command_name_prompt,role_flag,cu_flag);
     if(command_flag!=0){
-        strcpy(workdir,"");
-        strcpy(cluster_name,"");
-        strcpy(invalid_cluster_name,"");
-        strcpy(cluster_role,"");
         return command_flag;
     }
-    if(cmd_keyword_check(argc,argv,"-c",temp_cluster_name)==0){
-        if(cluster_name_check(temp_cluster_name)!=-127){
-            strcpy(workdir,"");
-            strcpy(invalid_cluster_name,temp_cluster_name);
-            strcpy(cluster_role,"");
-            return -3;
+    if(strcmp(cu_flag,"UNAME")==0||strcmp(cu_flag,"CNAME")==0){
+        flag1=cmd_keyword_check(argc,argv,"-c",temp_cluster_name_specified);
+        if(flag1==0){
+            strcpy(temp_cluster_name,temp_cluster_name_specified);
+            strcpy(cluster_name_source,"specified");
         }
         else{
-            strcpy(cluster_name,temp_cluster_name);
-            get_workdir(workdir,cluster_name);
-            strcpy(invalid_cluster_name,"");
-            cluster_role_detect(workdir,cluster_role);
-            return 2;
+            flag2=show_current_cluster(temp_workdir,temp_cluster_name_switched,0);
+            if(flag2==0){
+                strcpy(temp_cluster_name,temp_cluster_name_switched);
+                strcpy(cluster_name_source,"switched");
+            }
+        }
+        if(cluster_name_check(temp_cluster_name)!=-127){
+            if(interactive_flag==0){
+                if(strlen(temp_cluster_name)==0){
+                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " No specified or switched cluster. Please choose one from the list:\n");
+                }
+                else{
+                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " The specified cluster name " WARN_YELLO_BOLD "%s" RESET_DISPLAY " is invalid. Please choose one from the list:\n",temp_cluster_name);
+                }
+                list_all_cluster_names(1);
+                printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
+                fflush(stdin);
+                scanf("%s",temp_cluster_name);
+                getchar();
+                if(cluster_name_check(temp_cluster_name)!=-127){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] The input cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,temp_cluster_name);
+                    return -3;
+                }
+                strcpy(cluster_name_source,"input");
+            }
+            else{
+                if(strlen(temp_cluster_name)!=0){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,temp_cluster_name);
+                }
+                else{
+                    printf(FATAL_RED_BOLD "[ FATAL: ] No cluster specified or switched. Please use " WARN_YELLO_BOLD "-c" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "switch" FATAL_RED_BOLD " to one.\n" RESET_DISPLAY);
+                    list_all_cluster_names(1);
+                }
+                return -3;
+            }
+        }
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " cluster name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",cluster_name_source,temp_cluster_name);
+        strcpy(cluster_name,temp_cluster_name);
+        get_workdir(workdir,cluster_name);
+        cluster_role_detect(workdir,cluster_role);
+        if(strcmp(role_flag,"opr")==0&&strcmp(cluster_role,"opr")!=0){
+            printf("[ FATAL: ] The command %s needs the operator to execute. Current role: %s \n",argv[1],cluster_role);
+            return 1;
+        }
+        else if(strcmp(role_flag,"admin")==0&&strcmp(cluster_role,"opr")!=0&&strcmp(cluster_role,"admin")!=0){
+            printf("[ FATAL: ] The command %s needs the operator or admin to execute. Current role: %s \n",argv[1],cluster_role);
+            return 1;
         }
     }
-    else{
-        if(show_current_cluster(workdir,cluster_name,0)!=0){
-            strcpy(workdir,"");
-            strcpy(cluster_name,"");
-            strcpy(invalid_cluster_name,"");
-            strcpy(cluster_role,"");
+
+    if(strcmp(cu_flag,"UNAME")==0){
+        if(cmd_keyword_check(argc,argv,"-u",string_temp)!=0){
+            if(interactive_flag==0){
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid user name from the list below. \n");
+                hpc_user_list(workdir,CRYPTO_KEY_FILE,0);
+                printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
+                fflush(stdin);
+                scanf("%s",string_temp);
+                getchar();
+                if(user_name_quick_check(cluster_name,string_temp,SSHKEY_DIR)!=0){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] The input user name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,string_temp);
+                    return -5;
+                }
+            }
+            else{
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify a valid user name by " HIGH_CYAN_BOLD "-u" RESET_DISPLAY " or run hpcopr with " HIGH_CYAN_BOLD "--i" RESET_DISPLAY ".\n");
+                hpc_user_list(workdir,CRYPTO_KEY_FILE,0);
+                return -5;
+            }
+        }
+        if(user_name_quick_check(cluster_name,string_temp,SSHKEY_DIR)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The specified user name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,string_temp);
+            hpc_user_list(workdir,CRYPTO_KEY_FILE,0);
             return -5;
         }
-        else{
-            cluster_role_detect(workdir,cluster_role);
-            return 0;
-        }
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the user name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",string_temp);
+        strcpy(user_name,string_temp);
     }
+    return 0;
 }

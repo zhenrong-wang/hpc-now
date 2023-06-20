@@ -14,6 +14,7 @@
 #include "now_macros.h"
 #include "general_funcs.h"
 #include "cluster_general_funcs.h"
+#include "cluster_operations.h"
 #include "transfer.h"
 
 int get_cluster_name_import(char* cluster_name_output, char* tmp_top_output, char* tmp_import_root, char* md5sum){
@@ -550,6 +551,7 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     graph(workdir,crypto_keyfile,0);
     sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    switch_to_cluster(cluster_name_buffer);
     return 0;
 }
 

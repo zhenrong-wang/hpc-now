@@ -10,6 +10,7 @@
 #define GENERAL_FUNCS_H
 
 int string_to_positive_num(char* string);
+int get_key_value(char* filename, char* key, char ch, char* value);
 void reset_string(char* orig_string);
 int fgetline(FILE* file_p, char* line_string);
 int contain_or_not(const char* line, const char* findkey);
@@ -36,5 +37,7 @@ int cmd_flg_or_not(char* argv);
 int cmd_key_or_not(char* argv);
 int cmd_flag_check(int argc, char** argv, char* flag_string);
 int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string);
+
+int include_string_or_not(int cmd_c, char** cmds, char* string);
 
 #endif

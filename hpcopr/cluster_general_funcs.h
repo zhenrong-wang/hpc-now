@@ -31,7 +31,8 @@ int decrypt_single_file_general(char* now_crypto_exec, char* source_file, char* 
 int decrypt_files(char* workdir, char* crypto_key_filename);
 void encrypt_and_delete(char* now_crypto_exec, char* filename, char* md5sum);
 int delete_decrypted_files(char* workdir, char* crypto_key_filename);
-int getstate(char* workdir, char* crypto_filename);
+int getstate(char* workdir, char* crypto_keyfile);
+int get_state_value(char* workdir, char* key, char* value);
 int generate_sshkey(char* sshkey_folder, char* pubkey);
 int update_cluster_summary(char* workdir, char* crypto_keyfile);
 int archive_log(char* logarchive, char* logfile);
@@ -74,6 +75,9 @@ void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_fla
 void get_workdir(char* cluster_workdir, char* cluster_name);
 int get_cluster_name(char* cluster_name, char* cluster_workdir);
 int create_cluster_registry(void);
+int list_all_cluster_names(int header_flag);
+int exit_current_cluster(void);
+int delete_from_cluster_registry(char* deleted_cluster_name);
 /*  
  * If silent_flag==1, verbose. Will tell the user which cluster is active
  * If silent_flag==0, silent. Will print nothing

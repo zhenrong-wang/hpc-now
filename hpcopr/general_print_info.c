@@ -222,13 +222,13 @@ void print_help(char* cmd_name){
     }
     if(strcmp(cmd_name,"reconfc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "reconfc" RESET_DISPLAY "     :~ Reconfigure all the compute nodes.\n");
-        printf("|   --list             ~ List out all the available configurations");
+        printf("|   --list             ~ List out all the available configurations\n");
         printf("|   --conf NEW_CONFIG  ~ Specify the new_configuration.\n");
         printf("|   --ht   ON|OFF      ~ Turn on or off hyperthreading for AWS clusters.\n");
     }
     if(strcmp(cmd_name,"reconfm")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "reconfm" RESET_DISPLAY "     :~ Reconfigure the master node.\n");
-        printf("|   --list             ~ List out all the available configurations");
+        printf("|   --list             ~ List out all the available configurations\n");
         printf("|   --conf NEW_CONFIG  ~ Specify the new_configuration.\n");
     }
     if(strcmp(cmd_name,"sleep")==0||strcmp(cmd_name,"all")==0){
