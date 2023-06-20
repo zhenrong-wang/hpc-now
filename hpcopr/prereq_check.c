@@ -913,8 +913,8 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
                 }
                 else{
                     printf(FATAL_RED_BOLD "[ FATAL: ] No cluster specified or switched. Please use " WARN_YELLO_BOLD "-c" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "switch" FATAL_RED_BOLD " to one.\n" RESET_DISPLAY);
-                    list_all_cluster_names(1);
                 }
+                list_all_cluster_names(1);
                 return -3;
             }
         }
