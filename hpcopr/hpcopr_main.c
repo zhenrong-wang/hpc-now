@@ -553,8 +553,9 @@ int main(int argc, char* argv[]){
             run_flag=glance_clusters("all",crypto_keyfile);
         }
         else{
-            if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0){
+            if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0&&show_current_cluster(workdir,cluster_name,0)!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
+                list_all_cluster_names(1);
                 write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
                 check_and_cleanup(workdir);
                 return 25;
@@ -698,8 +699,9 @@ int main(int argc, char* argv[]){
             check_and_cleanup("");
             return 0;
         }
-        if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0){
+        if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0&&show_current_cluster(workdir,cluster_name,0)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
+            list_all_cluster_names(1);
             write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
             check_and_cleanup(workdir);
             return 25;
@@ -1344,6 +1346,9 @@ int main(int argc, char* argv[]){
             if(strcmp(argv[1],"reconfm")==0&&cluster_asleep_or_not(workdir)==0){
                 printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You need to wake up the cluster first.\n" RESET_DISPLAY);
             }
+            write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
+            check_and_cleanup(workdir);
+            return 9;
         }
     }
 

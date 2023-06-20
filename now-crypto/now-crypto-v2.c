@@ -53,7 +53,15 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
         }
         sprintf(header_valid,"%s v%s---",ENCRYPTED_FILE_HEADER,CRYPTO_VERSION);
         if(strcmp(header_buffer,header_valid)!=0){
-            return -7;
+            if(*(header_buffer+0)<'0'||*(header_buffer+0)>'9'){
+                fclose(file_p);
+                return -7;
+            }
+            if(*(header_buffer+3)!=','&&*(header_buffer+4)!=','){
+                fclose(file_p);
+                return -7;
+            }
+            file_p=fopen(orig_file,"r");
         }
         file_p_2=fopen(target_file,"w+");
         if(file_p_2==NULL){
