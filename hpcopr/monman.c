@@ -169,7 +169,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
     char temp_date[32]="";
     char temp_time_final[32]="";
     char temp_time[30]="";
-    char node_name_ext[32]="";
+    char node_name_list_converted[256][16]={""};
     char real_export_dest[DIR_LENGTH_EXT]="";
     char export_file[FILENAME_LENGTH]="";
     char node_name_temp[32]="";
@@ -259,12 +259,15 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
 
     if(strlen(node_name_list)==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] No node specified. Will extract the data of master and all the compute nodes." RESET_DISPLAY "\n");
-        node_filter_flag=0;
+        node_filter_flag=-1;
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Extracting the data of specified node(s):\n");
         printf("|          " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",node_name_list);
-        node_filter_flag=1;
+        node_filter_flag=calc_str_num(node_name_list,':');
+        for(i=0;i<node_filter_flag;i++){
+            get_seq_string(node_name_list,':',i+1,node_name_list_converted[i]);
+        }
     }
 
     interval_num=string_to_positive_num(interval);
@@ -292,20 +295,17 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
             continue;
         }
         else if(time_tmp<time2||time_tmp==time2){
-            if(node_filter_flag==0){
-                if((time_tmp-time1)%(interval_num*60)==0){
-                    fprintf(file_p_2,"%s\n",mon_data_line);
-                }
+            if((time_tmp-time1)%(interval_num*60)!=0){
+                continue;
+            }
+            if(node_filter_flag==-1){
+                fprintf(file_p_2,"%s\n",mon_data_line);
             }
             else{
-                i=1;
-                while(get_seq_string(node_name_list,':',i,node_name_temp)!=-1){
-                    i++;
-                    sprintf(node_name_ext,",%s,",node_name_temp);
-                    if(contain_or_not(mon_data_line,node_name_ext)==0){
-                        if((time_tmp-time1)%(interval_num*60)==0){
-                            fprintf(file_p_2,"%s\n",mon_data_line);
-                        }
+                get_seq_string(mon_data_line,',',4,node_name_temp);
+                for(i=0;i<node_filter_flag;i++){
+                    if(strcmp(node_name_temp,node_name_list_converted[i])==0){
+                        fprintf(file_p_2,"%s\n",mon_data_line);
                     }
                 }
             }
