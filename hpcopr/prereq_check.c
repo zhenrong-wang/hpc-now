@@ -923,15 +923,16 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
         get_workdir(workdir,cluster_name);
         cluster_role_detect(workdir,cluster_role);
         if(strcmp(role_flag,"opr")==0&&strcmp(cluster_role,"opr")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " needs the operator to execute. Current role: " WARN_YELLO_BOLD "%s \n" RESET_DISPLAY,argv[1],cluster_role);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " needs the operator to execute.\n",argv[1]);
+            printf("|          Current role: " WARN_YELLO_BOLD "%s \n" RESET_DISPLAY,cluster_role);
             return 1;
         }
         else if(strcmp(role_flag,"admin")==0&&strcmp(cluster_role,"opr")!=0&&strcmp(cluster_role,"admin")!=0){
-            printf("[ FATAL: ] The command %s needs the operator or admin to execute. Current role: %s \n",argv[1],cluster_role);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " needs the operator or admin to execute.\n",argv[1]); 
+            printf("|          Current role: " WARN_YELLO_BOLD "%s" RESET_DISPLAY " \n",cluster_role);
             return 1;
         }
     }
-
     if(strcmp(cu_flag,"UNAME")==0){
         if(cmd_keyword_check(argc,argv,"-u",string_temp)!=0){
             if(interactive_flag==0){
