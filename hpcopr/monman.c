@@ -107,8 +107,8 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
         }
         return -1;
     }
-    get_seq_string(datetime_input,'~',1,ymd);
-    get_seq_string(datetime_input,'~',2,hour_min);
+    get_seq_string(datetime_input,';',1,ymd);
+    get_seq_string(datetime_input,';',2,hour_min);
     get_seq_string(ymd,'-',1,year);
     get_seq_string(ymd,'-',2,month);
     get_seq_string(ymd,'-',3,mday);
@@ -154,7 +154,7 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
     return i;
 }
 
-int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name, char* start_datetime, char* end_datetime, char* interval, char* view_option, char* export_dest){
+int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_list, char* start_datetime, char* end_datetime, char* interval, char* view_option, char* export_dest){
     if(cluster_name_check(cluster_name)!=-127){
         return -3;
     }
@@ -172,6 +172,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name,
     char node_name_ext[32]="";
     char real_export_dest[DIR_LENGTH_EXT]="";
     char export_file[FILENAME_LENGTH]="";
+    char node_name_temp[32]="";
     int node_filter_flag;
     int interval_num;
     int i;
@@ -256,13 +257,13 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name,
     time2=mktime(&time_tm2);
 //    printf("%ld ======  %ld\n",time1,time2);
 
-    if(strlen(node_name)==0){
+    if(strlen(node_name_list)==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] No node specified. Will extract the data of master and all the compute nodes." RESET_DISPLAY "\n");
         node_filter_flag=0;
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Extracting the data of specified node " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",node_name);
-        sprintf(node_name_ext,",%s,",node_name);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Extracting the data of specified node(s):\n");
+        printf("|          " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",node_name_list);
         node_filter_flag=1;
     }
 
@@ -272,7 +273,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name,
         interval_num=5;
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the specified interval " HIGH_CYAN_BOLD "%d" RESET_DISPLAY " .\n",interval_num);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the specified interval " HIGH_CYAN_BOLD "%d" RESET_DISPLAY " mins.\n",interval_num);
     }
 
     file_p=fopen(cluster_mon_data_file,"r");
@@ -295,14 +296,17 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name,
                 if((time_tmp-time1)%(interval_num*60)==0){
                     fprintf(file_p_2,"%s\n",mon_data_line);
                 }
-                i++;
             }
             else{
-                if(contain_or_not(mon_data_line,node_name_ext)==0){
-                    if((time_tmp-time1)%(interval_num*60)==0){
-                        fprintf(file_p_2,"%s\n",mon_data_line);
-                    }
+                i=1;
+                while(get_seq_string(node_name_list,':',i,node_name_temp)!=-1){
                     i++;
+                    sprintf(node_name_ext,",%s,",node_name_temp);
+                    if(contain_or_not(mon_data_line,node_name_ext)==0){
+                        if((time_tmp-time1)%(interval_num*60)==0){
+                            fprintf(file_p_2,"%s\n",mon_data_line);
+                        }
+                    }
                 }
             }
         }

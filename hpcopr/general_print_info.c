@@ -108,8 +108,8 @@ void print_help(char* cmd_name){
     if(strcmp(cmd_name,"monman")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "monman" RESET_DISPLAY "      :~ Get, filter, and extract cluster monitoring data.\n");
         printf("|    -n     NODE_NAME        ~ Specify a node name, i.e. compute1.\n");
-        printf("|    -s     START_TIMESTAMP  ~ Specify a " HIGH_CYAN_BOLD "strictly-formatted" RESET_DISPLAY " start timestamp. i.e. " HIGH_CYAN_BOLD "2023-1-1~12:10" RESET_DISPLAY " \n");
-        printf("|                            ~ " WARN_YELLO_BOLD "Use a *different charactor* ( NOT '-' or ':' ) to split the date and time!" RESET_DISPLAY "\n");
+        printf("|    -s     START_TIMESTAMP  ~ Specify a " HIGH_CYAN_BOLD "strictly-formatted" RESET_DISPLAY " start timestamp. i.e. " HIGH_CYAN_BOLD "2023-1-1;12:10" RESET_DISPLAY " \n");
+        printf("|                            ~ " WARN_YELLO_BOLD "*MUST* use a ';' to split the date and time!" RESET_DISPLAY "\n");
         printf("|    -e     END_TIMESTAMP    ~ Specify a " HIGH_CYAN_BOLD "strictly-formatted" RESET_DISPLAY " end timestamp.\n");
         printf("|   --level INTERVAL_MINUTES ~ Time interval by minutes.\n");
         printf("|    -d     DEST_PATH        ~ Export the data to a destination folder or file.\n");
