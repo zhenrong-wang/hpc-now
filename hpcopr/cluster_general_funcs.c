@@ -883,7 +883,6 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char compute_status[16]="";
     char compute_config[16]="";
     char statefile[FILENAME_LENGTH]="";
-    char compute_template[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char ht_status[16]="";
     int node_num=0;
@@ -894,8 +893,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     create_and_get_stackdir(workdir,stackdir);
     get_cluster_name(cluster_name,workdir);
     sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
-    sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
-    if(file_exist_or_not(compute_template)!=0||file_exist_or_not(statefile)!=0||get_cloud_flag(workdir,cloud_flag)==-1){
+    if(file_exist_or_not(file_exist_or_not(statefile)!=0||get_cloud_flag(workdir,cloud_flag)==-1){
         return 1;
     }
     cluster_role_detect(workdir,cluster_role);
