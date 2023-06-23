@@ -893,7 +893,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     create_and_get_stackdir(workdir,stackdir);
     get_cluster_name(cluster_name,workdir);
     sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
-    if(file_exist_or_not(file_exist_or_not(statefile)!=0||get_cloud_flag(workdir,cloud_flag)==-1){
+    if(file_empty_or_not(statefile)<1||get_cloud_flag(workdir,cloud_flag)==-1){
         return 1;
     }
     cluster_role_detect(workdir,cluster_role);
