@@ -910,7 +910,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     get_key_value(statefile,"running_compute_nodes:",' ',running_node_num_string);
     running_node_num=string_to_positive_num(running_node_num_string);
     if(graph_level==0){
-        printf(GENERAL_BOLD "|        +-Cluster name: " HIGH_CYAN_BOLD "%s" GENERAL_BOLD " -+- Cluster role: " HIGH_CYAN_BOLD "%s" GENERAL_BOLD "\n",cluster_name,cluster_role);
+        printf(GENERAL_BOLD "|        +-Cluster name: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD " -+- Cluster role: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "\n",cluster_name,cluster_role);
         printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
         printf("|            +-db(%s)\n" RESET_DISPLAY,db_status);
     }
