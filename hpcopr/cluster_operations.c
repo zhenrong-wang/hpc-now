@@ -2016,7 +2016,7 @@ int view_run_log(char* workdir, char* stream, char* run_option, char* view_optio
     if(strlen(export_dest)!=0){
         local_path_parser(export_dest,real_export_dest);
         if(folder_exist_or_not(real_export_dest)==0){
-            sprintf(cmdline,"%s %s %s %s%s",COPY_FILE_CMD,logfile,real_export_dest,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"%s %s %s%s %s",COPY_FILE_CMD,logfile,real_export_dest,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the logfile to the specified folder " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",real_export_dest);
         }
