@@ -83,22 +83,32 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
     char hour_min[64]="";
     char hour[32]="";
     char min[32]="";
-    char ch='\0';
+    int i=0;
     int year_num,month_num,day_num,hour_num,min_num;
-    if(strlen(datetime_input)>16){
-        return 1;
+    time_t current_time_long;
+    struct tm* time_p=NULL;
+    time(&current_time_long);
+    time_p=localtime(&current_time_long);
+
+    int curr_year=time_p->tm_year+1900;
+    int curr_month=time_p->tm_mon+1;
+    int curr_mday=time_p->tm_mday;
+    int curr_hour=time_p->tm_hour;
+    int curr_min=time_p->tm_min;
+
+    if(strlen(datetime_input)>16||strlen(datetime_input)<3){
+        if(extend_flag==0){
+            strcpy(date_string,"1970-1-1");
+            strcpy(time_string,"0:0:0");
+        }
+        else{
+            strcpy(date_string,"2199-12-31");
+            strcpy(time_string,"23:59:59");
+        }
+        return -1;
     }
-    if(*(datetime_input+8)<'0'||*(datetime_input+8)>'9'){
-        ch=*(datetime_input+8);
-    }
-    else if(*(datetime_input+9)<'0'||*(datetime_input+9)>'9'){
-        ch=*(datetime_input+9);
-    }
-    else if(*(datetime_input+10)<'0'||*(datetime_input+10)>'9'){
-        ch=*(datetime_input+9);
-    }
-    get_seq_string(datetime_input,ch,1,ymd);
-    get_seq_string(datetime_input,ch,2,hour_min);
+    get_seq_string(datetime_input,'~',1,ymd);
+    get_seq_string(datetime_input,'~',2,hour_min);
     get_seq_string(ymd,'-',1,year);
     get_seq_string(ymd,'-',2,month);
     get_seq_string(ymd,'-',3,mday);
@@ -111,40 +121,37 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
     hour_num=string_to_positive_num(hour);
     min_num=string_to_positive_num(min);
 
-    if(year_num==-1){
-        goto illegal_string;
+    if(year_num<1){
+        i=1;
+        year_num=curr_year;
     }
     if(month_num<1||month_num>12){
-        goto illegal_string;
+        i=2;
+        month_num=curr_month;
     }
     if(day_num<1||day_num>31){
-        goto illegal_string;
+        i=3;
+        day_num=curr_mday;
     }
     if(day_num>28&&month_num==2&&year_num%4!=0){
-        goto illegal_string;
+        i=4;
+        day_num=curr_mday;
     }
     if(day_num>30&&month_num!=1&&month_num!=3&&month_num!=5&&month_num!=7&&month_num!=8&&month_num!=10&&month_num!=12){
-        goto illegal_string;
+        i=4;
+        day_num=curr_mday;
     }
+    sprintf(date_string,"%d-%d-%d",year_num,month_num,day_num);
     if(hour_num<0||hour_num>23){
-        goto illegal_string;
+        i=5;
+        hour_num=curr_hour;
     }
     if(min_num<0||min_num>59){
-        goto illegal_string;
+        i=6;
+        min_num=curr_min;
     }
-    sprintf(date_string,"%s-%s-%s",year,month,mday);
-    sprintf(time_string,"%s:%s:0",hour,min);
-    return 0;
-illegal_string:
-    if(extend_flag==0){
-        strcpy(date_string,"1970-1-1");
-        strcpy(time_string,"0:0:0");
-    }
-    else{
-        strcpy(date_string,"2199-12-31");
-        strcpy(time_string,"23:59:59");
-    }
-    return 1;
+    sprintf(time_string,"%d:%d:0",hour_num,min_num);
+    return i;
 }
 
 int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name, char* start_datetime, char* end_datetime, char* interval, char* view_option, char* export_dest){
@@ -160,7 +167,8 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name,
     char end_date[32]="";
     char end_time[32]="";
     char temp_date[32]="";
-    char temp_time[32]="";
+    char temp_time_final[32]="";
+    char temp_time[30]="";
     char node_name_ext[32]="";
     char real_export_dest[DIR_LENGTH_EXT]="";
     char export_file[FILENAME_LENGTH]="";
@@ -190,51 +198,64 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name,
     if(file_p_2==NULL){
         return -1;
     }
-    if(strlen(start_datetime)!=0){
-        run_flag=valid_time_format_or_not(start_datetime,0,start_date,start_time);
-        if(run_flag!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] The start date&time %s is invalid. Valid format: " HIGH_CYAN_BOLD "YYYY-MM-DD~HH:MM.\n",start_datetime);
-            printf(WARN_YELLO_BOLD "|          Will start from the first timestamp.\n" RESET_DISPLAY);
-        }
-        else{
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the specified start date&time " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",start_datetime);
-        }
+    run_flag=valid_time_format_or_not(start_datetime,0,start_date,start_time);
+    if(run_flag==-1){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] No start date&time specified. Will start from the first timestamp.\n" RESET_DISPLAY);
+    }
+    else if(run_flag==1){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Start date&time: Using the current year.\n");
+    }
+    else if(run_flag==2){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Start date&time: Using the current month.\n");
+    }
+    else if(run_flag==3){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Start date&time: Using the current mday.\n");
+    }
+    else if(run_flag==4){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Start date&time: Using the current hour.\n");
+    }
+    else if(run_flag==5){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Start date&time: Using the current minute.\n");
     }
     else{
-        printf(WARN_YELLO_BOLD "[ -WARN- ] No start date&time specified. Will start from the first timestamp.\n" RESET_DISPLAY);
-        strcpy(start_date,"1970-1-1");
-        strcpy(start_time,"0:0:0");
+        printf(GENERAL_BOLD "[ INFO- ]" RESET_DISPLAY " Start date&time: %s~%s.\n",start_date,start_time);
     }
     datetime_to_num(start_date,start_time,&time_tm1);
     time1=mktime(&time_tm1);
-
-    if(strlen(end_datetime)!=0){
-        run_flag=valid_time_format_or_not(end_datetime,1,end_date,end_time);
-        if(run_flag!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] The end date&time %s is invalid. Valid format: " HIGH_CYAN_BOLD "YYYY-MM-DD~HH:MM.\n",end_datetime);
-            printf(WARN_YELLO_BOLD "|          Will end with the last timestamp.\n" RESET_DISPLAY);
-        }
-        else{
-            datetime_to_num(end_date,end_time,&time_tm2);
-            time2=mktime(&time_tm2);
-            if(time1>time2){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] The specified end date&time is earlier than the start date&time. Skipping it.\n" RESET_DISPLAY);
-                strcpy(end_date,"2199-12-31");
-                strcpy(end_time,"23:59:59");
-            }
-            else{
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the specified end date&time " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",end_datetime);
-            }
-        }
+    run_flag=valid_time_format_or_not(end_datetime,1,end_date,end_time);
+    if(run_flag==-1){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] No end date&time specified. Will end with the last timestamp.\n" RESET_DISPLAY);
+    }
+    else if(run_flag==1){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] End date&time: Using the current year.\n");
+    }
+    else if(run_flag==2){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] End date&time: Using the current month.\n");
+    }
+    else if(run_flag==3){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] End date&time: Using the current mday.\n");
+    }
+    else if(run_flag==4){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] End date&time: Using the current hour.\n");
+    }
+    else if(run_flag==5){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] End date&time: Using the current minute.\n");
     }
     else{
-        printf(WARN_YELLO_BOLD "[ -WARN- ] No end date&time specified. Will end with the last timestamp." RESET_DISPLAY "\n");
-        strcpy(end_date,"2199-12-31");
-        strcpy(end_time,"23:59:59");
+        datetime_to_num(end_date,end_time,&time_tm2);
+        time2=mktime(&time_tm2);
+        if(time1>time2){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The specified end date&time is earlier than the start date&time. Skipping it.\n" RESET_DISPLAY);
+            valid_time_format_or_not("",1,end_date,end_time);
+        }
+        else{
+            printf(GENERAL_BOLD "[ INFO- ]" RESET_DISPLAY " End date&time: %s~%s.\n",end_date,end_time);
+        }
     }
     datetime_to_num(end_date,end_time,&time_tm2);
     time2=mktime(&time_tm2);
-    
+//    printf("%ld ======  %ld\n",time1,time2);
+
     if(strlen(node_name)==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] No node specified. Will extract the data of master and all the compute nodes." RESET_DISPLAY "\n");
         node_filter_flag=0;
@@ -246,8 +267,9 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name,
     }
 
     interval_num=string_to_positive_num(interval);
-    if(interval_num<0){
+    if(interval_num<1){
         printf(WARN_YELLO_BOLD "[ -WARN- ] No valid interval specified. Will use the default interval 5 mins." RESET_DISPLAY "\n");
+        interval_num=5;
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the specified interval " HIGH_CYAN_BOLD "%d" RESET_DISPLAY " .\n",interval_num);
@@ -260,9 +282,11 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name,
     while(!feof(file_p)){
         fgetline(file_p,mon_data_line);
         get_seq_string(mon_data_line,',',1,temp_date);
-        get_seq_string(mon_data_line,',',3,temp_time);
-        datetime_to_num(temp_date,temp_time,&time_tm_tmp);
+        get_seq_string(mon_data_line,',',2,temp_time);
+        sprintf(temp_time_final,"%s:0",temp_time);
+        datetime_to_num(temp_date,temp_time_final,&time_tm_tmp);
         time_tmp=mktime(&time_tm_tmp);
+//        printf("*******%ld**%ld***%ld,,,,,%d,,,,,%ld\n",time1,time2,time_tmp,interval_num,(time_tmp-time1)%(interval_num*60));
         if(time_tmp<time1){
             continue;
         }

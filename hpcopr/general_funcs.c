@@ -85,6 +85,9 @@ char command_keywords[CMD_KWDS_NUM][16]={
 int string_to_positive_num(char* string){
     int i,sum=0;
     int length=strlen(string);
+    if(length==0){
+        return 0;
+    }
     for(i=0;i<length;i++){
         if(*(string+i)<'0'||*(string+i)>'9'){
             return -1;
