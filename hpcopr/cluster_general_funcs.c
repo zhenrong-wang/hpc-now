@@ -877,6 +877,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char master_config[16]="";
     char db_status[16]="";
     char cloud_flag[16]="";
+    char cluster_role[16]="";
     char string_temp[32]="";
     char compute_address[32]="";
     char compute_status[16]="";
@@ -897,6 +898,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     if(file_exist_or_not(compute_template)!=0||file_exist_or_not(statefile)!=0||get_cloud_flag(workdir,cloud_flag)==-1){
         return 1;
     }
+    cluster_role_detect(workdir,cluster_role);
     get_key_value(statefile,"master_public_ip:",' ',master_address);
     get_key_value(statefile,"master_status:",' ',master_status);
     get_key_value(statefile,"database_status:",' ',db_status);
@@ -908,7 +910,8 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     get_key_value(statefile,"running_compute_nodes:",' ',running_node_num_string);
     running_node_num=string_to_positive_num(running_node_num_string);
     if(graph_level==0){
-        printf(HIGH_GREEN_BOLD "|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
+        printf("|        +-Cluster name: %s -+- Cluster role: %s\n",cluster_name,cluster_role);
+        printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
         printf("|            +-db(%s)\n" RESET_DISPLAY,db_status);
     }
     for(i=0;i<node_num;i++){
@@ -927,18 +930,18 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     }
     if(graph_level==1){
         if(strlen(ht_status)!=0){
-            printf("%s | %s | %s %s %s | %d/%d | %s | %s\n",cluster_name,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
+            printf("%s %s | %s | %s %s %s | %d/%d | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
         }
         else{
-            printf("%s | %s | %s %s %s | %d/%d | %s \n",cluster_name,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
+            printf("%s %s | %s | %s %s %s | %d/%d | %s \n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
         }
     }
     else if(graph_level==2){
         if(strlen(ht_status)!=0){
-            printf("%s,%s,%s,%s,%s,%d,%d,%s,%s\n",cluster_name,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
+            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
         }
         else{
-            printf("%s,%s,%s,%s,%s,%d,%d,%s\n",cluster_name,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
+            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
         }
     }
     return 0;
