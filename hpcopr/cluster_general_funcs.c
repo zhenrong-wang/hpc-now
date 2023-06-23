@@ -910,7 +910,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     get_key_value(statefile,"running_compute_nodes:",' ',running_node_num_string);
     running_node_num=string_to_positive_num(running_node_num_string);
     if(graph_level==0){
-        printf("|        +-Cluster name: %s -+- Cluster role: %s\n",cluster_name,cluster_role);
+        printf(GENERAL_BOLD "|        +-Cluster name: " HIGH_CYAN_BOLD "%s" GENERAL_BOLD " -+- Cluster role: " HIGH_CYAN_BOLD "%s" GENERAL_BOLD "\n",cluster_name,cluster_role);
         printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
         printf("|            +-db(%s)\n" RESET_DISPLAY,db_status);
     }
@@ -921,10 +921,10 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         get_key_value(statefile,string_temp,' ',compute_status);
         if(graph_level==0){
             if(strlen(ht_status)!=0){
-                printf(HIGH_GREEN_BOLD "|              +-compute%d(%s,%s,%s,%s)\n" RESET_DISPLAY,i+1,compute_address,compute_status,compute_config,ht_status);
+                printf(GENERAL_BOLD "|              +-compute%d(%s,%s,%s,%s)\n" RESET_DISPLAY,i+1,compute_address,compute_status,compute_config,ht_status);
             }
             else{
-                printf(HIGH_GREEN_BOLD "|              +-compute%d(%s,%s,%s)\n" RESET_DISPLAY,i+1,compute_address,compute_status,compute_config);
+                printf(GENERAL_BOLD "|              +-compute%d(%s,%s,%s)\n" RESET_DISPLAY,i+1,compute_address,compute_status,compute_config);
             }
         }
     }
@@ -944,6 +944,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             printf("%s,%s,%s,%s,%s,%s,%d,%d,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
         }
     }
+    printf(RESET_DISPLAY);
     return 0;
 }
 
