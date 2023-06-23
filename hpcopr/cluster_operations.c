@@ -94,6 +94,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 get_cloud_flag(temp_cluster_workdir,cloud_flag);
+                cluster_role_detect(temp_cluster_workdir,cluster_role);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
                     printf(HIGH_GREEN_BOLD "|  switch: <> ");
                 }
@@ -128,6 +129,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
+        cluster_role_detect(temp_cluster_workdir,cluster_role);
         if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,target_cluster_name)==0){
             printf(HIGH_GREEN_BOLD "|  switch: <> ");
         }
