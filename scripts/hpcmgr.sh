@@ -337,7 +337,6 @@ if [ $1 = 'connect' ]; then
   source /etc/profile
   echo -e "[ STEP 4 ] Updating the cluster configuration now ..."
   if [ -f /etc/hosts-clean ]; then
-    hostnamectl set-hostname master
     /bin/cp /etc/hosts-clean /etc/hosts
     cat /root/hostfile >> /etc/hosts
     /bin/cp /opt/slurm/etc/slurm.conf.128 /opt/slurm/etc/slurm.conf
@@ -440,7 +439,6 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
     echo -e "[ STEP 4 ] Pulling the compute node(s) up ..."
     for i in $( seq 1 $NODE_NUM )
     do
-      ssh compute${i} "hostnamectl set-hostname compute${i}"
       scp -q /root/hostfile root@compute${i}:/etc/
       scp -q /opt/slurm/etc/slurm.conf root@compute${i}:/opt/slurm/etc/
       ssh compute${i} "sed -i '/master/d' /etc/hosts && sed -i '/compute/d' /etc/hosts"
