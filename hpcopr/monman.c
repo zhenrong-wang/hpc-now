@@ -83,12 +83,22 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
     char hour_min[64]="";
     char hour[32]="";
     char min[32]="";
+    char ch='\0';
     int year_num,month_num,day_num,hour_num,min_num;
     if(strlen(datetime_input)>16){
         return 1;
     }
-    get_seq_string(datetime_input,'~',1,ymd);
-    get_seq_string(datetime_input,'~',2,hour_min);
+    if(*(datetime_input+8)<'0'||*(datetime_input+8)>'9'){
+        ch=*(datetime_input+8);
+    }
+    else if(*(datetime_input+9)<'0'||*(datetime_input+9)>'9'){
+        ch=*(datetime_input+9);
+    }
+    else if(*(datetime_input+10)<'0'||*(datetime_input+10)>'9'){
+        ch=*(datetime_input+9);
+    }
+    get_seq_string(datetime_input,ch,1,ymd);
+    get_seq_string(datetime_input,ch,2,hour_min);
     get_seq_string(ymd,'-',1,year);
     get_seq_string(ymd,'-',2,month);
     get_seq_string(ymd,'-',3,mday);
