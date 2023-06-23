@@ -870,7 +870,7 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
     }
     char role_flag[16]="";
     char cu_flag[16]="";
-    int interactive_flag=cmd_flag_check(argc,argv,"--i");
+    int interactive_flag=cmd_flag_check(argc,argv,"-i");
     command_flag=command_name_check(argv[1],command_name_prompt,role_flag,cu_flag);
     if(command_flag!=0){
         return command_flag;
@@ -947,7 +947,7 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
                 }
             }
             else{
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify a valid user name by " HIGH_CYAN_BOLD "-u" RESET_DISPLAY " or run hpcopr with " HIGH_CYAN_BOLD "--i" RESET_DISPLAY ".\n");
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify a valid user name by " HIGH_CYAN_BOLD "-u" RESET_DISPLAY " or run hpcopr with " HIGH_CYAN_BOLD "-i" RESET_DISPLAY ".\n");
                 hpc_user_list(workdir,CRYPTO_KEY_FILE,0);
                 return -5;
             }

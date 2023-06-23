@@ -48,7 +48,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
 int check_pslock(char* workdir);
 int confirm_to_operate_cluster(char* current_cluster_name);
 int check_down_nodes(char* workdir);
-int cluster_ssh(char* workdir, char* username);
+int cluster_ssh(char* workdir, char* username, char* cluster_role);
 int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
 void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);
@@ -61,6 +61,7 @@ int decrypt_user_passwords(char* workdir, char* crypto_keyfile);
 void delete_decrypted_user_passwords(char* workdir);
 void encrypt_and_delete_user_passwords(char* workdir, char* crypto_keyfile);
 int sync_user_passwords(char* workdir, char* sshkey_dir);
+int sync_statefile(char* workdir, char* sshkey_dir);
 int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag);
 int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir);
 int username_check(char* user_registry, char* username_input);

@@ -29,6 +29,10 @@ if [[ -f /root/hostfile && -z $HPCMGR_SCRIPT_URL ]]; then
   echo -e "# $time_current [ FATAL: ] The critical environment var HPCMGR_SCRIPT_URL is not set. Init abort." >> ${logfile}
   exit 1
 fi
+if [ -z $SCRIPTS_URL_ROOT ]; then
+  echo -e "# $time_current [ FATAL: ] The critical environment var SCRIPTS_URL_ROOT is not set. Init abort." >> ${logfile}
+  exit 1
+fi
 url_utils=${INITUTILS_REPO_ROOT}
 #CLOUD_A: Alicloud
 #CLOUD_B: QCloud/TencentCloud
@@ -99,6 +103,13 @@ if [ -f /root/hostfile ]; then
   mkdir -p /hpc_data/public
   chmod -R 777 /hpc_data/public
 fi
+
+mkdir -p /usr/hpc-now
+wget ${SCRIPTS_URL_ROOT}nowmon_agt.sh -O /usr/hpc-now/nowmon_agt.sh && chmod +x /usr/hpc-now/nowmon_agt.sh
+if [ -f /root/hostfile ]; then
+  wget ${SCRIPTS_URL_ROOT}nowmon_mgr.sh -O /usr/hpc-now/nowmon_mgr.sh && chmod +x /usr/hpc-now/nowmon_mgr.sh
+fi
+
 ########## Spread .ssh keys ###################
 echo -e "# $time_current Spawning ssh keys." >> ${logfile}
 if [ -f /root/hostfile ]; then 
@@ -547,5 +558,6 @@ fi
 echo -e "Cleaning Up ..."
 rm -rf /root/openmpi*
 echo -e "Installation Finished."
+echo "*/1 * * * *  /usr/hpc-now/nowmon_mgr.sh " >> /var/spool/cron/root
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Extra packages have been removed." >> ${logfile}

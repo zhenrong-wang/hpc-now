@@ -27,8 +27,8 @@ elif [ "$1" = "build" ]; then
     ar -rc ./installer/libgfuncs.a ./installer/gfuncs.o
     rm -rf ./installer/gfuncs.o
     clang ./installer/installer.c ./installer/libgfuncs.a -Wall -o ./build/installer-dwn-${installer_version_code}.exe
-    clang ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto-dwn.exe
-    gcc ./now-crypto/now-crypto-v2.c -Wall -lm -o ./build/now-crypto-v2-dwn.exe
+#    clang ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto-dwn.exe
+    clang ./now-crypto/now-crypto-v2.c -Wall -lm -o ./build/now-crypto-v2-dwn.exe
     chmod +x ./build/*
     mv ./installer/libgfuncs.a ./build/
 elif [ "$1" = "delete" ]; then

@@ -27,49 +27,51 @@
 #include "general_funcs.h"
 
 char command_flags[CMD_FLAG_NUM][16]={
-    "--all",
+    "-i", // interactive
+    "-r", // recursive
+    "-rf", // recursive + force
+    "-f", // force
+    "--all", 
     "--list",
     "--force",
     "--recursive",
-    "-r",
-    "-rf",
-    "-f",
-    "--print",
-    "--read",
-    "--std",
-    "--err",
-    "--this",
-    "--hist",
-    "--mc",
-    "--mcdb",
-    "--bkey",
-    "--rkey",
-    "--admin",
-    "--accept",
-    "--i"
+    "--print", // print contents
+    "--read", // read contents
+    "--std", // standard info
+    "--err", // error info
+    "--this", // this
+    "--hist", // historical
+    "--mc", // rebuild mc
+    "--mcdb", //rebuild mcdb
+    "--bkey", // display bucket passwd
+    "--rkey", // display root passwd
+    "--admin", //export admin privilege
+    "--accept", // accept license terms
+    "--echo" //echo_flag
 };
 
 char command_keywords[CMD_KWDS_NUM][16]={
-    "-c",
-    "-u",
-    "-p",
-    "--s",
-    "--d",
-    "--t",
+    "-c", //cluster
+    "-u", //user
+    "-p", // password
+    "-s", //Source  | start
+    "-e", //End
+    "-d", //Destination
+    "-t", // target
+    "-n", //node_name
     "--cmd",
     "--dcmd",
     "--ucmd",
     "--level",
-    "--cname",
+    "--cname", //cluster_name
     "--ak",
     "--sk",
-    "--echo",
-    "--ul",
-    "--key",
+    "--ul", // user list
+    "--key", //key file
     "--rg",
     "--az",
-    "--nn",
-    "--un",
+    "--nn", //node_num
+    "--un", //user_num
     "--mi",
     "--ci",
     "--os",
@@ -77,7 +79,7 @@ char command_keywords[CMD_KWDS_NUM][16]={
     "--conf",
     "--hloc",
     "--cloc",
-    "--hver",
+    "--hver"
 };
 
 int string_to_positive_num(char* string){

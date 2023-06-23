@@ -46,7 +46,12 @@ void bucket_path_check(char* path_string, char* hpc_user, char* real_path){
         }
     }
     else{
-        sprintf(real_path,"/%s%s",hpc_user,path_string);
+        if(strcmp(hpc_user,"root")==0){
+            strcpy(real_path,path_string);
+        }
+        else{
+            sprintf(real_path,"/%s%s",hpc_user,path_string);
+        }
     }
 }
 

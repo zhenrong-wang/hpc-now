@@ -28,7 +28,7 @@ if "%~1"=="" (
 	gcc .\installer\installer.c .\installer\libgfuncs.a -Wall -o .\build\installer-win-%installer_version_code%.exe
 	move /y .\installer\libgfuncs.a .\build\libgfuncs.a
 	del /f /s /q .\installer\gfuncs.o
-	gcc .\now-crypto\now-crypto.c -Wall -o .\build\now-crypto-win.exe
+::	gcc .\now-crypto\now-crypto.c -Wall -o .\build\now-crypto-win.exe
 	gcc .\now-crypto\now-crypto-v2.c -Wall -o .\build\now-crypto-v2-win.exe
 ) else if "%~1"=="delete" (
 	echo [ START: ] Deleting the binaries now ...

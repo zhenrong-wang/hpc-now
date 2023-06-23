@@ -77,11 +77,11 @@ void print_help(char* cmd_name){
         printf("|   --ul     USER_LIST    ~ Specify a list of users to be exported (split by ':').\n");
         printf("|   --key    KEYFILE      ~ Specify a crypto key file to encrypt the files.\n");
         printf("|   --admin               ~ Export with cluster admin privilege.\n");
-        printf("|   --d       EST_PATH    ~ Specify a destination path to export to.\n");
+        printf("|    -d      DEST_PATH    ~ Specify a destination path to export to.\n");
     }
     if(strcmp(cmd_name,"import")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "import" RESET_DISPLAY "      :~ Import a cluster to the current hpcopr client.\n");
-        printf("|   --s      SOURCE_PATH  ~ Specify the path of the source file.\n");
+        printf("|    -s      SOURCE_PATH  ~ Specify the path of the source file.\n");
         printf("|   --key    KEYFILE      ~ Specify a crypto key file to encrypt the files.\n");
     }
     if(strcmp(cmd_name,"remove")==0||strcmp(cmd_name,"all")==0){
@@ -103,19 +103,27 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "usage" RESET_DISPLAY "       :~ View and/or export the usage history.\n");
         printf("|   --read                ~ Use system util 'more' to read the usage.\n");
         printf("|   --print(Default)      ~ Print out the usage data.\n");
-        printf("|   --d       DEST_PATH   ~ Export the usage data to a destination file.\n");
+        printf("|    -d       DEST_PATH   ~ Export the usage data to a destination file.\n");
+    }
+    if(strcmp(cmd_name,"monman")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "monman" RESET_DISPLAY "      :~ Get, filter, and extract cluster monitoring data.\n");
+        printf("|    -n     NODE_NAME        ~ Specify a node name, i.e. compute1.\n");
+        printf("|    -s     START_TIMESTAMP  ~ Specify a formatted start timestamp. i.e. 2023-1-1~12:10 \n");
+        printf("|    -e     END_TIMESTAMP    ~ Specify a formatted end timestamp.\n");
+        printf("|   --level INTERVAL_MINUTES ~ Time interval by minutes.\n");
+        printf("|    -d     DEST_PATH        ~ Export the data to a destination folder or file.\n");
     }
     if(strcmp(cmd_name,"history")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "history" RESET_DISPLAY "     :~ View and/or export the operation log.\n");
         printf("|   --read                ~ Use system util 'more' to read the usage.\n");
         printf("|   --print(Default)      ~ Print out the usage data.\n");
-        printf("|   --d       DEST_PATH   ~ Export the usage data to a destination file.\n");
+        printf("|    -d       DEST_PATH   ~ Export the usage data to a destination file.\n");
     }
     if(strcmp(cmd_name,"syserr")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "syserr" RESET_DISPLAY "      :~ View and/or export the system cmd errors.\n");
         printf("|   --read                ~ Use system util 'more' to read the usage.\n");
         printf("|   --print(Default)      ~ Print out the usage data.\n");
-        printf("|   --d      DEST_PATH    ~ Export the usage data to a destination file.\n");
+        printf("|    -d      DEST_PATH    ~ Export the usage data to a destination file.\n");
     }
     if(strcmp(cmd_name,"ssh")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "ssh" RESET_DISPLAY "         :~ SSH to the master node of a cluster.\n");
@@ -190,8 +198,9 @@ void print_help(char* cmd_name){
     if(strcmp(cmd_name,"viewlog")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "viewlog" RESET_DISPLAY "     :~ View the operation log of the current cluster.\n");
         printf("|   --std  | --err     ~ Choose Standard output or Standart err stream.\n");
-        printf("|   --this | --hist    ~ Choose Standard output or Standart err stream.\n");
+        printf("|   --this | --hist    ~ Choose the log of this run or historical runs.\n");
         printf("|   --print            ~ Print out (not stream out) the contents.\n");
+        printf("|    -d   EXPORT_DEST  ~ Export the log to a specified folder or file.\n");
     }
     if(strcmp(cmd_name,"all")==0){
         printf(GENERAL_BOLD "+ V  . Cluster Operation:\n" RESET_DISPLAY);
@@ -372,9 +381,9 @@ void print_usrmgr_info(void){
 void print_dataman_info(void){
     printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "dataman" RESET_DISPLAY " CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...\n");
     printf("| General Flags    :~ -r, -rf, --recursive, --force, -f.\n");
-    printf("|   --s SOURCE_PATH  ~ Source path of the binary operations. i.e. cp\n");
-    printf("|   --d DEST_PATH    ~ Destination path of binary operations. i.e. cp\n");
-    printf("|   --t TARGET_PATH  ~ Target path of unary operations. i.e. ls\n");
+    printf("|    -s SOURCE_PATH  ~ Source path of the binary operations. i.e. cp\n");
+    printf("|    -d DEST_PATH    ~ Destination path of binary operations. i.e. cp\n");
+    printf("|    -t TARGET_PATH  ~ Target path of unary operations. i.e. ls\n");
     printf("| Bucket Operations:~ Transfer and manage data with the bucket.\n");
     printf("|   --dcmd put       ~ Upload a local file or folder to the bucket path.\n");
     printf("|   --dcmd get       ~ Download a bucket object(file or folder) to the local path.\n");
@@ -382,7 +391,7 @@ void print_dataman_info(void){
     printf("|   --dcmd list      ~ Show the object list of a specified folder/path.\n");
     printf("|   --dcmd delete    ~ Delete an object (file or folder) of the bucket.\n");
     printf("|   --dcmd move      ~ Move an existed object (file or folder) in the bucket.\n");
-    printf("|    Example: hpcopr dataman --dcmd put --s ./foo --d /foo -u user1\n");
+    printf("|    Example: hpcopr dataman --dcmd put -s ./foo -d /foo -u user1\n");
     printf("| Direct Operations:~ Transfer and manage data in the cluster storage.\n");
     printf("| * The cluster must be in running state (minimal or all). *\n");
     printf("|   --dcmd cp        ~ Remote copy between local and the cluster storage.\n");
@@ -401,5 +410,5 @@ void print_dataman_info(void){
     printf("|     @a/ to specify the /hpc_apps/ prefix, only for root or user1.\n");
     printf("|     @p/ to specify the public folder prefix " WARN_YELLO_BOLD "( INSECURE !)" RESET_DISPLAY ".\n");
     printf("|     @R/ to specify the / prefix, only for root or user1.\n");
-    printf("|    Example: hpcopr dataman --dcmd cp --s ~/foo/ --d @h/foo -r -u user1\n");
+    printf("|    Example: hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1\n");
 }

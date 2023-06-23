@@ -32,6 +32,7 @@
 #include "usage_and_logs.h"
 #include "dataman.h"
 #include "transfer.h"
+#include "monman.h"
 
 char url_code_root_var[LOCATION_LENGTH]="";
 char url_tf_root_var[LOCATION_LENGTH]="";
@@ -105,6 +106,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "destroy,opr,CNAME",
     "userman,admin,CNAME",
     "dataman,gen,UNAME",
+    "monman,admin,CNAME",
     "about,gen,NULL",
     "version,gen,NULL",
     "license,gen,NULL",
@@ -159,6 +161,7 @@ char dataman_commands[DATAMAN_COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
 37 NO_NEED_TO_SWITCH
 38 NO_NEED_TO_WAKEUP
 39 NOT_IN_THE_REGISTRY
+40 MONMAN_FAILED
 41 DESTROY_ERROR
 43 CLUSTER_ASLEEP
 45 GRAPH_FAILED
@@ -230,6 +233,7 @@ int main(int argc, char* argv[]){
     char string_temp[256]="";
     char string_temp2[256]="";
     char string_temp3[256]="";
+    char string_temp4[4]="";
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char cluster_role[8]="";
@@ -624,7 +628,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"usage")==0){
-        cmd_keyword_check(argc,argv,"--d",export_dest);
+        cmd_keyword_check(argc,argv,"-d",export_dest);
         if(cmd_flag_check(argc,argv,"--read")==0){
             run_flag=view_system_logs(usage_log,"read",export_dest);
         }
@@ -641,7 +645,7 @@ int main(int argc, char* argv[]){
         return 0;
     }
     if(strcmp(argv[1],"history")==0){
-        cmd_keyword_check(argc,argv,"--d",export_dest);
+        cmd_keyword_check(argc,argv,"-d",export_dest);
         if(cmd_flag_check(argc,argv,"--read")==0){
             run_flag=view_system_logs(operation_log,"read",export_dest);
         }
@@ -659,7 +663,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"syserr")==0){
-        cmd_keyword_check(argc,argv,"--d",export_dest);
+        cmd_keyword_check(argc,argv,"-d",export_dest);
         if(cmd_flag_check(argc,argv,"--read")==0){
             run_flag=view_system_logs(syserror_log,"read",export_dest);
         }
@@ -677,7 +681,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"import")==0){
-        cmd_keyword_check(argc,argv,"--s",import_source);
+        cmd_keyword_check(argc,argv,"-s",import_source);
         cmd_keyword_check(argc,argv,"--key",trans_keyfile);
         run_flag=import_cluster(import_source,trans_keyfile,crypto_keyfile);
         if(run_flag!=0){
@@ -687,9 +691,31 @@ int main(int argc, char* argv[]){
         }
         else{
             write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
-            check_and_cleanup("");
+            check_and_cleanup(workdir);
             return 0;
         }
+    }
+
+    if(strcmp(argv[1],"monman")==0){
+        cmd_keyword_check(argc,argv,"-n",string_temp);
+        cmd_keyword_check(argc,argv,"-s",string_temp2);
+        cmd_keyword_check(argc,argv,"-e",string_temp3);
+        cmd_keyword_check(argc,argv,"-d",destination_path);
+        cmd_keyword_check(argc,argv,"--level",string_temp4);
+        if(cmd_flag_check(argc,argv,"--read")==0){
+            run_flag=show_cluster_mon_data(cluster_name,SSHKEY_DIR,string_temp,string_temp2,string_temp3,string_temp4,"read",destination_path);
+        }
+        else{
+            run_flag=show_cluster_mon_data(cluster_name,SSHKEY_DIR,string_temp,string_temp2,string_temp3,string_temp4,"print",destination_path);
+        }
+        if(run_flag!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"MONITOR_MANAGER_FAILED",40);
+            check_and_cleanup(workdir);
+            return 40;
+        }
+        write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
+        check_and_cleanup(workdir);
+        return 0;
     }
 
     if(strcmp(argv[1],"switch")==0){
@@ -761,6 +787,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"viewlog")==0){
+        cmd_keyword_check(argc,argv,"-d",string_temp);
         if(cmd_flag_check(argc,argv,"--err")==0){
             strcpy(stream_name,"err");
         }
@@ -774,10 +801,10 @@ int main(int argc, char* argv[]){
             strcpy(log_type,"realtime");
         }
         if(cmd_flag_check(argc,argv,"--print")==0){
-            run_flag=view_run_log(workdir,stream_name,log_type,"print");
+            run_flag=view_run_log(workdir,stream_name,log_type,"print",string_temp);
         }
         else{
-            run_flag=view_run_log(workdir,stream_name,log_type,"");
+            run_flag=view_run_log(workdir,stream_name,log_type,"",string_temp);
         }
         if(run_flag==-1){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the log. Have you specified or switched to a cluster?\n" RESET_DISPLAY );
@@ -802,10 +829,11 @@ int main(int argc, char* argv[]){
         if(strcmp(user_name,"root")==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] SSH as root is VERY RISKY and *NOT* recommended! Only for operator or admins." RESET_DISPLAY "\n");
         }
-        run_flag=cluster_ssh(workdir,user_name);
+        run_flag=cluster_ssh(workdir,user_name,cluster_role);
         if(run_flag==-1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the ssh key. You can still try to use password to login.\n" RESET_DISPLAY);
             write_operation_log(cluster_name,operation_log,argc,argv,"FILE_I/O_ERROR",127);
-            check_and_cleanup("");
+            check_and_cleanup(workdir);
             return 127;
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",run_flag);
@@ -938,7 +966,7 @@ int main(int argc, char* argv[]){
         }
         cmd_keyword_check(argc,argv,"--ul",user_name_list);
         cmd_keyword_check(argc,argv,"--key",trans_keyfile);
-        cmd_keyword_check(argc,argv,"--d",export_dest);
+        cmd_keyword_check(argc,argv,"-d",export_dest);
 //        printf("%s ------------------ \n",trans_keyfile);
         if(cmd_flag_check(argc,argv,"--admin")==0){
             run_flag=export_cluster(cluster_name,user_name_list,"admin",crypto_keyfile,trans_keyfile,export_dest);
@@ -996,7 +1024,7 @@ int main(int argc, char* argv[]){
             }
         }
         if(strcmp(data_cmd,"put")==0||strcmp(data_cmd,"get")==0||strcmp(data_cmd,"copy")==0||strcmp(data_cmd,"move")==0||strcmp(data_cmd,"cp")==0||strcmp(data_cmd,"mv")==0||strcmp(data_cmd,"rput")==0||strcmp(data_cmd,"rget")==0){
-            if(cmd_keyword_check(argc,argv,"--s",source_path)!=0){
+            if(cmd_keyword_check(argc,argv,"-s",source_path)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a source path for this command.\n");
                 printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 printf("|          For " HIGH_CYAN_BOLD "local" RESET_DISPLAY " paths and " HIGH_CYAN_BOLD "bucket" RESET_DISPLAY " paths, no prefix needed.\n");
@@ -1005,7 +1033,7 @@ int main(int argc, char* argv[]){
                 scanf("%s",source_path);
                 getchar();
             }
-            if(cmd_keyword_check(argc,argv,"--d",destination_path)!=0){
+            if(cmd_keyword_check(argc,argv,"-d",destination_path)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a destination path for this command.\n");
                 printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 printf("|          For " HIGH_CYAN_BOLD "local" RESET_DISPLAY " paths and " HIGH_CYAN_BOLD "bucket" RESET_DISPLAY " paths, no prefix needed.\n");

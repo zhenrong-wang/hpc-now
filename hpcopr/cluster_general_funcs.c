@@ -29,9 +29,6 @@ int cluster_role_detect(char* workdir, char* cluster_role){
     char cluster_summary[FILENAME_LENGTH]="";
     char user_passwords[FILENAME_LENGTH]="";
     create_and_get_vaultdir(workdir,vaultdir);
-    if(cluster_empty_or_not(workdir)==0){
-        return -1;
-    }
     sprintf(cloud_secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     sprintf(cluster_summary,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
     sprintf(user_passwords,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
@@ -1268,16 +1265,21 @@ int check_down_nodes(char* workdir){
     return get_compute_node_num(statefile,"down");
 }
 
-int cluster_ssh(char* workdir, char* username){
+int cluster_ssh(char* workdir, char* username, char* role_flag){
     char master_address[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char private_sshkey[FILENAME_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     get_state_value(workdir,"master_public_ip:",master_address);
     get_cluster_name(cluster_name,workdir);
-    sprintf(private_sshkey,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,username);
+    if(strcmp(role_flag,"opr")==0){
+        sprintf(private_sshkey,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
+    }
+    else{
+        sprintf(private_sshkey,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,username);
+    }
     if(file_exist_or_not(private_sshkey)!=0){
-        return -3;
+        return -1;
     }
     sprintf(cmdline,"ssh -i %s -o StrictHostKeyChecking=no %s@%s",private_sshkey,username,master_address);
     return system(cmdline);
@@ -1482,6 +1484,14 @@ int sync_user_passwords(char* workdir, char* sshkey_dir){
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     return remote_copy(workdir,sshkey_dir,filename_temp,"/root/.cluster_secrets/user_secrets.txt","root","put","",0);
+}
+
+int sync_statefile(char* workdir, char* sshkey_dir){
+    char stackdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    return remote_copy(workdir,sshkey_dir,filename_temp,"/usr/hpc-now/currentstate","root","put","",0);
 }
 
 int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
@@ -2187,7 +2197,7 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     file_p_tmp=fopen(filename_temp,"w+");
     while(!feof(file_p)){
         fgetline(file_p,temp_line);
-        if(contain_or_not(temp_line,deleted_cluster_name_with_prefix)!=0){
+        if(contain_or_not(temp_line,deleted_cluster_name_with_prefix)!=0&&strlen(temp_line)>0){
             fprintf(file_p_tmp,"%s\n",temp_line);
         }
     }
