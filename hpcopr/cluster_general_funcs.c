@@ -40,7 +40,7 @@ int cluster_role_detect(char* workdir, char* cluster_role){
         strcpy(cluster_role,"admin");
         return 0;
     }
-    if(file_empty_or_not(cluster_summary)>1){
+    if(file_empty_or_not(user_passwords)>1){
         strcpy(cluster_role,"user");
         return 0;
     }
