@@ -67,7 +67,7 @@ char md5_aws_tf_zip_var[64]="";
  * UNAME: user_name is must
  */
 char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
-    "envcheckc,gen,NULL",
+    "envcheck,gen,NULL",
     "new-cluster,gen,NULL",
     "ls-clusters,gen,NULL",
     "switch,gen,NULL",
