@@ -923,13 +923,13 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
         get_workdir(workdir,cluster_name);
         cluster_role_detect(workdir,cluster_role);
         if(strcmp(role_flag,"opr")==0&&strcmp(cluster_role,"opr")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " needs the operator to execute.\n",argv[1]);
-            printf("|          Current role: " WARN_YELLO_BOLD "%s \n" RESET_DISPLAY,cluster_role);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " needs the " WARN_YELLO_BOLD "operator" FATAL_RED_BOLD " to execute.\n",argv[1]);
+            printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Current role: %s . Please contact the operator.\n",cluster_role);
             return 1;
         }
         else if(strcmp(role_flag,"admin")==0&&strcmp(cluster_role,"opr")!=0&&strcmp(cluster_role,"admin")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " needs the operator or admin to execute.\n",argv[1]); 
-            printf("|          Current role: " WARN_YELLO_BOLD "%s" RESET_DISPLAY " \n",cluster_role);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " needs the " WARN_YELLO_BOLD "operator" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "admin" FATAL_RED_BOLD " to execute.\n",argv[1]); 
+            printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Current role: %s . Please contact the operator.\n",cluster_role);
             return 1;
         }
     }
