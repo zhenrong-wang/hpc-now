@@ -107,8 +107,8 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
         }
         return -1;
     }
-    get_seq_string(datetime_input,';',1,ymd);
-    get_seq_string(datetime_input,';',2,hour_min);
+    get_seq_string(datetime_input,',',1,ymd);
+    get_seq_string(datetime_input,',',2,hour_min);
     get_seq_string(ymd,'-',1,year);
     get_seq_string(ymd,'-',2,month);
     get_seq_string(ymd,'-',3,mday);
