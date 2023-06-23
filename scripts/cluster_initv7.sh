@@ -66,9 +66,8 @@ systemctl enable atd
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current SSH setup finished" >> ${logfile}
 source /etc/profile
-
+/bin/cp /etc/hosts /etc/hosts-clean
 mkdir -p /root/.cluster_secrets
-
 time1=$(date)
 echo -e  "\n${time1}" >> ${logfile}
 if [ ! -n "$1" ] || [ ! -n "$2" ] || [ ! -n "$3" ]; then
@@ -350,8 +349,6 @@ if [ -f /root/hostfile ]; then
   mkdir -p /opt/slurm/archive
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "# $time_current Slurm built and configured in path /opt/slurm." >> ${logfile}
-
-  /bin/cp /etc/hosts /etc/hosts-clean
   if [ $centos_version -eq 7 ]; then
     wget ${HPCMGR_SCRIPT_URL} -o /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr # This is a workaround. CentOS-7 will be deprecated in the future
   else

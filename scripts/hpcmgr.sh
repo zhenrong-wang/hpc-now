@@ -336,21 +336,15 @@ if [ $1 = 'connect' ]; then
   echo -e "[ STEP 3 ] Environment Variable NODE_NUM has been updated to $number_of_nodes\n[ STEP 3 ] Environment Variable NODE_CORES has been updated to $number_of_cores" >> ${logfile}
   source /etc/profile
   echo -e "[ STEP 4 ] Updating the cluster configuration now ..."
-  if [ -f /etc/hosts-clean ]; then
-    /bin/cp /etc/hosts-clean /etc/hosts
-    cat /root/hostfile >> /etc/hosts
-    /bin/cp /opt/slurm/etc/slurm.conf.128 /opt/slurm/etc/slurm.conf
-    sed -i 's/NodeName=compute\[1-2\]/NodeName=compute\[1-'$NODE_NUM'\]/g' /opt/slurm/etc/slurm.conf
-    sed -i 's/CPUs=128/CPUs='$NODE_CORES'/g' /opt/slurm/etc/slurm.conf
-    sed -i 's/SCKTS/'$SOCKETS'/g' /opt/slurm/etc/slurm.conf
-    sed -i 's/C_P_S/'$CORES_PER_SOCKET'/g' /opt/slurm/etc/slurm.conf
-    sed -i 's/T_P_C/'$THREADS_PER_CORE'/g' /opt/slurm/etc/slurm.conf
-    echo -e "[ STEP 4 ] The cluster configuration file has been updated.\n" >>  ${logfile}
-  else
-    echo -e "[ FATAL: ] PLEASE MAKE SURE the /etc/hosts-clean exists.\n Exit now."
-    echo -e "[ FATAL: ] PLEASE MAKE SURE the /etc/hosts-clean exists.\n Exit now." >> ${logfile}
-    exit 31
-  fi
+  /bin/cp /etc/hosts-clean /etc/hosts
+  cat /root/hostfile >> /etc/hosts
+  /bin/cp /opt/slurm/etc/slurm.conf.128 /opt/slurm/etc/slurm.conf
+  sed -i 's/NodeName=compute\[1-2\]/NodeName=compute\[1-'$NODE_NUM'\]/g' /opt/slurm/etc/slurm.conf
+  sed -i 's/CPUs=128/CPUs='$NODE_CORES'/g' /opt/slurm/etc/slurm.conf
+  sed -i 's/SCKTS/'$SOCKETS'/g' /opt/slurm/etc/slurm.conf
+  sed -i 's/C_P_S/'$CORES_PER_SOCKET'/g' /opt/slurm/etc/slurm.conf
+  sed -i 's/T_P_C/'$THREADS_PER_CORE'/g' /opt/slurm/etc/slurm.conf
+  echo -e "[ STEP 4 ] The cluster configuration file has been updated.\n" >>  ${logfile}
   echo -e "[ STEP 5 ] Setting up users of compute nodes ... "
   for i in $(seq 1 $NODE_NUM )
   do
