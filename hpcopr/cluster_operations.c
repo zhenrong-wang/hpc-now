@@ -1811,7 +1811,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     char bucket_conf[FILENAME_LENGTH]="";
     char bucket_id[32]="";
     char cluster_name[64]="";
-    char username_temp[128]="";
+    char username_temp[64]="";
     char user_status_temp[32]="";
     char user_line_temp[256]="";
     FILE* file_p=NULL;
