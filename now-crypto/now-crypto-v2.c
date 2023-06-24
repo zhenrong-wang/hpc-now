@@ -52,7 +52,7 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
             k++;
         }
         sprintf(header_valid,"%s v%s---",ENCRYPTED_FILE_HEADER,CRYPTO_VERSION);
-        if(strcmp(header_buffer,header_valid)!=0){
+        if(strncmp(header_buffer,header_valid,68)!=0){
             if(*(header_buffer+0)<'0'||*(header_buffer+0)>'9'){
                 fclose(file_p);
                 return -7;

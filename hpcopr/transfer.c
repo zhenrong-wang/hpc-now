@@ -404,6 +404,7 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     char cluster_sshkey_dir[DIR_LENGTH];
     char workdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
+    char stackdir[DIR_LENGTH]="";
     char doubleconfirm[64]="";
     char md5sum[64]="";
     int update_flag=0;
@@ -534,11 +535,14 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
         activate_sshkey(filename_temp_2);
     }
     delete_decrypted_files(workdir,crypto_keyfile);
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    file_cr_clean(filename_temp);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster %s has been imported.\n\n",cluster_name_buffer);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Import Summary :\n");
     printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Cluster Name   : %s\n",cluster_name_buffer);
     printf(GENERAL_BOLD "|         " RESET_DISPLAY " User List      : \n");
-    hpc_user_list(workdir,crypto_keyfile,1);
+    hpc_user_list(workdir,crypto_keyfile,0);
     if(admin_flag==1){
         printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Admin Privilege : YES \n");
     }

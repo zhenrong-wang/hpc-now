@@ -911,3 +911,30 @@ int include_string_or_not(int cmd_c, char** cmds, char* string){
     }
     return 1;
 }
+
+int file_cr_clean(char* filename){
+    if(file_exist_or_not(filename)!=0){
+        return -1;
+    }
+    FILE* file_p=fopen(filename,"r");
+    char filename_temp[FILENAME_LENGTH]="";
+    char ch;
+    char cmdline[CMDLINE_LENGTH]="";
+    sprintf(filename_temp,"%s.tmp",filename);
+    FILE* file_p_tmp=fopen(filename_temp,"w+");
+    if(file_p_tmp==NULL){
+        fclose(file_p);
+        return -1;
+    }
+    while(!feof(file_p)){
+        ch=fgetc(file_p);
+        if(ch!='\r'){
+            fputc(ch,file_p_tmp);
+        }
+    }
+    fclose(file_p);
+    fclose(file_p_tmp);
+    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    return 0;
+}
