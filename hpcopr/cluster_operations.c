@@ -1952,6 +1952,9 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     get_user_sshkey(cluster_name,"root",sshkey_folder);
     while(!feof(file_p)){
         fgetline(file_p,user_line_temp);
+        if(strlen(user_line_temp)==0){
+            continue;
+        }
         get_seq_string(user_line_temp,' ',2,username_temp);
         get_seq_string(user_line_temp,' ',4,user_status_temp);
         printf("|        . Rebuilding user " GENERAL_BOLD "%s" RESET_DISPLAY " with status " GENERAL_BOLD "%s" RESET_DISPLAY " ...\n",username_temp,user_status_temp);
