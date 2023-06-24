@@ -104,7 +104,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "sleep,opr,CNAME",
     "wakeup,opr,CNAME",
     "destroy,opr,CNAME",
-    "userman,admin,CNAME",
+    "userman,gen,CNAME",
     "dataman,gen,UNAME",
     "monman,admin,CNAME",
     "about,gen,NULL",
@@ -158,6 +158,7 @@ char dataman_commands[DATAMAN_COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
 33 EMPTY REGISTRY
 34 REBUILD_FAILED
 35 Failed to exit current
+36 CLUSTER_ROLE_DOESN'T_MATCH
 37 NO_NEED_TO_SWITCH
 38 NO_NEED_TO_WAKEUP
 39 NOT_IN_THE_REGISTRY
@@ -1394,6 +1395,12 @@ int main(int argc, char* argv[]){
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
+        }
+        if(strcmp(user_cmd,"list")!=0&&strcmp(cluster_role,"opr")!=0&&strcmp(cluster_role,"admin")!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] You need the opr or admin role to run " WARN_YELLO_BOLD "--ucmd %s" RESET_DISPLAY FATAL_RED_BOLD " . Current role: " RESET_DISPLAY WARN_YELLO_BOLD "%s " RESET_DISPLAY "\n",user_cmd,cluster_role);
+            write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_CLUSTER_ROLE",36);
+            check_and_cleanup(workdir);
+            return 36;
         }
         if(strcmp(user_cmd,"list")==0){
             run_flag=hpc_user_list(workdir,crypto_keyfile,0);
