@@ -28,8 +28,8 @@ void print_empty_cluster_info(void){
 }
 
 void print_cluster_init_done(void){
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The cluster is initializing now. This step may take at\n");
-    printf("|          least 7 minutes. Please do not operate the cluster during this period. \n"); 
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The cluster is initializing now. " WARN_YELLO_BOLD "This step may take at\n");
+    printf("|          least *7* minutes. *DO NOT* operate the cluster during this period." RESET_DISPLAY " \n"); 
     printf("|          You can now log on the master node by 'hpcopr ssh -u USERNAME'.\n");
     printf("|          " HIGH_CYAN_BOLD "The desktop will be ready after the init process.\n" RESET_DISPLAY);
 }

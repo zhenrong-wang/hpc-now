@@ -191,7 +191,6 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
     }
     else if(run_flag==1||run_flag==-5){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the monitor data of cluster " WARN_YELLO_BOLD "%s" RESET_DISPLAY " . Has it been inited?\n" RESET_DISPLAY, cluster_name);
-        fclose(file_p_2);
         return -5;
     }
     sprintf(mon_data_file_temp,"%s%smon_data%smon_data_temp.csv",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
