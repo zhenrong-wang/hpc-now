@@ -17,7 +17,7 @@
 #include <math.h>
 
 #define CRYPTO_VERSION "0.2.2"
-#define ENCRYPTED_FILE_HEADER "---ENCRYPTED BY HPC-NOW SERVICES WITH LOCAL CRYPTO KEYFILE"
+#define ENCRYPTED_FILE_HEADER "---ENCRYPTED BY HPC-NOW SERVICES WITH LOCAL CRYPTO KEYFILE---"
 
 int file_encryption_decryption(char* option, char* orig_file, char* target_file, int encrypt_key){
     int real_key=((encrypt_key%1000*17+1301)%100+19)*17%1000;
@@ -52,7 +52,7 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
             k++;
         }
         sprintf(header_valid,"%s v%s---",ENCRYPTED_FILE_HEADER,CRYPTO_VERSION);
-        if(strncmp(header_buffer,header_valid,68)!=0){
+        if(strncmp(header_buffer,header_valid,61)!=0){
             if(*(header_buffer+0)<'0'||*(header_buffer+0)>'9'){
                 fclose(file_p);
                 return -7;
