@@ -50,9 +50,10 @@ function add_a_user() {
   ssh-keygen -t rsa -N '' -f /home/$1/.ssh/id_rsa -q
   cat /home/$1/.ssh/id_rsa.pub >> /home/$1/.ssh/authorized_keys
   cat /etc/now-pubkey.txt >> /home/$1/.ssh/authorized_keys
-  cp -r /home/user1/Desktop /home/$1/ && unlink /home/$1/Desktop/user1_data
-  mkdir -p /hpc_data/${1}_data && chmod -R 750 /hpc_data/${1}_data && chown -R $1:$1 /hpc_data/${1}_data
-  ln -s /hpc_data/${1}_data /home/$1/Desktop/
+  cp -r /root/Desktop/*.desktop /home/$1/Desktop/
+  mkdir -p /hpc_data/${1}_data && chmod -R 750 /hpc_data/${1}_data 
+  chown -R $1:$1 /hpc_data/${1}_data
+  ln -s /hpc_data/${1}_data /home/$1/Desktop/ >> /dev/null 2>&1
   ln -s /hpc_apps /home/$1/Desktop/ >> /dev/null 2>&1
   chown -R $1:$1 /home/$1
   for i in $(seq 1 $NODE_NUM )
@@ -68,13 +69,13 @@ function add_a_user() {
 }
 
 function bucket_conf() {
-  if [ -f /root/.cos.conf ]; then
+  if [ -f /root/.cos.conf ] && [ ! -f /home/$1/.cos.conf ]; then
     cp /root/.cos.conf /home/$1/ && chown -R $1:$1 /home/$1/.cos.conf
   fi
-  if [ -f /root/.ossutilconfig ]; then
+  if [ -f /root/.ossutilconfig ] && [ ! -f /home/$1/.ossutilconfig ]; then
     cp /root/.ossutilconfig /home/$1/ && chown -R $1:$1 /home/$1/.ossutilconfig
   fi
-  if [ -f /root/.s3cfg ]; then
+  if [ -f /root/.s3cfg ] && [ ! -f /home/$1/.s3cfg ]; then
     cp /root/.s3cfg /home/$1/ && chown -R $1:$1 /home/$1/.s3cfg
   fi
 }

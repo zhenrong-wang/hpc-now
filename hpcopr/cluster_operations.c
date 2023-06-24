@@ -1945,7 +1945,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     decrypt_user_passwords(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/.cluster_secrets/user_secrets.txt","root","put","",0);
-    remote_exec_general(workdir,sshkey_folder,"root","hpcmgr users rebuild >> /var/log/hpcmgr.log 2>&1",0,0);
+    remote_exec_general(workdir,sshkey_folder,"root","hpcmgr users rebuild",0,0);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rebuilding the cluster users now ...\n");
     file_p=fopen(filename_temp,"r");
     get_cluster_name(cluster_name,workdir);
