@@ -1812,6 +1812,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     char bucket_id[32]="";
     char cluster_name[64]="";
     char username_temp[128]="";
+    char user_status_temp[32]="";
     char user_line_temp[256]="";
     FILE* file_p=NULL;
     int i;
@@ -1944,15 +1945,24 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     decrypt_user_passwords(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/.cluster_secrets/user_secrets.txt","root","put","",0);
+    remote_exec_general(workdir,sshkey_folder,"root","hpcmgr users rebuild >> /var/log/hpcmgr.log 2>&1",0,0);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rebuilding the cluster users now ...\n");
     file_p=fopen(filename_temp,"r");
     get_cluster_name(cluster_name,workdir);
     get_user_sshkey(cluster_name,"root",sshkey_folder);
     while(!feof(file_p)){
         fgetline(file_p,user_line_temp);
         get_seq_string(user_line_temp,' ',2,username_temp);
+        get_seq_string(user_status_temp,' ',4);
+        printf("|        . Rebuilding user " GENERAL_BOLD "%s" RESET_DISPLAY " with status " GENERAL_BOLD "%s" RESET_DISPLAY " ...\n");
         if(strlen(username_temp)!=0){
             get_user_sshkey(cluster_name,username_temp,sshkey_folder);
+            if(strcmp(user_status_temp,"DISABLED")==0){
+                sprintf(remote_commands,"rm -rf /home/%s/.ssh/id_rsa >> /dev/null 2>&1",username_temp);
+                remote_exec_general(workdir,sshkey_folder,"root",remote_commands,1,0);
+            }
         }
+        printf("|        v User " GENERAL_BOLD "%s" RESET_DISPLAY " with status " GENERAL_BOLD "%s" RESET_DISPLAY " rebuilt.\n");
     }
     fclose(file_p);
     delete_decrypted_user_passwords(workdir);

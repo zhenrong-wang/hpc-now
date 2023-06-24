@@ -44,6 +44,41 @@ function node_invalid_info() {
   echo -e "           Exit now."
 }
 
+function add_a_user() {
+  mkdir -p /home/$1/.ssh
+  rm -rf /home/$1/.ssh/*
+  ssh-keygen -t rsa -N '' -f /home/$1/.ssh/id_rsa -q
+  cat /home/$1/.ssh/id_rsa.pub >> /home/$1/.ssh/authorized_keys
+  cat /etc/now-pubkey.txt >> /home/$1/.ssh/authorized_keys
+  cp -r /home/user1/Desktop /home/$1/ && unlink /home/$1/Desktop/user1_data
+  mkdir -p /hpc_data/${1}_data && chmod -R 750 /hpc_data/${1}_data && chown -R $1:$1 /hpc_data/${1}_data
+  ln -s /hpc_data/${1}_data /home/$1/Desktop/
+  ln -s /hpc_apps /home/$1/Desktop/ >> /dev/null 2>&1
+  chown -R $1:$1 /home/$1
+  for i in $(seq 1 $NODE_NUM )
+  do
+    ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
+    if [ $? -eq 0 ]; then
+      ssh -n compute${i} "useradd $1 -m"
+      ssh -n compute${i} "rm -rf /home/$1/.ssh"
+      scp -r -q /home/$1/.ssh root@compute${i}:/home/$1/
+      ssh -n compute${i} "chown -R $1:$1 /home/$1"
+    fi
+  done
+}
+
+function bucket_conf() {
+  if [ -f /root/.cos.conf ]; then
+    cp /root/.cos.conf /home/$1/ && chown -R $1:$1 /home/$1/.cos.conf
+  fi
+  if [ -f /root/.ossutilconfig ]; then
+    cp /root/.ossutilconfig /home/$1/ && chown -R $1:$1 /home/$1/.ossutilconfig
+  fi
+  if [ -f /root/.s3cfg ]; then
+    cp /root/.s3cfg /home/$1/ && chown -R $1:$1 /home/$1/.s3cfg
+  fi
+}
+
 if [ ! -n "$1" ]; then
   help_info
   exit 3
@@ -67,6 +102,7 @@ fi
 
 ##### USER MANAGEMENT #####################
 if [ $1 = 'users' ]; then
+  mkdir -p /root/.sshkey_deleted >> ${logfile} 2>&1
   if [ ! -f /root/hostfile ]; then
     node_invalid_info
     exit 5
@@ -75,7 +111,7 @@ if [ $1 = 'users' ]; then
     echo -e "Usage: \n\thpcmgr users list\n\thpcmgr users add your_user_name your_password\n\thpcmgr users delete your_user_name\nPlease check your parameters. Exit now.\n"
     exit 3
   fi
-  if [[ $2 != 'list' && $2 != 'add' && $2 != 'delete' ]]; then
+  if [[ $2 != 'list' && $2 != 'add' && $2 != 'delete' && $2 != 'rebuild' ]]; then
     echo -e "Usage: \n\thpcmgr users list\n\thpcmgr users add your_user_name your_password\n\thpcmgr users delete your_user_name\nPlease check your parameters. Exit now.\n"
     exit 3
   fi
@@ -98,6 +134,7 @@ if [ $1 = 'users' ]; then
           echo -e "User $3 already exists in this OS but not in this cluster. Adding to the cluster now.\n"
           echo "y" | sacctmgr add user $3 account=hpc_users
           sed -i "/$3/,+0 s/DISABLED/ENABLED/g" ${user_registry}
+          mv /root/.sshkey_deleted/id_rsa.$3 /home/$3/.ssh/id_rsa >> ${logfile} 2>&1
           exit 0
         fi
       else
@@ -118,35 +155,8 @@ if [ $1 = 'users' ]; then
           echo -e "$new_passwd ENABLED" >> ${user_registry}
           rm -rf /root/.cluster_secrets/secret_$3.txt
         fi
-        mkdir -p /home/$3/.ssh
-        rm -rf /home/$3/.ssh/*
-        ssh-keygen -t rsa -N '' -f /home/$3/.ssh/id_rsa -q
-        cat /home/$3/.ssh/id_rsa.pub >> /home/$3/.ssh/authorized_keys
-        cat /etc/now-pubkey.txt >> /home/$3/.ssh/authorized_keys
-        cp -r /home/user1/Desktop /home/$3/ && unlink /home/$3/Desktop/user1_data
-        mkdir -p /hpc_data/$3_data && chmod -R 750 /hpc_data/$3_data && chown -R $3:$3 /hpc_data/$3_data
-        ln -s /hpc_data/$3_data /home/$3/Desktop/
-        ln -s /hpc_apps /home/$3/Desktop/ >> /dev/null 2>&1
-        chown -R $3:$3 /home/$3
-        for i in $(seq 1 $NODE_NUM )
-        do
-          ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
-          if [ $? -eq 0 ]; then
-            ssh -n compute${i} "useradd $3 -m"
-            ssh -n compute${i} "rm -rf /home/$3/.ssh"
-            scp -r -q /home/$3/.ssh root@compute${i}:/home/$3/
-            ssh -n compute${i} "chown -R $3:$3 /home/$3"
-          fi
-        done
-        if [ -f /root/.cos.conf ]; then
-          cp /root/.cos.conf /home/$3/ && chown -R $3:$3 /home/$3/.cos.conf
-        fi
-        if [ -f /root/.ossutilconfig ]; then
-          cp /root/.ossutilconfig /home/$3/ && chown -R $3:$3 /home/$3/.ossutilconfig
-        fi
-        if [ -f /root/.s3cfg ]; then
-          cp /root/.s3cfg /home/$3/ && chown -R $3:$3 /home/$3/.s3cfg
-        fi
+        add_a_user $3
+        bucket_conf $3
         echo "y" | sacctmgr add user $3 account=hpc_users
         exit 0
       fi
@@ -177,6 +187,7 @@ if [ $1 = 'users' ]; then
     if [[ ! -n "$4" || $4 != "os" ]]; then
       echo -e "User $3 has been deleted from the cluster, but still in the OS."
       sed -i "/$3/,+0 s/ENABLED/DISABLED/g" ${user_registry}
+      mv /home/$3/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$3 >> ${logfile} 2>&1
       exit 0
     else
       echo -e "[ -WARN- ] User $3 will be erased from the Operating System permenantly!"
@@ -189,9 +200,36 @@ if [ $1 = 'users' ]; then
         fi
       done
       sed -i "/$3/d" ${user_registry}
+      rm -rf /root/.sshkey_deleted/id_rsa.$3 >> ${logfile} 2>&1
       echo -e "[ -DONE- ] User $3 Deleted permenantly."
       exit 0
     fi 
+  fi
+  if [ $2 = 'rebuild' ]; then
+    if [ ! -f ${user_registry} ]; then
+      echo -e "[ FATAL: ] The user registry is absent. Exit now."
+      exit 16
+    fi
+    while read user_row
+    do
+      user_name=`echo $user_row | awk '{print $2}'`
+      user_passwd=`echo $user_row | awk '{print $3}'`
+      user_status=`echo $user_row | awk '{print $4}'`
+      echo $user_name $user_passwd $user_status
+      id $user_name >> /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        useradd $user_name -m
+        add_a_user $user_name
+      fi
+      echo "${user_passwd}" | passwd $user_name --stdin > /dev/null 2>&1
+      bucket_conf $user_name
+      if [ -z $user_status ] || [ $user_status = 'ENABLED' ]; then
+        echo "y" | sacctmgr add user $user_name account=hpc_users
+      else
+        cp -r /home/$user_name/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$user_name
+        echo "y" | sacctmgr delete user $user_name
+      fi
+    done < ${user_registry}
   fi
 fi
 
