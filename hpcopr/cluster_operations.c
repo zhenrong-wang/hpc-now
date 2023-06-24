@@ -1958,7 +1958,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         if(strlen(username_temp)!=0){
             get_user_sshkey(cluster_name,username_temp,sshkey_folder);
             if(strcmp(user_status_temp,"DISABLED")==0){
-                sprintf(remote_commands,"rm -rf /home/%s/.ssh/id_rsa >> /dev/null 2>&1",username_temp);
+                sprintf(remote_commands,"rm -rf /home/%s/.ssh/id_rsa",username_temp);
                 remote_exec_general(workdir,sshkey_folder,"root",remote_commands,1,0);
             }
         }
