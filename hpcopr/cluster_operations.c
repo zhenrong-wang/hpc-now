@@ -1953,8 +1953,8 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     while(!feof(file_p)){
         fgetline(file_p,user_line_temp);
         get_seq_string(user_line_temp,' ',2,username_temp);
-        get_seq_string(user_status_temp,' ',4);
-        printf("|        . Rebuilding user " GENERAL_BOLD "%s" RESET_DISPLAY " with status " GENERAL_BOLD "%s" RESET_DISPLAY " ...\n");
+        get_seq_string(user_line_temp,' ',4,user_status_temp);
+        printf("|        . Rebuilding user " GENERAL_BOLD "%s" RESET_DISPLAY " with status " GENERAL_BOLD "%s" RESET_DISPLAY " ...\n",username_temp,user_status_temp);
         if(strlen(username_temp)!=0){
             get_user_sshkey(cluster_name,username_temp,sshkey_folder);
             if(strcmp(user_status_temp,"DISABLED")==0){
@@ -1962,7 +1962,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
                 remote_exec_general(workdir,sshkey_folder,"root",remote_commands,1,0);
             }
         }
-        printf("|        v User " GENERAL_BOLD "%s" RESET_DISPLAY " with status " GENERAL_BOLD "%s" RESET_DISPLAY " rebuilt.\n");
+        printf("|        v User " GENERAL_BOLD "%s" RESET_DISPLAY " with status " GENERAL_BOLD "%s" RESET_DISPLAY " rebuilt.\n",username_temp,user_status_temp);
     }
     fclose(file_p);
     delete_decrypted_user_passwords(workdir);
