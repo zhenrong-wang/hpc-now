@@ -309,16 +309,18 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char
     char private_key[FILENAME_LENGTH]="";
     char remote_address[32]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char cluster_role[16]="";
     get_state_value(workdir,"master_public_ip:",remote_address);
-    if(strcmp(username,"root")==0){
+    get_cluster_name(cluster_name,workdir);
+    cluster_role_detect(workdir,cluster_role);
+    if(strcmp(username,"root")==0&&strcmp(cluster_role,"opr")==0){
         sprintf(private_key,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
     }
     else{
-        get_cluster_name(cluster_name,workdir);
         sprintf(private_key,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,username);
-        if(file_exist_or_not(private_key)!=0){
-            return -3;
-        }
+    }
+    if(file_exist_or_not(private_key)!=0){
+        return -3;
     }
     if(delay_minutes==0){
         if(silent_flag==0){
