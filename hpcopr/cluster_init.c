@@ -554,7 +554,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return 3;
     }
     if(contain_or_not(zone_id,region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return 3;
     }
@@ -661,7 +661,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
     printf("|          Cluster ID:            %s\n",cluster_id);
     printf("|          Region:                %s\n",region_id);
-    printf("|          Avalability Zone:      %s\n",zone_id);
+    printf("|          Availability Zone:     %s\n",zone_id);
     printf("|          Number of Nodes:       %d\n",node_num);
     printf("|          Number of Users:       %d\n",hpc_user_num);
     printf("|          Master Node Instance:  %s\n",master_inst);
@@ -1177,7 +1177,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
  
     if(contain_or_not(zone_id,region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return 3;
     }
@@ -1236,7 +1236,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
     printf("|          Cluster ID:            %s\n",cluster_id);
     printf("|          Region:                %s\n",region_id);
-    printf("|          Avalability Zone:      %s\n",zone_id);
+    printf("|          Availability Zone:     %s\n",zone_id);
     printf("|          Number of Nodes:       %d\n",node_num);
     printf("|          Number of Users:       %d\n",hpc_user_num);
     printf("|          Master Node Instance:  %s\n",master_inst);
@@ -1713,7 +1713,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         find_and_get(filename_temp,region_id,"","",1,region_id,"","",' ',1,NAS_Zone);
     }
     if(contain_or_not(zone_id,region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return 3;
     }
@@ -1772,7 +1772,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
     printf("|          Cluster ID:            %s\n",cluster_id);
     printf("|          Region:                %s\n",region_id);
-    printf("|          Avalability Zone:      %s\n",zone_id);
+    printf("|          Availability Zone:     %s\n",zone_id);
     printf("|          Number of Nodes:       %d\n",node_num);
     printf("|          Number of Users:       %d\n",hpc_user_num);
     printf("|          Master Node Instance:  %s\n",master_inst);
