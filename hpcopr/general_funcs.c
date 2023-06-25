@@ -938,3 +938,72 @@ int file_cr_clean(char* filename){
     system(cmdline);
     return 0;
 }
+
+/* This function is risky! It overwrites the original file*/
+int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overwrite_flag){
+    if(file_empty_or_not(filename)<1){
+        return 1;
+    }
+    if(strlen(start_key)==0&&strlen(end_key)==0){
+        return 3;
+    }
+    if(strcmp(start_key,end_key)==0){
+        return 5;
+    }
+    FILE* file_p=fopen(filename,"r");
+    char filename_temp[FILENAME_LENGTH]="";
+    char line_buffer[LINE_LENGTH]="";
+    int start_flag=0;
+    int contain_start_flag;
+    int contain_end_flag;
+    char cmdline[CMDLINE_LENGTH]="";
+    sprintf(filename_temp,"%s.trunc.tmp",filename);
+    FILE* file_p_tmp=fopen(filename_temp,"w+");
+    if(file_p_tmp==NULL){
+        fclose(file_p);
+        return -1;
+    }
+    while(!feof(file_p)){
+        fgetline(file_p,line_buffer);
+        if(strlen(start_key)==0){
+            if(contain_or_not(line_buffer,end_key)!=0){
+                fprintf(file_p_tmp,"%s\n",line_buffer);
+            }
+            else{
+                break;
+            }
+        }
+        else{
+            contain_start_flag=contain_or_not(line_buffer,start_key);
+            if(strlen(end_key)!=0){
+                contain_end_flag=contain_or_not(line_buffer,end_key);
+            }
+            else{
+                contain_end_flag=-1;
+            }
+            if(contain_start_flag!=0&&start_flag==0){
+                continue;
+            }
+            else if(contain_start_flag==0&&start_flag==0){
+                if(contain_end_flag==0){
+                    break;
+                }
+                fprintf(file_p_tmp,"%s\n",line_buffer);
+                start_flag=1;
+            }
+            else{
+                if(contain_end_flag==0){
+                    break;
+                }
+                fprintf(file_p_tmp,"%s\n",line_buffer);
+            }
+        }
+    }
+    fclose(file_p);
+    fclose(file_p_tmp);
+    if(overwrite_flag!=0){
+        sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    return 0;
+}

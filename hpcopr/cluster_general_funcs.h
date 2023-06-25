@@ -17,7 +17,7 @@ void get_latest_hosts(char* stackdir, char* hostfile_latest);
 int decrypt_get_bucket_conf(char* workdir, char* crypto_keyfile, char* bucket_conf);
 int get_cloud_flag(char* workdir, char* cloud_flag);
 int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option, char* recursive_flag, int silent_flag);
-int get_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir);
+int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char* sshkey_dir);
 int activate_sshkey(char* ssh_privkey);
 void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir);
 void create_and_get_vaultdir(char* workdir, char* vaultdir);

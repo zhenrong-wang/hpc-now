@@ -68,6 +68,7 @@ echo -e "# $time_current SSH setup finished" >> ${logfile}
 source /etc/profile
 /bin/cp /etc/hosts /etc/hosts-clean
 mkdir -p /root/.cluster_secrets
+mkdir -p /root/.sshkey_deleted
 time1=$(date)
 echo -e  "\n${time1}" >> ${logfile}
 if [ ! -n "$1" ] || [ ! -n "$2" ] || [ ! -n "$3" ]; then
@@ -109,7 +110,6 @@ if [ -f /root/hostfile ]; then
   wget ${SCRIPTS_URL_ROOT}nowmon_mgr.sh -O /usr/hpc-now/nowmon_mgr.sh && chmod +x /usr/hpc-now/nowmon_mgr.sh
 fi
 
-########## Spread .ssh keys ###################
 echo -e "# $time_current Spawning ssh keys." >> ${logfile}
 if [ -f /root/hostfile ]; then 
   cat /hpc_apps/compute_nodes_ip.txt | grep compute >> /root/hostfile
@@ -119,9 +119,34 @@ if [ -f /root/hostfile ]; then
   echo -e "export NODE_NUM=$number_of_nodes" >> /etc/profile
   source /etc/profile
 fi
-echo -e "# $time_current SSH Keys spreaded." >> ${logfile}
 
 ############ Add Users ####################
+echo -e "user1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+while read user_row
+do
+  if [ -z $user_row ]; then
+    continue
+  fi
+  user_name=`echo $user_row | awk '{print $2}'`
+  user_passwd=`echo $user_row | awk '{print $3}'`
+  user_status=`echo $user_row | awk '{print $4}'`
+  useradd ${user_name} -m
+  mkdir -p /home/${user_name} && chown -R ${user_name}:${user_name} /home/${user_name}
+  echo -e "source /etc/profile" >> /home/${user_name}/.bashrc
+  if [ -f /root/hostfile ]; then
+    echo ${user_passwd} | passwd ${user_name} --stdin >> /dev/null 2>&1
+    mkdir -p /home/${user_name}/.ssh && rm -rf /home/${user_name}/.ssh/*
+    ssh-keygen -t rsa -N '' -f /home/${user_name}/.ssh/id_rsa -q
+    cat /home/${user_name}/.ssh/id_rsa.pub >> /home/${user_name}/.ssh/authorized_keys
+    cat /etc/now-pubkey.txt >> /home/${user_name}/.ssh/authorized_keys
+    mkdir -p /hpc_data/${user_name}_data
+    chmod -R 750 /hpc_data/${user_name}_data
+    chown -R ${user_name}:${user_name} /hpc_data/${user_name}_data
+  fi
+  chown -R ${user_name}:${user_name} /home/${user_name}
+done < /root/user_secrets.txt
+
+<<test
 for i in $( seq 1 $1 )
 do
   id user${i}
@@ -156,6 +181,7 @@ do
   fi
   echo -e "user1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 done
+test
 
 ########## stop firewall and SELinux ###############
 systemctl stop firewalld && systemctl disable firewalld

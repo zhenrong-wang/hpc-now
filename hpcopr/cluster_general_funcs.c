@@ -240,7 +240,7 @@ int activate_sshkey(char* ssh_privkey){
     return 0;
 }
 
-int get_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
+int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char* sshkey_dir){
     char sshkey_subdir[DIR_LENGTH]="";
     char ssh_privkey[FILENAME_LENGTH]="";
     char ssh_privkey_remote[FILENAME_LENGTH]="";
@@ -257,7 +257,12 @@ int get_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
         sprintf(ssh_privkey_remote,"/root/.ssh/id_rsa");
     }
     else{
-        sprintf(ssh_privkey_remote,"/home/%s/.ssh/id_rsa",user_name);
+        if(strcmp(user_status,"DISABLED")==0){
+            sprintf(ssh_privkey_remote,"/root/.sshkey_deleted/id_rsa.%s",user_name);
+        }
+        else{
+            sprintf(ssh_privkey_remote,"/home/%s/.ssh/id_rsa",user_name);
+        }
     }
     if(remote_copy(workdir,sshkey_dir,ssh_privkey,ssh_privkey_remote,"root","get","",0)!=0){
         return 1;
@@ -1679,9 +1684,9 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
         }
         strcpy(password_final,password);
     }
-    sprintf(remote_commands,"hpcmgr users add %s %s >> /var/log/hpcmgr.log 2>&1",username_input,password_final);
+    sprintf(remote_commands,"hpcmgr users add %s %s",username_input,password_final);
     if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
-        sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s | grep ENABLED >> /dev/null 2>&1",username_input);
+        sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s | grep ENABLED",username_input);
         if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
             printf("[ -INFO- ] Updating the local user-info registry ...\n");
             file_p=fopen(user_registry_file,"a");
@@ -1771,7 +1776,7 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
     }
     sprintf(remote_commands,"echo y-e-s | hpcmgr users delete %s os",username_input);
     if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
-        sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s >> /dev/null 2>&1",username_input);
+        sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s",username_input);
         if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the user %s from your cluster. Exit now.\n" RESET_DISPLAY,username_input);
             delete_decrypted_user_passwords(workdir);
@@ -1845,10 +1850,10 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
         return -5;
     }
     if(strcmp(option,"enable")==0){
-        sprintf(remote_commands,"hpcmgr users add %s >> /var/log/hpcmgr.log 2>&1",username_input);
+        sprintf(remote_commands,"hpcmgr users add %s",username_input);
     }
     else{
-        sprintf(remote_commands,"hpcmgr users delete %s >> /var/log/hpcmgr.log 2>&1",username_input);
+        sprintf(remote_commands,"hpcmgr users delete %s",username_input);
     }
     if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
         find_and_replace(user_registry_file,username_ext,"","","","",prev_keywords,new_keywords);
@@ -1938,7 +1943,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
         }
         strcpy(password_final,password);
     }
-    sprintf(remote_commands,"echo \"%s\" | passwd %s --stdin >> /dev/null 2>&1",password_final,username_input);
+    sprintf(remote_commands,"echo \"%s\" | passwd %s --stdin",password_final,username_input);
     if(remote_exec_general(workdir,ssheky_dir,"root",remote_commands,0,0)==0){
         sprintf(username_ext," %s ",username_input);
         find_and_get(user_registry_file,username_ext,"","",1,username_ext,"","",' ',3,password_prev);

@@ -345,7 +345,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int region_valid_flag=0;
-    int i;
+    int i,j;
     if(folder_exist_or_not(workdir)==1){
         return -1;
     }
@@ -724,7 +724,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
     sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
@@ -762,6 +762,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         global_replace(filename_temp,"NUMBER",string_temp);
         sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
         insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        for(j=0;j<hpc_user_num;j++){
+            sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
+            insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        }
     }
     sprintf(cmdline,"%s %s%shpc_stack.base %s%shpc_stack_base.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -932,10 +936,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(cluster_id,"root",sshkey_folder);
+    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
     for(i=0;i<hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,sshkey_folder);
+        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -998,7 +1002,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char compute_cpu_vendor[8]="";
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
-    int i;
+    int i,j;
     if(folder_exist_or_not(workdir)==1){
         return -1;
     }
@@ -1301,7 +1305,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
     sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
@@ -1334,6 +1338,10 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         global_replace(filename_temp,"RUNNING_FLAG","true");
         sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
         insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        for(j=0;j<hpc_user_num;j++){
+            sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
+            insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        }
     }
     sprintf(cmdline,"%s %s%shpc_stack.base %s%shpc_stack_base.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -1469,10 +1477,10 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(cluster_id,"root",sshkey_folder);
+    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
     for(i=0;i<hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,sshkey_folder);
+        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1535,7 +1543,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char compute_cpu_vendor[8]="";
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
-    int i;
+    int i,j;
     if(folder_exist_or_not(workdir)==1){
         return -1;
     }
@@ -1831,7 +1839,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
     sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
@@ -1865,6 +1873,10 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
         insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        for(j=0;j<hpc_user_num;j++){
+            sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
+            insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        }
     }
     sprintf(cmdline,"%s %s%shpc_stack.base %s%shpc_stack_base.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -2002,10 +2014,10 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(cluster_id,"root",sshkey_folder);
+    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
     for(i=0;i<hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,sshkey_folder);
+        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);

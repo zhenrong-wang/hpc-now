@@ -493,10 +493,17 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   fi
   while read hpc_user_row
   do
-    username=`echo -e $hpc_user_row | awk '{print $2}'`
-    sacctmgr list user ${username} | grep hpc_users >> ${logfile} 2>&1
-    if [ $? -ne 0 ]; then
-      echo "y" | sacctmgr add user ${username} account=hpc_users >> ${logfile} 2>&1
+    if [ -z $hpc_user_row ]; then
+      continue
+    fi
+    user_name=`echo -e $hpc_user_row | awk '{print $2}'`
+    user_status=`echo -e $hpc_user_row | awk '{print $4}'`
+    if [ ! -z $user_status ] && [ $user_status = "DISABLED" ]; then
+      echo "y" | sacctmgr delete user $user_name >> ${logfile} 2>&1
+      mv /home/$user_name/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$user_name >> ${logfile} 2>&1
+    else
+      echo "y" | sacctmgr add user ${user_name} account=hpc_users >> ${logfile} 2>&1
+      mv /root/.sshkey_deleted/id_rsa.$user_name /home/$user_name/.ssh/id_rsa >> ${logfile} 2>&1
     fi
   done < ${user_registry}
   echo -e "[ STEP 5 ] Cluster users are ready."
