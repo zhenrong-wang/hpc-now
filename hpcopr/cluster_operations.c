@@ -298,6 +298,8 @@ remove_files:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing all the related files ...\n");
     sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,cluster_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    sprintf(cmdline,"%s %s%s.%s %s",DELETE_FOLDER_CMD,SSHKEY_DIR,PATH_SLASH,target_cluster_name,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Deleting the cluster from the registry ...\n");
     delete_from_cluster_registry(target_cluster_name);
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The cluster %s has been removed completely.\n",target_cluster_name);
