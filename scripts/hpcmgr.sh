@@ -391,8 +391,7 @@ if [ $1 = 'connect' ]; then
     while read hpc_user_row
     do
       username=`echo -e $hpc_user_row | awk '{print $2}'`
-      #user_passwd=`echo -e $hpc_user_row | awk '{print $3}'`
-      #ssh -n compute${i} "echo '$user_passwd' | passwd $username --stdin >> /dev/null 2>&1"
+      ssh -n compute${i} "useradd ${username} -m >> /dev/null 2>&1 && mkdir -p /home/$username >> /dev/null 2>&1"
       scp -r -q /home/$username/.ssh root@compute${i}:/home/$username/
       ssh -n compute${i} "chown -R $username:$username /home/$username >> /dev/null 2>&1"
     done < ${user_registry}

@@ -176,6 +176,7 @@ void print_help(char* cmd_name){
         printf("|   --mi MASTER_INST  ~ Master node instance type\n");
         printf("|   --ci COMPUTE_INST ~ Compute node instance type\n");
         printf("|   --ht ON | OFF     ~ Hyperthreading option for AWS\n");
+        printf("|   --force           ~ Remove existed conf file\n");
     }
     if(strcmp(cmd_name,"rebuild")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "rebuild" RESET_DISPLAY "     :~ Rebuild the nodes *without* destroying the cluster's storage.\n");

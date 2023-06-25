@@ -941,8 +941,8 @@ int file_cr_clean(char* filename){
 
 /* This function is risky! It overwrites the original file*/
 int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overwrite_flag){
-    if(file_empty_or_not(filename)<1){
-        return 1;
+    if(file_exist_or_not(filename)!=0){
+        return -1;
     }
     if(strlen(start_key)==0&&strlen(end_key)==0){
         return 3;
@@ -998,6 +998,36 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
                 fprintf(file_p_tmp,"%s\n",line_buffer);
             }
         }
+    }
+    fclose(file_p);
+    fclose(file_p_tmp);
+    if(overwrite_flag!=0){
+        sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    return 0;
+}
+
+int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
+    if(file_exist_or_not(filename)!=0){
+        return -1;
+    }
+    FILE* file_p=fopen(filename,"r");
+    char filename_temp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char line_buffer[LINE_LENGTH]="";
+    sprintf(filename_temp,"%s.del.tmp",filename);
+    FILE* file_p_tmp=fopen(filename_temp,"w+");
+    if(file_p_tmp==NULL){
+        fclose(file_p);
+        return -1;
+    }
+    while(!feof(file_p)){
+        fgetline(file_p,line_buffer);
+        if(contain_or_not(line_buffer,key)==0){
+            continue;
+        }
+        fprintf(file_p_tmp,"%s\n",line_buffer);
     }
     fclose(file_p);
     fclose(file_p_tmp);

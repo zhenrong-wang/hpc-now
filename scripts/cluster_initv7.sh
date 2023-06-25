@@ -492,25 +492,28 @@ if [ -f /root/hostfile ]; then
   elif [ $cloud_flag = 'CLOUD_B' ]; then
     wget ${url_utils}shortcuts/cos.desktop -O /root/Desktop/cos.desktop
   fi
-  for i in $( seq 1 $1 )
+  while read user_row
   do
-    mkdir -p /home/user${i}/Desktop
-    ln -s /hpc_apps /home/user${i}/Desktop/
-    ln -s /hpc_data/user${i}_data /home/user${i}/Desktop/
-    cp /root/Desktop/*.desktop /home/user${i}/Desktop
-    if [ $cloud_flag = 'CLOUD_A' ]; then
-      cp /root/.ossutilconfig /home/user${i}/
-      chown -R user${i}:user${i} /home/user${i}/.ossutilconfig
-    elif [ $cloud_flag = 'CLOUD_B' ]; then
-      cp /root/.cos.conf /home/user${i}/
-      chown -R user${i}:user${i} /home/user${i}/.cos.conf
-    elif [ $cloud_flag = 'CLOUD_C' ]; then
-      cp /root/.s3cfg /home/user${i}/
-      chown -R user${i}:user${i} /home/user${i}/.s3cfg
+    if [ -z $user_row ]; then
+      continue
     fi
-    chown -R user${i}:user${i} /home/user${i}/Desktop
-  done
-  
+    user_name=`echo $user_row | awk '{print $2}'`
+    mkdir -p /home/${user_row}/Desktop
+    ln -s /hpc_apps /home/${user_row}/Desktop/
+    ln -s /hpc_data/${user_row}_data /home/${user_row}/Desktop/
+    cp /root/Desktop/*.desktop /home/${user_row}/Desktop
+    if [ -f /root/.cos.conf ] && [ ! -f /home/${user_row}/.cos.conf ]; then
+      cp /root/.cos.conf /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.cos.conf
+    fi
+    if [ -f /root/.ossutilconfig ] && [ ! -f /home/${user_row}/.ossutilconfig ]; then
+      cp /root/.ossutilconfig /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.ossutilconfig
+    fi
+    if [ -f /root/.s3cfg ] && [ ! -f /home/${user_row}/.s3cfg ]; then
+      cp /root/.s3cfg /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.s3cfg
+    fi
+    chown -R ${user_row}:${user_row} /home/${user_row}/Desktop
+  done < /root/.cluster_secrets/user_secrets.txt
+
   rm -rf /usr/share/backgrounds/*.png
   rm -rf /usr/share/backgrounds/*.jpg
   wget ${url_utils}pics/wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip

@@ -2038,6 +2038,38 @@ int create_cluster_registry(void){
     }
 }
 
+int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords){
+    if(file_exist_or_not(base_tf)!=0||file_exist_or_not(master_tf)!=0||file_exist_or_not(user_passwords)!=0){
+        return -1;
+    }
+    FILE* file_p=NULL;
+    FILE* file_p_base=NULL;
+    char user_line_buffer[256]="";
+    char line_temp[256]="";
+    char user_name_temp[64]="";
+    char user_passwd_temp[64]="";
+    char user_status_temp[16]="";
+    file_trunc_by_kwds(base_tf,"","user1_passwd",1);
+    delete_lines_by_kwd(master_tf,"username:",1);
+    file_p=fopen(user_passwords,"r");
+    file_p_base=fopen(base_tf,"a");
+    while(!feof(file_p)){
+        fgetline(file_p,user_line_buffer);
+        if(strlen(user_line_buffer)==0){
+            continue;
+        }
+        get_seq_string(user_line_buffer,' ',2,user_name_temp);
+        get_seq_string(user_line_buffer,' ',3,user_passwd_temp);
+        get_seq_string(user_line_buffer,' ',4,user_status_temp);
+        fprintf(file_p_base,"variable \"%s_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",user_name_temp,user_passwd_temp);
+        sprintf(line_temp,"echo -e \"username: %s ${var.%s_passwd} %s\" >> /root/user_secrets.txt",user_name_temp,user_name_temp,user_status_temp);
+        insert_lines(master_tf,"master_private_ip",line_temp);
+    }
+    fclose(file_p);
+    fclose(file_p_base);
+    return 0;
+}
+
 /*  
  * If silent_flag==1, verbose. Will tell the user which cluster is active
  * If silent_flag==0, silent. Will print nothing

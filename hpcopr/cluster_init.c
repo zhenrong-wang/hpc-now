@@ -47,7 +47,9 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     system(cmdline);
     sprintf(tf_prep_conf,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
     if(file_exist_or_not(tf_prep_conf)==0){
-        return -3; // If the conf file already exists, exit.
+        if(cmd_flag_check(argc,argv,"--force")!=0){
+            return -3; // If the conf file already exists, exit, unless force specified.
+        }
     }
     FILE* file_p=fopen(tf_prep_conf,"w+");
     if(file_p==NULL){
@@ -345,7 +347,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int region_valid_flag=0;
-    int i,j;
+    int i;
     if(folder_exist_or_not(workdir)==1){
         return -1;
     }
@@ -762,10 +764,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         global_replace(filename_temp,"NUMBER",string_temp);
         sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
         insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        for(j=0;j<hpc_user_num;j++){
+        /*for(j=0;j<hpc_user_num;j++){
             sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
             insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        }
+        }*/
     }
     sprintf(cmdline,"%s %s%shpc_stack.base %s%shpc_stack_base.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -1002,7 +1004,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char compute_cpu_vendor[8]="";
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
-    int i,j;
+    int i;
     if(folder_exist_or_not(workdir)==1){
         return -1;
     }
@@ -1338,10 +1340,10 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         global_replace(filename_temp,"RUNNING_FLAG","true");
         sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
         insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        for(j=0;j<hpc_user_num;j++){
+        /*for(j=0;j<hpc_user_num;j++){
             sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
             insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        }
+        }*/
     }
     sprintf(cmdline,"%s %s%shpc_stack.base %s%shpc_stack_base.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -1543,7 +1545,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char compute_cpu_vendor[8]="";
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
-    int i,j;
+    int i;
     if(folder_exist_or_not(workdir)==1){
         return -1;
     }
@@ -1873,10 +1875,10 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
         insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        for(j=0;j<hpc_user_num;j++){
+        /*for(j=0;j<hpc_user_num;j++){
             sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
             insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        }
+        }*/
     }
     sprintf(cmdline,"%s %s%shpc_stack.base %s%shpc_stack_base.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);

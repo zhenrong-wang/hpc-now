@@ -1806,6 +1806,9 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     char cmdline[CMDLINE_LENGTH]="";
     char remote_commands[128]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char base_tf[FILENAME_LENGTH]="";
+    char master_tf[FILENAME_LENGTH]="";
+    char user_passwords[FILENAME_LENGTH]="";
     char* sshkey_folder=SSHKEY_DIR;
     char cloud_flag[16]="";
     char node_name[16]="";
@@ -1887,6 +1890,14 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         sprintf(node_name,"compute%d",i);
         node_file_to_running(stackdir,node_name,cloud_flag);
     }
+
+    create_and_get_vaultdir(workdir,vaultdir);
+    decrypt_user_passwords(workdir,crypto_keyfile);
+    sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    sprintf(base_tf,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
+    sprintf(master_tf,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
+    update_tf_passwords(base_tf,master_tf,user_passwords);
+
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully removed previous nodes. Rebuilding new nodes ...\n");
     if(terraform_execution(TERRAFORM_EXEC,"apply",workdir,crypto_keyfile,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rebuild the nodes. Exit now.\n" RESET_DISPLAY);
@@ -1944,10 +1955,8 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
     sync_statefile(workdir,sshkey_folder);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rebuilding the cluster users now ...\n");
-    create_and_get_vaultdir(workdir,vaultdir);
-    decrypt_user_passwords(workdir,crypto_keyfile);
-    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"r");
+    
+    file_p=fopen(user_passwords,"r");
     get_cluster_name(cluster_name,workdir);
     get_user_sshkey(cluster_name,"root","ENABLED",sshkey_folder);
     while(!feof(file_p)){

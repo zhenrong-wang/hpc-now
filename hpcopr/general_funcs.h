@@ -34,6 +34,7 @@ int local_path_parser(char* path_string, char* path_final);
 int file_creation_test(char* filename);
 int file_cr_clean(char* filename);
 int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overwrite_flag);
+int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag);
 
 int cmd_flg_or_not(char* argv);
 int cmd_key_or_not(char* argv);
