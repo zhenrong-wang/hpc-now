@@ -212,13 +212,12 @@ int main(int argc, char* argv[]){
     char stream_name[128]="";
     char log_type[128]="";
     char user_name[128]="";
-    char pass_word[32]="";
+    char pass_word[128]="";
     char user_name_list[1024]="";
     char vault_bucket_flag[8]="";
     char vault_root_flag[8]="";
     char export_dest[FILENAME_LENGTH]="";
     char import_source[FILENAME_LENGTH]="";
-    char trans_keyfile[FILENAME_LENGTH]="";
 
     char data_cmd[128]="";
     char source_path[FILENAME_LENGTH]="";
@@ -683,8 +682,8 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"import")==0){
         cmd_keyword_check(argc,argv,"-s",import_source);
-        cmd_keyword_check(argc,argv,"--key",trans_keyfile);
-        run_flag=import_cluster(import_source,trans_keyfile,crypto_keyfile);
+        cmd_keyword_check(argc,argv,"-p",pass_word);
+        run_flag=import_cluster(import_source,pass_word,crypto_keyfile);
         if(run_flag!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"IMPORT_FAILED",32);
             check_and_cleanup("");
@@ -966,14 +965,13 @@ int main(int argc, char* argv[]){
             return 49;
         }
         cmd_keyword_check(argc,argv,"--ul",user_name_list);
-        cmd_keyword_check(argc,argv,"--key",trans_keyfile);
+        cmd_keyword_check(argc,argv,"-p",pass_word);
         cmd_keyword_check(argc,argv,"-d",export_dest);
-//        printf("%s ------------------ \n",trans_keyfile);
         if(cmd_flag_check(argc,argv,"--admin")==0){
-            run_flag=export_cluster(cluster_name,user_name_list,"admin",crypto_keyfile,trans_keyfile,export_dest);
+            run_flag=export_cluster(cluster_name,user_name_list,"admin",crypto_keyfile,pass_word,export_dest);
         }
         else{
-            run_flag=export_cluster(cluster_name,user_name_list,"",crypto_keyfile,trans_keyfile,export_dest);
+            run_flag=export_cluster(cluster_name,user_name_list,"",crypto_keyfile,pass_word,export_dest);
         }
         if(run_flag==0){
             write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);

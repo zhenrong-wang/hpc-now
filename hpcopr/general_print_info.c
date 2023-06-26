@@ -75,14 +75,15 @@ void print_help(char* cmd_name){
     if(strcmp(cmd_name,"export")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "export" RESET_DISPLAY "      :~ Export a cluster to another hpcopr client. Optional params:\n");
         printf("|   --ul     USER_LIST    ~ Specify a list of users to be exported (split by ':').\n");
-        printf("|   --key    KEYFILE      ~ Specify a crypto key file to encrypt the files.\n");
-        printf("|   --admin               ~ Export with cluster admin privilege.\n");
+        printf("|    -p      PASSWORD     ~ Specify a password string to encrypt the files.\n");
         printf("|    -d      DEST_PATH    ~ Specify a destination path to export to.\n");
+        printf("|   --admin               ~ Export with cluster admin privilege.\n");
+        printf("|                         ~ ONLY valid when user1 is in the user list.\n");
     }
     if(strcmp(cmd_name,"import")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "import" RESET_DISPLAY "      :~ Import a cluster to the current hpcopr client.\n");
         printf("|    -s      SOURCE_PATH  ~ Specify the path of the source file.\n");
-        printf("|   --key    KEYFILE      ~ Specify a crypto key file to encrypt the files.\n");
+        printf("|    -p      PASSWORD     ~ Input the password string to decrypt and import.\n");
     }
     if(strcmp(cmd_name,"remove")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "remove" RESET_DISPLAY "      :~ Completely remove a cluster from the OS and registry.\n");
@@ -277,8 +278,8 @@ void print_help(char* cmd_name){
     }
     if(strcmp(cmd_name,"license")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "license" RESET_DISPLAY "     :~ Read the terms of the GNU Public License-v2.0\n");
-        printf("|   --print               ~ Print out the license terms.\n");
-        printf("|   --read                ~ Read the license terms.\n");
+        printf("|   --print           ~ Print out the license terms.\n");
+        printf("|   --read            ~ Read the license terms.\n");
     }
     if(strcmp(cmd_name,"repair")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "repair" RESET_DISPLAY "      :~ Try to repair the hpcopr core components.\n");

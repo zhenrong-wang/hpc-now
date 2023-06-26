@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "now_macros.h"
 #include "general_funcs.h"
@@ -107,7 +108,7 @@ int user_list_check(char* cluster_name, char* user_list_read, char* user_list_fi
     return valid_user_num;
 }
 
-int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* crypto_keyfile, char* trans_keyfile, char* export_target_file){
+int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* crypto_keyfile, char* password, char* export_target_file){
     char workdir[DIR_LENGTH]="";
     char current_stackdir[DIR_LENGTH]="";
     char current_vaultdir[DIR_LENGTH]="";
@@ -125,7 +126,8 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char filename_temp_2[FILENAME_LENGTH]="";
     char username_temp[USERNAME_LENGTH_MAX]="";
     char username_temp_2[USERNAME_LENGTH_MAX]="";
-    char real_trans_keyfile[FILENAME_LENGTH]="";
+    char* password_temp;
+    char real_password[128]="";
     char real_export_file[FILENAME_LENGTH_EXT]="";
     char real_export_folder[FILENAME_LENGTH_EXT]="";
     char export_filename[1024]="";
@@ -184,29 +186,15 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster: %s . Exporting users below:\n",cluster_name);
         printf(GENERAL_BOLD "|          %s\n" RESET_DISPLAY,real_user_list);
     }
-//    printf("%s ... %s \n\n",trans_keyfile,filename_temp);
-    local_path_parser(trans_keyfile,filename_temp);
-//    printf("%s ... %s \n",trans_keyfile,filename_temp);
-    if(strlen(filename_temp)==0||file_empty_or_not(filename_temp)<1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the path of the key file. i.e. " HIGH_CYAN_BOLD "/home/hpc-now/foo.key\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-        fflush(stdin);
-        scanf("%s",filename_temp);
-        getchar();
-        local_path_parser(filename_temp,filename_temp_2);
-        if(strlen(filename_temp_2)==0||file_empty_or_not(filename_temp_2)<1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the key file " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY ,filename_temp);
-            return -3;
-        }
-        else{
-            strcpy(real_trans_keyfile,filename_temp_2);
-        }
+    if(strlen(password)==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a *complex* password to encrypt and export.\n");
+        password_temp=GETPASS_FUNC("[ INPUT: ] *without echo* ");
+        strcpy(real_password,password_temp);
     }
     else{
-        strcpy(real_trans_keyfile,filename_temp);
+        strcpy(real_password,password);
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the key file " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",real_trans_keyfile);
-
+    password_hash(real_password,md5sum_trans);
     local_path_parser(export_target_file,filename_temp);
     if(strlen(filename_temp)==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a path (folder or file) to export. i.e. " HIGH_CYAN_BOLD "/home/hpc-now/\n" RESET_DISPLAY);
@@ -335,7 +323,6 @@ next_user:
     fprintf(file_p,"This is not a genuine terraform-related file. Only for users of cluster %s. DO NOT DELETE THIS FILE.\n",cluster_name);
     fclose(file_p);
 
-    get_crypto_key(real_trans_keyfile,md5sum_trans);
     encrypt_and_delete(NOW_CRYPTO_EXEC,cluster_name_flag,md5sum_trans);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",tmp_vaultdir,PATH_SLASH);
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum_trans);
@@ -376,23 +363,22 @@ next_user:
         return 1;
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n\n",cluster_name);
-        printf(GENERAL_BOLD "|       +- Key File" RESET_DISPLAY "       : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",real_trans_keyfile);
-        printf(GENERAL_BOLD "|       +- Exported File" RESET_DISPLAY "  : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",export_filename);
-        printf(GENERAL_BOLD "|       +- User List" RESET_DISPLAY "      : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",user_list_buffer);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n\n",cluster_name);
+        printf(GENERAL_BOLD "|       +- Password" RESET_DISPLAY "       : " GREY_LIGHT "%s" RESET_DISPLAY "\n",real_password);
+        printf(GENERAL_BOLD "|       +- Exported File" RESET_DISPLAY "  : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",export_filename);
+        printf(GENERAL_BOLD "|       +- User List" RESET_DISPLAY "      : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",user_list_buffer);
         if(strcmp(real_admin_flag,"admin")==0){
-            printf(GENERAL_BOLD "|       +- Admin Privilege" RESET_DISPLAY ": " HIGH_CYAN_BOLD "YES" RESET_DISPLAY " .\n");
+            printf(GENERAL_BOLD "|       +- Admin Privilege" RESET_DISPLAY ": " HIGH_CYAN_BOLD "YES" RESET_DISPLAY "\n");
         }
         else{
-            printf(GENERAL_BOLD "|       +- Admin Privilege" RESET_DISPLAY ": " HIGH_CYAN_BOLD "NO" RESET_DISPLAY " .\n");
+            printf(GENERAL_BOLD "|       +- Admin Privilege" RESET_DISPLAY ": " HIGH_CYAN_BOLD "NO" RESET_DISPLAY "\n");
         }
         return 0;
     }
 }
 
-int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
+int import_cluster(char* zip_file, char* password, char* crypto_keyfile){
     char real_zipfile[FILENAME_LENGTH]="";
-    char real_keyfile[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp_2[FILENAME_LENGTH]="";
     char cluster_name_buffer[128]="";
@@ -406,6 +392,8 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
     char vaultdir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char doubleconfirm[64]="";
+    char* password_temp;
+    char real_password[128]="";
     char md5sum[64]="";
     int update_flag=0;
     FILE* file_p=NULL;
@@ -432,27 +420,15 @@ int import_cluster(char* zip_file, char* trans_keyfile, char* crypto_keyfile){
         strcpy(real_zipfile,filename_temp);
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the specified now-cluster file: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",real_zipfile);
-    local_path_parser(trans_keyfile,filename_temp);
-    if(strlen(filename_temp)==0||file_empty_or_not(filename_temp)<1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the path of the import key file. i.e. ~/import.key, d:\\import.key\n");
-        printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY );
-        fflush(stdin);
-        scanf("%s",filename_temp);
-        getchar();
-        local_path_parser(filename_temp,filename_temp_2);
-        if(strlen(filename_temp_2)==0||file_empty_or_not(filename_temp_2)<1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The speficied key file " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY ,filename_temp);
-            return -3;
-        }
-        else{
-            strcpy(real_keyfile,filename_temp_2);
-        }
+    if(strlen(password)==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the password to decrypt and import.\n");
+        password_temp=GETPASS_FUNC("[ INPUT: ] *without echo* ");
+        strcpy(real_password,password_temp);
     }
     else{
-        strcpy(real_keyfile,filename_temp);
+        strcpy(real_password,password);
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the specified import key file: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",real_keyfile);
-    get_crypto_key(real_keyfile,md5sum);
+    password_hash(real_password,md5sum);
     sprintf(tmp_import_root,"%s%simport",HPC_NOW_ROOT_DIR,PATH_SLASH);
     sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
     system(cmdline);
