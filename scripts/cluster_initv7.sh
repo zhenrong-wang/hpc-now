@@ -146,43 +146,6 @@ do
   chown -R ${user_name}:${user_name} /home/${user_name}
 done < /root/user_secrets.txt
 
-<<test
-for i in $( seq 1 $1 )
-do
-  id user${i}
-  if [ $? -eq 1 ]; then
-    useradd user${i}
-    mkdir -p /home/user${i} && chown -R user${i}:user${i} /home/user${i}
-    if [ -f /root/hostfile ]; then
-      if [ ! -f /root/user_secrets.txt ]; then
-        if [ $centos_version -eq 7 ]; then
-          openssl rand 8 -base64 -out /root/secret_user${i}.txt
-        else
-          openssl rand -base64 -out /root/secret_user${i}.txt 8
-        fi
-        cat /root/secret_user${i}.txt | passwd user${i} --stdin > /dev/null 2>&1
-        echo -n "username: user${i} " >> /root/user_secrets.txt
-        cat /root/secret_user${i}.txt >> /root/user_secrets.txt
-      else
-        cat /root/user_secrets.txt | grep -w user${i} | awk '{print $3}' | passwd user${i} --stdin > /dev/null 2>&1
-      fi
-      mkdir -p /home/user${i}/.ssh && rm -rf /home/user${i}/.ssh/*
-      ssh-keygen -t rsa -N '' -f /home/user${i}/.ssh/id_rsa -q
-      cat /home/user${i}/.ssh/id_rsa.pub >> /home/user${i}/.ssh/authorized_keys
-      cat /etc/now-pubkey.txt >> /home/user${i}/.ssh/authorized_keys
-      chown -R user${i}:user${i} /home/user${i}    
-      mkdir -p /hpc_data/user${i}_data
-      chmod -R 750 /hpc_data/user${i}_data
-      chown -R user${i}:user${i} /hpc_data/user${i}_data
-    fi
-    echo -e "source /etc/profile" >> /home/user${i}/.bashrc
-    time_current=`date "+%Y-%m-%d %H:%M:%S"`
-    echo -e "# $time_current user${i} added, password set. Please check /root/.user_secrets.txt." >> ${logfile}  
-  fi
-  echo -e "user1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-done
-test
-
 ########## stop firewall and SELinux ###############
 systemctl stop firewalld && systemctl disable firewalld
 if [ $SELINUX_STATUS != Disabled ]; then
