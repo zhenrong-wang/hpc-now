@@ -1027,8 +1027,9 @@ int main(int argc, char* argv[]){
         if(strcmp(data_cmd,"put")==0||strcmp(data_cmd,"get")==0||strcmp(data_cmd,"copy")==0||strcmp(data_cmd,"move")==0||strcmp(data_cmd,"cp")==0||strcmp(data_cmd,"mv")==0||strcmp(data_cmd,"rput")==0||strcmp(data_cmd,"rget")==0){
             if(cmd_keyword_check(argc,argv,"-s",source_path)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a source path for this command.\n");
-                printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
-                printf("|          For " HIGH_CYAN_BOLD "local" RESET_DISPLAY " paths and " HIGH_CYAN_BOLD "bucket" RESET_DISPLAY " paths, no prefix needed.\n");
+                if(strcmp(data_cmd,"put")!=0&&strcmp(data_cmd,"get")!=0&&strcmp(data_cmd,"copy")!=0&&strcmp(data_cmd,"move")!=0){
+                    printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
+                }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
                 scanf("%s",source_path);
@@ -1036,8 +1037,9 @@ int main(int argc, char* argv[]){
             }
             if(cmd_keyword_check(argc,argv,"-d",destination_path)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a destination path for this command.\n");
-                printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
-                printf("|          For " HIGH_CYAN_BOLD "local" RESET_DISPLAY " paths and " HIGH_CYAN_BOLD "bucket" RESET_DISPLAY " paths, no prefix needed.\n");
+                if(strcmp(data_cmd,"put")!=0&&strcmp(data_cmd,"get")!=0&&strcmp(data_cmd,"copy")!=0&&strcmp(data_cmd,"move")!=0){
+                    printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
+                }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
                 scanf("%s",destination_path);
@@ -1047,8 +1049,9 @@ int main(int argc, char* argv[]){
         else{
             if(cmd_keyword_check(argc,argv,"--t",target_path)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a target path for this command.\n");
-                printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
-                printf("|          For " HIGH_CYAN_BOLD "local" RESET_DISPLAY " paths and " HIGH_CYAN_BOLD "bucket" RESET_DISPLAY " paths, no prefix needed.\n");
+                if(strcmp(data_cmd,"list")!=0&&strcmp(data_cmd,"delete")!=0){
+                    printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
+                }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
                 scanf("%s",target_path);
