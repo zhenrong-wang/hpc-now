@@ -122,6 +122,7 @@ fi
 
 ############ Add Users ####################
 echo -e "user1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+chmod 511 /usr/bin/passwd # Disable ordinary users to change its own password
 while read user_row
 do
   if [ -z $user_row ]; then
