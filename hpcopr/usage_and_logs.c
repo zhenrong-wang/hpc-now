@@ -38,9 +38,9 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
     system(cmdline);
     if(strlen(export_dest)==0){
         printf(GENERAL_BOLD "\n[ -DONE- ]" RESET_DISPLAY " You can also export the latest logs to a file.\n");
-        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr history --d history.csv" RESET_DISPLAY " .\n");
-        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr usage --d usage.csv" RESET_DISPLAY " .\n");
-        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr syserr --d syserr.txt" RESET_DISPLAY " .\n");
+        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr history -d history.csv" RESET_DISPLAY " .\n");
+        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr usage -d usage.csv" RESET_DISPLAY " .\n");
+        printf("|          Example: " HIGH_GREEN_BOLD "hpcopr syserr -d syserr.txt" RESET_DISPLAY " .\n");
         return 0;
     }
     else{
