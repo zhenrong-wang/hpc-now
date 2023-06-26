@@ -11,7 +11,6 @@
 
 int cluster_role_detect(char* workdir, char* cluster_role);
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag);
-int get_crypto_key(char* crypto_key_filename, char* md5sum);
 void create_and_get_stackdir(char* workdir, char* stackdir);
 void get_latest_hosts(char* stackdir, char* hostfile_latest);
 int decrypt_get_bucket_conf(char* workdir, char* crypto_keyfile, char* bucket_conf);

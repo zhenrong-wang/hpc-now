@@ -264,7 +264,7 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     }
     fclose(file_p);
     fclose(file_p_tmp);
-    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
 }
@@ -391,7 +391,7 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     fprintf(file_temp_p,"%s",single_line);
     fclose(file_p);
     fclose(file_temp_p);
-    sprintf(cmdline,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return replace_count;
 }
@@ -663,7 +663,7 @@ int folder_exist_or_not(char* foldername){
     }
     else{
         fclose(test_file);
-        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
         return 0;
     }
@@ -848,7 +848,7 @@ int file_creation_test(char* filename){
         return 3;
     }
     fclose(file_p);
-    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
 }
@@ -934,7 +934,7 @@ int file_cr_clean(char* filename){
     }
     fclose(file_p);
     fclose(file_p_tmp);
-    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
 }
@@ -1002,7 +1002,7 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
-        sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
     }
     return 0;
@@ -1032,8 +1032,83 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
-        sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
     }
     return 0;
+}
+
+int get_crypto_key(char* crypto_key_filename, char* md5sum){
+    char cmdline[CMDLINE_LENGTH]="";
+    FILE* md5_tmp=NULL;
+#ifdef _WIN32
+    char buffer[256]="";
+#endif
+#ifdef __APPLE__
+    sprintf(cmdline,"md5 '%s' | awk '{print $NF}' > /tmp/md5.txt.tmp",crypto_key_filename);
+#elif __linux__
+    sprintf(cmdline,"md5sum '%s' | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
+#elif _WIN32
+    sprintf(cmdline,"certutil -hashfile \"%s\" md5 > c:\\programdata\\md5.txt.tmp",crypto_key_filename);
+#endif
+    system(cmdline);
+#ifdef _WIN32
+    md5_tmp=fopen("c:\\programdata\\md5.txt.tmp","r");
+#else
+    md5_tmp=fopen("/tmp/md5.txt.tmp","r");
+#endif
+    if(md5_tmp==NULL){
+        return -1;
+    }
+#ifdef _WIN32
+    fgetline(md5_tmp,buffer);
+#endif
+    fgetline(md5_tmp,md5sum);
+    fclose(md5_tmp);
+#ifdef _WIN32
+    sprintf(cmdline,"del /f /q c:\\programdata\\md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
+#else
+    sprintf(cmdline,"rm -rf /tmp/md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
+#endif
+    system(cmdline);
+    return 0;
+}
+
+int password_hash(char* password, char* md5_hash){
+    if(strlen(password)==0){
+        return -3;
+    }
+    char filename_temp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char string_temp[16]="";
+    generate_random_string(string_temp);
+    FILE* file_p=NULL;
+#ifdef _WIN32
+    sprintf(filename_temp,"c:\\programdata\\%s.tmp",string_temp);
+    file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        strcpy(md5_hash,"");
+        return -1;
+    }
+    fprintf(file_p,"%s\n",password);
+    fclose(file_p);
+#else
+    sprintf(filename_temp,"/tmp/%s.tmp",string_temp);
+    file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        strcpy(md5_hash,"");
+        return -1;
+    }
+    fprintf(file_p,"%s\r\n",password);
+    fclose(file_p);
+#endif
+    get_crypto_key(filename_temp,md5_hash);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+    if(strlen(md5_hash)>0){
+        return 0;
+    }
+    else{
+        return 1;
+    }
 }

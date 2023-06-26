@@ -65,42 +65,6 @@ int add_to_cluster_registry(char* new_cluster_name, char* import_flag){
     return 0;
 }
 
-int get_crypto_key(char* crypto_key_filename, char* md5sum){
-    char cmdline[CMDLINE_LENGTH]="";
-    FILE* md5_tmp=NULL;
-#ifdef _WIN32
-    char buffer[256]="";
-#endif
-#ifdef __APPLE__
-    sprintf(cmdline,"md5 '%s' | awk '{print $NF}' > /tmp/md5.txt.tmp",crypto_key_filename);
-#elif __linux__
-    sprintf(cmdline,"md5sum '%s' | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
-#elif _WIN32
-    sprintf(cmdline,"certutil -hashfile \"%s\" md5 > c:\\programdata\\hpc-now\\md5.txt.tmp",crypto_key_filename);
-#endif
-    system(cmdline);
-#ifdef _WIN32
-    md5_tmp=fopen("c:\\programdata\\hpc-now\\md5.txt.tmp","r");
-#else
-    md5_tmp=fopen("/tmp/md5.txt.tmp","r");
-#endif
-    if(md5_tmp==NULL){
-        return -1;
-    }
-#ifdef _WIN32
-    fgetline(md5_tmp,buffer);
-#endif
-    fgetline(md5_tmp,md5sum);
-    fclose(md5_tmp);
-#ifdef _WIN32
-    sprintf(cmdline,"del /f /q c:\\programdata\\hpc-now\\md5.txt.tmp %s",SYSTEM_CMD_REDIRECT);
-#else
-    sprintf(cmdline,"rm -rf /tmp/md5.txt.tmp %s",SYSTEM_CMD_REDIRECT);
-#endif
-    system(cmdline);
-    return 0;
-}
-
 void create_and_get_stackdir(char* workdir, char* stackdir){
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(stackdir,"%s%sstack",workdir,PATH_SLASH);
