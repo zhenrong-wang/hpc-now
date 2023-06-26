@@ -436,7 +436,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile){
     system(cmdline);
     sprintf(cmdline,"tar -zxf %s -C %s%s",real_zipfile,tmp_import_root,PATH_SLASH);
     if(system(cmdline)!=0||get_cluster_name_import(cluster_name_buffer,tmp_top_dir,tmp_import_root,md5sum)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The source file may NOT be a valid file. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified password " WARN_YELLO_BOLD "%s" RESET_DISPLAY " may be incorrect. Please double check.\n" RESET_DISPLAY,real_password);
         sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return -5;
