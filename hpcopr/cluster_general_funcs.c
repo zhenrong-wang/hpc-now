@@ -1945,7 +1945,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
     }
     sprintf(remote_commands,"echo \"%s\" | passwd %s --stdin",password_final,username_input);
     if(remote_exec_general(workdir,ssheky_dir,"root",remote_commands,0,0)==0){
-        sprintf(username_ext," %s ",username_input);
+        sprintf(username_ext,"username: %s ",username_input);
         find_and_get(user_registry_file,username_ext,"","",1,username_ext,"","",' ',3,password_prev);
         find_and_replace(user_registry_file,username_ext,"","","","",password_prev,password_final);
         sync_user_passwords(workdir,ssheky_dir);
@@ -1960,44 +1960,43 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
     }
 }
 
-int usrmgr_prereq_check(char* workdir){
+int usrmgr_prereq_check(char* workdir, char* ucmd){
     char confirm[64]="";
     if(cluster_asleep_or_not(workdir)==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not running. Please wake up first\n" RESET_DISPLAY);
         return -1;
     }
-    if(check_down_nodes(workdir)!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] There are down nodes. The user management efforts cannot take effect immediately.\n" RESET_DISPLAY);
-        printf(WARN_YELLO_BOLD "|          After any user management operations, you *MUST* run the commands below:\n");
-        printf("|            1. hpcopr wakeup --all\n");
-        printf("|            2. hpcopr ssh -u user1\n");
-        printf("|            3. sudo hpcmgr connect\n");
-        printf("|            4. sudo hpcmgr all\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "|          You can also exit now, run" RESET_DISPLAY HIGH_GREEN_BOLD " 'hpcopr wakeup --all'" RESET_DISPLAY GENERAL_BOLD " and then manage the users.\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted.\n");
-        printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-        fflush(stdin);
-        scanf("%s",confirm);
-        getchar();
-        if(strcmp(confirm,CONFIRM_STRING)!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny the operation. Exit now.\n");
-            return 3;
+    int i=check_down_nodes(workdir);
+    if(i!=0){
+        if(strcmp(ucmd,"delete")==0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] There are down nodes. When deleting users, although not required, it is\n");
+            printf(WARN_YELLO_BOLD "|          *strongly* recommended to wake up the whole cluster first.\n" RESET_DISPLAY);
+            printf(GENERAL_BOLD "[ -INFO- ] You can exit now, run" RESET_DISPLAY HIGH_GREEN_BOLD " 'hpcopr wakeup --all'" RESET_DISPLAY GENERAL_BOLD " to wake up all nodes.\n" RESET_DISPLAY);
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue *WITHOUT* waking up? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted.\n");
+            printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
+            fflush(stdin);
+            scanf("%s",confirm);
+            getchar();
+            if(strcmp(confirm,CONFIRM_STRING)!=0){
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny the operation. Exit now.\n");
+                return 3;
+            }
+            else{
+                return 5;
+            }
         }
-        else{
-            return 5;
-        }
+        printf(WARN_YELLO_BOLD "[ -WARN- ] There are %d down nodes.\n" RESET_DISPLAY,i);
     }
     return 0;
 }
 
 void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_flag){
-    if(prereq_check_flag==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote executing now ...\n");
-        remote_exec(workdir,sshkey_folder,"connect",1);
-        remote_exec(workdir,sshkey_folder,"all",2);
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote execution commands sent.\n");
-    }
-    else{
-        printf(WARN_YELLO_BOLD "[ -WARN- ] You *MUST* run the commands above to update the cluster users.\n" RESET_DISPLAY);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote executing now ...\n");
+    remote_exec(workdir,sshkey_folder,"connect",1);
+    remote_exec(workdir,sshkey_folder,"all",2);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote execution commands sent.\n");
+    if(prereq_check_flag!=0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster user has been updated with down nodes.\n" RESET_DISPLAY);
     }
 }
 

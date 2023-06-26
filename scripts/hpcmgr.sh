@@ -58,7 +58,7 @@ function add_a_user() {
   chown -R $1:$1 /home/$1
   for i in $(seq 1 $NODE_NUM )
   do
-    ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
+    ping -c 1 -W 1 -q compute${i} >> ${logfile} 2>&1
     if [ $? -eq 0 ]; then
       ssh -n compute${i} "useradd $1 -m"
       ssh -n compute${i} "rm -rf /home/$1/.ssh"
@@ -195,7 +195,7 @@ if [ $1 = 'users' ]; then
       userdel -f -r $3 && mv /hpc_data/${3}_data /hpc_data/${3}_data_deleted_user
       for i in $(seq 1 $NODE_NUM )
       do
-        ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
+        ping -c 1 -W 1 -q compute${i} >> ${logfile} 2>&1
         if [ $? -eq 0 ]; then
           ssh -n compute${i} "userdel -f -r $3"
         fi
@@ -264,7 +264,7 @@ if [ $1 = 'quick' ]; then
   echo -e "[ STEP 2 ] Restarting services on the compute node(s) ..."
   for i in $( seq 1 $NODE_NUM )
   do
-    ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
+    ping -c 1 -W 1 -q compute${i} >> ${logfile} 2>&1
     if [ $? -ne 0 ]; then
       echo -e "\n Node ${i} is unreachable." >> ${logfile}
       continue
@@ -300,7 +300,7 @@ if [ $1 = 'connect' ]; then
     private_ip=`echo -e "$iprow" | awk -F"\t" '{print $1}'`
     node_name=`echo -e "$iprow" | awk -F"\t" '{print $2}'`
     echo -e "[ STEP 2 ] Pinging $node_name with private IP $private_ip now .... "
-    ping -c 2 -W 1 -q $private_ip >> ${logfile} 2>&1
+    ping -c 1 -W 1 -q $private_ip >> ${logfile} 2>&1
     if [ $? -ne 0 ]; then
       sed -i "/$private_ip/d" /root/hostfile
       echo -e "[ STEP 2 ] Exclude $node_name from the cluster with private IP $private_ip."
@@ -387,6 +387,11 @@ if [ $1 = 'connect' ]; then
   echo -e "[ STEP 5 ] Setting up users of compute nodes ... "
   for i in $(seq 1 $NODE_NUM )
   do
+    ping -c 1 -W 1 -q compute${i} >> ${logfile} 2>&1
+    if [ $? -ne 0 ]; then
+      echo -e "[ -WARN- ] Failed to set up users for compute $i ."
+      continue
+    fi
     scp -r -q /etc/munge/munge.key root@compute${i}:/etc/munge
     while read hpc_user_row
     do

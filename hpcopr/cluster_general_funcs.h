@@ -70,7 +70,7 @@ int delete_user_from_registry(char* user_registry_file, char* username);
 int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char* username);
 int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, char* crypto_keyfile, char* option);
 int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, char* username, char* password);
-int usrmgr_prereq_check(char* workdir);
+int usrmgr_prereq_check(char* workdir, char* ucmd);
 void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_flag);
 
 void get_workdir(char* cluster_workdir, char* cluster_name);

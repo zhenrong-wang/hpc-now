@@ -1416,11 +1416,10 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return run_flag;   
         }
-        usrmgr_check_flag=usrmgr_prereq_check(workdir);
+        usrmgr_check_flag=usrmgr_prereq_check(workdir,user_cmd);
         if(usrmgr_check_flag==-1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not running. Please wake up first\n" RESET_DISPLAY);
-            check_and_cleanup(workdir);
             write_operation_log(cluster_name,operation_log,argc,argv,"USERMAN_PREREQ_CHECK_FAILED",77);
+            check_and_cleanup(workdir);
             return 77;
         }
         else if(usrmgr_check_flag==3){
