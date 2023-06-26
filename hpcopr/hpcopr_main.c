@@ -1406,12 +1406,7 @@ int main(int argc, char* argv[]){
         if(strcmp(user_cmd,"list")==0){
             run_flag=hpc_user_list(workdir,crypto_keyfile,0);
             if(cluster_asleep_or_not(workdir)==0){
-                if(command_flag==2){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is not running.\n" RESET_DISPLAY);
-                }
-                else{
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] The switched cluster is not running.\n" RESET_DISPLAY);
-                }
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The specified/switched cluster is not running.\n" RESET_DISPLAY);
             }
             write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
             check_and_cleanup(workdir);
