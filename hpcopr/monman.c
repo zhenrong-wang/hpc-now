@@ -98,8 +98,8 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
 
     if(strlen(datetime_input)>16||strlen(datetime_input)<3){
         if(extend_flag==0){
-            strcpy(date_string,"1970-1-1");
-            strcpy(time_string,"0:0:0");
+            strcpy(date_string,EPOCH_DATE);
+            strcpy(time_string,EPOCH_TIME);
         }
         else{
             strcpy(date_string,"2199-12-31");
@@ -190,7 +190,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
         printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster %s is not running. The data is not updated.\n" RESET_DISPLAY,cluster_name);
     }
     else if(run_flag==1||run_flag==-5){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the monitor data of cluster " WARN_YELLO_BOLD "%s" RESET_DISPLAY " . Has it been inited?\n" RESET_DISPLAY, cluster_name);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the monitor data of cluster " WARN_YELLO_BOLD "%s" RESET_DISPLAY "\n", cluster_name);
         return -5;
     }
     sprintf(mon_data_file_temp,"%s%smon_data%smon_data_temp.csv",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);

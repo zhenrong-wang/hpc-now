@@ -8,6 +8,7 @@
 
 . /etc/profile
 statefile=/usr/hpc-now/currentstate
+sed -i 's/\r//g' $statefile
 cluster_mon_data=/usr/hpc-now/mon_data.csv
 . /usr/hpc-now/nowmon_agt.sh
 line=`tail -n 1 /usr/hpc-now/mon_data.csv`
