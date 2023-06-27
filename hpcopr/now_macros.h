@@ -50,8 +50,6 @@
 #define FILENAME_SUFFIX_SHORT "win"
 #define FILENAME_SUFFIX_FULL "windows"
 
-#define EPOCH_DATE "1970-1-1"
-#define EPOCH_TIME "0:0:1"
 #define GETTIMEOFDAY_FUNC mingw_gettimeofday
 #define GETPASS_FUNC getpass_win
 
@@ -103,8 +101,6 @@
 #define FILENAME_SUFFIX_SHORT "lin"
 #define FILENAME_SUFFIX_FULL "linux"
 
-#define EPOCH_DATE "1970-1-1"
-#define EPOCH_TIME "0:0:0"
 #define GETTIMEOFDAY_FUNC gettimeofday
 #define GETPASS_FUNC getpass
 
@@ -156,8 +152,6 @@
 #define FILENAME_SUFFIX_SHORT "dwn"
 #define FILENAME_SUFFIX_FULL "darwin"
 
-#define EPOCH_DATE "1970-1-1"
-#define EPOCH_TIME "0:0:1"
 #define GETTIMEOFDAY_FUNC gettimeofday
 #define GETPASS_FUNC getpass
 

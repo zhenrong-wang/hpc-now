@@ -98,11 +98,11 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
 
     if(strlen(datetime_input)>16||strlen(datetime_input)<3){
         if(extend_flag==0){
-            strcpy(date_string,EPOCH_DATE);
-            strcpy(time_string,EPOCH_TIME);
+            strcpy(date_string,"2000-1-1");
+            strcpy(time_string,"0:0:0");
         }
         else{
-            strcpy(date_string,"2199-12-31");
+            strcpy(date_string,"2049-12-31");
             strcpy(time_string,"23:59:59");
         }
         return -1;
