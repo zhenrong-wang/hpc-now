@@ -9,11 +9,7 @@
 #ifndef CLUSTER_OPERATIONS_H
 #define CLUSTER_OPERATIONS_H
 
-int exit_current_cluster(void);
 int switch_to_cluster(char* target_cluster_name);
-int add_to_cluster_registry(char* new_cluster_name);
-int delete_from_cluster_registry(char* deleted_cluster_name);
-int list_all_cluster_names(int header_flag);
 int glance_clusters(char* target_cluster_name, char* crypto_keyfile);
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_flag);
 int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_flag);
@@ -33,6 +29,6 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag);
 int edit_configuration_file(char* cluster_name, char* crypto_keyfile);
 int remove_conf(char* cluster_name);
 int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option);
-int view_run_log(char* workdir, char* stream, char* run_option, char* view_option);
+int view_run_log(char* workdir, char* stream, char* run_option, char* view_option, char* export_dest);
 
 #endif

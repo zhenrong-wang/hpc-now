@@ -24,6 +24,7 @@ touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 sudo yum -y install at
 systemctl start atd && systemctl enable atd
 sudo mkdir /hpc_apps && sudo mkdir /hpc_data
+hostnamectl set-hostname master
 rm -rf /root/.ssh/id_rsa.pub
 rm -rf /root/.ssh/id_rsa
 rm -rf /root/.ssh/authorized_keys

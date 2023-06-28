@@ -11,13 +11,13 @@
 
 void print_empty_cluster_info(void);
 void print_cluster_init_done(void);
-void print_help(char* plain_flag);
+void print_help(char* cmd_name);
 void print_header(void);
 void print_version(void);
 void print_tail(void);
 void print_about(void);
-int read_license(void);
-void print_usrmgr_info(char* plain_flag);
-void print_dataman_info(char* plain_flag);
+int read_license(char* option);
+void print_usrmgr_info(void);
+void print_dataman_info(void);
 
 #endif

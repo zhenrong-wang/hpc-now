@@ -44,6 +44,42 @@ function node_invalid_info() {
   echo -e "           Exit now."
 }
 
+function add_a_user() {
+  mkdir -p /home/$1/.ssh
+  rm -rf /home/$1/.ssh/*
+  ssh-keygen -t rsa -N '' -f /home/$1/.ssh/id_rsa -q
+  cat /home/$1/.ssh/id_rsa.pub >> /home/$1/.ssh/authorized_keys
+  cat /etc/now-pubkey.txt >> /home/$1/.ssh/authorized_keys
+  cp -r /root/Desktop/*.desktop /home/$1/Desktop/
+  mkdir -p /hpc_data/${1}_data && chmod -R 750 /hpc_data/${1}_data 
+  chown -R $1:$1 /hpc_data/${1}_data
+  ln -s /hpc_data/${1}_data /home/$1/Desktop/ >> /dev/null 2>&1
+  ln -s /hpc_apps /home/$1/Desktop/ >> /dev/null 2>&1
+  chown -R $1:$1 /home/$1
+  for i in $(seq 1 $NODE_NUM )
+  do
+    ping -c 1 -W 1 -q compute${i} >> ${logfile} 2>&1
+    if [ $? -eq 0 ]; then
+      ssh -n compute${i} "useradd $1 -m"
+      ssh -n compute${i} "rm -rf /home/$1/.ssh"
+      scp -r -q /home/$1/.ssh root@compute${i}:/home/$1/
+      ssh -n compute${i} "chown -R $1:$1 /home/$1"
+    fi
+  done
+}
+
+function bucket_conf() {
+  if [ -f /root/.cos.conf ] && [ ! -f /home/$1/.cos.conf ]; then
+    cp /root/.cos.conf /home/$1/ && chown -R $1:$1 /home/$1/.cos.conf
+  fi
+  if [ -f /root/.ossutilconfig ] && [ ! -f /home/$1/.ossutilconfig ]; then
+    cp /root/.ossutilconfig /home/$1/ && chown -R $1:$1 /home/$1/.ossutilconfig
+  fi
+  if [ -f /root/.s3cfg ] && [ ! -f /home/$1/.s3cfg ]; then
+    cp /root/.s3cfg /home/$1/ && chown -R $1:$1 /home/$1/.s3cfg
+  fi
+}
+
 if [ ! -n "$1" ]; then
   help_info
   exit 3
@@ -67,6 +103,7 @@ fi
 
 ##### USER MANAGEMENT #####################
 if [ $1 = 'users' ]; then
+  mkdir -p /root/.sshkey_deleted >> ${logfile} 2>&1
   if [ ! -f /root/hostfile ]; then
     node_invalid_info
     exit 5
@@ -75,7 +112,7 @@ if [ $1 = 'users' ]; then
     echo -e "Usage: \n\thpcmgr users list\n\thpcmgr users add your_user_name your_password\n\thpcmgr users delete your_user_name\nPlease check your parameters. Exit now.\n"
     exit 3
   fi
-  if [[ $2 != 'list' && $2 != 'add' && $2 != 'delete' ]]; then
+  if [[ $2 != 'list' && $2 != 'add' && $2 != 'delete' && $2 != 'rebuild' ]]; then
     echo -e "Usage: \n\thpcmgr users list\n\thpcmgr users add your_user_name your_password\n\thpcmgr users delete your_user_name\nPlease check your parameters. Exit now.\n"
     exit 3
   fi
@@ -98,6 +135,7 @@ if [ $1 = 'users' ]; then
           echo -e "User $3 already exists in this OS but not in this cluster. Adding to the cluster now.\n"
           echo "y" | sacctmgr add user $3 account=hpc_users
           sed -i "/$3/,+0 s/DISABLED/ENABLED/g" ${user_registry}
+          mv /root/.sshkey_deleted/id_rsa.$3 /home/$3/.ssh/id_rsa >> ${logfile} 2>&1
           exit 0
         fi
       else
@@ -118,35 +156,8 @@ if [ $1 = 'users' ]; then
           echo -e "$new_passwd ENABLED" >> ${user_registry}
           rm -rf /root/.cluster_secrets/secret_$3.txt
         fi
-        mkdir -p /home/$3/.ssh
-        rm -rf /home/$3/.ssh/*
-        ssh-keygen -t rsa -N '' -f /home/$3/.ssh/id_rsa -q
-        cat /home/$3/.ssh/id_rsa.pub >> /home/$3/.ssh/authorized_keys
-        cat /etc/now-pubkey.txt >> /home/$3/.ssh/authorized_keys
-        cp -r /home/user1/Desktop /home/$3/ && unlink /home/$3/Desktop/user1_data
-        mkdir -p /hpc_data/$3_data && chmod -R 750 /hpc_data/$3_data && chown -R $3:$3 /hpc_data/$3_data
-        ln -s /hpc_data/$3_data /home/$3/Desktop/
-        ln -s /hpc_apps /home/$3/Desktop/ >> /dev/null 2>&1
-        chown -R $3:$3 /home/$3
-        for i in $(seq 1 $NODE_NUM )
-        do
-          ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
-          if [ $? -eq 0 ]; then
-            ssh -n compute${i} "useradd $3 -m"
-            ssh -n compute${i} "rm -rf /home/$3/.ssh"
-            scp -r -q /home/$3/.ssh root@compute${i}:/home/$3/
-            ssh -n compute${i} "chown -R $3:$3 /home/$3"
-          fi
-        done
-        if [ -f /root/.cos.conf ]; then
-          cp /root/.cos.conf /home/$3/ && chown -R $3:$3 /home/$3/.cos.conf
-        fi
-        if [ -f /root/.ossutilconfig ]; then
-          cp /root/.ossutilconfig /home/$3/ && chown -R $3:$3 /home/$3/.ossutilconfig
-        fi
-        if [ -f /root/.s3cfg ]; then
-          cp /root/.s3cfg /home/$3/ && chown -R $3:$3 /home/$3/.s3cfg
-        fi
+        add_a_user $3
+        bucket_conf $3
         echo "y" | sacctmgr add user $3 account=hpc_users
         exit 0
       fi
@@ -177,21 +188,49 @@ if [ $1 = 'users' ]; then
     if [[ ! -n "$4" || $4 != "os" ]]; then
       echo -e "User $3 has been deleted from the cluster, but still in the OS."
       sed -i "/$3/,+0 s/ENABLED/DISABLED/g" ${user_registry}
+      mv /home/$3/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$3 >> ${logfile} 2>&1
       exit 0
     else
       echo -e "[ -WARN- ] User $3 will be erased from the Operating System permenantly!"
       userdel -f -r $3 && mv /hpc_data/${3}_data /hpc_data/${3}_data_deleted_user
       for i in $(seq 1 $NODE_NUM )
       do
-        ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
+        ping -c 1 -W 1 -q compute${i} >> ${logfile} 2>&1
         if [ $? -eq 0 ]; then
           ssh -n compute${i} "userdel -f -r $3"
         fi
       done
       sed -i "/$3/d" ${user_registry}
+      rm -rf /root/.sshkey_deleted/id_rsa.$3 >> ${logfile} 2>&1
       echo -e "[ -DONE- ] User $3 Deleted permenantly."
       exit 0
     fi 
+  fi
+  if [ $2 = 'rebuild' ]; then
+    if [ ! -f ${user_registry} ]; then
+      echo -e "[ FATAL: ] The user registry is absent. Exit now."
+      exit 16
+    fi
+    while read user_row
+    do
+      user_name=`echo $user_row | awk '{print $2}'`
+      user_passwd=`echo $user_row | awk '{print $3}'`
+      user_status=`echo $user_row | awk '{print $4}'`
+      echo $user_name $user_passwd $user_status
+      id $user_name >> /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        useradd $user_name -m
+        add_a_user $user_name
+      fi
+      echo "${user_passwd}" | passwd $user_name --stdin > /dev/null 2>&1
+      bucket_conf $user_name
+      if [ -z $user_status ] || [ $user_status = 'ENABLED' ]; then
+        echo "y" | sacctmgr add user $user_name account=hpc_users
+      else
+        cp -r /home/$user_name/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$user_name
+        echo "y" | sacctmgr delete user $user_name
+      fi
+    done < ${user_registry}
   fi
 fi
 
@@ -225,7 +264,7 @@ if [ $1 = 'quick' ]; then
   echo -e "[ STEP 2 ] Restarting services on the compute node(s) ..."
   for i in $( seq 1 $NODE_NUM )
   do
-    ping -c 2 -W 1 -q compute${i} >> ${logfile} 2>&1
+    ping -c 1 -W 1 -q compute${i} >> ${logfile} 2>&1
     if [ $? -ne 0 ]; then
       echo -e "\n Node ${i} is unreachable." >> ${logfile}
       continue
@@ -261,7 +300,7 @@ if [ $1 = 'connect' ]; then
     private_ip=`echo -e "$iprow" | awk -F"\t" '{print $1}'`
     node_name=`echo -e "$iprow" | awk -F"\t" '{print $2}'`
     echo -e "[ STEP 2 ] Pinging $node_name with private IP $private_ip now .... "
-    ping -c 2 -W 1 -q $private_ip >> ${logfile} 2>&1
+    ping -c 1 -W 1 -q $private_ip >> ${logfile} 2>&1
     if [ $? -ne 0 ]; then
       sed -i "/$private_ip/d" /root/hostfile
       echo -e "[ STEP 2 ] Exclude $node_name from the cluster with private IP $private_ip."
@@ -336,31 +375,28 @@ if [ $1 = 'connect' ]; then
   echo -e "[ STEP 3 ] Environment Variable NODE_NUM has been updated to $number_of_nodes\n[ STEP 3 ] Environment Variable NODE_CORES has been updated to $number_of_cores" >> ${logfile}
   source /etc/profile
   echo -e "[ STEP 4 ] Updating the cluster configuration now ..."
-  if [ -f /etc/hosts-clean ]; then
-    hostnamectl set-hostname master
-    /bin/cp /etc/hosts-clean /etc/hosts
-    cat /root/hostfile >> /etc/hosts
-    /bin/cp /opt/slurm/etc/slurm.conf.128 /opt/slurm/etc/slurm.conf
-    sed -i 's/NodeName=compute\[1-2\]/NodeName=compute\[1-'$NODE_NUM'\]/g' /opt/slurm/etc/slurm.conf
-    sed -i 's/CPUs=128/CPUs='$NODE_CORES'/g' /opt/slurm/etc/slurm.conf
-    sed -i 's/SCKTS/'$SOCKETS'/g' /opt/slurm/etc/slurm.conf
-    sed -i 's/C_P_S/'$CORES_PER_SOCKET'/g' /opt/slurm/etc/slurm.conf
-    sed -i 's/T_P_C/'$THREADS_PER_CORE'/g' /opt/slurm/etc/slurm.conf
-    echo -e "[ STEP 4 ] The cluster configuration file has been updated.\n" >>  ${logfile}
-  else
-    echo -e "[ FATAL: ] PLEASE MAKE SURE the /etc/hosts-clean exists.\n Exit now."
-    echo -e "[ FATAL: ] PLEASE MAKE SURE the /etc/hosts-clean exists.\n Exit now." >> ${logfile}
-    exit 31
-  fi
+  /bin/cp /etc/hosts-clean /etc/hosts
+  cat /root/hostfile >> /etc/hosts
+  /bin/cp /opt/slurm/etc/slurm.conf.128 /opt/slurm/etc/slurm.conf
+  sed -i 's/NodeName=compute\[1-2\]/NodeName=compute\[1-'$NODE_NUM'\]/g' /opt/slurm/etc/slurm.conf
+  sed -i 's/CPUs=128/CPUs='$NODE_CORES'/g' /opt/slurm/etc/slurm.conf
+  sed -i 's/SCKTS/'$SOCKETS'/g' /opt/slurm/etc/slurm.conf
+  sed -i 's/C_P_S/'$CORES_PER_SOCKET'/g' /opt/slurm/etc/slurm.conf
+  sed -i 's/T_P_C/'$THREADS_PER_CORE'/g' /opt/slurm/etc/slurm.conf
+  echo -e "[ STEP 4 ] The cluster configuration file has been updated.\n" >>  ${logfile}
   echo -e "[ STEP 5 ] Setting up users of compute nodes ... "
   for i in $(seq 1 $NODE_NUM )
   do
+    ping -c 1 -W 1 -q compute${i} >> ${logfile} 2>&1
+    if [ $? -ne 0 ]; then
+      echo -e "[ -WARN- ] Failed to set up users for compute $i ."
+      continue
+    fi
     scp -r -q /etc/munge/munge.key root@compute${i}:/etc/munge
     while read hpc_user_row
     do
       username=`echo -e $hpc_user_row | awk '{print $2}'`
-      #user_passwd=`echo -e $hpc_user_row | awk '{print $3}'`
-      #ssh -n compute${i} "echo '$user_passwd' | passwd $username --stdin >> /dev/null 2>&1"
+      ssh -n compute${i} "useradd ${username} -m >> /dev/null 2>&1 && mkdir -p /home/$username >> /dev/null 2>&1"
       scp -r -q /home/$username/.ssh root@compute${i}:/home/$username/
       ssh -n compute${i} "chown -R $username:$username /home/$username >> /dev/null 2>&1"
     done < ${user_registry}
@@ -440,7 +476,6 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
     echo -e "[ STEP 4 ] Pulling the compute node(s) up ..."
     for i in $( seq 1 $NODE_NUM )
     do
-      ssh compute${i} "hostnamectl set-hostname compute${i}"
       scp -q /root/hostfile root@compute${i}:/etc/
       scp -q /opt/slurm/etc/slurm.conf root@compute${i}:/opt/slurm/etc/
       ssh compute${i} "sed -i '/master/d' /etc/hosts && sed -i '/compute/d' /etc/hosts"
@@ -462,10 +497,17 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   fi
   while read hpc_user_row
   do
-    username=`echo -e $hpc_user_row | awk '{print $2}'`
-    sacctmgr list user ${username} | grep hpc_users >> ${logfile} 2>&1
-    if [ $? -ne 0 ]; then
-      echo "y" | sacctmgr add user ${username} account=hpc_users >> ${logfile} 2>&1
+    if [ -z $hpc_user_row ]; then
+      continue
+    fi
+    user_name=`echo -e $hpc_user_row | awk '{print $2}'`
+    user_status=`echo -e $hpc_user_row | awk '{print $4}'`
+    if [ ! -z $user_status ] && [ $user_status = "DISABLED" ]; then
+      echo "y" | sacctmgr delete user $user_name >> ${logfile} 2>&1
+      mv /home/$user_name/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$user_name >> ${logfile} 2>&1
+    else
+      echo "y" | sacctmgr add user ${user_name} account=hpc_users >> ${logfile} 2>&1
+      mv /root/.sshkey_deleted/id_rsa.$user_name /home/$user_name/.ssh/id_rsa >> ${logfile} 2>&1
     fi
   done < ${user_registry}
   echo -e "[ STEP 5 ] Cluster users are ready."

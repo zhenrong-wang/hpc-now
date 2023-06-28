@@ -47,82 +47,63 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     system(cmdline);
     sprintf(tf_prep_conf,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
     if(file_exist_or_not(tf_prep_conf)==0){
-        return -3; // If the conf file already exists, exit.
+        if(cmd_flag_check(argc,argv,"--force")!=0){
+            return -3; // If the conf file already exists, exit, unless force specified.
+        }
     }
     FILE* file_p=fopen(tf_prep_conf,"w+");
     if(file_p==NULL){
         return -1;
     }
-    int i,j;
-    char header[16]="";
-    char tail[64]="";
     char default_region[32]="";
-    char real_region[32]="";
+    char real_region[128]="";
     char default_zone[36]="";
-    char real_zone[36]="";
+    char real_zone[128]="";
     int default_node_num=1;
-    char real_node_num_string[16]="";
+    char real_node_num_string[128]="";
     int default_user_num=3;
-    char real_user_num_string[16]="";
+    char real_user_num_string[128]="";
     char* default_master_inst="a8c16g";
-    char real_master_inst[16]="";
+    char real_master_inst[128]="";
     char* default_compute_inst="a4c8g";
-    char real_compute_inst[16]="";
+    char real_compute_inst[128]="";
     char* default_os_image="centoss9";
-    char real_os_image[16]="";
+    char real_os_image[128]="";
     char* default_ht_flag="ON";
-    char real_ht_flag[16]="";
+    char real_ht_flag[128]="";
+    int sum_temp;
 
-    for(i=2;i<argc;i++){
-        get_seq_string(argv[i],'=',1,header);
-        get_seq_string(argv[i],'=',2,tail);
-        if(strcmp(header,"--r")==0){
-            strcpy(real_region,tail);
+    cmd_keyword_check(argc,argv,"--rg",real_region);
+    cmd_keyword_check(argc,argv,"--az",real_zone);
+    cmd_keyword_check(argc,argv,"--nn",real_node_num_string);
+    cmd_keyword_check(argc,argv,"--un",real_user_num_string);
+    cmd_keyword_check(argc,argv,"--mi",real_master_inst);
+    cmd_keyword_check(argc,argv,"--ci",real_compute_inst);
+    cmd_keyword_check(argc,argv,"--os",real_os_image);
+    cmd_keyword_check(argc,argv,"--ht",real_ht_flag);
+
+    if(strlen(real_node_num_string)!=0){
+        sum_temp=string_to_positive_num(real_node_num_string);
+        if(sum_temp<MINIMUM_ADD_NODE_NUMBER||sum_temp>MAXIMUM_ADD_NODE_NUMBER){
+            fclose(file_p);
+            sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,tf_prep_conf,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            return 1;
         }
-        else if(strcmp(header,"--az")==0){
-            strcpy(real_zone,tail);
+    }
+
+    if(strlen(real_user_num_string)!=0){
+        sum_temp=string_to_positive_num(real_user_num_string);
+        if(sum_temp<MINIMUM_ADD_USER_NUNMBER||sum_temp>MAXIMUM_ADD_USER_NUMBER){
+            fclose(file_p);
+            sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,tf_prep_conf,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            return 1;
         }
-        else if(strcmp(header,"--nn")==0){
-            for(j=0;j<strlen(tail);j++){
-                if(*(tail+j)<'0'||*(tail+j)>'9'){
-                    fclose(file_p);
-                    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,tf_prep_conf,SYSTEM_CMD_REDIRECT);
-                    system(cmdline);
-                    return 1;
-                }
-            }
-            strcpy(real_node_num_string,tail);
-        }
-        else if(strcmp(header,"--un")==0){
-            for(j=0;j<strlen(tail);j++){
-                if(*(tail+j)<'0'||*(tail+j)>'9'){
-                    fclose(file_p);
-                    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,tf_prep_conf,SYSTEM_CMD_REDIRECT);
-                    system(cmdline);
-                    return 1;
-                }
-            }
-            strcpy(real_user_num_string,tail);
-        }
-        else if(strcmp(header,"--mi")==0){
-            strcpy(real_master_inst,tail);
-        }
-        else if(strcmp(header,"--ci")==0){
-            strcpy(real_compute_inst,tail);
-        }
-        else if(strcmp(header,"--os")==0){
-            if(strcmp(tail,"centoss9")==0||strcmp(tail,"centos7")==0){
-                strcpy(real_os_image,tail);
-            }
-        }
-        else if(strcmp(header,"--ht")==0){
-            if(strcmp(tail,"ON")==0||strcmp(tail,"OFF")==0){
-                strcpy(real_ht_flag,tail);
-            }
-        }
-        else{
-            continue;
-        }
+    }
+    
+    if(strcmp(real_ht_flag,"ON")!=0&&strcmp(real_ht_flag,"OFF")!=0){
+        strcpy(real_ht_flag,"");
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         strcpy(default_region,"cn-hangzhou");
@@ -193,10 +174,8 @@ int get_tf_prep_conf(char* conf_file, char* cluster_id, char* region_id, char* z
     char header[64]="";
     char tail[32]="";
     char tail_ext[32]="";
-    int i;
     int read_conf_lines=0;
     int sum_temp=0;
-    int sum_flag=0;
     while(!feof(file_p)){
         fgetline(file_p,conf_line_buffer);
         get_seq_string(conf_line_buffer,' ',1,header);
@@ -214,27 +193,21 @@ int get_tf_prep_conf(char* conf_file, char* cluster_id, char* region_id, char* z
             read_conf_lines++;
         }
         else if(strcmp(header,"NODE_NUM")==0){
-            for(i=0;i<strlen(tail);i++){
-                if(*(tail+i)<'0'||*(tail+i)>'9'){
-                    fclose(file_p);
-                    return 1;
-                }
-                else{
-                    *node_num+=(*(tail+i)-'0')*pow(10,strlen(tail)-i-1);
-                }
+            sum_temp=string_to_positive_num(tail);
+            if(sum_temp<MINIMUM_ADD_NODE_NUMBER||sum_temp>MAXIMUM_ADD_NODE_NUMBER){
+                fclose(file_p);
+                return 1;
             }
+            *node_num=sum_temp;
             read_conf_lines++;
         }
         else if(strcmp(header,"HPC_USER_NUM")==0){
-            for(i=0;i<strlen(tail);i++){
-                if(*(tail+i)<'0'||*(tail+i)>'9'){
-                    fclose(file_p);
-                    return 1;
-                }
-                else{
-                    *hpc_user_num+=(*(tail+i)-'0')*pow(10,strlen(tail)-i-1);
-                }
+            sum_temp=string_to_positive_num(tail);
+            if(sum_temp<MINIMUM_ADD_USER_NUNMBER||sum_temp>MAXIMUM_ADD_USER_NUMBER){
+                fclose(file_p);
+                return 1;
             }
+            *hpc_user_num=sum_temp;
             read_conf_lines++;
         }
         else if(strcmp(header,"master_init_param")==0){
@@ -255,17 +228,8 @@ int get_tf_prep_conf(char* conf_file, char* cluster_id, char* region_id, char* z
             read_conf_lines++;
         }
         else if(strcmp(header,"master_bandwidth")==0){
-            sum_temp=0;
-            for(i=0;i<strlen(tail);i++){
-                if(*(tail+i)<'0'||*(tail+i)>'9'){
-                    strcpy(master_bandwidth,"50");
-                    sum_flag=-127;
-                }
-                else{
-                    sum_temp+=(*(tail+i)-'0')*pow(10,strlen(tail)-i-1);
-                }
-            }
-            if(sum_temp>50||sum_flag==-127){
+            sum_temp=string_to_positive_num(tail);
+            if(sum_temp>50||sum_temp<0){
                 strcpy(master_bandwidth,"50");
             }
             else{
@@ -324,7 +288,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
@@ -392,7 +355,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
     printf("[ START: ] Start initializing the cluster ...\n");
     if(folder_exist_or_not(stackdir)!=0){
@@ -565,9 +527,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=MAXIMUM_ADD_NODE_NUMBER;
     }
-    if(node_num<MINUMUM_ADD_NODE_NUMBER){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
-        node_num=MINUMUM_ADD_NODE_NUMBER;
+    if(node_num<MINIMUM_ADD_NODE_NUMBER){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d is less than %d, reset to %d.\n" RESET_DISPLAY,node_num,MINIMUM_ADD_USER_NUNMBER,MINIMUM_ADD_NODE_NUMBER);
+        node_num=MINIMUM_ADD_NODE_NUMBER;
     }
     if(hpc_user_num>MAXIMUM_ADD_USER_NUMBER){
         printf(WARN_YELLO_BOLD "[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
@@ -594,7 +556,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return 3;
     }
     if(contain_or_not(zone_id,region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return 3;
     }
@@ -701,7 +663,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
     printf("|          Cluster ID:            %s\n",cluster_id);
     printf("|          Region:                %s\n",region_id);
-    printf("|          Avalability Zone:      %s\n",zone_id);
+    printf("|          Availability Zone:     %s\n",zone_id);
     printf("|          Number of Nodes:       %d\n",node_num);
     printf("|          Number of Users:       %d\n",hpc_user_num);
     printf("|          Master Node Instance:  %s\n",master_inst);
@@ -764,10 +726,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -800,6 +762,12 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         sprintf(string_temp,"comp%d",i+1);
         global_replace(filename_temp,"NUMBER",string_temp);
+        sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
+        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        /*for(j=0;j<hpc_user_num;j++){
+            sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
+            insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        }*/
     }
     sprintf(cmdline,"%s %s%shpc_stack.base %s%shpc_stack_base.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -829,7 +797,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog err archive" RESET_DISPLAY " for details.\n");
+            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -861,9 +829,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         }
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     }
-    file_p=fopen(currentstate,"r");
-    fgetline(file_p,master_address);
-    fclose(file_p);
+    get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(private_key_file,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     if(strcmp(region_flag,"cn_regions")==0){
         if(code_loc_flag_var==1){
@@ -969,11 +935,13 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
     for(i=0;i<hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,sshkey_folder);
+        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -985,7 +953,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
@@ -1045,7 +1012,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
     printf("[ START: ] Start initializing the cluster ...\n");
     if(folder_exist_or_not(stackdir)!=0){
@@ -1196,9 +1162,9 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=MAXIMUM_ADD_NODE_NUMBER;
     }
-    if(node_num<MINUMUM_ADD_NODE_NUMBER){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
-        node_num=MINUMUM_ADD_NODE_NUMBER;
+    if(node_num<MINIMUM_ADD_NODE_NUMBER){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d is less than %d, reset to %d.\n" RESET_DISPLAY,node_num, MINIMUM_ADD_NODE_NUMBER,MINIMUM_ADD_NODE_NUMBER);
+        node_num=MINIMUM_ADD_NODE_NUMBER;
     }
     if(hpc_user_num>MAXIMUM_ADD_USER_NUMBER){
         printf(WARN_YELLO_BOLD "[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
@@ -1217,7 +1183,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
  
     if(contain_or_not(zone_id,region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return 3;
     }
@@ -1276,7 +1242,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
     printf("|          Cluster ID:            %s\n",cluster_id);
     printf("|          Region:                %s\n",region_id);
-    printf("|          Avalability Zone:      %s\n",zone_id);
+    printf("|          Availability Zone:     %s\n",zone_id);
     printf("|          Number of Nodes:       %d\n",node_num);
     printf("|          Number of Users:       %d\n",hpc_user_num);
     printf("|          Master Node Instance:  %s\n",master_inst);
@@ -1341,10 +1307,10 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -1372,6 +1338,12 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         global_replace(filename_temp,"RUNNING_FLAG","true");
+        sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
+        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        /*for(j=0;j<hpc_user_num;j++){
+            sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
+            insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        }*/
     }
     sprintf(cmdline,"%s %s%shpc_stack.base %s%shpc_stack_base.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -1401,7 +1373,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog err archive" RESET_DISPLAY " for details.\n");
+            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -1422,9 +1394,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sleep(1);
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
-    file_p=fopen(currentstate,"r");
-    fgetline(file_p,master_address);
-    fclose(file_p);
+    get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(private_key_file,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     if(code_loc_flag_var==1){
         sprintf(cmdline,"%s %s%scos.conf %s%sbucket.conf %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -1506,11 +1476,13 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
     for(i=0;i<hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,sshkey_folder);
+        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1522,7 +1494,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char currentstate[FILENAME_LENGTH]="";
     char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
@@ -1582,7 +1553,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(currentstate,"%s%scurrentstate",stackdir,PATH_SLASH);
     sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
     printf("[ START: ] Start initializing the cluster ...\n");
     if(folder_exist_or_not(stackdir)!=0){
@@ -1732,9 +1702,9 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
         node_num=MAXIMUM_ADD_NODE_NUMBER;
     }
-    if(node_num<MINUMUM_ADD_NODE_NUMBER){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,node_num, MAXIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
-        node_num=MINUMUM_ADD_NODE_NUMBER;
+    if(node_num<MINIMUM_ADD_NODE_NUMBER){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The number of compute nodes %d is less than %d, reset to %d.\n" RESET_DISPLAY,node_num, MINIMUM_ADD_NODE_NUMBER,MINIMUM_ADD_NODE_NUMBER);
+        node_num=MINIMUM_ADD_NODE_NUMBER;
     }
     if(hpc_user_num>MAXIMUM_ADD_USER_NUMBER){
         printf(WARN_YELLO_BOLD "[ -WARN- ] The number of HPC users %d exceeds the maximum value %d, reset to %d.\n" RESET_DISPLAY,hpc_user_num,MAXIMUM_ADD_USER_NUMBER,MAXIMUM_ADD_USER_NUMBER);
@@ -1753,7 +1723,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         find_and_get(filename_temp,region_id,"","",1,region_id,"","",' ',1,NAS_Zone);
     }
     if(contain_or_not(zone_id,region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Avalability Zone ID doesn't match with Region ID, please double check.\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
         return 3;
     }
@@ -1812,7 +1782,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
     printf("|          Cluster ID:            %s\n",cluster_id);
     printf("|          Region:                %s\n",region_id);
-    printf("|          Avalability Zone:      %s\n",zone_id);
+    printf("|          Availability Zone:     %s\n",zone_id);
     printf("|          Number of Nodes:       %d\n",node_num);
     printf("|          Number of Users:       %d\n",hpc_user_num);
     printf("|          Master Node Instance:  %s\n",master_inst);
@@ -1871,10 +1841,10 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd}\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -1903,6 +1873,12 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
+        sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
+        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        /*for(j=0;j<hpc_user_num;j++){
+            sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
+            insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        }*/
     }
     sprintf(cmdline,"%s %s%shpc_stack.base %s%shpc_stack_base.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -1932,7 +1908,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
             sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog err archive" RESET_DISPLAY " for details.\n");
+            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -1956,9 +1932,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     find_and_get(filename_temp,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    file_p=fopen(currentstate,"r");
-    fgetline(file_p,master_address);
-    fclose(file_p);
+    get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(private_key_file,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     if(code_loc_flag_var==1){
         sprintf(cmdline,"%s %s%s.ossutilconfig %s%sbucket.conf %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -2039,11 +2013,13 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
     for(i=0;i<hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,sshkey_folder);
+        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);

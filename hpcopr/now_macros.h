@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0138"
+#define CORE_VERSION_CODE "0.2.0.0140"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -176,18 +176,23 @@
 #define USERNAME_LENGTH_MIN 4
 #define USER_PASSWORD_LENGTH_MAX 21
 #define CLUSTER_ID_LENGTH_MAX_PLUS 25
+#define DIR_LENGTH_SHORT 256
 #define DIR_LENGTH 384
+#define DIR_LENGTH_EXT 448
 #define FILENAME_LENGTH 512
+#define FILENAME_LENGTH_EXT 576
 #define LOCATION_LENGTH 384
 #define LOCATION_LENGTH_EXTENDED 512
 #define LINE_LENGTH 4096
 #define LINE_LENGTH_SHORT 256
 #define AKSK_LENGTH 128
 #define CONF_STRING_LENTH 64
-#define COMMAND_NUM 41
+#define COMMAND_NUM 44
 #define DATAMAN_COMMAND_NUM 17
-#define COMMAND_STRING_LENGTH_MAX 16
+#define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 12
+#define CMD_FLAG_NUM 21
+#define CMD_KWDS_NUM 30
 
 /* Usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"
@@ -204,9 +209,9 @@
 #define GENERAL_SLEEP_TIME 30
 
 /* You can modify the MAXIMUM_ADD_NODE_NUMBER to allow adding more than 16 nodes in one command */
-#define MAXIMUM_ADD_NODE_NUMBER 16
-#define MINUMUM_ADD_NODE_NUMBER 1
-#define MAXIMUM_ADD_USER_NUMBER 8
+#define MAXIMUM_ADD_NODE_NUMBER 32
+#define MINIMUM_ADD_NODE_NUMBER 1
+#define MAXIMUM_ADD_USER_NUMBER 32
 #define MINIMUM_ADD_USER_NUNMBER 2
 /* This macro guarantees the maximum waiting time for terraform running */
 #define MAXIMUM_WAIT_TIME 600
@@ -223,6 +228,8 @@
 #define DEFAULT_URL_SHELL_SCRIPTS "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/scripts/"
 #define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-crypto/"
 #define DEFAULT_INITUTILS_REPO_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/"
+
+#define TRANSFER_HEADER "EXPORTED AND TO BE IMPORTED BY HPC-NOW SERVICES"
 
 #define LOCATION_CONF_TOTAL_LINES 6
 #define LOCATION_LINES 5

@@ -29,6 +29,10 @@ if [[ -f /root/hostfile && -z $HPCMGR_SCRIPT_URL ]]; then
   echo -e "# $time_current [ FATAL: ] The critical environment var HPCMGR_SCRIPT_URL is not set. Init abort." >> ${logfile}
   exit 1
 fi
+if [ -z $SCRIPTS_URL_ROOT ]; then
+  echo -e "# $time_current [ FATAL: ] The critical environment var SCRIPTS_URL_ROOT is not set. Init abort." >> ${logfile}
+  exit 1
+fi
 url_utils=${INITUTILS_REPO_ROOT}
 #CLOUD_A: Alicloud
 #CLOUD_B: QCloud/TencentCloud
@@ -62,9 +66,9 @@ systemctl enable atd
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current SSH setup finished" >> ${logfile}
 source /etc/profile
-
+/bin/cp /etc/hosts /etc/hosts-clean
 mkdir -p /root/.cluster_secrets
-
+mkdir -p /root/.sshkey_deleted
 time1=$(date)
 echo -e  "\n${time1}" >> ${logfile}
 if [ ! -n "$1" ] || [ ! -n "$2" ] || [ ! -n "$3" ]; then
@@ -96,8 +100,16 @@ echo -e "source /etc/profile" >> /root/.bashrc
 if [ -f /root/hostfile ]; then
   mkdir -p /hpc_data/root_data
   chmod -R 750 /hpc_data/root_data
+  mkdir -p /hpc_data/public
+  chmod -R 777 /hpc_data/public
 fi
-########## Spread .ssh keys ###################
+
+mkdir -p /usr/hpc-now
+wget ${SCRIPTS_URL_ROOT}nowmon_agt.sh -O /usr/hpc-now/nowmon_agt.sh && chmod +x /usr/hpc-now/nowmon_agt.sh
+if [ -f /root/hostfile ]; then
+  wget ${SCRIPTS_URL_ROOT}nowmon_mgr.sh -O /usr/hpc-now/nowmon_mgr.sh && chmod +x /usr/hpc-now/nowmon_mgr.sh
+fi
+
 echo -e "# $time_current Spawning ssh keys." >> ${logfile}
 if [ -f /root/hostfile ]; then 
   cat /hpc_apps/compute_nodes_ip.txt | grep compute >> /root/hostfile
@@ -107,43 +119,33 @@ if [ -f /root/hostfile ]; then
   echo -e "export NODE_NUM=$number_of_nodes" >> /etc/profile
   source /etc/profile
 fi
-echo -e "# $time_current SSH Keys spreaded." >> ${logfile}
 
 ############ Add Users ####################
-for i in $( seq 1 $1 )
+echo -e "user1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+chmod 511 /usr/bin/passwd # Disable ordinary users to change its own password
+while read user_row
 do
-  id user${i}
-  if [ $? -eq 1 ]; then
-    useradd user${i}
-    mkdir -p /home/user${i} && chown -R user${i}:user${i} /home/user${i}
-    if [ -f /root/hostfile ]; then
-      if [ ! -f /root/user_secrets.txt ]; then
-        if [ $centos_version -eq 7 ]; then
-          openssl rand 8 -base64 -out /root/secret_user${i}.txt
-        else
-          openssl rand -base64 -out /root/secret_user${i}.txt 8
-        fi
-        cat /root/secret_user${i}.txt | passwd user${i} --stdin > /dev/null 2>&1
-        echo -n "username: user${i} " >> /root/user_secrets.txt
-        cat /root/secret_user${i}.txt >> /root/user_secrets.txt
-      else
-        cat /root/user_secrets.txt | grep -w user${i} | awk '{print $3}' | passwd user${i} --stdin > /dev/null 2>&1
-      fi
-      mkdir -p /home/user${i}/.ssh && rm -rf /home/user${i}/.ssh/*
-      ssh-keygen -t rsa -N '' -f /home/user${i}/.ssh/id_rsa -q
-      cat /home/user${i}/.ssh/id_rsa.pub >> /home/user${i}/.ssh/authorized_keys
-      cat /etc/now-pubkey.txt >> /home/user${i}/.ssh/authorized_keys
-      chown -R user${i}:user${i} /home/user${i}    
-      mkdir -p /hpc_data/user${i}_data
-      chmod -R 750 /hpc_data/user${i}_data
-      chown -R user${i}:user${i} /hpc_data/user${i}_data
-    fi
-    echo -e "source /etc/profile" >> /home/user${i}/.bashrc
-    time_current=`date "+%Y-%m-%d %H:%M:%S"`
-    echo -e "# $time_current user${i} added, password set. Please check /root/.user_secrets.txt." >> ${logfile}  
+  if [ -z $user_row ]; then
+    continue
   fi
-  echo -e "user1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-done
+  user_name=`echo $user_row | awk '{print $2}'`
+  user_passwd=`echo $user_row | awk '{print $3}'`
+  user_status=`echo $user_row | awk '{print $4}'`
+  useradd ${user_name} -m
+  mkdir -p /home/${user_name} && chown -R ${user_name}:${user_name} /home/${user_name}
+  echo -e "source /etc/profile" >> /home/${user_name}/.bashrc
+  if [ -f /root/hostfile ]; then
+    echo ${user_passwd} | passwd ${user_name} --stdin >> /dev/null 2>&1
+    mkdir -p /home/${user_name}/.ssh && rm -rf /home/${user_name}/.ssh/*
+    ssh-keygen -t rsa -N '' -f /home/${user_name}/.ssh/id_rsa -q
+    cat /home/${user_name}/.ssh/id_rsa.pub >> /home/${user_name}/.ssh/authorized_keys
+    cat /etc/now-pubkey.txt >> /home/${user_name}/.ssh/authorized_keys
+    mkdir -p /hpc_data/${user_name}_data
+    chmod -R 750 /hpc_data/${user_name}_data
+    chown -R ${user_name}:${user_name} /hpc_data/${user_name}_data
+  fi
+  chown -R ${user_name}:${user_name} /home/${user_name}
+done < /root/user_secrets.txt
 
 ########## stop firewall and SELinux ###############
 systemctl stop firewalld && systemctl disable firewalld
@@ -337,8 +339,6 @@ if [ -f /root/hostfile ]; then
   mkdir -p /opt/slurm/archive
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "# $time_current Slurm built and configured in path /opt/slurm." >> ${logfile}
-
-  /bin/cp /etc/hosts /etc/hosts-clean
   if [ $centos_version -eq 7 ]; then
     wget ${HPCMGR_SCRIPT_URL} -o /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr # This is a workaround. CentOS-7 will be deprecated in the future
   else
@@ -456,25 +456,28 @@ if [ -f /root/hostfile ]; then
   elif [ $cloud_flag = 'CLOUD_B' ]; then
     wget ${url_utils}shortcuts/cos.desktop -O /root/Desktop/cos.desktop
   fi
-  for i in $( seq 1 $1 )
+  while read user_row
   do
-    mkdir -p /home/user${i}/Desktop
-    ln -s /hpc_apps /home/user${i}/Desktop/
-    ln -s /hpc_data/user${i}_data /home/user${i}/Desktop/
-    cp /root/Desktop/*.desktop /home/user${i}/Desktop
-    if [ $cloud_flag = 'CLOUD_A' ]; then
-      cp /root/.ossutilconfig /home/user${i}/
-      chown -R user${i}:user${i} /home/user${i}/.ossutilconfig
-    elif [ $cloud_flag = 'CLOUD_B' ]; then
-      cp /root/.cos.conf /home/user${i}/
-      chown -R user${i}:user${i} /home/user${i}/.cos.conf
-    elif [ $cloud_flag = 'CLOUD_C' ]; then
-      cp /root/.s3cfg /home/user${i}/
-      chown -R user${i}:user${i} /home/user${i}/.s3cfg
+    if [ -z $user_row ]; then
+      continue
     fi
-    chown -R user${i}:user${i} /home/user${i}/Desktop
-  done
-  
+    user_name=`echo $user_row | awk '{print $2}'`
+    mkdir -p /home/${user_row}/Desktop
+    ln -s /hpc_apps /home/${user_row}/Desktop/
+    ln -s /hpc_data/${user_row}_data /home/${user_row}/Desktop/
+    cp /root/Desktop/*.desktop /home/${user_row}/Desktop
+    if [ -f /root/.cos.conf ] && [ ! -f /home/${user_row}/.cos.conf ]; then
+      cp /root/.cos.conf /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.cos.conf
+    fi
+    if [ -f /root/.ossutilconfig ] && [ ! -f /home/${user_row}/.ossutilconfig ]; then
+      cp /root/.ossutilconfig /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.ossutilconfig
+    fi
+    if [ -f /root/.s3cfg ] && [ ! -f /home/${user_row}/.s3cfg ]; then
+      cp /root/.s3cfg /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.s3cfg
+    fi
+    chown -R ${user_row}:${user_row} /home/${user_row}/Desktop
+  done < /root/.cluster_secrets/user_secrets.txt
+
   rm -rf /usr/share/backgrounds/*.png
   rm -rf /usr/share/backgrounds/*.jpg
   wget ${url_utils}pics/wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
@@ -545,5 +548,6 @@ fi
 echo -e "Cleaning Up ..."
 rm -rf /root/openmpi*
 echo -e "Installation Finished."
+echo "*/1 * * * *  /usr/hpc-now/nowmon_mgr.sh " >> /var/spool/cron/root
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Extra packages have been removed." >> ${logfile}

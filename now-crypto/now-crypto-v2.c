@@ -16,9 +16,8 @@
 #include <string.h>
 #include <math.h>
 
-#define CRYPTO_VERSION "0.2.1"
-#define ENCRYPTED_FILE_HEADER1 "---ENCRYPTED BY HPC-NOW SERVICES WITH LOCAL CRYPTO KEYFILE---"
-#define ENCRYPTED_FILE_HEADER2 "---VISIT: https://www.hpc-now.com MAILTO: info@hpc-now.com---"
+#define CRYPTO_VERSION "0.2.2"
+#define ENCRYPTED_FILE_HEADER "---ENCRYPTED BY HPC-NOW SERVICES WITH LOCAL CRYPTO KEYFILE"
 
 int file_encryption_decryption(char* option, char* orig_file, char* target_file, int encrypt_key){
     int real_key=((encrypt_key%1000*17+1301)%100+19)*17%1000;
@@ -27,17 +26,48 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
     int newc='\0';
     char ch='\0';
     int i=1,j=1;
+    int k=0;
+    char header_buffer[256]="";
+    char header_valid[256]="";
+    FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         return -1;
     }
-    FILE* file_p=fopen(orig_file,"r");
+    file_p=fopen(orig_file,"r");
     if(file_p==NULL){
         return -3;
     }
-    FILE* file_p_2=fopen(target_file,"w+");
-    if(file_p_2==NULL){
-        fclose(file_p);
-        return -5;
+    if(strcmp(option,"encrypt")==0){
+        file_p_2=fopen(target_file,"w+");
+        if(file_p_2==NULL){
+            fclose(file_p);
+            return -5;
+        }
+        fprintf(file_p_2,"%s v%s---\n",ENCRYPTED_FILE_HEADER,CRYPTO_VERSION);
+    }
+    else{
+        while((ch=fgetc(file_p))!='\n'&&k<256){
+            *(header_buffer+k)=ch;
+            k++;
+        }
+        sprintf(header_valid,"%s v%s---",ENCRYPTED_FILE_HEADER,CRYPTO_VERSION);
+        if(strncmp(header_buffer,header_valid,58)!=0){
+            if(*(header_buffer+0)<'0'||*(header_buffer+0)>'9'){
+                fclose(file_p);
+                return -7;
+            }
+            if(*(header_buffer+3)!=','&&*(header_buffer+4)!=','){
+                fclose(file_p);
+                return -7;
+            }
+            file_p=fopen(orig_file,"r");
+        }
+        file_p_2=fopen(target_file,"w+");
+        if(file_p_2==NULL){
+            fclose(file_p);
+            return -5;
+        }
     }
     while(!feof(file_p)){
         if(strcmp(option,"encrypt")==0){
@@ -104,11 +134,11 @@ int main(int argc,char *argv[]){
     int run_flag=0;
     if(argc!=5){
         printf("Error: Not Enough parameters.\n"); 
-        return -1;
+        return 1;
     }
     if(md5convert(argv[4])==-1){
         printf("Error: Not a valid crypto-key.\n");
-        return -3;
+        return 3;
     }
     run_flag=file_encryption_decryption(argv[1],argv[2],argv[3],md5convert(argv[4]));
     if(run_flag==-1){
@@ -117,11 +147,15 @@ int main(int argc,char *argv[]){
     }
     else if(run_flag==-3){
         printf("Error: Failed to open the original file.\n");
-        return 1;
+        return 7;
     }
     else if(run_flag==-5){
         printf("Error: Cannot create the target file.\n");
-        return 3;
+        return 9;
+    }
+    else if(run_flag==-7){
+        printf("Error: Not a HPC-NOW encrypted file.\n");
+        return 11;
     }
     else{
         printf("Done: %d Characters.\n",run_flag);

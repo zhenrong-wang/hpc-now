@@ -9,7 +9,7 @@
 #ifndef INSTALLER_H
 #define INSTALLER_H
 
-#define INSTALLER_VERSION_CODE "0.2.0.0121"
+#define INSTALLER_VERSION_CODE "0.2.0.0122"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/hpcopr-0.2.1/"
 
 int check_internet_installer(void);
@@ -22,7 +22,6 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
 int uninstall_services(void);
 int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int crypto_loc_flag, char* now_crypto_loc);
 int valid_loc_format_or_not(char* loc_string);
-int split_parameter(char* param, char* param_head, char* param_tail);
 int get_valid_verlist(void);
 int version_valid(char* hpcopr_ver);
 

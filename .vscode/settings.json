@@ -20,7 +20,8 @@
         "time_process.h": "c",
         "components.h": "c",
         "prereq_check.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "cmath": "c"
     },
     "C_Cpp.dimInactiveRegions": true
 }
