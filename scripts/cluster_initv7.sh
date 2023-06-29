@@ -348,9 +348,14 @@ if [ -f /root/hostfile ]; then
   if [ $cloud_flag = 'CLOUD_A' ]; then
     sudo -v ; curl https://gosspublic.alicdn.com/ossutil/install.sh | sudo bash
   elif [ $cloud_flag = 'CLOUD_B' ]; then
-    pip install coscmd
+    #pip install coscmd
+    curl https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-linux -o /usr/bin/coscli
+    chmod +x /usr/bin/coscli
   elif [ $cloud_flag = 'CLOUD_C' ]; then 
-    yum -y install s3cmd
+    #yum -y install s3cmd
+    curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscli.zip
+    unzip -o /tmp/awscli.zip -d /tmp
+    /tmp/aws/install 
   fi
 fi
 
@@ -466,15 +471,15 @@ if [ -f /root/hostfile ]; then
     ln -s /hpc_apps /home/${user_row}/Desktop/
     ln -s /hpc_data/${user_row}_data /home/${user_row}/Desktop/
     cp /root/Desktop/*.desktop /home/${user_row}/Desktop
-    if [ -f /root/.cos.conf ] && [ ! -f /home/${user_row}/.cos.conf ]; then
-      cp /root/.cos.conf /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.cos.conf
-    fi
-    if [ -f /root/.ossutilconfig ] && [ ! -f /home/${user_row}/.ossutilconfig ]; then
-      cp /root/.ossutilconfig /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.ossutilconfig
-    fi
-    if [ -f /root/.s3cfg ] && [ ! -f /home/${user_row}/.s3cfg ]; then
-      cp /root/.s3cfg /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.s3cfg
-    fi
+    #if [ -f /root/.cos.conf ] && [ ! -f /home/${user_row}/.cos.conf ]; then
+    #  cp /root/.cos.conf /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.cos.conf
+    #fi
+    #if [ -f /root/.ossutilconfig ] && [ ! -f /home/${user_row}/.ossutilconfig ]; then
+    #  cp /root/.ossutilconfig /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.ossutilconfig
+    #fi
+    #if [ -f /root/.s3cfg ] && [ ! -f /home/${user_row}/.s3cfg ]; then
+    #  cp /root/.s3cfg /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.s3cfg
+    #fi
     chown -R ${user_row}:${user_row} /home/${user_row}/Desktop
   done < /root/.cluster_secrets/user_secrets.txt
 

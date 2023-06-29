@@ -94,14 +94,14 @@ int get_cloud_flag(char* workdir, char* cloud_flag){
     return 0;
 }
 
-int decrypt_get_bucket_conf(char* workdir, char* crypto_keyfile, char* bucket_conf){
+int decrypt_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_info){
     char vaultdir[DIR_LENGTH]="";
     char md5sum[64]="";
     get_crypto_key(crypto_keyfile,md5sum);
     create_and_get_vaultdir(workdir,vaultdir);
     char cmdline[CMDLINE_LENGTH]="";
-    sprintf(bucket_conf,"%s%sbucket.conf",vaultdir,PATH_SLASH);
-    sprintf(cmdline,"%s decrypt %s%sbucket.conf.tmp %s%sbucket.conf %s %s",NOW_CRYPTO_EXEC,vaultdir,PATH_SLASH,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+    sprintf(bucket_info,"%s%sbucket_info.txt.tmp",vaultdir,PATH_SLASH);
+    sprintf(cmdline,"%s decrypt %s%sbucket_info.txt.tmp %s%sbucket_info.txt %s %s",NOW_CRYPTO_EXEC,vaultdir,PATH_SLASH,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     return system(cmdline);
 }
 
@@ -479,8 +479,8 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
-    sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+//    sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
+//    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);

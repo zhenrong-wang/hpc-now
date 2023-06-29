@@ -68,17 +68,17 @@ function add_a_user() {
   done
 }
 
-function bucket_conf() {
-  if [ -f /root/.cos.conf ] && [ ! -f /home/$1/.cos.conf ]; then
-    cp /root/.cos.conf /home/$1/ && chown -R $1:$1 /home/$1/.cos.conf
-  fi
-  if [ -f /root/.ossutilconfig ] && [ ! -f /home/$1/.ossutilconfig ]; then
-    cp /root/.ossutilconfig /home/$1/ && chown -R $1:$1 /home/$1/.ossutilconfig
-  fi
-  if [ -f /root/.s3cfg ] && [ ! -f /home/$1/.s3cfg ]; then
-    cp /root/.s3cfg /home/$1/ && chown -R $1:$1 /home/$1/.s3cfg
-  fi
-}
+#function bucket_conf() {
+#  if [ -f /root/.cos.conf ] && [ ! -f /home/$1/.cos.conf ]; then
+#    cp /root/.cos.conf /home/$1/ && chown -R $1:$1 /home/$1/.cos.conf
+#  fi
+#  if [ -f /root/.ossutilconfig ] && [ ! -f /home/$1/.ossutilconfig ]; then
+#    cp /root/.ossutilconfig /home/$1/ && chown -R $1:$1 /home/$1/.ossutilconfig
+#  fi
+#  if [ -f /root/.s3cfg ] && [ ! -f /home/$1/.s3cfg ]; then
+#    cp /root/.s3cfg /home/$1/ && chown -R $1:$1 /home/$1/.s3cfg
+#  fi
+#}
 
 if [ ! -n "$1" ]; then
   help_info
@@ -157,7 +157,7 @@ if [ $1 = 'users' ]; then
           rm -rf /root/.cluster_secrets/secret_$3.txt
         fi
         add_a_user $3
-        bucket_conf $3
+        #bucket_conf $3
         echo "y" | sacctmgr add user $3 account=hpc_users
         exit 0
       fi
@@ -223,7 +223,7 @@ if [ $1 = 'users' ]; then
         add_a_user $user_name
       fi
       echo "${user_passwd}" | passwd $user_name --stdin > /dev/null 2>&1
-      bucket_conf $user_name
+      #bucket_conf $user_name
       if [ -z $user_status ] || [ $user_status = 'ENABLED' ]; then
         echo "y" | sacctmgr add user $user_name account=hpc_users
       else

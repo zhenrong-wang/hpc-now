@@ -472,6 +472,10 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
 //        printf("\n%d\n",get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk));
         return -1;
     }
+    rf_flag_parser(rflag,fflag,real_rflag,real_fflag);
+    if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
+        strcpy(real_fflag,"");
+    }
     if(strcmp(cmd_type,"rput")==0){
         direct_path_check(source_path,hpc_user,real_source_path);
         bucket_path_check(dest_path,hpc_user,real_dest_path);
@@ -480,49 +484,42 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
         bucket_path_check(source_path,hpc_user,real_source_path);
         direct_path_check(dest_path,hpc_user,real_dest_path);
     }
-    rf_flag_parser(rflag,fflag,real_rflag,real_fflag);
-    if(strlen(real_rflag)!=0&&strlen(real_fflag)!=0){
-        strcpy(real_rf_flag,"-rf");
-    }
-    else if(strlen(real_rflag)!=0&&strlen(real_fflag)==0){
-        strcpy(real_rf_flag,"-r");
-    }
-    else if(strlen(real_rflag)==0&&strlen(real_fflag)!=0){
-        strcpy(real_rf_flag,"-f");
-    }
-    else{
-        strcpy(real_rf_flag,"");
-    }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"ossutil cp %s%s %s %s %s",bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"%s -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"ossutil cp %s %s%s %s %s",real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"%s -e oss-%s.aliyuncs.com -i %s -k %s cp %s %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"coscmd download %s %s %s",real_rf_flag,real_source_path,real_dest_path);
+            sprintf(remote_commands,"%s -e cos.%s.myqcloud.com -i %s -k %s cp %s%s %s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"coscmd upload %s %s %s",real_rf_flag,real_source_path,real_dest_path);
+            sprintf(remote_commands,"%s -e cos.%s.myqcloud.com -i %s -k %s cp %s %s%s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else{
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"s3cmd get %s%s %s %s %s",bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 cp %s%s %s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"s3cmd put %s %s%s %s %s",real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 cp %s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
 //    printf("%s ---\n",remote_commands);
     run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,0,1);
     if(run_flag!=0){
+        if(strcmp(cloud_flag,"CLOUD_C")==0){
+            unset_aws_bucket_envs();
+        }
         return 1;
     }
     else{
+        if(strcmp(cloud_flag,"CLOUD_C")==0){
+            unset_aws_bucket_envs();
+        }
         return 0;
     }
 }
