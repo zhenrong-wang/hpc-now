@@ -129,13 +129,13 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
     }
     else{
         if(strcmp(cmd_type,"copy")==0){
-            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 cp %s%s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 cp %s%s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else if(strcmp(cmd_type,"put")==0){
-            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 cp %s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 cp %s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 cp %s%s %s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
+            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 cp %s%s %s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
         }
     }
     if(system(cmdline)!=0){
@@ -193,10 +193,10 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
     }
     else{
         if(strcmp(cmd_type,"delete")==0){
-            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 rm %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag);
+            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 rm %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && %s s3 ls %s%s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag);
+            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 ls %s%s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag);
         }
     }
     if(system(cmdline)!=0){
@@ -501,10 +501,10 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
     }
     else{
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"export AWS_ACCESS_KEY_ID=%s && export AWS_SECRET_ACCESS_KEY=%s && export AWS_DEFAULT_REGION=%s && aws s3 cp %s%s %s %s %s",bucket_ak,bucket_sk,region_id,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"export AWS_ACCESS_KEY_ID=%s&&export AWS_SECRET_ACCESS_KEY=%s&&export AWS_DEFAULT_REGION=%s&&aws s3 cp %s%s %s %s %s",bucket_ak,bucket_sk,region_id,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"export AWS_ACCESS_KEY_ID=%s && export AWS_SECRET_ACCESS_KEY=%s && export AWS_DEFAULT_REGION=%s && aws s3 cp %s %s%s %s %s",bucket_ak,bucket_sk,region_id,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"export AWS_ACCESS_KEY_ID=%s&&export AWS_SECRET_ACCESS_KEY=%s&&export AWS_DEFAULT_REGION=%s&&aws s3 cp %s %s%s %s %s",bucket_ak,bucket_sk,region_id,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
 //    printf("%s ---\n",remote_commands);
