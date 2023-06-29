@@ -501,24 +501,18 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
     }
     else{
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && aws s3 cp %s%s %s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"export AWS_ACCESS_KEY_ID=%s && export AWS_SECRET_ACCESS_KEY=%s && export AWS_DEFAULT_REGION=%s && aws s3 cp %s%s %s %s %s",bucket_ak,bucket_sk,region_id,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"%s AWS_ACCESS_KEY_ID=%s && %s AWS_SECRET_ACCESS_KEY=%s && %s AWS_DEFAULT_REGION=%s && aws s3 cp %s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"export AWS_ACCESS_KEY_ID=%s && export AWS_SECRET_ACCESS_KEY=%s && export AWS_DEFAULT_REGION=%s && aws s3 cp %s %s%s %s %s",bucket_ak,bucket_sk,region_id,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
 //    printf("%s ---\n",remote_commands);
     run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,0,1);
     if(run_flag!=0){
-        if(strcmp(cloud_flag,"CLOUD_C")==0){
-            unset_aws_bucket_envs();
-        }
         return 1;
     }
     else{
-        if(strcmp(cloud_flag,"CLOUD_C")==0){
-            unset_aws_bucket_envs();
-        }
         return 0;
     }
 }
