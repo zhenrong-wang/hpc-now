@@ -37,7 +37,8 @@ void unset_aws_bucket_envs(void){
 }
 
 void bucket_path_check(char* path_string, char* hpc_user, char* real_path){
-    if(*(path_string+0)!='/'){
+    char* split_ch=PATH_SLASH;
+    if(*(path_string+0)!=*(split_ch+0)){
         if(strcmp(hpc_user,"root")==0){
             sprintf(real_path,"/%s",path_string);
         }
