@@ -1045,7 +1045,7 @@ int main(int argc, char* argv[]){
             }
         }
         else{
-            if(cmd_keyword_check(argc,argv,"--t",target_path)!=0){
+            if(cmd_keyword_check(argc,argv,"-t",target_path)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a target path for this command.\n");
                 if(strcmp(data_cmd,"list")!=0&&strcmp(data_cmd,"delete")!=0){
                     printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
