@@ -463,7 +463,6 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
     char real_source_path[DIR_LENGTH]="";
     char real_dest_path[DIR_LENGTH]="";
     char remote_commands[CMDLINE_LENGTH]="";
-    char real_rf_flag[4]="";
     char bucket_address[32]="";
     char region_id[32]="";
     char bucket_ak[128]="";
