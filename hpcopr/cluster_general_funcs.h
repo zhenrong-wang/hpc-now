@@ -13,7 +13,7 @@ int cluster_role_detect(char* workdir, char* cluster_role);
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag);
 void create_and_get_stackdir(char* workdir, char* stackdir);
 void get_latest_hosts(char* stackdir, char* hostfile_latest);
-int decrypt_get_bucket_conf(char* workdir, char* crypto_keyfile, char* bucket_conf);
+int decrypt_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_info);
 int get_cloud_flag(char* workdir, char* cloud_flag);
 int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option, char* recursive_flag, int silent_flag);
 int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char* sshkey_dir);

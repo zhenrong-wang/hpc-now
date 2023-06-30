@@ -324,7 +324,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
-    char private_key_file[FILENAME_LENGTH]="";
     int number_of_vcpu=0;
     int cpu_core_num=0;
     int threads;
@@ -830,55 +829,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     }
     get_state_value(workdir,"master_public_ip:",master_address);
-    sprintf(private_key_file,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    if(strcmp(region_flag,"cn_regions")==0){
-        if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%ss3cfg.txt %s%sbucket.conf %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        }
-        else{
-            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s%sbucket.conf",url_aws_root,vaultdir,PATH_SLASH);
-        }
-        if(system(cmdline)!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n" RESET_DISPLAY);
-        }
-        else{
-            sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
-            sprintf(string_temp,"s3.%s.amazonaws.com.cn",region_id);
-            global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
-            global_replace(filename_temp,"BLANK_SECRET_KEY_ID",bucket_sk);
-            global_replace(filename_temp,"DEFAULT_REGION",region_id);
-            global_replace(filename_temp,"DEFAULT_ENDPOINT",string_temp);
-            sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.s3cfg %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=s3://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-        }
-    }
-    else{
-        if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%ss3cfg.txt %s%sbucket.conf %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        }
-        else{
-            sprintf(cmdline,"curl %ss3cfg.txt -s -o %s%sbucket.conf",url_aws_root,vaultdir,PATH_SLASH);
-        }
-        if(system(cmdline)!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n" RESET_DISPLAY);
-        }
-        else{
-            sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
-            strcpy(string_temp,"s3.amazonaws.com");
-            global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
-            global_replace(filename_temp,"BLANK_SECRET_KEY_ID",bucket_sk);
-            global_replace(filename_temp,"DEFAULT_REGION",region_id);
-            global_replace(filename_temp,"DEFAULT_ENDPOINT",string_temp);
-            sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.s3cfg %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=s3://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-        }
-    }
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/usr/hpc-now/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: s3:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -985,7 +938,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
-    char private_key_file[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
@@ -1395,31 +1347,9 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     get_state_value(workdir,"master_public_ip:",master_address);
-    sprintf(private_key_file,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%scos.conf %s%sbucket.conf %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %scos.conf -s -o %s%sbucket.conf",url_qcloud_root,vaultdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n" RESET_DISPLAY);
-    }
-    else{
-        sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
-        global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
-        global_replace(filename_temp,"BLANK_SECRET_KEY",bucket_sk);
-        global_replace(filename_temp,"DEFAULT_REGION",region_id);
-        global_replace(filename_temp,"BLANK_BUCKET_NAME",bucket_id);
-        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.cos.conf %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.cos.conf\" %s",private_key_file,master_address,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=cos://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/usr/hpc-now/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: cos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -1526,7 +1456,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
-    char private_key_file[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
@@ -1933,30 +1862,9 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     get_state_value(workdir,"master_public_ip:",master_address);
-    sprintf(private_key_file,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%s.ossutilconfig %s%sbucket.conf %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %s.ossutilconfig -s -o %s%sbucket.conf",url_alicloud_root,vaultdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get the bucket configuration file. The bucket may not work.\n" RESET_DISPLAY);
-    }
-    else{
-        sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
-        global_replace(filename_temp,"BLANK_ACCESS_KEY",bucket_ak);
-        global_replace(filename_temp,"BLANK_SECRET_KEY",bucket_sk);
-        global_replace(filename_temp,"DEFAULT_REGION",region_id);
-        sprintf(cmdline,"scp -o StrictHostKeyChecking=no -i %s %s root@%s:/root/.ossutilconfig %s",private_key_file,filename_temp,master_address,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"chmod 644 /root/.ossutilconfig\" %s",private_key_file,master_address,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo -e \"export BUCKET=oss://%s\" >> /etc/profile\" %s",private_key_file,master_address,bucket_id,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/usr/hpc-now/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: oss:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);

@@ -1813,7 +1813,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     char cloud_flag[16]="";
     char node_name[16]="";
     char doubleconfirm[64]="";
-    char bucket_conf[FILENAME_LENGTH]="";
+    char bucket_info[FILENAME_LENGTH]="";
     char bucket_id[32]="";
     char cluster_name[64]="";
     char username_temp[64]="";
@@ -1937,17 +1937,15 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    decrypt_get_bucket_conf(workdir,crypto_keyfile,bucket_conf);
+    decrypt_bucket_info(workdir,crypto_keyfile,bucket_info);
+    remote_copy(workdir,sshkey_folder,bucket_info,"/usr/hpc-now/.bucket.info","root","put","",0);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
-        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.ossutilconfig","root","put","",0);
         sprintf(remote_commands,"echo -e \"export BUCKET=oss://%s\" >> /etc/profile",bucket_id);
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.cos.conf","root","put","",0);
         sprintf(remote_commands,"echo -e \"export BUCKET=cos://%s\" >> /etc/profile",bucket_id);
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        remote_copy(workdir,sshkey_folder,bucket_conf,"/root/.s3cfg","root","put","",0);
         sprintf(remote_commands,"echo -e \"export BUCKET=s3://%s\" >> /etc/profile",bucket_id);
     }
     remote_exec_general(workdir,sshkey_folder,"root",remote_commands,0,0);
@@ -1955,7 +1953,6 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
     sync_statefile(workdir,sshkey_folder);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rebuilding the cluster users now ...\n");
-    
     file_p=fopen(user_passwords,"r");
     get_cluster_name(cluster_name,workdir);
     get_user_sshkey(cluster_name,"root","ENABLED",sshkey_folder);
