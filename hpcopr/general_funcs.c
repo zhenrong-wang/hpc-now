@@ -563,13 +563,13 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
         return -1;
     }
     char single_line[LINE_LENGTH]="";
+    char get_string_buffer[LINE_LENGTH_SHORT]="";
     int flag_primary1=0,flag_primary2=0,flag_primary3=0;
     int flag_primary=1;
-    int flag_eof_or_not=0;
     int flag1=0,flag2=0,flag3=0;
     int i;
-    do{
-        flag_eof_or_not=fgetline(file_p,single_line);
+    while(flag_primary!=0&&!feof(file_p)){
+        fgetline(file_p,single_line);
         if(strlen(findkey_primary1)!=0){
             flag_primary1=contain_or_not(single_line,findkey_primary1);
         }
@@ -590,13 +590,14 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
             flag_primary3=0;
             continue;
         }
-    }while(flag_primary!=0&&flag_eof_or_not==0);
-    if(flag_eof_or_not==1){
+    }
+    if(feof(file_p)){
         fclose(file_p);
+        strcpy(get_string,"");
         return 1;
     }
     i=0;
-    while(flag_eof_or_not!=1&&i<plus_line_num){
+    while(!feof(file_p)&&i<plus_line_num){
         if(strlen(findkey1)!=0){
             flag1=contain_or_not(single_line,findkey1);
         }
@@ -611,12 +612,14 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
             flag2=0;
             flag3=0;
             i++;
-            flag_eof_or_not=fgetline(file_p,single_line);
+            fgetline(file_p,single_line);
             continue;
         }
         else{
             fclose(file_p);
-            return get_seq_string(single_line,split_ch,string_seq_num,get_string);
+            get_seq_string(single_line,split_ch,string_seq_num,get_string_buffer);
+            strcpy(get_string,get_string_buffer);
+            return 0;
         }
     }
     strcpy(get_string,"");

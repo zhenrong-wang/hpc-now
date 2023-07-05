@@ -1137,7 +1137,6 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     char password[32]="";
     char enable_flag[16]="";
     char master_address[32]="";
-    char root_password[PASSWORD_STRING_LENGTH]="";
     char bucket_address[32]="";
     char bucket_ak[128]="";
     char bucket_sk[128]="";
@@ -1177,8 +1176,8 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
             printf(WARN_YELLO_BOLD "[ -WARN- ] You are not an operator or administrator.\n" RESET_DISPLAY);
         }
         else{
-            find_and_get(filename_temp,"Master Node Root Password:","","",1,"Master Node Root Password:","","",':',2,root_password);
-            printf(FATAL_RED_BOLD "| Root Password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " ! DO NOT DISCLOSE TO ANYONE !\n" RESET_DISPLAY,root_password);
+            find_and_get(filename_temp,"Master Node Root Password:","","",1,"Master Node Root Password:","","",':',2,password);
+            printf(FATAL_RED_BOLD "| Root Password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " ! DO NOT DISCLOSE TO ANYONE !\n" RESET_DISPLAY,password);
         }
     }
     
