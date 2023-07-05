@@ -475,11 +475,11 @@ if [ -f /root/hostfile ]; then
       continue
     fi
     user_name=`echo $user_row | awk '{print $2}'`
-    mkdir -p /home/${user_row}/Desktop
-    ln -s /hpc_apps /home/${user_row}/Desktop/
-    ln -s /hpc_data/${user_row}_data /home/${user_row}/Desktop/
-    cp /root/Desktop/*.desktop /home/${user_row}/Desktop
-    chown -R ${user_row}:${user_row} /home/${user_row}/Desktop
+    mkdir -p /home/${user_name}/Desktop
+    ln -s /hpc_apps /home/${user_name}/Desktop/
+    ln -s /hpc_data/${user_name}_data /home/${user_name}/Desktop/
+    cp /root/Desktop/*.desktop /home/${user_name}/Desktop
+    chown -R ${user_name}:${user_name} /home/${user_name}/Desktop
   done < /root/.cluster_secrets/user_secrets.txt
 
   rm -rf /usr/share/backgrounds/*.png
