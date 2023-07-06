@@ -7,8 +7,6 @@
 # Bug report: info@hpc-now.com
 
 #arg1: # of users to be created
-#arg2: db - whether reinstall mariadb or not
-#arg3: mpi - whether install openmpi or not
 
 # Define URL prefixes for the 'wget' command
 
@@ -94,13 +92,12 @@ fi
 echo -e "# Plan to create $1 users."
 echo -e "# Plan create $1 users." >> ${logfile} 
 
-######### define something ##############
 yum -y install openssl openssl-devel wget unzip curl make perl
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 SELINUX_STATUS=`getenforce`
 APP_ROOT="/hpc_apps"
 echo -e "source /etc/profile" >> /root/.bashrc
-########## root ssh-passwd-free among nodes ############
+
 if [ -f /root/hostfile ]; then
   mkdir -p /hpc_data/root_data
   chmod -R 750 /hpc_data/root_data
@@ -124,7 +121,15 @@ if [ -f /root/hostfile ]; then
   source /etc/profile
 fi
 
-############ Add Users ####################
+# Add user slurm 
+id -u slurm
+if [ $? -ne 0 ]; then
+  useradd slurm
+fi
+time_current=`date "+%Y-%m-%d %H:%M:%S"`
+echo -e "# $time_current User slurm added." >> ${logfile}
+
+# Add System Users 
 echo -e "user1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 sed -i 's/env_reset/!env_reset/g' /etc/sudoers
 sed -i 's/Defaults    secure_path/#Defaults    secure_path/g' /etc/sudoers # Granted sudo permissions to user1
@@ -153,7 +158,7 @@ do
   chown -R ${user_name}:${user_name} /home/${user_name}
 done < /root/user_secrets.txt
 
-########## stop firewall and SELinux ###############
+# stop firewall and SELinux 
 systemctl stop firewalld && systemctl disable firewalld
 if [ $SELINUX_STATUS != Disabled ]; then
   sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
@@ -161,7 +166,6 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current SELINUX Disabled." >> ${logfile}
 
-######### Yum some packages ############
 # The update step really takes time, trying to avoid it.
 if [ $cloud_flag = 'CLOUD_B' ]; then
   yum -y update
@@ -183,7 +187,7 @@ yum -y install gtk2 gtk2-devel python python3 gcc-c++ gcc-gfortran htop sshpass
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Utils installed." >> ${logfile}
 
-########## Build munge #################
+# Build munge
 yum -y install rpm-build bzip2-devel zlib-devel m4 libxml2-devel
 cd /root
 if ! command -v munge >/dev/null 2>&1; then
@@ -200,15 +204,7 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`  
 echo -e "# $time_current Munge installed." >> ${logfile}
 
-########## Add user slurm ################
-id -u slurm
-if [ $? -ne 0 ]; then
-  useradd slurm
-fi
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "# $time_current User slurm added." >> ${logfile}
-
-############## Re-Install mariadb Be careful! ########################
+# Re-Install mariadb Be careful!
 if [ -f /root/hostfile ]; then
   yum remove -y `rpm -aq mariadb*`
   rm -rf /etc/my.cnf
@@ -269,8 +265,8 @@ if [ -f /root/hostfile ]; then
     mv /root/mariadb_slurm_acct_db_pw.txt /root/.cluster_secrets/
   fi
 fi
-########### Move sensative file to .cluster_secrets folder #############
 
+# Move sensative file to .cluster_secrets folder 
 rm -rf /root/secret_user*
 mv /root/user_secrets.txt /root/.cluster_secrets/
 mv /root/master_passwd.txt /root/.cluster_secrets/
@@ -280,7 +276,7 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "ALL the secrets are stored in the directory /root/.cluster_secrets/ ."
 echo -e "# $time_current ALL the secrets are stored in the directory /root/.cluster_secrets/ ." >> ${logfile}
 
-########### Change owners of some directories ################
+# Change owners of directories 
 mkdir -p /run/munge
 chown -R slurm:slurm /run/munge
 chown -R slurm:slurm /etc/munge
@@ -288,13 +284,13 @@ chown -R slurm:slurm /var/run/munge
 chown -R slurm:slurm /var/lib/munge
 chown -R slurm:slurm /var/log/munge
 
-########## munge #################
+# munge 
 if [ -f /root/hostfile ]; then
   mungekey
   chown -R slurm:slurm /etc/munge/munge.key
 fi
 
-########### Build SLURM #####################
+# Build SLURM 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Started building Slurm 21.08.8." >> ${logfile}
 cd /root
@@ -365,7 +361,7 @@ if [ -f /root/hostfile ]; then
   fi
 fi
 
-############## install environment-module ######################
+# install environment-module
 cd /root
 if ! command -v module >/dev/null 2>&1; then
   yum install tcl-devel -y
@@ -383,7 +379,7 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`  
 echo -e "# $time_current Environment Module has been installed." >> ${logfile}
 
-######### Install Desktop Env-NECESSARY- ##############
+# Install Desktop Env-NECESSARY
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 if [ -f /root/hostfile ]; then
   echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
@@ -459,7 +455,7 @@ if [ -f /root/hostfile ]; then
   echo -e "# $time_current Desktop Environment and RDP has been installed." >> ${logfile}
 fi
 
-####################### Download scripts & Desktop shortcuts ##########################
+# Download scripts & Desktop shortcuts 
 if [ -f /root/hostfile ]; then
   mkdir -p /root/Desktop
   ln -s /hpc_apps /root/Desktop/
@@ -506,7 +502,6 @@ if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete
 fi
 
-#############################  
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Necassary scripts has been downloaded to /root." >> ${logfile}
 rm -rf /root/slurm*
