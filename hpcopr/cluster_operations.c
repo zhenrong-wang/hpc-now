@@ -1976,6 +1976,39 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     return 0;
 }
 
+int switch_cluster_payment(char* cluster_name, char* new_payment_method){
+    char workdir[DIR_LENGTH]="";
+    char stackdir[DIR_LENGTH]="";
+    char cloud_flag[32]="";
+    char curr_payment_method[8]="";
+    char statefile[FILENAME_LENGTH]="";
+    if(cluster_name_check(cluster_name)!=-127){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " already exists in the registry.\n",cluster_name);
+        printf("|          Please check and retry. Exit now.\n" RESET_DISPLAY);
+        return 1;
+    }
+    get_workdir(workdir,cluster_name);
+    get_cloud_flag(workdir,cloud_flag);
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+        return -5;
+    }
+    if(strcmp(new_payment_method,"od")!=0&&strcmp(new_payment_method,"month")!=0){
+        return -3;
+    }
+//    if(find_multi_keys())
+    
+    if(strcmp(cloud_flag,"CLOUD_C")==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] This operation is not valid for AWS. Exit now." RESET_DISPLAY "\n");
+        return -1;
+    }
+    else if(strcmp(cloud_flag,"CLOUD_A")==0){
+        
+    }
+    else{
+
+    }
+}
+
 int view_run_log(char* workdir, char* stream, char* run_option, char* view_option, char* export_dest){
     char logfile[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";

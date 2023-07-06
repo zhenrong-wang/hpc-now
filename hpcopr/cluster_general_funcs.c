@@ -540,6 +540,7 @@ int getstate(char* workdir, char* crypto_filename){
     char ht_flag[16]="";
     char string_temp[64]="";
     char string_temp2[64]="";
+    char pay_method[8]="";
     char md5sum[64]="";
     int node_num_gs;
     int node_num_on_gs=0;
@@ -595,6 +596,12 @@ int getstate(char* workdir, char* crypto_filename){
     }
     else{
         strcpy(ht_flag,"hton");
+    }
+    if(find_multi_keys(compute_template,"instance_charge_type = PrePaid","","","","")==0||find_multi_keys(compute_template,"instance_charge_type = PREPAID","","","","")==0){
+        strcpy(pay_method,"month");
+    }
+    else{
+        strcpy(pay_method,"od");
     }
     fprintf(file_p_statefile,"---GENERATED AND MAINTAINED BY HPC-NOW SERVICES INTERNALLY---\n");
     fprintf(file_p_statefile,"master_config: %s\ncompute_config: %s\nht_flag: %s\n",master_config,compute_config,ht_flag);
@@ -662,6 +669,7 @@ int getstate(char* workdir, char* crypto_filename){
     fprintf(file_p_statefile,"total_compute_nodes: %d\n",node_num_gs);
     fprintf(file_p_statefile,"running_compute_nodes: %d\n",node_num_on_gs);
     fprintf(file_p_statefile,"down_compute_nodes: %d\n",node_num_gs-node_num_on_gs);
+    fprintf(file_p_statefile,"payment_method: %s\n",pay_method);
     fclose(file_p_statefile);
     fclose(file_p_hostfile);
     fclose(file_p_tfstate);

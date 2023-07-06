@@ -166,13 +166,13 @@ echo -e "# $time_current SELINUX Disabled." >> ${logfile}
 if [ $cloud_flag = 'CLOUD_B' ]; then
   yum -y update
   yum -y install https://mirrors.cloud.tencent.com/epel/epel-release-latest-9.noarch.rpm
-  yum -y install https://mirrors.cloud.tencent.com/epel/epel-next-release-latest-9.noarch.rpm
+#  yum -y install https://mirrors.cloud.tencent.com/epel/epel-next-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.cloud.tencent.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 elif [ $cloud_flag = 'CLOUD_A' ]; then
   yum -y update
   yum -y install https://mirrors.aliyun.com/epel/epel-release-latest-9.noarch.rpm
-  yum -y install https://mirrors.aliyun.com/epel/epel-next-release-latest-9.noarch.rpm
+#  yum -y install https://mirrors.aliyun.com/epel/epel-next-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.aliyun.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 else
