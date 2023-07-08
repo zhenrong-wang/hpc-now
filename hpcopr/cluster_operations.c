@@ -74,16 +74,15 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
         cluster_role_detect(temp_cluster_workdir,cluster_role);
         if(check_pslock(temp_cluster_workdir)!=0){
-            printf(HIGH_GREEN_BOLD "|  switch: <> %s %s | %s | * OPERATION-IN-PROGRESS *\n" RESET_DISPLAY,temp_cluster_name,cluster_role,cloud_flag);
+            printf(GENERAL_BOLD "| switch : <> %s %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
             fclose(file_p);
             return 0;
         }
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
-        printf(HIGH_GREEN_BOLD "|  switch: <> ");
+        printf(GENERAL_BOLD "| switch : <> ");
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-            printf("%s %s | %s | * EMPTY CLUSTER *\n" RESET_DISPLAY,temp_cluster_name,cluster_role,cloud_flag);
+            printf("%s %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
         }
-        printf(RESET_DISPLAY);
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         fclose(file_p);
         return 0;
@@ -96,22 +95,21 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_cloud_flag(temp_cluster_workdir,cloud_flag);
                 cluster_role_detect(temp_cluster_workdir,cluster_role);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
-                    printf(HIGH_GREEN_BOLD "|  switch: <> ");
+                    printf(GENERAL_BOLD "| switch : <> ");
                 }
                 else{
                     printf(RESET_DISPLAY "|        : <> ");
                 }
                 if(check_pslock(temp_cluster_workdir)!=0){
-                    printf("%s %s | %s | * OPERATION-IN-PROGRESS *\n" RESET_DISPLAY,temp_cluster_name,cluster_role,cloud_flag);
+                    printf("%s %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
                     i++;
                     continue;
                 }
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
                 i++;
                 if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-                    printf(GENERAL_BOLD "%s %s | %s | * EMPTY CLUSTER *\n" RESET_DISPLAY,temp_cluster_name,cluster_role,cloud_flag);
+                    printf("%s %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
                 }
-                printf(RESET_DISPLAY);
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }
         }
@@ -131,20 +129,19 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
         cluster_role_detect(temp_cluster_workdir,cluster_role);
         if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,target_cluster_name)==0){
-            printf(HIGH_GREEN_BOLD "|  switch: <> ");
+            printf(GENERAL_BOLD "| switch : <> ");
         }
         else{
             printf(RESET_DISPLAY "|        : <> ");
         }
         if(check_pslock(temp_cluster_workdir)!=0){
-            printf("%s %s | %s | * OPERATION-IN-PROGRESS * \n" RESET_DISPLAY,target_cluster_name,cluster_role,cloud_flag);
+            printf("%s %s | %s | * OPERATION-IN-PROGRESS * " RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
             return 0;
         }
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-            printf("%s %s | %s | * EMPTY CLUSTER *\n" RESET_DISPLAY,target_cluster_name,cluster_role,cloud_flag);
+            printf("%s %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
         }
-        printf(RESET_DISPLAY);
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
     }

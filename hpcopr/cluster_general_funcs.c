@@ -2187,7 +2187,7 @@ int list_all_cluster_names(int header_flag){
             else{
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
-                    printf(HIGH_GREEN_BOLD "|  switch: %s\n" RESET_DISPLAY,registry_line);
+                    printf(GENERAL_BOLD "| switch : %s\n" RESET_DISPLAY,registry_line);
                 }
                 else{
                     printf(RESET_DISPLAY "|        : %s\n" RESET_DISPLAY,registry_line);
