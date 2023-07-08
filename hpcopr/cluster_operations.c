@@ -74,16 +74,15 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
         cluster_role_detect(temp_cluster_workdir,cluster_role);
         if(check_pslock(temp_cluster_workdir)!=0){
-            printf(HIGH_GREEN_BOLD "|  switch: <> %s %s | %s | * OPERATION-IN-PROGRESS *\n" RESET_DISPLAY,temp_cluster_name,cluster_role,cloud_flag);
+            printf(GENERAL_BOLD "| switch : <> %s %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
             fclose(file_p);
             return 0;
         }
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
-        printf(HIGH_GREEN_BOLD "|  switch: <> ");
+        printf(GENERAL_BOLD "| switch : <> ");
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-            printf("%s %s | %s | * EMPTY CLUSTER *\n" RESET_DISPLAY,temp_cluster_name,cluster_role,cloud_flag);
+            printf("%s %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
         }
-        printf(RESET_DISPLAY);
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         fclose(file_p);
         return 0;
@@ -96,22 +95,21 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 get_cloud_flag(temp_cluster_workdir,cloud_flag);
                 cluster_role_detect(temp_cluster_workdir,cluster_role);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
-                    printf(HIGH_GREEN_BOLD "|  switch: <> ");
+                    printf(GENERAL_BOLD "| switch : <> ");
                 }
                 else{
                     printf(RESET_DISPLAY "|        : <> ");
                 }
                 if(check_pslock(temp_cluster_workdir)!=0){
-                    printf("%s %s | %s | * OPERATION-IN-PROGRESS *\n" RESET_DISPLAY,temp_cluster_name,cluster_role,cloud_flag);
+                    printf("%s %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
                     i++;
                     continue;
                 }
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
                 i++;
                 if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-                    printf(GENERAL_BOLD "%s %s | %s | * EMPTY CLUSTER *\n" RESET_DISPLAY,temp_cluster_name,cluster_role,cloud_flag);
+                    printf("%s %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
                 }
-                printf(RESET_DISPLAY);
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }
         }
@@ -131,20 +129,19 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
         cluster_role_detect(temp_cluster_workdir,cluster_role);
         if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,target_cluster_name)==0){
-            printf(HIGH_GREEN_BOLD "|  switch: <> ");
+            printf(GENERAL_BOLD "| switch : <> ");
         }
         else{
             printf(RESET_DISPLAY "|        : <> ");
         }
         if(check_pslock(temp_cluster_workdir)!=0){
-            printf("%s %s | %s | * OPERATION-IN-PROGRESS * \n" RESET_DISPLAY,target_cluster_name,cluster_role,cloud_flag);
+            printf("%s %s | %s | * OPERATION-IN-PROGRESS * " RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
             return 0;
         }
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-            printf("%s %s | %s | * EMPTY CLUSTER *\n" RESET_DISPLAY,target_cluster_name,cluster_role,cloud_flag);
+            printf("%s %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
         }
-        printf(RESET_DISPLAY);
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
     }
@@ -210,6 +207,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
     char tf_archive_log[FILENAME_LENGTH]="";
     char tf_realtime_err_log[FILENAME_LENGTH]="";
     char tf_archive_err_log[FILENAME_LENGTH]="";
+    char curr_payment_method[16]="";
     FILE* file_p=NULL;
     sprintf(log_trash,"%s%slog_trashbin.txt",HPC_NOW_ROOT_DIR,PATH_SLASH);
     if(cluster_name_check(target_cluster_name)!=-127){
@@ -218,6 +216,11 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
         return 3;
     }
     get_workdir(cluster_workdir,target_cluster_name);
+    get_state_value(cluster_workdir,"payment_method:",curr_payment_method);
+    if(strcmp(curr_payment_method,"month")==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
+        return -1;
+    }
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_archive_log,"%s%slog%stf_prep.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_realtime_err_log,"%s%slog%stf_prep.err.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
@@ -602,8 +605,14 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
     char* tf_exec=TERRAFORM_EXEC;
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
+    char curr_payment_method[16]="";
     int i;
     int compute_node_num=0;
+    get_state_value(workdir,"payment_method:",curr_payment_method);
+    if(strcmp(curr_payment_method,"month")==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
+        return -3;
+    }
     printf(GENERAL_BOLD "|*                                C A U T I O N !                                  \n");
     printf("|*                                                                                 \n");
     printf("|*   YOU ARE DELETING THE WHOLE CLUSTER - INCLUDING ALL THE NODES AND *DATA*!      \n");
@@ -627,8 +636,8 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster operation started ...\n");
     create_and_get_vaultdir(workdir,vaultdir);
-    decrypt_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
+    decrypt_files(workdir,crypto_keyfile);
     sprintf(dot_terraform,"%s%s.terraform",stackdir,PATH_SLASH);
     if(folder_exist_or_not(dot_terraform)==0){
         if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,1)!=0){
@@ -1973,6 +1982,65 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     printf(WARN_YELLO_BOLD "[ -INFO- ] The rebuild process may need 7 minutes. Please do not operate\n");
     printf("|          this cluster during the period. Exit now." RESET_DISPLAY "\n");
     delete_decrypted_files(workdir,crypto_keyfile);
+    return 0;
+}
+
+int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* crypto_keyfile){
+    char workdir[DIR_LENGTH]="";
+    char stackdir[DIR_LENGTH]="";
+    char cloud_flag[32]="";
+    char curr_payment_method[8]="";
+    char statefile[FILENAME_LENGTH]="";
+    if(cluster_name_check(cluster_name)!=-127){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " already exists in the registry.\n",cluster_name);
+        printf("|          Please check and retry. Exit now.\n" RESET_DISPLAY);
+        return 1;
+    }
+    get_workdir(workdir,cluster_name);
+    get_cloud_flag(workdir,cloud_flag);
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+        return -5;
+    }
+    if(strcmp(cloud_flag,"CLOUD_C")==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] This operation is not valid for AWS. Exit now." RESET_DISPLAY "\n");
+        return -5;
+    }
+    if(strcmp(new_payment_method,"od")!=0&&strcmp(new_payment_method,"month")!=0){
+        return -3;
+    }
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
+    get_state_value(workdir,"payment_method:",curr_payment_method);
+    if(strcmp(curr_payment_method,new_payment_method)==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The cluster payment has already been " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD "." RESET_DISPLAY "\n",curr_payment_method);
+        return 3;
+    }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Switching the payment method from " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " to " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",curr_payment_method,new_payment_method);
+    if(strcmp(new_payment_method,"month")==0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Please switch to " HIGH_CYAN_BOLD "od" WARN_YELLO_BOLD " if you'd like to destroy or remove this cluster.\n");
+        printf("|          " HIGH_CYAN_BOLD "Automatic renewal" WARN_YELLO_BOLD " will be activated." RESET_DISPLAY "\n");
+    }
+    decrypt_files(workdir,crypto_keyfile);
+    if(strcmp(new_payment_method,"month")==0){
+        modify_payment_lines(stackdir,cloud_flag,"add");
+    }
+    else{
+        modify_payment_lines(stackdir,cloud_flag,"del");
+    }
+    if(terraform_execution(TERRAFORM_EXEC,"apply",workdir,crypto_keyfile,1)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to switch the payment method to " WARN_YELLO_BOLD "%s" RESET_DISPLAY " .\n",new_payment_method);
+        if(strcmp(new_payment_method,"month")==0){
+            modify_payment_lines(stackdir,cloud_flag,"del");
+        }
+        else{
+            modify_payment_lines(stackdir,cloud_flag,"add");
+        }
+        delete_decrypted_files(workdir,crypto_keyfile);
+        return 5;
+    }
+    getstate(workdir,crypto_keyfile);
+    delete_decrypted_files(workdir,crypto_keyfile);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congrats! The payment method is now " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",new_payment_method);
     return 0;
 }
 

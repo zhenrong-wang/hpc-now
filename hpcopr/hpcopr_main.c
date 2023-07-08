@@ -104,6 +104,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "sleep,opr,CNAME",
     "wakeup,opr,CNAME",
     "destroy,opr,CNAME",
+    "payment,opr,CNAME",
     "userman,gen,CNAME",
     "dataman,gen,UNAME",
     "monman,admin,CNAME",
@@ -164,6 +165,7 @@ char dataman_commands[DATAMAN_COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
 39 NOT_IN_THE_REGISTRY
 40 MONMAN_FAILED
 41 DESTROY_ERROR
+42 PAYMENT_SWITCH_FAILED
 43 CLUSTER_ASLEEP
 45 GRAPH_FAILED
 47 GRAPH_NOT_UPDATED
@@ -1281,6 +1283,36 @@ int main(int argc, char* argv[]){
         write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_EMPTY",49);
         check_and_cleanup(workdir);
         return 49;
+    }
+
+    if(strcmp(argv[1],"payment")==0){
+        if(cmd_flag_check(argc,argv,"--od")!=0&&cmd_flag_check(argc,argv,"--month")!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify the new payment method with " WARN_YELLO_BOLD "--od" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "--month" RESET_DISPLAY " .\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
+            check_and_cleanup(workdir);
+            return 9;
+        }
+        if(confirm_to_operate_cluster(cluster_name)!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
+            check_and_cleanup(workdir);
+            return 3;
+        }
+        if(cmd_flag_check(argc,argv,"--od")==0){
+            run_flag=switch_cluster_payment(cluster_name,"od",crypto_keyfile);
+        }
+        else if(cmd_flag_check(argc,argv,"--month")==0){
+            run_flag=switch_cluster_payment(cluster_name,"month",crypto_keyfile);
+        }
+        if(run_flag==0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
+            check_and_cleanup(workdir);
+            return 0;
+        }
+        else{
+            write_operation_log(cluster_name,operation_log,argc,argv,"SWITCH_PAYMENT_FAILED",42);
+            check_and_cleanup(workdir);
+            return 42;
+        }
     }
 
     if(strcmp(argv[1],"rebuild")==0){

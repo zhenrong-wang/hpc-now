@@ -520,6 +520,7 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
  * total_compute_nodes:
  * running_compute_nodes:
  * down_compute_nodes:
+ * payment_method:
  */
 int getstate(char* workdir, char* crypto_filename){
     char cloud_flag[16]="";
@@ -540,6 +541,7 @@ int getstate(char* workdir, char* crypto_filename){
     char ht_flag[16]="";
     char string_temp[64]="";
     char string_temp2[64]="";
+    char pay_method[8]="";
     char md5sum[64]="";
     int node_num_gs;
     int node_num_on_gs=0;
@@ -595,6 +597,12 @@ int getstate(char* workdir, char* crypto_filename){
     }
     else{
         strcpy(ht_flag,"hton");
+    }
+    if(find_multi_keys(compute_template,"instance_charge_type = \"PrePaid\"","","","","")>0||find_multi_keys(compute_template,"instance_charge_type = \"PREPAID\"","","","","")>0){
+        strcpy(pay_method,"month");
+    }
+    else{
+        strcpy(pay_method,"od");
     }
     fprintf(file_p_statefile,"---GENERATED AND MAINTAINED BY HPC-NOW SERVICES INTERNALLY---\n");
     fprintf(file_p_statefile,"master_config: %s\ncompute_config: %s\nht_flag: %s\n",master_config,compute_config,ht_flag);
@@ -662,6 +670,7 @@ int getstate(char* workdir, char* crypto_filename){
     fprintf(file_p_statefile,"total_compute_nodes: %d\n",node_num_gs);
     fprintf(file_p_statefile,"running_compute_nodes: %d\n",node_num_on_gs);
     fprintf(file_p_statefile,"down_compute_nodes: %d\n",node_num_gs-node_num_on_gs);
+    fprintf(file_p_statefile,"payment_method: %s\n",pay_method);
     fclose(file_p_statefile);
     fclose(file_p_hostfile);
     fclose(file_p_tfstate);
@@ -853,6 +862,8 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char compute_address[32]="";
     char compute_status[16]="";
     char compute_config[16]="";
+    char payment_method[16]="";
+    char payment_method_long[64]="";
     char statefile[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char ht_status[16]="";
@@ -875,11 +886,19 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     get_key_value(statefile,"compute_config:",' ',compute_config);
     get_key_value(statefile,"ht_flag:",' ',ht_status);
     get_key_value(statefile,"total_compute_nodes:",' ',node_num_string);
+    get_key_value(statefile,"payment_method:",' ',payment_method);
     node_num=string_to_positive_num(node_num_string);
     get_key_value(statefile,"running_compute_nodes:",' ',running_node_num_string);
     running_node_num=string_to_positive_num(running_node_num_string);
+    if(strcmp(payment_method,"month")==0){
+        strcpy(payment_method_long,"Monthly PrePaid & Automatic Renewal");
+    }
+    else{
+        strcpy(payment_method_long,"On-Demand PostPaid");
+    }
     if(graph_level==0){
-        printf(GENERAL_BOLD "|        +-Cluster name: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD " -+- Cluster role: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "\n",cluster_name,cluster_role);
+        printf(GENERAL_BOLD "|       -+- Cluster name: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD " -+- Cluster role: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "\n",cluster_name,cluster_role);
+        printf("|       -+- Payment Method: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD " - " HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "\n",payment_method,payment_method_long);
         printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
         printf("|            +-db(%s)\n" RESET_DISPLAY,db_status);
     }
@@ -899,18 +918,18 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     }
     if(graph_level==1){
         if(strlen(ht_status)!=0){
-            printf("%s %s | %s | %s %s %s | %d/%d | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
+            printf("%s %s | %s | %s %s %s | %d/%d | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
         }
         else{
-            printf("%s %s | %s | %s %s %s | %d/%d | %s \n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
+            printf("%s %s | %s | %s %s %s | %d/%d | %s | %s \n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,payment_method);
         }
     }
     else if(graph_level==2){
         if(strlen(ht_status)!=0){
-            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status);
+            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
         }
         else{
-            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config);
+            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,payment_method);
         }
     }
     printf(RESET_DISPLAY);
@@ -1137,7 +1156,6 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     char password[32]="";
     char enable_flag[16]="";
     char master_address[32]="";
-    char root_password[PASSWORD_STRING_LENGTH]="";
     char bucket_address[32]="";
     char bucket_ak[128]="";
     char bucket_sk[128]="";
@@ -1177,8 +1195,8 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
             printf(WARN_YELLO_BOLD "[ -WARN- ] You are not an operator or administrator.\n" RESET_DISPLAY);
         }
         else{
-            find_and_get(filename_temp,"Master Node Root Password:","","",1,"Master Node Root Password:","","",':',2,root_password);
-            printf(FATAL_RED_BOLD "| Root Password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " ! DO NOT DISCLOSE TO ANYONE !\n" RESET_DISPLAY,root_password);
+            find_and_get(filename_temp,"Master Node Root Password:","","",1,"Master Node Root Password:","","",':',2,password);
+            printf(FATAL_RED_BOLD "| Root Password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " ! DO NOT DISCLOSE TO ANYONE !\n" RESET_DISPLAY,password);
         }
     }
     
@@ -2169,7 +2187,7 @@ int list_all_cluster_names(int header_flag){
             else{
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
-                    printf(HIGH_GREEN_BOLD "|  switch: %s\n" RESET_DISPLAY,registry_line);
+                    printf(GENERAL_BOLD "| switch : %s\n" RESET_DISPLAY,registry_line);
                 }
                 else{
                     printf(RESET_DISPLAY "|        : %s\n" RESET_DISPLAY,registry_line);
@@ -2255,3 +2273,70 @@ int check_protection(char* workdir){
 int delete_protection(char* workdir){
     return 0;
 }*/
+
+void modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer){
+    if(strcmp(modify_flag,"add")==0){
+        insert_lines(filename_temp,"user_data",line_buffer);
+    }
+    else{
+        delete_lines_by_kwd(filename_temp,line_buffer,1);
+    }
+}
+
+int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag){
+    if(strcmp(modify_flag,"add")!=0&&strcmp(modify_flag,"del")!=0){
+        return -1;
+    }
+    char line_buffer1[128]="";
+    char line_buffer2[128]="";
+    char line_buffer3[128]="";
+    char line_buffer4[128]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    int i;
+    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    int compute_nodes=get_compute_node_num(filename_temp,"all");
+    if(strcmp(cloud_flag,"CLOUD_A")==0){
+        strcpy(line_buffer1,"  instance_charge_type = \"PrePaid\"");
+        strcpy(line_buffer2,"  period_unit = \"Month\"");
+        strcpy(line_buffer3,"  period = 1");
+        strcpy(line_buffer4,"renewal_status = \"AutoRenewal\"");
+        
+    }
+    else if(strcmp(cloud_flag,"CLOUD_B")==0){
+        strcpy(line_buffer1,"  instance_charge_type = \"PREPAID\"");
+        strcpy(line_buffer2,"  instance_charge_type_prepaid_period = 1");
+        strcpy(line_buffer3,"  force_delete = true");
+        strcpy(line_buffer4,"instance_charge_type_prepaid_renew_flag = \"NOTIFY_AND_AUTO_RENEW\"");
+    }
+    else{
+        return -3;
+    }
+    sprintf(filename_temp,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer1);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer2);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer3);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer4);
+    sprintf(filename_temp,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer1);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer2);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer3);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer4);
+    sprintf(filename_temp,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer1);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer2);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer3);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer4);
+    sprintf(filename_temp,"%s%scompute_template",stackdir,PATH_SLASH);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer1);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer2);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer3);
+    modify_payment_single_line(filename_temp,modify_flag,line_buffer4);
+    for(i=0;i<compute_nodes;i++){
+        sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        modify_payment_single_line(filename_temp,modify_flag,line_buffer1);
+        modify_payment_single_line(filename_temp,modify_flag,line_buffer2);
+        modify_payment_single_line(filename_temp,modify_flag,line_buffer3);
+        modify_payment_single_line(filename_temp,modify_flag,line_buffer4);
+    }
+    return 0;
+}

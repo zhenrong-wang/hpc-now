@@ -7,14 +7,16 @@
 # Bug report: info@hpc-now.com
 
 #arg1: # of users to be created
-#arg2: db - whether reinstall mariadb or not
-#arg3: mpi - whether install openmpi or not
 
 # Define URL prefixes for the 'wget' command
 
 logfile='/root/cluster_init.log'
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Initialization started." >> ${logfile}
+grep openEuler /etc/system-release
+if [ $? -eq 0 ]; then
+  distro_type="oE"
+fi
 centos_version=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 echo -e "export CENTOS_V=$centos_version" >> /etc/profile
 echo -e "alias sudo='sudo -E'" >> /etc/profile
@@ -90,13 +92,12 @@ fi
 echo -e "# Plan to create $1 users."
 echo -e "# Plan create $1 users." >> ${logfile} 
 
-######### define something ##############
-yum -y install openssl openssl-devel
+yum -y install openssl openssl-devel wget unzip curl make perl
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 SELINUX_STATUS=`getenforce`
 APP_ROOT="/hpc_apps"
 echo -e "source /etc/profile" >> /root/.bashrc
-########## root ssh-passwd-free among nodes ############
+
 if [ -f /root/hostfile ]; then
   mkdir -p /hpc_data/root_data
   chmod -R 750 /hpc_data/root_data
@@ -120,8 +121,18 @@ if [ -f /root/hostfile ]; then
   source /etc/profile
 fi
 
-############ Add Users ####################
+# Add user slurm 
+id -u slurm
+if [ $? -ne 0 ]; then
+  useradd slurm
+fi
+time_current=`date "+%Y-%m-%d %H:%M:%S"`
+echo -e "# $time_current User slurm added." >> ${logfile}
+
+# Add System Users 
 echo -e "user1 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+sed -i 's/env_reset/!env_reset/g' /etc/sudoers
+sed -i 's/Defaults    secure_path/#Defaults    secure_path/g' /etc/sudoers # Granted sudo permissions to user1
 chmod 511 /usr/bin/passwd # Disable ordinary users to change its own password
 while read user_row
 do
@@ -147,7 +158,7 @@ do
   chown -R ${user_name}:${user_name} /home/${user_name}
 done < /root/user_secrets.txt
 
-########## stop firewall and SELinux ###############
+# stop firewall and SELinux 
 systemctl stop firewalld && systemctl disable firewalld
 if [ $SELINUX_STATUS != Disabled ]; then
   sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
@@ -155,18 +166,17 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current SELINUX Disabled." >> ${logfile}
 
-######### Yum some packages ############
 # The update step really takes time, trying to avoid it.
 if [ $cloud_flag = 'CLOUD_B' ]; then
   yum -y update
   yum -y install https://mirrors.cloud.tencent.com/epel/epel-release-latest-9.noarch.rpm
-  yum -y install https://mirrors.cloud.tencent.com/epel/epel-next-release-latest-9.noarch.rpm
+#  yum -y install https://mirrors.cloud.tencent.com/epel/epel-next-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.cloud.tencent.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 elif [ $cloud_flag = 'CLOUD_A' ]; then
   yum -y update
   yum -y install https://mirrors.aliyun.com/epel/epel-release-latest-9.noarch.rpm
-  yum -y install https://mirrors.aliyun.com/epel/epel-next-release-latest-9.noarch.rpm
+#  yum -y install https://mirrors.aliyun.com/epel/epel-next-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.aliyun.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 else
@@ -177,7 +187,7 @@ yum -y install gtk2 gtk2-devel python python3 gcc-c++ gcc-gfortran htop sshpass
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Utils installed." >> ${logfile}
 
-########## Build munge #################
+# Build munge
 yum -y install rpm-build bzip2-devel zlib-devel m4 libxml2-devel
 cd /root
 if ! command -v munge >/dev/null 2>&1; then
@@ -194,15 +204,7 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`  
 echo -e "# $time_current Munge installed." >> ${logfile}
 
-########## Add user slurm ################
-id -u slurm
-if [ $? -eq 1 ]; then
-  useradd slurm
-fi
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "# $time_current User slurm added." >> ${logfile}
-
-############## Re-Install mariadb Be careful! ########################
+# Re-Install mariadb Be careful!
 if [ -f /root/hostfile ]; then
   yum remove -y `rpm -aq mariadb*`
   rm -rf /etc/my.cnf
@@ -263,8 +265,8 @@ if [ -f /root/hostfile ]; then
     mv /root/mariadb_slurm_acct_db_pw.txt /root/.cluster_secrets/
   fi
 fi
-########### Move sensative file to .cluster_secrets folder #############
 
+# Move sensative file to .cluster_secrets folder 
 rm -rf /root/secret_user*
 mv /root/user_secrets.txt /root/.cluster_secrets/
 mv /root/master_passwd.txt /root/.cluster_secrets/
@@ -274,7 +276,7 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "ALL the secrets are stored in the directory /root/.cluster_secrets/ ."
 echo -e "# $time_current ALL the secrets are stored in the directory /root/.cluster_secrets/ ." >> ${logfile}
 
-########### Change owners of some directories ################
+# Change owners of directories 
 mkdir -p /run/munge
 chown -R slurm:slurm /run/munge
 chown -R slurm:slurm /etc/munge
@@ -282,13 +284,13 @@ chown -R slurm:slurm /var/run/munge
 chown -R slurm:slurm /var/lib/munge
 chown -R slurm:slurm /var/log/munge
 
-########## munge #################
+# munge 
 if [ -f /root/hostfile ]; then
   mungekey
   chown -R slurm:slurm /etc/munge/munge.key
 fi
 
-########### Build SLURM #####################
+# Build SLURM 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Started building Slurm 21.08.8." >> ${logfile}
 cd /root
@@ -353,13 +355,13 @@ if [ -f /root/hostfile ]; then
     chmod +x /usr/bin/coscli
   elif [ $cloud_flag = 'CLOUD_C' ]; then 
     #yum -y install s3cmd
-    curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscli.zip
+    curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -q -o /tmp/awscli.zip
     unzip -o /tmp/awscli.zip -d /tmp
     /tmp/aws/install 
   fi
 fi
 
-############## install environment-module ######################
+# install environment-module
 cd /root
 if ! command -v module >/dev/null 2>&1; then
   yum install tcl-devel -y
@@ -377,7 +379,7 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`  
 echo -e "# $time_current Environment Module has been installed." >> ${logfile}
 
-######### Install Desktop Env-NECESSARY- ##############
+# Install Desktop Env-NECESSARY
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 if [ -f /root/hostfile ]; then
   echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
@@ -394,7 +396,7 @@ if [ -f /root/hostfile ]; then
     chmod +x /etc/g_ini.sh
     sed -i '/gini/d' /etc/profile
     echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
-  else
+  elif [ $centos_version -eq 9 ]; then
     echo -e "# $time_current CENTOS VERSION $centos_version. Installing GUI now." >> ${logfile}
     yum grouplist installed -q | grep "Server with GUI" >> /dev/null 2>&1
     if [ $? -ne 0 ]; then
@@ -403,6 +405,10 @@ if [ -f /root/hostfile ]; then
     systemctl enable gdm --now
     systemctl disable firewalld
     systemctl stop firewalld
+  elif [ $distro_type = 'oE' ]; then
+    dnf install gnome-shell gdm gnome-session
+    systemctl enable gdm.service
+    systemctl set-default graphical.target
   fi
   systemctl set-default graphical.target
   yum -y install tigervnc tigervnc-server
@@ -449,7 +455,7 @@ if [ -f /root/hostfile ]; then
   echo -e "# $time_current Desktop Environment and RDP has been installed." >> ${logfile}
 fi
 
-####################### Download scripts & Desktop shortcuts ##########################
+# Download scripts & Desktop shortcuts 
 if [ -f /root/hostfile ]; then
   mkdir -p /root/Desktop
   ln -s /hpc_apps /root/Desktop/
@@ -467,27 +473,18 @@ if [ -f /root/hostfile ]; then
       continue
     fi
     user_name=`echo $user_row | awk '{print $2}'`
-    mkdir -p /home/${user_row}/Desktop
-    ln -s /hpc_apps /home/${user_row}/Desktop/
-    ln -s /hpc_data/${user_row}_data /home/${user_row}/Desktop/
-    cp /root/Desktop/*.desktop /home/${user_row}/Desktop
-    #if [ -f /root/.cos.conf ] && [ ! -f /home/${user_row}/.cos.conf ]; then
-    #  cp /root/.cos.conf /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.cos.conf
-    #fi
-    #if [ -f /root/.ossutilconfig ] && [ ! -f /home/${user_row}/.ossutilconfig ]; then
-    #  cp /root/.ossutilconfig /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.ossutilconfig
-    #fi
-    #if [ -f /root/.s3cfg ] && [ ! -f /home/${user_row}/.s3cfg ]; then
-    #  cp /root/.s3cfg /home/${user_row}/ && chown -R ${user_row}:${user_row} /home/${user_row}/.s3cfg
-    #fi
-    chown -R ${user_row}:${user_row} /home/${user_row}/Desktop
+    mkdir -p /home/${user_name}/Desktop
+    ln -s /hpc_apps /home/${user_name}/Desktop/
+    ln -s /hpc_data/${user_name}_data /home/${user_name}/Desktop/
+    cp /root/Desktop/*.desktop /home/${user_name}/Desktop
+    chown -R ${user_name}:${user_name} /home/${user_name}/Desktop
   done < /root/.cluster_secrets/user_secrets.txt
 
   rm -rf /usr/share/backgrounds/*.png
   rm -rf /usr/share/backgrounds/*.jpg
   wget ${url_utils}pics/wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
   cd /usr/share/backgrounds && unzip wallpapers.zip
-  if [ $centos_version -ne 7 ]; then
+  if [ -z $centos_version ] || [ $centos_version -ne 7 ]; then
     sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm/custom.conf
     yum -y install gnome-tweaks gnome-extensions-app.x86_64
     echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options centered\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/day.jpg" > /etc/g_ini.sh
@@ -505,7 +502,6 @@ if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete
 fi
 
-#############################  
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Necassary scripts has been downloaded to /root." >> ${logfile}
 rm -rf /root/slurm*
@@ -530,7 +526,7 @@ if [[ $3 = 'mpi' && -f /root/hostfile ]]; then
     make -j$NUM_PROCESSORS && make install
     if [ $? -eq 0 ]; then
       cat /etc/profile | grep OMPI_ALLOW_RUN_AS_ROOT
-      if [ $? -eq 1 ]; then
+      if [ $? -ne 0 ]; then
         export OMPI_ALLOW_RUN_AS_ROOT=1
         export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
         echo -e "export OMPI_ALLOW_RUN_AS_ROOT=1\nexport OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\n" >> /etc/profile

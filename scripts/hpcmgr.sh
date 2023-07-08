@@ -497,9 +497,6 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   fi
   while read hpc_user_row
   do
-    if [ -z $hpc_user_row ]; then
-      continue
-    fi
     user_name=`echo -e $hpc_user_row | awk '{print $2}'`
     user_status=`echo -e $hpc_user_row | awk '{print $4}'`
     if [ ! -z $user_status ] && [ $user_status = "DISABLED" ]; then
