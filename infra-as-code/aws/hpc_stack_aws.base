@@ -227,7 +227,7 @@ data "aws_ec2_instance_types" "t2c4g" {
 # Still need CentOS Stream 8 & 9
 
 resource "aws_resourcegroups_group" "resource_group" {
-  name = "RG_NAME"
+  name = "rg_RG_NAME"
   resource_query {
     query = <<JSON
 {

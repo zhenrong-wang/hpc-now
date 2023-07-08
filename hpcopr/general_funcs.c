@@ -26,6 +26,111 @@
 #include "now_macros.h"
 #include "general_funcs.h"
 
+char command_flags[CMD_FLAG_NUM][16]={
+    "-i", // interactive
+    "-r", // recursive
+    "-rf", // recursive + force
+    "-f", // force
+    "--all", 
+    "--list",
+    "--force",
+    "--recursive",
+    "--print", // print contents
+    "--read", // read contents
+    "--std", // standard info
+    "--err", // error info
+    "--this", // this
+    "--hist", // historical
+    "--mc", // rebuild mc
+    "--mcdb", //rebuild mcdb
+    "--bkey", // display bucket passwd
+    "--rkey", // display root passwd
+    "--admin", //export admin privilege
+    "--accept", // accept license terms
+    "--echo", //echo_flag
+    "--od",
+    "--month"
+};
+
+char command_keywords[CMD_KWDS_NUM][16]={
+    "-c", //cluster
+    "-u", //user
+    "-p", // password
+    "-s", //Source  | start
+    "-e", //End
+    "-d", //Destination
+    "-t", // target
+    "-n", //node_name
+    "--cmd",
+    "--dcmd",
+    "--ucmd",
+    "--level",
+    "--cname", //cluster_name
+    "--ak",
+    "--sk",
+    "--ul", // user list
+    "--key", //key file
+    "--rg",
+    "--az",
+    "--nn", //node_num
+    "--un", //user_num
+    "--mi",
+    "--ci",
+    "--os",
+    "--ht",
+    "--conf",
+    "--hloc",
+    "--cloc",
+    "--hver"
+};
+
+int string_to_positive_num(char* string){
+    int i,sum=0;
+    int length=strlen(string);
+    if(length==0){
+        return 0;
+    }
+    for(i=0;i<length;i++){
+        if(*(string+i)<'0'||*(string+i)>'9'){
+            return -1;
+        }
+    }
+    for(i=0;i<length;i++){
+        sum+=(*(string+i)-'0')*pow(10,length-i-1);
+    }
+    return sum;
+}
+
+
+int get_key_value(char* filename, char* key, char ch, char* value){
+    char line_buffer[LINE_LENGTH_SHORT]="";
+    char head[128]="";
+    char tail[256]="";
+    FILE* file_p=fopen(filename,"r");
+    if(file_p==NULL){
+        strcpy(value,"");
+        return -1;
+    }
+    if(strlen(key)==0||ch=='\0'){
+        fclose(file_p);
+        strcpy(value,"");
+        return -3;
+    }
+    while(!feof(file_p)){
+        fgetline(file_p,line_buffer);
+        get_seq_string(line_buffer,ch,1,head);
+        get_seq_string(line_buffer,ch,2,tail);
+        if(strcmp(key,head)==0){
+            fclose(file_p);
+            strcpy(value,tail);
+            return 0;
+        }
+    }
+    fclose(file_p);
+    strcpy(value,"");
+    return 1;
+}
+
 void reset_string(char* orig_string){
     int length=strlen(orig_string);
     int i;
@@ -161,7 +266,7 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     }
     fclose(file_p);
     fclose(file_p_tmp);
-    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
 }
@@ -288,7 +393,7 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     fprintf(file_temp_p,"%s",single_line);
     fclose(file_p);
     fclose(file_temp_p);
-    sprintf(cmdline,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return replace_count;
 }
@@ -460,13 +565,13 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
         return -1;
     }
     char single_line[LINE_LENGTH]="";
+    char get_string_buffer[LINE_LENGTH_SHORT]="";
     int flag_primary1=0,flag_primary2=0,flag_primary3=0;
     int flag_primary=1;
-    int flag_eof_or_not=0;
     int flag1=0,flag2=0,flag3=0;
     int i;
-    do{
-        flag_eof_or_not=fgetline(file_p,single_line);
+    while(flag_primary!=0&&!feof(file_p)){
+        fgetline(file_p,single_line);
         if(strlen(findkey_primary1)!=0){
             flag_primary1=contain_or_not(single_line,findkey_primary1);
         }
@@ -487,13 +592,14 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
             flag_primary3=0;
             continue;
         }
-    }while(flag_primary!=0&&flag_eof_or_not==0);
-    if(flag_eof_or_not==1){
+    }
+    if(feof(file_p)){
         fclose(file_p);
+        strcpy(get_string,"");
         return 1;
     }
     i=0;
-    while(flag_eof_or_not!=1&&i<plus_line_num){
+    while(!feof(file_p)&&i<plus_line_num){
         if(strlen(findkey1)!=0){
             flag1=contain_or_not(single_line,findkey1);
         }
@@ -508,12 +614,14 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
             flag2=0;
             flag3=0;
             i++;
-            flag_eof_or_not=fgetline(file_p,single_line);
+            fgetline(file_p,single_line);
             continue;
         }
         else{
             fclose(file_p);
-            return get_seq_string(single_line,split_ch,string_seq_num,get_string);
+            get_seq_string(single_line,split_ch,string_seq_num,get_string_buffer);
+            strcpy(get_string,get_string_buffer);
+            return 0;
         }
     }
     strcpy(get_string,"");
@@ -560,7 +668,7 @@ int folder_exist_or_not(char* foldername){
     }
     else{
         fclose(test_file);
-        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
         return 0;
     }
@@ -698,4 +806,320 @@ int insert_lines(char* filename, char* keyword, char* insert_string){
     sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
+}
+
+int local_path_parser(char* path_string, char* path_final){
+#ifdef _WIN32
+    strcpy(path_final,path_string);
+    return 0;
+#endif
+    int i;
+    char path_temp[DIR_LENGTH]="";
+    if(strlen(path_string)==0){
+        strcpy(path_final,"");
+        return 0;
+    }
+    if(*(path_string+0)=='~'){
+        for(i=1;i<strlen(path_string);i++){
+            *(path_temp+i-1)=*(path_string+i);
+        }
+#ifdef __linux__
+//        printf("%s       %s    ppppp\n",path_temp,path_final);
+        sprintf(path_final,"/home/hpc-now%s",path_temp);
+//        printf("%s       %s    ppppp\n",path_temp,path_final);
+#elif __APPLE__
+        sprintf(path_final,"/Users/hpc-now%s",path_temp);
+#else
+        strcpy(path_final,path_string);
+        return 1;
+#endif
+    }
+    else{
+        strcpy(path_final,path_string);
+    }
+    return 0;
+}
+
+int file_creation_test(char* filename){
+    char cmdline[CMDLINE_LENGTH]="";
+    if(strlen(filename)==0){
+        return -1;
+    }
+    if(file_exist_or_not(filename)==0){
+        return 1;
+    }
+    FILE* file_p=fopen(filename,"w+");
+    if(file_p==NULL){
+        return 3;
+    }
+    fclose(file_p);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+    return 0;
+}
+
+int cmd_flg_or_not(char* argv){
+    int i;
+    for(i=0;i<CMD_FLAG_NUM;i++){
+        if(strcmp(argv,command_flags[i])==0){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int cmd_key_or_not(char* argv){
+    int i;
+    for(i=0;i<CMD_KWDS_NUM;i++){
+        if(strcmp(argv,command_keywords[i])==0){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int cmd_flag_check(int argc, char** argv, char* flag_string){
+    int i;
+    for(i=2;i<argc;i++){
+        if(strcmp(argv[i],flag_string)==0){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string){
+    int i,j;
+    for(i=2;i<argc-1;i++){
+        if(strcmp(argv[i],key_word)==0){
+            j=i+1;
+            if(cmd_flg_or_not(argv[j])!=0&&cmd_key_or_not(argv[j])!=0){
+                strcpy(kwd_string,argv[j]);
+                return 0;
+            }
+            else{
+                strcpy(kwd_string,"");
+                return 1;
+            }
+        }
+    }
+    strcpy(kwd_string,"");
+    return 1;
+}
+
+int include_string_or_not(int cmd_c, char** cmds, char* string){
+    int i;
+    for(i=0;i<cmd_c;i++){
+        if(strcmp(cmds[i],string)==0){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int file_cr_clean(char* filename){
+    if(file_exist_or_not(filename)!=0){
+        return -1;
+    }
+    FILE* file_p=fopen(filename,"r");
+    char filename_temp[FILENAME_LENGTH]="";
+    char ch;
+    char cmdline[CMDLINE_LENGTH]="";
+    sprintf(filename_temp,"%s.tmp",filename);
+    FILE* file_p_tmp=fopen(filename_temp,"w+");
+    if(file_p_tmp==NULL){
+        fclose(file_p);
+        return -1;
+    }
+    while(!feof(file_p)){
+        ch=fgetc(file_p);
+        if(ch!='\r'){
+            fputc(ch,file_p_tmp);
+        }
+    }
+    fclose(file_p);
+    fclose(file_p_tmp);
+    sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+    return 0;
+}
+
+/* This function is risky! It overwrites the original file*/
+int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overwrite_flag){
+    if(file_exist_or_not(filename)!=0){
+        return -1;
+    }
+    if(strlen(start_key)==0&&strlen(end_key)==0){
+        return 3;
+    }
+    if(strcmp(start_key,end_key)==0){
+        return 5;
+    }
+    FILE* file_p=fopen(filename,"r");
+    char filename_temp[FILENAME_LENGTH]="";
+    char line_buffer[LINE_LENGTH]="";
+    int start_flag=0;
+    int contain_start_flag;
+    int contain_end_flag;
+    char cmdline[CMDLINE_LENGTH]="";
+    sprintf(filename_temp,"%s.trunc.tmp",filename);
+    FILE* file_p_tmp=fopen(filename_temp,"w+");
+    if(file_p_tmp==NULL){
+        fclose(file_p);
+        return -1;
+    }
+    while(!feof(file_p)){
+        fgetline(file_p,line_buffer);
+        if(strlen(start_key)==0){
+            if(contain_or_not(line_buffer,end_key)!=0){
+                fprintf(file_p_tmp,"%s\n",line_buffer);
+            }
+            else{
+                break;
+            }
+        }
+        else{
+            contain_start_flag=contain_or_not(line_buffer,start_key);
+            if(strlen(end_key)!=0){
+                contain_end_flag=contain_or_not(line_buffer,end_key);
+            }
+            else{
+                contain_end_flag=-1;
+            }
+            if(contain_start_flag!=0&&start_flag==0){
+                continue;
+            }
+            else if(contain_start_flag==0&&start_flag==0){
+                if(contain_end_flag==0){
+                    break;
+                }
+                fprintf(file_p_tmp,"%s\n",line_buffer);
+                start_flag=1;
+            }
+            else{
+                if(contain_end_flag==0){
+                    break;
+                }
+                fprintf(file_p_tmp,"%s\n",line_buffer);
+            }
+        }
+    }
+    fclose(file_p);
+    fclose(file_p_tmp);
+    if(overwrite_flag!=0){
+        sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+        system(cmdline);
+    }
+    return 0;
+}
+
+int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
+    if(file_exist_or_not(filename)!=0){
+        return -1;
+    }
+    if(strlen(key)==0){
+        return -3;
+    }
+    FILE* file_p=fopen(filename,"r");
+    char filename_temp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char line_buffer[LINE_LENGTH]="";
+    int getline_flag=0;
+    sprintf(filename_temp,"%s.del.tmp",filename);
+    FILE* file_p_tmp=fopen(filename_temp,"w+");
+    if(file_p_tmp==NULL){
+        fclose(file_p);
+        return -1;
+    }
+    while(!feof(file_p)){
+        getline_flag=fgetline(file_p,line_buffer);
+        if(contain_or_not(line_buffer,key)==0){
+            continue;
+        }
+        if(getline_flag==0){
+            fprintf(file_p_tmp,"%s\n",line_buffer);
+        }
+    }
+    fclose(file_p);
+    fclose(file_p_tmp);
+    if(overwrite_flag!=0){
+        sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+        system(cmdline);
+    }
+    return 0;
+}
+
+int get_crypto_key(char* crypto_key_filename, char* md5sum){
+    char cmdline[CMDLINE_LENGTH]="";
+    FILE* md5_tmp=NULL;
+#ifdef _WIN32
+    char buffer[256]="";
+#endif
+#ifdef __APPLE__
+    sprintf(cmdline,"md5 '%s' | awk '{print $NF}' > /tmp/md5.txt.tmp",crypto_key_filename);
+#elif __linux__
+    sprintf(cmdline,"md5sum '%s' | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
+#elif _WIN32
+    sprintf(cmdline,"certutil -hashfile \"%s\" md5 > c:\\programdata\\md5.txt.tmp",crypto_key_filename);
+#endif
+    system(cmdline);
+#ifdef _WIN32
+    md5_tmp=fopen("c:\\programdata\\md5.txt.tmp","r");
+#else
+    md5_tmp=fopen("/tmp/md5.txt.tmp","r");
+#endif
+    if(md5_tmp==NULL){
+        return -1;
+    }
+#ifdef _WIN32
+    fgetline(md5_tmp,buffer);
+#endif
+    fgetline(md5_tmp,md5sum);
+    fclose(md5_tmp);
+#ifdef _WIN32
+    sprintf(cmdline,"del /f /q c:\\programdata\\md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
+#else
+    sprintf(cmdline,"rm -rf /tmp/md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
+#endif
+    system(cmdline);
+    return 0;
+}
+
+int password_hash(char* password, char* md5_hash){
+    if(strlen(password)==0){
+        return -3;
+    }
+    char filename_temp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char string_temp[16]="";
+    generate_random_string(string_temp);
+    FILE* file_p=NULL;
+#ifdef _WIN32
+    sprintf(filename_temp,"c:\\programdata\\%s.tmp",string_temp);
+    file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        strcpy(md5_hash,"");
+        return -1;
+    }
+    fprintf(file_p,"%s\n",password);
+    fclose(file_p);
+#else
+    sprintf(filename_temp,"/tmp/%s.tmp",string_temp);
+    file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        strcpy(md5_hash,"");
+        return -1;
+    }
+    fprintf(file_p,"%s\r\n",password);
+    fclose(file_p);
+#endif
+    get_crypto_key(filename_temp,md5_hash);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+    if(strlen(md5_hash)>0){
+        return 0;
+    }
+    else{
+        return 1;
+    }
 }

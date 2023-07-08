@@ -10,6 +10,6 @@
 #define USAGE_AND_LOGS_H
 
 int view_system_logs(char* logfile, char* view_option, char* export_path);
-int write_operation_log(char* cluster_name, char* operation_logfile, char* operation, char* description, int runflag);
+int write_operation_log(char* cluster_name, char* operation_logfile, int argc, char** argv, char* description, int runflag);
 
 #endif

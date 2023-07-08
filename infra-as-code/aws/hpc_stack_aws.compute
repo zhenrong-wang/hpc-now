@@ -23,6 +23,7 @@ echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
 systemctl restart sshd
 echo -e "${var.compute_passwd}" | passwd root --stdin >> /dev/null 2>&1
 mkdir /hpc_apps && mkdir /hpc_data
+hostnamectl set-hostname COMPUTE_NODE_N
 yum -y install nfs-utils
 mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${aws_efs_mount_target.hpc_apps_mount_target.ip_address}:/ /hpc_apps
 mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${aws_efs_mount_target.hpc_data_mount_target.ip_address}:/ /hpc_data

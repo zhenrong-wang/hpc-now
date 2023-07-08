@@ -22,261 +22,275 @@
 
 void print_empty_cluster_info(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " It seems the cluster is empty. You can either:\n");
-    printf("|          a) Run 'hpcopr init' to create a *default* cluster directly. OR\n");
-    printf("|          b) Run 'hpcopr get-conf' -> 'hpcopr edit-conf' -> 'hpcopr init' \n");
-    printf("|          Exit now.\n");
+    printf("|          a) Run 'hpcopr init' to create a *default* cluster directly.\n");
+    printf("|          b) Run 'hpcopr init' with init options. i.e. --rg region_id .\n");
+    printf("|          c) Run 'hpcopr edit-conf' -> 'hpcopr init' (not recommended).\n");
 }
 
 void print_cluster_init_done(void){
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The cluster is initializing now. This step may take at\n");
-    printf("|          least 7 minutes. Please do not operate the cluster during this period. \n"); 
-    printf("|          You can now log on the master node by 'hpcopr ssh USERNAME'.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The cluster is initializing now. " WARN_YELLO_BOLD "This step may take at\n");
+    printf("|          least *7* minutes. *DO NOT* operate the cluster during this period." RESET_DISPLAY " \n"); 
+    printf("|          You can now log on the master node by 'hpcopr ssh -u USERNAME'.\n");
     printf("|          " HIGH_CYAN_BOLD "The desktop will be ready after the init process.\n" RESET_DISPLAY);
 }
 
-void print_help(char* plain_flag){
-    if(strcmp(plain_flag,"plain")==0){
-        printf("[ -INFO- ] Usage: hpcopr Command PARAM1 PARAM2 ... (Optional)-c=CLUSTER_NAME\n");
-        printf("| Commands:\n");
-        printf("+ 0  . Get-Started:\n");
-        printf("|  envcheck    : Quickly check the running environment.\n");
-        printf("+ I  . Multi-Cluster Management:\n");
-        printf("|  new-cluster : Create a new cluster to initialize.\n");
-        printf("|      (Optional)CLUSTER_NAME (Optional)AK (Optional)SK (Optional)ECHO_FLAG\n");
-        printf("|        CLUSTER_NAME - A-Z | a-z | 0-9 | - , %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
-        printf("|        AK           - cloud access key id\n");
-        printf("|        SK           - cloud access secret id\n");
-        printf("|        ECHO_FLAG    - Specify 'echo' to echo the ak/sk.\n");
-        printf("|  ls-clusters : List all the current clusters.\n");
-        printf("|  switch      : Switch to a cluster in the registry to operate.\n");
-        printf("|      (Optional)TARGET_CLUSTER_NAME - Keep it blank to view the cluster list.\n");
-        printf("|  glance      : View all the clusters or a target cluster.\n");
-        printf("|      (Optional)all - Default to glance the current cluster.\n");
-        printf("|  refresh     : Refresh a cluster without changing the resources.\n");
-        printf("|      (Optional)force \n");
-        printf("|        Specify 'force' as the 2nd param to do force-refresh ( DANGER! ).\n");
-        printf("|  exit-current: Exit the current cluster.\n");
-        printf("|  remove      : Completely remove a cluster from the OS and registry.\n");
-        printf("|      (Optional)force\n");
-        printf("|        Specify 'force' as the 2nd param to do force-remove ( DANGER! ).\n");
-        printf("+ II. Global Management:\n");
-        printf("|  help        : Show this page and the information here.\n");
-        printf("|      (Optional)plain - Show this page in plain text (for redirecting to a file).\n");
-        printf("|  usage       : View and/or export the usage history.\n");
-        printf("|      (Optional)print(default)|read (Optional)EXPORT_DEST\n");
-        printf("|        print - Print all the information to standard output.\n");
-        printf("|        read  - Read the information with 'more'.\n");
-        printf("|        EXPORT_DEST  - Export the plain-text-format to a file..\n");
-        printf("|  history     : View and/or export the operation log.\n");
-        printf("|      (Optional)print(default)|read (Optional)EXPORT_DEST\n");
-        printf("|  syserr      : View and/or export the system cmd errors.\n");
-        printf("|      (Optional)print(default)|read (Optional)EXPORT_DEST\n");
-        printf("|  ssh         : SSH to the master node of a cluster.\n");
-        printf("|      USER_NAME\n"); 
-        printf("|        USER_NAME    - Must specify to log in as which user. For example: user1.\n");
+void print_help(char* cmd_name){
+    printf(GENERAL_BOLD "[ -INFO- ] Usage: hpcopr" HIGH_GREEN_BOLD " Command " GENERAL_BOLD "CMD_FLAG ..." RESET_DISPLAY " [ " HIGH_CYAN_BOLD "KEY_WORD1" RESET_DISPLAY " KEY_STRING1 ] ...\n");
+    printf("|          Global key word & string pair: " GENERAL_BOLD "-c CLUSTER_NAME\n\n" RESET_DISPLAY);
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "| Command Instructions\n\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ 0    . Get-Started:\n" RESET_DISPLAY);
+    }
+    if(strcmp(cmd_name,"envcheck")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "envcheck" RESET_DISPLAY "    :~ Quickly check the running environment.\n");
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ I    . Multi-Cluster Management:\n" RESET_DISPLAY);
+    }
+    if(strcmp(cmd_name,"new-cluster")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "new-cluster" RESET_DISPLAY " :~ Create a new cluster to initialize.\n");
+        printf("|   --cname  CLUSTER_NAME ~ A-Z | a-z | 0-9 | - , %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
+        printf("|   --ak     ACCESS_KEY   ~ Cloud access key id\n");
+        printf("|   --sk     SECRET_KEY   ~ cloud access secret id\n");
+        printf("|   --echo                ~ Specify 'echo' to echo the ak/sk.\n");
+    }
+    if(strcmp(cmd_name,"ls-clusters")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "ls-clusters" RESET_DISPLAY " :~ List all the current clusters.\n");
+    }
+    if(strcmp(cmd_name,"switch")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "switch" RESET_DISPLAY "      :~ Switch to a cluster in the registry to operate.\n");
+        printf("|   --list                ~ List out all the cluster names.\n");
+        printf("|   -c   TARGET_CLUSTER   ~ Specify a target cluster.\n");
+    }
+    if(strcmp(cmd_name,"glance")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "glance" RESET_DISPLAY "      :~ View all the clusters or a target cluster.\n");
+        printf("|   --all                 ~ Glance all the clusters.\n");
+        printf("|   -c   TARGET_CLUSTER   ~ Specify a target cluster.\n");
+    }
+    if(strcmp(cmd_name,"refresh")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "refresh" RESET_DISPLAY "     :~ Refresh a cluster without changing the resources.\n");
+        printf("|   -c   TARGET_CLUSTER   ~ Specify a target cluster.\n");
+        printf("|   --force               ~ do force-refresh " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
+    }
+    if(strcmp(cmd_name,"export")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "export" RESET_DISPLAY "      :~ Export a cluster to another hpcopr client. Optional params:\n");
+        printf("|   --ul     USER_LIST    ~ Specify a list of users to be exported (split by ':').\n");
+        printf("|    -p      PASSWORD     ~ Specify a password string to encrypt the files.\n");
+        printf("|    -d      DEST_PATH    ~ Specify a destination path to export to.\n");
+        printf("|   --admin               ~ Export with cluster admin privilege.\n");
+        printf("|                         ~ ONLY valid when user1 is in the user list.\n");
+    }
+    if(strcmp(cmd_name,"import")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "import" RESET_DISPLAY "      :~ Import a cluster to the current hpcopr client.\n");
+        printf("|    -s      SOURCE_PATH  ~ Specify the path of the source file.\n");
+        printf("|    -p      PASSWORD     ~ Input the password string to decrypt and import.\n");
+    }
+    if(strcmp(cmd_name,"remove")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "remove" RESET_DISPLAY "      :~ Completely remove a cluster from the OS and registry.\n");
+        printf("|   -c   TARGET_CLUSTER   ~ Specify a target cluster.\n");
+        printf("|   --force               ~ Do force-remove " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
+    }
+    if(strcmp(cmd_name,"exit-current")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "exit-current" RESET_DISPLAY ":~ Exit the current cluster.\n");
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ II   . Global Management:\n" RESET_DISPLAY);
+    }
+    if(strcmp(cmd_name,"help")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "help" RESET_DISPLAY "        :~ Show this page and the information here.\n");
+        printf("|   --cmd    CMD_NAME     ~ Search help info by command name.\n");
+    }
+    if(strcmp(cmd_name,"usage")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "usage" RESET_DISPLAY "       :~ View and/or export the usage history.\n");
+        printf("|   --read                ~ Use system util 'more' to read the usage.\n");
+        printf("|   --print(Default)      ~ Print out the usage data.\n");
+        printf("|    -d       DEST_PATH   ~ Export the usage data to a destination file.\n");
+    }
+    if(strcmp(cmd_name,"monman")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "monman" RESET_DISPLAY "      :~ Get, filter, and extract cluster monitoring data.\n");
+        printf("|    -n     NODE_LIST        ~ Specify node names connected by :, i.e. " HIGH_CYAN_BOLD "compute1:compute2:master" RESET_DISPLAY "\n");
+        printf("|    -s     START_TIMESTAMP  ~ Specify a " HIGH_CYAN_BOLD "strictly-formatted" RESET_DISPLAY " start timestamp. i.e. " HIGH_CYAN_BOLD "2023-1-1@12:10" RESET_DISPLAY " \n");
+        printf("|                            ~ " WARN_YELLO_BOLD "*MUST* use a "HIGH_CYAN_BOLD "@" RESET_DISPLAY " to split the date and time!" RESET_DISPLAY "\n");
+        printf("|    -e     END_TIMESTAMP    ~ Specify a " HIGH_CYAN_BOLD "strictly-formatted" RESET_DISPLAY " end timestamp. i.e. " HIGH_CYAN_BOLD "2023-1-1@12:10" RESET_DISPLAY "\n");
+        printf("|   --level INTERVAL_MINUTES ~ Time interval by minutes.\n");
+        printf("|    -d     DEST_PATH        ~ Export the data to a destination folder or file.\n");
+    }
+    if(strcmp(cmd_name,"history")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "history" RESET_DISPLAY "     :~ View and/or export the operation log.\n");
+        printf("|   --read                ~ Use system util 'more' to read the usage.\n");
+        printf("|   --print(Default)      ~ Print out the usage data.\n");
+        printf("|    -d       DEST_PATH   ~ Export the usage data to a destination file.\n");
+    }
+    if(strcmp(cmd_name,"syserr")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "syserr" RESET_DISPLAY "      :~ View and/or export the system cmd errors.\n");
+        printf("|   --read                ~ Use system util 'more' to read the usage.\n");
+        printf("|   --print(Default)      ~ Print out the usage data.\n");
+        printf("|    -d      DEST_PATH    ~ Export the usage data to a destination file.\n");
+    }
+    if(strcmp(cmd_name,"ssh")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "ssh" RESET_DISPLAY "         :~ SSH to the master node of a cluster.\n");
+        printf("|   -u       USER_NAME    ~ SSH to the cluster as a valid user.\n");
+    }
+    if(strcmp(cmd_name,"all")==0){
         printf("+  Advanced - For developers:\n");
-        printf("|  configloc   : Configure the locations for the terraform binaries, providers, IaC\n");
-        printf("|                templates and shell scripts.\n");
-        printf("|  showloc     : Show the current configured locations.\n");
-        printf("|  showmd5     : Show the md5sum values of core components.\n");
-        printf("|  resetloc    : Reset to the default locations.\n");
-        printf("+ III. Cluster Initialization: \n");
-        printf("|  new-keypair : *Rotate* a new keypair for an existing cluster. The new keypair\n");
-        printf("|                should be valid and comes from the same cloud vendor.\n");
-        printf("|      (Optional)AK (Optional)SK (Optional)ECHO_FLAG\n");
-        printf("|        AK           - cloud access key id\n");
-        printf("|        SK           - cloud access secret id\n");
-        printf("|        ECHO_FLAG    - Specify 'echo' to echo the ak/sk.\n");
-        printf("|  get-conf    : Get the default configuration file to edit and build a customized\n");
-        printf("|                HPC cluster later (using the 'init' command).\n");
-        printf("|  edit-conf   : Edit and save the default configuration file *before* init.\n");
-        printf("|  init        : Initialize a new cluster. If the configuration file is absent,\n");
-        printf("|                the command will generate a default configuration file.\n");
-        printf("|  rebuild     : Rebuild the nodes *without* destroying the cluster's storage.\n");
-        printf("|        REBUILD_OPTION\n");
-        printf("|          mc   - Only rebuild the master and all the compute node(s).\n");
-        printf("|          mcdb - All the nodes above + database node.\n");
-        printf("|          all  - All the nodes above + nat node.\n");
-        printf("+ IV . Cluster Management:\n");
-        printf("|  vault       : Check the sensitive information of the current cluster.\n");
-        printf("|        (Optional)ROOT_FLAG\n");
-        printf("|          root  - Display with root password. By default, the root password is hidden.\n");
-        printf("|  graph       : Display the cluster map including all the nodes and status.\n");
-        printf("|  viewlog     : View the operation log of the current cluster.\n");
-        printf("|      (Optional)STREAM_NAME (Optional)LOG_TYPE (Optional)VIEW_OPTION\n");
-        printf("|        STREAM_NAME - std(default) | err . std: normal output. err: error output.\n");
-        printf("|        LOG_TYPE    - realtime(default) | archive .\n");
-        printf("|                      realtime: view the output of the current on-going operation.\n");
-        printf("|                      archive : view the output for the historical operations.\n");
-        printf("|        VIEW_OPTION - stream(default) | print.\n");
-        printf("|                      stream: refresh the latest lines.\n");
-        printf("|                      print : print out all the lines.\n");
-        printf("+ V  . Cluster Operation:\n");
-        printf("|  delc        : Delete specified compute nodes:\n");
-        printf("|        all     - Delete *ALL* the compute nodes, you can run 'hpcopr addc' to\n");
-        printf("|                  add compute nodes later.\n");
-        printf("|        NUM     - Delete the last NUM of the compute nodes. NUM should be less\n");
-        printf("|                  than the current quantity of compute nodes.\n");
-        printf("|  addc        : Add compute nodes to current cluster. You must specify how many\n");
-        printf("|                to be added.\n");
-        printf("|        NUM     - Add NUM new compute nodes.\n");
-        printf("|  shutdownc   : Shutdown specified compute nodes. Similar to 'delc',\n");
-        printf("|                you can specify to shut down all or part of the compute nodes by\n");
-        printf("|                the param 'all' or 'NUM'.\n");
-        printf("|        all | NUM .\n");
-        printf("|  turnonc     : Turn on specified compute nodes. Similar to 'delc',\n");
-        printf("|                you can specify to turn on all or part of the compute nodes by\n");
-        printf("|                the parameter 'all' or 'NUM'.\n");
-        printf("|        all | NUM .\n");
-        printf("|  reconfc     : Reconfigure all the compute nodes.\n");
-        printf("|      (Optional)NEW_CONFIG (Optional)HT_FLAG\n");
-        printf("|        NEW_CONFIG  - target configuration. i.e.\n");
-        printf("|                a64c128g | i64c128g | a96c192g | i96c192g | a32c64g | i32c64g\n");
-        printf("|                a16c32g  | i16c32g  |    ...   | a2c4g    | i2c4g\n");
-        printf("|                Keep it blank to view all the available options.\n");
-        printf("|        HT_FLAG     - Hyper-Thread flag (hton|htoff). Only valid for AWS.\n");
-        printf("|  reconfm     : Reconfigure the master node.\n");
-        printf("|      (Optional)NEW_CONFIG\n");
-        printf("|        NEW_CONFIG  - target configuration. Keep it blank to view all options.\n");
-        printf("|  sleep       : Turn off all the nodes (management and compute) of the cluster.\n"); 
-        printf("|  wakeup      : Wake up the cluster nodes.\n");
-        printf("|      (Optional)minimal(default) | all\n");
-        printf("|        minimal - Turn on the management nodes of the cluster.\n");
-        printf("|        all     - Turn on the management and compute nodes of the cluster.\n");
-        printf("|  destroy     : *DESTROY* the whole cluster - including all the resources & data.\n");
-        printf("|      (Optional)force\n");
-        printf("|           Specify 'force' as the 2nd param to do force-destroy ( DANGER! ).\n");
-        printf("+ VI . Cluster User Management:\n");
-        print_usrmgr_info("plain");
-        printf("+ VII. Others:\n");
-        printf("|  about       : About this software and HPC-NOW project.\n");
-        printf("|  version     : Display the version info.\n");
-        printf("|  license     : Read the terms and conditions of the GNU Public License - 2.0\n");
-        printf("|  repair      : Try to repair the hpcopr core components.\n");
-        printf("\n");
-        printf("<> visit: https://www.hpc-now.com <> mailto: info@hpc-now.com\n");
     }
-    else{
-        printf(GENERAL_BOLD "[ -INFO- ] Usage: hpcopr " RESET_DISPLAY HIGH_GREEN_BOLD "Command" RESET_DISPLAY " PARAM1 PARAM2 ... (Optional)-c=CLUSTER_NAME\n");
-        printf(GENERAL_BOLD "| " RESET_DISPLAY HIGH_GREEN_BOLD "Commands:\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "+ 0  . Get-Started:\n");
-        printf("|  " HIGH_GREEN_BOLD "envcheck" RESET_DISPLAY "    : Quickly check the running environment.\n");
-        printf(GENERAL_BOLD "+ I  . Multi-Cluster Management:\n");
-        printf("|  " HIGH_GREEN_BOLD "new-cluster" RESET_DISPLAY " : Create a new cluster to initialize.\n");
-        printf("|      (Optional)CLUSTER_NAME (Optional)AK (Optional)SK (Optional)ECHO_FLAG\n");
-        printf("|        CLUSTER_NAME - A-Z | a-z | 0-9 | - , %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
-        printf("|        AK           - cloud access key id\n");
-        printf("|        SK           - cloud access secret id\n");
-        printf("|        ECHO_FLAG    - Specify 'echo' to echo the ak/sk.\n");
-        printf("|  " HIGH_GREEN_BOLD "ls-clusters" RESET_DISPLAY " : List all the current clusters.\n");
-        printf("|  " HIGH_GREEN_BOLD "switch" RESET_DISPLAY "      : Switch to a cluster in the registry to operate.\n");
-        printf("|      (Optional)TARGET_CLUSTER_NAME - Keep it blank to view the cluster list.\n");
-        printf("|  " HIGH_GREEN_BOLD "glance" RESET_DISPLAY "      : View all the clusters or a target cluster.\n");
-        printf("|      (Optional)all - Default to glance the current cluster.\n");
-        printf("|  " HIGH_GREEN_BOLD "refresh" RESET_DISPLAY "     : Refresh the target cluster without changing the resources.\n");
-        printf("|      (Optional)force\n");
-        printf("|        Specify 'force' as the 2nd param to do force-refresh " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
-        printf("|  " HIGH_GREEN_BOLD "exit-current" RESET_DISPLAY ": Exit the current cluster.\n");
-        printf("|  " HIGH_GREEN_BOLD "remove" RESET_DISPLAY "      : Completely remove a cluster from the OS and registry.\n");
-        printf("|      (Optional)force\n");
-        printf("|        Specify 'force' as the 2nd param to do force-remove " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
-        printf(GENERAL_BOLD "+ II. Global Management:\n");
-        printf("|  " HIGH_GREEN_BOLD "help" RESET_DISPLAY "        : Show this page and the information here.\n");
-        printf("|      (Optional)plain - Show this page in plain text (for redirecting to a file).\n");
-        printf("|  " HIGH_GREEN_BOLD "usage" RESET_DISPLAY "       : View and/or export the usage history.\n");
-        printf("|      (Optional)print(default)|read (Optional)EXPORT_DEST\n");
-        printf("|        print - Print all the information to standard output.\n");
-        printf("|        read  - Read the information with 'more'.\n");
-        printf("|        EXPORT_DEST  - Export the plain-text-format to a file..\n");
-        printf("|  " HIGH_GREEN_BOLD "history" RESET_DISPLAY "     : View and/or export the operation log.\n");
-        printf("|      (Optional)print(default)|read (Optional)EXPORT_DEST\n");
-        printf("|  " HIGH_GREEN_BOLD "syserr" RESET_DISPLAY "      : View and/or export the system cmd errors.\n");
-        printf("|      (Optional)print(default)|read (Optional)EXPORT_DEST\n");
-        printf("|  " HIGH_GREEN_BOLD "ssh" RESET_DISPLAY "         : SSH to the master node of a cluster.\n");
-        printf("|      USER_NAME\n"); 
-        printf("|        USER_NAME    - Must specify to log in as which user. For example: user1.\n");
-        printf(WARN_YELLO_BOLD "+  Advanced - For developers:\n" RESET_DISPLAY);
-        printf("|  " HIGH_GREEN_BOLD "configloc" RESET_DISPLAY "   : Configure the locations for the terraform binaries, providers, IaC\n");
-        printf("|                templates and shell scripts.\n");
-        printf("|  " HIGH_GREEN_BOLD "showloc" RESET_DISPLAY "     : Show the current configured locations.\n");
-        printf("|  " HIGH_GREEN_BOLD "showmd5" RESET_DISPLAY "     : Show the md5sum values of core components.\n");
-        printf("|  " HIGH_GREEN_BOLD "resetloc" RESET_DISPLAY "    : Reset to the default locations.\n");
-        printf(GENERAL_BOLD "+ III. Cluster Initialization: \n");
-        printf("|  " HIGH_GREEN_BOLD "new-keypair" RESET_DISPLAY " : *Rotate* a new keypair for an existing cluster. The new keypair\n");
-        printf("|                should be valid and comes from the same cloud vendor.\n");
-        printf("|      (Optional)AK (Optional)SK (Optional)ECHO_FLAG\n");
-        printf("|        AK           - cloud access key id\n");
-        printf("|        SK           - cloud access secret id\n");
-        printf("|        ECHO_FLAG    - Specify 'echo' to echo the ak/sk.\n");
-        printf("|  " HIGH_GREEN_BOLD "get-conf" RESET_DISPLAY "    : Get the default configuration file to edit and build a customized\n");
-        printf("|                HPC cluster later (using the 'init' command).\n");
-        printf("|  " HIGH_GREEN_BOLD "edit-conf" RESET_DISPLAY "   : Edit and save the default configuration file *before* init.\n");
-        printf("|  " HIGH_GREEN_BOLD "init" RESET_DISPLAY "        : Initialize a new cluster. If the configuration file is absent,\n");
-        printf("|                the command will generate a default configuration file.\n");
-        printf("|  " HIGH_GREEN_BOLD "rebuild" RESET_DISPLAY "     : Rebuild the nodes *without* destroying the cluster's storage.\n");
-        printf("|      REBUILD_OPTION\n");
-        printf("|        mc   - Only rebuild the master and all the compute node(s).\n");
-        printf("|        mcdb - All the nodes above + database node.\n");
-        printf("|        all  - All the nodes above + nat node.\n");
-        printf(GENERAL_BOLD "+ IV . Cluster Management:\n");
-        printf("|  " HIGH_GREEN_BOLD "vault" RESET_DISPLAY "       : Check the sensitive information of the current cluster.\n");
-        printf("|      (Optional)ROOT_FLAG\n");
-        printf("|        root  - Display with root password. By default, the root password is hidden.\n");
-        printf("|  " HIGH_GREEN_BOLD "graph" RESET_DISPLAY "       : Display the cluster map including all the nodes and status.\n");
-        printf("|  " HIGH_GREEN_BOLD "viewlog" RESET_DISPLAY "     : View the operation log of the current cluster.\n");
-        printf("|      (Optional)STREAM_NAME (Optional)LOG_TYPE (Optional)VIEW_OPTION\n");
-        printf("|        STREAM_NAME - std(default) | err . std: normal output. err: error output.\n");
-        printf("|        LOG_TYPE    - realtime(default) | archive .\n");
-        printf("|                      realtime: view the output of the current on-going operation.\n");
-        printf("|                      archive : view the output for the historical operations.\n");
-        printf("|        VIEW_OPTION - stream(default) | print.\n");
-        printf("|                      stream: refresh the latest lines.\n");
-        printf("|                      print : print out all the lines.\n");
-        printf(GENERAL_BOLD "+ V  . Cluster Operation:\n");
-        printf("|  " HIGH_GREEN_BOLD "delc" RESET_DISPLAY "        : Delete specified compute nodes:\n");
-        printf("|        all     - Delete *ALL* the compute nodes, you can run 'hpcopr addc' to\n");
-        printf("|                  add compute nodes later.\n");
-        printf("|        NUM     - Delete the last NUM of the compute nodes. NUM should be less\n");
-        printf("|                  than the current quantity of compute nodes.\n");
-        printf("|  " HIGH_GREEN_BOLD "addc" RESET_DISPLAY "        : Add compute nodes to current cluster. You must specify how many\n");
-        printf("|                to be added.\n");
-        printf("|        NUM    - Add NUM new compute nodes.\n");
-        printf("|  " HIGH_GREEN_BOLD "shutdownc" RESET_DISPLAY "   : Shutdown specified compute nodes. Similar to 'delc',\n");
-        printf("|                you can specify to shut down all or part of the compute nodes by\n");
-        printf("|                the param 'all' or 'NUM'.\n");
-        printf("|        all | NUM .\n");
-        printf("|  " HIGH_GREEN_BOLD "turnonc" RESET_DISPLAY "     : Turn on specified compute nodes. Similar to 'delc',\n");
-        printf("|                you can specify to turn on all or part of the compute nodes by\n");
-        printf("|                the parameter 'all' or 'NUM'.\n");
-        printf("|        all | NUM .\n");
-        printf("|  " HIGH_GREEN_BOLD "reconfc" RESET_DISPLAY "     : Reconfigure all the compute nodes.\n");
-        printf("|      (Optional)NEW_CONFIG (Optional)HT_FLAG\n");
-        printf("|        NEW_CONFIG  - target configuration. i.e.\n");
-        printf("|                  a64c128g | i64c128g | a96c192g | i96c192g | a32c64g | i32c64g\n");
-        printf("|                  a16c32g  | i16c32g  |    ...   | a2c4g    | i2c4g\n");
-        printf("|          Keep it blank to view all the available options.\n");
-        printf("|        HT_FLAG     - Hyper-Thread flag (hton|htoff). Only valid for AWS.\n");
-        printf("|  " HIGH_GREEN_BOLD "reconfm" RESET_DISPLAY "     : Reconfigure the master node.\n");
-        printf("|      (Optional)NEW_CONFIG\n");
-        printf("|          NEW_CONFIG  - target configuration. Keep it blank to view all options.\n");
-        printf("|  " HIGH_GREEN_BOLD "sleep" RESET_DISPLAY "       : Turn off all the nodes (management and compute) of the cluster.\n"); 
-        printf("|  " HIGH_GREEN_BOLD "wakeup" RESET_DISPLAY "      : Wake up the cluster nodes.\n");
-        printf("|      (Optional)minimal(default) | all\n");
-        printf("|        minimal - Turn on the management nodes of the cluster.\n");
-        printf("|        all     - Turn on the management and compute nodes of the cluster.\n");
-        printf("|  " HIGH_GREEN_BOLD "destroy" RESET_DISPLAY "     : *DESTROY* the whole cluster - including all the resources & data.\n");
-        printf("|      (Optional)force\n");
-        printf("|        Specify 'force' as the 2nd param to do force-destroy " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
-        printf(GENERAL_BOLD "+ VI . Cluster User Management:\n");
-        print_usrmgr_info("");
-        printf(GENERAL_BOLD "+ VII. Others:\n" RESET_DISPLAY);
-        printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       : About this software and HPC-NOW project.\n");
-        printf("|  " HIGH_GREEN_BOLD "version" RESET_DISPLAY "     : Display the version info.\n");
-        printf("|  " HIGH_GREEN_BOLD "license" RESET_DISPLAY "     : Read the terms and conditions of the GNU Public License - 2.0\n");
-        printf("|  " HIGH_GREEN_BOLD "repair" RESET_DISPLAY "      : Try to repair the hpcopr core components.\n");
-        printf("\n");
-        printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com" GENERAL_BOLD " <> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
+    if(strcmp(cmd_name,"configloc")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "configloc" RESET_DISPLAY "   :~ Configure the locations for the terraform binaries, providers\n");
+        printf("|              :~ IaC templates and shell scripts.\n");
     }
+    if(strcmp(cmd_name,"showloc")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "showloc" RESET_DISPLAY "     :~ Show the current configured locations.\n");
+    }
+    if(strcmp(cmd_name,"showmd5")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "showmd5" RESET_DISPLAY "     :~ Show the md5sum values of core components.\n");
+    }
+    if(strcmp(cmd_name,"resetloc")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "resetloc" RESET_DISPLAY "    :~ Reset to the default locations.\n");
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ III  . Cluster Initialization: \n" RESET_DISPLAY);
+    }
+    if(strcmp(cmd_name,"new-keypair")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "new-keypair" RESET_DISPLAY " :~ *Rotate* a new keypair for an existing cluster. The new keypair\n");
+        printf("|              :~  should be valid and comes from the same cloud vendor.\n");
+        printf("|   --ak     ACCESS_KEY   ~ Cloud access key id\n");
+        printf("|   --sk     SECRET_KEY   ~ cloud access secret id\n");
+        printf("|   --echo                ~ Specify 'echo' to echo the ak/sk.\n");
+    }
+    if(strcmp(cmd_name,"get-conf")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "get-conf" RESET_DISPLAY "    :~ Get the default configuration file to edit and build a customized\n");
+        printf("|                HPC cluster later (using the 'init' command).\n");
+    }
+    if(strcmp(cmd_name,"edit-conf")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "edit-conf" RESET_DISPLAY "   :~ Edit and save the default configuration file *before* init.\n");
+    }
+    if(strcmp(cmd_name,"rm-conf")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "rm-conf" RESET_DISPLAY "     :~ Remove the configuration file *before* init.\n");
+    }
+    if(strcmp(cmd_name,"init")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "init" RESET_DISPLAY "        :~ Initialize a new cluster. If the configuration file is absent,\n");
+        printf("|              :~ the command will generate a default configuration file.\n");
+        printf("|   --rg REGION_ID    ~ Cloud Region ID\n");
+        printf("|   --az AZ_ID        ~ Cloud Availability Zone ID\n");
+        printf("|   --nn NODE_NUM     ~ Initial compute number\n");
+        printf("|   --un USER_NUM     ~ Initial cluster user number\n");
+        printf("|   --mi MASTER_INST  ~ Master node instance type\n");
+        printf("|   --ci COMPUTE_INST ~ Compute node instance type\n");
+        printf("|   --ht ON | OFF     ~ Hyperthreading option for AWS\n");
+        printf("|   --force           ~ Remove existed conf file\n");
+    }
+    if(strcmp(cmd_name,"rebuild")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "rebuild" RESET_DISPLAY "     :~ Rebuild the nodes *without* destroying the cluster's storage.\n");
+        printf("|   --mc              ~ Only rebuild the master and all the compute node(s).\n");
+        printf("|   --mcdb            ~ All the nodes above + database node.\n");
+        printf("|   --all             ~ All the nodes above + nat node.\n");
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ IV   . Cluster Management:\n" RESET_DISPLAY);
+    }
+    if(strcmp(cmd_name,"vault")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "vault" RESET_DISPLAY "       :~ Check the sensitive information of the current cluster.\n");
+        printf("|   -u     USER_NAME   ~ A Valid cluster user.\n");
+        printf("|   --bkey             ~ Display the cloud bucket AccessKey and SecretKey.\n");
+        printf("|   --rkey             ~ " WARN_YELLO_BOLD "(RISKY!)" RESET_DISPLAY " Display with root password. By default, it is hidden.\n");
+    }
+    if(strcmp(cmd_name,"graph")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "graph" RESET_DISPLAY "       :~ Display the cluster map including all the nodes and status.\n");
+        printf("|   --level DISP_LEVEL ~ You can choose to graph with 'csv','txt', or 'topo'\n");
+    }
+    if(strcmp(cmd_name,"viewlog")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "viewlog" RESET_DISPLAY "     :~ View the operation log of the current cluster.\n");
+        printf("|   --std  | --err     ~ Choose Standard output or Standart err stream.\n");
+        printf("|   --this | --hist    ~ Choose the log of this run or historical runs.\n");
+        printf("|   --print            ~ Print out (not stream out) the contents.\n");
+        printf("|    -d   EXPORT_DEST  ~ Export the log to a specified folder or file.\n");
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ V  . Cluster Operation:\n" RESET_DISPLAY);
+    }
+    if(strcmp(cmd_name,"delc")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "delc" RESET_DISPLAY "        :~ Delete specified compute nodes:\n");
+        printf("|   --all         ~ Delete *ALL* the compute nodes, you can run 'hpcopr addc' to\n");
+        printf("|                 ~ add compute nodes later.\n");
+        printf("|   --nn NODE_NUM ~ Delete the last NUM of the compute nodes. NUM should be less\n");
+        printf("|                 ~ than the current quantity of compute nodes.\n");
+    }
+    if(strcmp(cmd_name,"addc")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "addc" RESET_DISPLAY "        :~ Add compute nodes to current cluster. You must specify how many\n");
+        printf("|              :~ to be added.\n");
+        printf("|   --nn NODE_NUM ~ Add NUM new compute nodes.\n");
+    }
+    if(strcmp(cmd_name,"shutdownc")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "shutdownc" RESET_DISPLAY "   :~ Shutdown specified compute nodes. Similar to 'delc',\n");
+        printf("|              :~ you can specify to shut down all or part of the compute nodes by\n");
+        printf("|              :~ the param 'all' or 'NUM'.\n");
+        printf("|   --all | --nn NODE_NUM .\n");
+    }
+    if(strcmp(cmd_name,"turnonc")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "turnonc" RESET_DISPLAY "     :~ Turn on specified compute nodes. Similar to 'delc',\n");
+        printf("|              :~ you can specify to turn on all or part of the compute nodes by\n");
+        printf("|              :~ the parameter 'all' or 'NUM'.\n");
+        printf("|   --all | --nn NODE_NUM .\n");
+    }
+    if(strcmp(cmd_name,"reconfc")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "reconfc" RESET_DISPLAY "     :~ Reconfigure all the compute nodes.\n");
+        printf("|   --list             ~ List out all the available configurations\n");
+        printf("|   --conf NEW_CONFIG  ~ Specify the new_configuration.\n");
+        printf("|   --ht   ON|OFF      ~ Turn on or off hyperthreading for AWS clusters.\n");
+    }
+    if(strcmp(cmd_name,"reconfm")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "reconfm" RESET_DISPLAY "     :~ Reconfigure the master node.\n");
+        printf("|   --list             ~ List out all the available configurations\n");
+        printf("|   --conf NEW_CONFIG  ~ Specify the new_configuration.\n");
+    }
+    if(strcmp(cmd_name,"sleep")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "sleep" RESET_DISPLAY "       :~ Turn off all the nodes (management and compute) of the cluster.\n"); 
+    }
+    if(strcmp(cmd_name,"wakeup")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "wakeup" RESET_DISPLAY "      :~ Wake up the cluster nodes.\n");
+        printf("|   --minimal      ~ Turn on the management nodes of the cluster.\n");
+        printf("|   --all          ~ Turn on the management and compute nodes of the cluster.\n");
+    }
+    if(strcmp(cmd_name,"destroy")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "destroy" RESET_DISPLAY "     :~ *DESTROY* the whole cluster - including all the resources & data.\n");
+        printf("|   --force        ~ Do force-destroy " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
+    }
+    if(strcmp(cmd_name,"payment")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "payment" RESET_DISPLAY "     :~ Switch the payment method between on-demand and monthly.\n");
+        printf("|   --od          ~ Switch to On-Demand method.\n");
+        printf("|   --month       ~ Switch to Monthly-pay method.\n");
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ VI   . Cluster User Management:\n" RESET_DISPLAY);
+    }
+    if(strcmp(cmd_name,"userman")==0||strcmp(cmd_name,"all")==0){
+        print_usrmgr_info();
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ VII  . Cluster Data Management:\n" RESET_DISPLAY);
+    }
+    if(strcmp(cmd_name,"dataman")==0||strcmp(cmd_name,"all")==0){
+        print_dataman_info();
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ VIII . Others:\n" RESET_DISPLAY);
+    }
+    if(strcmp(cmd_name,"about")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       :~ About this software and HPC-NOW project.\n");
+    }
+    if(strcmp(cmd_name,"version")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "version" RESET_DISPLAY "     :~ Display the version info.\n");
+    }
+    if(strcmp(cmd_name,"license")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "license" RESET_DISPLAY "     :~ Read the terms of the GNU Public License-v2.0\n");
+        printf("|   --print           ~ Print out the license terms.\n");
+        printf("|   --read            ~ Read the license terms.\n");
+    }
+    if(strcmp(cmd_name,"repair")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "repair" RESET_DISPLAY "      :~ Try to repair the hpcopr core components.\n");
+    }
+    printf("\n");
+    printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com " GENERAL_BOLD "<> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
 }
 
 void print_header(void){
@@ -286,7 +300,7 @@ void print_header(void){
     time_p=localtime(&current_time_long);
     printf(GENERAL_BOLD "|   /HPC->  Welcome to HPC-NOW Cluster Operator! Version: %s\n",CORE_VERSION_CODE);
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n" RESET_DISPLAY);
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n" RESET_DISPLAY "\n");
 }
 
 void print_tail(void){
@@ -320,18 +334,33 @@ void print_about(void){
     print_tail();
 }
 
-int read_license(void){
+int read_license(char* option){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     sprintf(filename_temp,"%s%sGPL-2",NOW_LIC_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        sprintf(cmdline,"more %s",filename_temp);
+        if(strcmp(option,"print")==0){
+            sprintf(cmdline,"%s %s",CAT_FILE_CMD,filename_temp);
+        }
+        else{
+            sprintf(cmdline,"more %s",filename_temp);
+        }
         system(cmdline);
         return 0;
     }
-    sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
+    if(strcmp(option,"print")==0){
+        sprintf(cmdline,"curl -s %s",URL_LICENSE);
+    }
+    else{
+        sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
+    }
     if(system(cmdline)!=0){
-        sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
+        if(strcmp(option,"print")==0){
+            sprintf(cmdline,"curl -s %s",URL_LICENSE_FSF);
+        }
+        else{
+            sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
+        }
         if(system(cmdline)!=0){
             return 1;
         }
@@ -339,39 +368,55 @@ int read_license(void){
     return 0;
 }
 
-void print_usrmgr_info(char* plain_flag){
-    if(strcmp(plain_flag,"plain")==0){
-        printf("| Usage: hpcopr userman Option (Optional)USERMAN_PARAM1 (Optional)USERMAN_PARAM2\n");
-        printf("| * The cluster must be in running state (minimal or all). *\n");
-        printf("|        list    : List all the current cluster users.\n");
-        printf("|        add     : Add a user to the cluster. By default, added users are enabled.\n");
-        printf("|          USERMAN_PARAM1   - Username string (A-Z | a-z | - , Length %d-%d)\n",USERNAME_LENGTH_MIN,USERNAME_LENGTH_MAX);
-        printf("|          USERMAN_PARAM2   - password string\n");
-        printf("|        delete  : Delete a user from the cluster.\n");
-        printf("|          USERMAN_PARAM1   - Username to be deleted\n");
-        printf("|        enable  : Enable a *disabled* user. Enabled users can run HPC workloads.\n");
-        printf("|          USERMAN_PARAM1   - Username to be enabled\n");
-        printf("|        disable : Disable a user. Disabled users still can access the cluster.\n");
-        printf("|          USERMAN_PARAM1   - Username to be enabled\n");
-        printf("|        passwd  : Change user's password.\n");
-        printf("|          USERMAN_PARAM1   - An existed username\n");
-        printf("|          USERMAN_PARAM2   - new password string\n");
-    }
-    else{
-        printf(GENERAL_BOLD "| Usage:" RESET_DISPLAY HIGH_GREEN_BOLD " hpcopr userman" RESET_DISPLAY HIGH_CYAN_BOLD " Option" RESET_DISPLAY GENERAL_BOLD " (Optional)" RESET_DISPLAY "USERMAN_PARAM1 " GENERAL_BOLD "(Optional)" RESET_DISPLAY "USERMAN_PARAM2\n");
-        printf(GENERAL_BOLD "| * The cluster must be in running state (minimal or all). *\n" RESET_DISPLAY);
-        printf("|        " HIGH_CYAN_BOLD "list" RESET_DISPLAY "    : List all the current cluster users.\n");
-        printf("|        " HIGH_CYAN_BOLD "add" RESET_DISPLAY "     : Add a user to the cluster. By default, added users are enabled.\n");
-        printf("|          USERMAN_PARAM1   - Username string " WARN_YELLO_BOLD "(A-Z | a-z | - , Length %d-%d)" RESET_DISPLAY "\n",USERNAME_LENGTH_MIN,USERNAME_LENGTH_MAX);
-        printf("|          USERMAN_PARAM2   - password string\n");
-        printf("|        " HIGH_CYAN_BOLD "delete" RESET_DISPLAY "  : Delete a user from the cluster.\n");
-        printf("|          USERMAN_PARAM1   - Username to be deleted\n");
-        printf("|        " HIGH_CYAN_BOLD "enable" RESET_DISPLAY "  : Enable a *disabled* user. Enabled users can run HPC workloads.\n");
-        printf("|          USERMAN_PARAM1   - Username to be enabled\n");
-        printf("|        " HIGH_CYAN_BOLD "disable" RESET_DISPLAY " : Disable a user. Disabled users still can access the cluster.\n");
-        printf("|          USERMAN_PARAM1   - Username to be enabled\n");
-        printf("|        " HIGH_CYAN_BOLD "passwd" RESET_DISPLAY "  : Change user's password.\n");
-        printf("|          USERMAN_PARAM1   - An existed username\n");
-        printf("|          USERMAN_PARAM2   - new password string\n");
-    }
+void print_usrmgr_info(void){
+    printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "userman" RESET_DISPLAY " --ucmd USER_CMD [ KEY_WORD1 KEY_STRING1 ] ...\n");
+    printf("| * The cluster must be in running state (minimal or all). *\n");
+    printf("|   --ucmd list    ~ List all the current cluster users.\n");
+    printf("|   --ucmd add     ~ Add a user to the cluster. By default, added users are enabled.\n");
+    printf("|     -u     USERNAME   ~ Username string (A-Z | a-z | - , Length %d-%d)\n",USERNAME_LENGTH_MIN,USERNAME_LENGTH_MAX);
+    printf("|     -p     PASSWORD   ~ password string.\n");
+    printf("|   --ucmd delete  ~ Delete a user from the cluster.\n");
+    printf("|     -u     USERNAME   ~ Username to be deleted.\n");
+    printf("|   --ucmd enable  ~ Enable a *disabled* user. Enabled users can run HPC workloads.\n");
+    printf("|     -u     USERNAME   ~ Username to be enabled.\n");
+    printf("|   --ucmd disable ~ Disable a user. Disabled users still can access the cluster.\n");
+    printf("|     -u     USERNAME   ~ Username to be disabled.\n");
+    printf("|   --ucmd passwd  ~ Change user's password.\n");
+    printf("|     -u     USERNAME   ~ An existed username.\n");
+    printf("|     -p     PASSWORD   ~ New password string.\n");
+}
+
+void print_dataman_info(void){
+    printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "dataman" RESET_DISPLAY " CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...\n");
+    printf("| General Flags    :~ -r, -rf, --recursive, --force, -f.\n");
+    printf("|    -s SOURCE_PATH  ~ Source path of the binary operations. i.e. cp\n");
+    printf("|    -d DEST_PATH    ~ Destination path of binary operations. i.e. cp\n");
+    printf("|    -t TARGET_PATH  ~ Target path of unary operations. i.e. ls\n");
+    printf("| Bucket Operations:~ Transfer and manage data with the bucket.\n");
+    printf("|   --dcmd put       ~ Upload a local file or folder to the bucket path.\n");
+    printf("|   --dcmd get       ~ Download a bucket object(file or folder) to the local path.\n");
+    printf("|   --dcmd copy      ~ Copy a bucket object to another folder/path.\n");
+    printf("|   --dcmd list      ~ Show the object list of a specified folder/path.\n");
+    printf("|   --dcmd delete    ~ Delete an object (file or folder) of the bucket.\n");
+    printf("|   --dcmd move      ~ Move an existed object (file or folder) in the bucket.\n");
+    printf("|    Example: hpcopr dataman --dcmd put -s ./foo -d /foo -u user1\n");
+    printf("| Direct Operations:~ Transfer and manage data in the cluster storage.\n");
+    printf("| * The cluster must be in running state (minimal or all). *\n");
+    printf("|   --dcmd cp        ~ Remote copy between local and the cluster storage.\n");
+    printf("|   --dcmd mv        ~ Move the remote files/folders in the cluster storage.\n");
+    printf("|   --dcmd ls        ~ List the files/folders in the cluster storage.\n");
+    printf("|   --dcmd rm        ~ Remove the files/folders in the cluster storage.\n");
+    printf("|   --dcmd mkdir     ~ Make a directory in the cluster storage.\n");
+    printf("|   --dcmd cat       ~ Print out a remote plain text file.\n");
+    printf("|   --dcmd more      ~ Read a remote file.\n");
+    printf("|   --dcmd less      ~ Read a remote file.\n");
+    printf("|   --dcmd tail      ~ Streaming out a remote file dynamically.\n");
+    printf("|   --dcmd rput      ~ Upload a *remote* file or folder to the bucket path.\n");
+    printf("|   --dcmd rget      ~ Download a bucket object(file or folder) to the *remote* path.\n");
+    printf("|     @h/ to specify the $HOME prefix of the cluster.\n");
+    printf("|     @d/ to specify the /hpc_data/user_data prefix.\n");
+    printf("|     @a/ to specify the /hpc_apps/ prefix, only for root or user1.\n");
+    printf("|     @p/ to specify the public folder prefix " WARN_YELLO_BOLD "( INSECURE !)" RESET_DISPLAY ".\n");
+    printf("|     @R/ to specify the / prefix, only for root or user1.\n");
+    printf("|    Example: hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1\n");
 }

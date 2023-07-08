@@ -36,7 +36,11 @@
 
 如前所述，**hpcopr** 是您操作和管理 Cloud HPC 集群的核心界面。 **hpcopr** 目前以命令行的形式提供多种功能。您可以运行 `hpcopr help` 命令查看详细的帮助信息，主要如下：
 
- **`hpcopr command_name PARAM1 PARAM2 ... -c=CLUSTER_NAME`** 
+ **`hpcopr command_name CMD_FLAG ... [ CMD_KEYWORD1 CMD_KEY_STRING1 ] ...`** 
+
+CMD_FLAG: 单值选项，例如 --force，--all 等
+
+CMD_KEYWORD: 键值选项，例如 -c myFirstCluster
 
 ##### 3.0 快速环境检查
 
@@ -49,6 +53,8 @@
 - switch ：切换集群，您需要提供目标集群的名字作为命令参数
 - glance ：查看集群。您可以用 'all' 或者 目标集群的名字作为命令参数，以分别快速查看所有集群或者某个集群
 - refresh：刷新集群。您可以不用参数以刷新当前集群（如果您已切换至一个集群）或者将目标集群的名字作为命令参数，以刷新目标集群
+- export: 加密导出集群，以供他人使用或管理
+- import: 解密导入集群，以进行使用或管理
 - exit-current ：退出当前集群。
 - remove ：彻底删除某个集群。您需要提供目标集群的名字作为命令参数
 
@@ -56,6 +62,7 @@
 
 - help ：显示详细的帮助信息
 - usage ：以文本方式查看集群的用量统计，该命令同样会将最新的用量统计导出到您的工作目录中
+- monman: 获取、筛选、导出集群的监控数据，包括 CPU 利用率、内存利用率、存储占用等关键信息
 - history ：以文本方式查看 hpcopr 的命令运行历史记录
 - syserr ：以文本方式查看系统命令的报警和错误，一般用于故障排查
 - ssh ： 免密 SSH 登录至您的当前集群
@@ -97,16 +104,51 @@
 
 注意：用户管理功能要求您的集群处于（最小或完整）运行状态。
 
-用法：hpcopr userman 管理选项 参数1 参数2 ...
+用法：hpcopr userman --ucmd USER_CMD [CMD_KEYWORD CMD_KEY_STRING] ...
 
-- userman add ： 新增一个用户。该命令最多可以带两个字符串作为参数，分别是用户名和密码
-- userman delete ：删除一个用户。该命令最多可以带一个字符串作为参数，用于指定用户名
-- userman list ： 列出当前的所有用户。该命令无需携带参数
-- userman enable ： 激活一个已存在的用户，处于 enabled 的用户可以提交超算任务。该命令最多可以携带一个字符串作为参数，用于指定用户名
-- userman disable：注销一个已经活跃用户，处于 disabled 的用户仍然可以登录集群，但是无法提交超算任务。该命令最多可以携带一个字符串作为参数，用户指定用户名
-- userman passwd ：重置用户的密码。该命令最多可以携带两个字符串作为参数，用于指定用户名（已存在）和新的密码字符串
+- --ucmd add ： 新增一个用户。该命令最多可以带两个字符串作为参数，分别是用户名和密码
+- --ucmd delete ：删除一个用户。该命令最多可以带一个字符串作为参数，用于指定用户名
+- --ucmd list ： 列出当前的所有用户。该命令无需携带参数
+- --ucmd enable ： 激活一个已存在的用户，处于 enabled 的用户可以提交超算任务。该命令最多可以携带一个字符串作为参数，用于指定用户名
+- --ucmd disable：注销一个已经活跃用户，处于 disabled 的用户仍然可以登录集群，但是无法提交超算任务。该命令最多可以携带一个字符串作为参数，用户指定用户名
+- --ucmd passwd ：重置用户的密码。该命令最多可以携带两个字符串作为参数，用于指定用户名（已存在）和新的密码字符串
 
-##### 3.7 其他功能：
+##### 3.7 数据管理：
+
+用法： hpcopr dataman --dcmd DATA_CMD CMD_FLAGS ... [CMD_KEYWORD CMD_KEY_STRING] ...
+
+存储桶级别操作：用于用户本地与集群存储桶之间的数据传输
+
+- --dcmd put ： 将本地文件或目录上传至存储桶
+- --dcmd get ： 将存储桶中的文件或目录下载至本地
+- --dcmd list ： 列出存储桶中的目录
+- --dcmd copy ： 复制存储桶中的对象（文件或目录）
+- --dcmd delete ： 删除存储桶中的对象（文件或目录）
+- --dcmd move ： 移动存储桶中的对象（文件或目录）
+
+集群存储级别操作：用于用户本地与远程集群中的直连数据操作
+
+- --dcmd cp : 用户将本地文件复制到远程目录、将远程目录复制到本地、远程目录之间的复制
+- --dcmd mv ： 远程目录之间移动
+- --dcmd ls ： 列出远程目录中的内容
+- --dcmd rm ： 删除远程目录中的内容
+- --dcmd mkdir ： 创建集群远程文件夹
+- --dcmd cat ： 查看集群远程文件内容
+- --dcmd more ： 阅读集群远程文件内容
+- --dcmd less ： 功能同 more
+- --dcmd tail ： 动态刷新查看集群远程文件的内容
+- --dcmd rput ： 将集群上的远程文件上传至集群存储桶
+- --dcmd rget ： 将存储桶中的文件或文件夹下载至集群目录中
+
+集群存储远程目录的前缀：
+
+- @h/: 用户家目录
+- @d/: 用户数据目录
+- @p/: 公共目录
+- @a/: 集群应用目录
+- @R/：集群的根目录
+
+##### 3.8 其他功能：
 
 - about ：关于本程序
 - license ：阅读程序的 License，本程序使用 GNU Public License 作为主要 License。其余开源组件的 License 将在后续包含进来
@@ -161,7 +203,7 @@
 - cd C:\Users\ABC\hpc-now\build
 - 您可以选择不同的安装选项：
     - 如您想要使用在步骤 5 中自行构建的 hpcopr-win.exe，请运行：
-        - .\installer-win.exe install hpcoprloc=hpcopr-win.exe （建议开发者）
+        - .\installer-win.exe install --hloc hpcopr-win.exe （建议开发者）
     - 如您想使用默认的最新版本 hpcopr-win.exe，请运行：
         - .\installer-win.exe install （建议一般用户）
     - 同样的，如您想要使用自行构建的 now-crypto-lin.exe，可参考如上方式添加 cryptoloc=now-crypto-lin.exe 参数。
@@ -186,7 +228,7 @@
 - cd /home/ABC/hpc-now/build
 - 您可以选择不同的安装选项：
     - 如您想要使用在步骤 5 中自行构建的 hpcopr-lin.exe，请运行：
-        - sudo ./installer-lin.exe install hpcoprloc=hpcopr-lin.exe （建议开发者）
+        - sudo ./installer-lin.exe install --hloc hpcopr-lin.exe （建议开发者）
     - 如您想使用默认的最新版本 hpcopr-lin.exe，请运行：
         - sudo ./installer-lin.exe install （建议一般用户）
     - 同样的，如您想要使用自行构建的 now-crypto-lin.exe，可参考如上方式添加 cryptoloc=now-crypto-lin.exe 参数。
@@ -213,7 +255,7 @@
 - cd /Users/ABC/hpc-now/build
 - 您可以选择不同的安装选项：
     - 如您想要使用在步骤 5 中自行构建的 hpcopr-dwn.exe，请运行：
-        - sudo ./installer-dwn.exe install hpcoprloc=hpcopr-dwn.exe （建议开发者）
+        - sudo ./installer-dwn.exe install --hloc hpcopr-dwn.exe （建议开发者）
     - 如您想使用默认的最新版本 hpcopr-dwn.exe，请运行：
         - sudo ./installer-dwn.exe install （建议一般用户）
     - 同样的，如您想要使用自行构建的 now-crypto-dwn.exe，可参考如上方式添加 cryptoloc=now-crypto-dwn.exe 参数。
