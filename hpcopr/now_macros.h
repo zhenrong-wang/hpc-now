@@ -187,11 +187,11 @@
 #define LINE_LENGTH_SHORT 256
 #define AKSK_LENGTH 128
 #define CONF_STRING_LENTH 64
-#define COMMAND_NUM 44
+#define COMMAND_NUM 45
 #define DATAMAN_COMMAND_NUM 17
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 12
-#define CMD_FLAG_NUM 21
+#define CMD_FLAG_NUM 23
 #define CMD_KWDS_NUM 30
 
 /* Usually you don't need to modify the macros in this section.*/

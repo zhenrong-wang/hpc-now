@@ -255,6 +255,11 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "destroy" RESET_DISPLAY "     :~ *DESTROY* the whole cluster - including all the resources & data.\n");
         printf("|   --force        ~ Do force-destroy " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");
     }
+    if(strcmp(cmd_name,"payment")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "payment" RESET_DISPLAY "     :~ Switch the payment method between on-demand and monthly.\n");
+        printf("|   --od          ~ Switch to On-Demand method.\n");
+        printf("|   --month       ~ Switch to Monthly-pay method.\n");
+    }
     if(strcmp(cmd_name,"all")==0){
         printf(GENERAL_BOLD "+ VI   . Cluster User Management:\n" RESET_DISPLAY);
     }

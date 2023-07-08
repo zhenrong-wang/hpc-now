@@ -80,6 +80,9 @@ int exit_current_cluster(void);
 int delete_from_cluster_registry(char* deleted_cluster_name);
 int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords);
 
+void modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer);
+int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag);
+
 /*  
  * If silent_flag==1, verbose. Will tell the user which cluster is active
  * If silent_flag==0, silent. Will print nothing

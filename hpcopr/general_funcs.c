@@ -47,7 +47,9 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--rkey", // display root passwd
     "--admin", //export admin privilege
     "--accept", // accept license terms
-    "--echo" //echo_flag
+    "--echo", //echo_flag
+    "--od",
+    "--month"
 };
 
 char command_keywords[CMD_KWDS_NUM][16]={
@@ -1015,10 +1017,14 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     if(file_exist_or_not(filename)!=0){
         return -1;
     }
+    if(strlen(key)==0){
+        return -3;
+    }
     FILE* file_p=fopen(filename,"r");
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char line_buffer[LINE_LENGTH]="";
+    int getline_flag=0;
     sprintf(filename_temp,"%s.del.tmp",filename);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
@@ -1026,11 +1032,13 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
         return -1;
     }
     while(!feof(file_p)){
-        fgetline(file_p,line_buffer);
+        getline_flag=fgetline(file_p,line_buffer);
         if(contain_or_not(line_buffer,key)==0){
             continue;
         }
-        fprintf(file_p_tmp,"%s\n",line_buffer);
+        if(getline_flag==0){
+            fprintf(file_p_tmp,"%s\n",line_buffer);
+        }
     }
     fclose(file_p);
     fclose(file_p_tmp);
