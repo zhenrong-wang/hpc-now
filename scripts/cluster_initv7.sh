@@ -11,6 +11,8 @@
 # Define URL prefixes for the 'wget' command
 
 logfile='/root/cluster_init.log'
+public_app_registry="/usr/hpc-now/.public_apps.reg"
+
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Initialization started." >> ${logfile}
 grep openEuler /etc/system-release
@@ -73,8 +75,8 @@ mkdir -p /root/.cluster_secrets
 mkdir -p /root/.sshkey_deleted
 time1=$(date)
 echo -e  "\n${time1}" >> ${logfile}
-if [ ! -n "$1" ] || [ ! -n "$2" ] || [ ! -n "$3" ]; then
-  echo -e "Lack of Parameters.\n# arg1: #\n# arg2: db\n# arg3: mpi\n# arg4: gcc8\n# arg5: of7\nPLEASE PAY ATTENTION TO THE SEQUENCE OF THE PARAMETERS!\nExit now."
+if [ ! -n "$1" ] || [ ! -n "$2" ]; then
+  echo -e "Lack of Parameters.\n# arg1: #\n# arg2: db\nPLEASE PAY ATTENTION TO THE SEQUENCE OF THE PARAMETERS!\nExit now."
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "![IMPORTANT]\n# $time_current Cluster initialization failed due to lack of command parameters.\n" >> ${logfile}
   exit
@@ -95,7 +97,6 @@ echo -e "# Plan create $1 users." >> ${logfile}
 yum -y install openssl openssl-devel wget unzip curl make perl
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 SELINUX_STATUS=`getenforce`
-APP_ROOT="/hpc_apps"
 echo -e "source /etc/profile" >> /root/.bashrc
 
 if [ -f /root/hostfile ]; then
@@ -110,16 +111,7 @@ wget ${SCRIPTS_URL_ROOT}nowmon_agt.sh -O /usr/hpc-now/nowmon_agt.sh && chmod +x 
 if [ -f /root/hostfile ]; then
   wget ${SCRIPTS_URL_ROOT}nowmon_mgr.sh -O /usr/hpc-now/nowmon_mgr.sh && chmod +x /usr/hpc-now/nowmon_mgr.sh
 fi
-
-echo -e "# $time_current Spawning ssh keys." >> ${logfile}
-if [ -f /root/hostfile ]; then 
-  cat /hpc_apps/compute_nodes_ip.txt | grep compute >> /root/hostfile
-  rm -rf /hpc_apps/compute_nodes_ip.txt
-  number_of_nodes=`cat /root/hostfile | grep compute | wc -l`
-  sed -i '/NODE_NUM/d' /etc/profile
-  echo -e "export NODE_NUM=$number_of_nodes" >> /etc/profile
-  source /etc/profile
-fi
+touch $public_app_registry
 
 # Add user slurm 
 id -u slurm
@@ -152,8 +144,11 @@ do
     cat /home/${user_name}/.ssh/id_rsa.pub >> /home/${user_name}/.ssh/authorized_keys
     cat /etc/now-pubkey.txt >> /home/${user_name}/.ssh/authorized_keys
     mkdir -p /hpc_data/${user_name}_data
+    mkdir -p /hpc_apps/${user_name}_apps
     chmod -R 750 /hpc_data/${user_name}_data
+    chmod -R 750 /hpc_apps/${user_name}_apps
     chown -R ${user_name}:${user_name} /hpc_data/${user_name}_data
+    chown -R ${user_name}:${user_name} /hpc_apps/${user_name}_apps
   fi
   chown -R ${user_name}:${user_name} /home/${user_name}
 done < /root/user_secrets.txt
@@ -170,13 +165,11 @@ echo -e "# $time_current SELINUX Disabled." >> ${logfile}
 if [ $cloud_flag = 'CLOUD_B' ]; then
   yum -y update
   yum -y install https://mirrors.cloud.tencent.com/epel/epel-release-latest-9.noarch.rpm
-#  yum -y install https://mirrors.cloud.tencent.com/epel/epel-next-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.cloud.tencent.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 elif [ $cloud_flag = 'CLOUD_A' ]; then
   yum -y update
   yum -y install https://mirrors.aliyun.com/epel/epel-release-latest-9.noarch.rpm
-#  yum -y install https://mirrors.aliyun.com/epel/epel-next-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.aliyun.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 else
@@ -412,6 +405,7 @@ if [ -f /root/hostfile ]; then
   fi
   systemctl set-default graphical.target
   yum -y install tigervnc tigervnc-server
+  echo -e "desktop_env" >> $public_app_registry
 # yum -y install xrdp 
 # FATAL: xrdp-0.9.22 fails to work. We have to build xrdp from source.
   yum -y remove xrdp # For Amazon Machines, xrdp may have been installed. Here we need to remove and rebuild.
@@ -443,6 +437,7 @@ if [ -f /root/hostfile ]; then
     if [ $? -ne 0 ]; then
       echo -e "alias cos='/opt/cosbrowser.AppImage --no-sandbox'" >> /etc/profile
     fi
+    echo -e "cosbrowser" >> $public_app_registry
   elif [ $cloud_flag = 'CLOUD_A' ]; then
     wget https://gosspublic.alicdn.com/oss-browser/1.16.0/oss-browser-linux-x64.zip -O /opt/oss.zip
     cd /opt && unzip -o oss.zip && rm -rf oss.zip 
@@ -450,6 +445,7 @@ if [ -f /root/hostfile ]; then
     if [ $? -ne 0 ]; then
       echo -e "alias oss='/opt/oss-browser-linux-x64/oss-browser'" >> /etc/profile
     fi
+    echo -e "ossbrowser" >> $public_app_registry
   fi
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "# $time_current Desktop Environment and RDP has been installed." >> ${logfile}
@@ -474,7 +470,7 @@ if [ -f /root/hostfile ]; then
     fi
     user_name=`echo $user_row | awk '{print $2}'`
     mkdir -p /home/${user_name}/Desktop
-    ln -s /hpc_apps /home/${user_name}/Desktop/
+    ln -s /hpc_apps/${user_name}_apps /home/${user_name}/Desktop/
     ln -s /hpc_data/${user_name}_data /home/${user_name}/Desktop/
     cp /root/Desktop/*.desktop /home/${user_name}/Desktop
     chown -R ${user_name}:${user_name} /home/${user_name}/Desktop
@@ -491,9 +487,8 @@ if [ -f /root/hostfile ]; then
     chmod +x /etc/g_ini.sh
     echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
   fi
-
   if [ ! -f /hpc_data/sbatch_sample.sh ]; then
-  wget ${url_utils}slurm/sbatch_sample.sh -O /hpc_data/sbatch_sample.sh
+    wget ${url_utils}slurm/sbatch_sample.sh -O /hpc_data/sbatch_sample.sh
   fi
 fi
 
@@ -509,42 +504,6 @@ rm -rf /root/munge*
 rm -rf /root/modules*
 rm -rf /root/dun.gpg
 rm -rf /rpmbuild
-
-if [[ $3 = 'mpi' && -f /root/hostfile ]]; then
- # build openmpi-4.1.2 This has been deprecated.
-  time_current=`date "+%Y-%m-%d %H:%M:%S"`
-  echo -e "# $time_current Started building OpenMPI-4.1.2." >> ${logfile}
-  if [ ! -f /hpc_apps/ompi-4.1.2/bin/mpirun ]; then
-    rm -rf /hpc_apps/ompi-4.1.2/*
-    cd /root
-    if [ ! -f openmpi-4.1.2.tar.gz ]; then
-      wget ${url_utils}openmpi-4.1.2.tar.gz
-    fi
-    tar zvxf openmpi-4.1.2.tar.gz
-    cd openmpi-4.1.2
-    ./configure --prefix=/hpc_apps/ompi-4.1.2 --enable-mpi-cxx
-    make -j$NUM_PROCESSORS && make install
-    if [ $? -eq 0 ]; then
-      cat /etc/profile | grep OMPI_ALLOW_RUN_AS_ROOT
-      if [ $? -ne 0 ]; then
-        export OMPI_ALLOW_RUN_AS_ROOT=1
-        export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
-        echo -e "export OMPI_ALLOW_RUN_AS_ROOT=1\nexport OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\n" >> /etc/profile
-      fi
-      echo -e "#%Module1.0\nprepend-path PATH /hpc_apps/ompi-4.1.2/bin\nprepend-path LD_LIBRARY_PATH /hpc_apps/ompi-4.1.2/lib\n" > /etc/modulefiles/ompi-4.1.2
-      time_current=`date "+%Y-%m-%d %H:%M:%S"`
-      echo -e "# $time_current OpenMPI-4.1.2 has been built." >> ${logfile}
-    else
-      time_current=`date "+%Y-%m-%d %H:%M:%S"`
-      echo -e "# $time_current Error: Failed to OpenMPI-4.1.2. Please retry after the cluster initialization."
-    fi
-  else
-    echo -e "#%Module1.0\nprepend-path PATH /hpc_apps/ompi-4.1.2/bin\nprepend-path LD_LIBRARY_PATH /hpc_apps/ompi-4.1.2/lib\n" > /etc/modulefiles/ompi-4.1.2
-    time_current=`date "+%Y-%m-%d %H:%M:%S"`
-    echo -e "# $time_current OpenMPI-4.1.2 has been built." >> ${logfile}
-  fi
-fi
-
 # Clean up
 echo -e "Cleaning Up ..."
 rm -rf /root/openmpi*

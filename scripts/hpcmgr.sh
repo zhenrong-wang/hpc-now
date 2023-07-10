@@ -8,25 +8,6 @@
 
 # This script is used by 'hpcmgr' command line tool.
 
-CURRENT_USER=`whoami`
-if [ $CURRENT_USER != 'root' ]; then
-  echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr'. "
-  echo -e "           Please make sure you use either user1 with 'sudo' privilege, OR"
-  echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now."
-  exit 1
-fi
-#CRITICAL: Environment Variable $NODE_NUM and $NODE_CORES MUST be written to /etc/profile IN ADVANCE!
-source /etc/profile
-if [ ! -z $APPS_INSTALL_SCRIPTS_URL ]; then
-  URL_INSTSCRIPTS_ROOT=$APPS_INSTALL_SCRIPTS_URL
-fi
-rm -rf ~/.ssh/known_hosts
-user_registry=/root/.cluster_secrets/user_secrets.txt
-logfile='/var/log/hpcmgr.log'
-time1=$(date)
-
-echo -e "${time1}: HPC-NOW Cluster Manager task started." >> ${logfile}
-
 function help_info() {
   echo -e "[ FATAL: ] The command parameter is invalid. Valid parameters are:"
   echo -e "           quick   - quick config"
@@ -51,10 +32,12 @@ function add_a_user() {
   cat /home/$1/.ssh/id_rsa.pub >> /home/$1/.ssh/authorized_keys
   cat /etc/now-pubkey.txt >> /home/$1/.ssh/authorized_keys
   cp -r /root/Desktop/*.desktop /home/$1/Desktop/
-  mkdir -p /hpc_data/${1}_data && chmod -R 750 /hpc_data/${1}_data 
+  mkdir -p /hpc_data/${1}_data && chmod -R 750 /hpc_data/${1}_data
+  mkdir -p /hpc_apps/${1}_apps && chmod -R 750 /hpc_apps/${1}_apps 
   chown -R $1:$1 /hpc_data/${1}_data
+  chown -R $1:$1 /hpc_apps/${1}_apps
   ln -s /hpc_data/${1}_data /home/$1/Desktop/ >> /dev/null 2>&1
-  ln -s /hpc_apps /home/$1/Desktop/ >> /dev/null 2>&1
+  ln -s /hpc_apps/${1}_apps /home/$1/Desktop/ >> /dev/null 2>&1
   chown -R $1:$1 /home/$1
   for i in $(seq 1 $NODE_NUM )
   do
@@ -68,22 +51,31 @@ function add_a_user() {
   done
 }
 
-#function bucket_conf() {
-#  if [ -f /root/.cos.conf ] && [ ! -f /home/$1/.cos.conf ]; then
-#    cp /root/.cos.conf /home/$1/ && chown -R $1:$1 /home/$1/.cos.conf
-#  fi
-#  if [ -f /root/.ossutilconfig ] && [ ! -f /home/$1/.ossutilconfig ]; then
-#    cp /root/.ossutilconfig /home/$1/ && chown -R $1:$1 /home/$1/.ossutilconfig
-#  fi
-#  if [ -f /root/.s3cfg ] && [ ! -f /home/$1/.s3cfg ]; then
-#    cp /root/.s3cfg /home/$1/ && chown -R $1:$1 /home/$1/.s3cfg
-#  fi
-#}
-
 if [ ! -n "$1" ]; then
   help_info
   exit 3
 fi
+current_user=`whoami`
+if [ $current_user != 'root' ] && [ $1 != 'install' ] && [ $1 != 'build' ]; then
+  echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr $1'. "
+  echo -e "           Please make sure you use either user1 with 'sudo' privilege, OR"
+  echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now."
+  exit 1
+fi
+#CRITICAL: Environment Variable $NODE_NUM and $NODE_CORES MUST be written to /etc/profile IN ADVANCE!
+source /etc/profile
+if [ ! -z $APPS_INSTALL_SCRIPTS_URL ]; then
+  URL_INSTSCRIPTS_ROOT=$APPS_INSTALL_SCRIPTS_URL
+fi
+rm -rf ~/.ssh/known_hosts
+user_registry=/root/.cluster_secrets/user_secrets.txt
+if [ $current_user = 'root' ]; then
+  logfile="/var/log/hpcmgr.log"
+else
+  logfile="$HOME/.hpcmgr.log"
+fi
+time1=$(date)
+echo -e "${time1}: HPC-NOW Cluster Manager task started." >> ${logfile}
 
 if [ $1 != 'quick' ] && [ $1 != 'master' ] && [ $1 != 'all' ] && [ $1 != 'clear' ] && [ $1 != 'users' ] && [ $1 != 'connect' ] && [ $1 != 'install' ]; then
   help_info
@@ -192,7 +184,9 @@ if [ $1 = 'users' ]; then
       exit 0
     else
       echo -e "[ -WARN- ] User $3 will be erased from the Operating System permenantly!"
-      userdel -f -r $3 && mv /hpc_data/${3}_data /hpc_data/${3}_data_deleted_user
+      userdel -f -r $3
+      mv /hpc_data/${3}_data /hpc_data/${3}_data_deleted_user
+      rm -rf /hpc_apps/${3}_apps
       for i in $(seq 1 $NODE_NUM )
       do
         ping -c 1 -W 1 -q compute${i} >> ${logfile} 2>&1

@@ -6,61 +6,54 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *WPS* to HPC-NOW cluster.
 
-URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_PKGS=${URL_ROOT}packages/
+url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
+url_pkgs=${url_root}packages/
+current_user=`whoami`
+if [ $current_user != 'root' ]; then
+  echo -e "[ FATAL: ] ONLY root user or user1 with sudo can install this app."
+  echo -e "           Please contact the administrator. Exit now."
+  exit 1
+fi
+public_app_registry="/usr/hpc-now/.public_apps.reg"
+app_root="/hpc_apps/"
+app_cache="/hpc_apps/.cache/"
+mkdir -p $app_cache
 tmp_log=/tmp/hpcmgr_install.log
 
-if [ ! -d /opt/packs ]; then
-  mkdir -p /opt/packs
+cat $public_app_registry | grep kingsoft_wps >> /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
+  exit 3
 fi
-echo -e "[ -INFO- ] Software: WPS Office for Linux "
-CENTOS_V=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 
-if [ $CENTOS_V -eq 7 ]; then
-  yum grouplist installed -q | grep "GNOME Desktop" >> /dev/null 2>&1
+echo -e "[ -INFO- ] Software: WPS Office for Linux."
+# Check whether the desktop environment is ready
+yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
+  hpcmgr install desktop >> ${tmp_log}.desktop
   if [ $? -ne 0 ]; then
-    echo -e "[ -INFO- ] WPS needs desktop environment. Installing now ..."
-    hpcmgr install desktop >> ${tmp_log}.desktop
-    if [ $? -ne 0 ]; then
-      echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
-      exit
-    fi
+    echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
+    exit 5
   fi
+fi
+
+centos_v=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
+if [ ! -z $centos_v ] && [ $centos_v -eq 7 ]; then
   yum -y install libXScrnSaver -q
-  rpm -q wps-office >> /dev/null 2>&1
-  if [ $? -eq 0 ]; then
-    echo -e "[ -INFO- ] WPS Office is in place. Exit now."
-    exit
-  fi
-  if [ ! -f /opt/packs/wps-office-10.1.0.6634-1.x86_64.rpm ]; then
+  if [ ! -f ${app_cache}wps-office-10.1.0.6634-1.x86_64.rpm ]; then
     echo -e "[ -INFO- ] Downloading package(s) ..."
-    wget ${URL_PKGS}wps-office-10.1.0.6634-1.x86_64.rpm -O /opt/packs/wps-office-10.1.0.6634-1.x86_64.rpm -q
+    wget ${url_pkgs}wps-office-10.1.0.6634-1.x86_64.rpm -O ${app_cache}wps-office-10.1.0.6634-1.x86_64.rpm -q
   fi
-  rpm -ivh /opt/packs/wps-office-10.1.0.6634-1.x86_64.rpm
-  echo -e "[ -DONE- ] WPS Office has been installed."
-elif [ $CENTOS_V -eq 9 ]; then
-  yum grouplist installed -q | grep "Server with GUI" >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "[ -INFO- ] WPS Office needs desktop environment. Installing now ..."
-    hpcmgr install desktop >> ${tmp_log}.desktop
-    if [ $? -ne 0 ]; then
-      echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
-      exit
-    fi
-  fi
-  yum -y install libXScrnSaver -q
-  rpm -q wps-office >> /dev/null 2>&1
-  if [ $? -eq 0 ]; then
-    echo -e "[ -INFO- ] WPS Office is in place. Exit now."
-    exit
-  fi
-  if [ ! -f /opt/packs/wps-office-11.1.0.11664-1.x86_64.rpm ]; then
-    echo -e "[ -INFO- ] Downloading package(s) ..."
-    wget https://wps-linux-personal.wpscdn.cn/wps/download/ep/Linux2019/11664/wps-office-11.1.0.11664-1.x86_64.rpm -O /opt/packs/wps-office-11.1.0.11664-1.x86_64.rpm -q
-  fi
-  rpm -ivh /opt/packs/wps-office-11.1.0.11664-1.x86_64.rpm
+  rpm -ivh ${app_cache}wps-office-10.1.0.6634-1.x86_64.rpm
   echo -e "[ -DONE- ] WPS Office has been installed."
 else
-  echo -e "[ FATAL: ] Unsupported OS Distribution. Installation Abort. Exit now."
-  exit
+  yum -y install libXScrnSaver -q
+  if [ ! -f ${app_cache}wps-office-11.1.0.11664-1.x86_64.rpm ]; then
+    echo -e "[ -INFO- ] Downloading package(s) ..."
+    wget https://wps-linux-personal.wpscdn.cn/wps/download/ep/Linux2019/11664/wps-office-11.1.0.11664-1.x86_64.rpm -O ${app_cache}wps-office-11.1.0.11664-1.x86_64.rpm -q
+  fi
+  rpm -ivh ${app_cache}wps-office-11.1.0.11664-1.x86_64.rpm
+  echo -e "[ -DONE- ] WPS Office has been installed."
 fi
+echo -e "kingsoft_wps" >> $public_app_registry

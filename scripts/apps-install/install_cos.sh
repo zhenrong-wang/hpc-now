@@ -6,43 +6,92 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *HPC-NOW Netdisk (COSbrowser)* to HPC-NOW cluster.
 
-URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_PKGS=${URL_ROOT}packages/cosbrowser/
+current_user=`whoami`
+public_app_registry="/usr/hpc-now/.public_apps.reg"
+private_app_registry="$HOME/.now_apps.reg"
 
-yum list installed -q | grep gnome >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "[ -INFO- ] NOW Disk needs desktop environment. Installing now."
-  hpcmgr install desktop >> ${tmp_log}.desktop
-  if [ $? -ne 0 ]; then
-    echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
-    exit
+if [ $current_user = 'root' ]; then
+  app_root="/hpc_apps/"
+  app_cache="/hpc_apps/.cache/"
+else
+  app_root="/hpc_apps/${current_user}_apps/"
+  app_cache="/hpc_apps/${current_user}_apps/.cache/"
+fi
+mkdir -p $app_cache
+
+cat $public_app_registry | grep cosbrowser >> /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
+  exit 1
+else
+  cat $private_app_registry | grep cosbrowser >> /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
+    exit 3
   fi
 fi
 
-if [ ! -f /opt/cosbrowser.AppImage ]; then
-  echo -e "[ -INFO- ] Downloading package(s) ..."
-  wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O /opt/cosbrowser.zip -q
-  cd /opt && unzip cosbrowser.zip && rm -rf /opt/cosbrowser.zip
-fi
-chmod +x /opt/cosbrowser.AppImage
-if [ ! -f /opt/app.png ]; then
-  wget ${URL_PKGS}app.png -O /opt/app.png -q
-fi
-echo -e "[ -INFO- ] Creating a shortcut on the desktop ..."
-wget ${URL_PKGS}cos.desktop -O /opt/cos.desktop -q
-if [ -d /root/Desktop ]; then
-  /bin/cp /opt/cos.desktop /root/Desktop
-fi
-find /home -name "Desktop" > /tmp/desktop_dirs.txt
-while read rows
-do 
-  user_row=`echo $rows | awk -F"/" '{print $3}'`
-  /bin/cp /opt/cos.desktop ${rows}
-  chown -R ${user_row}:${user_row} ${rows}
-done < /tmp/desktop_dirs.txt
-rm -rf /tmp/desktop_dirs.txt
-cat /etc/profile | grep "alias cos=" >> /dev/null 2>&1
+# Check whether the desktop environment is ready
+yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo -e "alias cos='/opt/cosbrowser.AppImage --no-sandbox'" >> /etc/profile
+  if [ $current_user != 'root' ]; then
+    echo -e "[ FATAL: ] Desktop environment is absent. Please contact the administrator."
+    exit 5
+  fi
+  echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
+  hpcmgr install desktop >> ${tmp_log}.desktop
+  if [ $? -ne 0 ]; then
+    echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
+    exit 7
+  fi
 fi
-echo -e "[ -DONE- ] COS has been installed to your system."
+
+cat $public_app_registry | grep desktop_env >> /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo -e "desktop_env" >> $public_app_registry
+fi
+
+echo -e "[ -INFO- ] Downloading package(s) ..."
+wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O ${app_cache}/cosbrowser.zip -q
+unzip ${app_cache}/cosbrowser.zip -d $app_root
+chmod +x ${app_root}/cosbrowser.AppImage
+echo -e "[ -INFO- ] Creating a shortcut on the desktop ..."
+echo -e "[Desktop Entry]" > $HOME/Desktop/cos.desktop
+echo -e "Encoding=UTF-8" >> $HOME/Desktop/cos.desktop
+echo -e "Version=1.0" >> $HOME/Desktop/cos.desktop
+echo -e "Name=cosbrowser" >> $HOME/Desktop/cos.desktop
+echo -e "Comment=cosbrowser" >> $HOME/Desktop/cos.desktop
+echo -e "Exec=${app_root}cosbrowser.AppImage --no-sandbox" >> $HOME/Desktop/cos.desktop
+echo -e "Icon=/opt/app.png" >> $HOME/Desktop/cos.desktop
+echo -e "Terminal=false" >> $HOME/Desktop/cos.desktop
+echo -e "StartupNotify=true" >> $HOME/Desktop/cos.desktop
+echo -e "Type=Application" >> $HOME/Desktop/cos.desktop
+echo -e "Categories=Applications;" >> $HOME/Desktop/cos.desktop
+
+if [ $current_user = 'root' ]; then
+  while read user_row
+  do
+    if [ -z $user_row ]; then
+      continue
+    fi
+    user_name=`echo $user_row | awk '{print $2}'`
+    cat /home/$user_name/.now_apps.reg | grep cosbrowser >> /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      /bin/cp $HOME/Desktop/cos.desktop /home/$user_name/Desktop/
+      chown -R $user_name:$user_name /home/$user_name/Desktop/cos.desktop
+    fi
+  done < /root/.cluster_secrets/user_secrets.txt
+  cat /etc/profile | grep "alias cos.pub=" >> /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo -e "alias cos.pub='${app_root}cosbrowser.AppImage --no-sandbox'" >> /etc/profile
+  fi
+  echo -e "cosbrwoser" >> $public_app_registry
+  echo -e "[ -DONE- ] COS has been installed to all users."
+else
+  cat $HOME/.bashrc | grep "alias cos=" >> /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo -e "alias cos='${app_root}cosbrowser.AppImage --no-sandbox'" >> $HOME/.bashrc
+  fi
+  echo -e "cosbrowser" >> $private_app_registry
+fi
+echo -e "[ -DONE- ] COS has been installed to the current user."
