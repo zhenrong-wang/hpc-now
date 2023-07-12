@@ -6,65 +6,77 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *Paraview 5* to HPC-NOW cluster.
 
-URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_PKGS=${URL_ROOT}packages/
-if [ ! -d /opt/packs ]; then
-  mkdir -p /opt/packs
-fi
-if [ -f /opt/ParaView/bin/paraview ]; then
-  echo -e "[ -INFO- ] It seems ParaView is already in place. If you do want to reinstall it, pease delete the /opt/ParaView folder and retry. Exit now."
-  cat /etc/profile | grep paraview >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "alias paraview='/opt/ParaView/bin/paraview'" >> /etc/profile
-  fi
-  exit
-fi
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-logfile=/var/log/hpcmgr_install.log && echo -e "\n# $time_current INSTALLING PARAVIEW" >> ${logfile}
-tmp_log=/tmp/hpcmgr_install.log
-CENTOS_V=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
-if [ $CENTOS_V -eq 9 ]; then
-  echo -e "[ -INFO- ] Downloading and extracting files ..."
-  if [ ! -f /opt/packs/ParaView5.tar.gz ]; then
-    wget ${URL_PKGS}ParaView-5.10.1-MPI-Linux-Python3.9-x86_64.tar.gz -q -O /opt/packs/ParaView5.tar.gz
-  fi
-  if [ -d /opt/ParaView ]; then
-    rm -rf /opt/ParaView
-  fi
-  cd /opt && tar zxf /opt/packs/ParaView5.tar.gz
-  mv /opt/ParaView-5.10.1-MPI-Linux-Python3.9-x86_64 /opt/ParaView
-  echo -e "[ -INFO- ] Adding environment variables ..."
-  cat /etc/profile | grep paraview >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "alias paraview='/opt/ParaView/bin/paraview'" >> /etc/profile
-  fi
-  echo -e "[ -INFO- ] ParaView-Version 5.10 has been installed into this cluster. Please run 'paraview' command to start ParaView."
-elif [ $CENTOS_V -eq 7 ]; then
-  echo -e "[ -INFO- ] Downloading and extracting files ..."
-  if [ ! -f /opt/packs/ParaView4.tar.gz ]; then
-    wget ${URL_PKGS}ParaView-4.0.1-Linux-64bit-glibc-2.3.6.tar.gz -q -O /opt/packs/ParaView4.tar.gz
-  fi
-  if [ -d /opt/ParaView ]; then
-    rm -rf /opt/ParaView
-  fi
-  cd /opt && tar zxf /opt/packs/ParaView4.tar.gz
-  mv /opt/ParaView-4.0.1-Linux-64bit /opt/ParaView
-  echo -e "[ -INFO- ] Adding environment variables ..."
-  cat /etc/profile | grep paraview >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "alias paraview='/opt/ParaView/bin/paraview'" >> /etc/profile
-  fi
-  echo -e "[ -INFO- ] ParaView-Version 4.01 has been installed into this cluster. Please run 'paraview' command to start ParaView."
+url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
+url_pkgs=${url_root}packages/
+
+current_user=`whoami`
+public_app_registry="/usr/hpc-now/.public_apps.reg"
+private_app_registry="$HOME/.now_apps.reg"
+tmp_log=/tmp/hpcmgr_install_paraview.log
+
+if [ $current_user = 'root' ]; then
+  app_root="/opt/"
+  app_cache="/hpc_apps/.cache/"
 else
-  echo -e "[ FATAL: ] Unknown CentOS Version. Exit Now.\n"
-  exit
+  app_root="/hpc_apps/${current_user}_apps/"
+  app_cache="/hpc_apps/${current_user}_apps/.cache/"
 fi
-echo -e "[Desktop Entry]\nEncoding=UTF-8\nVersion=1.0\nName=ParaView\nComment=ParaView\nExec=/opt/ParaView/bin/paraview\nIcon=/opt/app.png\nTerminal=false\nStartupNotify=true\nType=Application\nCategories=Applications;" > /root/Desktop/ParaView.desktop
-find /home -name "Desktop" > /tmp/desktop_dirs.txt
-while read rows
-do 
-  user_row=`echo $rows | awk -F"/" '{print $3}'`
-  /bin/cp /root/Desktop/ParaView.desktop ${rows}
-  chown -R ${user_row}:${user_row} ${rows}
-done < /tmp/desktop_dirs.txt
-rm -rf /tmp/desktop_dirs.txt
+mkdir -p $app_cache
+
+grep paraview $public_app_registry >> /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
+  exit 1
+else
+  grep paraview $private_app_registry >> /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
+    exit 3
+  fi
+fi
+
+centos_v=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
+if [ -z $centos_v ] || [ $centos_v -ne 7 ]; then
+  echo -e "[ -INFO- ] Downloading and extracting files ..."
+  if [ ! -f ${app_cache}ParaView5.tar.gz ]; then
+    wget ${url_pkgs}ParaView-5.10.1-MPI-Linux-Python3.9-x86_64.tar.gz -O ${app_cache}ParaView5.tar.gz
+  fi
+  tar zxf ${app_cache}ParaView5.tar.gz -C ${app_root}
+  mv ${app_root}ParaView-5.10.1-MPI-Linux-Python3.9-x86_64 ${app_root}ParaView
+else
+  echo -e "[ -INFO- ] Downloading and extracting files ..."
+  if [ ! -f ${app_cache}ParaView4.tar.gz ]; then
+    wget ${url_pkgs}ParaView-4.0.1-Linux-64bit-glibc-2.3.6.tar.gz -O ${app_cache}ParaView4.tar.gz
+  fi
+  tar zxf ${app_cache}ParaView4.tar.gz -C ${app_root}
+  mv ${app_root}ParaView-4.0.1-Linux-64bit ${app_root}ParaView
+fi
+
+echo -e "[ -INFO- ] Adding environment variables ..."
+if [ $current_user = 'root' ]; then
+  grep paraview.pub /etc/profile >> /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo -e "alias paraview.pub='${app_root}ParaView/bin/paraview'" >> /etc/profile
+  fi
+  echo -e "[Desktop Entry]\nEncoding=UTF-8\nVersion=1.0\nName=ParaView\nComment=ParaView\nExec=/opt/ParaView/bin/paraview\nIcon=/opt/app.png\nTerminal=false\nStartupNotify=true\nType=Application\nCategories=Applications;" > $HOME/Desktop/ParaView.desktop
+  while read user_row
+  do
+    user_name=`echo $user_row | awk '{print $2}'`
+    grep paraview /home/$user_name/.now_apps.reg >> /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      /bin/cp $HOME/Desktop/ParaView.desktop /home/$user_name/Desktop/
+      chown -R $user_name:$user_name /home/$user_name/Desktop/ParaView.desktop
+    fi
+  done < /root/.cluster_secrets/user_secrets.txt
+  echo -e "paraview" >> $public_app_registry
+  echo -e "[ -DONE- ] ParaView has been installed to all users."
+else
+  grep paraview $HOME/.bashrc >> /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo -e "alias paraview='${app_root}ParaView/bin/paraview'" >> $HOME/.bashrc
+  fi
+  echo -e "[Desktop Entry]\nEncoding=UTF-8\nVersion=1.0\nName=ParaView\nComment=ParaView\nExec=/opt/ParaView/bin/paraview\nIcon=/opt/app.png\nTerminal=false\nStartupNotify=true\nType=Application\nCategories=Applications;" > $HOME/Desktop/ParaView.desktop
+  echo -e "paraview" >> $private_app_registry
+  echo -e "[ -DONE- ] ParaView has been installed to the current user."
+fi
+

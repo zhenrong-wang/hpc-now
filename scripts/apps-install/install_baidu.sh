@@ -17,12 +17,11 @@ if [ $current_user != 'root' ]; then
 fi
 
 public_app_registry="/usr/hpc-now/.public_apps.reg"
-app_root="/hpc_apps/"
 app_cache="/hpc_apps/.cache/"
 mkdir -p $app_cache
-tmp_log=/tmp/hpcmgr_install.log
+tmp_log=/tmp/hpcmgr_install_baidu.log
 
-cat $public_app_registry | grep baidunetdisk >> /dev/null 2>&1
+grep baidunetdisk $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 3
@@ -47,7 +46,7 @@ if [ ! -z $centos_v ] && [ $centos_v -eq 7 ]; then
     wget ${url_pkgs}baidunetdisk-4.3.0.x86_64.rpm -O ${app_cache}baidunetdisk-4.3.0.x86_64.rpm -q
   fi
   rpm -ivh ${app_cache}baidunetdisk-4.3.0.x86_64.rpm
-  cat /etc/profile | grep "alias baidu='/opt/baidunetdisk/baidunetdisk --no-sandbox'" >> /dev/null 2>&1
+  grep "alias baidu='/opt/baidunetdisk/baidunetdisk --no-sandbox'" /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "alias baidu='/opt/baidunetdisk/baidunetdisk --no-sandbox'" >> /etc/profile
   fi
@@ -77,7 +76,7 @@ else
   rpm -ivh ${app_cache}baidunetdisk-4.15.5.x86_64.rpm 
   rpm -ivh ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm
   wget ${url_pkgs}libgdkpatch.so -O /opt/baidunetdisk/libgdkpatch.so -q
-  cat /etc/profile | grep "alias baidu='LD_PRELOAD=/opt/baidunetdisk/libgdkpatch.so /opt/baidunetdisk/baidunetdisk --no-sandbox'" >> /dev/null 2>&1
+  grep "alias baidu='LD_PRELOAD=/opt/baidunetdisk/libgdkpatch.so /opt/baidunetdisk/baidunetdisk --no-sandbox'" /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "alias baidu='LD_PRELOAD=/opt/baidunetdisk/libgdkpatch.so /opt/baidunetdisk/baidunetdisk --no-sandbox'" >> /etc/profile
   fi

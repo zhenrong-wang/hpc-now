@@ -6,12 +6,11 @@
  * Bug report: info@hpc-now.com
  */
 
-#ifndef APPMAN_H
-#define APPMAN_H
+#ifndef JOBMAN_H
+#define JOBMAN_H
 
-int app_list();
-int app_build();
-int app_install();
-int app_remove();
+int job_submit();
+int job_cancel();
+int job_list();
 
 #endif

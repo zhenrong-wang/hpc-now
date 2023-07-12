@@ -128,9 +128,6 @@ sed -i 's/Defaults    secure_path/#Defaults    secure_path/g' /etc/sudoers # Gra
 chmod 511 /usr/bin/passwd # Disable ordinary users to change its own password
 while read user_row
 do
-  if [ -z $user_row ]; then
-    continue
-  fi
   user_name=`echo $user_row | awk '{print $2}'`
   user_passwd=`echo $user_row | awk '{print $3}'`
   user_status=`echo $user_row | awk '{print $4}'`
@@ -465,9 +462,6 @@ if [ -f /root/hostfile ]; then
   fi
   while read user_row
   do
-    if [ -z $user_row ]; then
-      continue
-    fi
     user_name=`echo $user_row | awk '{print $2}'`
     mkdir -p /home/${user_name}/Desktop
     ln -s /hpc_apps/${user_name}_apps /home/${user_name}/Desktop/

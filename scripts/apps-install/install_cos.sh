@@ -9,9 +9,10 @@
 current_user=`whoami`
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 private_app_registry="$HOME/.now_apps.reg"
+tmp_log=/tmp/hpcmgr_install_cos.log
 
 if [ $current_user = 'root' ]; then
-  app_root="/hpc_apps/"
+  app_root="/opt/"
   app_cache="/hpc_apps/.cache/"
 else
   app_root="/hpc_apps/${current_user}_apps/"
@@ -19,12 +20,12 @@ else
 fi
 mkdir -p $app_cache
 
-cat $public_app_registry | grep cosbrowser >> /dev/null 2>&1
+grep cosbrowser $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 1
 else
-  cat $private_app_registry | grep cosbrowser >> /dev/null 2>&1
+  grep cosbrowser $private_app_registry >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
     echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
     exit 3
@@ -39,14 +40,14 @@ if [ $? -ne 0 ]; then
     exit 5
   fi
   echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
-  hpcmgr install desktop >> ${tmp_log}.desktop
+  hpcmgr install desktop >> ${tmp_log}
   if [ $? -ne 0 ]; then
     echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
     exit 7
   fi
 fi
 
-cat $public_app_registry | grep desktop_env >> /dev/null 2>&1
+grep desktop_env  $public_app_registry >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "desktop_env" >> $public_app_registry
 fi
@@ -71,24 +72,21 @@ echo -e "Categories=Applications;" >> $HOME/Desktop/cos.desktop
 if [ $current_user = 'root' ]; then
   while read user_row
   do
-    if [ -z $user_row ]; then
-      continue
-    fi
     user_name=`echo $user_row | awk '{print $2}'`
-    cat /home/$user_name/.now_apps.reg | grep cosbrowser >> /dev/null 2>&1
+    grep cosbrowser /home/$user_name/.now_apps.reg >> /dev/null 2>&1
     if [ $? -ne 0 ]; then
       /bin/cp $HOME/Desktop/cos.desktop /home/$user_name/Desktop/
       chown -R $user_name:$user_name /home/$user_name/Desktop/cos.desktop
     fi
   done < /root/.cluster_secrets/user_secrets.txt
-  cat /etc/profile | grep "alias cos.pub=" >> /dev/null 2>&1
+  grep "alias cos.pub=" /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "alias cos.pub='${app_root}cosbrowser.AppImage --no-sandbox'" >> /etc/profile
   fi
   echo -e "cosbrwoser" >> $public_app_registry
   echo -e "[ -DONE- ] COS has been installed to all users."
 else
-  cat $HOME/.bashrc | grep "alias cos=" >> /dev/null 2>&1
+  grep "alias cos=" $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "alias cos='${app_root}cosbrowser.AppImage --no-sandbox'" >> $HOME/.bashrc
   fi

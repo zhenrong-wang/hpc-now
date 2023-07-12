@@ -6,13 +6,24 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to install *Desktop* to HPC-NOW cluster.
 
-URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_PKGS=${URL_ROOT}packages/desktop/
-tmp_log=/tmp/hpcmgr_install.log
+url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
+url_pkgs=${url_root}packages/desktop/
+tmp_log=/tmp/hpcmgr_install_desktop.log
 
-CENTOS_V=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
+current_user=`whoami`
+if [ $current_user != 'root' ]; then
+  echo -e "[ FATAL: ] ONLY root user or user1 with sudo can install this app."
+  echo -e "           Please contact the administrator. Exit now."
+  exit 1
+fi
 
-if [ $CENTOS_V -eq 7 ]; then
+yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  echo -e "[ -WARN- ] It seem the desktop environment has already been installed. Reinstalling now ..."
+fi
+
+centos_v=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
+if [ ! -z $centos_v ] && [ $centos_v -eq 7 ]; then
   yum -y install ntpdate >> $tmp_log 2>&1
   ntpdate ntp.ntsc.ac.cn >> $tmp_log 2>&1
   cp -r /etc/profile /etc/profile.orig
@@ -41,23 +52,23 @@ if [ $CENTOS_V -eq 7 ]; then
   sed -i '/gini/d' /etc/profile
   echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
   echo -e "[ -DONE- ] *IMPORTANT*: Please set password for the users in order to log into the desktop by using RDP."
-  wget ${URL_PKGS}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26 -q
+  wget ${url_pkgs}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26 -q
   rm -rf /usr/lib64/libstdc++.so.6
   ln -s /usr/lib64/libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6
-  cat /root/.bashrc | grep "source /etc/profile" >> /dev/null 2>&1
+  grep "source /etc/profile" /root/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "source /etc/profile" >> /root/.bashrc
   fi
   find /home -name ".bashrc" > /tmp/bashrc_dirs.txt
   while read rows
   do 
-    cat ${rows} | grep "source /etc/profile" >> /dev/null 2>&1
+    grep "source /etc/profile" ${rows} >> /dev/null 2>&1
     if [ $? -ne 0 ]; then
       echo -e "source /etc/profile" >> ${rows}
     fi
   done < /tmp/bashrc_dirs.txt
   rm -rf /tmp/bashrc_dirs.txt
-elif [ $CENTOS_V -eq 9 ]; then
+else
   yum -y install chrony >> $tmp_log 2>&1
   systemctl start chronyd && systemctl enable chronyd
   cp -r /etc/profile /etc/profile.orig
@@ -85,7 +96,7 @@ elif [ $CENTOS_V -eq 9 ]; then
   if [ ! -f /usr/share/backgrounds/wallpapers.zip ]; then
     rm -rf /usr/share/backgrounds/*.png
     rm -rf /usr/share/backgrounds/*.jpg
-    wget -q ${URL_PKGS}wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
+    wget -q ${url_pkgs}wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
     cd /usr/share/backgrounds && unzip -q wallpapers.zip
   fi
 # Make sure the desktop is user-friendly
@@ -97,20 +108,17 @@ elif [ $CENTOS_V -eq 9 ]; then
   echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
   echo -e "[ -DONE- ] Desktop environment installed."
   echo -e "[ -DONE- ] *IMPORTANT*: Please set password for the users in order to log into the desktop by using RDP."
-  cat /root/.bashrc | grep "source /etc/profile" >> /dev/null 2>&1
+  grep "source /etc/profile" /root/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "source /etc/profile" >> /root/.bashrc
   fi
   find /home -name ".bashrc" > /tmp/bashrc_dirs.txt
   while read rows
   do 
-    cat ${rows} | grep "source /etc/profile" >> /dev/null 2>&1
+    grep "source /etc/profile" ${rows} >> /dev/null 2>&1
     if [ $? -ne 0 ]; then
       echo -e "source /etc/profile" >> ${rows}
     fi
   done < /tmp/bashrc_dirs.txt
   rm -rf /tmp/bashrc_dirs.txt
-else
-  echo -e "[ FATAL: ] Unsupported OS Distribution. Currently we only support CentOS 7.9 & CentOS Stream 9. Installation Abort. Exit now."
-  exit
 fi

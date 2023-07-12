@@ -727,8 +727,8 @@ int main(int argc, char* argv[]){
             check_and_cleanup("");
             return 0;
         }
-        if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0&&show_current_cluster(workdir,cluster_name,0)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
+        if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY WARN_YELLO_BOLD "-c CLUSTER_NAME" RESET_DISPLAY FATAL_RED_BOLD " .\n" RESET_DISPLAY);
             list_all_cluster_names(1);
             write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
             check_and_cleanup(workdir);
