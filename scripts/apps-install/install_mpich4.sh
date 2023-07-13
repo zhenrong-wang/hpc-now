@@ -27,7 +27,6 @@ if [ -f $APP_ROOT/mpich-4.0.2/bin/mpicc ]; then
   exit
 fi
 #source /opt/environment-modules/init/bash
-hpcmgr install envmod >> $tmp_log 2>&1
 module ava -t | grep gcc >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   gcc_version=`module ava -t | grep gcc | tail -n1 | awk '{print $1}'`

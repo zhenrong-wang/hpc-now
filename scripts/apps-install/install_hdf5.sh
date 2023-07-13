@@ -46,8 +46,6 @@ NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 gcc_version=`gcc --version | head -n1`
 gcc_vnum=`echo $gcc_version | awk '{print $3}' | awk -F"." '{print $1}'`
 
-hpcmgr install envmod >> $tmp_log 2>&1
-
 module ava -t | grep ompi >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   mpi_version=`module ava -t | grep ompi | tail -n1 | awk '{print $1}'`

@@ -39,7 +39,6 @@ if [[ -f /hpc_apps/netcdf4/bin/nc-config && -f /hpc_apps/netcdf4/bin/nf-config ]
   exit 
 fi
 
-hpcmgr install envmod >> $tmp_log 2>&1
 source /etc/profile
 
 module ava -t | grep gcc-12.1.0 >> /dev/null 2>&1

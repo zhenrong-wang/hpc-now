@@ -65,4 +65,4 @@ else
   fi
   echo -e "fftw3" >> $private_app_registry
 fi
-echo -e "[ FATAL: ] FFTW-3 has been built to ${app_root}fftw3."
+echo -e "[ -DONE- ] FFTW-3 has been built to ${app_root}fftw3."

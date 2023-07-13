@@ -42,7 +42,6 @@ if [ ! -d /hpc_apps ]; then
   exit
 fi
 echo -e "[ -INFO- ] Checking Prerequisitions: MPI version ..."
-hpcmgr install envmod >> $tmp_log 2>&1
 module ava -t | grep ompi >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   mpi_version=`module ava -t | grep ompi | tail -n1 | awk '{print $1}'`

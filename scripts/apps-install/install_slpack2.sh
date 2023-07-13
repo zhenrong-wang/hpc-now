@@ -17,7 +17,6 @@ if [[ ! -f /hpc_apps/lapack-3.11/libcblas.a || ! -f /hpc_apps/lapack-3.11/liblap
   echo -e "[ FATAL: ] You need to build LAPACK in advance. Please exit and run 'hpcmgr install lapk311' command and retry. Exit now."
   exit
 fi
-hpcmgr install envmod >> $tmp_log 2>&1
 module ava -t | grep ompi >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   mpi_version=`module ava -t | grep ompi | tail -n1 | awk '{print $1}'`

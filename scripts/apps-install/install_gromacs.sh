@@ -34,7 +34,6 @@ echo -e "[ -INFO- ] By *default*, GROMACS will be built with fftw3. if you'd lik
 echo -e "[ -INFO- ] If you'd like to build your own version of GROMACS, please contact us by email info@hpc-now.com, or contact your technical support."
 echo -e "[ -INFO- ] You can also go to the source code in /opt/packs/gromacs and build as you preferred. But this is not recommended."
 echo -e "[ -INFO- ] Checking the Compilers now ..."
-hpcmgr install envmod >> $tmp_log 2>&1
 module ava -t | grep mpich >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   mpi_version=`module ava -t | grep mpich | tail -n1 | awk '{print $1}'`

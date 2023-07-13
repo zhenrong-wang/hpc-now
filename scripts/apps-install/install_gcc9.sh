@@ -52,7 +52,6 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 3 ] $time_current Installing gcc-9.5.0 now, this step is quick ..."
 make install >> $tmp_log 2>&1
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-hpcmgr install envmod >> $tmp_log 2>&1
 echo -e "[ STEP 4 ] $time_current Comgratulations! GCC-9.5.0 has been built."
 echo -e "#%Module1.0\nprepend-path PATH $APP_ROOT/gcc-9.5.0/bin\nprepend-path LD_LIBRARY_PATH $APP_ROOT/gcc-9.5.0/lib64\n" > /etc/modulefiles/gcc-9.5.0
 echo -e "# $time_current GCC-9.5.0 has been built." >> ${logfile}

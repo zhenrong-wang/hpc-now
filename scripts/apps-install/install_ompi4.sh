@@ -41,7 +41,6 @@ echo -e "[ STEP 2 ] $time_current Building libraries and binaries from the sourc
 cd /opt/packs/openmpi-4.1.2 && ./configure --prefix=/hpc_apps/ompi-4.1.2 --enable-mpi-cxx >> $tmp_log 2>&1
 make -j$NUM_PROCESSORS >> $tmp_log 2>&1
 make install >> $tmp_log 2>&1
-hpcmgr install envmod >> $tmp_log 2>&1
 if [ $? -eq 0 ]; then
   cat /etc/profile | grep OMPI_ALLOW_RUN_AS_ROOT >> /dev/null 2>&1
   if [ $? -eq 1 ]; then

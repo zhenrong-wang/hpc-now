@@ -41,7 +41,6 @@ echo -e "[ STEP 2 ] $time_current Building libraries and binaries from the sourc
 cd /opt/packs/openmpi-3.1.6 && ./configure --prefix=/hpc_apps/ompi-3.1.6 --enable-mpi-cxx >> $tmp_log 2>&1
 make -j$NUM_PROCESSORS >> $tmp_log 2>&1
 make install >> $tmp_log 2>&1
-hpcmgr install envmod >> $tmp_log 2>&1
 if [ $? -eq 0 ]; then
   echo -e "#%Module1.0\nprepend-path PATH /hpc_apps/ompi-3.1.6/bin\nprepend-path LD_LIBRARY_PATH /hpc_apps/ompi-3.1.6/lib\nprepend-path C_INCLUDE_PATH /hpc_apps/ompi-3.1.6/include\nprepend-path CPLUS_INCLUDE_PATH /hpc_apps/ompi-3.1.6/include\n" > /etc/modulefiles/ompi-3.1.6
   echo -e "[ -DONE- ] $time_current OpenMPI-3.1.6 has been built. "

@@ -41,7 +41,6 @@ if [[ -n $1 && $1 = 'rebuild' ]]; then
   rm -rf $APP_ROOT/OpenFOAM/ThirdParty-7 
 fi
 #source /opt/environment-modules/init/bash
-hpcmgr install envmod >> $tmp_log 2>&1
 module ava -t | grep gcc-12.1.0 >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   module load gcc-12.1.0

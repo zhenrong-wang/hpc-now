@@ -14,15 +14,9 @@ APP_ROOT=/hpc_apps
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 tmp_log=/tmp/hpcmgr_install.log
 
-if [ ! -d /hpc_apps ]; then
-  echo -e "[ FATAL: ] The root directory /hpc_apps is missing. Installation abort. Exit now."
-  exit
-fi
-
 echo -e "[ -INFO- ] Software: ABINIT-9.6.2"
 
 mkdir -p $APP_ROOT/abinit
-hpcmgr install envmod >> $tmp_log 2>&1
 source /etc/profile
 
 if [ -f $APP_ROOT/abinit/build/bin/abinit ]; then
