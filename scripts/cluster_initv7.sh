@@ -94,7 +94,7 @@ fi
 echo -e "# Plan to create $1 users."
 echo -e "# Plan create $1 users." >> ${logfile} 
 
-yum -y install openssl openssl-devel wget unzip curl make perl
+yum -y install wget
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 SELINUX_STATUS=`getenforce`
 echo -e "source /etc/profile" >> /root/.bashrc
@@ -150,6 +150,7 @@ do
   chown -R ${user_name}:${user_name} /home/${user_name}
 done < /root/user_secrets.txt
 
+yum -y install openssl openssl-devel unzip curl make perl
 # stop firewall and SELinux 
 systemctl stop firewalld && systemctl disable firewalld
 if [ $SELINUX_STATUS != Disabled ]; then
