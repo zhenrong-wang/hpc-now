@@ -321,6 +321,11 @@ int main(int argc, char* argv[]){
         check_and_cleanup(workdir);
         return 5;
     }
+    else if(command_flag==-7){
+        write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_EMPTY",49);
+        check_and_cleanup(workdir);
+        return 49;
+    }
     else if(command_flag==1){
         check_and_cleanup(workdir);
         return 5;
