@@ -270,7 +270,7 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     return system(cmdline);
 }
 
-int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char* commands, int delay_minutes, int silent_flag){
+int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char* commands, char* extra_options, int delay_minutes, int silent_flag){
     if(delay_minutes<0){
         return -1;
     }
@@ -293,18 +293,24 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char
     }
     if(delay_minutes==0){
         if(silent_flag==0){
-            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",private_key,username,remote_address,commands,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",extra_options,private_key,username,remote_address,commands,SYSTEM_CMD_REDIRECT);
+        }
+        else if(silent_flag==1){
+            sprintf(cmdline,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",extra_options,private_key,username,remote_address,commands);
         }
         else{
-            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",private_key,username,remote_address,commands);
+            sprintf(cmdline,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",extra_options,private_key,username,remote_address,commands,SYSTEM_CMD_ERR_REDIRECT_NULL);
         }
     }
     else{
         if(silent_flag==0){
-            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",private_key,username,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",extra_options,private_key,username,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
+        }
+        else if(silent_flag==1){
+            sprintf(cmdline,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\"",extra_options,private_key,username,remote_address,commands,delay_minutes);
         }
         else{
-            sprintf(cmdline,"ssh -n -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\"",private_key,username,remote_address,commands,delay_minutes);
+            sprintf(cmdline,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",extra_options,private_key,username,remote_address,commands,delay_minutes,SYSTEM_CMD_ERR_REDIRECT_NULL);
         }
     }
     return system(cmdline);
@@ -1667,9 +1673,9 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
         strcpy(password_final,password);
     }
     sprintf(remote_commands,"hpcmgr users add %s %s",username_input,password_final);
-    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
+    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0)==0){
         sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s | grep ENABLED",username_input);
-        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
+        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0)==0){
             printf("[ -INFO- ] Updating the local user-info registry ...\n");
             file_p=fopen(user_registry_file,"a");
             fprintf(file_p,"username: %s %s ENABLED\n",username_input,password_final);
@@ -1757,9 +1763,9 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
         return -3;
     }
     sprintf(remote_commands,"echo y-e-s | hpcmgr users delete %s os",username_input);
-    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
+    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0)==0){
         sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s",username_input);
-        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
+        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the user %s from your cluster. Exit now.\n" RESET_DISPLAY,username_input);
             delete_decrypted_user_passwords(workdir);
             return 1;
@@ -1837,7 +1843,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
     else{
         sprintf(remote_commands,"hpcmgr users delete %s",username_input);
     }
-    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,0,0)==0){
+    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0)==0){
         find_and_replace(user_registry_file,username_ext,"","","","",prev_keywords,new_keywords);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully %s the user %s.\n",new_keywords,username_input);
         encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
@@ -1926,7 +1932,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
         strcpy(password_final,password);
     }
     sprintf(remote_commands,"echo \"%s\" | passwd %s --stdin",password_final,username_input);
-    if(remote_exec_general(workdir,ssheky_dir,"root",remote_commands,0,0)==0){
+    if(remote_exec_general(workdir,ssheky_dir,"root",remote_commands,"-n",0,0)==0){
         sprintf(username_ext,"username: %s ",username_input);
         find_and_get(user_registry_file,username_ext,"","",1,username_ext,"","",' ',3,password_prev);
         find_and_replace(user_registry_file,username_ext,"","","","",password_prev,password_final);

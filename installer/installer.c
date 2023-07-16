@@ -647,7 +647,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     printf(GENERAL_BOLD "|*                                C A U T I O N !                                  \n");
     printf("|*                                                                                 \n");
     printf("|*     YOU ARE UPDATING THE HPC-NOW SERVICES. THE CURRENT hpcopr BINARY WILL BE    \n");
-    printf("|*     REPLACED. IF YOU UPDATE WITH THE --hloc AND/ORr --cloc OPTIONS, PLEASE MAKE  \n");
+    printf("|*     REPLACED. IF YOU UPDATE WITH THE --hloc AND/OR --cloc OPTIONS, PLEASE MAKE  \n");
     printf("|*     SURE THE LOCATION(S) POINT(S) TO VALID EXECUTABLE(S).                       \n");
     printf("|*                                                                                 \n");
     printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n\n" RESET_DISPLAY);

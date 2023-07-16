@@ -36,6 +36,8 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--force",
     "--recursive",
     "--print", // print contents
+    "--installed",
+    "--verbose",
     "--read", // read contents
     "--std", // standard info
     "--err", // error info
@@ -64,6 +66,9 @@ char command_keywords[CMD_KWDS_NUM][16]={
     "--cmd",
     "--dcmd",
     "--ucmd",
+    "--acmd",
+    "--app",
+    "--jcmd",
     "--level",
     "--cname", //cluster_name
     "--ak",

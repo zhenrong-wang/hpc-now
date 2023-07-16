@@ -9,9 +9,7 @@
 #ifndef APPMAN_H
 #define APPMAN_H
 
-int app_list();
-int app_build();
-int app_install();
-int app_remove();
+int app_list(char* workdir, char* option, char* user_name, char* sshkey_dir);
+int app_operation(char* workdir, char* user_name, char* option, char* app_name, char* sshkey_dir);
 
 #endif

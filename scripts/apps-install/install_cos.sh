@@ -8,8 +8,8 @@
 
 current_user=`whoami`
 public_app_registry="/usr/hpc-now/.public_apps.reg"
-private_app_registry="$HOME/.now_apps.reg"
-tmp_log=/tmp/hpcmgr_install_cos.log
+private_app_registry="/usr/hpc-now/.private_apps.reg"
+tmp_log=/tmp/hpcmgr_install_cos_${current_user}.log
 
 if [ $current_user = 'root' ]; then
   app_root="/opt/"
@@ -25,7 +25,7 @@ if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 1
 else
-  grep cosbrowser $private_app_registry >> /dev/null 2>&1
+  grep "cosbrowser ~ ${current_user}" $private_app_registry >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
     echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
     exit 3
@@ -90,6 +90,6 @@ else
   if [ $? -ne 0 ]; then
     echo -e "alias cos='${app_root}cosbrowser.AppImage --no-sandbox'" >> $HOME/.bashrc
   fi
-  echo -e "cosbrowser" >> $private_app_registry
+  echo -e "cosbrowser ~ ${current_user}" >> $private_app_registry
 fi
 echo -e "[ -DONE- ] COS has been installed to the current user."

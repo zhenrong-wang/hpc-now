@@ -9,7 +9,7 @@
 #ifndef JOBMAN_H
 #define JOBMAN_H
 
-int job_submit();
+int job_submit(char* workdir, char* option, char* user_name, char* sshkey_dir);
 int job_cancel();
 int job_list();
 

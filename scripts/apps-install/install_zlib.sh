@@ -8,7 +8,7 @@
 
 current_user=`whoami`
 public_app_registry="/usr/hpc-now/.public_apps.reg"
-private_app_registry="$HOME/.now_apps.reg"
+private_app_registry="/usr/hpc-now/.private_apps.reg"
 tmp_log=/tmp/hpcmgr_install_zlib.log
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
@@ -29,7 +29,7 @@ if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 1
 else
-  grep zlib $private_app_registry >> /dev/null 2>&1
+  grep "zlib ~ ${current_user}" $private_app_registry >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
     echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
     exit 3
@@ -62,6 +62,6 @@ else
   sed -i '/zlib-1.2.13/d' $HOME/.bashrc
   echo -e "export LD_LIBRARY_PATH=/hpc_apps/zlib-1.2.13/lib:\$LD_LIBRARY_PATH" >> $HOME/.bashrc
   echo -e "export C_INCLUDE_PATH=/hpc_apps/zlib-1.2.13/include:\$C_INCLUDE_PATH" >> $HOME/.bashrc
-  echo -e "zlib" >> $private_app_registry
+  echo -e "zlib ~ ${current_user}" >> $private_app_registry
 fi
 echo -e "[ -DONE- ] zlib-1.2.13 has been successfully installed to ${app_root}."

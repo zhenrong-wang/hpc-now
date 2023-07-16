@@ -33,6 +33,8 @@
 #include "dataman.h"
 #include "transfer.h"
 #include "monman.h"
+#include "appman.h"
+#include "jobman.h"
 
 char url_code_root_var[LOCATION_LENGTH]="";
 char url_tf_root_var[LOCATION_LENGTH]="";
@@ -107,6 +109,8 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "payment,opr,CNAME",
     "userman,gen,CNAME",
     "dataman,gen,UNAME",
+    "appman,gen,UNAME",
+    "jobman,gen,UNAME",
     "monman,admin,CNAME",
     "about,gen,NULL",
     "version,gen,NULL",
@@ -132,6 +136,19 @@ char dataman_commands[DATAMAN_COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "more",
     "less",
     "tail"
+};
+
+char appman_commands[4][COMMAND_STRING_LENGTH_MAX]={
+    "list",
+    "build",
+    "install",
+    "remove"
+};
+
+char jobman_commands[3][COMMAND_STRING_LENGTH_MAX]={
+    "list",
+    "submit",
+    "cancel"
 };
 
 /*
@@ -167,6 +184,7 @@ char dataman_commands[DATAMAN_COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
 41 DESTROY_ERROR
 42 PAYMENT_SWITCH_FAILED
 43 CLUSTER_ASLEEP
+44 APPMAN_FAILED
 45 GRAPH_FAILED
 47 GRAPH_NOT_UPDATED
 49 CLUSTER_EMPTY
@@ -229,6 +247,10 @@ int main(int argc, char* argv[]){
     char force_flag_string[16]="";
     char node_num_string[128]="";
     char user_cmd[128]="";
+    char app_cmd[128]="";
+    char app_name[128]="";
+    char job_cmd[128]="";
+    char job_id[32]="";
     char* usage_log=USAGE_LOG_FILE;
     char* operation_log=OPERATION_LOG_FILE;
     char* syserror_log=SYSTEM_CMD_ERROR_LOG;
@@ -1518,20 +1540,109 @@ int main(int argc, char* argv[]){
 
     if(cluster_asleep_or_not(workdir)==0){
         if(command_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not running. Please wake up first\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not running. Please wake up first.\n");
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] The switched cluster is not running. Please wake up first\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The switched cluster is not running. Please wake up first.\n");
         }
         if(strcmp(argv[1],"addc")==0){
-            printf("|          Command: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY);
+            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY);
         }
         else{
-            printf("|          Command: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup --min | --all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY);
+            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --min | --all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY);
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_IS_ASLEEP",43);
         check_and_cleanup(workdir);
         return 43;
+    }
+
+    if(strcmp(argv[1],"appman")==0){
+        if(cmd_keyword_check(argc,argv,"--acmd",app_cmd)!=0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid command: list, build, install, remove.\n");
+            printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
+            fflush(stdin);
+            scanf("%s",app_cmd);
+            getchar();
+        }
+        int i=0;
+        while(strcmp(app_cmd,appman_commands[i])!=0){
+            i++;
+            if(i==4){
+                break;
+            }
+        }
+        if(i==4){
+            printf("[ FATAL: ] The command %s is incorrect. Please read the help for details.\n",app_cmd);
+            write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
+            check_and_cleanup(workdir);
+            return 9;
+        }
+        if(strcmp(app_cmd,"list")==0){
+            if(cmd_flag_check(argc,argv,"--installed")==0){
+                run_flag=app_list(workdir,"installed",user_name,SSHKEY_DIR);
+            }
+            else{
+                run_flag=app_list(workdir,"all",user_name,SSHKEY_DIR);
+            }
+        }
+        else{
+            if(cmd_keyword_check(argc,argv,"--app",app_name)!=0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Please specify an app name, i.e. " WARN_YELLO_BOLD "of9" FATAL_RED_BOLD " . Exit now." RESET_DISPLAY "\n");
+                write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
+                check_and_cleanup(workdir);
+                return 9;
+            }
+            run_flag=app_operation(workdir,user_name,app_cmd,app_name,SSHKEY_DIR);
+        }
+        if(run_flag!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"APPMAN_FAILED",44);
+            check_and_cleanup(workdir);
+            return 44;
+        }
+        else{
+            write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
+            check_and_cleanup(workdir);
+            return 0;
+        }
+    }
+
+    if(strcmp(argv[1],"jobman")==0){
+        if(cmd_keyword_check(argc,argv,"--jcmd",job_cmd)!=0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid command: submit, list, cancel .\n");
+            printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
+            fflush(stdin);
+            scanf("%s",job_cmd);
+            getchar();
+        }
+        int i=0;
+        while(strcmp(job_cmd,jobman_commands[i])!=0){
+            i++;
+            if(i==3){
+                break;
+            }
+        }
+        if(i==3){
+            printf("[ FATAL: ] The command %s is incorrect. Please read the help for details.\n",job_cmd);
+            write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
+            check_and_cleanup(workdir);
+            return 9;
+        }
+        if(strcmp(job_cmd,"list")==0){
+
+        }
+        else{
+
+        }
+        if(run_flag!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"APPMAN_FAILED",44);
+            check_and_cleanup(workdir);
+            return 44;
+        }
+        else{
+            write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
+            check_and_cleanup(workdir);
+            return 0;
+        }
     }
     
     if(strcmp(argv[1],"delc")==0){

@@ -24,3 +24,8 @@
 #include "general_print_info.h"
 #include "appman.h"
 
+int job_submit(char* workdir, char* user_name, char* sshkey_dir, int tasks_per_node, int node_num, char* job_name, char* executable, char* run_log){
+    return 0;
+}
+int job_cancel();
+int job_list();

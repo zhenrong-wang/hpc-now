@@ -12,6 +12,7 @@
 
 logfile='/root/cluster_init.log'
 public_app_registry="/usr/hpc-now/.public_apps.reg"
+private_app_registry="/usr/hpc-now/.private_apps.reg"
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Initialization started." >> ${logfile}
@@ -111,7 +112,9 @@ wget ${SCRIPTS_URL_ROOT}nowmon_agt.sh -O /usr/hpc-now/nowmon_agt.sh && chmod +x 
 if [ -f /root/hostfile ]; then
   wget ${SCRIPTS_URL_ROOT}nowmon_mgr.sh -O /usr/hpc-now/nowmon_mgr.sh && chmod +x /usr/hpc-now/nowmon_mgr.sh
 fi
-touch $public_app_registry
+touch $public_app_registry # Only root user can modify this file
+touch $private_app_registry
+chmod 766 $private_app_registry # Allow users to modify this file
 
 # Add user slurm 
 id -u slurm
@@ -369,6 +372,7 @@ if ! command -v module >/dev/null 2>&1; then
 fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`  
 echo -e "# $time_current Environment Module has been installed." >> ${logfile}
+echo -e "environment_modules" >> $public_app_registry
 
 # Install Desktop Env-NECESSARY
 time_current=`date "+%Y-%m-%d %H:%M:%S"`

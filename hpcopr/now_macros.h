@@ -9,7 +9,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0141"
+#define CORE_VERSION_CODE "0.2.0.0142"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -19,6 +19,7 @@
 #define SYSTEM_CMD_ERROR_LOG "C:\\programdata\\hpc-now\\system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">nul 2>>C:\\programdata\\hpc-now\\system_command_error.log"
 #define SYSTEM_CMD_REDIRECT_NULL ">nul 2>&1"
+#define SYSTEM_CMD_ERR_REDIRECT_NULL "2>nul"
 #define DESTROYED_DIR "c:\\programdata\\hpc-now\\.destroyed\\"
 #define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
 #define SSHKEY_DIR "C:\\hpc-now\\.now-ssh"
@@ -70,6 +71,7 @@
 #define SYSTEM_CMD_ERROR_LOG "/usr/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/usr/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT_NULL ">>/dev/null 2>&1"
+#define SYSTEM_CMD_ERR_REDIRECT_NULL "2>/dev/null"
 #define DESTROYED_DIR "/usr/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/home/hpc-now/LICENSES"
 #define SSHKEY_DIR "/home/hpc-now/.now-ssh"
@@ -121,6 +123,7 @@
 #define SYSTEM_CMD_ERROR_LOG "/Applications/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/Applications/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT_NULL ">>/dev/null 2>&1"
+#define SYSTEM_CMD_ERR_REDIRECT_NULL "2>/dev/null"
 #define DESTROYED_DIR "/Applications/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/Users/hpc-now/LICENSES"
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
@@ -187,12 +190,12 @@
 #define LINE_LENGTH_SHORT 256
 #define AKSK_LENGTH 128
 #define CONF_STRING_LENTH 64
-#define COMMAND_NUM 45
+#define COMMAND_NUM 47
 #define DATAMAN_COMMAND_NUM 17
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 12
-#define CMD_FLAG_NUM 23
-#define CMD_KWDS_NUM 30
+#define CMD_FLAG_NUM 25
+#define CMD_KWDS_NUM 33
 
 /* Usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"

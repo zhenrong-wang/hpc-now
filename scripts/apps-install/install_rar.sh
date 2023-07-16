@@ -8,11 +8,11 @@
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/rar/
-tmp_log=/tmp/hpcmgr_install_rar.log
+tmp_log=/tmp/hpcmgr_install_rar_${current_user}.log
 
 current_user=`whoami`
 public_app_registry="/usr/hpc-now/.public_apps.reg"
-private_app_registry="$HOME/.now_apps.reg"
+private_app_registry="/usr/hpc-now/.private_apps.reg"
 
 if [ $current_user = 'root' ]; then
   app_root="/opt/"
@@ -28,7 +28,7 @@ if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 1
 else
-  grep rarlinux $private_app_registry >> /dev/null 2>&1
+  grep "rarlinux ~ ${current_user}" $private_app_registry >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
     echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
     exit 3
@@ -38,10 +38,10 @@ fi
 echo -e "[ -INFO- ] Software: RAR for Linux "
 if [ ! -f ${app_cache}rarlinux-x64-612.tar.gz ]; then
   echo -e "[ -INFO- ] Downloading package(s) ..."
-  wget ${url_pkgs}rarlinux-x64-612.tar.gz -O ${app_cache}rarlinux-x64-612.tar.gz -q
+  wget ${url_pkgs}rarlinux-x64-612.tar.gz -O ${app_cache}rarlinux-x64-612.tar.gz >> ${tmp_log}
 fi
 
-tar zxf ${app_cache}rarlinux-x64-612.tar.gz -C ${app_root}
+tar zvxf ${app_cache}rarlinux-x64-612.tar.gz -C ${app_root} >> ${tmp_log}
 if [ $current_user = 'root' ]; then
   mkdir -p /usr/local/bin
   mkdir -p /usr/local/lib
@@ -51,7 +51,7 @@ if [ $current_user = 'root' ]; then
   echo -e "rarlinux" >> $public_app_registry
 else
   echo -e "export PATH=${app_root}rar/:\$PATH" >> $HOME/.bashrc
-  echo -e "rarlinux" >> $private_app_registry
+  echo -e "rarlinux ~ ${current_user}" >> $private_app_registry
 fi
 
-echo -e "[ -DONE- ] rarlinux has been installed. "
+echo -e "[ -DONE- ] rarlinux has been installed. " >> ${tmp_log}
