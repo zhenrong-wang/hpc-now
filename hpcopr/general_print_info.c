@@ -431,8 +431,10 @@ void print_appmgr_info(void){
     printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "appman" RESET_DISPLAY " --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...\n");
     printf("| * The cluster must be in running state (minimal or all). *\n");
     printf("| * -u USERNAME    ~ A valid user name. Use 'root' for all users.\n");
-    printf("|   --acmd list    ~ List out all the available (default) or installed apps.\n");
-    printf("|     --installed       ~ List out all the installed apps.\n");
+    printf("|   --acmd store   ~ List out the apps in store.\n");
+    printf("|   --acmd avail   ~ List out all the installed apps.\n");
+    printf("|   --acmd check   ~ Check whether an app is available.\n");
+    printf("|     --app  APP_NAME   ~ The app name to be installed.\n");
     printf("|   --acmd install ~ Install an app to all users or a specified user.\n");
     printf("|     --app  APP_NAME   ~ The app name to be installed.\n");
     printf("|   --acmd build   ~ Compile and build an app to all users or a specified user.\n");

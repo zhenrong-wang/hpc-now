@@ -20,6 +20,7 @@
 #define SYSTEM_CMD_REDIRECT ">nul 2>>C:\\programdata\\hpc-now\\system_command_error.log"
 #define SYSTEM_CMD_REDIRECT_NULL ">nul 2>&1"
 #define SYSTEM_CMD_ERR_REDIRECT_NULL "2>nul"
+#define NULL_STREAM "nul"
 #define DESTROYED_DIR "c:\\programdata\\hpc-now\\.destroyed\\"
 #define NOW_LIC_DIR "C:\\hpc-now\\LICENSES"
 #define SSHKEY_DIR "C:\\hpc-now\\.now-ssh"
@@ -72,6 +73,7 @@
 #define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/usr/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT_NULL ">>/dev/null 2>&1"
 #define SYSTEM_CMD_ERR_REDIRECT_NULL "2>/dev/null"
+#define NULL_STREAM "/dev/null"
 #define DESTROYED_DIR "/usr/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/home/hpc-now/LICENSES"
 #define SSHKEY_DIR "/home/hpc-now/.now-ssh"
@@ -124,6 +126,7 @@
 #define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/Applications/.hpc-now/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT_NULL ">>/dev/null 2>&1"
 #define SYSTEM_CMD_ERR_REDIRECT_NULL "2>/dev/null"
+#define NULL_STREAM "/dev/null"
 #define DESTROYED_DIR "/Applications/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/Users/hpc-now/LICENSES"
 #define SSHKEY_DIR "/Users/hpc-now/.now-ssh"
@@ -195,7 +198,7 @@
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 12
 #define CMD_FLAG_NUM 25
-#define CMD_KWDS_NUM 33
+#define CMD_KWDS_NUM 34
 
 /* Usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"

@@ -548,7 +548,7 @@ if [ $1 = 'install' ]; then
     echo -e "5. Other Tools:"
     echo -e "\tdesktop   - Desktop Environment" 
     echo -e "\tbaidu     - Baidu Netdisk"
-    echo -e "\tnowdisk   - COSBrowser (RECOMMENDED)" 
+    echo -e "\tcos       - COSBrowser (RECOMMENDED)" 
     echo -e "\trar       - RAR for Linux (RECOMMENDED)" 
     echo -e "\tkswps     - WPS Office Suite for Linux (RECOMMENDED)" 
     echo -e "\tenvmod    - Environment Modules" 
@@ -570,7 +570,7 @@ if [ $1 = 'install' ]; then
     curl -s ${URL_INSTSCRIPTS_ROOT}install_gcc9.sh | bash
   elif [[ -n $2 && $2 = 'gcc12' ]]; then
     curl -s ${URL_INSTSCRIPTS_ROOT}install_gcc12.sh | bash
-  elif [[ -n $2 && $2 = 'nowdisk' ]]; then
+  elif [[ -n $2 && $2 = 'cos' ]]; then
     curl -s ${URL_INSTSCRIPTS_ROOT}install_cos.sh | bash
   elif [[ -n $2 && $2 = 'baidu' ]]; then
     curl -s ${URL_INSTSCRIPTS_ROOT}install_baidu.sh | bash

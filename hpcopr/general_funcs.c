@@ -69,6 +69,7 @@ char command_keywords[CMD_KWDS_NUM][16]={
     "--acmd",
     "--app",
     "--jcmd",
+    "--jid",
     "--level",
     "--cname", //cluster_name
     "--ak",

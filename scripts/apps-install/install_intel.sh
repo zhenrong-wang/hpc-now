@@ -18,7 +18,7 @@ if [ $current_user != 'root' ]; then
   exit 1
 fi
 
-grep intelhpc $public_app_registry >> /dev/null 2>&1
+grep "< intel >" $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 3
@@ -42,4 +42,4 @@ else
   echo -e "[ -WARN- ] You didn't install the toolkit to the default path. Please set envvars manually." 
 fi  
 echo -e "[ -DONE- ] Congratulations! Intel(R) HPC Kit - Latest version has been installed."
-echo -e "intelhpc" >> $public_app_registry
+echo -e "< intel >" >> $public_app_registry

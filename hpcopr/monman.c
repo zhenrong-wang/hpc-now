@@ -133,9 +133,15 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
         i=3;
         day_num=curr_mday;
     }
-    if(day_num>28&&month_num==2&&year_num%4!=0){
-        i=4;
-        day_num=curr_mday;
+    if(day_num>28&&month_num==2){
+        if(year_num%4!=0){
+            i=4;
+            day_num=curr_mday;
+        }
+        else if(year_num%400!=0){
+            i=4;
+            day_num=curr_mday;
+        } 
     }
     if(day_num>30&&month_num!=1&&month_num!=3&&month_num!=5&&month_num!=7&&month_num!=8&&month_num!=10&&month_num!=12){
         i=4;

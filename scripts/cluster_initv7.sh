@@ -372,7 +372,7 @@ if ! command -v module >/dev/null 2>&1; then
 fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`  
 echo -e "# $time_current Environment Module has been installed." >> ${logfile}
-echo -e "environment_modules" >> $public_app_registry
+echo -e "< envmod >" >> $public_app_registry
 
 # Install Desktop Env-NECESSARY
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
@@ -407,7 +407,7 @@ if [ -f /root/hostfile ]; then
   fi
   systemctl set-default graphical.target
   yum -y install tigervnc tigervnc-server
-  echo -e "desktop_env" >> $public_app_registry
+  echo -e "< desktop_env >" >> $public_app_registry
 # yum -y install xrdp 
 # FATAL: xrdp-0.9.22 fails to work. We have to build xrdp from source.
   yum -y remove xrdp # For Amazon Machines, xrdp may have been installed. Here we need to remove and rebuild.
@@ -439,7 +439,7 @@ if [ -f /root/hostfile ]; then
     if [ $? -ne 0 ]; then
       echo -e "alias cos='/opt/cosbrowser.AppImage --no-sandbox'" >> /etc/profile
     fi
-    echo -e "cosbrowser" >> $public_app_registry
+    echo -e "< cos >" >> $public_app_registry
   elif [ $cloud_flag = 'CLOUD_A' ]; then
     wget https://gosspublic.alicdn.com/oss-browser/1.16.0/oss-browser-linux-x64.zip -O /opt/oss.zip
     cd /opt && unzip -o oss.zip && rm -rf oss.zip 
@@ -447,7 +447,7 @@ if [ -f /root/hostfile ]; then
     if [ $? -ne 0 ]; then
       echo -e "alias oss='/opt/oss-browser-linux-x64/oss-browser'" >> /etc/profile
     fi
-    echo -e "ossbrowser" >> $public_app_registry
+    echo -e "< oss >" >> $public_app_registry
   fi
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "# $time_current Desktop Environment and RDP has been installed." >> ${logfile}

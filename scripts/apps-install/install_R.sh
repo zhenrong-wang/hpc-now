@@ -43,7 +43,7 @@ if [ $? -ne 0 ]; then
   fi
 fi
 
-grep rstudio $public_app_registry >> /dev/null 2>&1
+grep "< R >" $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 7
@@ -57,7 +57,7 @@ cpanm FindBin
 if [ ! -f ${app_cache}openssl-1.1.1q.tar.gz ]; then
   wget ${url_pkgs}openssl-1.1.1q.tar.gz -O ${app_cache}openssl-1.1.1q.tar.gz
 fi
-grep openssl-1.1.1q $public_app_registry >> /dev/null 2>&1
+grep "< openssl-1.1.1q >" $public_app_registry >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   cd ${app_cache}
   tar zvxf openssl-1.1.1q.tar.gz >> $tmp_log
@@ -70,7 +70,7 @@ if [ $? -ne 0 ]; then
     echo -e "export LD_LIBRARY_PATH=${app_root}openssl-1.1.1q/lib:\$LD_LIBRARY_PATH\nexport PATH=${app_root}openssl-1.1.1q/bin:\$PATH\n" >> /etc/profile
   fi
   source /etc/profile
-  echo -e "openssl-1.1.1q" >> $public_app_registry
+  echo -e "< openssl-1.1.1q >" >> $public_app_registry
 fi
 
 echo -e "[ STEP 2 ] Installing R ... "
@@ -86,7 +86,7 @@ echo -e "export PATH=\$JAVA_HOME/bin:\$PATH" >> /etc/profile
 echo -e "export CPATH=\$JAVA_HOME/include:\$JAVA_HOME/include/linux:\$CPATH" >> /etc/profile
 source /etc/profile
 
-grep "r_env" $public_app_registry >> /dev/null 2>&1
+grep "< r_env >" $public_app_registry >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   if [ ! -f ${app_cache}R-4.2.1.tar.gz ]; then
     wget ${url_pkgs}R-4.2.1.tar.gz -O ${app_cache}R-4.2.1.tar.gz 
@@ -102,7 +102,7 @@ if [ $? -ne 0 ]; then
     echo -e "export LD_LIBRARY_PATH=${app_root}R-4.2.1/lib64:\$LD_LIBRARY_PATH" >> /etc/profile
     source /etc/profile
   fi
-  echo -e "r_env" >> $public_app_registry
+  echo -e "< r_env >" >> $public_app_registry
 fi
 
 echo -e "[ STEP 3 ] Installing RStudio ... "
@@ -157,4 +157,4 @@ done < /tmp/desktop_dirs.txt
 rm -rf /tmp/desktop_dirs.txt
 
 echo -e "[ -WARN- ] when install package rgdal, please use 'install.packages("rgdal",configure.args = "--host=x86_64")' to specify configure vars"
-echo -e "rstudio" >> ${public_app_registry}
+echo -e "< R >" >> ${public_app_registry}

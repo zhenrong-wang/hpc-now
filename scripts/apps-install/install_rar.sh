@@ -23,12 +23,12 @@ else
 fi
 mkdir -p $app_cache
 
-grep rarlinux $public_app_registry >> /dev/null 2>&1
+grep "< rar >" $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 1
 else
-  grep "rarlinux ~ ${current_user}" $private_app_registry >> /dev/null 2>&1
+  grep "< rar > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
     echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
     exit 3
@@ -48,10 +48,10 @@ if [ $current_user = 'root' ]; then
   /bin/cp ${app_root}rar/rar ${app_root}rar/unrar /usr/local/bin
   /bin/cp ${app_root}rar/rarfiles.lst /etc
   /bin/cp ${app_root}rar/default.sfx /usr/local/lib
-  echo -e "rarlinux" >> $public_app_registry
+  echo -e "< rar >" >> $public_app_registry
 else
   echo -e "export PATH=${app_root}rar/:\$PATH" >> $HOME/.bashrc
-  echo -e "rarlinux ~ ${current_user}" >> $private_app_registry
+  echo -e "< rar > < ${current_user} >" >> $private_app_registry
 fi
 
 echo -e "[ -DONE- ] rarlinux has been installed. " >> ${tmp_log}

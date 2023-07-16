@@ -138,10 +138,12 @@ char dataman_commands[DATAMAN_COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "tail"
 };
 
-char appman_commands[4][COMMAND_STRING_LENGTH_MAX]={
-    "list",
+char appman_commands[6][COMMAND_STRING_LENGTH_MAX]={
+    "store",
+    "avail",
     "build",
     "install",
+    "check",
     "remove"
 };
 
@@ -186,6 +188,7 @@ char jobman_commands[3][COMMAND_STRING_LENGTH_MAX]={
 43 CLUSTER_ASLEEP
 44 APPMAN_FAILED
 45 GRAPH_FAILED
+46 JOBMAN_FAILED
 47 GRAPH_NOT_UPDATED
 49 CLUSTER_EMPTY
 51 CLUSTER_NOT_EMPTY
@@ -1558,7 +1561,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"appman")==0){
         if(cmd_keyword_check(argc,argv,"--acmd",app_cmd)!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid command: list, build, install, remove.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid command: store, avail, build, install, remove.\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
             scanf("%s",app_cmd);
@@ -1567,23 +1570,21 @@ int main(int argc, char* argv[]){
         int i=0;
         while(strcmp(app_cmd,appman_commands[i])!=0){
             i++;
-            if(i==4){
+            if(i==6){
                 break;
             }
         }
-        if(i==4){
+        if(i==6){
             printf("[ FATAL: ] The command %s is incorrect. Please read the help for details.\n",app_cmd);
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
         }
-        if(strcmp(app_cmd,"list")==0){
-            if(cmd_flag_check(argc,argv,"--installed")==0){
-                run_flag=app_list(workdir,"installed",user_name,SSHKEY_DIR);
-            }
-            else{
-                run_flag=app_list(workdir,"all",user_name,SSHKEY_DIR);
-            }
+        if(strcmp(app_cmd,"store")==0){
+            run_flag=app_list(workdir,"all",user_name,"",SSHKEY_DIR,0);
+        }
+        else if(strcmp(app_cmd,"avail")==0){
+            run_flag=app_list(workdir,"installed",user_name,"",SSHKEY_DIR,0);
         }
         else{
             if(cmd_keyword_check(argc,argv,"--app",app_name)!=0){
@@ -1592,9 +1593,14 @@ int main(int argc, char* argv[]){
                 check_and_cleanup(workdir);
                 return 9;
             }
-            run_flag=app_operation(workdir,user_name,app_cmd,app_name,SSHKEY_DIR);
+            if(strcmp(app_cmd,"check")==0){
+                run_flag=app_list(workdir,"check",user_name,app_name,SSHKEY_DIR,1);
+            }
+            else{
+                run_flag=app_operation(workdir,user_name,app_cmd,app_name,SSHKEY_DIR);
+            }
         }
-        if(run_flag!=0){
+        if(run_flag==-3||run_flag==-1||run_flag==1||run_flag==3){
             write_operation_log(cluster_name,operation_log,argc,argv,"APPMAN_FAILED",44);
             check_and_cleanup(workdir);
             return 44;
@@ -1627,16 +1633,26 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 9;
         }
-        if(strcmp(job_cmd,"list")==0){
-
+        if(strcmp(job_cmd,"submit")==0){
+//            run_flag=job_submit(workdir,user_name,SSHKEY_DIR,"","","","",0,0);
+        }
+        else if(strcmp(job_cmd,"list")==0){
+            run_flag=job_list(workdir,user_name,SSHKEY_DIR);
         }
         else{
-
+            if(cmd_keyword_check(argc,argv,"--jid",job_id)!=0){
+                job_list(workdir,user_name,SSHKEY_DIR);
+                printf("[ INPUT: ] Please specify the job id to be canceled: ");
+                fflush(stdin);
+                scanf("%s",job_id);
+                getchar();
+            }
+            run_flag=job_cancel(workdir,user_name,SSHKEY_DIR,job_id);
         }
         if(run_flag!=0){
-            write_operation_log(cluster_name,operation_log,argc,argv,"APPMAN_FAILED",44);
+            write_operation_log(cluster_name,operation_log,argc,argv,"JOBMAN_FAILED",46);
             check_and_cleanup(workdir);
-            return 44;
+            return 46;
         }
         else{
             write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);

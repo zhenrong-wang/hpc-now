@@ -21,7 +21,7 @@ app_cache="/hpc_apps/.cache/"
 mkdir -p $app_cache
 tmp_log=/tmp/hpcmgr_install_baidu.log
 
-grep baidunetdisk $public_app_registry >> /dev/null 2>&1
+grep "< baidu >" $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 3
@@ -96,4 +96,4 @@ else
   done < /tmp/desktop_dirs.txt
   rm -rf /tmp/desktop_dirs.txt
 fi
-echo -e "baidunetdisk" >> $public_app_registry
+echo -e "< baidu >" >> $public_app_registry

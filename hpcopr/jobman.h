@@ -9,8 +9,20 @@
 #ifndef JOBMAN_H
 #define JOBMAN_H
 
-int job_submit(char* workdir, char* option, char* user_name, char* sshkey_dir);
-int job_cancel();
-int job_list();
+typedef struct
+{
+    char* app_name;
+    int node_num;
+    int tasks_per_node;
+    char* job_name;
+    int duration_hours;
+    char* job_exec;
+    char* job_data;
+} jobinfo;
+
+int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* sshkey_dir, char* crypto_keyfile, jobinfo* job_info);
+int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_info);
+int job_cancel(char* workdir, char* user_name, char* sshkey_dir, char* job_id);
+int job_list(char* workdir, char* user_name, char* sshkey_dir);
 
 #endif

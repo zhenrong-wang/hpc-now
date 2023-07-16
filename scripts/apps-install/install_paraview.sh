@@ -23,12 +23,12 @@ else
 fi
 mkdir -p $app_cache
 
-grep paraview $public_app_registry >> /dev/null 2>&1
+grep "< pview >" $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 1
 else
-  grep "paraview ~ ${current_user}" $private_app_registry >> /dev/null 2>&1
+  grep "< paraview > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
     echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
     exit 3
@@ -68,7 +68,7 @@ if [ $current_user = 'root' ]; then
       chown -R $user_name:$user_name /home/$user_name/Desktop/ParaView.desktop
     fi
   done < /root/.cluster_secrets/user_secrets.txt
-  echo -e "paraview" >> $public_app_registry
+  echo -e "< pview >" >> $public_app_registry
   echo -e "[ -DONE- ] ParaView has been installed to all users."
 else
   grep paraview $HOME/.bashrc >> /dev/null 2>&1
@@ -76,7 +76,7 @@ else
     echo -e "alias paraview='${app_root}ParaView/bin/paraview'" >> $HOME/.bashrc
   fi
   echo -e "[Desktop Entry]\nEncoding=UTF-8\nVersion=1.0\nName=ParaView\nComment=ParaView\nExec=${app_root}ParaView/bin/paraview\nIcon=/opt/app.png\nTerminal=false\nStartupNotify=true\nType=Application\nCategories=Applications;" > $HOME/Desktop/ParaView.desktop
-  echo -e "paraview ~ ${current_user}" >> $private_app_registry
+  echo -e "< pview > < ${current_user} >" >> $private_app_registry
   echo -e "[ -DONE- ] ParaView has been installed to the current user."
 fi
 

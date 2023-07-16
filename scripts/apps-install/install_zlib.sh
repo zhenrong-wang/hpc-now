@@ -24,12 +24,12 @@ else
 fi
 mkdir -p $app_cache
 
-grep zlib $public_app_registry >> /dev/null 2>&1
+grep "< zlib >" $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 1
 else
-  grep "zlib ~ ${current_user}" $private_app_registry >> /dev/null 2>&1
+  grep "< zlib > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
     echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
     exit 3
@@ -57,11 +57,11 @@ if [ $current_user = 'root' ]; then
   sed -i '/zlib-1.2.13/d' /etc/profile
   echo -e "export LD_LIBRARY_PATH=/hpc_apps/zlib-1.2.13/lib:\$LD_LIBRARY_PATH" >> /etc/profile
   echo -e "export C_INCLUDE_PATH=/hpc_apps/zlib-1.2.13/include:\$C_INCLUDE_PATH" >> /etc/profile
-  echo -e "zlib" >> $public_app_registry
+  echo -e "< zlib >" >> $public_app_registry
 else
   sed -i '/zlib-1.2.13/d' $HOME/.bashrc
   echo -e "export LD_LIBRARY_PATH=/hpc_apps/zlib-1.2.13/lib:\$LD_LIBRARY_PATH" >> $HOME/.bashrc
   echo -e "export C_INCLUDE_PATH=/hpc_apps/zlib-1.2.13/include:\$C_INCLUDE_PATH" >> $HOME/.bashrc
-  echo -e "zlib ~ ${current_user}" >> $private_app_registry
+  echo -e "< zlib > < ${current_user} >" >> $private_app_registry
 fi
 echo -e "[ -DONE- ] zlib-1.2.13 has been successfully installed to ${app_root}."

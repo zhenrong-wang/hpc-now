@@ -9,6 +9,7 @@
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/desktop/
 tmp_log=/tmp/hpcmgr_install_desktop.log
+public_app_registry="/usr/hpc-now/.public_apps.reg"
 
 current_user=`whoami`
 if [ $current_user != 'root' ]; then
@@ -121,4 +122,8 @@ else
     fi
   done < /tmp/bashrc_dirs.txt
   rm -rf /tmp/bashrc_dirs.txt
+fi
+grep "< desktop_env >"  $public_app_registry >> /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo -e "< desktop_env >" >> $public_app_registry
 fi

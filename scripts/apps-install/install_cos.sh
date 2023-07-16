@@ -20,12 +20,12 @@ else
 fi
 mkdir -p $app_cache
 
-grep cosbrowser $public_app_registry >> /dev/null 2>&1
+grep "< cosbrowser >" $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 1
 else
-  grep "cosbrowser ~ ${current_user}" $private_app_registry >> /dev/null 2>&1
+  grep "< cosbrowser > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
     echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
     exit 3
@@ -40,16 +40,11 @@ if [ $? -ne 0 ]; then
     exit 5
   fi
   echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
-  hpcmgr install desktop >> ${tmp_log}
+  hpcmgr install desktop >> ${tmp_log}.desktop
   if [ $? -ne 0 ]; then
     echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
     exit 7
   fi
-fi
-
-grep desktop_env  $public_app_registry >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "desktop_env" >> $public_app_registry
 fi
 
 echo -e "[ -INFO- ] Downloading package(s) ..."
@@ -83,13 +78,13 @@ if [ $current_user = 'root' ]; then
   if [ $? -ne 0 ]; then
     echo -e "alias cos.pub='${app_root}cosbrowser.AppImage --no-sandbox'" >> /etc/profile
   fi
-  echo -e "cosbrwoser" >> $public_app_registry
+  echo -e "< cosbrwoser >" >> $public_app_registry
   echo -e "[ -DONE- ] COS has been installed to all users."
 else
   grep "alias cos=" $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "alias cos='${app_root}cosbrowser.AppImage --no-sandbox'" >> $HOME/.bashrc
   fi
-  echo -e "cosbrowser ~ ${current_user}" >> $private_app_registry
+  echo -e "< cosbrowser > < ${current_user} >" >> $private_app_registry
 fi
 echo -e "[ -DONE- ] COS has been installed to the current user."

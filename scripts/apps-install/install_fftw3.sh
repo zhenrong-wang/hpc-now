@@ -24,12 +24,12 @@ else
 fi
 mkdir -p $app_cache
 
-grep fftw3 $public_app_registry >> /dev/null 2>&1
+grep "< fftw3 >" $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
   exit 1
 else
-  grep "fftw3 ~ ${current_user}" $private_app_registry >> /dev/null 2>&1
+  grep "< fftw3 > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
     echo -e "[ -INFO- ] This app has been installed to ${current_user}. Please run it directly."
     exit 3
@@ -60,12 +60,12 @@ if [ $current_user = 'root' ]; then
   if [ $? -ne 0 ]; then
     echo -e "export PATH=${app_root}fftw3/bin/:\$PATH\nexport LD_LIBRARY_PATH=${app_root}fftw3/lib/:\$LD_LIBRARY_PATH" >> /etc/profile
   fi
-  echo -e "fftw3" >> $public_app_registry
+  echo -e "< fftw3 >" >> $public_app_registry
 else
   grep fftw3 $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "export PATH=${app_root}fftw3/bin/:\$PATH\nexport LD_LIBRARY_PATH=${app_root}fftw3/lib/:\$LD_LIBRARY_PATH" >> $HOME/.bashrc
   fi
-  echo -e "fftw3 ~ ${current_user}" >> $private_app_registry
+  echo -e "< fftw3 > < ${current_user} >" >> $private_app_registry
 fi
 echo -e "[ -DONE- ] FFTW-3 has been built to ${app_root}fftw3."
