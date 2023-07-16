@@ -270,10 +270,16 @@ void print_help(char* cmd_name){
         printf(GENERAL_BOLD "+ VII  . Cluster Data Management:\n" RESET_DISPLAY);
     }
     if(strcmp(cmd_name,"dataman")==0||strcmp(cmd_name,"all")==0){
-        print_dataman_info();
+        print_datamgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ VIII . Others:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ VIII . Cluster App Management:\n" RESET_DISPLAY);
+    }
+    if(strcmp(cmd_name,"appman")==0||strcmp(cmd_name,"all")==0){
+        print_appmgr_info();
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ IX   . Others:\n" RESET_DISPLAY);
     }
     if(strcmp(cmd_name,"about")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       :~ About this software and HPC-NOW project.\n");
@@ -386,7 +392,7 @@ void print_usrmgr_info(void){
     printf("|     -p     PASSWORD   ~ New password string.\n");
 }
 
-void print_dataman_info(void){
+void print_datamgr_info(void){
     printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "dataman" RESET_DISPLAY " CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...\n");
     printf("| General Flags    :~ -r, -rf, --recursive, --force, -f.\n");
     printf("|    -s SOURCE_PATH  ~ Source path of the binary operations. i.e. cp\n");
@@ -419,4 +425,18 @@ void print_dataman_info(void){
     printf("|     @p/ to specify the public folder prefix " WARN_YELLO_BOLD "( INSECURE !)" RESET_DISPLAY ".\n");
     printf("|     @R/ to specify the / prefix, only for root or user1.\n");
     printf("|    Example: hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1\n");
+}
+
+void print_appmgr_info(void){
+    printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "appman" RESET_DISPLAY " --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...\n");
+    printf("| * The cluster must be in running state (minimal or all). *\n");
+    printf("| * -u USERNAME    ~ A valid user name. Use 'root' for all users.\n");
+    printf("|   --acmd list    ~ List out all the available (default) or installed apps.\n");
+    printf("|     --installed       ~ List out all the installed apps.\n");
+    printf("|   --acmd install ~ Install an app to all users or a specified user.\n");
+    printf("|     --app  APP_NAME   ~ The app name to be installed.\n");
+    printf("|   --acmd build   ~ Compile and build an app to all users or a specified user.\n");
+    printf("|     --app  APP_NAME   ~ The app name to be compiled and built.\n");
+    printf("|   --acmd remove  ~ Remove an app from the cluster.\n");
+    printf("|     --app  APP_NAME   ~ The app name to be removed.\n");
 }
