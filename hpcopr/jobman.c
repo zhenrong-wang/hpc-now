@@ -121,7 +121,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         else{
             num_temp=string_to_positive_num(string_temp);
             if(num_temp<1){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] The specified duration hours %s is incorrect. Using the default." RESET_DISPLAY "\n",string_temp);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The specified duration hours %s is invalid. Using the default." RESET_DISPLAY "\n",string_temp);
                 duration_hours=400000000;
             }
             else{
@@ -142,7 +142,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
     
     if(cmd_keyword_check(argc,argv,"--jexec",exec_name)!=0){
-        printf(GENERAL_BOLD "[ -WARN- ]" RESET_DISPLAY " Please specify an executable: ");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify an executable: ");
         fflush(stdin);
         scanf("%s",exec_name);
         getchar();
