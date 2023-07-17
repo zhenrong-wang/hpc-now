@@ -1653,9 +1653,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     }
     printf("\n");
     sync_statefile(workdir,sshkeydir);
-    if(strcmp(option,"all")==0){
-        remote_exec(workdir,sshkeydir,"quick",1);
-    }
+    remote_exec(workdir,sshkeydir,"quick",1);
     if(strcmp(option,"all")==0){
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The cluster is in the state of " HIGH_CYAN_BOLD "full" RESET_DISPLAY " running.\n");
     }

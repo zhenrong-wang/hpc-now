@@ -20,5 +20,6 @@ int read_license(char* option);
 void print_usrmgr_info(void);
 void print_datamgr_info(void);
 void print_appmgr_info(void);
+void print_jobmgr_info(void);
 
 #endif

@@ -264,6 +264,8 @@ int main(int argc, char* argv[]){
     char doubleconfirm[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char cluster_role[8]="";
+    int cluster_state_flag=0;
+    jobinfo job_info;
     print_header();
 
 #ifdef _WIN32
@@ -531,7 +533,8 @@ int main(int argc, char* argv[]){
         check_and_cleanup("");
         return 19;
     }
-
+    
+    cluster_state_flag=cluster_asleep_or_not(workdir);
     if(strcmp(argv[1],"new-cluster")==0){
         cmd_keyword_check(argc,argv,"--cname",new_cluster_name);
         cmd_keyword_check(argc,argv,"--ak",cloud_ak);
@@ -851,7 +854,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"ssh")==0){
-        if(cluster_asleep_or_not(workdir)==0){
+        if(cluster_state_flag==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to wake up the cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " first.\n" RESET_DISPLAY,cluster_name);
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
             check_and_cleanup(workdir);
@@ -1047,7 +1050,7 @@ int main(int argc, char* argv[]){
             return 9;
         }
         if(strcmp(data_cmd,"put")!=0&&strcmp(data_cmd,"get")!=0&&strcmp(data_cmd,"copy")!=0&&strcmp(data_cmd,"list")!=0&&strcmp(data_cmd,"delete")!=0&&strcmp(data_cmd,"move")!=0){
-            if(cluster_asleep_or_not(workdir)==0){
+            if(cluster_state_flag==0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] You need to wake up the cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " first.\n" RESET_DISPLAY,cluster_name);
                 write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
                 check_and_cleanup(workdir);
@@ -1373,7 +1376,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"sleep")==0){
-        if(cluster_asleep_or_not(workdir)==0){
+        if(cluster_state_flag==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is " RESET_DISPLAY HIGH_CYAN_BOLD "not running" RESET_DISPLAY FATAL_RED_BOLD ". No need to hibernate.\n" RESET_DISPLAY);
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
             check_and_cleanup("");
@@ -1396,7 +1399,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 38;
         }
-        if(cluster_asleep_or_not(workdir)!=0){
+        if(cluster_state_flag!=0){
             if(cmd_flag_check(argc,argv,"--all")!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "minimal running" RESET_DISPLAY FATAL_RED_BOLD ". Please try \n" RESET_DISPLAY);
                 printf(FATAL_RED_BOLD "|          " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD " to wake up the whole cluster.\n" RESET_DISPLAY);
@@ -1435,7 +1438,7 @@ int main(int argc, char* argv[]){
             if(strcmp(argv[1],"reconfc")==0&&check_down_nodes(workdir)!=0&&strcmp(cloud_flag,"CLOUD_B")==0){
                 printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You need to turn on all the compute nodes first.\n" RESET_DISPLAY);
             }
-            if(strcmp(argv[1],"reconfm")==0&&cluster_asleep_or_not(workdir)==0){
+            if(strcmp(argv[1],"reconfm")==0&&cluster_state_flag==0){
                 printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You need to wake up the cluster first.\n" RESET_DISPLAY);
             }
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
@@ -1467,7 +1470,7 @@ int main(int argc, char* argv[]){
         }
         if(strcmp(user_cmd,"list")==0){
             run_flag=hpc_user_list(workdir,crypto_keyfile,0);
-            if(cluster_asleep_or_not(workdir)==0){
+            if(cluster_state_flag==0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] The specified/switched cluster is not running.\n" RESET_DISPLAY);
             }
             write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
@@ -1541,7 +1544,7 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
 
-    if(cluster_asleep_or_not(workdir)==0){
+    if(cluster_state_flag==0){
         if(command_flag==2){
             printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not running. Please wake up first.\n");
         }
@@ -1613,6 +1616,9 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"jobman")==0){
+        if(cluster_state_flag==1){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] No compute node is running." RESET_DISPLAY "\n");
+        }
         if(cmd_keyword_check(argc,argv,"--jcmd",job_cmd)!=0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid command: submit, list, cancel .\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
@@ -1634,7 +1640,13 @@ int main(int argc, char* argv[]){
             return 9;
         }
         if(strcmp(job_cmd,"submit")==0){
-//            run_flag=job_submit(workdir,user_name,SSHKEY_DIR,"","","","",0,0);
+            run_flag=get_job_info(argc,argv,workdir,user_name,SSHKEY_DIR,crypto_keyfile,&job_info);
+            if(run_flag!=0){
+                write_operation_log(cluster_name,operation_log,argc,argv,"JOBMAN_FAILED",46);
+                check_and_cleanup(workdir);
+                return 46;
+            }
+            run_flag=job_submit(workdir,user_name,SSHKEY_DIR,&job_info);
         }
         else if(strcmp(job_cmd,"list")==0){
             run_flag=job_list(workdir,user_name,SSHKEY_DIR);

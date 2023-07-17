@@ -16,8 +16,6 @@ void rf_flag_parser(const char* rflag, const char* fflag, char* real_rflag, char
 int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_path, char* rflag, char* fflag, char* crypto_keyfile, char* cloud_flag, char* cmd_type);
 int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, char* fflag, char* crypto_keyfile, char* cloud_flag, char* cmd_type);
 
-int direct_path_check(char* path_string, char* real_path, char* hpc_user);
-
 int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_path, char* target_path, char* recursive_flag, char* force_flag, char* cmd_type);
 int direct_rm_ls_mkdir(char* workdir, char* hpc_user, char* sshkey_dir, char* remote_path, char* force_flag, char* recursive_flag, char* cmd_type);
 int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char* remote_path, char* cmd_type);

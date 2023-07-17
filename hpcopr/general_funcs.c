@@ -69,7 +69,11 @@ char command_keywords[CMD_KWDS_NUM][16]={
     "--acmd",
     "--app",
     "--jcmd",
+    "--jname", //Job Name
     "--jid",
+    "--jtime",
+    "--jexec",
+    "--jdata",
     "--level",
     "--cname", //cluster_name
     "--ak",
@@ -79,6 +83,7 @@ char command_keywords[CMD_KWDS_NUM][16]={
     "--rg",
     "--az",
     "--nn", //node_num
+    "--tn", //tasks per node
     "--un", //user_num
     "--mi",
     "--ci",
@@ -844,6 +849,64 @@ int local_path_parser(char* path_string, char* path_final){
         strcpy(path_final,path_string);
     }
     return 0;
+}
+
+int direct_path_check(char* path_string, char* hpc_user, char* real_path){
+    char header[256]="";
+    char tail[DIR_LENGTH]="";
+    int i=0;
+    int j;
+    while(*(path_string+i)!='/'&&i<strlen(path_string)){
+        *(header+i)=*(path_string+i);
+        i++;
+    }
+    for(j=i;j<strlen(path_string);j++){
+        *(tail+j-i)=*(path_string+j);
+    }
+    if(strcmp(header,"@h")==0){
+        if(strcmp(hpc_user,"root")==0){
+            sprintf(real_path,"/root/%s",tail);
+        }
+        else{
+            sprintf(real_path,"/home/%s/%s",hpc_user,tail);
+        }
+        return 0;
+    }
+    else if(strcmp(header,"@d")==0){
+        if(strcmp(hpc_user,"root")==0){
+            sprintf(real_path,"/hpc_data/%s",tail);
+        }
+        else{
+            sprintf(real_path,"/hpc_data/%s_data/%s",hpc_user,tail);
+        }
+        return 0;
+    }
+    else if(strcmp(header,"@a")==0){
+        if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
+            sprintf(real_path,"/hpc_apps/%s",tail);
+        }
+        else{
+            sprintf(real_path,"/home/%s/%s",hpc_user,tail);
+        }
+        return 0;
+    }
+    else if(strcmp(header,"@p")==0){
+        sprintf(real_path,"/hpc_data/public/%s",tail);
+        return 0;
+    }
+    else if(strcmp(header,"@R")==0){
+        if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
+            sprintf(real_path,"/%s",tail);
+        }
+        else{
+            sprintf(real_path,"/home/%s/%s",hpc_user,tail);
+        }
+        return 0;
+    }
+    else{
+        strcpy(real_path,path_string);
+        return 1;
+    }
 }
 
 int file_creation_test(char* filename){

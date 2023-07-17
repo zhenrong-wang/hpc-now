@@ -1006,12 +1006,19 @@ int cluster_empty_or_not(char* workdir){
 
 int cluster_asleep_or_not(char* workdir){
     char master_state[32]="";
+    char running_compute_nodes[4]="";
     get_state_value(workdir,"master_status:",master_state);
     if(strcmp(master_state,"running")!=0&&strcmp(master_state,"Running")!=0&&strcmp(master_state,"RUNNING")!=0){
         return 0;
     }
     else{
-        return 1;
+        get_state_value(workdir,"running_compute_nodes:",running_compute_nodes);
+        if(strcmp(running_compute_nodes,"0")==0){
+            return 1;
+        }
+        else{
+            return 2;
+        }
     }
 }
 

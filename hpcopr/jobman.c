@@ -27,37 +27,151 @@
 
 int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* sshkey_dir, char* crypto_keyfile, jobinfo* job_info){
     char string_temp[128]="";
-    char pub_app_reg[FILENAME_LENGTH]="";
-    char priv_app_reg[FILENAME_LENGTH]="";
-    char compute_node_num_string[4]="";
-    char compute_cores_string[4]="";
-    int compute_node_num;
-    int compute_cores;
+    char cluster_node_num_string[4]="";
+    char cluster_node_cores_string[4]="";
+    char app_name[128]="";
+    char exec_name[128]="";
+    char job_data[256]="";
+    char job_data_final[256]="";
+    char job_name[128]="";
+    int cluster_node_num=0;
+    int cluster_node_cores=0;
+    int specified_node_num=0;
+    int specified_node_cores=0;
+    int duration_hours=0;
+    int run_flag;
+    int num_temp=0;
+    int i;
+
+    get_state_value(workdir,"total_compute_nodes:",cluster_node_num_string);
+    get_state_value(workdir,"compute_node_cores:",cluster_node_cores_string);
+    cluster_node_num=string_to_positive_num(cluster_node_num_string);
+    cluster_node_cores=string_to_positive_num(cluster_node_cores_string);
+
     if(strcmp(user_name,"root")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The root user cannot submit jobs, please specify another user." RESET_DISPLAY "\n");
         hpc_user_list(workdir,crypto_keyfile,0);
         return -3;
     }
-    if(cmd_keyword_check(argc,argv,"--app",string_temp)!=0){
+    if(cmd_keyword_check(argc,argv,"--app",app_name)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify an app for this job.\n");
-//        app_list(workdir,"installed",user_name,sshkey_dir);
+        app_list(workdir,"installed",user_name,"",sshkey_dir,0);
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
-        scanf("%s",string_temp);
+        scanf("%s",app_name);
         getchar();
+    }
+    run_flag=app_list(workdir,"check",user_name,app_name,sshkey_dir,0);
+    if(run_flag!=4&&run_flag!=7){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified app " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",app_name);
+        return -5;
     }
     
     if(cmd_keyword_check(argc,argv,"--nn",string_temp)!=0){
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify the node num for this job:");
-        graph(workdir,crypto_keyfile,1);
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify compute node num (<=%d) for this job:",cluster_node_num);
         fflush(stdin);
         scanf("%s",string_temp);
         getchar();
     }
-    if(string_to_positive_num(string_temp)<1){
+    specified_node_num=string_to_positive_num(string_temp);
+    if(specified_node_num<1||specified_node_num>cluster_node_num){
         printf("[ FATAL: ] The specified node num %s is invalid. Exit now.\n",string_temp);
         return -5;
     }
+
+    if(cmd_keyword_check(argc,argv,"--tn",string_temp)!=0){
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify threads per node (<=%d) for this job:",cluster_node_cores);
+        fflush(stdin);
+        scanf("%s",string_temp);
+        getchar();
+    }
+    specified_node_cores=string_to_positive_num(string_temp);
+    if(specified_node_cores<1||specified_node_num>cluster_node_cores){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified threads " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " per node is invalid. Exit now." RESET_DISPLAY "\n",string_temp);
+        return -5;
+    }
+
+    if(cmd_keyword_check(argc,argv,"--jname",job_name)!=0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] No job name specified. Input y or yes to use the default (%s-job)." RESET_DISPLAY "\n",user_name);
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Or, input a string as the job name:" RESET_DISPLAY" ");
+        fflush(stdin);
+        scanf("%s",string_temp);
+        getchar();
+        if(strcmp(string_temp,"y")==0||strcmp(string_temp,"yes")==0||strcmp(string_temp,"Y")==0||strcmp(string_temp,"YES")==0||strcmp(string_temp,"Yes")==0){
+            sprintf(job_name,"%s-job",user_name);
+        }
+        else{
+            strcpy(job_name,string_temp);
+        }
+    }
+
+    if(cmd_keyword_check(argc,argv,"--jtime",string_temp)!=0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] No duration hours specified. Input y or yes to use the default (INFINITE)." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Or, input a positive number: ");
+        fflush(stdin);
+        scanf("%s",string_temp);
+        getchar();
+        if(strcmp(string_temp,"y")==0||strcmp(string_temp,"yes")==0||strcmp(string_temp,"Y")==0||strcmp(string_temp,"YES")==0||strcmp(string_temp,"Yes")==0){
+            duration_hours=400000000;
+        }
+        else{
+            num_temp=string_to_positive_num(string_temp);
+            if(num_temp<1){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The specified duration hours %s is incorrect. Using the default." RESET_DISPLAY "\n",string_temp);
+                duration_hours=400000000;
+            }
+            else{
+                duration_hours=num_temp;
+            }
+        }
+    }
+    
+    if(cmd_keyword_check(argc,argv,"--jexec",exec_name)!=0){
+        printf(GENERAL_BOLD "[ -WARN- ]" RESET_DISPLAY " Please specify an executable: ");
+        fflush(stdin);
+        scanf("%s",exec_name);
+        getchar();
+    }
+
+    if(cmd_keyword_check(argc,argv,"--jdata",job_data)!=0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] No data directory specified. Please specify a remote path." RESET_DISPLAY "\n");
+        printf("|          *MUST* use " HIGH_CYAN_BOLD "@d/" RESET_DISPLAY " (user data) or " HIGH_CYAN_BOLD "@p/" RESET_DISPLAY " (public data) as the prefix.\n");
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+        fflush(stdin);
+        scanf("%s",job_data);
+        getchar();
+    }
+
+    reset_string(string_temp);
+    for(i=0;i<3;i++){
+        *(string_temp+i)=*(job_data+i);
+    }
+    if(strcmp(string_temp,"@d/")!=0&&strcmp(string_temp,"@p/")!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified data directory " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",string_temp);
+        return -5;
+    }
+    else{
+        direct_path_check(job_data,user_name,job_data_final);
+    }
+   
+    strcpy(job_info->app_name,app_name);
+    job_info->node_num=specified_node_num;
+    job_info->tasks_per_node=specified_node_cores;
+    strcpy(job_info->job_name,job_name);
+    job_info->duration_hours=duration_hours;
+    strcpy(job_info->job_exec,exec_name);
+    strcpy(job_info->job_data,job_data_final);
+    
+    printf("\n");
+    printf(GENERAL_BOLD "[ -INFO- ] Job Information Summary:" RESET_DISPLAY "\n");
+    printf("|          App Name       : %s\n",job_info->app_name);
+    printf("|          Job Nodes      : %d\n",job_info->node_num);
+    printf("|          Cores per node : %d\n",job_info->tasks_per_node);
+    printf("|          Job Name       : %s\n",job_info->job_name);
+    printf("|          Duration Hours : %d\n",job_info->duration_hours);
+    printf("|          Job Executable : %s\n",job_info->job_exec);
+    printf("|          Data Directory : %s\n",job_info->job_data);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The job will be sent to the cluster.\n");
     return 0;
 }
 

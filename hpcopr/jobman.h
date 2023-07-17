@@ -11,13 +11,13 @@
 
 typedef struct
 {
-    char* app_name;
+    char app_name[128];
     int node_num;
     int tasks_per_node;
-    char* job_name;
+    char job_name[128];
     int duration_hours;
-    char* job_exec;
-    char* job_data;
+    char job_exec[256];
+    char job_data[256];
 } jobinfo;
 
 int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* sshkey_dir, char* crypto_keyfile, jobinfo* job_info);

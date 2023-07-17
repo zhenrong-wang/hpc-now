@@ -279,7 +279,13 @@ void print_help(char* cmd_name){
         print_appmgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ IX   . Others:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ IX   . Cluster Job Management:\n" RESET_DISPLAY);
+    }
+    if(strcmp(cmd_name,"jobman")==0||strcmp(cmd_name,"all")==0){
+        print_jobmgr_info();
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ X    . Others:\n" RESET_DISPLAY);
     }
     if(strcmp(cmd_name,"about")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       :~ About this software and HPC-NOW project.\n");
@@ -431,6 +437,7 @@ void print_appmgr_info(void){
     printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "appman" RESET_DISPLAY " --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...\n");
     printf("| * The cluster must be in running state (minimal or all). *\n");
     printf("| * -u USERNAME    ~ A valid user name. Use 'root' for all users.\n");
+    printf("| *                ~ " WARN_YELLO_BOLD "Admin or Operator role is required for 'root." RESET_DISPLAY "\n");
     printf("|   --acmd store   ~ List out the apps in store.\n");
     printf("|   --acmd avail   ~ List out all the installed apps.\n");
     printf("|   --acmd check   ~ Check whether an app is available.\n");
@@ -441,4 +448,22 @@ void print_appmgr_info(void){
     printf("|     --app  APP_NAME   ~ The app name to be compiled and built.\n");
     printf("|   --acmd remove  ~ Remove an app from the cluster.\n");
     printf("|     --app  APP_NAME   ~ The app name to be removed.\n");
+}
+
+void print_jobmgr_info(void){
+    printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "jobman" RESET_DISPLAY " --jcmd APP_CMD [ KEY_WORD1 KEY_STRING1 ] ...\n");
+    printf("| * The cluster must be in running state (minimal or all). *\n");
+    printf("| * -u USERNAME    ~ A valid user name. " WARN_YELLO_BOLD "The root user CANNOT submit jobs." RESET_DISPLAY "\n");
+    printf("|   --jcmd submit  ~ Submit a job to the cluster.\n");
+    printf("|     --app   APP_NAME         ~ The app name for this job.\n");
+    printf("|     --nn    NODE_NUM         ~ The number of compute nodes for this job.\n");
+    printf("|     --tn    THREADS_PER_NODE ~ Threads per node for this job.\n");
+    printf("|     --jname JOB_NAME         ~ Job name. 'y' for the default name.\n");
+    printf("|     --jtime DURATION_HOURS   ~ Duration hours. 'y' for INFINITE.\n");
+    printf("|     --jexec EXECUTABLE_NAME  ~ Executable name for this job.\n");
+    printf("|     --jdata DATA_DIRECTORY   ~ The data directory for this job.\n");
+    printf("|                              ~ MUST use @d/ or @p/ as the prefix.\n");
+    printf("|   --jcmd list    ~ List out all the jobs.\n");
+    printf("|   --jcmd cancel  ~ Cancel a job with specified ID\n");
+    printf("|     --jid   JOB_ID           ~ A valid job ID.\n");
 }

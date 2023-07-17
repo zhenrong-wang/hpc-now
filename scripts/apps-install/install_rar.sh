@@ -40,7 +40,7 @@ if [ ! -f ${app_cache}rarlinux-x64-612.tar.gz ]; then
   echo -e "[ -INFO- ] Downloading package(s) ..."
   wget ${url_pkgs}rarlinux-x64-612.tar.gz -O ${app_cache}rarlinux-x64-612.tar.gz >> ${tmp_log}
 fi
-
+echo -e "[ -INFO- ] Extracting packages ..."
 tar zvxf ${app_cache}rarlinux-x64-612.tar.gz -C ${app_root} >> ${tmp_log}
 if [ $current_user = 'root' ]; then
   mkdir -p /usr/local/bin
@@ -54,4 +54,4 @@ else
   echo -e "< rar > < ${current_user} >" >> $private_app_registry
 fi
 
-echo -e "[ -DONE- ] rarlinux has been installed. " >> ${tmp_log}
+echo -e "[ -DONE- ] rarlinux has been installed. "

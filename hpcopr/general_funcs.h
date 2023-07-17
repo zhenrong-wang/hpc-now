@@ -31,6 +31,7 @@ int generate_random_string(char* random_string);
 char* getpass_win(char* prompt);
 int insert_lines(char* filename, char* keyword, char* insert_string);
 int local_path_parser(char* path_string, char* path_final);
+int direct_path_check(char* path_string, char* real_path, char* hpc_user);
 int file_creation_test(char* filename);
 int file_cr_clean(char* filename);
 int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overwrite_flag);

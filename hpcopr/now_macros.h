@@ -198,7 +198,7 @@
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 12
 #define CMD_FLAG_NUM 25
-#define CMD_KWDS_NUM 34
+#define CMD_KWDS_NUM 39
 
 /* Usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"
