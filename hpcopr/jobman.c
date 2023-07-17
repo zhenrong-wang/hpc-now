@@ -27,6 +27,9 @@
 
 int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* sshkey_dir, char* crypto_keyfile, jobinfo* job_info){
     char string_temp[128]="";
+    char node_num_string[128]="";
+    char node_cores_string[128]="";
+    char duration_hours_string[128]="";
     char cluster_node_num_string[4]="";
     char cluster_node_cores_string[4]="";
     char app_name[128]="";
@@ -67,27 +70,27 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         return -5;
     }
     
-    if(cmd_keyword_check(argc,argv,"--nn",string_temp)!=0){
+    if(cmd_keyword_check(argc,argv,"--nn",node_num_string)!=0){
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify compute node num (<=%d) for this job:",cluster_node_num);
         fflush(stdin);
-        scanf("%s",string_temp);
+        scanf("%s",node_num_string);
         getchar();
     }
-    specified_node_num=string_to_positive_num(string_temp);
+    specified_node_num=string_to_positive_num(node_num_string);
     if(specified_node_num<1||specified_node_num>cluster_node_num){
-        printf("[ FATAL: ] The specified node num %s is invalid. Exit now.\n",string_temp);
+        printf("[ FATAL: ] The specified node num %s is invalid. Exit now.\n",node_num_string);
         return -5;
     }
 
-    if(cmd_keyword_check(argc,argv,"--tn",string_temp)!=0){
+    if(cmd_keyword_check(argc,argv,"--tn",node_cores_string)!=0){
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify threads per node (<=%d) for this job:",cluster_node_cores);
         fflush(stdin);
-        scanf("%s",string_temp);
+        scanf("%s",node_cores_string);
         getchar();
     }
-    specified_node_cores=string_to_positive_num(string_temp);
+    specified_node_cores=string_to_positive_num(node_cores_string);
     if(specified_node_cores<1||specified_node_num>cluster_node_cores){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified threads " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " per node is invalid. Exit now." RESET_DISPLAY "\n",string_temp);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified threads " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " per node is invalid. Exit now." RESET_DISPLAY "\n",node_cores_string);
         return -5;
     }
 
@@ -103,9 +106,10 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         else{
             strcpy(job_name,string_temp);
         }
+        reset_string(string_temp);
     }
 
-    if(cmd_keyword_check(argc,argv,"--jtime",string_temp)!=0){
+    if(cmd_keyword_check(argc,argv,"--jtime",duration_hours_string)!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] No duration hours specified. Input y or yes to use the default (INFINITE)." RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Or, input a positive number: ");
         fflush(stdin);
@@ -123,6 +127,17 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
             else{
                 duration_hours=num_temp;
             }
+        }
+        reset_string(string_temp);
+    }
+    else{
+        num_temp=string_to_positive_num(duration_hours_string);
+        if(num_temp<1){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The specified duration hours %s is incorrect. Using the default." RESET_DISPLAY "\n",duration_hours_string);
+            duration_hours=400000000;
+        }
+        else{
+            duration_hours=num_temp;
         }
     }
     
@@ -171,7 +186,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     printf("|          Duration Hours : %d\n",job_info->duration_hours);
     printf("|          Job Executable : %s\n",job_info->job_exec);
     printf("|          Data Directory : %s\n",job_info->job_data);
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The job will be sent to the cluster.\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The job will be sent to the cluster.\n\n");
     return 0;
 }
 
