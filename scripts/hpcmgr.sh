@@ -15,7 +15,10 @@ function help_info() {
   echo -e "           connect - check cluster connectivity"
   echo -e "           all     - refresh the whole cluster"
   echo -e "           clear   - clear the hostfile_dead_nodes list"
+  echo -e "           build   - build software from source"
   echo -e "           install - install software"
+  echo -e "           remove  - remove software"
+  echo -e "           submit  - submit a job"
   echo -e "[ FATAL: ] Please double check your input. Exit now."
 }
 
@@ -56,7 +59,7 @@ if [ ! -n "$1" ]; then
   exit 3
 fi
 current_user=`whoami`
-if [ $current_user != 'root' ] && [ $1 != 'install' ] && [ $1 != 'build' ]; then
+if [ $current_user != 'root' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 !='submit' ]; then
   echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr $1'. "
   echo -e "           Please make sure you use either user1 with 'sudo' privilege, OR"
   echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now."
@@ -77,7 +80,7 @@ fi
 time1=$(date)
 echo -e "${time1}: HPC-NOW Cluster Manager task started." >> ${logfile}
 
-if [ $1 != 'quick' ] && [ $1 != 'master' ] && [ $1 != 'all' ] && [ $1 != 'clear' ] && [ $1 != 'users' ] && [ $1 != 'connect' ] && [ $1 != 'install' ]; then
+if [ $1 != 'quick' ] && [ $1 != 'master' ] && [ $1 != 'connect' ] && [ $1 != 'all' ] && [ $1 != 'clear' ] && [ $1 != 'users' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 != 'submit' ]; then
   help_info
   exit 3
 fi
@@ -510,7 +513,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   sinfo -N
 fi
 
-if [ $1 = 'install' ]; then
+if [ $1 = 'install' ] || [ $1 = 'remove' ]; then
   if [ -z $URL_INSTSCRIPTS_ROOT ]; then
     echo -e "[ FATAL: ] Failed to connect to a valid appstore repo. Exit now."
     exit 35
@@ -635,6 +638,10 @@ if [ $1 = 'install' ]; then
     echo -e "[ -INFO- ] If your software is not in the list, please describe your requirements and send email to info@hpc-now.com."
     echo -e "[ -INFO- ] Exit now."
   fi
-fi  
+fi
+
+if [ $1 = 'job_submit' ]; then
+  echo -e "[ -INFO- ] This module is in development. Please wait for days."
+fi
 time1=$(date)
 echo -e  "End Time: ${time1}\n" >> ${logfile}

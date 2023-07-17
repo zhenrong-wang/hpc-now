@@ -192,8 +192,33 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
 
 int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_info){
     char remote_commands[CMDLINE_LENGTH]="";
-    sprintf(remote_commands,"hpcmgr job_submit %s %d %d %s %d %s %s",job_info->app_name,job_info->node_num,job_info->tasks_per_node,job_info->job_name,job_info->duration_hours,job_info->job_exec,job_info->job_data);
-    return remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,2,"","");
+    char cmdline[CMDLINE_LENGTH]="";
+    char dirname_temp[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char remote_filename_temp[FILENAME_LENGTH]="";
+    sprintf(dirname_temp,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+    sprintf(filename_temp,"%s%sjob_submit_info.tmp",dirname_temp,PATH_SLASH);
+    FILE* file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        return -1;
+    }
+    fprintf(file_p,"App Name       :~%s\n",job_info->app_name);
+    fprintf(file_p,"Job Nodes      :~%d\n",job_info->node_num);
+    fprintf(file_p,"Cores per node :~%d\n",job_info->tasks_per_node);
+    fprintf(file_p,"Job Name       :~%s\n",job_info->job_name);
+    fprintf(file_p,"Duration Hours :~%d\n",job_info->duration_hours);
+    fprintf(file_p,"Job Executable :~%s\n",job_info->job_exec);
+    fprintf(file_p,"Data Directory :~%s\n",job_info->job_data);
+    fclose(file_p);
+    sprintf(remote_filename_temp,"/tmp/job_submit_info_%s.tmp",user_name);
+    remote_copy(workdir,sshkey_dir,filename_temp,remote_filename_temp,user_name,"put","",0);
+    sprintf(remote_commands,"hpcmgr submit %s",remote_filename_temp);
+    remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,2,"","");
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+    return 0;
 }
 
 int job_list(char* workdir, char* user_name, char* sshkey_dir){
