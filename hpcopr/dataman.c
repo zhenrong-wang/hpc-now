@@ -427,10 +427,10 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"ossutil64.exe -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s %s %s",region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"ossutil64 -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s %s %s",region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"ossutil64.exe -e oss-%s.aliyuncs.com -i %s -k %s cp %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"ossutil64 -e oss-%s.aliyuncs.com -i %s -k %s cp %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){

@@ -6,13 +6,12 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *rarlinux* to HPC-NOW cluster.
 
+current_user=`whoami`
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/rar/
-tmp_log=/tmp/hpcmgr_install_rar_${current_user}.log
-
-current_user=`whoami`
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 private_app_registry="/usr/hpc-now/.private_apps.reg"
+tmp_log=/tmp/hpcmgr_install_rar_${current_user}.log
 
 if [ $current_user = 'root' ]; then
   app_root="/opt/"
