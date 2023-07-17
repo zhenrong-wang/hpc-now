@@ -248,11 +248,13 @@ if [ $1 = 'quick' ]; then
   echo -e "[ STEP 1 ] Restarting services on the master node ..."
   mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged >> $logfile 2>&1
   systemctl restart slurmdbd >> $logfile 2>&1
+  systemctl enable slurmdbd >> $logfile 2>&1
   for i in $(seq 1 2 )
   do
     sleep 1
   done
   systemctl restart slurmctld >> $logfile 2>&1
+  systemctl enable slurmctld >> $logfile 2>&1
   systemctl status slurmdbd >> ${logfile}
   systemctl status slurmctld >> ${logfile}
   echo -e "[ STEP 2 ] Restarting services on the compute node(s) ..."
@@ -264,7 +266,7 @@ if [ $1 = 'quick' ]; then
       continue
     fi
     ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged" >> $logfile 2>&1
-    ssh compute${i} "systemctl restart slurmd" >> $logfile 2>&1
+    ssh compute${i} "systemctl restart slurmd && systemctl enable slurmd" >> $logfile 2>&1
     scontrol update NodeName=compute${i} State=DOWN Reason=hung_completing
     scontrol update NodeName=compute${i} State=RESUME
     echo -e "\nSlurmd Status of Node ${i}:" >> ${logfile}
@@ -446,6 +448,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   echo -e "[ STEP 2 ] Authentication of Compute node(s) is OK."
   echo -e "[ STEP 3 ] Pulling the master node up ..."  
   systemctl restart slurmdbd
+  systemctl enable slurmdbd
   systemctl status slurmdbd | grep "Active: active" >> ${logfile}
   if [ $? -eq 0 ]; then
     for i in $( seq 1 2)
@@ -453,6 +456,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
       sleep 1
     done
     systemctl restart slurmctld
+    systemctl enable slurmctld
     echo -e "[ STEP 3 ] The master node is up."
   else
     echo -e "[ FATAL: ] SLURMDBD is not properly started. Exit now."
@@ -473,7 +477,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
       scp -q /root/hostfile root@compute${i}:/etc/
       scp -q /opt/slurm/etc/slurm.conf root@compute${i}:/opt/slurm/etc/
       ssh compute${i} "sed -i '/master/d' /etc/hosts && sed -i '/compute/d' /etc/hosts"
-      ssh compute${i} "cat /etc/hostfile >> /etc/hosts && rm -rf /etc/hostfile && systemctl restart slurmd"
+      ssh compute${i} "cat /etc/hostfile >> /etc/hosts && rm -rf /etc/hostfile && systemctl restart slurmd && systemctl enable slurmd"
       echo -e "\nSlurmd Status of Node ${i}:" >> ${logfile}
       ssh compute${i} "systemctl status slurmd" >> ${logfile}
       echo -e "\n" >> ${logfile}
