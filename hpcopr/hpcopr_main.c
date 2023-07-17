@@ -1044,7 +1044,7 @@ int main(int argc, char* argv[]){
             }
         }
         if(i==DATAMAN_COMMAND_NUM){
-            printf("[ FATAL: ] The command %s is incorrect. Please read the help for details.\n",data_cmd);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is incorrect. Please read the help for details." RESET_DISPLAY "\n",data_cmd);
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
@@ -1578,7 +1578,7 @@ int main(int argc, char* argv[]){
             }
         }
         if(i==6){
-            printf("[ FATAL: ] The command %s is incorrect. Please read the help for details.\n",app_cmd);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is incorrect. Please read the help for details." RESET_DISPLAY "\n",app_cmd);
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
@@ -1634,7 +1634,7 @@ int main(int argc, char* argv[]){
             }
         }
         if(i==3){
-            printf("[ FATAL: ] The command %s is incorrect. Please read the help for details.\n",job_cmd);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is incorrect. Please read the help for details." RESET_DISPLAY "\n",job_cmd);
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
