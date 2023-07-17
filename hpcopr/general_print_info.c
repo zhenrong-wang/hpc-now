@@ -437,7 +437,7 @@ void print_appmgr_info(void){
     printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "appman" RESET_DISPLAY " --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...\n");
     printf("| * The cluster must be in running state (minimal or all). *\n");
     printf("| * -u USERNAME    ~ A valid user name. Use 'root' for all users.\n");
-    printf("| *                ~ " WARN_YELLO_BOLD "Admin or Operator role is required for 'root." RESET_DISPLAY "\n");
+    printf("| *                ~ " WARN_YELLO_BOLD "Admin or Operator role is required for root." RESET_DISPLAY "\n");
     printf("|   --acmd store   ~ List out the apps in store.\n");
     printf("|   --acmd avail   ~ List out all the installed apps.\n");
     printf("|   --acmd check   ~ Check whether an app is available.\n");
