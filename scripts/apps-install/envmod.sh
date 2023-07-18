@@ -6,38 +6,39 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *Environment Modules* to HPC-NOW cluster.
 
-if [ ! -d /hpc_apps ]; then
-  echo -e "[ FATAL: ] The root directory /hpc_apps is missing. Installation abort. Exit now."
-  exit
-fi
-if [ ! -d /opt/packs ]; then
-  mkdir -p /opt/packs
+if [ $1 = 'remove' ]; then
+  echo -e "[ FATAL: ] This is an internal & global component. Cannot be removed."
+  exit 3
 fi
 
-if [ -f /opt/environment-modules/bin/modulecmd ]; then
-  echo -e "[ -INFO- ] It seems environment-module is in place (opt/environment-modules).\n[ -INFO- ] If you really want to rebuild it. Please delete folder and retry. Exit now."
-  exit
+current_user=`whoami`
+if [ $current_user != 'root' ]; then
+  echo -e "[ FATAL: ] ONLY root user or user1 with sudo can $1 this app."
+  echo -e "           Please contact the administrator. Exit now."
+  exit 1
 fi
 
-URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_PKGS=${URL_ROOT}packages/envmod/
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-logfile=/var/log/hpcmgr_install.log && echo -e "\n# $time_current INSTALLING environment-module" >> ${logfile}
-tmp_log=/tmp/hpcmgr_install.log
-NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
-
+url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
+url_pkgs_envmod=${url_root}packages/envmod/
+public_app_registry="/usr/hpc-now/.public_apps.reg"
+app_cache="/hpc_apps/.cache/"
+tmp_log=/tmp/hpcmgr_install_envmod.log
+mkdir -p $app_cache
+num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
 yum install tcl-devel -y -q >> $tmp_log
-if [ ! -f /opt/packs/modules-5.1.0.tar.gz ]; then
-  wget ${URL_PKGS}modules-5.1.0.tar.gz -q -O /opt/packs/modules-5.1.0.tar.gz
+
+echo -e "[ -INFO- ] Downloading and Extracting files ..."
+if [ ! -f ${app_cache}modules-5.1.0.tar.gz ]; then
+  wget ${url_pkgs_envmod}modules-5.1.0.tar.gz -O ${app_cache}modules-5.1.0.tar.gz -o ${tmp_log}
 fi
-mkdir -p /etc/modulefiles
-tar zxf /opt/packs/modules-5.1.0.tar.gz -C /opt/packs
-cd /opt/packs/modules-5.1.0
-./configure --prefix=/opt/environment-modules --modulefilesdir=/etc/modulefiles >> $tmp_log 2>&1
-make -j$NUM_PROCESSORS >> $tmp_log 2>&1
-make install >> $tmp_log 2>&1
+tar zvxf ${app_cache}modules-5.1.0.tar.gz -C ${app_cache} >> ${tmp_log}
+cd ${app_cache}modules-5.1.0
+echo -e "[ -INFO- ] Configuring building options ..."
+./configure --prefix=/opt/environment-modules --modulefilesdir=/hpc_apps/envmod >> $tmp_log
+echo -e "[ -INFO- ] Compiling in progress ..."
+make -j$num_processors >> $tmp_log
+make install >> $tmp_log
 rm -rf /etc/profile.d/modules.sh && ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.sh
 rm -rf /etc/profile.d/modules.csh && ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.csh
-time_current=`date "+%Y-%m-%d %H:%M:%S"`  
 echo -e "[ -DONE- ] Environment Modules has been installed. "
-echo -e "# $time_current Environment Modules has been installed." >> ${logfile}
+echo -e "< envmod >" >> $public_app_registry

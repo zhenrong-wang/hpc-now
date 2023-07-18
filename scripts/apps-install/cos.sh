@@ -18,20 +18,33 @@ else
   app_root="/hpc_apps/${current_user}_apps/"
   app_cache="/hpc_apps/${current_user}_apps/.cache/"
 fi
-mkdir -p $app_cache
 
-grep "< cosbrowser >" $public_app_registry >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
-  exit 1
-else
-  grep "< cosbrowser > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
-  if [ $? -eq 0 ]; then
-    echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
-    exit 3
+if [ $1 = 'remove' ]; then
+  rm -rf ${app_root}cosbrowser.AppImage
+  if [ $current_user = 'root' ]; then
+    rm -rf /root/Desktop/cos.desktop
+    sed -i '/< cos >/d' $public_app_registry
+    sed -i '/cosbrowser.AppImage/d' /etc/profile
+    while read user_row
+    do
+      user_name=`echo $user_row | awk '{print $2}'`
+      grep "< cos > < $user_name >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        rm -rf /home/$user_name/Desktop/cos.desktop
+      fi
+    done < /root/.cluster_secrets/user_secrets.txt
+  else
+    rm -rf /home/${user_name}/Desktop/cos.desktop
+    sed -e "/< cos > < ${user_name} >/d" $private_app_registry > /tmp/sed_${user_name}.tmp
+    cat /tmp/sed_${user_name}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${user_name}.tmp
+    sed -i '/cosbrowser.AppImage/d' $HOME/.bashrc
   fi
+  echo -e "[ -INFO- ] Cosbrowser has been removed successfully."
+  exit 0
 fi
 
+mkdir -p $app_cache
 # Check whether the desktop environment is ready
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
@@ -68,7 +81,7 @@ if [ $current_user = 'root' ]; then
   while read user_row
   do
     user_name=`echo $user_row | awk '{print $2}'`
-    grep cosbrowser /home/$user_name/.now_apps.reg >> /dev/null 2>&1
+    grep "< cos > < ${user_name} >" $private_app_registry >> /dev/null 2>&1
     if [ $? -ne 0 ]; then
       /bin/cp $HOME/Desktop/cos.desktop /home/$user_name/Desktop/
       chown -R $user_name:$user_name /home/$user_name/Desktop/cos.desktop
@@ -78,13 +91,13 @@ if [ $current_user = 'root' ]; then
   if [ $? -ne 0 ]; then
     echo -e "alias cos.pub='${app_root}cosbrowser.AppImage --no-sandbox'" >> /etc/profile
   fi
-  echo -e "< cosbrwoser >" >> $public_app_registry
+  echo -e "< cos >" >> $public_app_registry
   echo -e "[ -DONE- ] COS has been installed to all users."
 else
   grep "alias cos=" $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "alias cos='${app_root}cosbrowser.AppImage --no-sandbox'" >> $HOME/.bashrc
   fi
-  echo -e "< cosbrowser > < ${current_user} >" >> $private_app_registry
+  echo -e "< cos > < ${current_user} >" >> $private_app_registry
 fi
 echo -e "[ -DONE- ] COS has been installed to the current user."

@@ -10,21 +10,33 @@ url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/baidu/
 current_user=`whoami`
 if [ $current_user != 'root' ]; then
-  echo -e "[ FATAL: ] ONLY root user or user1 with sudo can install this app."
+  echo -e "[ FATAL: ] ONLY root user or user1 with sudo can $1 this app."
   echo -e "           Please contact the administrator. Exit now."
   exit 1
 fi
+
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 app_cache="/hpc_apps/.cache/"
-mkdir -p $app_cache
 tmp_log=/tmp/hpcmgr_install_baidu.log
 
-grep "< baidu >" $public_app_registry >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
-  exit 3
+if [ $1 = 'remove' ]; then
+  rpm -e baidunetdisk-patch
+  rpm -e baidunetdisk
+  rm -rf /opt/baidunetdisk
+  sed -i '/< baidu >/d' $public_app_registry
+  sed -i '#/opt/baidunetdisk/baidunetdisk#d' /etc/profile
+
+  rm -rf /root/Desktop/baidu.desktop
+  while read user_row
+  do
+    user_name=`echo $user_row | awk '{print $2}'`
+    rm -rf /home/$user_name/Desktop/baidu.desktop
+  done < /root/.cluster_secrets/user_secrets.txt
+  echo -e "[ -INFO- ] Baidunetdisk has been removed successfully."
+  exit 0
 fi
 
+mkdir -p $app_cache
 # Check whether the desktop environment is ready
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
 if [ $? -ne 0 ]; then

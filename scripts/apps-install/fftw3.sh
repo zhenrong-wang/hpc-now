@@ -22,23 +22,27 @@ else
   app_root="/hpc_apps/${current_user}_apps/"
   app_cache="/hpc_apps/${current_user}_apps/.cache/"
 fi
-mkdir -p $app_cache
 
-grep "< fftw3 >" $public_app_registry >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
-  exit 1
-else
-  grep "< fftw3 > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
-  if [ $? -eq 0 ]; then
-    echo -e "[ -INFO- ] This app has been installed to ${current_user}. Please run it directly."
-    exit 3
+if [ $1 = 'remove' ]; then
+  rm -rf ${app_root}fftw3
+  if [ $current_user = 'root' ]; then
+    sed -i '/< fftw3 >/d' $public_app_registry
+    sed -i '/fftw3/d' /etc/profile
+  else
+    sed -e "/< fftw3 > < ${user_name} >/d" $private_app_registry > /tmp/sed_${user_name}.tmp
+    cat /tmp/sed_${user_name}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${user_name}.tmp
+    sed -i '/fftw3/d' $HOME/.bashrc
   fi
+  echo -e "[ -INFO- ] Cosbrowser has been removed successfully."
+  exit 0
 fi
+
+mkdir -p $app_cache
 
 echo -e "[ -INFO- ] Downloading and extracting packages ..."
 if [ ! -f ${app_cache}fftw-3.3.10.tar.gz ]; then
-  wget ${url_pkgs}fftw-3.3.10.tar.gz -O ${app_cache}fftw-3.3.10.tar.gz >> ${tmp_log}
+  wget ${url_pkgs}fftw-3.3.10.tar.gz -O ${app_cache}fftw-3.3.10.tar.gz -o ${tmp_log}
 fi
 rm -rf ${app_cache}fftw-3.3.10
 tar zvxf ${app_cache}fftw-3.3.10.tar.gz -C ${app_cache} >> ${tmp_log}

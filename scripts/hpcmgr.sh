@@ -586,7 +586,7 @@ elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
       fi
     fi
   fi
-  curl -s ${URL_INSTSCRIPTS_ROOT}${2}.sh $1 | bash
+  curl -s ${URL_INSTSCRIPTS_ROOT}${2}.sh | bash -s $1
   exit 0
 elif [ $1 = 'submit' ]; then
   echo -e "[ -INFO- ] This module is in development. Please wait for days."

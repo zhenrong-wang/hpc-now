@@ -6,6 +6,11 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to install *Desktop* to HPC-NOW cluster.
 
+if [ $1 = 'remove' ]; then
+  echo -e "[ FATAL: ] This is an internal & global component. Cannot be removed."
+  exit 0
+fi
+
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/desktop/
 tmp_log=/tmp/hpcmgr_install_desktop.log
