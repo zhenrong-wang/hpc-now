@@ -152,7 +152,7 @@ int app_list(char* workdir, char* option, char* user_name, char* app_name, char*
         }
     }
     else{
-        run_flag=remote_exec_general(workdir,sshkey_dir,"root","hpcmgr install list","-t",0,1,"","");
+        run_flag=remote_exec_general(workdir,sshkey_dir,"root","hpcmgr applist","-t",0,1,"","");
         if(run_flag!=0){
             return 1;
         }

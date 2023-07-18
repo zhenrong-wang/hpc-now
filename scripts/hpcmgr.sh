@@ -15,6 +15,7 @@ function help_info() {
   echo -e "           connect - check cluster connectivity"
   echo -e "           all     - refresh the whole cluster"
   echo -e "           clear   - clear the hostfile_dead_nodes list"
+  echo -e "           applist - List out the apps in the store"
   echo -e "           build   - build software from source"
   echo -e "           install - install software"
   echo -e "           remove  - remove software"
@@ -60,8 +61,12 @@ if [ ! -n "$1" ]; then
   help_info
   exit 3
 fi
+
 current_user=`whoami`
-if [ $current_user != 'root' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 !='submit' ]; then
+public_app_registry="/usr/hpc-now/.public_apps.reg"
+private_app_registry="/usr/hpc-now/.private_apps.reg"
+
+if [ $current_user != 'root' ] && [ $1 != 'applist' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 !='submit' ]; then
   echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr $1'. "
   echo -e "           Please make sure you use either user1 with 'sudo' privilege, OR"
   echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now."
@@ -82,11 +87,6 @@ fi
 time1=$(date)
 echo -e "${time1}: HPC-NOW Cluster Manager task started." >> ${logfile}
 
-if [ $1 != 'quick' ] && [ $1 != 'master' ] && [ $1 != 'connect' ] && [ $1 != 'all' ] && [ $1 != 'clear' ] && [ $1 != 'users' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 != 'submit' ]; then
-  help_info
-  exit 3
-fi
-
 if [ $1 = 'clear' ]; then
   if [ ! -f /root/hostfile ]; then
     node_invalid_info
@@ -96,10 +96,7 @@ if [ $1 = 'clear' ]; then
   echo -e "[ -INFO- ] The hostfile_dead_nodes list had been emptied. Exit now."
   echo -e "[ -INFO- ] The hostfile_dead_nodes list had been emptied." >> ${logfile}
   exit 0
-fi
-
-##### USER MANAGEMENT #####################
-if [ $1 = 'users' ]; then
+elif [ $1 = 'users' ]; then
   mkdir -p /root/.sshkey_deleted >> ${logfile} 2>&1
   if [ ! -f /root/hostfile ]; then
     node_invalid_info
@@ -232,10 +229,8 @@ if [ $1 = 'users' ]; then
       fi
     done < ${user_registry}
   fi
-fi
-
-# quick mode - quickly restart all the services in master and compute nodes
-if [ $1 = 'quick' ]; then
+  exit 0
+elif [ $1 = 'quick' ]; then
   if [ ! -f /root/hostfile ]; then
     node_invalid_info
     exit 3
@@ -282,10 +277,7 @@ if [ $1 = 'quick' ]; then
   echo -e "[ -DONE- ] HPC-NOW Cluster Status:\n"
   sinfo -N
   exit 0
-fi
-
-####### Check connectivities ###########################
-if [ $1 = 'connect' ]; then
+elif [ $1 = 'connect' ]; then
   if [ ! -f /root/hostfile ]; then
     node_invalid_info
     exit 3
@@ -406,9 +398,7 @@ if [ $1 = 'connect' ]; then
   echo -e "[ STEP 5 ] Users are ready."
   echo -e "[ -DONE- ] Connectivety check finished! \n[ -DONE- ] You need to run the command 'hpcmgr all' on the master node.\n[ -DONE- ] Exit now."
   exit 0
-fi
-# all mode: restart services on all nodes
-if [[ $1 = 'master' || $1 = 'all' ]]; then
+elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
   if [ ! -f /root/hostfile ]; then
     node_invalid_info
     exit 3
@@ -425,7 +415,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
       exit 17
     fi
   fi
-# To make sure the munged is up
+  # To make sure the munged is up
   echo -e "[ STEP 1 ] Checking the authentication of the master node ..."
   ps -aux | grep slurm | grep munged >> ${logfile}
   if [ $? -ne 0 ]; then
@@ -493,7 +483,6 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
     echo -e "[ STEP 4 ] Compute nodes are ready."
     sinfo -N >> ${logfile}
   fi
-  
   echo -e "[ STEP 5 ] Checking cluster users ... "
   sacctmgr list account hpc_users | grep -w hpc_users >> ${logfile} 2>&1
   if [ $? -ne 0 ]; then
@@ -514,66 +503,96 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   echo -e "[ STEP 5 ] Cluster users are ready."
   echo -e "[ -DONE- ] HPC-NOW Cluster Status:\n"
   sinfo -N
-fi
-
-if [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
+  exit 0
+elif [ $1 = 'applist' ]; then
   if [ -z $URL_INSTSCRIPTS_ROOT ]; then
     echo -e "[ FATAL: ] Failed to connect to a valid appstore repo. Exit now."
     exit 35
   fi
-  if [ ! -n "$2" ] || [ $2 = 'list' ]; then
-    echo -e "1. Applications:"
-    echo -e "\tof7       - OpenFOAM-v7"
-    echo -e "\tof9       - OpenFOAM-v9"
-    echo -e "\tof2112    - OpenFOAM-v2112"
-    echo -e "\tlammps    - LAMMPS dev latest"
-    echo -e "\tgromacs   - GROMACS"
-    echo -e "\twrf       - WRF & WPS -4.4"
-    echo -e "\tvasp5     - VASP-5.4.4 (BRING YOUR OWN LICENSE)"
-    echo -e "\tvasp6.1   - VASP-6.1.0 (BRING YOUR OWN LICENSE)"
-    echo -e "\tR         - R & RStudio (in development)"
-    echo -e "\tparaview  - ParaView-5"
-    echo -e "\thdf5      - HDF5-1.10.9"
-    echo -e "\tnetcdf4   - netCDF-C-4.9.0 & netCDF-fortran-4.5.3"
-    echo -e "\tabinit    - ABINIT-9.6.2"
-    echo -e "2. MPI Toolkits:"
-    echo -e "\tmpich3    - MPICH-3.2.1"
-    echo -e "\tmpich4    - MPICH-4.0.2"
-    echo -e "\tompi3     - OpenMPI-3.1.6"
-    echo -e "\tompi4     - OpenMPI-4.1.2"
-    echo -e "3. Compilers:"
-    echo -e "\tgcc4      - GNU Compiler Collections - 4.9.2"
-    echo -e "\tgcc8      - GNU Compiler Collections - 8.2.0"
-    echo -e "\tgcc9      - GNU Compiler Collections - 9.5.0."
-    echo -e "\tgcc12     - GNU Compiler Collections - 12.1.0"
-    echo -e "\tintel     - Intel(R) HPC Toolkit Latest"
-    echo -e "4. Important Libraries:"
-    echo -e "\tfftw3     - FFTW 3"
-    echo -e "\tlapack311 - LAPACK-3.11.0"
-    echo -e "\tzlib      - zlib-1.2.13"
-    echo -e "\tslpack2   - ScaLAPACK-2.1.0"
-    echo -e "\topenblas  - OpenBLAS 0.3.15 *SINGLE THREAD*"
-    echo -e "5. Other Tools:"
-    echo -e "\tdesktop   - Desktop Environment" 
-    echo -e "\tbaidu     - Baidu Netdisk"
-    echo -e "\tcos       - COSBrowser (RECOMMENDED)" 
-    echo -e "\trar       - RAR for Linux (RECOMMENDED)" 
-    echo -e "\tkswps     - WPS Office Suite for Linux (RECOMMENDED)" 
-    echo -e "\tenvmod    - Environment Modules" 
-    echo -e "\tvscode    - Visual Studio Code" 
-    exit 0
-  else
+  echo -e "1. Applications:"
+  echo -e "\tof7       - OpenFOAM-v7"
+  echo -e "\tof9       - OpenFOAM-v9"
+  echo -e "\tof2112    - OpenFOAM-v2112"
+  echo -e "\tlammps    - LAMMPS dev latest"
+  echo -e "\tgromacs   - GROMACS"
+  echo -e "\twrf       - WRF & WPS -4.4"
+  echo -e "\tvasp5     - VASP-5.4.4 (BRING YOUR OWN LICENSE)"
+  echo -e "\tvasp6.1   - VASP-6.1.0 (BRING YOUR OWN LICENSE)"
+  echo -e "\tR         - R & RStudio (in development)"
+  echo -e "\tparaview  - ParaView-5"
+  echo -e "\thdf5      - HDF5-1.10.9"
+  echo -e "\tnetcdf4   - netCDF-C-4.9.0 & netCDF-fortran-4.5.3"
+  echo -e "\tabinit    - ABINIT-9.6.2"
+  echo -e "2. MPI Toolkits:"
+  echo -e "\tmpich3    - MPICH-3.2.1"
+  echo -e "\tmpich4    - MPICH-4.0.2"
+  echo -e "\tompi3     - OpenMPI-3.1.6"
+  echo -e "\tompi4     - OpenMPI-4.1.2"
+  echo -e "3. Compilers:"
+  echo -e "\tgcc4      - GNU Compiler Collections - 4.9.2"
+  echo -e "\tgcc8      - GNU Compiler Collections - 8.2.0"
+  echo -e "\tgcc9      - GNU Compiler Collections - 9.5.0."
+  echo -e "\tgcc12     - GNU Compiler Collections - 12.1.0"
+  echo -e "\tintel     - Intel(R) HPC Toolkit Latest"
+  echo -e "4. Important Libraries:"
+  echo -e "\tfftw3     - FFTW 3"
+  echo -e "\tlapack311 - LAPACK-3.11.0"
+  echo -e "\tzlib      - zlib-1.2.13"
+  echo -e "\tslpack2   - ScaLAPACK-2.1.0"
+  echo -e "\topenblas  - OpenBLAS 0.3.15 *SINGLE THREAD*"
+  echo -e "5. Other Tools:"
+  echo -e "\tdesktop   - Desktop Environment" 
+  echo -e "\tbaidu     - Baidu Netdisk"
+  echo -e "\tcos       - COSBrowser (RECOMMENDED)" 
+  echo -e "\trar       - RAR for Linux (RECOMMENDED)" 
+  echo -e "\tkswps     - WPS Office Suite for Linux (RECOMMENDED)" 
+  echo -e "\tenvmod    - Environment Modules" 
+  echo -e "\tvscode    - Visual Studio Code"
+  exit 0 
+elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
+  if [ ! -n "$2" ]; then
+    echo -e "[ -INFO- ] Please specify an app to $1"
+    exit 37
+  fi
+  if [ $1 = 'install' ] || [ $1 = 'build' ]; then
     curl -s ${URL_INSTSCRIPTS_ROOT}_app_list.txt | grep "< ${2} >" >> /dev/null 2>&1
     if [ $? -ne 0 ]; then
       echo -e "[ FATAL: ] The software ${2} is not in the store. Exit now."
-      exit 37
+      exit 39
     fi
-    curl -s ${URL_INSTSCRIPTS_ROOT}${2}.sh $1 | bash
+    grep "< $2 >" $public_app_registry >> /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
+      exit 41
+    else
+      grep "< $2 > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
+        exit 43
+      fi
+    fi
+  else
+    if [ $current_user = 'root' ]; then
+      grep "< $2 >" $public_app_registry >> /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        echo -e "[ -INFO- ] This app has not been installed to all users."
+        exit 41
+      fi
+    else
+      grep "< $2 > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        echo -e "[ -INFO- ] This app has not been installed to the current user."
+        exit 41
+      fi
+    fi
   fi
-fi
-
-if [ $1 = 'submit' ]; then
+  curl -s ${URL_INSTSCRIPTS_ROOT}${2}.sh $1 | bash
+  exit 0
+elif [ $1 = 'submit' ]; then
   echo -e "[ -INFO- ] This module is in development. Please wait for days."
+  exit 0
+else
+  echo -e "[ FATAL ] The command $1 is invalid."
+  help_info
+  exit 3
 fi
-time1=$(date)
-echo -e  "End Time: ${time1}\n" >> ${logfile}
