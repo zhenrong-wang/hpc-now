@@ -551,7 +551,7 @@ elif [ $1 = 'applist' ]; then
   exit 0 
 elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
   if [ ! -n "$2" ]; then
-    echo -e "[ -INFO- ] Please specify an app to $1"
+    echo -e "[ -INFO- ] Please specify an app to $1 ."
     exit 37
   fi
   if [ $1 = 'install' ] || [ $1 = 'build' ]; then
