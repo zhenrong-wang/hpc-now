@@ -109,8 +109,8 @@ if [ ! -f /hpc_apps/hdf5-1.10.9/bin/h5pcc ]; then
   fi
 fi
 
-yum -y install m4 >> $tmp_log 2>&1
-yum -y install libxml2-devel >> $tmp_log 2>&1
+#yum -y install m4 >> $tmp_log 2>&1
+#yum -y install libxml2-devel >> $tmp_log 2>&1
 
 echo -e "[ -INFO- ] netCDF-C and netCDF-Fortran will be built with GNU Compiler Collections."
 echo -e "[ START: ] Downloading and Extracting source code ..."

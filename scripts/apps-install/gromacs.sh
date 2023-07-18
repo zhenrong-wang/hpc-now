@@ -23,7 +23,6 @@ echo -e "[ -INFO- ] INSTALLING GROMACS-version 2022-2 now."
 tmp_log=/tmp/hpcmgr_install.log
 APP_ROOT=/hpc_apps
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
-yum -y install python3-devel >> ${tmp_log} 2>&1
 
 if [ -f $APP_ROOT/gromacs2022/bin/gmx_mpi_d ]; then
   echo -e "[ FATAL: ] It seems GROMACS mpi version is already in place. If you do want to rebuild it, please emtpy $APP_ROOT/gromacs2022/ folder and retry. Exit now."

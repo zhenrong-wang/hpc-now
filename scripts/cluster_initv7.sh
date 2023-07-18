@@ -145,10 +145,13 @@ do
     cat /etc/now-pubkey.txt >> /home/${user_name}/.ssh/authorized_keys
     mkdir -p /hpc_data/${user_name}_data
     mkdir -p /hpc_apps/${user_name}_apps
+    mkdir -p /hpc_apps/envmod/${user_name}_env
     chmod -R 750 /hpc_data/${user_name}_data
     chmod -R 750 /hpc_apps/${user_name}_apps
+    chmod -R 750 /hpc_apps/envmod/${user_name}_env
     chown -R ${user_name}:${user_name} /hpc_data/${user_name}_data
     chown -R ${user_name}:${user_name} /hpc_apps/${user_name}_apps
+    chown -R ${user_name}:${user_name} /hpc_apps/envmod/${user_name}_env
   fi
   chown -R ${user_name}:${user_name} /home/${user_name}
 done < /root/user_secrets.txt
@@ -177,7 +180,7 @@ else
   yum -y install epel-release # epel release is really slow for China region
 fi
 # yum -y makecache # make cache needs time. Let's skip it.
-yum -y install gtk2 gtk2-devel python python3 gcc-c++ gcc-gfortran htop sshpass
+yum -y install gtk2 gtk2-devel python python3 python3-devel gcc-c++ gcc-gfortran htop sshpass
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Utils installed." >> ${logfile}
 
@@ -365,7 +368,7 @@ if ! command -v module >/dev/null 2>&1; then
   tar zvxf modules-5.1.0.tar.gz
   cd modules-5.1.0
   mkdir -p /etc/modulefiles
-  ./configure --prefix=/opt/environment-modules --modulefilesdir=/etc/modulefiles
+  ./configure --prefix=/opt/environment-modules --modulefilesdir=/hpc_apps/envmod
   make -j$NUM_PROCESSORS && make install
   ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.sh
   ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.csh

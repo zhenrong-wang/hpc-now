@@ -8,14 +8,12 @@
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/baidu/
-
 current_user=`whoami`
 if [ $current_user != 'root' ]; then
   echo -e "[ FATAL: ] ONLY root user or user1 with sudo can install this app."
   echo -e "           Please contact the administrator. Exit now."
   exit 1
 fi
-
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 app_cache="/hpc_apps/.cache/"
 mkdir -p $app_cache

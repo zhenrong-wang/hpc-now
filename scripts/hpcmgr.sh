@@ -36,9 +36,11 @@ function add_a_user() {
   cat /etc/now-pubkey.txt >> /home/$1/.ssh/authorized_keys
   cp -r /root/Desktop/*.desktop /home/$1/Desktop/
   mkdir -p /hpc_data/${1}_data && chmod -R 750 /hpc_data/${1}_data
-  mkdir -p /hpc_apps/${1}_apps && chmod -R 750 /hpc_apps/${1}_apps 
+  mkdir -p /hpc_apps/${1}_apps && chmod -R 750 /hpc_apps/${1}_apps
+  mkdir -p /hpc_apps/envmod/${1}_env && chmod -R 750 /hpc_apps/envmod/${1}_env
   chown -R $1:$1 /hpc_data/${1}_data
   chown -R $1:$1 /hpc_apps/${1}_apps
+  chown -R $1:$1 /hpc_apps/envmod/${1}_env
   ln -s /hpc_data/${1}_data /home/$1/Desktop/ >> /dev/null 2>&1
   ln -s /hpc_apps/${1}_apps /home/$1/Desktop/ >> /dev/null 2>&1
   chown -R $1:$1 /home/$1
@@ -190,6 +192,7 @@ if [ $1 = 'users' ]; then
       userdel -f -r $3
       mv /hpc_data/${3}_data /hpc_data/${3}_data_deleted_user
       rm -rf /hpc_apps/${3}_apps
+      rm -rf /hpc_apps/envmod/${3}_env
       for i in $(seq 1 $NODE_NUM )
       do
         ping -c 1 -W 1 -q compute${i} >> ${logfile} 2>&1
@@ -513,14 +516,12 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   sinfo -N
 fi
 
-if [ $1 = 'install' ] || [ $1 = 'remove' ]; then
+if [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
   if [ -z $URL_INSTSCRIPTS_ROOT ]; then
     echo -e "[ FATAL: ] Failed to connect to a valid appstore repo. Exit now."
     exit 35
   fi
-  if [[ ! -n "$2" || $2 = 'list' ]]; then
-    echo -e "[ -INFO- ] Usage: hpcmgr install software_to_be_installed"
-    echo -e "[ -INFO- ] Please specify the software you'd like to build:\n"
+  if [ ! -n "$2" ] || [ $2 = 'list' ]; then
     echo -e "1. Applications:"
     echo -e "\tof7       - OpenFOAM-v7"
     echo -e "\tof9       - OpenFOAM-v9"
@@ -531,9 +532,9 @@ if [ $1 = 'install' ] || [ $1 = 'remove' ]; then
     echo -e "\tvasp5     - VASP-5.4.4 (BRING YOUR OWN LICENSE)"
     echo -e "\tvasp6.1   - VASP-6.1.0 (BRING YOUR OWN LICENSE)"
     echo -e "\tR         - R & RStudio (in development)"
-    echo -e "\tpview     - ParaView-5"
+    echo -e "\tparaview  - ParaView-5"
     echo -e "\thdf5      - HDF5-1.10.9"
-    echo -e "\tncdf4     - netCDF-C-4.9.0 & netCDF-fortran-4.5.3"
+    echo -e "\tnetcdf4   - netCDF-C-4.9.0 & netCDF-fortran-4.5.3"
     echo -e "\tabinit    - ABINIT-9.6.2"
     echo -e "2. MPI Toolkits:"
     echo -e "\tmpich3    - MPICH-3.2.1"
@@ -548,10 +549,10 @@ if [ $1 = 'install' ] || [ $1 = 'remove' ]; then
     echo -e "\tintel     - Intel(R) HPC Toolkit Latest"
     echo -e "4. Important Libraries:"
     echo -e "\tfftw3     - FFTW 3"
-    echo -e "\tlapk311   - LAPACK-3.11.0"
+    echo -e "\tlapack311 - LAPACK-3.11.0"
     echo -e "\tzlib      - zlib-1.2.13"
     echo -e "\tslpack2   - ScaLAPACK-2.1.0"
-    echo -e "\toblas     - OpenBLAS 0.3.15 *SINGLE THREAD*"
+    echo -e "\topenblas  - OpenBLAS 0.3.15 *SINGLE THREAD*"
     echo -e "5. Other Tools:"
     echo -e "\tdesktop   - Desktop Environment" 
     echo -e "\tbaidu     - Baidu Netdisk"
@@ -561,82 +562,13 @@ if [ $1 = 'install' ] || [ $1 = 'remove' ]; then
     echo -e "\tenvmod    - Environment Modules" 
     echo -e "\tvscode    - Visual Studio Code" 
     exit 0
-  elif [[ -n $2 && $2 = 'of7' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_of7.sh | bash
-  elif [[ -n $2 && $2 = 'of2112' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_of2112.sh | bash
-  elif [[ -n $2 && $2 = 'mpich4' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_mpich4.sh | bash
-  elif [[ -n $2 && $2 = 'mpich3' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_mpich3.sh | bash
-  elif [[ -n $2 && $2 = 'gcc4' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_gcc4.sh | bash
-  elif [[ -n $2 && $2 = 'gcc8' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_gcc8.sh | bash
-  elif [[ -n $2 && $2 = 'gcc9' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_gcc9.sh | bash
-  elif [[ -n $2 && $2 = 'gcc12' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_gcc12.sh | bash
-  elif [[ -n $2 && $2 = 'cos' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_cos.sh | bash
-  elif [[ -n $2 && $2 = 'baidu' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_baidu.sh | bash
-  elif [[ -n $2 && $2 = 'fftw3' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_fftw3.sh | bash
-  elif [[ -n $2 && $2 = 'lammps' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_lammps.sh | bash
-  elif [[ -n $2 && $2 = 'intel' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_intel.sh | bash
-  elif [[ -n $2 && $2 = 'gromacs' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_gromacs.sh | bash
-  elif [[ -n $2 && $2 = 'pview' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_paraview.sh | bash
-  elif [[ -n $2 && $2 = 'of9' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_of9.sh | bash
-  elif [[ -n $2 && $2 = 'ompi3' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_ompi3.sh | bash
-  elif [[ -n $2 && $2 = 'ompi4' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_ompi4.sh | bash
-  elif [[ -n $2 && $2 = 'lapk311' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_lapack311.sh | bash
-  elif [[ -n $2 && $2 = 'R' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_R.sh | bash
-  elif [[ -n $2 && $2 = 'slpack2' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_slpack2.sh | bash
-  elif [[ -n $2 && $2 = 'vasp6.1' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_vasp6.1.sh | bash
-  elif [[ -n $2 && $2 = 'vasp6.3' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_vasp6.3.sh | bash
-  elif [[ -n $2 && $2 = 'vasp5' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_vasp5.sh | bash
-  elif [[ -n $2 && $2 = 'hdf5' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_hdf5.sh | bash
-  elif [[ -n $2 && $2 = 'zlib' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_zlib.sh | bash
-  elif [[ -n $2 && $2 = 'ncdf4' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_netcdf4.sh | bash
-  elif [[ -n $2 && $2 = 'desktop' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_desktop.sh | bash
-  elif [[ -n $2 && $2 = 'envmod' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_module.sh | bash
-  elif [[ -n $2 && $2 = 'rar' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_rar.sh | bash
-  elif [[ -n $2 && $2 = 'kswps' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_wps.sh | bash
-  elif [[ -n $2 && $2 = 'vscode' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_vscode.sh | bash
-  elif [[ -n $2 && $2 = 'oblas' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_openblas.sh | bash
-  elif [[ -n $2 && $2 = 'abinit' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_abinit.sh | bash
-  elif [[ -n $2 && $2 = 'wrf' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_wrf.sh | bash
-  elif [[ -n $2 && $2 = 'vasp6.3' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_vasp6.3.sh | bash
   else
-    echo -e "[ FATAL: ] Unknown software. Please run 'hpcmgr install list' command to show all currently available software."
-    echo -e "[ -INFO- ] If your software is not in the list, please describe your requirements and send email to info@hpc-now.com."
-    echo -e "[ -INFO- ] Exit now."
+    curl -s ${URL_INSTSCRIPTS_ROOT}_app_list.txt | grep "< ${2} >" >> /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      echo -e "[ FATAL: ] The software ${2} is not in the store. Exit now."
+      exit 37
+    fi
+    curl -s ${URL_INSTSCRIPTS_ROOT}${2}.sh $1 | bash
   fi
 fi
 

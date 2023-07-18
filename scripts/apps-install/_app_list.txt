@@ -1,0 +1,44 @@
+1. Applications:
+< of7 >
+< of9 >
+< of2112 >
+< lammps >
+< gromacs >
+< wrf >
+< vasp5 >
+< vasp6.1 >
+< vasp6.3 >
+< R >
+< paraview >
+< hdf5 >
+< netcdf4 >
+< abinit >
+
+2. MPI Toolkits:
+< mpich3 >
+< mpich4 >
+< ompi3 >
+< ompi4 >
+
+3. Compilers:
+< gcc4 >
+< gcc8 >
+< gcc9 >
+< gcc12 >
+< intel >
+
+4. Important Libraries:
+< fftw3 >
+< lapack311 >
+< zlib >
+< slpack2 >
+< openblas >
+
+5. Other Tools:
+< desktop >
+< baidu >
+< cos >
+< rar >
+< kswps >
+< envmod >
+< vscode >
