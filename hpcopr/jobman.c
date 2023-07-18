@@ -204,13 +204,13 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
     if(file_p==NULL){
         return -1;
     }
-    fprintf(file_p,"App Name       :~%s\n",job_info->app_name);
-    fprintf(file_p,"Job Nodes      :~%d\n",job_info->node_num);
-    fprintf(file_p,"Cores per node :~%d\n",job_info->tasks_per_node);
-    fprintf(file_p,"Job Name       :~%s\n",job_info->job_name);
-    fprintf(file_p,"Duration Hours :~%d\n",job_info->duration_hours);
-    fprintf(file_p,"Job Executable :~%s\n",job_info->job_exec);
-    fprintf(file_p,"Data Directory :~%s\n",job_info->job_data);
+    fprintf(file_p,"App Name       ::%s\n",job_info->app_name);
+    fprintf(file_p,"Job Nodes      ::%d\n",job_info->node_num);
+    fprintf(file_p,"Cores per node ::%d\n",job_info->tasks_per_node);
+    fprintf(file_p,"Job Name       ::%s\n",job_info->job_name);
+    fprintf(file_p,"Duration Hours ::%d\n",job_info->duration_hours);
+    fprintf(file_p,"Job Executable ::%s\n",job_info->job_exec);
+    fprintf(file_p,"Data Directory ::%s\n",job_info->job_data);
     fclose(file_p);
     sprintf(remote_filename_temp,"/tmp/job_submit_info_%s.tmp",user_name);
     remote_copy(workdir,sshkey_dir,filename_temp,remote_filename_temp,user_name,"put","",0);

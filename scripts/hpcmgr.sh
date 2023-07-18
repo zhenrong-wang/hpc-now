@@ -640,7 +640,7 @@ if [ $1 = 'install' ] || [ $1 = 'remove' ]; then
   fi
 fi
 
-if [ $1 = 'job_submit' ]; then
+if [ $1 = 'submit' ]; then
   echo -e "[ -INFO- ] This module is in development. Please wait for days."
 fi
 time1=$(date)
