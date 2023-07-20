@@ -168,7 +168,7 @@ int app_operation(char* workdir, char* user_name, char* option, char* app_name, 
     }
     char remote_commands[CMDLINE_LENGTH]="";
     int run_flag=0;
-    sprintf(remote_commands,"nohup hpcmgr %s %s > /tmp/app_operation_%s.log 2>&1 &",option,app_name,user_name);
+    sprintf(remote_commands,"nohup hpcmgr %s %s > /tmp/app_operation_%s_%s.log 2>&1 &",option,app_name,user_name,app_name);
     run_flag=remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,2,"","");
     if(run_flag!=0){
         return 1;

@@ -206,15 +206,15 @@ export MPI_ARCH_LIBS="-L${mpi_root}lib -lmpi"
 source ${of_cache}OpenFOAM-v2112/etc/bashrc
 export FOAM_EXTRA_LDFLAGS="-L${of_cache}ThirdParty-v2112/platforms/linux64Gcc/fftw-3.3.10/lib -lfftw3"
 echo -e "[ -INFO- ] Building OpenFOAM in progress ... It takes really long time (for example, 2.5 hours with 8 vCPUs)"
-echo -e "[ -INFO- ] Please check the log files: Build_OF.log."
+echo -e "[ -INFO- ] Please check the log files: Build_OF2112.log."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 3 ] $time_current Started compiling source codes ..."
 #module load $mpi_version
 PATH=${mpi_root}bin:$PATH LD_LIBRARY_PATH=${mpi_root}lib:$LD_LIBRARY_PATH
-${of_cache}ThirdParty-v2112/Allclean -build > ${of_cache}Build_OF.log 2>&1
-${of_cache}OpenFOAM-v2112/Allwmake -j$num_processors >> ${of_cache}Build_OF.log 2>&1
+${of_cache}ThirdParty-v2112/Allclean -build > ${of_cache}Build_OF2112.log 2>&1
+${of_cache}OpenFOAM-v2112/Allwmake -j$num_processors >> ${of_cache}Build_OF2112.log 2>&1
 if [ $? -ne 0 ]; then
-  echo -e "[ FATAL: ] Building OpenFOAM-v2112 failed. Please check the Build_OF.log and retry later. Exit now."
+  echo -e "[ FATAL: ] Building OpenFOAM-v2112 failed. Please check the Build_OF2112.log and retry later. Exit now."
   exit
 fi
 echo -e "[ -INFO- ] Copying files ..."

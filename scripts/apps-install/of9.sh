@@ -210,12 +210,10 @@ fi
 sed -i 's/export WM_MPLIB=SYSTEMOPENMPI/export WM_MPLIB=SYSTEMMPI/g' ${of_cache}OpenFOAM-9/etc/bashrc
 . ${of_cache}OpenFOAM-9/etc/bashrc
 echo -e "[ -INFO- ] Building OpenFOAM in progress ... It takes really long time (for example, 2.5 hours with 8 vCPUs)"
-echo -e "[ -INFO- ] Please check the log files: Build_OF.log."
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "[ STEP 3 ] $time_current Started compiling source codes ..."
-nohup ${of_cache}OpenFOAM-9/Allwmake -j$num_processors > ${of_cache}Build_OF.log 2>&1
+echo -e "[ -INFO- ] Please check the log files: Build_OF9.log."
+nohup ${of_cache}OpenFOAM-9/Allwmake -j$num_processors > ${of_cache}Build_OF9.log 2>&1
 if [ $? -ne 0 ]; then
-  echo -e "[ FATAL: ] Building OpenFOAM-9 failed. Please check the Build_OF.log and retry later. Exit now."
+  echo -e "[ FATAL: ] Building OpenFOAM-9 failed. Please check the Build_OF9.log and retry later. Exit now."
   exit
 fi
 echo -e "[ -INFO- ] Copying files ..."
