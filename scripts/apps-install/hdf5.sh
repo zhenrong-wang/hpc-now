@@ -105,8 +105,8 @@ else
     fi
   fi
 fi
-gcc_version=`gcc --version | head -n1`
-gcc_vnum=`echo $gcc_version | awk '{print $3}' | awk -F"." '{print $1}'`
+gcc_v=`gcc --version | head -n1`
+gcc_vnum=`echo $gcc_v | awk '{print $3}' | awk -F"." '{print $1}'`
 
 ompi_vers=('ompi4' 'ompi3')
 ompi_code=('ompi-4.1.2' 'ompi-3.1.6')

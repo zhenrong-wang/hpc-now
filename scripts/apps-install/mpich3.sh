@@ -87,11 +87,11 @@ else
     fi
   fi
 fi
-gcc_version=`gcc --version | head -n1`
-gcc_vnum=`echo $gcc_version | awk '{print $3}' | awk -F"." '{print $1}'`
+gcc_v=`gcc --version | head -n1`
+gcc_vnum=`echo $gcc_v | awk '{print $3}' | awk -F"." '{print $1}'`
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "[ -INFO- ] $time_current MPICH-3.2.1 will be built with System GNU C Compiler - $gcc_version."
+echo -e "[ -INFO- ] $time_current MPICH-3.2.1 will be built with System GNU C Compiler - $gcc_v."
 echo -e "[ START: ] $time_current Started building MPICH-3.2.1."
 echo -e "[ STEP 1 ] $time_current Downloading and extracting source packages ..."
 if [ ! -f ${app_cache}mpich-3.2.1.tar.gz ]; then

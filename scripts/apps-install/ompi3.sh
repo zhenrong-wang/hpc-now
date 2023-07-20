@@ -87,8 +87,8 @@ else
     fi
   fi
 fi
-gcc_version=`gcc --version | head -n1`
-gcc_vnum=`echo $gcc_version | awk '{print $3}' | awk -F"." '{print $1}'`
+gcc_v=`gcc --version | head -n1`
+gcc_vnum=`echo $gcc_v | awk '{print $3}' | awk -F"." '{print $1}'`
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Started building OpenMPI-3.1.6."
