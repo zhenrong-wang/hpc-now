@@ -9,7 +9,7 @@
 current_user=`whoami`
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 private_app_registry="/usr/hpc-now/.private_apps.reg"
-tmp_log=/tmp/hpcmgr_install_cos_${current_user}.log
+tmp_log="/tmp/hpcmgr_install_cos_${current_user}.log"
 
 if [ $current_user = 'root' ]; then
   app_root="/opt/"
@@ -62,7 +62,7 @@ fi
 
 echo -e "[ -INFO- ] Downloading package(s) ..."
 wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O ${app_cache}/cosbrowser.zip -q
-unzip ${app_cache}/cosbrowser.zip -d $app_root
+unzip -o ${app_cache}/cosbrowser.zip -d $app_root
 chmod +x ${app_root}/cosbrowser.AppImage
 echo -e "[ -INFO- ] Creating a shortcut on the desktop ..."
 echo -e "[Desktop Entry]" > $HOME/Desktop/cos.desktop

@@ -13,7 +13,7 @@ fi
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/desktop/
-tmp_log=/tmp/hpcmgr_install_desktop.log
+tmp_log="/tmp/hpcmgr_install_desktop_${current_user}.log"
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 
 current_user=`whoami`
@@ -28,8 +28,8 @@ if [ $? -eq 0 ]; then
   echo -e "[ -WARN- ] It seem the desktop environment has already been installed. Reinstalling now ..."
 fi
 
-centos_v=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
-if [ ! -z $centos_v ] && [ $centos_v -eq 7 ]; then
+centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
+if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
   yum -y install ntpdate >> $tmp_log 2>&1
   ntpdate ntp.ntsc.ac.cn >> $tmp_log 2>&1
   cp -r /etc/profile /etc/profile.orig

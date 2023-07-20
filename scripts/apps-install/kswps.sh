@@ -17,13 +17,14 @@ url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 app_cache="/hpc_apps/.cache/"
-tmp_log=/tmp/hpcmgr_install_kswps.log
+tmp_log="/tmp/hpcmgr_install_kswps_${current_user}.log"
 
 if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Removing the app ..."
   rpm -e wps-office
   sed -i '/< kswps >/d' $public_app_registry
   echo -e "[ -INFO- ] The app has been removed successfully."
+  exit 0
 fi
 
 mkdir -p $app_cache

@@ -11,7 +11,7 @@ url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/rar/
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 private_app_registry="/usr/hpc-now/.private_apps.reg"
-tmp_log=/tmp/hpcmgr_install_rar_${current_user}.log
+tmp_log="/tmp/hpcmgr_install_rar_${current_user}.log"
 
 if [ $current_user = 'root' ]; then
   app_root="/opt/"
@@ -20,20 +20,27 @@ else
   app_root="/hpc_apps/${current_user}_apps/"
   app_cache="/hpc_apps/${current_user}_apps/.cache/"
 fi
-mkdir -p $app_cache
 
-grep "< rar >" $public_app_registry >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
-  exit 1
-else
-  grep "< rar > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
-  if [ $? -eq 0 ]; then
-    echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
-    exit 3
+if [ $1 = 'remove' ]; then
+  echo -e "[ -INFO- ] Removing the binaries and libraries ..."
+  if [ $current_user = 'root' ]; then
+    rm -rf /usr/local/bin/rar
+    rm -rf /usr/local/bin/unrar
+    rm -rf /etc/rarfiles.lst
+    rm -rf /usr/local/lib/default.sfx
+    sed -i '/< rar >/d' $public_app_registry
+  else
+    rm -rf ${app_root}rar
+    sed -i '/rar/d' $HOME/.bashrc
+    sed -e "/< rar > < ${user_name} >/d" $private_app_registry > /tmp/sed_${user_name}.tmp
+    cat /tmp/sed_${user_name}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${user_name}.tmp
   fi
+  echo -e "[ -INFO- ] App removed."
+  exit 0
 fi
 
+mkdir -p $app_cache
 echo -e "[ -INFO- ] Software: RAR for Linux "
 if [ ! -f ${app_cache}rarlinux-x64-612.tar.gz ]; then
   echo -e "[ -INFO- ] Downloading package(s) ..."

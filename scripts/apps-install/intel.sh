@@ -20,6 +20,7 @@ if [ $1 = 'remove' ]; then
   sed -i '/alias intelenv/d' /etc/profile
   sed -i '/< intel >/d' $public_app_registry
   echo -e "[ -INFO- ] The app has been removed successfully."
+  exit 0
 fi
 
 echo -e "[ -INFO- ] Start installing Intel(R) HPC Kit latest version now ..."

@@ -17,7 +17,7 @@ fi
 
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 app_cache="/hpc_apps/.cache/"
-tmp_log=/tmp/hpcmgr_install_baidu.log
+tmp_log="/tmp/hpcmgr_install_baidu_${current_user}.log"
 
 if [ $1 = 'remove' ]; then
   rpm -e baidunetdisk-patch
@@ -25,7 +25,6 @@ if [ $1 = 'remove' ]; then
   rm -rf /opt/baidunetdisk
   sed -i '/< baidu >/d' $public_app_registry
   sed -i '#/opt/baidunetdisk/baidunetdisk#d' /etc/profile
-
   rm -rf /root/Desktop/baidu.desktop
   while read user_row
   do
@@ -48,62 +47,58 @@ if [ $? -ne 0 ]; then
   fi
 fi
 
-centos_v=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
-if [ ! -z $centos_v ] && [ $centos_v -eq 7 ]; then
+centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
+if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
   echo -e "[ -INFO- ] Downloading and installing Baidu Netdisk now ..."
-  yum -y install libXScrnSaver -q
+  yum -y install libXScrnSaver >> $tmp_log
   if [ ! -f ${app_cache}baidunetdisk-4.3.0.x86_64.rpm ]; then
-    wget ${url_pkgs}baidunetdisk-4.3.0.x86_64.rpm -O ${app_cache}baidunetdisk-4.3.0.x86_64.rpm -q
+    wget ${url_pkgs}baidunetdisk-4.3.0.x86_64.rpm -O ${app_cache}baidunetdisk-4.3.0.x86_64.rpm -o $tmp_log
   fi
   rpm -ivh ${app_cache}baidunetdisk-4.3.0.x86_64.rpm
   grep "alias baidu='/opt/baidunetdisk/baidunetdisk --no-sandbox'" /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "alias baidu='/opt/baidunetdisk/baidunetdisk --no-sandbox'" >> /etc/profile
   fi
-  echo -e "[ -DONE- ] Baidu Netdisk has been installed. You can either run 'baidu' command or click the shortcut to use it. "
-  wget ${url_pkgs}baidu.desktop -O /opt/baidunetdisk/baidu.desktop -q
-  echo -e "[ -INFO- ] Creating a shortcut on the desktop ..."
-  if [ -d /root/Desktop ]; then
-    /bin/cp /opt/baidunetdisk/baidu.desktop /root/Desktop
-  fi
-  find /home -name "Desktop" > /tmp/desktop_dirs.txt
-  while read rows
-  do 
-    user_row=`echo $rows | awk -F"/" '{print $3}'`
-    /bin/cp /opt/baidunetdisk/baidu.desktop ${rows}
-    chown -R ${user_row}:${user_row} ${rows}
-  done < /tmp/desktop_dirs.txt
-  rm -rf /tmp/desktop_dirs.txt
+  echo -e "#! /bin/bash\n/opt/baidunetdisk/baidunetdisk --no-sandbox" > /opt/baidunetdisk/baidu.sh
+  chmod +x /opt/baidunetdisk/baidu.sh
 else
-  yum -y install libXScrnSaver libcloudproviders -q
+  yum -y install libXScrnSaver libcloudproviders >> $tmp_log
   echo -e "[ -INFO- ] Downloading and installing Baidu Netdisk now ..."
   if [ ! -f ${app_cache}baidunetdisk-4.15.5.x86_64.rpm ]; then
-    wget ${url_pkgs}baidunetdisk-4.15.5.x86_64.rpm -O ${app_cache}baidunetdisk-4.15.5.x86_64.rpm -q
+    wget ${url_pkgs}baidunetdisk-4.15.5.x86_64.rpm -O ${app_cache}baidunetdisk-4.15.5.x86_64.rpm -o $tmp_log
   fi
   if [ ! -f ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm ]; then
-    wget ${url_pkgs}baidunetdisk-patch-1.0.1-1.x86_64.rpm -O ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm  -q
+    wget ${url_pkgs}baidunetdisk-patch-1.0.1-1.x86_64.rpm -O ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm -o $tmp_log
   fi
   rpm -ivh ${app_cache}baidunetdisk-4.15.5.x86_64.rpm 
   rpm -ivh ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm
-  wget ${url_pkgs}libgdkpatch.so -O /opt/baidunetdisk/libgdkpatch.so -q
+  if [ ! -f ${app_cache}libgdkpatch.so ]; then
+    wget ${url_pkgs}libgdkpatch.so -O ${app_cache}libgdkpatch.so -o $tmp_log
+  fi
+  /bin/cp ${app_cache}libgdkpatch.so /opt/baidunetdisk/
   grep "alias baidu='LD_PRELOAD=/opt/baidunetdisk/libgdkpatch.so /opt/baidunetdisk/baidunetdisk --no-sandbox'" /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "alias baidu='LD_PRELOAD=/opt/baidunetdisk/libgdkpatch.so /opt/baidunetdisk/baidunetdisk --no-sandbox'" >> /etc/profile
-  fi
-  echo -e "[ -DONE- ] Baidu Netdisk has been installed. You can either run 'baidu' command or click the shortcut to use it. " 
-  echo -e "#! /bin/bash\nLD_PRELOAD=/opt/baidunetdisk/libgdkpatch.so /opt/baidunetdisk/baidunetdisk --no-sandbox" > /opt/baidunetdisk/baidu.sh && chmod +x /opt/baidunetdisk/baidu.sh
-  wget ${url_pkgs}baidu.desktop -O /opt/baidunetdisk/baidu.desktop -q
-  sed -i 's@Exec=/opt/baidunetdisk/baidunetdisk --no-sandbox@Exec=/opt/baidunetdisk/baidu.sh@g' /opt/baidunetdisk/baidu.desktop
-  if [ -d /root/Desktop ]; then
-    /bin/cp /opt/baidunetdisk/baidu.desktop /root/Desktop
-  fi
-  find /home -name "Desktop" > /tmp/desktop_dirs.txt
-  while read rows
-  do 
-    user_row=`echo $rows | awk -F"/" '{print $3}'`
-    /bin/cp /opt/baidunetdisk/baidu.desktop ${rows}
-    chown -R ${user_row}:${user_row} ${rows}
-  done < /tmp/desktop_dirs.txt
-  rm -rf /tmp/desktop_dirs.txt
+  fi 
+  echo -e "#! /bin/bash\nLD_PRELOAD=/opt/baidunetdisk/libgdkpatch.so /opt/baidunetdisk/baidunetdisk --no-sandbox" > /opt/baidunetdisk/baidu.sh
+  chmod +x /opt/baidunetdisk/baidu.sh
 fi
+echo -e "[Desktop Entry]" > $HOME/Desktop/baidu.desktop
+echo -e "Encoding=UTF-8" >> $HOME/Desktop/baidu.desktop
+echo -e "Version=1.0" >> $HOME/Desktop/baidu.desktop
+echo -e "Name=baidu" >> $HOME/Desktop/baidu.desktop
+echo -e "Comment=baidunetdisk" >> $HOME/Desktop/baidu.desktop
+echo -e "Exec=/opt/baidunetdisk/baidu.sh" >> $HOME/Desktop/baidu.desktop
+echo -e "Icon=/opt/app.png" >> $HOME/Desktop/baidu.desktop
+echo -e "Terminal=false" >> $HOME/Desktop/baidu.desktop
+echo -e "StartupNotify=true" >> $HOME/Desktop/baidu.desktop
+echo -e "Type=Application" >> $HOME/Desktop/baidu.desktop
+echo -e "Categories=Applications;" >> $HOME/Desktop/baidu.desktop
+while read user_row
+do
+  user_name=`echo $user_row | awk '{print $2}'`
+  cp -r $HOME/Desktop/baidu.desktop /home/${user_name}/Desktop/
+  chown -R ${user_name}:${user_name} /home/${user_name}/Desktop/
+done < /root/.cluster_secrets/user_secrets.txt
 echo -e "< baidu >" >> $public_app_registry
+echo -e "[ -DONE- ] Baidu Netdisk has been installed. You can either run 'baidu' command or click the shortcut to use it. " 

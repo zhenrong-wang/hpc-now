@@ -10,27 +10,56 @@
 # It is quite difficult for CentOS 7 to run R environment, considering so many dependencies are needed. 
 # Therefore, CentOS Stream or Fedora would be a good choice to aviod as many dependency problems as possible.
 
+current_user=`whoami`
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
 num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
-
-current_user=`whoami`
 if [ $current_user != 'root' ]; then
-  echo -e "[ FATAL: ] ONLY root user or user1 with sudo can install this app."
+  echo -e "[ FATAL: ] ONLY root user or user1 with sudo can $1 this app."
   echo -e "           Please contact the administrator. Exit now."
   exit 1
 fi
-
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 app_root="/hpc_apps/"
 app_cache="/hpc_apps/.cache/"
-mkdir -p $app_cache
-tmp_log=/tmp/hpcmgr_install_R.log
-
+app_extract_cache="/root/.app_extract_cache/"
+tmp_log="/tmp/hpcmgr_install_R_${current_user}.log"
 centos_v=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 if [ $centos_v -eq 7 ]; then
   echo -e "[ FATAL: ] R & RStudio can not be installed to CentOS 7.x. Exit now."
   exit 3
+fi
+mkdir -p ${app_cache}
+mkdir -p ${app_extract_cache}
+
+if [ $1 = 'remove' ]; then
+  echo -e "[ -INFO- ] Removing RStudio ..."
+  rpm -e rstudio
+  echo -e "[ -INFO- ] Removing R environment ..."
+  rm -rf ${app_root}R-4.2.1
+  echo -e "[ -INFO- ] Removing openssl-1.1.1q ..."
+  rm -rf ${app_root}openssl-1.1.1q
+  echo -e "[ -INFO- ] Removing gdal-3.5.2 ..."
+  rm -rf ${app_extract_cache}gdal-3.5.2
+  echo -e "[ -INFO- ] Removing proj & geos-devel ..."
+  yum -y install proj-devel geos-devel >> $tmp_log
+  echo -e "[ -INFO- ] Removing envrionment varables ..."
+  sed -i '/R-4.2.1/d' /etc/profile
+  sed -i '/openssl-1.1.1q/d' /etc/profile
+  echo -e "[ -INFO- ] Removing desktop shortcuts ..."
+  rm -rf $HOME/Desktop/rstudio.desktop
+  find /home -name "Desktop" > /tmp/desktop_dirs.txt
+  while read rows
+  do 
+    rm -rf $HOME/Desktop/rstudio.desktop
+  done < /tmp/desktop_dirs.txt
+  rm -rf /tmp/desktop_dirs.txt
+  sed -i '/< R >/d' ${public_app_registry}
+  sed -i '/< r_env >/d' ${public_app_registry}
+  sed -i '/< openssl-1.1.1q >/d' ${public_app_registry}
+  echo -e "[ -INFO- ] R & RStudio removed. JAVA packages not removed."
+  echo -e "[ -INFO- ] You can remove manually by 'yum -y remove java java-devel'."
+  exit 0
 fi
 
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
@@ -43,12 +72,6 @@ if [ $? -ne 0 ]; then
   fi
 fi
 
-grep "< R >" $public_app_registry >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
-  exit 7
-fi
-
 source /etc/profile
 echo -e "[ STEP 1 ] Installing OpenSSL-1.1.1 ... "
 # RStudio needs OpenSSL-1.1.1
@@ -59,9 +82,8 @@ if [ ! -f ${app_cache}openssl-1.1.1q.tar.gz ]; then
 fi
 grep "< openssl-1.1.1q >" $public_app_registry >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  cd ${app_cache}
-  tar zvxf openssl-1.1.1q.tar.gz >> $tmp_log
-  cd ${app_cache}openssl-1.1.1q
+  tar zvxf ${app_cache}openssl-1.1.1q.tar.gz -C ${app_extract_cache} >> $tmp_log
+  cd ${app_extract_cache}openssl-1.1.1q
   ./config --prefix=${app_root}openssl-1.1.1q >> $tmp_log
   make -j$num_processors >> $tmp_log
   make install >> $tmp_log
@@ -91,8 +113,8 @@ if [ $? -ne 0 ]; then
   if [ ! -f ${app_cache}R-4.2.1.tar.gz ]; then
     wget ${url_pkgs}R-4.2.1.tar.gz -O ${app_cache}R-4.2.1.tar.gz 
   fi
-  tar zvxf ${app_cache}R-4.2.1.tar.gz -C ${app_cache} >> $tmp_log
-  cd ${app_cache}R-4.2.1
+  tar zvxf ${app_cache}R-4.2.1.tar.gz -C ${app_extract_cache} >> $tmp_log
+  cd ${app_extract_cache}R-4.2.1
   ./configure --enable-R-shlib --prefix=${app_root}R-4.2.1 >> $tmp_log
   make -j$num_processors >> $tmp_log
   make install >> $tmp_log
@@ -125,16 +147,13 @@ yum -y install proj-devel geos-devel
 if [ ! -f ${app_cache}gdal-3.5.2.tar.gz ]; then
   wget -q ${url_pkgs}gdal-3.5.2.tar.gz -O ${app_cache}gdal-3.5.2.tar.gz
 fi
-tar zvxf ${app_cache}gdal-3.5.2.tar.gz -C ${app_root} >> $tmp_log
-cd ${app_root}gdal-3.5.2
-./configure >> $tmp_log
+tar zvxf ${app_cache}gdal-3.5.2.tar.gz -C ${app_extract_cache} >> $tmp_log
+cd ${app_extract_cache}gdal-3.5.2
+./configure --prefix=${app_root}gdal-3.5.2 >> $tmp_log
 make -j$num_processors >> $tmp_log
 make install >> $tmp_log
 # NOW, you can use R & RStudio environment for data processing
-# NOTE: when install package rgdal, please use 'install.packages("rgdal",configure.args = "--host=x86_64")' to specify configure vars
-echo -e "[ -DONE- ] R & RStudio has been installed to the cluster."
 echo -e "[ -INFO- ] Creating a shortcut on the desktop ..."
-
 echo -e "[Desktop Entry]" > $HOME/Desktop/rstudio.desktop
 echo -e "Encoding=UTF-8" >> $HOME/Desktop/rstudio.desktop
 echo -e "Version=1.0" >> $HOME/Desktop/rstudio.desktop
@@ -156,5 +175,6 @@ do
 done < /tmp/desktop_dirs.txt
 rm -rf /tmp/desktop_dirs.txt
 
-echo -e "[ -WARN- ] when install package rgdal, please use 'install.packages("rgdal",configure.args = "--host=x86_64")' to specify configure vars"
+echo -e "[ -WARN- ] when install package rgdal, please use 'install.packages(\"rgdal\",configure.args = \"--host=x86_64\")' to specify configure vars."
 echo -e "< R >" >> ${public_app_registry}
+echo -e "[ -DONE- ] R & RStudio has been installed to the cluster."

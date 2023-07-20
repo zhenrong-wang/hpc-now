@@ -9,7 +9,7 @@
 current_user=`whoami`
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 private_app_registry="/usr/hpc-now/.private_apps.reg"
-tmp_log=/tmp/hpcmgr_install_fftw3_${current_user}.log
+tmp_log="/tmp/hpcmgr_install_fftw3_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -39,7 +39,6 @@ if [ $1 = 'remove' ]; then
 fi
 
 mkdir -p $app_cache
-
 echo -e "[ -INFO- ] Downloading and extracting packages ..."
 if [ ! -f ${app_cache}fftw-3.3.10.tar.gz ]; then
   wget ${url_pkgs}fftw-3.3.10.tar.gz -O ${app_cache}fftw-3.3.10.tar.gz -o ${tmp_log}

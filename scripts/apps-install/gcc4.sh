@@ -9,7 +9,7 @@
 current_user=`whoami`
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 private_app_registry="/usr/hpc-now/.private_apps.reg"
-tmp_log=/tmp/hpcmgr_install_gcc4_${current_user}.log
+tmp_log="/tmp/hpcmgr_install_gcc4_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -18,14 +18,16 @@ num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
-  app_extract_cache="/root/.app_extract_cache"
+  app_extract_cache="/root/.app_extract_cache/"
   envmod_root="/hpc_apps/envmod/"
 else
   app_root="/hpc_apps/${current_user}_apps/"
   app_cache="/hpc_apps/${current_user}_apps/.cache/"
-  app_extract_cache="/home/${current_user}/.app_extract_cache"
-  envmod_root="/hpc_apps/envmod/${current_user}_env"
+  app_extract_cache="/home/${current_user}/.app_extract_cache/"
+  envmod_root="/hpc_apps/envmod/${current_user}_env/"
 fi
+mkdir -p ${app_cache}
+mkdir -p ${app_extract_cache}
 
 if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Removing binaries and libraries ..."
@@ -36,15 +38,13 @@ if [ $1 = 'remove' ]; then
   if [ $current_user = 'root' ]; then
     sed -i '/< gcc4 >/d' $public_app_registry
   else
-    sed -e "/< gcc4 > < ${user_name} >/d" $private_app_registry > /tmp/sed_${user_name}.tmp
-    cat /tmp/sed_${user_name}.tmp > $private_app_registry
-    rm -rf /tmp/sed_${user_name}.tmp
+    sed -e "/< gcc4 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
+    cat /tmp/sed_${current_user}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${current_user}.tmp
   fi
   echo -e "[ -INFO- ] GCC-4.9.2 has been removed successfully."
   exit 0
 fi
-
-mkdir -p $app_cache
 
 unset LIBRARY_PATH #Only for gcc, we have to do this
 unset LD_LIBRARY_PATH

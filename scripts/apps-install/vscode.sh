@@ -6,14 +6,22 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *VSCode* to HPC-NOW cluster.
 
-public_app_registry="/usr/hpc-now/.public_apps.reg"
-tmp_log=/tmp/hpcmgr_install_vscode.log
-
 current_user=`whoami`
 if [ $current_user != 'root' ]; then
-  echo -e "[ FATAL: ] ONLY root user or user1 with sudo can install this app."
+  echo -e "[ FATAL: ] ONLY root user or user1 with sudo can $1 this app."
   echo -e "           Please contact the administrator. Exit now."
   exit 1
+fi
+
+public_app_registry="/usr/hpc-now/.public_apps.reg"
+tmp_log="/tmp/hpcmgr_install_vscode_${current_user}.log"
+
+if [ $1 = 'remove' ]; then
+  echo -e "[ -INFO- ] Removing the package ..."
+  yum remove code -y
+  sed -i '/< code >/d' $public_app_registry
+  echo -e "[ -INFO- ] App removed successfully."
+  exit 0
 fi
 
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
@@ -26,11 +34,6 @@ if [ $? -ne 0 ]; then
   fi
 fi
 
-grep "vscode" $public_app_registry >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
-  exit 5
-fi
 echo -e "[ -INFO- ] Installing Visual Studio Code for Linux now ..."
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
 sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
@@ -38,7 +41,7 @@ yum check-update >> /dev/null 2>&1
 yum install code -y >> $tmp_log 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -DONE- ] VSCode installed. You can run command 'code' to start using it."
-  echo -e "vscode" >> $public_app_registry
+  echo -e "< vscode >" >> $public_app_registry
 else
   echo -e "[ FATAL: ] Failed to install VSCode. Please check the log file for details. Exit now."
   exit 7

@@ -6,186 +6,185 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *OpenFOAM-v2112* to HPC-NOW cluster.
 
-if [ ! -d /hpc_apps ]; then
-  echo -e "[ FATAL: ] The root directory /hpc_apps is missing. Installation abort. Exit now."
-  exit
+current_user=`whoami`
+public_app_registry="/usr/hpc-now/.public_apps.reg"
+private_app_registry="/usr/hpc-now/.private_apps.reg"
+tmp_log="/tmp/hpcmgr_install_of2112_${current_user}.log"
+
+url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
+url_pkgs=${url_root}packages/
+num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
+centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
+
+if [ $current_user = 'root' ]; then
+  app_root="/hpc_apps/"
+  app_cache="/hpc_apps/.cache/"
+  of_cache="/root/OpenFOAM/"
+  envmod_root="/hpc_apps/envmod/"
+else
+  app_root="/hpc_apps/${current_user}_apps/"
+  app_cache="/hpc_apps/${current_user}_apps/.cache/"
+  of_cache="/home/${current_user}/OpenFOAM/"
+  envmod_root="/hpc_apps/envmod/${current_user}_env/"
 fi
 
-URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_PKGS=${URL_ROOT}packages/
+mkdir -p $app_cache
+mkdir -p $of_cache
 
-source /etc/profile
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-logfile=/var/log/hpcmgr_install.log && echo -e "\n# $time_current INSTALLING OpenFOAM-v2112" >> ${logfile}
-tmp_log=/tmp/hpcmgr_install.log
-APP_ROOT=/hpc_apps
-NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
+of_root="${app_root}OpenFOAM/"
 
-ls /hpc_apps/OpenFOAM/OpenFOAM-v2112/platforms/linux*/bin/*Foam >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  foam2112check=`ls /hpc_apps/OpenFOAM/OpenFOAM-v2112/platforms/linux*/bin/*Foam | wc -l` 
-  if [ $foam2112check -gt $((80)) ]; then
-    cat /etc/profile | grep of2112 >> /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-      echo -e "alias of2112='source $APP_ROOT/OpenFOAM/of2112.sh'" >> /etc/profile
-    fi
-    echo -e "[ -INFO- ] It seems $foam2112check Openfoam2112 binaries are in place."
-    echo -e "[ -INFO- ] If you REALLY want to rebuild, please move the previous binaries to other folders and retry. Exit now." 
-    exit
+if [ $1 = 'remove' ]; then
+  echo -e "[ -INFO- ] Removing binaries and libraries, this may take minutes ..."
+  rm -rf ${of_root}OpenFOAM-v2112
+  rm -rf ${of_root}ThirdParty-v2112
+  echo -e "[ -INFO- ] Updating envrionment variables ..."
+  if [ $current_user = 'root' ]; then
+    sed -i '/of2112.sh/d' /etc/profile
+    sed -i '/< of2112 >/d' ${public_app_registry}
+  else
+    sed -i '/of2112.sh/d' $HOME/.bashrc
+    sed -e "/< of2112 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
+    cat /tmp/sed_${current_user}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${current_user}.tmp
   fi
+  echo -e "[ -INFO- ] OpenFOAM-v2112 has been removed successfully."
+  exit 0
 fi
+
 echo -e "[ -INFO- ] Cleaning up processes..."
 ps -aux | grep OpenFOAM-v2112/wmake | cut -c 9-15 | xargs kill -9 >> /dev/null 2>&1
-if [[ -n $1 && $1 = 'rebuild' ]]; then
-  echo -e "[ -WARN- ] The previously OpenFOAM and Third-party folder will be removed and re-created."
-  rm -rf $APP_ROOT/OpenFOAM/OpenFOAM-v2112
-  rm -rf $APP_ROOT/OpenFOAM/ThirdParty-v2112 
-fi
-yum list installed -q | grep zlib-devel >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "[ -INFO- ] OpenFOAM-v2112 needs zlib-devel. Installing now ..."
-  yum -y install zlib-devel -q
-fi
-
-CENTOS_VER=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
-
-yum list installed -q | grep "cmake\." | grep "3\.">> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "[ -INFO- ] OpenFOAM-v2112 needs cmake3. Installing now ..."
-  if [ $CENTOS_VER -eq 7 ]; then
-    yum -y install cmake3 -q >> $tmp_log 2>&1
-    rm -rf /bin/cmake
-    ln -s /bin/cmake3 /bin/cmake
-  else
-    yum -y install cmake -q >> $tmp_log 2>&1
-  fi
-fi
-
-yum install gmp-devel mpfr-devel -y >> $tmp_log 2>&1
-
-yum list installed -q | grep flex >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "[ -INFO- ] OpenFOAM-v2112 needs flex. Installing now ..."
-  yum -y install flex -q >> $tmp_log 2>&1
-fi
-
-#source /opt/environment-modules/init/bash
-module ava -t | grep gcc-12.1.0 >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  module load gcc-12.1.0
-  gcc_v=gcc-12.1.0
-  gcc_vnum=12
-  systemgcc='false'
-  echo -e "[ -INFO- ] OpenFOAM will be built with GNU C Compiler: $gcc_v"
-else
-  module ava -t | grep gcc-8.2.0 >> /dev/null 2>&1
-  if [ $? -eq 0 ]; then
-    module load gcc-8.2.0
-    gcc_v=gcc-8.2.0
-    gcc_vnum=8
-    systemgcc='false'
-    echo -e "[ -INFO- ] OpenFOAM will be built with GNU C Compiler: $gcc_v"
-  else
-    gcc_v=`gcc --version | head -n1`
-    gcc_vnum=`echo $gcc_v | awk '{print $3}' | awk -F"." '{print $1}'`
-    systemgcc='true'
-    echo -e "[ -INFO- ] OpenFOAM will be built with GNU C Compiler: $gcc_v"
-    if [ $gcc_vnum -lt 8 ]; then
-      echo -e "[ -WARN- ] Your gcc version is too old to compile OpenFOAM. Will start installing gcc-12.1.0 which may take long time."
-      echo -e "[ -WARN- ] You can press keyboard 'Ctrl C' to stop current building process."
-      echo -ne "[ -WAIT- ] |--> "
-      for i in $( seq 1 10)
-      do
-	      sleep 1
-        echo -ne "$((11-i))--> "
-      done
-      echo -e "|\n[ -INFO- ] Building gcc-12.1.0 now ..."
-      hpcmgr install gcc12 >> ${tmp_log}
-      gcc_v=gcc-12.1.0
-      gcc_vnum=12
+echo -e "[ -INFO- ] Detecting GNU Compiler Collection ..."
+gcc_vers=('gcc12' 'gcc9' 'gcc8' 'gcc4')
+gcc_code=('gcc-12.1.0' 'gcc-9.5.0' 'gcc-8.2.0' 'gcc-4.9.2')
+systemgcc='true'
+if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
+  for i in $(seq 0 3)
+  do
+	  grep "< ${gcc_vers[i]} >" $public_app_registry >> /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      module load ${gcc_code[i]}
+      gcc_env="${gcc_code[i]}"
       systemgcc='false'
-      module load gcc-12.2.0
+      break
     fi
-  fi
-fi
-module ava -t | grep mpich >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  mpi_version=`module ava -t | grep mpich | tail -n1 | awk '{print $1}'`
-  module load $mpi_version
-  echo -e "[ -INFO- ] OpenFOAM will be built with $mpi_version."
+    if [ $current_user != 'root' ]; then
+      grep "< ${gcc_vers[i]} > < $current_user >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        module load ${current_user}_apps/${gcc_code[i]}
+        gcc_env="${current_user}_env/${gcc_code[i]}"
+        systemgcc='false'
+        break
+      fi
+    fi
+  done
 else
-  module ava -t | grep ompi >> /dev/null 2>&1
+  grep "< ${gcc_vers[0]} >" $public_app_registry >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
-    mpi_version=`module ava -t | grep ompi | tail -n1 | awk '{print $1}'`
-    module load $mpi_version
-    echo -e "[ -INFO- ] OpenFOAM will be built with $mpi_version."
+    module load ${gcc_code[0]}
+    gcc_env="${gcc_code[0]}"
+    systemgcc='false'
   else
-    echo -e "[ -INFO- ] No MPI version found, installing MPICH-4.0.2 now..."
-    hpcmgr install mpich4 >> ${tmp_log}.mpich4
-    if [ $? -ne 0 ]; then
-      echo -e "[ FATAL: ] Failed to install MPICH-4.0.2. Installation abort. Please check the log file for details. Exit now."
-      exit
-    else
-      echo -e "[ -INFO- ] MPICH-4.0.2 has been successfully built."
-      mpi_version=mpich-4.0.2
-      module purge
-      module load $mpi_version
+    if [ $current_user != 'root' ]; then
+      grep "< ${gcc_vers[0]} > < $current_user >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        module load ${current_user}_env/${gcc_code[0]}
+        gcc_env="${current_user}_env/${gcc_code[0]}"
+        systemgcc='false'
+      fi
     fi
   fi
 fi
+gcc_version=`gcc --version | head -n1`
+gcc_vnum=`echo $gcc_version | awk '{print $3}' | awk -F"." '{print $1}'`
+echo -e "[ -INFO- ] Using GNU Compiler Collections - ${gcc_version}."
+echo -e "[ -INFO- ] Detecting MPICH Libraries ..."
+mpi_vers=('mpich4' 'mpich3' 'ompi4' 'ompi3')
+mpi_code=('mpich-4.0.2' 'mpich-3.2.1' 'ompi-4.1.2' 'ompi-3.1.6')
+for i in $(seq 0 3)
+do
+	grep "< ${mpi_vers[i]} >" $public_app_registry >> /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    module load ${mpi_code[i]}
+    mpi_root="/hpc_apps/${mpi_code[i]}/"
+    mpi_env="${mpi_code[i]}"
+    break
+  fi
+  if [ $current_user != 'root' ]; then
+    grep "< ${mpi_vers[i]} > < $current_user >" $private_app_registry >> /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      module load ${current_user}_env/${mpi_code[i]}
+      mpi_root="${app_root}${mpi_code[i]}/"
+      mpi_env="${current_user}_env/${mpi_code[i]}"
+      break
+    fi
+  fi
+done
+mpirun --version >> /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo -e "[ -INFO- ] Building MPICH Libraries now ..."
+  hpcmgr install mpich4 >> ${tmp_log}
+  if [ $current_user = 'root' ]; then
+    module load mpich-4.0.2
+    mpi_env="mpich-4.0.2"
+  else
+    module load ${current_user}_env/mpich-4.0.2
+    mpi_env="${current_user}_env/mpich-4.0.2"
+  fi
+  mpi_root="${app_root}mpich-4.0.2/"
+fi
+echo -e "[ -INFO- ] Using MPICH Libraries - ${mpi_env}."
 
+time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Building OpenFOAM-v2112 now ... "
-echo -e "[ START: ] $time_current Building OpenFOAM-v2112 now ... " >> $logfile
-mkdir -p $APP_ROOT/OpenFOAM
+mkdir -p ${of_root}
+rm -rf ${of_root}*
+
 echo -e "[ STEP 1 ] $time_current Downloading & extracting source packages ..."
-echo -e "[ STEP 1 ] $time_current Downloading & extracting source packages ..." >> $logfile
-if [ ! -f $APP_ROOT/OpenFOAM/OpenFOAM-v2112.tgz ]; then
-  wget ${URL_PKGS}OpenFOAM-v2112.tgz -q -O $APP_ROOT/OpenFOAM/OpenFOAM-v2112.tgz
+
+if [ ! -f ${app_cache}OpenFOAM-v2112.tgz ]; then
+  wget ${url_pkgs}OpenFOAM-v2112.tgz -O ${app_cache}OpenFOAM-v2112.tgz -o ${tmp_log}
 fi  
-if [ ! -f $APP_ROOT/OpenFOAM/ThirdParty-v2112.tgz ]; then
-  wget ${URL_PKGS}ThirdParty-v2112.tgz -q -O $APP_ROOT/OpenFOAM/ThirdParty-v2112.tgz
+if [ ! -f ${app_cache}ThirdParty-v2112.tgz ]; then
+  wget ${url_pkgs}ThirdParty-v2112.tgz -O ${app_cache}ThirdParty-v2112.tgz -o ${tmp_log}
 fi
-if [ ! -d $APP_ROOT/OpenFOAM/OpenFOAM-v2112 ]; then
-  cd $APP_ROOT/OpenFOAM && tar zvxf OpenFOAM-v2112.tgz >> $tmp_log 2>&1
+cd ${app_cache}
+tar zvxf OpenFOAM-v2112.tgz -C ${of_cache} >> $tmp_log
+tar zvxf ThirdParty-v2112.tgz -C ${of_cache} >> $tmp_log 
+if [ ! -f ${of_cache}ThirdParty-v2112/sources/ADIOS2-2.6.0.zip ]; then
+  wget ${url_pkgs}ADIOS2-2.6.0.zip -O ${of_cache}ThirdParty-v2112/sources/ADIOS2-2.6.0.zip >> $tmp_log 2>&1
 fi
-if [ ! -d $APP_ROOT/OpenFOAM/ThirdParty-v2112 ]; then
-  cd $APP_ROOT/OpenFOAM && tar zvxf ThirdParty-v2112.tgz >> $tmp_log 2>&1
+#cd ${of_cache}ThirdParty-v2112/sources && rm -rf ADIOS2-2.6.0 && unzip ADIOS2-2.6.0.zip >> $tmp_log 2>&1
+if [ ! -f ${of_cache}ThirdParty-v2112/sources/metis-5.1.0.tar.gz ]; then
+  wget ${url_pkgs}metis-5.1.0.tar.gz -O ${of_cache}ThirdParty-v2112/sources/metis-5.1.0.tar.gz -q
 fi
-if [ ! -f $APP_ROOT/OpenFOAM/ThirdParty-v2112/sources/ADIOS2-2.6.0.zip ]; then
-  wget ${URL_PKGS}ADIOS2-2.6.0.zip -O $APP_ROOT/OpenFOAM/ThirdParty-v2112/sources/ADIOS2-2.6.0.zip >> $tmp_log 2>&1
-fi
-#cd $APP_ROOT/OpenFOAM/ThirdParty-v2112/sources && rm -rf ADIOS2-2.6.0 && unzip ADIOS2-2.6.0.zip >> $tmp_log 2>&1
-if [ ! -f $APP_ROOT/OpenFOAM/ThirdParty-v2112/sources/metis-5.1.0.tar.gz ]; then
-  wget ${URL_PKGS}metis-5.1.0.tar.gz -O $APP_ROOT/OpenFOAM/ThirdParty-v2112/sources/metis-5.1.0.tar.gz -q
-fi
-#cd $APP_ROOT/OpenFOAM/ThirdParty-v2112/sources && rm -rf metis-5.1.0 && tar zvxf metis-5.1.0.tar.gz >> $tmp_log 2>&1
+#cd ${of_cache}ThirdParty-v2112/sources && rm -rf metis-5.1.0 && tar zvxf metis-5.1.0.tar.gz >> $tmp_log 2>&1
 echo -e "[ -INFO- ] Removing the tarballs are not recommended. If you want to rebuild of2112, please remove the folder OpenFOAM-v2112 & ThirdParty-v2112."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 2 ] $time_current Removing previously-built binaries ..."
 echo -e "[ STEP 2 ] $time_current Removing previously-built binaries ..." >> $logfile
-#rm -rf $APP_ROOT/OpenFOAM/OpenFOAM-v2112/platforms/*
-#rm -rf $APP_ROOT/OpenFOAM/ThirdParty-v2112/platforms/* 
+#rm -rf ${of_cache}OpenFOAM-v2112/platforms/*
+#rm -rf ${of_cache}ThirdParty-v2112/platforms/* 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 3 ] $time_current Compiling started ..."
-if [ ! -f  $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/config.sh/settings-orig ]; then
-  cp $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/config.sh/settings $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/config.sh/settings-orig
+if [ ! -f  ${of_cache}OpenFOAM-v2112/etc/config.sh/settings-orig ]; then
+  cp ${of_cache}OpenFOAM-v2112/etc/config.sh/settings ${of_cache}OpenFOAM-v2112/etc/config.sh/settings-orig
 else
-  /bin/cp $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/config.sh/settings-orig $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/config.sh/settings 
+  /bin/cp ${of_cache}OpenFOAM-v2112/etc/config.sh/settings-orig ${of_cache}OpenFOAM-v2112/etc/config.sh/settings 
 fi
-if [ ! -f $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c-orig ]; then
-  cp $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c-orig
+if [ ! -f ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c-orig ]; then
+  cp ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c-orig
 else
-  /bin/cp $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c-orig $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c
+  /bin/cp ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c-orig ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c
 fi
-if [ ! -f $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c++-orig ]; then
-  cp $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c++ $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c++-orig
+if [ ! -f ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c++-orig ]; then
+  cp ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c++ ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c++-orig
 else
-  /bin/cp  $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c++-orig $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c++
+  /bin/cp  ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c++-orig ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c++
 fi
-if [ ! -f $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/bashrc-orig ]; then
-  cp $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/bashrc $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/bashrc-orig
+if [ ! -f ${of_cache}OpenFOAM-v2112/etc/bashrc-orig ]; then
+  cp ${of_cache}OpenFOAM-v2112/etc/bashrc ${of_cache}OpenFOAM-v2112/etc/bashrc-orig
 else
-  /bin/cp $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/bashrc-orig $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/bashrc
+  /bin/cp ${of_cache}OpenFOAM-v2112/etc/bashrc-orig ${of_cache}OpenFOAM-v2112/etc/bashrc
 fi
 if [ $gcc_vnum -gt 10 ]; then
   cat /proc/cpuinfo | grep "model name" | grep "AMD EPYC"  >> /dev/null 2>&1
@@ -193,50 +192,63 @@ if [ $gcc_vnum -gt 10 ]; then
     cpu_model=`cat /proc/cpuinfo | grep "model name" | grep "AMD EPYC" | head -n1 | awk '{print $6}'`
     cpu_gen=${cpu_model: -1}
     if [ $cpu_gen = '3' ]; then
-      sed -i 's/-fPIC/-fPIC -march=znver3/g' $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c
-      sed -i 's/-fPIC/-fPIC -march=znver3/g' $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c++
+      sed -i 's/-fPIC/-fPIC -march=znver3/g' ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c
+      sed -i 's/-fPIC/-fPIC -march=znver3/g' ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c++
     elif [ $cpu_gen = '2' ]; then
-      sed -i 's/-fPIC/-fPIC -march=znver2/g' $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c
-      sed -i 's/-fPIC/-fPIC -march=znver2/g' $APP_ROOT/OpenFOAM/OpenFOAM-v2112/wmake/rules/linux64Gcc/c++
+      sed -i 's/-fPIC/-fPIC -march=znver2/g' ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c
+      sed -i 's/-fPIC/-fPIC -march=znver2/g' ${of_cache}OpenFOAM-v2112/wmake/rules/linux64Gcc/c++
     fi
   fi
 fi    
-sed -i 's/export WM_MPLIB=SYSTEMOPENMPI/export WM_MPLIB=SYSTEMMPI/g' $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/bashrc
-export MPI_ROOT=/hpc_apps/$mpi_version
-echo "$mpi_version" | grep ompi >> /dev/null 2>&1
+sed -i 's/export WM_MPLIB=SYSTEMOPENMPI/export WM_MPLIB=SYSTEMMPI/g' ${of_cache}OpenFOAM-v2112/etc/bashrc
+export MPI_ROOT=${mpi_root}
+echo "${mpi_env}" | grep ompi >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   export MPI_ARCH_FLAGS="-DOMPI_SKIP_MPICXX"
 else
   export MPI_ARCH_FLAGS="-DMPICH_SKIP_MPICXX"
 fi
-export MPI_ARCH_INC="-I/hpc_apps/$mpi_version/include" 
-export MPI_ARCH_LIBS="-L/hpc_apps/$mpi_version/lib -lmpi"
-#echo -e $MPI_ROOT $MPI_ARCH_FLAGS $MPI_ARCH_INC $MPI_ARCH_LIBS
-#/bin/cp $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/config.sh/adios2 $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/config.sh/adios2-orig
-#sed -i 's/adios2_version=ADIOS2-2.6.0/adios2_version=ADIOS2-2.7.1/g' $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/config.sh/adios2
-source $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/bashrc
-echo -e "[ -INFO- ] Building OpenFOAM in progress ... It takes really long time (for example, 2.5 hours with 8 vCPUs).\n[ -INFO- ] Please check the log files: Build_OF.log."
-export FOAM_EXTRA_LDFLAGS="-L/hpc_apps/OpenFOAM/ThirdParty-v2112/platforms/linux64Gcc/fftw-3.3.10/lib -lfftw3"
+export MPI_ARCH_INC="-I${mpi_root}include" 
+export MPI_ARCH_LIBS="-L${mpi_root}lib -lmpi"
+source ${of_cache}OpenFOAM-v2112/etc/bashrc
+export FOAM_EXTRA_LDFLAGS="-L${of_cache}ThirdParty-v2112/platforms/linux64Gcc/fftw-3.3.10/lib -lfftw3"
+echo -e "[ -INFO- ] Building OpenFOAM in progress ... It takes really long time (for example, 2.5 hours with 8 vCPUs)"
+echo -e "[ -INFO- ] Please check the log files: Build_OF.log."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 3 ] $time_current Started compiling source codes ..." >> $logfile
 #module load $mpi_version
-PATH=$APP_ROOT/$mpi_version/bin:$PATH LD_LIBRARY_PATH=$APP_ROOT/$mpi_version/lib:$LD_LIBRARY_PATH
-$APP_ROOT/OpenFOAM/ThirdParty-v2112/Allclean -build > $APP_ROOT/OpenFOAM/Build_OF.log 2>&1
-$APP_ROOT/OpenFOAM/OpenFOAM-v2112/Allwmake -j$NUM_PROCESSORS >> $APP_ROOT/OpenFOAM/Build_OF.log 2>&1
+PATH=${mpi_root}bin:$PATH LD_LIBRARY_PATH=${mpi_root}lib:$LD_LIBRARY_PATH
+${of_cache}ThirdParty-v2112/Allclean -build > ${of_cache}Build_OF.log 2>&1
+${of_cache}OpenFOAM-v2112/Allwmake -j$num_processors >> ${of_cache}Build_OF.log 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Building OpenFOAM-v2112 failed. Please check the Build_OF.log and retry later. Exit now."
   exit
 fi
-if [ $systemgcc = 'true' ]; then
-  echo -e "#! /bin/bash\nmodule purge\nexport MPI_ROOT=/hpc_apps/$mpi_version\nexport MPI_ARCH_FLAGS=\"-DMPICH_SKIP_MPICXX\"\nexport MPI_ARCH_INC=\"-I\$MPI_ROOT/include\"\nexport MPI_ARCH_LIBS=\"-L\$MPI_ROOT/lib -lmpi\"\nmodule load $mpi_version\nsource $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/bashrc\necho \"Openfoam2112 with $mpi_version and system gcc: $gcc_v is ready for running.\"" > $APP_ROOT/OpenFOAM/of2112.sh
-else
-  echo -e "#! /bin/bash\nmodule purge\nexport MPI_ROOT=/hpc_apps/$mpi_version\nexport MPI_ARCH_FLAGS=\"-DMPICH_SKIP_MPICXX\"\nexport MPI_ARCH_INC=\"-I\$MPI_ROOT/include\"\nexport MPI_ARCH_LIBS=\"-L\$MPI_ROOT/lib -lmpi\"\nmodule load $mpi_version\nmodule load $gcc_v\nsource $APP_ROOT/OpenFOAM/OpenFOAM-v2112/etc/bashrc\necho \"Openfoam2112 with $mpi_version and $gcc_v is ready for running.\"" > $APP_ROOT/OpenFOAM/of2112.sh
-fi
+echo -e "[ -INFO- ] Copying files ..."
+rsync -a --info=progress2 ${of_cache} ${of_root}
 
-cat /etc/profile | grep of2112 >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "alias of2112='source $APP_ROOT/OpenFOAM/of2112.sh'" >> /etc/profile
+echo -e "#! /bin/bash\nmodule purge" > ${of_root}of2112.sh
+echo -e "export MPI_ROOT=${MPI_ROOT}" >> ${of_root}of2112.sh
+echo -e "export MPI_ARCH_FLAGS=${MPI_ARCH_FLAGS}" >> ${of_root}of2112.sh
+echo -e "export MPI_ARCH_INC=${MPI_ARCH_INC}" >> ${of_root}of2112.sh
+echo -e "export MPI_ARCH_LIBS=${MPI_ARCH_LIBS}" >> ${of_root}of2112.sh
+echo -e "module load ${mpi_env}" >> ${of_root}of2112.sh
+if [ $systemgcc = 'false' ]; then
+  echo -e "module load ${gcc_env}" >> ${of_root}of2112.sh
+fi 
+echo -e "source ${of_root}OpenFOAM-9/etc/bashrc" >> ${of_root}of2112.sh
+echo -e "echo -e \"OpenFOAM-v2112 with ${mpi_env} and ${gcc_version} is ready for running.\"" >> ${of_root}of2112.sh
+if [ $current_user = 'root' ]; then
+  grep of2112 /etc/profile >> /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo -e "alias of2112='source ${of_root}of2112.sh'" >> /etc/profile
+  fi
+  echo -e "< of2112 >" >> $public_app_registry
+else
+  grep of2112 $HOME/.bashrc >> /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo -e "alias of2112='source ${of_root}of2112.sh'" >> $HOME/.bashrc
+  fi
+  echo -e "< of2112 > < ${current_user} >" >> $private_app_registry
 fi
-echo -e "[ -DONE- ] Congratulations! OpenFOAM-v2112 with $mpi_version and $gcc_v has been built."
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "[ -DONE- ] $time_current Congratulations! OpenFOAM-v2112 with $mpi_version and $gcc_v has been built." >> $logfile
+echo -e "[ -DONE- ] Congratulations! OpenFOAM-v2112 with ${mpi_env} and ${gcc_version} has been built."

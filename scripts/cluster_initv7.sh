@@ -434,7 +434,7 @@ if [ -f /root/hostfile ]; then
   sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
   systemctl start xrdp
   systemctl enable xrdp
-  yum -y install rpcbind flex GConf2 cmake ibus libXScrnSaver ibus-pinyin
+  yum -y install rpcbind flex GConf2 cmake cmake3 ibus libXScrnSaver ibus-pinyin gmp-devel mpfr-devel
   if [ $cloud_flag = 'CLOUD_B' ]; then
     wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O /opt/cosbrowser.zip
     cd /opt && unzip -o cosbrowser.zip && rm -rf cosbrowser.zip
@@ -475,7 +475,7 @@ if [ -f /root/hostfile ]; then
     ln -s /hpc_apps/${user_name}_apps /home/${user_name}/Desktop/
     ln -s /hpc_data/${user_name}_data /home/${user_name}/Desktop/
     cp /root/Desktop/*.desktop /home/${user_name}/Desktop
-    chown -R ${user_name}:${user_name} /home/${user_name}/Desktop
+    chown -R ${user_name}:${user_name} /home/${user_name}
   done < /root/.cluster_secrets/user_secrets.txt
 
   rm -rf /usr/share/backgrounds/*.png

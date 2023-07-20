@@ -6,13 +6,12 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *Paraview 5* to HPC-NOW cluster.
 
+current_user=`whoami`
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
-
-current_user=`whoami`
 public_app_registry="/usr/hpc-now/.public_apps.reg"
 private_app_registry="/usr/hpc-now/.private_apps.reg"
-tmp_log=/tmp/hpcmgr_install_pview_${current_user}.log
+tmp_log="/tmp/hpcmgr_install_paraview_${current_user}.log"
 
 if [ $current_user = 'root' ]; then
   app_root="/opt/"
@@ -21,20 +20,35 @@ else
   app_root="/hpc_apps/${current_user}_apps/"
   app_cache="/hpc_apps/${current_user}_apps/.cache/"
 fi
-mkdir -p $app_cache
 
-grep "< pview >" $public_app_registry >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
-  exit 1
-else
-  grep "< paraview > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
-  if [ $? -eq 0 ]; then
-    echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
-    exit 3
+if [ $1 = 'remove' ]; then
+  echo -e "[ -INFO- ] Removing binaries and libraries ..."
+  rm -rf ${app_root}ParaView
+  echo -e "[ -INFO- ] Removing environment module file ..."
+  if [ $current_user = 'root' ]; then
+    rm -rf /root/Desktop/ParaView.desktop
+    sed -i '/< paraview >/d' $public_app_registry
+    sed -i '/paraview/d' /etc/profile
+    while read user_row
+    do
+      user_name=`echo $user_row | awk '{print $2}'`
+      grep "< paraview > < $user_name >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        rm -rf /home/$user_name/Desktop/ParaView.desktop
+      fi
+    done < /root/.cluster_secrets/user_secrets.txt
+  else
+    rm -rf /home/${user_name}/Desktop/ParaView.desktop
+    sed -e "/< paraview > < ${user_name} >/d" $private_app_registry > /tmp/sed_${user_name}.tmp
+    cat /tmp/sed_${user_name}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${user_name}.tmp
+    sed -i '/paraview/d' $HOME/.bashrc
   fi
+  echo -e "[ -INFO- ] ParaView has been removed successfully."
+  exit 0
 fi
 
+mkdir -p $app_cache
 centos_v=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 if [ -z $centos_v ] || [ $centos_v -ne 7 ]; then
   echo -e "[ -INFO- ] Downloading and extracting files ..."
@@ -62,13 +76,13 @@ if [ $current_user = 'root' ]; then
   while read user_row
   do
     user_name=`echo $user_row | awk '{print $2}'`
-    grep paraview /home/$user_name/.now_apps.reg >> /dev/null 2>&1
+    grep "< paraview > < ${user_name} >" $private_app_registry >> /dev/null 2>&1
     if [ $? -ne 0 ]; then
       /bin/cp $HOME/Desktop/ParaView.desktop /home/$user_name/Desktop/
       chown -R $user_name:$user_name /home/$user_name/Desktop/ParaView.desktop
     fi
   done < /root/.cluster_secrets/user_secrets.txt
-  echo -e "< pview >" >> $public_app_registry
+  echo -e "< paraview >" >> $public_app_registry
   echo -e "[ -DONE- ] ParaView has been installed to all users."
 else
   grep paraview $HOME/.bashrc >> /dev/null 2>&1
@@ -76,7 +90,6 @@ else
     echo -e "alias paraview='${app_root}ParaView/bin/paraview'" >> $HOME/.bashrc
   fi
   echo -e "[Desktop Entry]\nEncoding=UTF-8\nVersion=1.0\nName=ParaView\nComment=ParaView\nExec=${app_root}ParaView/bin/paraview\nIcon=/opt/app.png\nTerminal=false\nStartupNotify=true\nType=Application\nCategories=Applications;" > $HOME/Desktop/ParaView.desktop
-  echo -e "< pview > < ${current_user} >" >> $private_app_registry
+  echo -e "< paraview > < ${current_user} >" >> $private_app_registry
   echo -e "[ -DONE- ] ParaView has been installed to the current user."
 fi
-

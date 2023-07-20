@@ -6,162 +6,155 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *netCDF-c-4.9.0, netcdf-fortran-4.5.3* to HPC-NOW cluster.
 
-if [ ! -d /hpc_apps ]; then
-  echo -e "[ FATAL: ] The root directory /hpc_apps is missing. Installation abort. Exit now."
-  exit
-fi
+current_user=`whoami`
+public_app_registry="/usr/hpc-now/.public_apps.reg"
+private_app_registry="/usr/hpc-now/.private_apps.reg"
+tmp_log="/tmp/hpcmgr_install_netcdf4_${current_user}.log"
 
-URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_PKGS=${URL_ROOT}packages/
-tmp_log=/tmp/hpcmgr_install.log
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-logfile=/var/log/hpcmgr_install.log && echo -e "\n# $time_current INSTALLING netCDF-c-4.9.0, netcdf-fortran-4.5.3" >> ${logfile}
-APP_ROOT=/hpc_apps
-NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
+url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
+url_pkgs=${url_root}packages/
+num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
+centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 
-echo -e "\n# $time_current SOFTWARE: netCDF-c-4.9.0, netcdf-fortran-4.5.3"
-
-if [[ -f /hpc_apps/netcdf4/bin/nc-config && -f /hpc_apps/netcdf4/bin/nf-config ]]; then
-  echo -e "[ -INFO- ] It seems netCDF binaries are already in place (/hpc_apps/netcdf4)."
-  echo -e "[ -INFO- ] If you REALLY want to rebuild, please remove the previous folder and retry. Exit now."
-  cat /etc/profile | grep "LD_LIBRARY_PATH=/hpc_apps/netcdf4/lib" >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "export LD_LIBRARY_PATH=/hpc_apps/netcdf4/lib:\$LD_LIBRARY_PATH" >> /etc/profile
-  fi
-  cat /etc/profile | grep "PATH=/hpc_apps/netcdf4/bin" >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "export PATH=/hpc_apps/netcdf4/bin:\$PATH" >> /etc/profile
-  fi
-  cat /etc/profile | grep "C_INCLUDE_PATH=/hpc_apps/netcdf4/include" >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "export C_INCLUDE_PATH=/hpc_apps/netcdf4/include:\$C_INCLUDE_PATH" >> /etc/profile
-  fi
-  exit 
-fi
-
-source /etc/profile
-
-module ava -t | grep gcc-12.1.0 >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  module load gcc-12.1.0
-  gcc_v=gcc-12.1.0
-  gcc_vnum=12
-  systemgcc='false'
-  echo -e "[ -INFO- ] The software will be built with GNU C Compiler: $gcc_v"
+if [ $current_user = 'root' ]; then
+  app_root="/hpc_apps/"
+  app_cache="/hpc_apps/.cache/"
+  app_extract_cache="/root/.app_extract_cache/"
+  envmod_root="/hpc_apps/envmod/"
 else
-  module ava -t | grep gcc-8.2.0 >> /dev/null 2>&1
-  if [ $? -eq 0 ]; then
-    module load gcc-8.2.0
-    gcc_v=gcc-8.2.0
-    gcc_vnum=8
-    systemgcc='false'
-    echo -e "[ -INFO- ] The software will be built with GNU C Compiler: $gcc_v"
+  app_root="/hpc_apps/${current_user}_apps/"
+  app_cache="/hpc_apps/${current_user}_apps/.cache/"
+  app_extract_cache="/home/${current_user}/.app_extract_cache/"
+  envmod_root="/hpc_apps/envmod/${current_user}_env/"
+fi
+mkdir -p ${app_cache}
+mkdir -p ${app_extract_cache}
+
+if [ $1 = 'remove' ]; then
+  echo -e "[ -INFO- ] Removing binaries and libraries ..."
+  rm -rf ${app_root}netcdf4
+  echo -e "[ -INFO- ] Removing environment module file ..."
+  rm -rf ${envmod_root}netcdf4
+  echo -e "[ -INFO- ] Updating the registry ..."
+  if [ $current_user = 'root' ]; then
+    sed -i '/< netcdf4 >/d' $public_app_registry
   else
-    gcc_v=`gcc --version | head -n1`
-    gcc_vnum=`echo $gcc_v | awk '{print $3}' | awk -F"." '{print $1}'`
-    systemgcc='true'
-    echo -e "[ -INFO- ] The software will be built with GNU C Compiler: $gcc_v"
-    if [ $gcc_vnum -lt 8 ]; then
-      echo -e "[ -WARN- ] Your gcc version is too old to compile the software. Will start installing gcc-12.1.0 which may take long time."
-      echo -e "[ -WARN- ] You can press keyboard 'Ctrl C' to stop current building process."
-      echo -ne "[ -WAIT- ] |--> "
-      for i in $( seq 1 10)
-      do
-	      sleep 1
-        echo -ne "$((11-i))--> "
-      done
-      echo -e "|\n[ -INFO- ] Building gcc-12.1.0 now ..."
-      hpcmgr install gcc12 >> ${tmp_log}
-      gcc_v=gcc-12.1.0
-      gcc_vnum=12
+    sed -e "/< netcdf4 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
+    cat /tmp/sed_${current_user}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${current_user}.tmp
+  fi
+  echo -e "[ -INFO- ] NetCDF has been removed successfully."
+  exit 0
+fi
+
+time_current=`date "+%Y-%m-%d %H:%M:%S"`
+echo -e "[ -INFO- ] $time_current SOFTWARE: netCDF-c-4.9.0, netcdf-fortran-4.5.3"
+
+gcc_vers=('gcc12' 'gcc9' 'gcc8' 'gcc4')
+gcc_code=('gcc-12.1.0' 'gcc-9.5.0' 'gcc-8.2.0' 'gcc-4.9.2')
+systemgcc='true'
+if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
+  for i in $(seq 0 3)
+  do
+	  grep "< ${gcc_vers[i]} >" $public_app_registry >> /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      module load ${gcc_code[i]}
+      gcc_env="${gcc_code[i]}"
       systemgcc='false'
-      module load gcc-12.2.0
+      break
+    fi
+    if [ $current_user != 'root' ]; then
+      grep "< ${gcc_vers[i]} > < $current_user >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        module load ${current_user}_apps/${gcc_code[i]}
+        gcc_env="${current_user}_env/${gcc_code[i]}"
+        systemgcc='false'
+        break
+      fi
+    fi
+  done
+else
+  grep "< ${gcc_vers[0]} >" $public_app_registry >> /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    module load ${gcc_code[0]}
+    gcc_env="${gcc_code[0]}"
+    systemgcc='false'
+  else
+    if [ $current_user != 'root' ]; then
+      grep "< ${gcc_vers[0]} > < $current_user >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        module load ${current_user}_env/${gcc_code[0]}
+        gcc_env="${current_user}_env/${gcc_code[0]}"
+        systemgcc='false'
+      fi
     fi
   fi
 fi
+gcc_version=`gcc --version | head -n1`
+gcc_vnum=`echo $gcc_version | awk '{print $3}' | awk -F"." '{print $1}'`
 
-module ava -t | grep ompi >> /dev/null 2>&1
+grep "< hdf5 >" $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
-  mpi_version=`module ava -t | grep ompi | tail -n1 | awk '{print $1}'`
-  module purge
-  module load $mpi_version
-  echo -e "[ -INFO- ] netCDF4 will be built with $mpi_version."
+  hdf5_root="/hpc_apps/hdf5-1.10.9/"
 else
-  echo -e "[ -INFO- ] No MPI version found, installing OpenMPI-4.1.2 now..."
-  hpcmgr install ompi4 >> ${tmp_log}.ompi
-  if [ $? -ne 0 ]; then
-    echo -e "[ FATAL: ] Failed to install OpenMPI-4.1.2. Installation abort. Please check the log file for details. Exit now."
-    exit
+  if [ $current_user != 'root' ]; then
+    grep "< hdf5 > < ${current_user} >" ${private_app_registry}
+    if [ $? -eq 0 ]; then
+      hdf5_root="${app_root}hdf5-1.10.9/"
+    else
+      hpcmgr install hdf5 >> $tmp_log
+      hdf5_root="${app_root}hdf5-1.10.9/"
+    fi
   else
-    echo -e "[ -INFO- ] OpenMPI-4.1.2 has been successfully built."
-    mpi_version=ompi-4.1.2
-    module purge
-    module load $mpi_version
+    hpcmgr install hdf5 >> $tmp_log
+    hdf5_root="${app_root}hdf5-1.10.9/"
   fi
 fi
 
-if [ ! -f /hpc_apps/hdf5-1.10.9/bin/h5pcc ]; then
-  echo -e "[ -INFO- ] HDF5 not found. Installing hdf5-1.10.9 now ..."
-  hpcmgr install hdf5 >> ${tmp_log}.hdf5
-  if [ $? -ne 0 ]; then
-    echo -e "[ FATAL: ] Failed to build hdf5-1.10.9. Please check the log file for more details. Exit now."
-    exit
-  fi
-fi
-
+mpi_root=`grep mpi_root ${hdf5_root} | awk '{print $2}'`
+zlib_path=`grep zlib ${hdf5_root} | awk '{print $2}'`
+cppflags="-I${hdf5_root}include -I${zlib_path}include -I${mpi_root}include"
+ldflags="-L${hdf5_root}lib -L${zlib_path}lib"
 #yum -y install m4 >> $tmp_log 2>&1
 #yum -y install libxml2-devel >> $tmp_log 2>&1
-
 echo -e "[ -INFO- ] netCDF-C and netCDF-Fortran will be built with GNU Compiler Collections."
 echo -e "[ START: ] Downloading and Extracting source code ..."
-if [ ! -d /opt/packs ]; then
-  mkdir -p /opt/packs
+if [ ! -f ${app_cache}netcdf-c-4.9.0.zip ]; then
+  wget ${url_pkgs}netcdf-c-4.9.0.zip -O ${app_cache}netcdf-c-4.9.0.zip -o $tmp_log
 fi
-if [ ! -f /opt/packs/netcdf-c-4.9.0.zip ]; then
-  wget ${URL_PKGS}netcdf-c-4.9.0.zip -q -O /opt/packs/netcdf-c-4.9.0.zip
+if [ ! -f ${app_cache}netcdf-fortran-4.5.3.tar.gz ]; then
+  wget ${url_pkgs}netcdf-fortran-4.5.3.tar.gz -O ${app_cache}netcdf-fortran-4.5.3.tar.gz -o $tmp_log
 fi
-if [ ! -f /opt/packs/netcdf-fortran-4.5.3.tar.gz ]; then
-  wget ${URL_PKGS}netcdf-fortran-4.5.3.tar.gz -q -O /opt/packs/netcdf-fortran-4.5.3.tar.gz
-fi
-rm -rf /opt/packs/netcdf-c-4.9.0 && rm -rf /opt/packs/netcdf-fortran-4.5.3
-unzip -q -o /opt/packs/netcdf-c-4.9.0.zip -d /opt/packs >> $tmp_log 2>&1
-tar zxf /opt/packs/netcdf-fortran-4.5.3.tar.gz -C /opt/packs/ >> $tmp_log 2>&1
+unzip -o ${app_cache}netcdf-c-4.9.0.zip -d ${app_extract_cache} >> $tmp_log
+tar zvxf ${app_cache}netcdf-fortran-4.5.3.tar.gz -C ${app_extract_cache} >> $tmp_log
 
-echo -e "[ STEP 1 ] Building netCDF-C-4.9.0 & netCDF-fortran-4.5.3 ... This step usually takes seconds."
+echo -e "[ STEP 1 ] Building netCDF-C-4.9.0 & netCDF-fortran-4.5.3 ... This step usually takes minutes."
 
-cd /opt/packs/netcdf-c-4.9.0 && CPPFLAGS='-I/hpc_apps/hdf5-1.10.9/include -I/hpc_apps/zlib-1.2.13/include -I/hpc_apps/'$mpi_version'/include' LDFLAGS='-L/hpc_apps/hdf5-1.10.9/lib -L/hpc_apps/zlib-1.2.13/lib' CC=gcc ./configure --prefix=/hpc_apps/netcdf4 >> $tmp_log 2>&1
-make -j$NUM_PROCESSORS >> $tmp_log 2>&1
+cd ${app_extract_cache}netcdf-c-4.9.0
+CPPFLAGS="${cppflags}" LDFLAGS="${ldflags}" CC=gcc ./configure --prefix=${app_root}netcdf4 >> $tmp_log
+make -j$num_processors >> $tmp_log
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build netCDF-C-4.9.0. Please check the log file for more details. Exit now."
-  exit
+  exit 3
 fi
-make install >> $tmp_log 2>&1
+make install >> $tmp_log
 echo -e "[ -INFO- ] netCDF-C-4.9.0 has been built. Installing netCDF-fortran-4.5.3 now ..."
-cat /etc/profile | grep "LD_LIBRARY_PATH=/hpc_apps/netcdf4/lib" >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "export LD_LIBRARY_PATH=/hpc_apps/netcdf4/lib:\$LD_LIBRARY_PATH" >> /etc/profile
-fi
-source /etc/profile
-cd /opt/packs/netcdf-fortran-4.5.3 && CPPFLAGS='-I/hpc_apps/netcdf4/include' LDFLAGS='-L/hpc_apps/netcdf4/lib' ./configure --prefix=/hpc_apps/netcdf4 >> $tmp_log 2>&1
-make -j$NUM_PROCESSORS >> $tmp_log 2>&1
+cd ${app_extract_cache}netcdf-fortran-4.5.3
+CPPFLAGS="-I${app_root}netcdf4/include" LDFLAGS="-L${app_root}netcdf4/lib" ./configure --prefix=${app_root}netcdf4 >> $tmp_log
+make -j$num_processors >> $tmp_log
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build netCDF-fortran-4.5.3. Please check the log file for more details. Exit now."
-  exit
+  exit 3
 fi
-make install >> $tmp_log 2>&1
+make install >> $tmp_log
 echo -e "[ -INFO- ] netCDF-C-4.9.0 and netCDF-fortran-4.5.3 has been built from the source code."
 echo -e "[ STEP 2 ] Setting up system environments now ..."
-cat /etc/profile | grep "LD_LIBRARY_PATH=/hpc_apps/netcdf4/lib" >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "export LD_LIBRARY_PATH=/hpc_apps/netcdf4/lib:\$LD_LIBRARY_PATH" >> /etc/profile
+echo -e "#%Module1.0\nprepend-path PATH ${app_root}netcdf4/bin" > ${envmod_root}netcdf4
+echo -e "prepend-path LD_LIBRARY_PATH ${app_root}netcdf4/lib" >> ${envmod_root}netcdf4
+echo -e "prepend-path C_INCLUDE_PATH ${app_root}netcdf4/include" >> ${envmod_root}netcdf4
+if [ $current_user = 'root' ]; then
+  echo -e "< netcdf4 >" >> $public_app_registry
+else
+  echo -e "< netcdf4 > < ${current_user} >" >> $private_app_registry
 fi
-cat /etc/profile | grep "PATH=/hpc_apps/netcdf4/bin" >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "export PATH=/hpc_apps/netcdf4/bin:\$PATH" >> /etc/profile
-fi
-cat /etc/profile | grep "C_INCLUDE_PATH=/hpc_apps/netcdf4/include" >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "export C_INCLUDE_PATH=/hpc_apps/netcdf4/include:\$C_INCLUDE_PATH" >> /etc/profile
-fi
-source /etc/profile
 echo -e "[ -DONE- ] netCDF-C-4.9.0 and netCDF-fortran-4.5.3 has been successfully installed to your cluster." 
