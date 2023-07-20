@@ -161,7 +161,6 @@ fi
 echo -e "[ -INFO- ] Removing the tarballs are not recommended. If you want to rebuild of2112, please remove the folder OpenFOAM-v2112 & ThirdParty-v2112."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 2 ] $time_current Removing previously-built binaries ..."
-echo -e "[ STEP 2 ] $time_current Removing previously-built binaries ..." >> $logfile
 #rm -rf ${of_cache}OpenFOAM-v2112/platforms/*
 #rm -rf ${of_cache}ThirdParty-v2112/platforms/* 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
@@ -215,7 +214,7 @@ export FOAM_EXTRA_LDFLAGS="-L${of_cache}ThirdParty-v2112/platforms/linux64Gcc/ff
 echo -e "[ -INFO- ] Building OpenFOAM in progress ... It takes really long time (for example, 2.5 hours with 8 vCPUs)"
 echo -e "[ -INFO- ] Please check the log files: Build_OF.log."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "[ STEP 3 ] $time_current Started compiling source codes ..." >> $logfile
+echo -e "[ STEP 3 ] $time_current Started compiling source codes ..."
 #module load $mpi_version
 PATH=${mpi_root}bin:$PATH LD_LIBRARY_PATH=${mpi_root}lib:$LD_LIBRARY_PATH
 ${of_cache}ThirdParty-v2112/Allclean -build > ${of_cache}Build_OF.log 2>&1
