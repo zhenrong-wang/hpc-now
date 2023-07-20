@@ -32,9 +32,9 @@ if [ $1 = 'remove' ]; then
   else
     rm -rf ${app_root}rar
     sed -i '/rar/d' $HOME/.bashrc
-    sed -e "/< rar > < ${user_name} >/d" $private_app_registry > /tmp/sed_${user_name}.tmp
-    cat /tmp/sed_${user_name}.tmp > $private_app_registry
-    rm -rf /tmp/sed_${user_name}.tmp
+    sed -e "/< rar > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
+    cat /tmp/sed_${current_user}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${current_user}.tmp
   fi
   echo -e "[ -INFO- ] App removed."
   exit 0

@@ -95,10 +95,10 @@ else
     fi
   fi
 fi
-gcc_version=`gcc --version | head -n1`
-gcc_vnum=`echo $gcc_version | awk '{print $3}' | awk -F"." '{print $1}'`
-echo -e "[ -INFO- ] Using GNU Compiler Collections - ${gcc_version}."
-echo -e "[ -INFO- ] Detecting MPICH Libraries ..."
+gcc_v=`gcc --version | head -n1`
+gcc_vnum=`echo $gcc_v | awk '{print $3}' | awk -F"." '{print $1}'`
+echo -e "[ -INFO- ] Using GNU Compiler Collections - ${gcc_v}."
+echo -e "[ -INFO- ] Detecting MPI Libraries ..."
 mpi_vers=('mpich4' 'mpich3' 'ompi4' 'ompi3')
 mpi_code=('mpich-4.0.2' 'mpich-3.2.1' 'ompi-4.1.2' 'ompi-3.1.6')
 for i in $(seq 0 3)
@@ -122,7 +122,7 @@ do
 done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo -e "[ -INFO- ] Building MPICH Libraries now ..."
+  echo -e "[ -INFO- ] Building MPI Libraries now ..."
   hpcmgr install mpich4 >> ${tmp_log}
   if [ $current_user = 'root' ]; then
     module load mpich-4.0.2
@@ -133,7 +133,7 @@ if [ $? -ne 0 ]; then
   fi
   mpi_root="${app_root}mpich-4.0.2/"
 fi
-echo -e "[ -INFO- ] Using MPICH Libraries - ${mpi_env}."
+echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Building OpenFOAM-7 now ... "
@@ -220,16 +220,16 @@ fi
 echo -e "[ -INFO- ] Copying files ..."
 rsync -a --info=progress2 ${of_cache} ${of_root}
 echo -e "#! /bin/bash\nmodule purge" > ${of_root}of7.sh
-echo -e "export MPI_ROOT=${MPI_ROOT}" >> ${of_root}of7.sh
-echo -e "export MPI_ARCH_FLAGS=${MPI_ARCH_FLAGS}" >> ${of_root}of7.sh
-echo -e "export MPI_ARCH_INC=${MPI_ARCH_INC}" >> ${of_root}of7.sh
-echo -e "export MPI_ARCH_LIBS=${MPI_ARCH_LIBS}" >> ${of_root}of7.sh
+echo -e "export MPI_ROOT=\"${MPI_ROOT}\"" >> ${of_root}of7.sh
+echo -e "export MPI_ARCH_FLAGS=\"${MPI_ARCH_FLAGS}\"" >> ${of_root}of7.sh
+echo -e "export MPI_ARCH_INC=\"${MPI_ARCH_INC}\"" >> ${of_root}of7.sh
+echo -e "export MPI_ARCH_LIBS=\"${MPI_ARCH_LIBS}\"" >> ${of_root}of7.sh
 echo -e "module load ${mpi_env}" >> ${of_root}of7.sh
 if [ $systemgcc = 'false' ]; then
   echo -e "module load ${gcc_env}" >> ${of_root}of7.sh
 fi 
 echo -e "source ${of_root}OpenFOAM-7/etc/bashrc" >> ${of_root}of7.sh
-echo -e "echo -e \"OpenFOAM7 with ${mpi_env} and ${gcc_version} is ready for running.\"" >> ${of_root}of7.sh
+echo -e "echo -e \"OpenFOAM7 with ${mpi_env} and ${gcc_v} is ready for running.\"" >> ${of_root}of7.sh
 
 if [ $current_user = 'root' ]; then
   grep of7 /etc/profile >> /dev/null 2>&1
@@ -244,4 +244,4 @@ else
   fi
   echo -e "< of7 > < ${current_user} >" >> $private_app_registry
 fi
-echo -e "[ -DONE- ] Congratulations! OpenFOAM7 with ${mpi_env} and ${gcc_version} has been built."
+echo -e "[ -DONE- ] Congratulations! OpenFOAM7 with ${mpi_env} and ${gcc_v} has been built."

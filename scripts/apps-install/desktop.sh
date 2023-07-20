@@ -103,7 +103,7 @@ else
     rm -rf /usr/share/backgrounds/*.png
     rm -rf /usr/share/backgrounds/*.jpg
     wget -q ${url_pkgs}wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
-    cd /usr/share/backgrounds && unzip -q wallpapers.zip
+    cd /usr/share/backgrounds && unzip -o -q wallpapers.zip
   fi
 # Make sure the desktop is user-friendly
   sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm/custom.conf

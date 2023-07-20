@@ -38,10 +38,10 @@ if [ $1 = 'remove' ]; then
       fi
     done < /root/.cluster_secrets/user_secrets.txt
   else
-    rm -rf /home/${user_name}/Desktop/ParaView.desktop
-    sed -e "/< paraview > < ${user_name} >/d" $private_app_registry > /tmp/sed_${user_name}.tmp
-    cat /tmp/sed_${user_name}.tmp > $private_app_registry
-    rm -rf /tmp/sed_${user_name}.tmp
+    rm -rf /home/${current_user}/Desktop/ParaView.desktop
+    sed -e "/< paraview > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
+    cat /tmp/sed_${current_user}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${current_user}.tmp
     sed -i '/paraview/d' $HOME/.bashrc
   fi
   echo -e "[ -INFO- ] ParaView has been removed successfully."

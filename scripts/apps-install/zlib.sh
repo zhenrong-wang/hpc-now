@@ -32,9 +32,9 @@ if [ $1 = 'remove' ]; then
   if [ $current_user = 'root' ]; then
     sed -i '/< zlib >/d' ${public_app_registry}
   else
-    sed -e "/< zlib > < ${user_name} >/d" $private_app_registry > /tmp/sed_${user_name}.tmp
-    cat /tmp/sed_${user_name}.tmp > $private_app_registry
-    rm -rf /tmp/sed_${user_name}.tmp
+    sed -e "/< zlib > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
+    cat /tmp/sed_${current_user}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${current_user}.tmp
   fi
   echo -e "[ -INFO- ] App removed successfully."
   exit 0

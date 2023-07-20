@@ -94,10 +94,10 @@ else
     fi
   fi
 fi
-gcc_version=`gcc --version | head -n1`
-gcc_vnum=`echo $gcc_version | awk '{print $3}' | awk -F"." '{print $1}'`
-echo -e "[ -INFO- ] Using GNU Compiler Collections - ${gcc_version}."
-echo -e "[ -INFO- ] Detecting MPICH Libraries ..."
+gcc_v=`gcc --version | head -n1`
+gcc_vnum=`echo $gcc_v | awk '{print $3}' | awk -F"." '{print $1}'`
+echo -e "[ -INFO- ] Using GNU Compiler Collections - ${gcc_v}."
+echo -e "[ -INFO- ] Detecting MPI Libraries ..."
 mpi_vers=('mpich4' 'mpich3' 'ompi4' 'ompi3')
 mpi_code=('mpich-4.0.2' 'mpich-3.2.1' 'ompi-4.1.2' 'ompi-3.1.6')
 for i in $(seq 0 3)
@@ -121,7 +121,7 @@ do
 done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo -e "[ -INFO- ] Building MPICH Libraries now ..."
+  echo -e "[ -INFO- ] Building MPI Libraries now ..."
   hpcmgr install mpich4 >> ${tmp_log}
   if [ $current_user = 'root' ]; then
     module load mpich-4.0.2
@@ -132,15 +132,13 @@ if [ $? -ne 0 ]; then
   fi
   mpi_root="${app_root}mpich-4.0.2/"
 fi
-echo -e "[ -INFO- ] Using MPICH Libraries - ${mpi_env}."
+echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Building OpenFOAM-v2112 now ... "
 mkdir -p ${of_root}
 rm -rf ${of_root}*
-
 echo -e "[ STEP 1 ] $time_current Downloading & extracting source packages ..."
-
 if [ ! -f ${app_cache}OpenFOAM-v2112.tgz ]; then
   wget ${url_pkgs}OpenFOAM-v2112.tgz -O ${app_cache}OpenFOAM-v2112.tgz -o ${tmp_log}
 fi  
@@ -153,16 +151,12 @@ tar zvxf ThirdParty-v2112.tgz -C ${of_cache} >> $tmp_log
 if [ ! -f ${of_cache}ThirdParty-v2112/sources/ADIOS2-2.6.0.zip ]; then
   wget ${url_pkgs}ADIOS2-2.6.0.zip -O ${of_cache}ThirdParty-v2112/sources/ADIOS2-2.6.0.zip >> $tmp_log 2>&1
 fi
-#cd ${of_cache}ThirdParty-v2112/sources && rm -rf ADIOS2-2.6.0 && unzip ADIOS2-2.6.0.zip >> $tmp_log 2>&1
 if [ ! -f ${of_cache}ThirdParty-v2112/sources/metis-5.1.0.tar.gz ]; then
   wget ${url_pkgs}metis-5.1.0.tar.gz -O ${of_cache}ThirdParty-v2112/sources/metis-5.1.0.tar.gz -q
 fi
-#cd ${of_cache}ThirdParty-v2112/sources && rm -rf metis-5.1.0 && tar zvxf metis-5.1.0.tar.gz >> $tmp_log 2>&1
 echo -e "[ -INFO- ] Removing the tarballs are not recommended. If you want to rebuild of2112, please remove the folder OpenFOAM-v2112 & ThirdParty-v2112."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 2 ] $time_current Removing previously-built binaries ..."
-#rm -rf ${of_cache}OpenFOAM-v2112/platforms/*
-#rm -rf ${of_cache}ThirdParty-v2112/platforms/* 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 3 ] $time_current Compiling started ..."
 if [ ! -f  ${of_cache}OpenFOAM-v2112/etc/config.sh/settings-orig ]; then
@@ -225,18 +219,17 @@ if [ $? -ne 0 ]; then
 fi
 echo -e "[ -INFO- ] Copying files ..."
 rsync -a --info=progress2 ${of_cache} ${of_root}
-
 echo -e "#! /bin/bash\nmodule purge" > ${of_root}of2112.sh
-echo -e "export MPI_ROOT=${MPI_ROOT}" >> ${of_root}of2112.sh
-echo -e "export MPI_ARCH_FLAGS=${MPI_ARCH_FLAGS}" >> ${of_root}of2112.sh
-echo -e "export MPI_ARCH_INC=${MPI_ARCH_INC}" >> ${of_root}of2112.sh
-echo -e "export MPI_ARCH_LIBS=${MPI_ARCH_LIBS}" >> ${of_root}of2112.sh
+echo -e "export MPI_ROOT=\"${MPI_ROOT}\"" >> ${of_root}of2112.sh
+echo -e "export MPI_ARCH_FLAGS=\"${MPI_ARCH_FLAGS}\"" >> ${of_root}of2112.sh
+echo -e "export MPI_ARCH_INC=\"${MPI_ARCH_INC}\"" >> ${of_root}of2112.sh
+echo -e "export MPI_ARCH_LIBS=\"${MPI_ARCH_LIBS}\"" >> ${of_root}of2112.sh
 echo -e "module load ${mpi_env}" >> ${of_root}of2112.sh
 if [ $systemgcc = 'false' ]; then
   echo -e "module load ${gcc_env}" >> ${of_root}of2112.sh
 fi 
-echo -e "source ${of_root}OpenFOAM-9/etc/bashrc" >> ${of_root}of2112.sh
-echo -e "echo -e \"OpenFOAM-v2112 with ${mpi_env} and ${gcc_version} is ready for running.\"" >> ${of_root}of2112.sh
+echo -e "source ${of_root}OpenFOAM-v2112/etc/bashrc" >> ${of_root}of2112.sh
+echo -e "echo -e \"OpenFOAM-v2112 with ${mpi_env} and ${gcc_v} is ready for running.\"" >> ${of_root}of2112.sh
 if [ $current_user = 'root' ]; then
   grep of2112 /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
@@ -250,4 +243,4 @@ else
   fi
   echo -e "< of2112 > < ${current_user} >" >> $private_app_registry
 fi
-echo -e "[ -DONE- ] Congratulations! OpenFOAM-v2112 with ${mpi_env} and ${gcc_version} has been built."
+echo -e "[ -DONE- ] Congratulations! OpenFOAM-v2112 with ${mpi_env} and ${gcc_v} has been built."

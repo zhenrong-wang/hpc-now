@@ -6,54 +6,114 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *LAPACK-3.11.0* to HPC-NOW cluster.
 
-if [ ! -d /hpc_apps ]; then
-  echo -e "[ FATAL: ] The root directory /hpc_apps is missing. Installation abort. Exit now."
-  exit
+current_user=`whoami`
+public_app_registry="/usr/hpc-now/.public_apps.reg"
+private_app_registry="/usr/hpc-now/.private_apps.reg"
+tmp_log="/tmp/hpcmgr_install_lapack311_${current_user}.log"
+
+url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
+url_pkgs=${url_root}packages/
+num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
+centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
+
+if [ $current_user = 'root' ]; then
+  app_root="/hpc_apps/"
+  app_cache="/hpc_apps/.cache/"
+  app_extract_cache="/root/.app_extract_cache/"
+  envmod_root="/hpc_apps/envmod/"
+else
+  app_root="/hpc_apps/${current_user}_apps/"
+  app_cache="/hpc_apps/${current_user}_apps/.cache/"
+  app_extract_cache="/home/${current_user}/.app_extract_cache/"
+  envmod_root="/hpc_apps/envmod/${current_user}_env/"
+fi
+mkdir -p ${app_cache}
+mkdir -p ${app_extract_cache}
+
+if [ $1 = 'remove' ]; then
+  echo -e "[ -INFO- ] Removing binaries and libraries ..."
+  rm -rf ${app_root}lapack-3.11
+  echo -e "[ -INFO- ] Removing environment module file ..."
+  rm -rf ${envmod_root}lapack-3.11
+  echo -e "[ -INFO- ] Updating the registry ..."
+  if [ $current_user = 'root' ]; then
+    sed -i '/< lapack311 >/d' $public_app_registry
+  else
+    sed -e "/< lapack311 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
+    cat /tmp/sed_${current_user}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${current_user}.tmp
+  fi
+  echo -e "[ -INFO- ] LAPACK-3.11.0 has been removed successfully."
+  exit 0
 fi
 
-URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_PKGS=${URL_ROOT}packages/
-tmp_log=/tmp/hpcmgr_install.log
+gcc_vers=('gcc12' 'gcc9' 'gcc8' 'gcc4')
+gcc_code=('gcc-12.1.0' 'gcc-9.5.0' 'gcc-8.2.0' 'gcc-4.9.2')
+systemgcc='true'
+if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
+  for i in $(seq 0 3)
+  do
+	  grep "< ${gcc_vers[i]} >" $public_app_registry >> /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      module load ${gcc_code[i]}
+      gcc_env="${gcc_code[i]}"
+      systemgcc='false'
+      break
+    fi
+    if [ $current_user != 'root' ]; then
+      grep "< ${gcc_vers[i]} > < $current_user >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        module load ${current_user}_apps/${gcc_code[i]}
+        gcc_env="${current_user}_env/${gcc_code[i]}"
+        systemgcc='false'
+        break
+      fi
+    fi
+  done
+else
+  grep "< ${gcc_vers[0]} >" $public_app_registry >> /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    module load ${gcc_code[0]}
+    gcc_env="${gcc_code[0]}"
+    systemgcc='false'
+  else
+    if [ $current_user != 'root' ]; then
+      grep "< ${gcc_vers[0]} > < $current_user >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        module load ${current_user}_env/${gcc_code[0]}
+        gcc_env="${current_user}_env/${gcc_code[0]}"
+        systemgcc='false'
+      fi
+    fi
+  fi
+fi
+gcc_v=`gcc --version | head -n1`
+gcc_vnum=`echo $gcc_v | awk '{print $3}' | awk -F"." '{print $1}'`
+
+mkdir -p ${app_root}lapack-3.11/
+rm -rf ${app_root}lapack-3.11/*
+
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-logfile=/var/log/hpcmgr_install.log && echo -e "\n# $time_current INSTALLING LAPACK-3.11.0" >> ${logfile}
-APP_ROOT=/hpc_apps
-NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
-echo -e "\n# $time_current SOFTWARE: LAPACK-3.11.0"
-
-if [[ -f /hpc_apps/lapack-3.11/libcblas.a && -f /hpc_apps/lapack-3.11/liblapack.a && -f /hpc_apps/lapack-3.11/liblapacke.a && -f /hpc_apps/lapack-3.11/librefblas.a && -f /hpc_apps/lapack-3.11/libtmglib.a ]]; then
-  echo -e "[ -INFO- ] It seems LAPACK-3.11.0 libraries are already in place (/hpc_apps/lapack-3.11)."
-  echo -e "[ -INFO- ] If you REALLY want to rebuild, please remove the previous libraries and retry. Exit now."
-  exit 
-fi
-rm -rf /hpc_apps/lapack-3.11/libcblas.a
-rm -rf /hpc_apps/lapack-3.11/liblapack.a
-rm -rf /hpc_apps/lapack-3.11/liblapacke.a
-rm -rf /hpc_apps/lapack-3.11/librefblas.a
-rm -rf /hpc_apps/lapack-3.11/libtmglib.a
-echo -e "[ -INFO- ] LAPACK-3.11.0 will be built with GNU Compiler Collections."
+echo -e "[ START: ] $time_current Started building LAPACK-3.11.0."
 echo -e "[ START: ] Downloading and Extracting source code ..."
-if [ ! -d /opt/packs ]; then
-  mkdir -p /opt/packs
+if [ ! -f ${app_cache}lapack-3.11.tar.gz ]; then
+  wget ${url_pkgs}lapack-3.11.tar.gz -O ${app_cache}lapack-3.11.tar.gz -o $tmp_log
 fi
-if [ ! -f /opt/packs/lapack-3.11.tar.gz ]; then
-  wget ${URL_PKGS}lapack-3.11.tar.gz -q -O /opt/packs/lapack-3.11.tar.gz
-fi
-tar zvxf /opt/packs/lapack-3.11.tar.gz -C /hpc_apps/ >> $tmp_log 2>&1
+tar zvxf ${app_cache}lapack-3.11.tar.gz -C ${app_root} >> $tmp_log
 echo -e "[ STEP 1 ] Building LAPACK, BLAS, CBLAS, LAPACKE ... This step usually takes minutes."
-cd /hpc_apps/lapack-3.11 && /bin/cp make.inc.example make.inc
-make -j$NUM_PROCESSORS >> $tmp_log 2>&1
-cd /hpc_apps/lapack-3.11/LAPACKE && make -j$NUM_PROCESSORS >> $tmp_log 2>&1
-cd /hpc_apps/lapack-3.11/BLAS && make -j$NUM_PROCESSORS >> $tmp_log 2>&1
-cd /hpc_apps/lapack-3.11/CBLAS && make -j$NUM_PROCESSORS >> $tmp_log 2>&1
-echo -e "[ -INFO- ] LAPACK-3.11 has been built from the source code."
-echo -e "[ STEP 2 ] Setting up system environments now ..."
-cat /etc/profile | grep "LIBRARY_PATH=/hpc_apps/lapack-3.11" >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "export LIBRARY_PATH=/hpc_apps/lapack-3.11:\$LIBRARY_PATH" >> /etc/profile
+cd ${app_root}lapack-3.11/
+bin/cp make.inc.example make.inc
+make -j$num_processors >> $tmp_log
+cd ${app_root}lapack-3.11/LAPACKE && make -j$num_processors >> $tmp_log
+cd ${app_root}lapack-3.11/BLAS && make -j$num_processors >> $tmp_log
+cd ${app_root}lapack-3.11/CBLAS && make -j$num_processors >> $tmp_log
+echo -e "#%Module1.0\nprepend-path LIBRARY_PATH ${app_root}lapack-3.11" > ${envmod_root}lapack-3.11
+echo -e "prepend-path C_INCLUDE_PATH ${app_root}lapack-3.11/LAPACKE/include" >> ${envmod_root}lapack-3.11
+echo -e "prepend-path C_INCLUDE_PATH ${app_root}lapack-3.11/CBLAS/include" >> ${envmod_root}lapack-3.11
+if [ $current_user = 'root' ]; then
+  echo -e "< lapack311 >" >> $public_app_registry
+else
+  echo -e "< lapack311 > < ${current_user} >" >> $private_app_registry
 fi
-cat /etc/profile | grep "C_INCLUDE_PATH=/hpc_apps/lapack-3.11/LAPACKE/include" >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "export C_INCLUDE_PATH=/hpc_apps/lapack-3.11/LAPACKE/include:/hpc_apps/lapack-3.11/CBLAS/include:\$C_INCLUDE_PATH" >> /etc/profile
-fi
-source /etc/profile
-echo -e "[ -DONE- ] LAPACK-3.11 has been successfully installed to your cluster." 
+time_current=`date "+%Y-%m-%d %H:%M:%S"`
+echo -e "[ -DONE- ] $time_current LAPACK-3.11.0 has been built."

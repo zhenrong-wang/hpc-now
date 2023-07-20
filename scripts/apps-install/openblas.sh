@@ -39,9 +39,9 @@ if [ $1 = 'remove' ]; then
   if [ $current_user = 'root' ]; then
     sed -i '/< openblas >/d' $public_app_registry
   else
-    sed -e "/< openblas > < ${user_name} >/d" $private_app_registry > /tmp/sed_${user_name}.tmp
-    cat /tmp/sed_${user_name}.tmp > $private_app_registry
-    rm -rf /tmp/sed_${user_name}.tmp
+    sed -e "/< openblas > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
+    cat /tmp/sed_${current_user}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${current_user}.tmp
   fi
   echo -e "[ -INFO- ] OpenBLAS-0.3.21 has been removed successfully."
   exit 0
@@ -87,8 +87,8 @@ else
     fi
   fi
 fi
-gcc_version=`gcc --version | head -n1`
-gcc_vnum=`echo $gcc_version | awk '{print $3}' | awk -F"." '{print $1}'`
+gcc_v=`gcc --version | head -n1`
+gcc_vnum=`echo $gcc_v | awk '{print $3}' | awk -F"." '{print $1}'`
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Started building OpenBLAS-0.3.21."

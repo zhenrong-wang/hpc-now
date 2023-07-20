@@ -6,85 +6,176 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *ScaLAPACK-Latest* to HPC-NOW cluster.
 
-if [ ! -d /hpc_apps ]; then
-  echo -e "[ FATAL: ] The root directory /hpc_apps is missing. Installation abort. Exit now."
-  exit
-fi
+current_user=`whoami`
+public_app_registry="/usr/hpc-now/.public_apps.reg"
+private_app_registry="/usr/hpc-now/.private_apps.reg"
+tmp_log="/tmp/hpcmgr_install_slpack2_${current_user}.log"
 
-tmp_log=/tmp/hpcmgr_install.log
+url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
+url_pkgs=${url_root}packages/
+num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
+centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 
-if [[ ! -f /hpc_apps/lapack-3.11/libcblas.a || ! -f /hpc_apps/lapack-3.11/liblapack.a ]]; then
-  echo -e "[ FATAL: ] You need to build LAPACK in advance. Please exit and run 'hpcmgr install lapk311' command and retry. Exit now."
-  exit
-fi
-module ava -t | grep ompi >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  mpi_version=`module ava -t | grep ompi | tail -n1 | awk '{print $1}'`
-  module purge
-  module load $mpi_version
-  echo -e "[ -INFO- ] ScaLAPACK will be built with $mpi_version."
+if [ $current_user = 'root' ]; then
+  app_root="/hpc_apps/"
+  app_cache="/hpc_apps/.cache/"
+  app_extract_cache="/root/.app_extract_cache/"
+  envmod_root="/hpc_apps/envmod/"
 else
-  module ava -t | grep mpich >> /dev/null 2>&1
-  if [ $? -eq 0 ]; then
-    mpi_version=`module ava -t | grep mpich | tail -n1 | awk '{print $1}'`
-    module purge
-    module load $mpi_version
-    echo -e "[ -INFO- ] ScaLAPACK will be built with $mpi_version. However, we recommend OpenMPI for compiling ScaLAPACK."
+  app_root="/hpc_apps/${current_user}_apps/"
+  app_cache="/hpc_apps/${current_user}_apps/.cache/"
+  app_extract_cache="/home/${current_user}/.app_extract_cache/"
+  envmod_root="/hpc_apps/envmod/${current_user}_env/"
+fi
+mkdir -p ${app_cache}
+mkdir -p ${app_extract_cache}
+
+if [ $1 = 'remove' ]; then
+  echo -e "[ -INFO- ] Removing binaries and libraries ..."
+  rm -rf ${app_root}scalapack
+  echo -e "[ -INFO- ] Removing environment module file ..."
+  rm -rf ${envmod_root}scalapack
+  echo -e "[ -INFO- ] Updating the registry ..."
+  if [ $current_user = 'root' ]; then
+    sed -i '/< slpack2 >/d' $public_app_registry
   else
-    echo -e "[ FATAL: ] No MPI version found. Please install mpi first. You can run 'hpcmgr install mpich3/mpich4/ompi3/ompi4' and retry. Exit now."
-    exit
+    sed -e "/< slpack2 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
+    cat /tmp/sed_${current_user}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${current_user}.tmp
   fi
+  echo -e "[ -INFO- ] ScaLAPACK-Latest has been removed successfully."
+  exit 0
 fi
 
-URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-URL_PKGS=${URL_ROOT}packages/
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-logfile=/var/log/hpcmgr_install.log && echo -e "\n# $time_current INSTALLING ScaLAPACK-Latest" >> ${logfile}
-APP_ROOT=/hpc_apps
-NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
-gcc_version=`gcc --version | head -n1`
-gcc_vnum=`echo $gcc_version | awk '{print $3}' | awk -F"." '{print $1}'`
-
-echo -e "\n# $time_current SOFTWARE: ScaLAPACK-Latest"
-
-if [ -f /hpc_apps/scalapack/libscalapack.a ]; then
-  echo -e "[ -INFO- ] It seems ScaLAPACK-Latest libraries are already in place (/hpc_apps/scalapack)."
-  echo -e "[ -INFO- ] If you REALLY want to rebuild, please remove the previous libraries and retry. Exit now."
-  cat /etc/profile | grep "LIBRARY_PATH=/hpc_apps/scalapack" >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "export LIBRARY_PATH=/hpc_apps/scalapack:\$LIBRARY_PATH" >> /etc/profile
-  fi
-  exit 
-fi
-echo -e "[ -INFO- ] ScaLAPACK-Latest will be built with GNU Compiler Collections."
-echo -e "[ START: ] Downloading and Extracting source code ..."
-if [ ! -d /opt/packs ]; then
-  mkdir -p /opt/packs
-fi
-if [ ! -f /opt/packs/scalapack-master.zip ]; then
-  wget ${URL_PKGS}scalapack-master.zip -q -O /opt/packs/scalapack-master.zip
-fi
-unzip /opt/packs/scalapack-master.zip -d /hpc_apps/ >> $tmp_log 2>&1
-mv /hpc_apps/scalapack-master /hpc_apps/scalapack
-echo -e "[ STEP 1 ] Building ScaLAPACK ... This step usually takes seconds."
-cd /hpc_apps/scalapack && /bin/cp SLmake.inc.example SLmake.inc
-if [ $gcc_vnum -gt 10 ]; then
-  sed -i 's@FCFLAGS       = -O3@FCFLAGS       = -O3 -fallow-argument-mismatch -fPIC@g' /hpc_apps/scalapack/SLmake.inc
+gcc_vers=('gcc12' 'gcc9' 'gcc8' 'gcc4')
+gcc_code=('gcc-12.1.0' 'gcc-9.5.0' 'gcc-8.2.0' 'gcc-4.9.2')
+systemgcc='true'
+if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
+  for i in $(seq 0 3)
+  do
+	  grep "< ${gcc_vers[i]} >" $public_app_registry >> /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      module load ${gcc_code[i]}
+      gcc_env="${gcc_code[i]}"
+      systemgcc='false'
+      break
+    fi
+    if [ $current_user != 'root' ]; then
+      grep "< ${gcc_vers[i]} > < $current_user >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        module load ${current_user}_apps/${gcc_code[i]}
+        gcc_env="${current_user}_env/${gcc_code[i]}"
+        systemgcc='false'
+        break
+      fi
+    fi
+  done
 else
-  sed -i 's@FCFLAGS       = -O3@FCFLAGS       = -O3 -fPIC@g' /hpc_apps/scalapack/SLmake.inc
+  grep "< ${gcc_vers[0]} >" $public_app_registry >> /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    module load ${gcc_code[0]}
+    gcc_env="${gcc_code[0]}"
+    systemgcc='false'
+  else
+    if [ $current_user != 'root' ]; then
+      grep "< ${gcc_vers[0]} > < $current_user >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        module load ${current_user}_env/${gcc_code[0]}
+        gcc_env="${current_user}_env/${gcc_code[0]}"
+        systemgcc='false'
+      fi
+    fi
+  fi
 fi
-sed -i 's@BLASLIB       = -lblas@BLASLIB       = -L/hpc_apps/lapack-3.11 -lrefblas -lcblas@g' /hpc_apps/scalapack/SLmake.inc
-sed -i 's@LAPACKLIB     = -llapack@LAPACKLIB     = -L/hpc_apps/lapack-3.11 -llapack.a -llapacke -ltmglib@g' /hpc_apps/scalapack/SLmake.inc
-cd /hpc_apps/scalapack/ && make lib >> $tmp_log 2>&1
+gcc_v=`gcc --version | head -n1`
+gcc_vnum=`echo $gcc_v | awk '{print $3}' | awk -F"." '{print $1}'`
+
+grep "< lapack311 >" $public_app_registry >> /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  module load lapack-3.11
+  lapack_lib="/hpc_apps/lapack-3.11"
+else
+  if [ $current_user = 'root' ]; then
+    hpcmgr install lapack311 >> $tmp_log
+    module load lapack-3.11
+    lapack_lib="/hpc_apps/lapack-3.11"
+  else
+    grep "< lapack311 > < $current_user >" $private_app_registry >> /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      hpcmgr install lapack-3.11 >> $tmp_log
+    fi
+    module load ${current_user}_env/lapack-3.11
+    lapack_lib="${app_root}lapack-3.11"
+  fi
+fi
+
+echo -e "[ -INFO- ] Detecting MPI Libraries ..."
+mpi_vers=('ompi4' 'ompi3' 'mpich4' 'mpich3')
+mpi_code=('ompi-4.1.2' 'ompi-3.1.6' 'mpich-4.0.2' 'mpich-3.2.1')
+for i in $(seq 0 3)
+do
+	grep "< ${mpi_vers[i]} >" $public_app_registry >> /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    module load ${mpi_code[i]}
+    mpi_root="/hpc_apps/${mpi_code[i]}/"
+    mpi_env="${mpi_code[i]}"
+    break
+  fi
+  if [ $current_user != 'root' ]; then
+    grep "< ${mpi_vers[i]} > < $current_user >" $private_app_registry >> /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      module load ${current_user}_env/${mpi_code[i]}
+      mpi_root="${app_root}${mpi_code[i]}/"
+      mpi_env="${current_user}_env/${mpi_code[i]}"
+      break
+    fi
+  fi
+done
+mpirun --version >> /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo -e "[ -INFO- ] Building MPI Libraries now ..."
+  hpcmgr install ompi4 >> ${tmp_log}
+  if [ $current_user = 'root' ]; then
+    module load ompi-4.1.2
+    mpi_env="ompi-4.1.2"
+  else
+    module load ${current_user}_env/ompi-4.1.2
+    mpi_env="${current_user}_env/ompi-4.1.2"
+  fi
+  mpi_root="${app_root}ompi-4.1.2/"
+fi
+echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
+
+time_current=`date "+%Y-%m-%d %H:%M:%S"`
+echo -e "[ START: ] $time_current Started building ScaLAPACK-Latest."
+echo -e "[ START: ] Downloading and Extracting source code ..."
+
+if [ ! -f ${app_cache}scalapack-master.zip ]; then
+  wget ${url_pkgs}scalapack-master.zip -O ${app_cache}scalapack-master.zip -o ${tmp_log}
+fi
+unzip -o ${app_cache}scalapack-master.zip -d ${app_root} >> $tmp_log
+rm -rf ${app_root}scalapack
+mv ${app_root}scalapack-master ${app_root}scalapack
+echo -e "[ STEP 1 ] Building ScaLAPACK ... This step usually takes seconds."
+cd ${app_root}scalapack
+/bin/cp SLmake.inc.example SLmake.inc
+if [ $gcc_vnum -gt 10 ]; then
+  sed -i 's@FCFLAGS       = -O3@FCFLAGS       = -O3 -fallow-argument-mismatch -fPIC@g' ${app_root}scalapack/SLmake.inc
+else
+  sed -i 's@FCFLAGS       = -O3@FCFLAGS       = -O3 -fPIC@g' ${app_root}scalapack/SLmake.inc
+fi
+sed -i "s@BLASLIB       = -lblas@BLASLIB       = -L${lapack_lib} -lrefblas -lcblas@g" ${app_root}scalapack/SLmake.inc
+sed -i "s@LAPACKLIB     = -llapack@LAPACKLIB     = -L${lapack_lib} -llapack.a -llapacke -ltmglib@g" ${app_root}scalapack/SLmake.inc
+cd ${app_root}scalapack
+make lib >> $tmp_log
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build ScaLAPACK. Please check the log file for more details. Exit now."
   exit
 fi
-echo -e "[ -INFO- ] ScaLAPACK-Latest has been built from the source code."
-echo -e "[ STEP 2 ] Setting up system environments now ..."
-cat /etc/profile | grep "LIBRARY_PATH=/hpc_apps/scalapack" >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "export LIBRARY_PATH=/hpc_apps/scalapack:\$LIBRARY_PATH" >> /etc/profile
+echo -e "#%Module1.0\nprepend-path LIBRARY_PATH ${app_root}scalapack\n" > ${envmod_root}scalapack
+if [ $current_user = 'root' ]; then
+  echo -e "< slpack2 >" >> $public_app_registry
+else
+  echo -e "< slpack2 > < ${current_user} >" >> $private_app_registry
 fi
-source /etc/profile
-echo -e "[ -DONE- ] ScaLAPACK-Latest has been successfully installed to your cluster." 
+echo -e "[ -INFO- ] ScaLAPACK-Latest has been built from the source code."
