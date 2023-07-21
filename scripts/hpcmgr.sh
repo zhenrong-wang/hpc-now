@@ -36,10 +36,13 @@ function add_a_user() {
   cat /home/$1/.ssh/id_rsa.pub >> /home/$1/.ssh/authorized_keys
   cat /etc/now-pubkey.txt >> /home/$1/.ssh/authorized_keys
   cp -r /root/Desktop/*.desktop /home/$1/Desktop/
-  mkdir -p /hpc_data/${1}_data && chmod -R 750 /hpc_data/${1}_data
-  mkdir -p /hpc_apps/${1}_apps && chmod -R 750 /hpc_apps/${1}_apps
-  mkdir -p /hpc_apps/envmod/${1}_env && chmod -R 750 /hpc_apps/envmod/${1}_env
+  mkdir -p /hpc_data/${1}_data
+  chmod -R 750 /hpc_data/${1}_data
+  mkdir -p /hpc_apps/${1}_apps
   touch /hpc_apps/${1}_apps/.private_apps.reg
+  chmod -R 750 /hpc_apps/${1}_apps
+  mkdir -p /hpc_apps/envmod/${1}_env
+  chmod -R 750 /hpc_apps/envmod/${1}_env
   chown -R $1:$1 /hpc_data/${1}_data
   chown -R $1:$1 /hpc_apps/${1}_apps
   chown -R $1:$1 /hpc_apps/envmod/${1}_env
@@ -64,8 +67,26 @@ if [ ! -n "$1" ]; then
 fi
 
 current_user=`whoami`
-public_app_registry="/usr/hpc-now/.public_apps.reg"
-private_app_registry="/usr/hpc-now/.private_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
+if [ $current_user != 'root' ]; then
+  private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
+fi
+
+main_menu=('quick' 'master' 'connect' 'all' 'clear' 'applist' 'build' 'install' 'remove' 'submit')
+command_flag='false'
+for i in $(seq 0 9)
+do
+  if [ $1 = ${main_menu[i]} ]; then
+    command_flag='true'
+    break
+  fi
+done
+
+if [ $command_flag = 'false' ]; then
+  echo -e "[ FATAL: ] The command $1 is incorrect. Exit now."
+  help_info
+  exit 51
+fi
 
 if [ $current_user != 'root' ] && [ $1 != 'applist' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 !='submit' ]; then
   echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr $1'. "
@@ -76,7 +97,7 @@ fi
 #CRITICAL: Environment Variable $NODE_NUM and $NODE_CORES MUST be written to /etc/profile IN ADVANCE!
 source /etc/profile
 if [ ! -z $APPS_INSTALL_SCRIPTS_URL ]; then
-  URL_INSTSCRIPTS_ROOT=$APPS_INSTALL_SCRIPTS_URL
+  url_instscripts_root=$APPS_INSTALL_SCRIPTS_URL
 fi
 rm -rf ~/.ssh/known_hosts
 user_registry=/root/.cluster_secrets/user_secrets.txt
@@ -506,7 +527,7 @@ elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
   sinfo -N
   exit 0
 elif [ $1 = 'applist' ]; then
-  if [ -z $URL_INSTSCRIPTS_ROOT ]; then
+  if [ -z $url_instscripts_root ]; then
     echo -e "[ FATAL: ] Failed to connect to a valid appstore repo. Exit now."
     exit 35
   fi
@@ -556,7 +577,7 @@ elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
     exit 37
   fi
   if [ $1 = 'install' ] || [ $1 = 'build' ]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}_app_list.txt | grep "< ${2} >" >> /dev/null 2>&1
+    curl -s ${url_instscripts_root}_app_list.txt | grep "< ${2} >" >> /dev/null 2>&1
     if [ $? -ne 0 ]; then
       echo -e "[ FATAL: ] The software ${2} is not in the store. Exit now."
       exit 39
@@ -587,7 +608,7 @@ elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
       fi
     fi
   fi
-  curl -s ${URL_INSTSCRIPTS_ROOT}${2}.sh | bash -s $1
+  curl -s ${url_instscripts_root}${2}.sh | bash -s $1
   exit 0
 elif [ $1 = 'submit' ]; then
   echo -e "[ -INFO- ] This module is in development. Please wait for days."
