@@ -45,7 +45,7 @@ fi
 mkdir -p $app_cache
 echo -e "[ START: ] Downloading and Extracting source code ..."
 if [ ! -f ${app_cache}zlib-1.2.13.tar.gz ]; then
-  wget ${url_pkgs}zlib-1.2.13.tar.gz -O ${app_cache}zlib-1.2.13.tar.gz
+  wget ${url_pkgs}zlib-1.2.13.tar.gz -O ${app_cache}zlib-1.2.13.tar.gz -o $tmp_log
 fi
 tar zxf ${app_cache}zlib-1.2.13.tar.gz -C ${app_cache} >> /dev/null 2>&1
 

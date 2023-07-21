@@ -434,7 +434,9 @@ if [ -f /root/hostfile ]; then
   sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
   systemctl start xrdp
   systemctl enable xrdp
-  yum -y install rpcbind flex GConf2 cmake cmake3 ibus libXScrnSaver gmp-devel mpfr-devel
+  yum -y install rpcbind flex GConf2 cmake cmake3 tcsh
+  yum -y install ibus libXScrnSaver
+  yum -y install gmp-devel mpfr-devel
   if [ $cloud_flag = 'CLOUD_B' ]; then
     wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O /opt/cosbrowser.zip
     cd /opt && unzip -o cosbrowser.zip && rm -rf cosbrowser.zip

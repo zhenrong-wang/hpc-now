@@ -6,23 +6,12 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *VASP-6.1.0* to HPC-NOW cluster.
 
-tmp_log=/tmp/hpcmgr_install.log
-
-echo -e "[ -INFO- ] Software: VASP-6.1.0\n"
-echo -e "**************** IMPORTANT! ****************"
-echo -e "*    VASP is non-free software licensed    *"
-echo -e "*    by VASP Software GmbH located at      *"
-echo -e "*    Sensengasse 8/12, A-1090, Vienna,     *"
-echo -e "*    Austria. Shanghai HPC-NOW Technol-    *"
-echo -e "*    -ogies Co., Ltd (HPC-NOW) doesn't     *"
-echo -e "*    provide commercial license to you.    *"
-echo -e "*    Please make sure you are licensed     *"
-echo -e "*    by the software vendor or officia-    *" 
-echo -e "*    -lly authorized resellers before      *"
-echo -e "*    installation! HPC-NOW doesn't pro-    *"
-echo -e "*    -vide any technical support on any    *"
-echo -e "*    version(s) of VASP.                   *"
-echo -e "********************************************\n"
+echo -e "******************************* IMPORTANT! **********************************"
+echo -e "*    VASP is non-free software licensed by VASP Software GmbH located at    *"
+echo -e "*    Sensengasse 8/12, A-1090, Vienna, Austria.                             *"
+echo -e "*    Please make sure you are licensed by the software vendor or officia-   *"
+echo -e "*    -lly authorized resellers before installation!                         *"
+echo -e "*****************************************************************************\n"
 echo -e "[ -INFO- ] If you are *NOT* sure whether you've been licensed. Please press keyboard 'Ctrl C' to stop current process."
 echo -ne "[ -WAIT- ] |"
 for i in $( seq 1 10)

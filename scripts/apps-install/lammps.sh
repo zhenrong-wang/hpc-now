@@ -45,8 +45,6 @@ if [ $1 = 'remove' ]; then
   fi
   echo -e "[ -INFO- ] LAMMPS has been removed successfully."
   exit 0
-
-  exit 0
 fi
 
 mkdir -p ${app_root}lammps
