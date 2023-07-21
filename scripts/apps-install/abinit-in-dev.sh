@@ -6,6 +6,33 @@
 # mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *ABINIT-9.6.2* to HPC-NOW cluster.
 
+current_user=`whoami`
+public_app_registry="/hpc_apps/.public_apps.reg"
+if [ $current_user != 'root' ]; then
+  private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
+fi
+tmp_log="/tmp/hpcmgr_install_slpack2_${current_user}.log"
+
+url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
+url_pkgs=${url_root}packages/
+num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
+centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
+
+if [ $current_user = 'root' ]; then
+  app_root="/hpc_apps/"
+  app_cache="/hpc_apps/.cache/"
+  app_extract_cache="/root/.app_extract_cache/"
+  envmod_root="/hpc_apps/envmod/"
+else
+  app_root="/hpc_apps/${current_user}_apps/"
+  app_cache="/hpc_apps/${current_user}_apps/.cache/"
+  app_extract_cache="/home/${current_user}/.app_extract_cache/"
+  envmod_root="/hpc_apps/envmod/${current_user}_env/"
+fi
+mkdir -p ${app_cache}
+mkdir -p ${app_extract_cache}
+
+
 URL_ROOT=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 URL_PKGS=${URL_ROOT}packages/
 time_current=`date "+%Y-%m-%d %H:%M:%S"`

@@ -10,7 +10,7 @@ current_user=`whoami`
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
 public_app_registry="/hpc_apps/.public_apps.reg"
-if [ current_user != 'root' ]; then
+if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 tmp_log="/tmp/hpcmgr_install_paraview_${current_user}.log"

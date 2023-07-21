@@ -8,7 +8,7 @@
 
 current_user=`whoami`
 public_app_registry="/hpc_apps/.public_apps.reg"
-if [ current_user != 'root' ]; then
+if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 tmp_log="/tmp/hpcmgr_install_fftw3_${current_user}.log"
