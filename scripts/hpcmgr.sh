@@ -9,7 +9,7 @@
 # This script is used by 'hpcmgr' command line tool.
 
 function help_info() {
-  echo -e "[ FATAL: ] The command parameter is invalid. Valid parameters are:"
+  echo -e "[ -INFO- ] Valid options/commands:"
   echo -e "           quick   - quick config"
   echo -e "           master  - refresh only master node"
   echo -e "           connect - check cluster connectivity"
@@ -20,7 +20,6 @@ function help_info() {
   echo -e "           install - install software"
   echo -e "           remove  - remove software"
   echo -e "           submit  - submit a job"
-  echo -e "[ FATAL: ] Please double check your input. Exit now."
 }
 
 function node_invalid_info() {
