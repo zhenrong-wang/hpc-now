@@ -24,8 +24,26 @@
 #include "general_print_info.h"
 #include "appman.h"
 
-int app_list(char* workdir, char* option, char* user_name, char* app_name, char* sshkey_dir, int check_silent_flag){
-    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+int app_list(char* workdir, char* option, char* user_name, char* app_name, char* sshkey_dir, char* std_redirect){
+    char remote_commands[CMDLINE_LENGTH]="";
+    int run_flag=0;
+    if(strcmp(option,"installed")==0){
+        run_flag=remote_exec_general(workdir,sshkey_dir,user_name,"hpcmgr applist avail","-t",0,3,std_redirect,NULL_STREAM);
+    }
+    else if(strcmp(option,"check")==0){
+        sprintf(remote_commands,"hpcmgr applist check %s",app_name);
+        run_flag=remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"-t",0,3,std_redirect,NULL_STREAM);
+    }
+    else{
+        run_flag=remote_exec_general(workdir,sshkey_dir,"root","hpcmgr applist","-t",0,3,std_redirect,NULL_STREAM);
+    }
+    if(run_flag!=0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+    /*char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char dirname_temp[DIR_LENGTH]="";
     char pub_apps_cache[FILENAME_LENGTH]="";
     char priv_apps_cache[FILENAME_LENGTH]="";
@@ -159,7 +177,7 @@ int app_list(char* workdir, char* option, char* user_name, char* app_name, char*
         else{
             return 0;
         }
-    }
+    }*/
 }
 
 int app_operation(char* workdir, char* user_name, char* option, char* app_name, char* sshkey_dir){

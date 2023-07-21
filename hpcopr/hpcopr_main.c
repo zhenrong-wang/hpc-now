@@ -1587,10 +1587,10 @@ int main(int argc, char* argv[]){
             return 9;
         }
         if(strcmp(app_cmd,"store")==0){
-            run_flag=app_list(workdir,"all",user_name,"",SSHKEY_DIR,0);
+            run_flag=app_list(workdir,"all",user_name,"",SSHKEY_DIR,"");
         }
         else if(strcmp(app_cmd,"avail")==0){
-            run_flag=app_list(workdir,"installed",user_name,"",SSHKEY_DIR,0);
+            run_flag=app_list(workdir,"installed",user_name,"",SSHKEY_DIR,"");
         }
         else{
             if(cmd_keyword_check(argc,argv,"--app",app_name)!=0){
@@ -1600,13 +1600,13 @@ int main(int argc, char* argv[]){
                 return 9;
             }
             if(strcmp(app_cmd,"check")==0){
-                run_flag=app_list(workdir,"check",user_name,app_name,SSHKEY_DIR,1);
+                run_flag=app_list(workdir,"check",user_name,app_name,SSHKEY_DIR,"");
             }
             else{
                 run_flag=app_operation(workdir,user_name,app_cmd,app_name,SSHKEY_DIR);
             }
         }
-        if(run_flag==-3||run_flag==-1||run_flag==1||run_flag==3){
+        if(run_flag!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"APPMAN_FAILED",44);
             check_and_cleanup(workdir);
             return 44;

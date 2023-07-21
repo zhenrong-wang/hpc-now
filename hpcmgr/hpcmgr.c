@@ -75,7 +75,7 @@ int main(int argc,char *argv[]){
   char confirm[64];
   int real_argc;
   
-  print_header_hpcmgr();
+  //print_header_hpcmgr(); The hpcmgr has been internalized. No need to print header or tail.
   srand((unsigned)time(NULL));
   int rand_num=rand();
   if(rand_num>1000000){
@@ -118,31 +118,31 @@ int main(int argc,char *argv[]){
     }
     else{
       printf("[ -INFO- ]You denied the operation. Nothing changed.\n");
-      print_tail_hpcmgr();
+//      print_tail_hpcmgr();
       return 1;
     }
   }
   system_run_flag=system(final_cmd_dl);
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 1.\n");
-    print_tail_hpcmgr();
+//    print_tail_hpcmgr();
     return 1;
   }
   system_run_flag=system(final_cmd_chmod);  
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 2.\n");
     system(final_cmd_dele);
-    print_tail_hpcmgr();
+//    print_tail_hpcmgr();
     return 1;
   }
   system_run_flag=system(final_cmd_run);
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 3.\n");
     system(final_cmd_dele);
-    print_tail_hpcmgr();
+//    print_tail_hpcmgr();
     return 1;
   } 
   system(final_cmd_dele);
-  print_tail_hpcmgr();
+//  print_tail_hpcmgr();
   return 0;
 }

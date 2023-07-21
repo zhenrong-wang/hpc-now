@@ -60,7 +60,7 @@ function add_a_user() {
   done
 }
 
-if [ ! -n "$1" ]; then
+if [ -z "$1" ]; then
   help_info
   exit 3
 fi
@@ -87,7 +87,7 @@ if [ $command_flag = 'false' ]; then
   exit 51
 fi
 
-if [ $current_user != 'root' ] && [ $1 != 'applist' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 !='submit' ]; then
+if [ $current_user != 'root' ] && [ $1 != 'applist' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 != 'submit' ]; then
   echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr $1'. "
   echo -e "           Please make sure you use either user1 with 'sudo' privilege, OR"
   echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now."
@@ -123,7 +123,7 @@ elif [ $1 = 'users' ]; then
     node_invalid_info
     exit 5
   fi
-  if [ ! -n "$2" ]; then
+  if [ -z "$2" ]; then
     echo -e "Usage: \n\thpcmgr users list\n\thpcmgr users add your_user_name your_password\n\thpcmgr users delete your_user_name\nPlease check your parameters. Exit now.\n"
     exit 3
   fi
@@ -136,7 +136,7 @@ elif [ $1 = 'users' ]; then
     exit 0
   fi
   if [ $2 = 'add' ]; then
-    if [ ! -n "$3" ]; then
+    if [ -z "$3" ]; then
       echo -e "Usage: \n\thpcmgr users add your_user_name your_password\nPlease check your parameters. Exit now.\n"
       exit 3
     else
@@ -179,7 +179,7 @@ elif [ $1 = 'users' ]; then
     fi
   fi
   if [ $2 = 'delete' ]; then
-    if [ ! -n "$3" ]; then
+    if [ -z "$3" ]; then
       echo -e "Usage: \n\thpcmgr users delete your_user_name\n\thpcmgr users delete your_user_name os\nPlease check your parameters. Exit now."
       exit 3
     fi
@@ -188,7 +188,7 @@ elif [ $1 = 'users' ]; then
       exit 13
     fi
     sacctmgr list user $3 | grep hpc_users >> /dev/null 2>&1
-    if [ ! -n "$4" ] || [ $4 != 'os' ]; then
+    if [ -z "$4" ] || [ $4 != 'os' ]; then
       if [ $? -ne 0 ]; then
         echo -e "$3 is not in the cluster. Nothing deleted, exit now."
         exit 15
@@ -200,7 +200,7 @@ elif [ $1 = 'users' ]; then
       echo -e "$3 is not in the cluster. Nothing deleted, exit now."
       exit 15
     fi
-    if [[ ! -n "$4" || $4 != "os" ]]; then
+    if [[ -z "$4" || $4 != "os" ]]; then
       echo -e "User $3 has been deleted from the cluster, but still in the OS."
       sed -i "/$3/,+0 s/ENABLED/DISABLED/g" ${user_registry}
       mv /home/$3/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$3 >> ${logfile} 2>&1
@@ -528,50 +528,111 @@ elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
 elif [ $1 = 'applist' ]; then
   if [ -z $url_instscripts_root ]; then
     echo -e "[ FATAL: ] Failed to connect to a valid appstore repo. Exit now."
-    exit 35
+    exit 34
   fi
-  echo -e "1. Applications:"
-  echo -e "\tof7       - OpenFOAM-v7"
-  echo -e "\tof9       - OpenFOAM-v9"
-  echo -e "\tof2112    - OpenFOAM-v2112"
-  echo -e "\tlammps    - LAMMPS dev latest"
-  echo -e "\tgromacs   - GROMACS"
-  echo -e "\twrf       - WRF & WPS -4.4"
-  echo -e "\tvasp5     - VASP-5.4.4 (BRING YOUR OWN LICENSE)"
-  echo -e "\tvasp6.1   - VASP-6.1.0 (BRING YOUR OWN LICENSE)"
-  echo -e "\tR         - R & RStudio (in development)"
-  echo -e "\tparaview  - ParaView-5"
-  echo -e "\thdf5      - HDF5-1.10.9"
-  echo -e "\tnetcdf4   - netCDF-C-4.9.0 & netCDF-fortran-4.5.3"
-  echo -e "\tabinit    - ABINIT-9.6.2"
-  echo -e "2. MPI Toolkits:"
-  echo -e "\tmpich3    - MPICH-3.2.1"
-  echo -e "\tmpich4    - MPICH-4.0.2"
-  echo -e "\tompi3     - OpenMPI-3.1.6"
-  echo -e "\tompi4     - OpenMPI-4.1.2"
-  echo -e "3. Compilers:"
-  echo -e "\tgcc4      - GNU Compiler Collections - 4.9.2"
-  echo -e "\tgcc8      - GNU Compiler Collections - 8.2.0"
-  echo -e "\tgcc9      - GNU Compiler Collections - 9.5.0."
-  echo -e "\tgcc12     - GNU Compiler Collections - 12.1.0"
-  echo -e "\tintel     - Intel(R) HPC Toolkit Latest"
-  echo -e "4. Important Libraries:"
-  echo -e "\tfftw3     - FFTW 3"
-  echo -e "\tlapack311 - LAPACK-3.11.0"
-  echo -e "\tzlib      - zlib-1.2.13"
-  echo -e "\tslpack2   - ScaLAPACK-2.1.0"
-  echo -e "\topenblas  - OpenBLAS 0.3.15 *SINGLE THREAD*"
-  echo -e "5. Other Tools:"
-  echo -e "\tdesktop   - Desktop Environment" 
-  echo -e "\tbaidu     - Baidu Netdisk"
-  echo -e "\tcos       - COSBrowser (RECOMMENDED)" 
-  echo -e "\trar       - RAR for Linux (RECOMMENDED)" 
-  echo -e "\tkswps     - WPS Office Suite for Linux (RECOMMENDED)" 
-  echo -e "\tenvmod    - Environment Modules" 
-  echo -e "\tvscode    - Visual Studio Code"
-  exit 0 
+  if [ -z $2 ]; then
+    echo -e "1. Applications:"
+    echo -e "\tof7       - OpenFOAM-v7"
+    echo -e "\tof9       - OpenFOAM-v9"
+    echo -e "\tof2112    - OpenFOAM-v2112"
+    echo -e "\tlammps    - LAMMPS dev latest"
+    echo -e "\tgromacs   - GROMACS"
+    echo -e "\twrf       - WRF & WPS -4.4"
+    echo -e "\tvasp5     - VASP-5.4.4 (BRING YOUR OWN LICENSE)"
+    echo -e "\tvasp6.1   - VASP-6.1.0 (BRING YOUR OWN LICENSE)"
+    echo -e "\tR         - R & RStudio (in development)"
+    echo -e "\tparaview  - ParaView-5"
+    echo -e "\thdf5      - HDF5-1.10.9"
+    echo -e "\tnetcdf4   - netCDF-C-4.9.0 & netCDF-fortran-4.5.3"
+    echo -e "\tabinit    - ABINIT-9.6.2"
+    echo -e "2. MPI Toolkits:"
+    echo -e "\tmpich3    - MPICH-3.2.1"
+    echo -e "\tmpich4    - MPICH-4.0.2"
+    echo -e "\tompi3     - OpenMPI-3.1.6"
+    echo -e "\tompi4     - OpenMPI-4.1.2"
+    echo -e "3. Compilers:"
+    echo -e "\tgcc4      - GNU Compiler Collections - 4.9.2"
+    echo -e "\tgcc8      - GNU Compiler Collections - 8.2.0"
+    echo -e "\tgcc9      - GNU Compiler Collections - 9.5.0."
+    echo -e "\tgcc12     - GNU Compiler Collections - 12.1.0"
+    echo -e "\tintel     - Intel(R) HPC Toolkit Latest"
+    echo -e "4. Important Libraries:"
+    echo -e "\tfftw3     - FFTW 3"
+    echo -e "\tlapack311 - LAPACK-3.11.0"
+    echo -e "\tzlib      - zlib-1.2.13"
+    echo -e "\tslpack2   - ScaLAPACK-2.1.0"
+    echo -e "\topenblas  - OpenBLAS 0.3.15 *SINGLE THREAD*"
+    echo -e "5. Other Tools:"
+    echo -e "\tdesktop   - Desktop Environment" 
+    echo -e "\tbaidu     - Baidu Netdisk"
+    echo -e "\tcos       - COSBrowser (RECOMMENDED)" 
+    echo -e "\trar       - RAR for Linux (RECOMMENDED)" 
+    echo -e "\tkswps     - WPS Office Suite for Linux (RECOMMENDED)" 
+    echo -e "\tenvmod    - Environment Modules" 
+    echo -e "\tvscode    - Visual Studio Code"
+    exit 0
+  elif [ $2 = 'avail' ]; then
+    echo -e "|       +- Available(Installed) Apps ~ Public:"
+    while read public_reg_row
+    do
+      echo -e "|          ${public_reg_row}"
+    done < $public_app_registry
+    echo -e "|       +- Available(Installed) Apps ~ Private:"
+    if [ $current_user = 'root' ]; then
+      while read user_row
+      do
+        user_name_tmp=`echo $user_row | awk '{print $2}'`
+        while read private_reg_row
+        do
+          echo -e "|          ${private_reg_row}"
+        done < /hpc_apps/${user_name_tmp}_apps/.private_apps.reg
+      done < /root/.cluster_secrets/user_secrets.txt
+    else
+      while read private_reg_row
+      do
+        echo -e "|          ${private_reg_row}"
+      done < /hpc_apps/${current_user}_apps/.private_apps.reg
+    fi
+    exit 0
+  elif [ $2 = 'check' ]; then
+    if [ -z $3 ]; then
+      echo -e "[ FATAL: ] Please provide an app name to check."
+      exit 35
+    else
+      grep "< $3 >" $public_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        echo -e "[ -INFO- ] The app $3 is available for all users."
+        exit 0
+      else
+        if [ $current_user = 'root' ]; then
+          while read user_row
+          do
+            user_name_tmp=`echo $user_row | awk '{print $2}'`
+            grep "< $3 >" /hpc_apps/${user_name_tmp}_apps/.private_apps.reg
+            if [ $? -eq 0 ]; then
+              echo -e "[ -INFO- ] The app $3 is available for ${user_name_tmp}."
+              exit 0
+            fi
+          done < /root/.cluster_secrets/user_secrets.txt
+          echo -e "[ -INFO- ] The app $3 is not available for any users."
+          exit 0
+        else
+          grep "< $3 >" ${private_app_registry}
+          if [ $? -eq 0 ]; then
+            echo -e "[ -INFO- ] The app $3 is available for the current user ${current_user}."
+          else
+            echo -e "[ -INFO- ] The app $3 is not available for the current user ${current_user}"
+          fi
+          exit 0
+        fi
+      fi
+    fi
+  else
+    echo -e "[ FATAL: ] Invalid applist sub-commands. Valid commands: avail, check."
+    exit 36
+  fi
 elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
-  if [ ! -n "$2" ]; then
+  if [ -z "$2" ]; then
     echo -e "[ -INFO- ] Please specify an app to $1 ."
     exit 37
   fi

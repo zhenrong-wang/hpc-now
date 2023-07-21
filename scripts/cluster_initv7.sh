@@ -75,7 +75,7 @@ mkdir -p /root/.cluster_secrets
 mkdir -p /root/.sshkey_deleted
 time1=$(date)
 echo -e  "\n${time1}" >> ${logfile}
-if [ ! -n "$1" ] || [ ! -n "$2" ]; then
+if [ -z "$1" ] || [ -z "$2" ]; then
   echo -e "Lack of Parameters.\n# arg1: #\n# arg2: db\nPLEASE PAY ATTENTION TO THE SEQUENCE OF THE PARAMETERS!\nExit now."
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "![IMPORTANT]\n# $time_current Cluster initialization failed due to lack of command parameters.\n" >> ${logfile}
@@ -374,8 +374,9 @@ if ! command -v module >/dev/null 2>&1; then
 fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`  
 echo -e "# $time_current Environment Module has been installed." >> ${logfile}
-echo -e "< envmod >" >> $public_app_registry
-
+if [ -f /root/hostfile ]; then
+  echo -e "< envmod >" >> $public_app_registry
+fi
 # Install Desktop Env-NECESSARY
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 if [ -f /root/hostfile ]; then

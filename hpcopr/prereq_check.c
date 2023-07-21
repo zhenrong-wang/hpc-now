@@ -116,7 +116,6 @@ int install_bucket_clis(int silent_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp_zip[FILENAME_LENGTH]="";
-    
     if(silent_flag!=0){
         printf("|        . Checking & installing the dataman components: 1/3 ...\n");
     }
@@ -796,6 +795,10 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(cmdline,"rm -rf /Users/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
+    sprintf(dirname_temp,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+    
     if(repair_flag==1){
         printf("|        v Environment variables have been repaired.\n");
         printf("|        v SSH files have been repaired. \n");

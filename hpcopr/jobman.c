@@ -32,6 +32,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     char duration_hours_string[128]="";
     char cluster_node_num_string[4]="";
     char cluster_node_cores_string[4]="";
+    char filename_temp[FILENAME_LENGTH]="";
     char app_name[128]="";
     char exec_name[128]="";
     char job_data[256]="";
@@ -58,18 +59,19 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
     if(cmd_keyword_check(argc,argv,"--app",app_name)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify an app for this job.\n");
-        app_list(workdir,"installed",user_name,"",sshkey_dir,0);
+        app_list(workdir,"installed",user_name,"",sshkey_dir,"");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
         scanf("%s",app_name);
         getchar();
     }
-    run_flag=app_list(workdir,"check",user_name,app_name,sshkey_dir,0);
-    if(run_flag!=4&&run_flag!=7){
+    sprintf(filename_temp,"%s%s.tmp%sapp_check.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
+    app_list(workdir,"check",user_name,app_name,sshkey_dir,filename_temp);
+    run_flag=find_multi_keys(filename_temp,"not available","","","","");
+    if(run_flag>0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified app " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",app_name);
         return -5;
     }
-    
     if(cmd_keyword_check(argc,argv,"--nn",node_num_string)!=0){
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify compute node num (<=%d) for this job:",cluster_node_num);
         fflush(stdin);
