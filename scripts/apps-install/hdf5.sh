@@ -126,7 +126,7 @@ do
   if [ $current_user != 'root' ]; then
     grep "< ${ompi_vers[i]} > < $current_user >" $private_app_registry >> /dev/null 2>&1
     if [ $? -eq 0 ]; then
-      module load ${current_user}/${ompi_code[i]}
+      module load ${current_user}_env/${ompi_code[i]}
       mpi_root="${app_root}${ompi_code[i]}/"
       cxxflags="-I${mpi_root}include"
       ldflags="-L${mpi_root}lib -lmpi_cxx"
@@ -142,7 +142,7 @@ if [ $? -ne 0 ]; then
   if [ $current_user = 'root' ]; then
     module load ompi-4.1.2
   else
-    module load ${current_user}/ompi-4.1.2
+    module load ${current_user}_env/ompi-4.1.2
   fi
   mpi_root="${app_root}ompi-4.1.2/"
   cxxflags="-I${mpi_root}include"
@@ -160,7 +160,7 @@ echo -e "[ STEP 1 ] Building HDF5-1.10.9 ... This step usually takes seconds."
 #yum -y install zlib-devel >> $tmp_log 2>&1
 #cd /opt/packs/hdf5-1.10.9 && make clean >> $tmp_log 2>&1
 cd ${app_extract_cache}hdf5-1.10.9
-CXXFLAGS="${cxxflags}" LDFLAGS="${ldflags}" ./configure --prefix=${app_root}hdf5-1.10.9 CC=${cc_path} --enable-parallel --enable-shared --enable-fortran --enable-cxx --enable-hl --with-zlib=${zlib_path} --enable-unsupported >> $tmp_log
+CXXFLAGS="${cxxflags}" LDFLAGS="${ldflags}" ./configure --prefix=${app_root}hdf5-1.10.9 CC=${cc_path} --enable-parallel --enable-shared --enable-fortran --enable-cxx --enable-hl --with-zlib=${zlib_path} --enable-unsupported >> $tmp_log 2>&1
 make -j${num_processors} >> $tmp_log
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build HDF5-1.10.9. Please check the log file for more details. Exit now."
@@ -177,6 +177,6 @@ if [ $current_user = 'root' ]; then
 else
   echo -e "< hdf5 > < ${current_user} >" >> $private_app_registry
 fi
-echo -e "zlib ${zlib_path}" > ${app_root}build_info.txt
-echo -e "mpi_root ${mpi_root}" >> ${app_root}build_info.txt
+echo -e "zlib ${zlib_path}" > ${app_root}hdf5-1.10.9/build_info.txt
+echo -e "mpi_root ${mpi_root}" >> ${app_root}hdf5-1.10.9/build_info.txt
 echo -e "[ -DONE- ] HDF5-1.10.9 has been successfully installed to your cluster."

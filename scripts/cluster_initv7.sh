@@ -434,7 +434,7 @@ if [ -f /root/hostfile ]; then
   sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
   systemctl start xrdp
   systemctl enable xrdp
-  yum -y install rpcbind flex GConf2 cmake cmake3 ibus libXScrnSaver ibus-pinyin gmp-devel mpfr-devel
+  yum -y install rpcbind flex GConf2 cmake cmake3 ibus libXScrnSaver gmp-devel mpfr-devel
   if [ $cloud_flag = 'CLOUD_B' ]; then
     wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O /opt/cosbrowser.zip
     cd /opt && unzip -o cosbrowser.zip && rm -rf cosbrowser.zip
@@ -493,12 +493,10 @@ if [ -f /root/hostfile ]; then
     wget ${url_utils}slurm/sbatch_sample.sh -O /hpc_data/sbatch_sample.sh
   fi
 fi
-
 # Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
 if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete
 fi
-
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Necassary scripts has been downloaded to /root." >> ${logfile}
 rm -rf /root/slurm*

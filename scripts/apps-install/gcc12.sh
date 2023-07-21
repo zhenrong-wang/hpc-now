@@ -60,7 +60,7 @@ if [ ! -f ${app_cache}gcc-12.1.0-full.tar.gz ]; then
 fi
 tar zvxf ${app_cache}gcc-12.1.0-full.tar.gz -C ${app_extract_cache} >> $tmp_log
 cd ${app_extract_cache}gcc-12.1.0
-./configure --prefix=${app_root}gcc-12.1.0 --enable-checking=release --enable-languages=c,c++,fortran --disable-multilib >> $tmp_log
+./configure --prefix=${app_root}gcc-12.1.0 --enable-checking=release --enable-languages=c,c++,fortran --disable-multilib >> $tmp_log 2>&1
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 2 ] $time_current Making gcc-12.1.0 now, this step usually takes more than 2 hours with 8 cores..."
 make -j${num_processors} >> $tmp_log

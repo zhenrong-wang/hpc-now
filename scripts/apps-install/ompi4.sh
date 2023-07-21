@@ -102,7 +102,7 @@ tar zvxf ${app_cache}openmpi-4.1.2.tar.gz -C ${app_extract_cache} >> $tmp_log
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 2 ] $time_current Building libraries and binaries from the source packages ..."
 cd ${app_extract_cache}openmpi-4.1.2
-./configure --prefix=${app_root}ompi-4.1.2 --enable-mpi-cxx >> $tmp_log
+./configure --prefix=${app_root}ompi-4.1.2 --enable-mpi-cxx >> $tmp_log 2>&1
 make -j$num_processors >> $tmp_log
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build OpenMPI-4.1.2. Please check the log file for details. Exit now."

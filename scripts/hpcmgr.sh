@@ -645,12 +645,12 @@ elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
     grep "< $2 >" $public_app_registry >> /dev/null 2>&1
     if [ $? -eq 0 ]; then
       echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
-      exit 41
+      exit 0
     else
       grep "< $2 > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
       if [ $? -eq 0 ]; then
         echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
-        exit 43
+        exit 0
       fi
     fi
   else
@@ -658,13 +658,13 @@ elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
       grep "< $2 >" $public_app_registry >> /dev/null 2>&1
       if [ $? -ne 0 ]; then
         echo -e "[ -INFO- ] This app has not been installed to all users."
-        exit 41
+        exit 4
       fi
     else
       grep "< $2 > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
       if [ $? -ne 0 ]; then
         echo -e "[ -INFO- ] This app has not been installed to the current user."
-        exit 41
+        exit 4
       fi
     fi
   fi

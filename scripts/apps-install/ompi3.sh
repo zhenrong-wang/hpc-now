@@ -102,7 +102,7 @@ cd ${app_cache} && unzip -o openmpi-3.1.6.zip -d ${app_extract_cache} >> ${tmp_l
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 2 ] $time_current Building libraries and binaries from the source packages ..."
 cd ${app_extract_cache}openmpi-3.1.6
-./configure --prefix=${app_root}ompi-3.1.6 --enable-mpi-cxx >> ${tmp_log}
+./configure --prefix=${app_root}ompi-3.1.6 --enable-mpi-cxx >> ${tmp_log} 2>&1
 make -j$num_processors >> ${tmp_log}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build OpenMPI-3.1.6. Please check the log file for details. Exit now."

@@ -107,7 +107,7 @@ if [ $gcc_vnum -gt 10 ]; then
   export FCFLAGS="-w -fallow-argument-mismatch -O2"
 fi
 cd ${app_extract_cache}mpich-3.2.1
-./configure --prefix=${app_root}mpich-3.2.1 --enable-cxx --enable-fortran=all >> $tmp_log
+./configure --prefix=${app_root}mpich-3.2.1 --enable-cxx --enable-fortran=all >> $tmp_log 2>&1
 make -j$num_processors >> $tmp_log
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build MPICH-3.2.1. Please check the log file for details. Exit now."

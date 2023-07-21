@@ -113,8 +113,8 @@ else
   fi
 fi
 
-mpi_root=`grep mpi_root ${hdf5_root} | awk '{print $2}'`
-zlib_path=`grep zlib ${hdf5_root} | awk '{print $2}'`
+mpi_root=`grep mpi_root ${hdf5_root}build_info.txt | awk '{print $2}'`
+zlib_path=`grep zlib ${hdf5_root}build_info.txt | awk '{print $2}'`
 cppflags="-I${hdf5_root}include -I${zlib_path}include -I${mpi_root}include"
 ldflags="-L${hdf5_root}lib -L${zlib_path}lib"
 #yum -y install m4 >> $tmp_log 2>&1
@@ -133,7 +133,7 @@ tar zvxf ${app_cache}netcdf-fortran-4.5.3.tar.gz -C ${app_extract_cache} >> $tmp
 echo -e "[ STEP 1 ] Building netCDF-C-4.9.0 & netCDF-fortran-4.5.3 ... This step usually takes minutes."
 
 cd ${app_extract_cache}netcdf-c-4.9.0
-CPPFLAGS="${cppflags}" LDFLAGS="${ldflags}" CC=gcc ./configure --prefix=${app_root}netcdf4 >> $tmp_log
+CPPFLAGS="${cppflags}" LDFLAGS="${ldflags}" CC=gcc ./configure --prefix=${app_root}netcdf4 >> $tmp_log 2>&1
 make -j$num_processors >> $tmp_log
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build netCDF-C-4.9.0. Please check the log file for more details. Exit now."
@@ -142,7 +142,9 @@ fi
 make install >> $tmp_log
 echo -e "[ -INFO- ] netCDF-C-4.9.0 has been built. Installing netCDF-fortran-4.5.3 now ..."
 cd ${app_extract_cache}netcdf-fortran-4.5.3
-CPPFLAGS="-I${app_root}netcdf4/include" LDFLAGS="-L${app_root}netcdf4/lib" ./configure --prefix=${app_root}netcdf4 >> $tmp_log
+export LD_LIBRARY_PATH=${app_root}netcdf4/lib:$LD_LIBRARY_PATH
+export C_INCLUDE_PATH=${app_root}netcdf4/include:$C_INCLUDE_PATH
+CPPFLAGS="-I${app_root}netcdf4/include" LDFLAGS="-L${app_root}netcdf4/lib" ./configure --prefix=${app_root}netcdf4 >> $tmp_log 2>&1
 make -j$num_processors >> $tmp_log
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build netCDF-fortran-4.5.3. Please check the log file for more details. Exit now."

@@ -20,9 +20,13 @@ num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
+  app_extract_cache="/root/.app_extract_cache/"
+  envmod_root="/hpc_apps/envmod/"
 else
   app_root="/hpc_apps/${current_user}_apps/"
   app_cache="/hpc_apps/${current_user}_apps/.cache/"
+  app_extract_cache="/home/${current_user}/.app_extract_cache/"
+  envmod_root="/hpc_apps/envmod/${current_user}_env/"
 fi
 
 if [ $1 = 'remove' ]; then
@@ -46,11 +50,10 @@ if [ ! -f ${app_cache}fftw-3.3.10.tar.gz ]; then
   wget ${url_pkgs}fftw-3.3.10.tar.gz -O ${app_cache}fftw-3.3.10.tar.gz -o ${tmp_log}
 fi
 rm -rf ${app_cache}fftw-3.3.10
-tar zvxf ${app_cache}fftw-3.3.10.tar.gz -C ${app_cache} >> ${tmp_log}
-
-cd ${app_cache}fftw-3.3.10
+tar zvxf ${app_cache}fftw-3.3.10.tar.gz -C ${app_extract_cache} >> ${tmp_log}
+cd ${app_extract_cache}fftw-3.3.10
 echo -e "[ -INFO- ] Configuring build options ..."
-./configure --prefix=${app_root}fftw3 --enable-sse2 --enable-avx --enable-avx2 --enable-shared >> ${tmp_log}
+./configure --prefix=${app_root}fftw3 --enable-sse2 --enable-avx --enable-avx2 --enable-shared >> ${tmp_log} 2>&1
 echo -e "[ -INFO- ] Compiling in progress ..."
 make -j${num_processors} >> $tmp_log
 echo -e "[ -INFO- ] Installing the binaries and libraries to the destination ..."
@@ -59,18 +62,10 @@ if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build FFTW-3. Please check the log file for details. Exit now."
   exit
 fi
-
+echo -e "#%Module1.0\nprepend-path PATH ${app_root}fftw3/bin\nprepend-path LD_LIBRARY_PATH ${app_root}fftw3/lib\n" > ${envmod_root}fftw3
 if [ $current_user = 'root' ]; then
-  grep fftw3 /etc/profile >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "export PATH=${app_root}fftw3/bin/:\$PATH\nexport LD_LIBRARY_PATH=${app_root}fftw3/lib/:\$LD_LIBRARY_PATH" >> /etc/profile
-  fi
   echo -e "< fftw3 >" >> $public_app_registry
 else
-  grep fftw3 $HOME/.bashrc >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "export PATH=${app_root}fftw3/bin/:\$PATH\nexport LD_LIBRARY_PATH=${app_root}fftw3/lib/:\$LD_LIBRARY_PATH" >> $HOME/.bashrc
-  fi
   echo -e "< fftw3 > < ${current_user} >" >> $private_app_registry
 fi
 echo -e "[ -DONE- ] FFTW-3 has been built to ${app_root}fftw3."

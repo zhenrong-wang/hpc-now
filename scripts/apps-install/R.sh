@@ -115,7 +115,7 @@ if [ $? -ne 0 ]; then
   fi
   tar zvxf ${app_cache}R-4.2.1.tar.gz -C ${app_extract_cache} >> $tmp_log
   cd ${app_extract_cache}R-4.2.1
-  ./configure --enable-R-shlib --prefix=${app_root}R-4.2.1 >> $tmp_log
+  ./configure --enable-R-shlib --prefix=${app_root}R-4.2.1 >> $tmp_log 2>&1
   make -j$num_processors >> $tmp_log
   make install >> $tmp_log
   grep ${app_root}R-4.2.1/bin /etc/profile >> /dev/null 2>&1
@@ -149,7 +149,7 @@ if [ ! -f ${app_cache}gdal-3.5.2.tar.gz ]; then
 fi
 tar zvxf ${app_cache}gdal-3.5.2.tar.gz -C ${app_extract_cache} >> $tmp_log
 cd ${app_extract_cache}gdal-3.5.2
-./configure --prefix=${app_root}gdal-3.5.2 >> $tmp_log
+./configure --prefix=${app_root}gdal-3.5.2 >> $tmp_log 2>&1
 make -j$num_processors >> $tmp_log
 make install >> $tmp_log
 # NOW, you can use R & RStudio environment for data processing

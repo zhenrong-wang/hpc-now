@@ -34,7 +34,7 @@ fi
 tar zvxf ${app_cache}modules-5.1.0.tar.gz -C ${app_cache} >> ${tmp_log}
 cd ${app_cache}modules-5.1.0
 echo -e "[ -INFO- ] Configuring building options ..."
-./configure --prefix=/opt/environment-modules --modulefilesdir=/hpc_apps/envmod >> $tmp_log
+./configure --prefix=/opt/environment-modules --modulefilesdir=/hpc_apps/envmod >> $tmp_log 2>&1
 echo -e "[ -INFO- ] Compiling in progress ..."
 make -j$num_processors >> $tmp_log
 make install >> $tmp_log

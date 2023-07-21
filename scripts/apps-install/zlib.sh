@@ -51,7 +51,7 @@ tar zxf ${app_cache}zlib-1.2.13.tar.gz -C ${app_cache} >> /dev/null 2>&1
 
 echo -e "[ STEP 1 ] Building zlib-1.2.13 ... This step usually takes seconds."
 cd ${app_cache}zlib-1.2.13
-./configure --prefix=${app_root}zlib-1.2.13 >> $tmp_log
+./configure --prefix=${app_root}zlib-1.2.13 >> $tmp_log 2>&1
 make -j${num_processors} >> $tmp_log
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build zlib-1.2.13. Please check the log file for more details. Exit now."
