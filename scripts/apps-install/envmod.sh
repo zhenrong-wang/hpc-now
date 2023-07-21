@@ -20,7 +20,7 @@ fi
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs_envmod=${url_root}packages/envmod/
-public_app_registry="/usr/hpc-now/.public_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
 app_cache="/hpc_apps/.cache/"
 tmp_log="/tmp/hpcmgr_install_envmod_${current_user}.log"
 mkdir -p $app_cache

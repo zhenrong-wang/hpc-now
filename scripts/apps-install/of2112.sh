@@ -7,8 +7,10 @@
 # This script is used by 'hpcmgr' command to build *OpenFOAM-v2112* to HPC-NOW cluster.
 
 current_user=`whoami`
-public_app_registry="/usr/hpc-now/.public_apps.reg"
-private_app_registry="/usr/hpc-now/.private_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
+if [ current_user != 'root' ]; then
+  private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
+fi
 tmp_log="/tmp/hpcmgr_install_of2112_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
@@ -138,7 +140,7 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Building OpenFOAM-v2112 now ... "
 mkdir -p ${of_root}
 rm -rf ${of_root}*
-echo -e "[ STEP 1 ] $time_current Downloading & extracting source packages ..."
+echo -e "[ -INFO- ] $time_current Downloading & extracting source packages ..."
 if [ ! -f ${app_cache}OpenFOAM-v2112.tgz ]; then
   wget ${url_pkgs}OpenFOAM-v2112.tgz -O ${app_cache}OpenFOAM-v2112.tgz -o ${tmp_log}
 fi  
@@ -154,11 +156,8 @@ fi
 if [ ! -f ${of_cache}ThirdParty-v2112/sources/metis-5.1.0.tar.gz ]; then
   wget ${url_pkgs}metis-5.1.0.tar.gz -O ${of_cache}ThirdParty-v2112/sources/metis-5.1.0.tar.gz -q
 fi
-echo -e "[ -INFO- ] Removing the tarballs are not recommended. If you want to rebuild of2112, please remove the folder OpenFOAM-v2112 & ThirdParty-v2112."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "[ STEP 2 ] $time_current Removing previously-built binaries ..."
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "[ STEP 3 ] $time_current Compiling started ..."
+echo -e "[ -INFO- ] $time_current Compiling started ..."
 if [ ! -f  ${of_cache}OpenFOAM-v2112/etc/config.sh/settings-orig ]; then
   cp ${of_cache}OpenFOAM-v2112/etc/config.sh/settings ${of_cache}OpenFOAM-v2112/etc/config.sh/settings-orig
 else

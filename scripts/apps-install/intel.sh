@@ -7,7 +7,7 @@
 # This script is used by 'hpcmgr' command to build *INTEL(R) HPC Toolkit* to HPC-NOW cluster.
 
 current_user=`whoami`
-public_app_registry="/usr/hpc-now/.public_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   echo -e "[ FATAL: ] ONLY root user or user1 with sudo can $1 this app."
   echo -e "           Please contact the administrator. Exit now."

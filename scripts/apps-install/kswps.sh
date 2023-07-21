@@ -15,7 +15,7 @@ fi
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
-public_app_registry="/usr/hpc-now/.public_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
 app_cache="/hpc_apps/.cache/"
 tmp_log="/tmp/hpcmgr_install_kswps_${current_user}.log"
 

@@ -175,7 +175,7 @@ int app_operation(char* workdir, char* user_name, char* option, char* app_name, 
     }
     printf(GENERAL_BOLD "[ -INFO- ] App operation is in progress. Detailed info as below.\n");
     printf("|          You can press 'ctrl C' to stop viewing the log.\n" RESET_DISPLAY "\n");
-    sprintf(remote_commands,"tail -f /tmp/app_operation_%s.log",user_name);
+    sprintf(remote_commands,"tail -f /tmp/app_operation_%s_%s.log",user_name,app_name);
     run_flag=remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"-t",0,1,"","");
     if(run_flag!=0){
         return 3;

@@ -14,7 +14,7 @@ fi
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/desktop/
 tmp_log="/tmp/hpcmgr_install_desktop_${current_user}.log"
-public_app_registry="/usr/hpc-now/.public_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
 
 current_user=`whoami`
 if [ $current_user != 'root' ]; then

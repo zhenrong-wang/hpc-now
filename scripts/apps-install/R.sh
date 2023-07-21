@@ -19,7 +19,7 @@ if [ $current_user != 'root' ]; then
   echo -e "           Please contact the administrator. Exit now."
   exit 1
 fi
-public_app_registry="/usr/hpc-now/.public_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
 app_root="/hpc_apps/"
 app_cache="/hpc_apps/.cache/"
 app_extract_cache="/root/.app_extract_cache/"

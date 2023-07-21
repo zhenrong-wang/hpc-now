@@ -39,6 +39,7 @@ function add_a_user() {
   mkdir -p /hpc_data/${1}_data && chmod -R 750 /hpc_data/${1}_data
   mkdir -p /hpc_apps/${1}_apps && chmod -R 750 /hpc_apps/${1}_apps
   mkdir -p /hpc_apps/envmod/${1}_env && chmod -R 750 /hpc_apps/envmod/${1}_env
+  touch /hpc_apps/${1}_apps/.private_apps.reg
   chown -R $1:$1 /hpc_data/${1}_data
   chown -R $1:$1 /hpc_apps/${1}_apps
   chown -R $1:$1 /hpc_apps/envmod/${1}_env

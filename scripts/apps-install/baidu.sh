@@ -15,7 +15,7 @@ if [ $current_user != 'root' ]; then
   exit 1
 fi
 
-public_app_registry="/usr/hpc-now/.public_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
 app_cache="/hpc_apps/.cache/"
 tmp_log="/tmp/hpcmgr_install_baidu_${current_user}.log"
 

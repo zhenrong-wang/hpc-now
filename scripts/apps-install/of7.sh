@@ -7,8 +7,10 @@
 # This script is used by 'hpcmgr' command to build *OpenFOAM-7* to HPC-NOW cluster.
 
 current_user=`whoami`
-public_app_registry="/usr/hpc-now/.public_apps.reg"
-private_app_registry="/usr/hpc-now/.private_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
+if [ current_user != 'root' ]; then
+  private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
+fi
 tmp_log="/tmp/hpcmgr_install_of7_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
@@ -139,7 +141,7 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Building OpenFOAM-7 now ... "
 mkdir -p ${of_root}
 rm -rf ${of_root}*
-echo -e "[ STEP 1 ] $time_current Downloading & extracting source packages ..."
+echo -e "[ -INFO- ] $time_current Downloading & extracting source packages ..."
 if [ ! -f ${app_cache}OpenFOAM-7-version-7.tar.gz ]; then
   wget ${url_pkgs}OpenFOAM-7-version-7.tar.gz -O ${app_cache}OpenFOAM-7-version-7.tar.gz -o ${tmp_log}
 fi  
@@ -152,11 +154,8 @@ tar zxf ThirdParty-7-version-7.tar.gz -C ${of_cache} >> ${tmp_log}
 cd ${of_cache}
 rm -rf OpenFOAM-7 && rm -rf ThirdParty-7
 mv OpenFOAM-7-version-7 OpenFOAM-7 && mv ThirdParty-7-version-7 ThirdParty-7
-echo -e "[ -INFO- ] Removing the tarballs are not recommended. If you want to rebuild OF7, please remove the folder OpenFOAM-7 & ThirdParty-7."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "[ STEP 2 ] $time_current Removing previously-built binaries ..."
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "[ STEP 3 ] $time_current Compiling started ..."
+echo -e "[ -INFO- ] $time_current Compiling started ..."
 export MPI_ROOT=${mpi_root}
 echo "${mpi_env}" | grep ompi >> /dev/null 2>&1
 if [ $? -eq 0 ]; then

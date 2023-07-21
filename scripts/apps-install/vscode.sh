@@ -13,7 +13,7 @@ if [ $current_user != 'root' ]; then
   exit 1
 fi
 
-public_app_registry="/usr/hpc-now/.public_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
 tmp_log="/tmp/hpcmgr_install_vscode_${current_user}.log"
 
 if [ $1 = 'remove' ]; then

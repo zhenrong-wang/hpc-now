@@ -11,8 +11,7 @@
 # Define URL prefixes for the 'wget' command
 
 logfile='/root/cluster_init.log'
-public_app_registry="/usr/hpc-now/.public_apps.reg"
-private_app_registry="/usr/hpc-now/.private_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Initialization started." >> ${logfile}
@@ -113,8 +112,6 @@ if [ -f /root/hostfile ]; then
   wget ${SCRIPTS_URL_ROOT}nowmon_mgr.sh -O /usr/hpc-now/nowmon_mgr.sh && chmod +x /usr/hpc-now/nowmon_mgr.sh
 fi
 touch $public_app_registry # Only root user can modify this file
-touch $private_app_registry
-chmod 766 $private_app_registry # Allow users to modify this file
 
 # Add user slurm 
 id -u slurm
@@ -134,6 +131,7 @@ do
   user_name=`echo $user_row | awk '{print $2}'`
   user_passwd=`echo $user_row | awk '{print $3}'`
   user_status=`echo $user_row | awk '{print $4}'`
+  private_app_registry="/hpc_apps/${user_name}_apps/.private_apps.reg"
   useradd ${user_name} -m
   mkdir -p /home/${user_name} && chown -R ${user_name}:${user_name} /home/${user_name}
   echo -e "source /etc/profile" >> /home/${user_name}/.bashrc
@@ -146,6 +144,7 @@ do
     mkdir -p /hpc_data/${user_name}_data
     mkdir -p /hpc_apps/${user_name}_apps
     mkdir -p /hpc_apps/envmod/${user_name}_env
+    touch ${private_app_registry}
     chmod -R 750 /hpc_data/${user_name}_data
     chmod -R 750 /hpc_apps/${user_name}_apps
     chmod -R 750 /hpc_apps/envmod/${user_name}_env

@@ -7,8 +7,10 @@
 # This script is used by 'hpcmgr' command to build *OpenFOAM-9* to HPC-NOW cluster.
 
 current_user=`whoami`
-public_app_registry="/usr/hpc-now/.public_apps.reg"
-private_app_registry="/usr/hpc-now/.private_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
+if [ current_user != 'root' ]; then
+  private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
+fi
 tmp_log="/tmp/hpcmgr_install_of9_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
@@ -138,7 +140,7 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Building OpenFOAM-9 now ... "
 mkdir -p ${of_root}
 rm -rf ${of_root}*
-echo -e "[ STEP 1 ] $time_current Downloading & extracting source packages ..."
+echo -e "[ -INFO- ] $time_current Downloading & extracting source packages ..."
 if [ ! -f ${app_cache}OpenFOAM-9.zip ]; then
   wget ${url_pkgs}OpenFOAM-9.zip -O ${app_cache}OpenFOAM-9.zip -o ${tmp_log}
 fi  
@@ -151,11 +153,8 @@ unzip -o ThirdParty-9.zip -d ${of_cache} >> ${tmp_log}
 cd ${of_cache}
 rm -rf OpenFOAM-9 && rm -rf ThirdParty-9
 mv OpenFOAM-9-master OpenFOAM-9 && mv ThirdParty-9-master ThirdParty-9
-echo -e "[ -INFO- ] Removing the tarballs are not recommended. If you want to rebuild OF9, please remove the folder OpenFOAM-9 & ThirdParty-9."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "[ STEP 2 ] $time_current Removing previously-built binaries ..."
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "[ STEP 3 ] $time_current Compiling started ..."
+echo -e "[ -INFO- ] $time_current Compiling started ..."
 export MPI_ROOT=${mpi_root}
 echo "${mpi_env}" | grep ompi >> /dev/null 2>&1
 if [ $? -eq 0 ]; then

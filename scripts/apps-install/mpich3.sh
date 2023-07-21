@@ -7,8 +7,10 @@
 # This script is used by 'hpcmgr' command to build *MPICH-3.2.1* to HPC-NOW cluster.
 
 current_user=`whoami`
-public_app_registry="/usr/hpc-now/.public_apps.reg"
-private_app_registry="/usr/hpc-now/.private_apps.reg"
+public_app_registry="/hpc_apps/.public_apps.reg"
+if [ current_user != 'root' ]; then
+  private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
+fi
 tmp_log="/tmp/hpcmgr_install_mpich3_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
