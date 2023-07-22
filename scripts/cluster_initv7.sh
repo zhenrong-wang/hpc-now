@@ -437,6 +437,7 @@ if [ -f /root/hostfile ]; then
   yum -y install rpcbind flex GConf2 cmake cmake3 tcsh
   yum -y install ibus libXScrnSaver
   yum -y install gmp-devel mpfr-devel
+  yum -y install ibus-pinyin
   if [ $cloud_flag = 'CLOUD_B' ]; then
     wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O /opt/cosbrowser.zip
     cd /opt && unzip -o cosbrowser.zip && rm -rf cosbrowser.zip
