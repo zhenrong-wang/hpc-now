@@ -155,25 +155,29 @@ echo -e "[ START: ] Downloading and Extracting source code ..."
 if [ ! -f ${app_cache}scalapack-master.zip ]; then
   wget ${url_pkgs}scalapack-master.zip -O ${app_cache}scalapack-master.zip -o ${tmp_log}
 fi
-unzip -o ${app_cache}scalapack-master.zip -d ${app_root} >> $tmp_log
+unzip -o ${app_cache}scalapack-master.zip -d ${app_extract_cache} >> $tmp_log
 rm -rf ${app_root}scalapack
-mv ${app_root}scalapack-master ${app_root}scalapack
+rm -rf ${app_extract_cache}scalapack
+mv ${app_extract_cache}scalapack-master ${app_extract_cache}scalapack
 echo -e "[ STEP 1 ] Building ScaLAPACK ... This step usually takes seconds."
-cd ${app_root}scalapack
+cd ${app_extract_cache}scalapack
 /bin/cp SLmake.inc.example SLmake.inc
 if [ $gcc_vnum -gt 10 ]; then
-  sed -i 's@FCFLAGS       = -O3@FCFLAGS       = -O3 -fallow-argument-mismatch -fPIC@g' ${app_root}scalapack/SLmake.inc
+  sed -i 's@FCFLAGS       = -O3@FCFLAGS       = -O3 -fallow-argument-mismatch -fPIC@g' ${app_extract_cache}scalapack/SLmake.inc
 else
-  sed -i 's@FCFLAGS       = -O3@FCFLAGS       = -O3 -fPIC@g' ${app_root}scalapack/SLmake.inc
+  sed -i 's@FCFLAGS       = -O3@FCFLAGS       = -O3 -fPIC@g' ${app_extract_cache}scalapack/SLmake.inc
 fi
-sed -i "s@BLASLIB       = -lblas@BLASLIB       = -L${lapack_lib} -lrefblas -lcblas@g" ${app_root}scalapack/SLmake.inc
-sed -i "s@LAPACKLIB     = -llapack@LAPACKLIB     = -L${lapack_lib} -llapack.a -llapacke -ltmglib@g" ${app_root}scalapack/SLmake.inc
-cd ${app_root}scalapack
+sed -i "s@BLASLIB       = -lblas@BLASLIB       = -L${lapack_lib} -lrefblas -lcblas@g" ${app_extract_cache}scalapack/SLmake.inc
+sed -i "s@LAPACKLIB     = -llapack@LAPACKLIB     = -L${lapack_lib} -llapack.a -llapacke -ltmglib@g" ${app_extract_cache}scalapack/SLmake.inc
+cd ${app_extract_cache}scalapack
 make lib >> $tmp_log
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build ScaLAPACK. Please check the log file for more details. Exit now."
-  exit
+  exit 3
 fi
+rm -rf ${app_root}scalapack
+mkdir -p ${app_root}scalapack
+/bin/cp ${app_extract_cache}scalapack/libscalapack.a ${app_root}scalapack/
 echo -e "#%Module1.0\nprepend-path LIBRARY_PATH ${app_root}scalapack\n" > ${envmod_root}scalapack
 if [ $current_user = 'root' ]; then
   echo -e "< slpack2 >" >> $public_app_registry

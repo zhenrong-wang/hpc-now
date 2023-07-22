@@ -101,14 +101,23 @@ echo -e "[ START: ] Downloading and Extracting source code ..."
 if [ ! -f ${app_cache}lapack-3.11.tar.gz ]; then
   wget ${url_pkgs}lapack-3.11.tar.gz -O ${app_cache}lapack-3.11.tar.gz -o $tmp_log
 fi
-tar zvxf ${app_cache}lapack-3.11.tar.gz -C ${app_root} >> $tmp_log
+tar zvxf ${app_cache}lapack-3.11.tar.gz -C ${app_extract_cache} >> $tmp_log
 echo -e "[ STEP 1 ] Building LAPACK, BLAS, CBLAS, LAPACKE ... This step usually takes minutes."
-cd ${app_root}lapack-3.11/
-bin/cp make.inc.example make.inc
+cd ${app_extract_cache}lapack-3.11/
+/bin/cp make.inc.example make.inc
 make -j$num_processors >> $tmp_log
-cd ${app_root}lapack-3.11/LAPACKE && make -j$num_processors >> $tmp_log
-cd ${app_root}lapack-3.11/BLAS && make -j$num_processors >> $tmp_log
-cd ${app_root}lapack-3.11/CBLAS && make -j$num_processors >> $tmp_log
+cd ${app_extract_cache}lapack-3.11/LAPACKE && make -j$num_processors >> $tmp_log
+cd ${app_extract_cache}lapack-3.11/BLAS && make -j$num_processors >> $tmp_log
+cd ${app_extract_cache}lapack-3.11/CBLAS && make -j$num_processors >> $tmp_log
+if [ $? -ne 0 ]; then
+  echo -e "[ FATAL: ] Failed to build ScaLAPACK. Please check the log file for more details. Exit now."
+  exit 3
+fi
+rm -rf ${app_root}lapack-3.11
+mkdir -p ${app_root}lapack-3.11
+/bin/cp -r ${app_extract_cache}lapack-3.11/*.a ${app_root}lapack-3.11
+/bin/cp -r ${app_extract_cache}lapack-3.11/LAPACKE ${app_root}lapack-3.11/
+/bin/cp -r ${app_extract_cache}lapack-3.11/CBLAS ${app_root}lapack-3.11/
 echo -e "#%Module1.0\nprepend-path LIBRARY_PATH ${app_root}lapack-3.11" > ${envmod_root}lapack-3.11
 echo -e "prepend-path C_INCLUDE_PATH ${app_root}lapack-3.11/LAPACKE/include" >> ${envmod_root}lapack-3.11
 echo -e "prepend-path C_INCLUDE_PATH ${app_root}lapack-3.11/CBLAS/include" >> ${envmod_root}lapack-3.11

@@ -31,16 +31,15 @@ fi
 
 if [ $1 = 'remove' ]; then
   rm -rf ${app_root}fftw3
+  rm -rf ${envmod_root}fftw3
   if [ $current_user = 'root' ]; then
     sed -i '/< fftw3 >/d' $public_app_registry
-    sed -i '/fftw3/d' /etc/profile
   else
-    sed -e "/< fftw3 > < ${user_name} >/d" $private_app_registry > /tmp/sed_${user_name}.tmp
-    cat /tmp/sed_${user_name}.tmp > $private_app_registry
-    rm -rf /tmp/sed_${user_name}.tmp
-    sed -i '/fftw3/d' $HOME/.bashrc
+    sed -e "/< fftw3 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
+    cat /tmp/sed_${current_user}.tmp > $private_app_registry
+    rm -rf /tmp/sed_${current_user}.tmp
   fi
-  echo -e "[ -INFO- ] Cosbrowser has been removed successfully."
+  echo -e "[ -INFO- ] FFTW-3.3.10 has been removed successfully."
   exit 0
 fi
 

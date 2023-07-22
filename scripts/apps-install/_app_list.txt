@@ -10,6 +10,9 @@
 < hdf5 >
 < netcdf4 >
 < abinit >
+< vasp5 >
+< vasp6.1 >
+< vasp6.3 >
 
 2. MPI Toolkits:
 < mpich3 >
