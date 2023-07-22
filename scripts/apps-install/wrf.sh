@@ -41,10 +41,12 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Updating the registry ..."
   if [ $current_user = 'root' ]; then
     sed -i '/< wrf >/d' $public_app_registry
+    sed -i '/wrfenv=/d' /etc/profile
   else
     sed -e "/< wrf > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
     cat /tmp/sed_${current_user}.tmp > $private_app_registry
     rm -rf /tmp/sed_${current_user}.tmp
+    sed -i '/wrfenv=/d' $HOME/.bashrc
   fi
   echo -e "[ -INFO- ] WRF & WPS has been removed successfully."
   exit 0
@@ -144,17 +146,21 @@ grep "< netcdf4 >" $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   module load netcdf4
   netcdf4_root="/hpc_apps/netcdf4/"
+  netcdf4_env="netcdf4"
 else
   module load ${current_user}_env/netcdf4
   netcdf4_root="${app_root}netcdf4/"
+  netcdf4_env="${current_user}_env/netcdf4"
 fi
 grep "< hdf5 >" $public_app_registry >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   module load hdf5-1.10.9
   hdf5_root="/hpc_apps/hdf5-1.10.9/"
+  hdf5_env="hdf5-1.10.9"
 else
   module load ${current_user}_env/hdf5-1.10.9
   hdf5_root="${app_root}hdf5-1.10.9/"
+  hdf5_env="${current_user}_env/hdf5-1.10.9"
 fi
 
 echo -e "[ -INFO- ] Checking and installing prerequisitions: jasper ..."
@@ -209,6 +215,7 @@ if [ $systemgcc = 'false' ]; then
   echo -e "module load $gcc_env" >> ${wrf_root}wrfenv.sh
 fi
 echo -e "module load ${mpi_env}\nexport PATH=${wrf_root}:\$PATH" >> ${wrf_root}wrfenv.sh
+echo -e "module load ${netcdf4_env}\nmodule load ${hdf5_env}" >> ${wrf_root}wrfenv.sh
 echo -e "export LD_LIBRARY_PATH=${wrf_root}jasper/lib:\$LD_LIBRARY_PATH" >> ${wrf_root}wrfenv.sh
 echo -e "[ STEP 4 ] Building WPS now ..."
 if [ ! -f ${app_cache}wps-latest.tar.gz ]; then
