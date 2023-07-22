@@ -208,7 +208,8 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
     }
     fprintf(file_p,"App Name       ::%s\n",job_info->app_name);
     fprintf(file_p,"Job Nodes      ::%d\n",job_info->node_num);
-    fprintf(file_p,"Cores per node ::%d\n",job_info->tasks_per_node);
+    fprintf(file_p,"Cores Per Node ::%d\n",job_info->tasks_per_node);
+    fprintf(file_p,"Total Cores    ::%d\n",job_info->tasks_per_node*job_info->node_num);
     fprintf(file_p,"Job Name       ::%s\n",job_info->job_name);
     fprintf(file_p,"Duration Hours ::%d\n",job_info->duration_hours);
     fprintf(file_p,"Job Executable ::%s\n",job_info->job_exec);

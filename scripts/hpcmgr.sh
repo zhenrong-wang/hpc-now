@@ -672,12 +672,40 @@ elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
   curl -s ${url_instscripts_root}${2}.sh | bash -s $1
   exit 0
 elif [ $1 = 'submit' ]; then
-  if [ ! -f /tmp/job_submit_info_${current_user} ]; then
-    echo -e "[ -INFO- ] Job submit info is absent. Exit now."
+  if [ -z $2 ]; then
+    job_info_tmp="/tmp/job_submit_info_${current_user}.tmp"
+  else
+    job_info_tmp=$2
+  fi
+  if [ ! -f ${job_info_tmp} ]; then
+    echo -e "[ FATAL: ] Job submit info file $2 is absent. Exit now."
     exit 51
   fi
-  
-  exit 0
+  app_name=`grep "App Name" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  job_nodes=`grep "Job Nodes" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  cores_per_node=`grep "Cores Per Node" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  total_cores=`grep "Total Cores" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  job_name=`grep "Job Name" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  duration_hours=`grep "Duration Hours" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  job_exec=`grep "Job Executable" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  data_directory=`grep "Data Directory" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  echo -e '#!/bin/bash' > ${data_directory}/job_submit.sh
+  echo -e "#SBATCH --account=hpc_users\n#SBATCH --cluster=cluster\n#SBATCH --partition=debug" >> ${data_directory}/job_submit.sh
+  echo -e "#SBATCH --nodes=${job_nodes}\n#SBATCH --ntasks-per-node=${cores_per_node}" >> ${data_directory}/job_submit.sh
+  echo -e "#SBATCH --job-name=${job_name}\n#SBATCH --output=output.%j.${job_name}.out" >> ${data_directory}/job_submit.sh
+  echo -e "#SBATCH --time=${duration_hours}:00:00\n" >> ${data_directory}/job_submit.sh
+  echo -e "mpirun -np ${total_cores} -bind-to numa ${job_exec} -parallel > ${data_directory}/${job_name}_run.log" ${data_directory}/job_submit.sh
+  cd ${data_directory}
+  ${app_name}.env
+  sbatch job_submit.sh
+  rm -rf ${job_info_tmp}
+  if [ $? -eq 0 ]; then
+    echo -e "[ -INFO- ] Job submitted successfully."
+    exit 0
+  else
+    echo -e "[ -INFO- ] Failed to submit the job."
+    exit 53
+  fi
 else
   echo -e "[ FATAL ] The command $1 is invalid."
   help_info
