@@ -41,12 +41,12 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Updating the registry ..."
   if [ $current_user = 'root' ]; then
     sed -i '/< wrf >/d' $public_app_registry
-    sed -i '/wrfenv=/d' /etc/profile
+    sed -i '/wrf.env=/d' /etc/profile
   else
     sed -e "/< wrf > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
     cat /tmp/sed_${current_user}.tmp > $private_app_registry
     rm -rf /tmp/sed_${current_user}.tmp
-    sed -i '/wrfenv=/d' $HOME/.bashrc
+    sed -i '/wrf.env=/d' $HOME/.bashrc
   fi
   echo -e "[ -INFO- ] WRF & WPS has been removed successfully."
   exit 0
@@ -237,15 +237,15 @@ else
 fi
 
 if [ $current_user = 'root' ]; then
-  grep "alias wrfenv" /etc/profile >> /dev/null 2>&1
+  grep "alias wrf.env" /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias wrfenv='source ${wrf_root}wrfenv.sh'" >> /etc/profile
+    echo -e "alias wrf.env='source ${wrf_root}wrfenv.sh'" >> /etc/profile
   fi
   echo -e "< wrf >" >> $public_app_registry
 else
-  grep "alias wrfenv" $HOME/.bashrc >> /dev/null 2>&1
+  grep "alias wrf.env" $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias wrfenv='source ${wrf_root}wrfenv.sh'" >> $HOME/.bashrc
+    echo -e "alias wrf.env='source ${wrf_root}wrfenv.sh'" >> $HOME/.bashrc
   fi
   echo -e "< wrf > < ${current_user} >" >> $private_app_registry
 fi

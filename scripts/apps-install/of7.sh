@@ -41,10 +41,10 @@ if [ $1 = 'remove' ]; then
   rm -rf ${of_root}ThirdParty-7
   echo -e "[ -INFO- ] Updating envrionment variables ..."
   if [ $current_user = 'root' ]; then
-    sed -i '/of7.sh/d' /etc/profile
+    sed -i '/of7.env/d' /etc/profile
     sed -i '/< of7 >/d' ${public_app_registry}
   else
-    sed -i '/of7.sh/d' $HOME/.bashrc
+    sed -i '/of7.env/d' $HOME/.bashrc
     sed -e "/< of7 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
     cat /tmp/sed_${current_user}.tmp > $private_app_registry
     rm -rf /tmp/sed_${current_user}.tmp
@@ -233,13 +233,13 @@ echo -e "echo -e \"OpenFOAM7 with ${mpi_env} and ${gcc_v} is ready for running.\
 if [ $current_user = 'root' ]; then
   grep of7 /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias of7='source ${of_root}of7.sh'" >> /etc/profile
+    echo -e "alias of7.env='source ${of_root}of7.sh'" >> /etc/profile
   fi
   echo -e "< of7 >" >> $public_app_registry
 else
   grep of7 $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias of7='source ${of_root}of7.sh'" >> $HOME/.bashrc
+    echo -e "alias of7.env='source ${of_root}of7.sh'" >> $HOME/.bashrc
   fi
   echo -e "< of7 > < ${current_user} >" >> $private_app_registry
 fi

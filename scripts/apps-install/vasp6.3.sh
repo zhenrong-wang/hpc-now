@@ -52,12 +52,12 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Removing environment variables ..."
   if [ $current_user = 'root' ]; then
     sed -i '/< vasp6.3 >/d' $public_app_registry
-    sed -i '/vasp63env=/d' /etc/profile
+    sed -i '/vasp6.3.env=/d' /etc/profile
   else
     sed -e "/< vasp6.3 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
     cat /tmp/sed_${current_user}.tmp > $private_app_registry
     rm -rf /tmp/sed_${current_user}.tmp
-    sed -i '/vasp63env=/d' $HOME/.bashrc
+    sed -i '/vasp6.3.env=/d' $HOME/.bashrc
   fi
   echo -e "[ -INFO- ] VASP-6.3.0 has been removed successfully."
   exit 0
@@ -260,15 +260,15 @@ echo -e "export PATH=${app_root}vasp.6.3.0/bin:\$PATH" >> ${app_root}vasp.6.3.0/
 echo -e "echo -e \"VASP-6.3.0 is ready for running.\"" >> ${app_root}vasp.6.3.0/vasp6.3.sh
 
 if [ $current_user = 'root' ]; then
-  grep "alias vasp63env" /etc/profile >> /dev/null 2>&1
+  grep "alias vasp6.3.env" /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias vasp63env='source ${app_root}vasp.6.3.0/vasp6.3.sh'" >> /etc/profile
+    echo -e "alias vasp6.3.env='source ${app_root}vasp.6.3.0/vasp6.3.sh'" >> /etc/profile
   fi
   echo -e "< vasp5 >" >> $public_app_registry
 else
-  grep "alias vasp63env" $HOME/.bashrc >> /dev/null 2>&1
+  grep "alias vasp6.3.env" $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias vasp63env='source ${app_root}vasp.6.3.0/vasp6.3.sh'" >> $HOME/.bashrc
+    echo -e "alias vasp6.3.env='source ${app_root}vasp.6.3.0/vasp6.3.sh'" >> $HOME/.bashrc
   fi
   echo -e "< vasp5 > < ${current_user} >" >> $private_app_registry
 fi

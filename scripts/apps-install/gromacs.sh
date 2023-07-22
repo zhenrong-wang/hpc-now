@@ -43,10 +43,12 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Updating the registry ..."
   if [ $current_user = 'root' ]; then
     sed -i '/< gromacs >/d' $public_app_registry
+    sed -i '/gromacs.env=/d' /etc/profile
   else
     sed -e "/< gromacs > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
     cat /tmp/sed_${current_user}.tmp > $private_app_registry
     rm -rf /tmp/sed_${current_user}.tmp
+    sed -i '/gromacs.env=/d' $HOME/.bashrc
   fi
   echo -e "[ -INFO- ] ABINIT has been removed successfully."
   exit 0
@@ -174,17 +176,17 @@ if [ $? -ne 0 ]; then
 fi
 make install >> ${tmp_log}
 if [ $current_user = 'root' ]; then
-  grep "alias gmxenv" /etc/profile >> /dev/null 2>&1
+  grep "alias gromacs.env" /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias gmxenv='module load ${fftw3_env} && source ${app_root}gromacs2022/bin/GMXRC'" >> /etc/profile
+    echo -e "alias gromacs.env='module load ${fftw3_env} && source ${app_root}gromacs2022/bin/GMXRC'" >> /etc/profile
   fi
   echo -e "< gromacs >" >> $public_app_registry
 else
-  grep "alias gmxenv" $HOME/.bashrc >> /dev/null 2>&1
+  grep "alias gromacs.env" $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias gmxenv='module load ${fftw3_env} && source ${app_root}gromacs2022/bin/GMXRC'" >> $HOME/.bashrc
+    echo -e "alias gromacs.env='module load ${fftw3_env} && source ${app_root}gromacs2022/bin/GMXRC'" >> $HOME/.bashrc
   fi
   echo -e "< gromacs > < ${current_user} >" >> $private_app_registry
 fi
 echo -e "[ -DONE- ] Congratulations! GROMACS-2022-2 has been built."
-echo -e "|          Please run 'gmxenv' command to load the environment before using GROMACS."
+echo -e "|          Please run 'gromacs.env' command to load the environment before using GROMACS."

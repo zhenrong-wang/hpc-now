@@ -672,7 +672,11 @@ elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
   curl -s ${url_instscripts_root}${2}.sh | bash -s $1
   exit 0
 elif [ $1 = 'submit' ]; then
-  echo -e "[ -INFO- ] This module is in development. Please wait for days."
+  if [ ! -f /tmp/job_submit_info_${current_user} ]; then
+    echo -e "[ -INFO- ] Job submit info is absent. Exit now."
+    exit 51
+  fi
+  
   exit 0
 else
   echo -e "[ FATAL ] The command $1 is invalid."

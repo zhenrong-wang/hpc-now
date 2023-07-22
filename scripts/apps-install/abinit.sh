@@ -38,10 +38,12 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Updating the registry ..."
   if [ $current_user = 'root' ]; then
     sed -i '/< abinit >/d' $public_app_registry
+    sed -i '/abinit.env=/d' /etc/profile
   else
     sed -e "/< abinit > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
     cat /tmp/sed_${current_user}.tmp > $private_app_registry
     rm -rf /tmp/sed_${current_user}.tmp
+    sed -i '/abinit.env=/d' $HOME/.bashrc
   fi
   echo -e "[ -INFO- ] ABINIT has been removed successfully."
   exit 0
@@ -239,14 +241,14 @@ echo -e "echo -e \"ABINIT is ready for running.\"" >> ${abinit_root}abinit_env.s
 if [ $current_user = 'root' ]; then
   grep abinit /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias abinitenv='source ${abinit_root}abinit_env.sh'" >> /etc/profile
+    echo -e "alias abinit.env='source ${abinit_root}abinit_env.sh'" >> /etc/profile
   fi
   echo -e "< abinit >" >> $public_app_registry
 else
   grep abinit $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias abinitenv='source ${abinit_root}abinit_env.sh'" >> $HOME/.bashrc
+    echo -e "alias abinit.env='source ${abinit_root}abinit_env.sh'" >> $HOME/.bashrc
   fi
   echo -e "< abinit > < $current_user >" >> $private_app_registry
 fi
-echo -e "[ -DONE- ] ABINIT-9.6.2 has been sucessfully built to your cluster. You need to run command 'abinitenv' before using it."
+echo -e "[ -DONE- ] ABINIT-9.6.2 has been sucessfully built to your cluster. You need to run command 'abinit.env' before using it."

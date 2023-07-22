@@ -38,10 +38,12 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Updating the registry ..."
   if [ $current_user = 'root' ]; then
     sed -i '/< lammps >/d' $public_app_registry
+    sed -i '/lammps.env=/d' /etc/profile
   else
     sed -e "/< lammps > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
     cat /tmp/sed_${current_user}.tmp > $private_app_registry
     rm -rf /tmp/sed_${current_user}.tmp
+    sed -i '/lammps.env=/d' $HOME/.bashrc
   fi
   echo -e "[ -INFO- ] LAMMPS has been removed successfully."
   exit 0
@@ -219,15 +221,15 @@ echo -e "export C_INCLUDE_PATH=${app_root}lammps/ADIOS2/include:\$C_INCLUDE_PATH
 echo -e "echo -e \"LAMMPS is ready for running.\""  >> ${app_root}lammps/lammps_environment.sh
 
 if [ $current_user = 'root' ]; then
-  grep "alias lmpenv" /etc/profile >> /dev/null 2>&1
+  grep "alias lammps.env" /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias lmpenv='source ${app_root}lammps/lammps_environment.sh'" >> /etc/profile
+    echo -e "alias lammps.env='source ${app_root}lammps/lammps_environment.sh'" >> /etc/profile
   fi
   echo -e "< lammps >" >> $public_app_registry
 else
-  grep "alias lmpenv" $HOME/.bashrc >> /dev/null 2>&1
+  grep "alias lammps.env" $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias lmpenv='source ${app_root}lammps/lammps_environment.sh'" >> $HOME/.bashrc
+    echo -e "alias lammps.env='source ${app_root}lammps/lammps_environment.sh'" >> $HOME/.bashrc
   fi
   echo -e "< lammps > < ${current_user} >" >> $private_app_registry
 fi

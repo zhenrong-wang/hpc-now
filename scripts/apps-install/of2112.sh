@@ -41,10 +41,10 @@ if [ $1 = 'remove' ]; then
   rm -rf ${of_root}ThirdParty-v2112
   echo -e "[ -INFO- ] Updating envrionment variables ..."
   if [ $current_user = 'root' ]; then
-    sed -i '/of2112.sh/d' /etc/profile
+    sed -i '/of2112.env/d' /etc/profile
     sed -i '/< of2112 >/d' ${public_app_registry}
   else
-    sed -i '/of2112.sh/d' $HOME/.bashrc
+    sed -i '/of2112.env/d' $HOME/.bashrc
     sed -e "/< of2112 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
     cat /tmp/sed_${current_user}.tmp > $private_app_registry
     rm -rf /tmp/sed_${current_user}.tmp
@@ -232,13 +232,13 @@ echo -e "echo -e \"OpenFOAM-v2112 with ${mpi_env} and ${gcc_v} is ready for runn
 if [ $current_user = 'root' ]; then
   grep of2112 /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias of2112='source ${of_root}of2112.sh'" >> /etc/profile
+    echo -e "alias of2112.env='source ${of_root}of2112.sh'" >> /etc/profile
   fi
   echo -e "< of2112 >" >> $public_app_registry
 else
   grep of2112 $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias of2112='source ${of_root}of2112.sh'" >> $HOME/.bashrc
+    echo -e "alias of2112.env='source ${of_root}of2112.sh'" >> $HOME/.bashrc
   fi
   echo -e "< of2112 > < ${current_user} >" >> $private_app_registry
 fi

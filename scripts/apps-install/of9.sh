@@ -41,10 +41,10 @@ if [ $1 = 'remove' ]; then
   rm -rf ${of_root}ThirdParty-9
   echo -e "[ -INFO- ] Updating envrionment variables ..."
   if [ $current_user = 'root' ]; then
-    sed -i '/of9.sh/d' /etc/profile
+    sed -i '/of9.env/d' /etc/profile
     sed -i '/< of9 >/d' ${public_app_registry}
   else
-    sed -i '/of9.sh/d' $HOME/.bashrc
+    sed -i '/of9.env/d' $HOME/.bashrc
     sed -e "/< of9 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
     cat /tmp/sed_${current_user}.tmp > $private_app_registry
     rm -rf /tmp/sed_${current_user}.tmp
@@ -231,13 +231,13 @@ echo -e "echo -e \"OpenFOAM9 with ${mpi_env} and ${gcc_v} is ready for running.\
 if [ $current_user = 'root' ]; then
   grep of9 /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias of9='source ${of_root}of9.sh'" >> /etc/profile
+    echo -e "alias of9.env='source ${of_root}of9.sh'" >> /etc/profile
   fi
   echo -e "< of9 >" >> $public_app_registry
 else
   grep of9 $HOME/.bashrc >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo -e "alias of9='source ${of_root}of9.sh'" >> $HOME/.bashrc
+    echo -e "alias of9.env='source ${of_root}of9.sh'" >> $HOME/.bashrc
   fi
   echo -e "< of9 > < ${current_user} >" >> $private_app_registry
 fi
