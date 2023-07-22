@@ -697,6 +697,10 @@ elif [ $1 = 'submit' ]; then
   echo -e "mpirun -np ${total_cores} -bind-to numa ${job_exec} -parallel > ${data_directory}/${job_name}_run.log" ${data_directory}/job_submit.sh
   cd ${data_directory}
   ${app_name}.env
+  if [ $? -ne 0 ]; then
+    echo -e "[ FATAL: ] Failed to load the running environment for ${app_name}. Exit now."
+    exit 53
+  fi
   sbatch job_submit.sh
   rm -rf ${job_info_tmp}
   if [ $? -eq 0 ]; then
@@ -704,7 +708,7 @@ elif [ $1 = 'submit' ]; then
     exit 0
   else
     echo -e "[ -INFO- ] Failed to submit the job."
-    exit 53
+    exit 55
   fi
 else
   echo -e "[ FATAL ] The command $1 is invalid."
