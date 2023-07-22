@@ -685,20 +685,68 @@ int folder_exist_or_not(char* foldername){
     }
 }
 
+int password_complexity_check(char* password){
+    int i,length=strlen(password);
+    int uppercase_flag=0;
+    int lowercase_flag=0;
+    int number_flag=0;
+    int special_ch_flag=0;
+    for(i=0;i<length;i++){
+        if(*(password+i)=='A'||*(password+i)=='Z'){
+            uppercase_flag=1;
+        }
+        else if(*(password+i)>'A'&&*(password+i)<'Z'){
+            uppercase_flag=1;
+        }
+        else if(*(password+i)=='a'||*(password+i)=='z'){
+            lowercase_flag=1;
+        }
+        else if(*(password+i)>'a'&&*(password+i)<'z'){
+            lowercase_flag=1;
+        }
+        else if(*(password+i)=='0'||*(password+i)=='9'){
+            number_flag=1;
+        }
+        else if(*(password+i)>'0'&&*(password+i)<'9'){
+            number_flag=1;
+        }
+        else{
+            special_ch_flag=1;
+        }
+    }
+//    printf(" ------%d   %d    %d    %d    %d\n\n",length,uppercase_flag,lowercase_flag,number_flag,special_ch_flag);
+    if((uppercase_flag+lowercase_flag+number_flag+special_ch_flag)<3){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
 int generate_random_passwd(char* password){
-    int i,rand_num;
+    int i,total_times,rand_num;
     struct timeval current_time;
     char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
+    char password_temp[PASSWORD_STRING_LENGTH]="";
     unsigned int seed_num;
-    for(i=0;i<PASSWORD_LENGTH;i++){
-        GETTIMEOFDAY_FUNC(&current_time,NULL);
-        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
-        srand(seed_num);
-        rand_num=rand()%72;
-        *(password+i)=*(ch_table+rand_num);
-        usleep(5000);
+    for(total_times=0;total_times<10;total_times++){
+        for(i=0;i<PASSWORD_LENGTH;i++){
+            GETTIMEOFDAY_FUNC(&current_time,NULL);
+            seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+            srand(seed_num);
+            rand_num=rand()%72;
+            *(password_temp+i)=*(ch_table+rand_num);
+            usleep(5000);
+        }
+//        printf(":::   %s \n",password_temp);
+        if(password_complexity_check(password_temp)==0){
+//            printf(":::   %s \n",password_temp);
+            strcpy(password,password_temp);
+            return 0;
+        }
+        reset_string(password_temp);
     }
-    return 0;
+    return 1;
 }
 
 int generate_random_db_passwd(char* password){

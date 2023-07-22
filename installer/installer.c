@@ -222,11 +222,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating and configuring the running directory ...\n");
     system("mkdir c:\\hpc-now > nul 2>&1");
-    system("mkdir c:\\hpc-now\\LICENSES > nul 2>&1");
-    system("mkdir c:\\hpc-now\\.now-ssh\\ > nul 2>&1");
+    system("mkdir c:\\hpc-now\\utils > nul 2>&1");
+    system("mkdir c:\\hpc-now\\hpc-now.licenses > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\ > nul 2>&1");
+    system("mkdir c:\\programdata\\hpc-now\\.now-ssh\\ > nul 2>&1");
     system("mkdir c:\\programdata\\hpc-now\\.destroyed\\ > nul 2>&1");
-    system("mkdir c:\\programdata\\hpc-now\\bin\\ > nul 2>&1");
     system("icacls c:\\hpc-now /grant hpc-now:(OI)(CI)F /t > nul 2>&1");
     system("icacls c:\\hpc-now /deny hpc-now:(DE) /t > nul 2>&1");
 #elif __linux__
@@ -291,8 +291,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating and configuring the running directory ...\n");
-    system("mkdir -p /home/hpc-now/.bin >> /dev/null 2>&1");
-    system("mkdir -p /usr/.hpc-now/.bin >> /dev/null 2>&1 && chmod -R 700 /usr/.hpc-now >> /dev/null 2>&1");
+    system("mkdir -p /home/hpc-now/.bin/utils >> /dev/null 2>&1");
+    system("mkdir -p /usr/.hpc-now >> /dev/null 2>&1");
+    system("chmod -R 700 /usr/.hpc-now >> /dev/null 2>&1");
 #elif __APPLE__
     system("rm -rf /Users/hpc-now/ >> /dev/null 2>&1");
     system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
@@ -312,8 +313,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating and configuring the running directory ...\n");
     system("mkdir -p /Users/hpc-now >> /dev/null 2>&1");
-    system("mkdir -p /Users/hpc-now/.bin >> /dev/null 2>&1");
-    system("mkdir -p /Applications/.hpc-now/.bin >> /dev/null 2>&1 && chmod -R 700 /Applications/.hpc-now >> /dev/null 2>&1");
+    system("mkdir -p /Users/hpc-now/.bin/utils >> /dev/null 2>&1");
+    system("mkdir -p /Applications/.hpc-now >> /dev/null 2>&1");
+    system("chmod -R 700 /Applications/.hpc-now >> /dev/null 2>&1");
 #endif
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a random file for encryption/decryption ...\n");
     generate_random_passwd(random_string);
@@ -395,7 +397,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
         system("net user hpc-now /delete > nul 2>&1");
         return -1;
     }
-    sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
+    sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\GPL-2",URL_LICENSE);
     system(cmdline1);
     system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
@@ -454,16 +456,16 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     sprintf(cmdline1,"chmod +x %s && chmod +x %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating other key running directories ...\n");
-    system("mkdir -p /home/hpc-now/.now-ssh/ >> /dev/null 2>&1");
-    system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
-    sprintf(cmdline1,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
+    system("mkdir -p /home/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
+    system("mkdir -p /usr/.hpc-now/.now-ssh/ >> /dev/null 2>&1");
+    sprintf(cmdline1,"curl -s %s -o /home/hpc-now/hpc-now.licenses/GPL-2",URL_LICENSE);
     system(cmdline1);
     system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /home/hpc-now/ >> /dev/null 2>&1");
-    system("chown -R hpc-now:hpc-now /usr/.hpc-now/.bin >> /dev/null 2>&1");
-    system("chown hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
     system("chmod -R 700 /home/hpc-now/ >> /dev/null 2>&1");
-    system("chmod 711 /home/hpc-now >> /dev/null 2>&1 && chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
+    system("chmod 711 /home/hpc-now >> /dev/null 2>&1");
+    system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
+    system("chown -R hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
     sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
@@ -504,16 +506,16 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     sprintf(cmdline1,"chmod +x %s && chmod +x %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating other key running directories ...\n");
-    system("mkdir -p /Users/hpc-now/.now-ssh/ >> /dev/null 2>&1");
-    system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
-    sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/LICENSES/GPL-2",URL_LICENSE);
+    system("mkdir -p /Users/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
+    system("mkdir -p /Applications/.hpc-now/.now-ssh/ >> /dev/null 2>&1");
+    sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/GPL-2",URL_LICENSE);
     system(cmdline1);
     system("mkdir -p '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chmod -R 755 '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chown -R hpc-now:hpc-now '/Library/Application Support/io.terraform' >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Users/hpc-now/ >> /dev/null 2>&1");
-    system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.bin >> /dev/null 2>&1");
-    system("chown hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
     system("chmod -R 700 /Users/hpc-now/ >> /dev/null 2>&1");
-    system("chmod 711 /Users/hpc-now >> /dev/null 2>&1 && chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
+    system("chmod 711 /Users/hpc-now >> /dev/null 2>&1");
+    system("chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
+    system("chown -R hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
     sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
@@ -662,11 +664,43 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UPDATING THE SERVICES NOW ...\n");
 #ifdef _WIN32
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
+    if(system("dir c:\\programdata\\hpc-now | findstr .now-ssh > nul 2>&1")!=0){ // For compatibility
+        printf("[ -INFO- ] Moving previous keys to the new directory ...\n");
+        system("move /y c:\\.now-ssh c:\\programdata\\hpc-now\\ > nul 2>&1");
+    }
     system("takeown /f c:\\hpc-now\\hpcopr.exe /d y > nul 2>&1");
     system("icacls c:\\hpc-now\\hpcopr.exe /grant Administrators:F > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
-    system("takeown /f c:\\programdata\\hpc-now\\bin\\now-crypto.exe /d y > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now\\bin\\now-crypto.exe /grant Administrators:F > nul 2>&1");
+    if(system("dir c:\\hpc-now | findstr utils > nul 2>&1")!=0){ // For compatibility
+        printf("[ -INFO- ] Moving previous utilities to the new directory ...\n");
+        system("move /y c:\\programdata\\hpc-now\\bin c:\\hpc-now\\utils > nul 2>&1");
+    }
+    system("takeown /f c:\\hpc-now\\utils\\now-crypto.exe /d y > nul 2>&1");
+    system("icacls c:\\hpc-now\\utils\\now-crypto.exe /grant Administrators:F > nul 2>&1");
+#elif __linux__
+    if(system("ls -la /home/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
+        printf("[ -INFO- ] Moving previous utilities to the new directory ...\n");
+        system("/bin/cp -r /usr/.hpc-now/.bin /home/hpc-now/.bin/utils >> /dev/null 2>&1");
+        system("chmod -R 711 /home/hpc-now/.bin/utils >> /dev/null 2>&1");
+        system("chown -R hpc-now:hpc-now /home/hpc-now/.bin/utils >> /dev/null 2>&1");
+    }
+    if(system("ls -la /usr/.hpc-now | grep .now-ssh >> /dev/null 2>&1")!=0){
+        printf("[ -INFO- ] Moving previous keys to the new directory ...\n");
+        system("mv /home/hpc-now/.now-ssh /usr/.hpc-now/ >> /dev/null 2>&1");
+        system("chown -R hpc-now:hpc-now /usr/.hpc-now/.now-ssh >> /dev/null 2>&1");
+    }
+#elif __APPLE__
+    if(system("ls -la /Users/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
+        printf("[ -INFO- ] Moving previous utilities to the new directory ...\n");
+        system("/bin/cp -r /Applications/.hpc-now/.bin /Users/hpc-now/.bin/utils >> /dev/null 2>&1");
+        system("chmod -R 711 /Users/hpc-now/.bin/utils >> /dev/null 2>&1");
+        system("chown -R hpc-now:hpc-now /Users/hpc-now/.bin/utils >> /dev/null 2>&1");
+    }
+    if(system("ls -la /Applications/.hpc-now | grep .now-ssh >> /dev/null 2>&1")!=0){
+        printf("[ -INFO- ] Moving previous keys to the new directory ...\n");
+        system("/bin/cp -r /Users/hpc-now/.now-ssh /Applications/.hpc-now/ >> /dev/null 2>&1");
+        system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.now-ssh >> /dev/null 2>&1");
+    }
 #endif
     if(hpcopr_loc_flag==-1){
         if(strlen(hpcopr_ver)==0){
@@ -727,9 +761,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         return 1;
     }
 #ifdef _WIN32
-    system("mkdir c:\\hpc-now\\LICENSES > nul 2>&1");
-    if(file_exist_or_not("C:\\hpc-now\\LICENSES\\GPL-2")!=0){
-        sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\LICENSES\\GPL-2",URL_LICENSE);
+    system("mkdir c:\\hpc-now\\hpc-now.licenses > nul 2>&1");
+    if(file_exist_or_not("C:\\hpc-now\\hpc-now.licenses\\GPL-2")!=0){
+        sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\GPL-2",URL_LICENSE);
         system(cmdline1);
     }
     system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
@@ -757,28 +791,30 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     printf("\n");
 #elif __linux__
-    system("mkdir -p /home/hpc-now/LICENSES/ >> /dev/null 2>&1");
-    if(file_exist_or_not("/home/hpc-now/LICENSES/GPL-2")!=0){
-        sprintf(cmdline1,"curl -s %s -o /home/hpc-now/LICENSES/GPL-2",URL_LICENSE);
+    system("mkdir -p /home/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
+    if(file_exist_or_not("/home/hpc-now/hpc-now.licenses/GPL-2")!=0){
+        sprintf(cmdline1,"curl -s %s -o /home/hpc-now/hpc-now.licenses/GPL-2",URL_LICENSE);
         system(cmdline1);
     }
-    system("chown -R hpc-now:hpc-now /usr/.hpc-now/.bin >> /dev/null 2>&1");
+    system("chown -R hpc-now:hpc-now /home/hpc-now >> /dev/null 2>&1");
     system("chmod -R 700 /home/hpc-now/ >> /dev/null 2>&1");
-    system("chmod 711 /home/hpc-now >> /dev/null 2>&1 && chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
+    system("chmod 711 /home/hpc-now >> /dev/null 2>&1");
+    system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
     sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
 #elif __APPLE__
-    system("mkdir -p /Users/hpc-now/LICENSES/ >> /dev/null 2>&1");
-    if(file_exist_or_not("/Users/hpc-now/LICENSES/GPL-2")!=0){
-        sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/LICENSES/GPL-2",URL_LICENSE);
+    system("mkdir -p /Users/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
+    if(file_exist_or_not("/Users/hpc-now/hpc-now.licenses/GPL-2")!=0){
+        sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/GPL-2",URL_LICENSE);
         system(cmdline1);
     }
-    system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.bin >> /dev/null 2>&1");
+    system("chown -R hpc-now:hpc-now /Users/hpc-now >> /dev/null 2>&1");
     system("chmod -R 700 /Users/hpc-now/ >> /dev/null 2>&1");
-    system("chmod 711 /Users/hpc-now >> /dev/null 2>&1 && chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
+    system("chmod 711 /Users/hpc-now >> /dev/null 2>&1");
+    system("chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
     sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     system("mkdir -p '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chmod -R 755 '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chown -R hpc-now:hpc-now '/Library/Application Support/io.terraform' >> /dev/null 2>&1");

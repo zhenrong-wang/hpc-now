@@ -465,7 +465,7 @@ elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
   echo -e "[ STEP 2 ] Authentication of Compute node(s) is OK."
   echo -e "[ STEP 3 ] Pulling the master node up ..."  
   systemctl restart slurmdbd
-  systemctl enable slurmdbd
+  systemctl enable slurmdbd >> ${logfile}
   systemctl status slurmdbd | grep "Active: active" >> ${logfile}
   if [ $? -eq 0 ]; then
     for i in $( seq 1 2)
@@ -473,7 +473,7 @@ elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
       sleep 1
     done
     systemctl restart slurmctld
-    systemctl enable slurmctld
+    systemctl enable slurmctld >> ${logfile}
     echo -e "[ STEP 3 ] The master node is up."
   else
     echo -e "[ FATAL: ] SLURMDBD is not properly started. Exit now."
@@ -494,7 +494,7 @@ elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
       scp -q /root/hostfile root@compute${i}:/etc/
       scp -q /opt/slurm/etc/slurm.conf root@compute${i}:/opt/slurm/etc/
       ssh compute${i} "sed -i '/master/d' /etc/hosts && sed -i '/compute/d' /etc/hosts"
-      ssh compute${i} "cat /etc/hostfile >> /etc/hosts && rm -rf /etc/hostfile && systemctl restart slurmd && systemctl enable slurmd"
+      ssh compute${i} "cat /etc/hostfile >> /etc/hosts && rm -rf /etc/hostfile && systemctl restart slurmd && systemctl enable slurmd" >> ${logfile}
       echo -e "\nSlurmd Status of Node ${i}:" >> ${logfile}
       ssh compute${i} "systemctl status slurmd" >> ${logfile}
       echo -e "\n" >> ${logfile}
