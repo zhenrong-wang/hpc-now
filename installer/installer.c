@@ -673,7 +673,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     if(system("dir c:\\hpc-now | findstr utils > nul 2>&1")!=0){
         printf("[ -INFO- ] Moving previous utilities to the new directory ...\n");
-        system("move /y c:\\programdata\\hpc-now\\bin c:\\hpc-now\\ > nul 2>&1");
+        system("takeown /f c:\\programdata\\hpc-now\\bin /r /d y > nul 2>&1");
+        system("move /y c:\\programdata\\hpc-now\\bin c:\\hpc-now\\utils > nul 2>&1");
+        system("icacls c:\\hpc-now\\utils /grant hpc-now:F /t > nul 2>&1");
     }
     system("takeown /f c:\\hpc-now\\hpcopr.exe /d y > nul 2>&1");
     system("icacls c:\\hpc-now\\hpcopr.exe /grant Administrators:F > nul 2>&1");
