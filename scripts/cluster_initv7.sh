@@ -179,7 +179,7 @@ else
   yum -y install epel-release # epel release is really slow for China region
 fi
 # yum -y makecache # make cache needs time. Let's skip it.
-yum -y install gtk2 gtk2-devel python python3 python3-devel gcc-c++ gcc-gfortran htop sshpass
+yum -y install python 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Utils installed." >> ${logfile}
 
@@ -436,7 +436,7 @@ if [ -f /root/hostfile ]; then
   systemctl enable xrdp
   yum -y install rpcbind flex GConf2 cmake cmake3 tcsh
   yum -y install ibus libXScrnSaver
-  yum -y install gmp-devel mpfr-devel
+  yum -y install gmp-devel mpfr-devel 
   yum -y install ibus-pinyin
   if [ $cloud_flag = 'CLOUD_B' ]; then
     wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O /opt/cosbrowser.zip
@@ -480,7 +480,6 @@ if [ -f /root/hostfile ]; then
     cp /root/Desktop/*.desktop /home/${user_name}/Desktop
     chown -R ${user_name}:${user_name} /home/${user_name}
   done < /root/.cluster_secrets/user_secrets.txt
-
   rm -rf /usr/share/backgrounds/*.png
   rm -rf /usr/share/backgrounds/*.jpg
   wget ${url_utils}pics/wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
@@ -496,6 +495,9 @@ if [ -f /root/hostfile ]; then
     wget ${url_utils}slurm/sbatch_sample.sh -O /hpc_data/sbatch_sample.sh
   fi
 fi
+
+yum -y gcc-c++ gcc-gfortran htop sshpass python3 python3-devel gtk2 gtk2-devel
+
 # Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
 if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete

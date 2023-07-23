@@ -138,7 +138,8 @@ echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Building OpenFOAM-v2112 now ... "
 mkdir -p ${of_root}
-rm -rf ${of_root}*
+rm -rf ${of_root}OpenFOAM-v2112
+rm -rf ${of_root}ThirdParty-v2112
 echo -e "[ -INFO- ] $time_current Downloading & extracting source packages ..."
 if [ ! -f ${app_cache}OpenFOAM-v2112.tgz ]; then
   wget ${url_pkgs}OpenFOAM-v2112.tgz -O ${app_cache}OpenFOAM-v2112.tgz -o ${2}

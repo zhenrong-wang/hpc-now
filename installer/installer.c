@@ -682,7 +682,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #elif __linux__
     if(system("ls -la /home/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
         printf("[ -INFO- ] Moving previous utilities to the new directory ...\n");
-        system("/bin/cp -r /usr/.hpc-now/.bin /home/hpc-now/.bin/utils >> /dev/null 2>&1");
+        system("mv /usr/.hpc-now/.bin /home/hpc-now/.bin/utils >> /dev/null 2>&1");
         system("chmod -R 711 /home/hpc-now/.bin/utils >> /dev/null 2>&1");
         system("chown -R hpc-now:hpc-now /home/hpc-now/.bin/utils >> /dev/null 2>&1");
     }
@@ -694,13 +694,13 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #elif __APPLE__
     if(system("ls -la /Users/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
         printf("[ -INFO- ] Moving previous utilities to the new directory ...\n");
-        system("/bin/cp -r /Applications/.hpc-now/.bin /Users/hpc-now/.bin/utils >> /dev/null 2>&1");
+        system("mv /Applications/.hpc-now/.bin /Users/hpc-now/.bin/utils >> /dev/null 2>&1");
         system("chmod -R 711 /Users/hpc-now/.bin/utils >> /dev/null 2>&1");
         system("chown -R hpc-now:hpc-now /Users/hpc-now/.bin/utils >> /dev/null 2>&1");
     }
     if(system("ls -la /Applications/.hpc-now | grep .now-ssh >> /dev/null 2>&1")!=0){
         printf("[ -INFO- ] Moving previous keys to the new directory ...\n");
-        system("/bin/cp -r /Users/hpc-now/.now-ssh /Applications/.hpc-now/ >> /dev/null 2>&1");
+        system("mv -r /Users/hpc-now/.now-ssh /Applications/.hpc-now/ >> /dev/null 2>&1");
         system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.now-ssh >> /dev/null 2>&1");
     }
 #endif

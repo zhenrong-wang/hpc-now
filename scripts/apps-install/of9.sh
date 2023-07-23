@@ -138,7 +138,8 @@ echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Building OpenFOAM-9 now ... "
 mkdir -p ${of_root}
-rm -rf ${of_root}*
+rm -rf ${of_root}OpenFOAM-9
+rm -rf ${of_root}ThirdParty-9
 echo -e "[ -INFO- ] $time_current Downloading & extracting source packages ..."
 if [ ! -f ${app_cache}OpenFOAM-9.zip ]; then
   wget ${url_pkgs}OpenFOAM-9.zip -O ${app_cache}OpenFOAM-9.zip -o ${2}
