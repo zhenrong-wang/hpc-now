@@ -155,7 +155,7 @@ do
   chown -R ${user_name}:${user_name} /home/${user_name}
 done < /root/user_secrets.txt
 
-yum -y install openssl openssl-devel unzip curl make perl
+yum -y install openssl openssl-devel unzip curl make perl sshpass
 # stop firewall and SELinux 
 systemctl stop firewalld && systemctl disable firewalld
 if [ $SELINUX_STATUS != Disabled ]; then
@@ -166,12 +166,12 @@ echo -e "# $time_current SELINUX Disabled." >> ${logfile}
 
 # The update step really takes time, trying to avoid it.
 if [ $cloud_flag = 'CLOUD_B' ]; then
-  yum -y update
+#  yum -y update
   yum -y install https://mirrors.cloud.tencent.com/epel/epel-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.cloud.tencent.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 elif [ $cloud_flag = 'CLOUD_A' ]; then
-  yum -y update
+#  yum -y update
   yum -y install https://mirrors.aliyun.com/epel/epel-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.aliyun.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
@@ -496,7 +496,8 @@ if [ -f /root/hostfile ]; then
   fi
 fi
 
-yum -y gcc-c++ gcc-gfortran htop sshpass python3 python3-devel gtk2 gtk2-devel
+yum -y update
+yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel gtk2 gtk2-devel
 
 # Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
 if [ $cloud_flag = 'CLOUD_B' ]; then
