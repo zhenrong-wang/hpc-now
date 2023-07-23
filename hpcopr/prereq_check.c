@@ -774,7 +774,9 @@ int check_and_install_prerequisitions(int repair_flag){
         sprintf(cmdline,"type nul > %s",filename_temp);
         system(cmdline);
     }
-    sprintf(cmdline,"del /f /q %s\\known_hosts* >nul 2>&1",dotssh_dir);
+    sprintf(cmdline,"takeown /f %s /r /d y %s",sshkey_dir,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+    sprintf(cmdline,"del /f /q %s\\known_hosts* >nul 2>&1",dotssh_dir);x
 #elif __linux__
     if(file_exist_or_not("/home/hpc-now/.cos.yaml")!=0){
         system("echo \"\" > /home/hpc-now/.cos.yaml");
