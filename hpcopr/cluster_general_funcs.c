@@ -947,10 +947,10 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         strcpy(payment_method_long,"On-Demand PostPaid");
     }
     if(graph_level==0){
-        printf(GENERAL_BOLD "|       -+- Cluster name: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD " -+- Cluster role: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "\n",cluster_name,cluster_role);
-        printf("|       -+- Payment Method: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD " - " HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "\n",payment_method,payment_method_long);
+        printf(GENERAL_BOLD "|        " RESET_DISPLAY "+-" GENERAL_BOLD "Cluster name: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY " +-" GENERAL_BOLD "Cluster role: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "\n",cluster_name,cluster_role);
+        printf("|        " RESET_DISPLAY "+-" GENERAL_BOLD "Payment Method: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "-" HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",payment_method,payment_method_long);
         printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
-        printf("|            +-db(%s)\n" RESET_DISPLAY,db_status);
+        printf("|          +-+-db(%s)\n",db_status);
     }
     for(i=0;i<node_num;i++){
         sprintf(string_temp,"compute%d_private_ip:",i+1);
@@ -959,10 +959,10 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         get_key_value(statefile,string_temp,' ',compute_status);
         if(graph_level==0){
             if(strlen(ht_status)!=0){
-                printf(GENERAL_BOLD "|              +-compute%d(%s,%s,%s,%s)\n" RESET_DISPLAY,i+1,compute_address,compute_status,compute_config,ht_status);
+                printf("|            +-+-compute%d(%s,%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config,ht_status);
             }
             else{
-                printf(GENERAL_BOLD "|              +-compute%d(%s,%s,%s)\n" RESET_DISPLAY,i+1,compute_address,compute_status,compute_config);
+                printf("|            +-+-compute%d(%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config);
             }
         }
     }

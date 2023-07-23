@@ -18,6 +18,7 @@ typedef struct
     int duration_hours;
     char job_exec[256];
     char job_data[256];
+    char echo_flag[8];
 } jobinfo;
 
 int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* sshkey_dir, char* crypto_keyfile, jobinfo* job_info);

@@ -517,7 +517,11 @@ elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
       echo "y" | sacctmgr delete user $user_name >> ${logfile} 2>&1
       mv /home/$user_name/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$user_name >> ${logfile} 2>&1
     else
-      echo "y" | sacctmgr add user ${user_name} account=hpc_users >> ${logfile} 2>&1
+      if [ $user_name = 'user1' ]; then
+        echo "y" | sacctmgr add user ${user_name} account=hpc_users adminlevel=admin >> ${logfile} 2>&1
+      else
+        echo "y" | sacctmgr add user ${user_name} account=hpc_users >> ${logfile} 2>&1
+      fi
       mv /root/.sshkey_deleted/id_rsa.$user_name /home/$user_name/.ssh/id_rsa >> ${logfile} 2>&1
     fi
   done < ${user_registry}
@@ -702,16 +706,22 @@ elif [ $1 = 'submit' ]; then
   echo -e "#SBATCH --nodes=${job_nodes}\n#SBATCH --ntasks-per-node=${cores_per_node}" >> ${data_directory}/job_submit.sh
   echo -e "#SBATCH --job-name=${job_name}\n#SBATCH --output=output.%j.${job_name}.out" >> ${data_directory}/job_submit.sh
   echo -e "#SBATCH --time=${duration_hours}:00:00\n" >> ${data_directory}/job_submit.sh
-  echo -e "mpirun -np ${total_cores} -bind-to numa ${job_exec} -parallel > ${data_directory}/${job_name}_run.log" ${data_directory}/job_submit.sh
+  echo -e "mpirun -np ${total_cores} -bind-to numa ${job_exec} -parallel > ${data_directory}/${job_name}_run.log 2>&1" >> ${data_directory}/job_submit.sh
   cd ${data_directory}
-  ${app_name}.env
+  grep "< ${app_name} >" $public_app_registry >> /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    app_env=`grep ${app_name}.env /etc/profile | awk -F"'" '{print $2}' | awk '{print $2}'`
+  else
+    app_env=`grep ${app_name}.env ${HOME}/.bashrc | awk -F"'" '{print $2}'| awk '{print $2}'`
+  fi
+  source ${app_env}
   if [ $? -ne 0 ]; then
     echo -e "[ FATAL: ] Failed to load the running environment for ${app_name}. Exit now."
     exit 55
   fi
   sbatch job_submit.sh
   if [ $? -eq 0 ]; then
-    echo -e "[ -INFO- ] Job submitted successfully."
+    echo -e "[ -INFO- ] Job submitted successfully. Console output: ${data_directory}/${job_name}_run.log ."
     exit 0
   else
     echo -e "[ -INFO- ] Failed to submit the job."

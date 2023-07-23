@@ -133,13 +133,18 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         reset_string(string_temp);
     }
     else{
-        num_temp=string_to_positive_num(duration_hours_string);
-        if(num_temp<1){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] The specified duration hours %s is incorrect. Using the default." RESET_DISPLAY "\n",duration_hours_string);
+        if(strcmp(duration_hours_string,"y")==0||strcmp(duration_hours_string,"yes")==0||strcmp(duration_hours_string,"Y")==0||strcmp(duration_hours_string,"YES")==0||strcmp(duration_hours_string,"Yes")==0){
             duration_hours=400000000;
         }
         else{
-            duration_hours=num_temp;
+            num_temp=string_to_positive_num(duration_hours_string);
+            if(num_temp<1){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The specified duration hours %s is incorrect. Using the default." RESET_DISPLAY "\n",duration_hours_string);
+                duration_hours=400000000;
+            }
+            else{
+                duration_hours=num_temp;
+            }
         }
     }
     
@@ -178,6 +183,12 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     job_info->duration_hours=duration_hours;
     strcpy(job_info->job_exec,exec_name);
     strcpy(job_info->job_data,job_data_final);
+    if(cmd_flag_check(argc,argv,"--echo")==0){
+        strcpy(job_info->echo_flag,"true");
+    }
+    else{
+        strcpy(job_info->echo_flag,"false");
+    }
     
     printf("\n");
     printf(GENERAL_BOLD "[ -INFO- ] Job Information Summary:" RESET_DISPLAY "\n");
@@ -188,6 +199,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     printf("|          Duration Hours : %d\n",job_info->duration_hours);
     printf("|          Job Executable : %s\n",job_info->job_exec);
     printf("|          Data Directory : %s\n",job_info->job_data);
+    printf("|          Console Output : %s\n",job_info->echo_flag);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The job will be sent to the cluster.\n\n");
     return 0;
 }
@@ -198,6 +210,7 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
     char dirname_temp[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char remote_filename_temp[FILENAME_LENGTH]="";
+    int i,run_flag=0;
     sprintf(dirname_temp,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
     sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
@@ -218,9 +231,28 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
     sprintf(remote_filename_temp,"/tmp/job_submit_info_%s.tmp",user_name);
     remote_copy(workdir,sshkey_dir,filename_temp,remote_filename_temp,user_name,"put","",0);
     sprintf(remote_commands,"hpcmgr submit %s",remote_filename_temp);
-    remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,2,"","");
+    run_flag=remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,2,"","");
+    if(run_flag!=0){
+        return 1;
+    }
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
+    if(strcmp(job_info->echo_flag,"true")==0){
+        printf("\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You can press " WARN_YELLO_BOLD "Ctrl C" RESET_DISPLAY " to stop displaying the job output.\n");
+        for(i=0;i<5;i++){
+            printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Will display the job output in %d seconds ... \r",5-i);
+            fflush(stdout);
+            sleep(1);
+        }
+        printf("\n");
+        sprintf(filename_temp,"%s/%s_run.log",job_info->job_data,job_info->job_name);
+        sprintf(remote_commands,"tail -f %s",filename_temp);
+        remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,2,"","");
+    }
+    else{
+        printf("[ -DONE- ] You can now log into the cluster and view the job output.\n");
+    }
     return 0;
 }
 
