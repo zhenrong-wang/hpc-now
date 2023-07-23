@@ -951,6 +951,10 @@ int direct_path_check(char* path_string, char* hpc_user, char* real_path){
         }
         return 0;
     }
+    else if(strcmp(header,"@t")==0){
+        sprintf(real_path,"/tmp/%s",tail);
+        return 0;
+    }
     else{
         strcpy(real_path,path_string);
         return 1;

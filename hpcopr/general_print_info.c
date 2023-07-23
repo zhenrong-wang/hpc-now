@@ -430,6 +430,7 @@ void print_datamgr_info(void){
     printf("|     @a/ to specify the /hpc_apps/ prefix, only for root or user1.\n");
     printf("|     @p/ to specify the public folder prefix " WARN_YELLO_BOLD "( INSECURE !)" RESET_DISPLAY ".\n");
     printf("|     @R/ to specify the / prefix, only for root or user1.\n");
+    printf("|     @t/ to specify the /tmp prefix.\n");
     printf("|    Example: hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1\n");
 }
 

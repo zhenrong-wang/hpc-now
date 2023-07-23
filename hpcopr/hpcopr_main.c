@@ -1063,7 +1063,7 @@ int main(int argc, char* argv[]){
             if(cmd_keyword_check(argc,argv,"-s",source_path)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a source path for this command.\n");
                 if(strcmp(data_cmd,"put")!=0&&strcmp(data_cmd,"get")!=0&&strcmp(data_cmd,"copy")!=0&&strcmp(data_cmd,"move")!=0){
-                    printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
+                    printf("|          Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
@@ -1073,7 +1073,7 @@ int main(int argc, char* argv[]){
             if(cmd_keyword_check(argc,argv,"-d",destination_path)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a destination path for this command.\n");
                 if(strcmp(data_cmd,"put")!=0&&strcmp(data_cmd,"get")!=0&&strcmp(data_cmd,"copy")!=0&&strcmp(data_cmd,"move")!=0){
-                    printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
+                    printf("|          Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
