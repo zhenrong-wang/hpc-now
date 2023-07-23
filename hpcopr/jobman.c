@@ -194,7 +194,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     printf(GENERAL_BOLD "[ -INFO- ] Job Information Summary:" RESET_DISPLAY "\n");
     printf("|          App Name       : %s\n",job_info->app_name);
     printf("|          Job Nodes      : %d\n",job_info->node_num);
-    printf("|          Cores per node : %d\n",job_info->tasks_per_node);
+    printf("|          Cores Per Node : %d\n",job_info->tasks_per_node);
     printf("|          Job Name       : %s\n",job_info->job_name);
     printf("|          Duration Hours : %d\n",job_info->duration_hours);
     printf("|          Job Executable : %s\n",job_info->job_exec);
