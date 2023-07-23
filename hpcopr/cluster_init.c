@@ -1627,7 +1627,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
     sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
-    read_conf_flag=get_tf_prep_conf(conf_file,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,master_bandwidth,compute_inst,os_image,conf_param_buffer);
+    read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,master_bandwidth,compute_inst,os_image,conf_param_buffer);
     if(read_conf_flag!=0){
         if(read_conf_flag==-3){
             printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now.\n" RESET_DISPLAY);
