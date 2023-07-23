@@ -23,7 +23,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 app_root="/hpc_apps/"
 app_cache="/hpc_apps/.cache/"
 app_extract_cache="/root/.app_extract_cache/"
-tmp_log="/tmp/hpcmgr_install_R_${current_user}.log"
 centos_v=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 if [ $centos_v -eq 7 ]; then
   echo -e "[ FATAL: ] R & RStudio can not be installed to CentOS 7.x. Exit now."
@@ -42,7 +41,7 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Removing gdal-3.5.2 ..."
   rm -rf ${app_extract_cache}gdal-3.5.2
   echo -e "[ -INFO- ] Removing proj & geos-devel ..."
-  yum -y install proj-devel geos-devel >> $tmp_log
+  yum -y install proj-devel geos-devel >> ${2}
   echo -e "[ -INFO- ] Removing envrionment varables ..."
   sed -i '/R-4.2.1/d' /etc/profile
   sed -i '/openssl-1.1.1q/d' /etc/profile
@@ -65,7 +64,7 @@ fi
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
-  hpcmgr install desktop >> ${tmp_log}
+  hpcmgr install desktop >> ${2}
   if [ $? -ne 0 ]; then
     echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
     exit 5
@@ -82,11 +81,11 @@ if [ ! -f ${app_cache}openssl-1.1.1q.tar.gz ]; then
 fi
 grep "< openssl-1.1.1q >" $public_app_registry >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  tar zvxf ${app_cache}openssl-1.1.1q.tar.gz -C ${app_extract_cache} >> $tmp_log
+  tar zvxf ${app_cache}openssl-1.1.1q.tar.gz -C ${app_extract_cache} >> ${2}
   cd ${app_extract_cache}openssl-1.1.1q
-  ./config --prefix=${app_root}openssl-1.1.1q >> $tmp_log
-  make -j$num_processors >> $tmp_log
-  make install >> $tmp_log
+  ./config --prefix=${app_root}openssl-1.1.1q >> ${2}
+  make -j$num_processors >> ${2}
+  make install >> ${2}
   grep "openssl-1.1.1q/lib" /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "export LD_LIBRARY_PATH=${app_root}openssl-1.1.1q/lib:\$LD_LIBRARY_PATH\nexport PATH=${app_root}openssl-1.1.1q/bin:\$PATH\n" >> /etc/profile
@@ -113,11 +112,11 @@ if [ $? -ne 0 ]; then
   if [ ! -f ${app_cache}R-4.2.1.tar.gz ]; then
     wget ${url_pkgs}R-4.2.1.tar.gz -O ${app_cache}R-4.2.1.tar.gz 
   fi
-  tar zvxf ${app_cache}R-4.2.1.tar.gz -C ${app_extract_cache} >> $tmp_log
+  tar zvxf ${app_cache}R-4.2.1.tar.gz -C ${app_extract_cache} >> ${2}
   cd ${app_extract_cache}R-4.2.1
-  ./configure --enable-R-shlib --prefix=${app_root}R-4.2.1 >> $tmp_log 2>&1
-  make -j$num_processors >> $tmp_log
-  make install >> $tmp_log
+  ./configure --enable-R-shlib --prefix=${app_root}R-4.2.1 >> ${2} 2>&1
+  make -j$num_processors >> ${2}
+  make install >> ${2}
   grep ${app_root}R-4.2.1/bin /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "export PATH=${app_root}R-4.2.1/bin:\$PATH" >> /etc/profile
@@ -129,15 +128,15 @@ fi
 
 echo -e "[ STEP 3 ] Installing RStudio ... "
 # Install RStudio
-yum -y install postgresql-devel postgresql sqlite >> $tmp_log
+yum -y install postgresql-devel postgresql sqlite >> ${2}
 if [ ! -f ${app_cache}rstudio-2022.07.1-554-x86_64-centos9.rpm ]; then
   wget ${url_pkgs}rstudio-2022.07.1-554-x86_64-centos9.rpm -O ${app_cache}rstudio-2022.07.1-554-x86_64-centos9.rpm
 fi
-rpm -ivh ${app_cache}rstudio-2022.07.1-554-x86_64-centos9.rpm >> $tmp_log
+rpm -ivh ${app_cache}rstudio-2022.07.1-554-x86_64-centos9.rpm >> ${2}
 # RStudio & R should work well. The problems are in installing other packages.
 
 echo -e "[ STEP 4 ] Installing JAVA Support ... "
-yum -y install cmake3 icu libicu-devel libjpeg-turbo-devel libpng-devel netcdf netcdf-devel python-devel >> $tmp_log
+yum -y install cmake3 icu libicu-devel libjpeg-turbo-devel libpng-devel netcdf netcdf-devel python-devel >> ${2}
 R CMD javareconf
 # JAVA support should work well now. proj & gdal might be important for some R packages. Therefore we need to build them
 
@@ -147,11 +146,11 @@ yum -y install proj-devel geos-devel
 if [ ! -f ${app_cache}gdal-3.5.2.tar.gz ]; then
   wget -q ${url_pkgs}gdal-3.5.2.tar.gz -O ${app_cache}gdal-3.5.2.tar.gz
 fi
-tar zvxf ${app_cache}gdal-3.5.2.tar.gz -C ${app_extract_cache} >> $tmp_log
+tar zvxf ${app_cache}gdal-3.5.2.tar.gz -C ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}gdal-3.5.2
-./configure --prefix=${app_root}gdal-3.5.2 >> $tmp_log 2>&1
-make -j$num_processors >> $tmp_log
-make install >> $tmp_log
+./configure --prefix=${app_root}gdal-3.5.2 >> ${2} 2>&1
+make -j$num_processors >> ${2}
+make install >> ${2}
 # NOW, you can use R & RStudio environment for data processing
 echo -e "[ -INFO- ] Creating a shortcut on the desktop ..."
 echo -e "[Desktop Entry]" > $HOME/Desktop/rstudio.desktop

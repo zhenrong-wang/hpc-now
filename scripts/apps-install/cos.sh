@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_cos_${current_user}.log"
 
 if [ $current_user = 'root' ]; then
   app_root="/opt/"
@@ -55,7 +54,7 @@ if [ $? -ne 0 ]; then
     exit 5
   fi
   echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
-  hpcmgr install desktop >> ${tmp_log}.desktop
+  hpcmgr install desktop >> ${2}.desktop
   if [ $? -ne 0 ]; then
     echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
     exit 7

@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_slpack2_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -98,13 +97,13 @@ if [ $? -eq 0 ]; then
   lapack_lib="/hpc_apps/lapack-3.11"
 else
   if [ $current_user = 'root' ]; then
-    hpcmgr install lapack311 >> $tmp_log
+    hpcmgr install lapack311 >> ${2}
     module load lapack-3.11
     lapack_lib="/hpc_apps/lapack-3.11"
   else
     grep "< lapack311 > < $current_user >" $private_app_registry >> /dev/null 2>&1
     if [ $? -ne 0 ]; then
-      hpcmgr install lapack-3.11 >> $tmp_log
+      hpcmgr install lapack-3.11 >> ${2}
     fi
     module load ${current_user}_env/lapack-3.11
     lapack_lib="${app_root}lapack-3.11"
@@ -136,7 +135,7 @@ done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] Building MPI Libraries now ..."
-  hpcmgr install ompi4 >> ${tmp_log}
+  hpcmgr install ompi4 >> ${2}
   if [ $current_user = 'root' ]; then
     module load ompi-4.1.2
     mpi_env="ompi-4.1.2"
@@ -153,9 +152,9 @@ echo -e "[ START: ] $time_current Started building ScaLAPACK-Latest."
 echo -e "[ START: ] Downloading and Extracting source code ..."
 
 if [ ! -f ${app_cache}scalapack-master.zip ]; then
-  wget ${url_pkgs}scalapack-master.zip -O ${app_cache}scalapack-master.zip -o ${tmp_log}
+  wget ${url_pkgs}scalapack-master.zip -O ${app_cache}scalapack-master.zip -o ${2}
 fi
-unzip -o ${app_cache}scalapack-master.zip -d ${app_extract_cache} >> $tmp_log
+unzip -o ${app_cache}scalapack-master.zip -d ${app_extract_cache} >> ${2}
 rm -rf ${app_root}scalapack
 rm -rf ${app_extract_cache}scalapack
 mv ${app_extract_cache}scalapack-master ${app_extract_cache}scalapack
@@ -170,7 +169,7 @@ fi
 sed -i "s@BLASLIB       = -lblas@BLASLIB       = -L${lapack_lib} -lrefblas -lcblas@g" ${app_extract_cache}scalapack/SLmake.inc
 sed -i "s@LAPACKLIB     = -llapack@LAPACKLIB     = -L${lapack_lib} -llapack.a -llapacke -ltmglib@g" ${app_extract_cache}scalapack/SLmake.inc
 cd ${app_extract_cache}scalapack
-make lib >> $tmp_log
+make lib >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build ScaLAPACK. Please check the log file for more details. Exit now."
   exit 3

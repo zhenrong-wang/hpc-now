@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_wrf_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -125,7 +124,7 @@ done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] Building MPI Libraries now ..."
-  hpcmgr install ompi4 >> ${tmp_log}
+  hpcmgr install ompi4 >> ${2}
   if [ $current_user = 'root' ]; then
     module load ompi-4.1.2
     mpi_env="ompi-4.1.2"
@@ -137,7 +136,7 @@ if [ $? -ne 0 ]; then
 fi
 echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 echo -e "[ -INFO- ] Checking and installing prerequisitions: netCDF"
-hpcmgr install netcdf4 >> $tmp_log
+hpcmgr install netcdf4 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build/install netcdf4. Exit now."
   exit 3
@@ -165,20 +164,20 @@ fi
 
 echo -e "[ -INFO- ] Checking and installing prerequisitions: jasper ..."
 if [ ! -f ${app_cache}jasper-1.900.1.tar.gz ]; then
-  wget ${url_pkgs}jasper-1.900.1.tar.gz -O ${app_cache}jasper-1.900.1.tar.gz -o $tmp_log
+  wget ${url_pkgs}jasper-1.900.1.tar.gz -O ${app_cache}jasper-1.900.1.tar.gz -o ${2}
 fi
-tar zvxf ${app_cache}jasper-1.900.1.tar.gz -C ${app_extract_cache} >> $tmp_log
+tar zvxf ${app_cache}jasper-1.900.1.tar.gz -C ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}jasper-1.900.1
-./configure --prefix=${wrf_root}jasper >> $tmp_log 2>&1
-make -j$num_processors >> $tmp_log 2>&1
-make install >> $tmp_log 2>&1
+./configure --prefix=${wrf_root}jasper >> ${2} 2>&1
+make -j$num_processors >> ${2} 2>&1
+make install >> ${2} 2>&1
 
 echo -e "[ STEP 1 ] Downloading WRF source code packages ... "
 if [ ! -f ${app_cache}wrf-latest.tar.gz ]; then
-  wget ${url_pkgs}wrf-latest.tar.gz -O ${app_cache}wrf-latest.tar.gz -o $tmp_log
+  wget ${url_pkgs}wrf-latest.tar.gz -O ${app_cache}wrf-latest.tar.gz -o ${2}
 fi
 echo -e "[ STEP 2 ] Extracting WRF source code tarball ..."
-tar zvxf ${app_cache}wrf-latest.tar.gz -C ${app_extract_cache} >> $tmp_log
+tar zvxf ${app_cache}wrf-latest.tar.gz -C ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}WRF
 export NETCDF=${netcdf4_root}
 export NETCDF_classic=1
@@ -188,23 +187,23 @@ export JASPERLIB=${wrf_root}jasper/lib/
 export JASPERINC=${wrf_root}jasper/include/
 
 echo -e "[ STEP 3 ] Configuring and building WRF from the source code ..."
-echo 35 | ./configure >> $tmp_log 2>&1
-./compile -j $num_processors wrf >> $tmp_log 2>&1
-./compile -j $num_processors em_b_wave >> $tmp_log 2>&1
-./compile -j $num_processors em_convrad >> $tmp_log 2>&1
-./compile -j $num_processors em_esmf_exp >> $tmp_log 2>&1
-./compile -j $num_processors em_fire >> $tmp_log 2>&1
-./compile -j $num_processors em_grav2d_x >> $tmp_log 2>&1
-./compile -j $num_processors em_heldsuarez >> $tmp_log 2>&1
-./compile -j $num_processors em_hill2d_x >> $tmp_log 2>&1
-./compile -j $num_processors em_les >> $tmp_log 2>&1
-./compile -j $num_processors em_quarter_ss >> $tmp_log 2>&1
-./compile -j $num_processors em_real >> $tmp_log 2>&1
-./compile -j $num_processors em_scm_xy >> $tmp_log 2>&1
-./compile -j $num_processors em_seabreeze2d_x >> $tmp_log 2>&1
-./compile -j $num_processors em_squall2d_x >> $tmp_log 2>&1
-./compile -j $num_processors em_squall2d_y >> $tmp_log 2>&1
-./compile -j $num_processors em_tropical_cyclone >> $tmp_log 2>&1
+echo 35 | ./configure >> ${2} 2>&1
+./compile -j $num_processors wrf >> ${2} 2>&1
+./compile -j $num_processors em_b_wave >> ${2} 2>&1
+./compile -j $num_processors em_convrad >> ${2} 2>&1
+./compile -j $num_processors em_esmf_exp >> ${2} 2>&1
+./compile -j $num_processors em_fire >> ${2} 2>&1
+./compile -j $num_processors em_grav2d_x >> ${2} 2>&1
+./compile -j $num_processors em_heldsuarez >> ${2} 2>&1
+./compile -j $num_processors em_hill2d_x >> ${2} 2>&1
+./compile -j $num_processors em_les >> ${2} 2>&1
+./compile -j $num_processors em_quarter_ss >> ${2} 2>&1
+./compile -j $num_processors em_real >> ${2} 2>&1
+./compile -j $num_processors em_scm_xy >> ${2} 2>&1
+./compile -j $num_processors em_seabreeze2d_x >> ${2} 2>&1
+./compile -j $num_processors em_squall2d_x >> ${2} 2>&1
+./compile -j $num_processors em_squall2d_y >> ${2} 2>&1
+./compile -j $num_processors em_tropical_cyclone >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build WRF. Please check the log file for details. Exit now."
   exit 5
@@ -219,15 +218,15 @@ echo -e "module load ${netcdf4_env}\nmodule load ${hdf5_env}" >> ${wrf_root}wrfe
 echo -e "export LD_LIBRARY_PATH=${wrf_root}jasper/lib:\$LD_LIBRARY_PATH" >> ${wrf_root}wrfenv.sh
 echo -e "[ STEP 4 ] Building WPS now ..."
 if [ ! -f ${app_cache}wps-latest.tar.gz ]; then
-  wget ${url_pkgs}wps-latest.tar.gz -O ${app_cache}wps-latest.tar.gz -o $tmp_log
+  wget ${url_pkgs}wps-latest.tar.gz -O ${app_cache}wps-latest.tar.gz -o ${2}
 fi
-tar zvxf ${app_cache}wps-latest.tar.gz -C ${app_extract_cache} >> $tmp_log
+tar zvxf ${app_cache}wps-latest.tar.gz -C ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}WPS
 sed -i 's# NETCDFF=" "# NETCDFF="-lnetcdff -lgomp"#' configure # In order to build WPS
-echo 3 | ./configure >> $tmp_log 2>&1
+echo 3 | ./configure >> ${2} 2>&1
 cp configure.wps configure.wps.bkup
 sed -i 's@-L$(NETCDF)/lib -lnetcdff -lnetcdf@-L$(NETCDF)/lib -lnetcdff -lnetcdf -fopenmp@g' configure.wps # In order to build WPS
-./compile >> $tmp_log 2>&1
+./compile >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -WARN- ] WRF has been successfully built, but WPS encountered some problems. Exit now."
   echo -e "WRF with $gcc_v & $mpi_env is ready for running." >> ${wrf_root}wrfenv.sh

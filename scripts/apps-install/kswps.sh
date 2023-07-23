@@ -17,7 +17,6 @@ url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
 public_app_registry="/hpc_apps/.public_apps.reg"
 app_cache="/hpc_apps/.cache/"
-tmp_log="/tmp/hpcmgr_install_kswps_${current_user}.log"
 
 if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Removing the app ..."
@@ -33,7 +32,7 @@ echo -e "[ -INFO- ] Software: WPS Office for Linux."
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
-  hpcmgr install desktop >> ${tmp_log}.desktop
+  hpcmgr install desktop >> ${2}.desktop
   if [ $? -ne 0 ]; then
     echo -e "[ FATAL: ] Desktop environment installation failed. Exit now."
     exit 5
@@ -44,14 +43,14 @@ if [ ! -z $centos_v ] && [ $centos_v -eq 7 ]; then
   yum -y install libXScrnSaver -q
   if [ ! -f ${app_cache}wps-office-10.1.0.6634-1.x86_64.rpm ]; then
     echo -e "[ -INFO- ] Downloading package(s) ..."
-    wget ${url_pkgs}wps-office-10.1.0.6634-1.x86_64.rpm -O ${app_cache}wps-office-10.1.0.6634-1.x86_64.rpm -o $tmp_log
+    wget ${url_pkgs}wps-office-10.1.0.6634-1.x86_64.rpm -O ${app_cache}wps-office-10.1.0.6634-1.x86_64.rpm -o ${2}
   fi
   rpm -ivh ${app_cache}wps-office-10.1.0.6634-1.x86_64.rpm
 else
   yum -y install libXScrnSaver -q
   if [ ! -f ${app_cache}wps-office-11.1.0.11664-1.x86_64.rpm ]; then
     echo -e "[ -INFO- ] Downloading package(s) ..."
-    wget https://wps-linux-personal.wpscdn.cn/wps/download/ep/Linux2019/11664/wps-office-11.1.0.11664-1.x86_64.rpm -O ${app_cache}wps-office-11.1.0.11664-1.x86_64.rpm -o $tmp_log
+    wget https://wps-linux-personal.wpscdn.cn/wps/download/ep/Linux2019/11664/wps-office-11.1.0.11664-1.x86_64.rpm -O ${app_cache}wps-office-11.1.0.11664-1.x86_64.rpm -o ${2}
   fi
   rpm -ivh ${app_cache}wps-office-11.1.0.11664-1.x86_64.rpm
 fi

@@ -11,8 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_abinit_${current_user}.log"
-
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
 num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
@@ -121,7 +119,7 @@ done
 
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  hpcmgr install ompi4 >> $tmp_log
+  hpcmgr install ompi4 >> ${2}
   if [ $current_user = 'root' ]; then
     module load ompi-4.1.2
     mpi_env=ompi-4.1.2
@@ -134,7 +132,7 @@ fi
 echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: OpenBLAS Libraries ..."
-hpcmgr install openblas >> $tmp_log
+hpcmgr install openblas >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build OpenBLAS. Exit now."
   exit 11
@@ -153,33 +151,33 @@ mkdir -p $abinit_root
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: libXC libraries ..."
 if [ ! -f ${abinit_root}libxc-4.3.4/lib/libxcf90.la ]; then
   if [ ! -f ${app_cache}libxc-4.3.0.tar.gz ]; then
-    wget ${url_pkgs}libxc-4.3.4.tar.gz -O ${app_cache}libxc-4.3.4.tar.gz -o $tmp_log
+    wget ${url_pkgs}libxc-4.3.4.tar.gz -O ${app_cache}libxc-4.3.4.tar.gz -o ${2}
   fi
-  tar zvxf ${app_cache}libxc-4.3.4.tar.gz -C ${app_extract_cache} >> $tmp_log
+  tar zvxf ${app_cache}libxc-4.3.4.tar.gz -C ${app_extract_cache} >> ${2}
   cd ${app_extract_cache}libxc-4.3.4
-  ./configure --prefix=${abinit_root}libxc-4.3.4 >> $tmp_log 2>&1
-  make -j$num_processors >> $tmp_log
-  make install >> $tmp_log
+  ./configure --prefix=${abinit_root}libxc-4.3.4 >> ${2} 2>&1
+  make -j$num_processors >> ${2}
+  make install >> ${2}
 fi
 
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: FFTW-3.3.8 Libraries ..."
 if [[ ! -f ${abinit_root}fftw-3.3.8/lib/libfftw3.a || ! -f ${abinit_root}fftw-3.3.8/lib/libfftw3_mpi.la ]]; then
   if [ ! -f ${app_cache}fftw-3.3.8.tar.gz ]; then
-    wget ${url_pkgs}fftw-3.3.8.tar.gz -O ${app_cache}fftw-3.3.8.tar.gz -o $tmp_log
+    wget ${url_pkgs}fftw-3.3.8.tar.gz -O ${app_cache}fftw-3.3.8.tar.gz -o ${2}
   fi
-  tar zvxf ${app_cache}fftw-3.3.8.tar.gz -C ${app_extract_cache} >> $tmp_log
+  tar zvxf ${app_cache}fftw-3.3.8.tar.gz -C ${app_extract_cache} >> ${2}
   cd ${app_extract_cache}fftw-3.3.8
-  ./configure --prefix=${abinit_root}fftw-3.3.8 --enable-single --enable-mpi --enable-threads --enable-shared >> $tmp_log 2>&1
-  make -j$num_processors >> $tmp_log
-  make install >> $tmp_log
+  ./configure --prefix=${abinit_root}fftw-3.3.8 --enable-single --enable-mpi --enable-threads --enable-shared >> ${2} 2>&1
+  make -j$num_processors >> ${2}
+  make install >> ${2}
 
   cd ${app_extract_cache}fftw-3.3.8
-  ./configure --prefix=${abinit_root}fftw-3.3.8 --enable-mpi --enable-threads --enable-shared >> $tmp_log 2>&1
-  make -j$num_processors >> $tmp_log
-  make install >> $tmp_log
+  ./configure --prefix=${abinit_root}fftw-3.3.8 --enable-mpi --enable-threads --enable-shared >> ${2} 2>&1
+  make -j$num_processors >> ${2}
+  make install >> ${2}
 fi
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: HDF5 ..."
-hpcmgr install hdf5 >> $tmp_log
+hpcmgr install hdf5 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build HDF5. Exit now."
   exit 13
@@ -194,7 +192,7 @@ else
 fi
 
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: netCDF4 ..."
-hpcmgr install netcdf4 >> $tmp_log
+hpcmgr install netcdf4 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build netcdf4. Exit now."
   exit 15
@@ -207,25 +205,25 @@ else
   netcdf_root="${app_root}netcdf4"
   netcdf_env="${current_user}_env/netcdf4"
 fi
-pip install configurator >> $tmp_log
+pip install configurator >> ${2}
 
 echo -e "[ -INFO- ] Now, finally, we can start building ABINIT-9.6.2 ..."
 echo -e "[ STEP 1 ] Downloading and extracing source code ..."
 if [ ! -f ${app_cache}abinit-9.6.2.tar.gz ]; then
-  wget ${url_pkgs}abinit-9.6.2.tar.gz -O ${app_cache}abinit-9.6.2.tar.gz -o $tmp_log
+  wget ${url_pkgs}abinit-9.6.2.tar.gz -O ${app_cache}abinit-9.6.2.tar.gz -o ${2}
 fi
 echo -e "[ STEP 2 ] Configuring and Compiling in progress, this step usually takes minutes ..."
-tar zvxf ${app_cache}abinit-9.6.2.tar.gz -C ${app_extract_cache} >> $tmp_log
+tar zvxf ${app_cache}abinit-9.6.2.tar.gz -C ${app_extract_cache} >> ${2}
 rm -rf ${abinit_root}build
 mkdir -p ${abinit_root}build
 cd ${app_extract_cache}abinit-9.6.2
-FC_LDFLAGS_EXTRA="-L${openblas_lib} -lopenblas -L${abinit_root}fftw-3.3.8/lib -lfftw3_mpi -lfftw3f_mpi -lfftw3 -lfftw3f -lfftw3_threads -lfftw3f_threads" ./configure --prefix=${abinit_root}build --with-mpi=${mpi_root} --with-hdf5=${hdf5_root} --with-fftw3=${abinit_root}fftw-3.3.8 --with-libxc=${abinit_root}libxc-4.3.4 --with-netcdf=${netcdf_root} >> ${tmp_log} 2>&1
-make -j$num_processors >> $tmp_log
+FC_LDFLAGS_EXTRA="-L${openblas_lib} -lopenblas -L${abinit_root}fftw-3.3.8/lib -lfftw3_mpi -lfftw3f_mpi -lfftw3 -lfftw3f -lfftw3_threads -lfftw3f_threads" ./configure --prefix=${abinit_root}build --with-mpi=${mpi_root} --with-hdf5=${hdf5_root} --with-fftw3=${abinit_root}fftw-3.3.8 --with-libxc=${abinit_root}libxc-4.3.4 --with-netcdf=${netcdf_root} >> ${2} 2>&1
+make -j$num_processors >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build ABINIT. Please check the log file for details. Exit now."
   exit 1
 fi
-make install >> $tmp_log 2>&1
+make install >> ${2} 2>&1
 echo -e "# !/bin/bash\nmodule purge" > ${abinit_root}abinit_env.sh
 if [ ${systemgcc} = 'false' ]; then
   echo -e "module load ${gcc_env}" >> ${abinit_root}abinit_env.sh

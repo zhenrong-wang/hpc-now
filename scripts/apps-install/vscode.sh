@@ -12,9 +12,7 @@ if [ $current_user != 'root' ]; then
   echo -e "           Please contact the administrator. Exit now."
   exit 1
 fi
-
 public_app_registry="/hpc_apps/.public_apps.reg"
-tmp_log="/tmp/hpcmgr_install_vscode_${current_user}.log"
 
 if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Removing the package ..."
@@ -27,7 +25,7 @@ fi
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
-  hpcmgr install desktop >> ${tmp_log}
+  hpcmgr install desktop >> ${2}
   if [ $? -ne 0 ]; then
     echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
     exit 3
@@ -38,7 +36,7 @@ echo -e "[ -INFO- ] Installing Visual Studio Code for Linux now ..."
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
 sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
 yum check-update >> /dev/null 2>&1
-yum install code -y >> $tmp_log 2>&1
+yum install code -y >> ${2} 2>&1
 if [ $? -eq 0 ]; then
   echo -e "[ -DONE- ] VSCode installed. You can run command 'code' to start using it."
   echo -e "< vscode >" >> $public_app_registry

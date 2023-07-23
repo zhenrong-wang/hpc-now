@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_lapack311_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -99,16 +98,16 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Started building LAPACK-3.11.0."
 echo -e "[ START: ] Downloading and Extracting source code ..."
 if [ ! -f ${app_cache}lapack-3.11.tar.gz ]; then
-  wget ${url_pkgs}lapack-3.11.tar.gz -O ${app_cache}lapack-3.11.tar.gz -o $tmp_log
+  wget ${url_pkgs}lapack-3.11.tar.gz -O ${app_cache}lapack-3.11.tar.gz -o ${2}
 fi
-tar zvxf ${app_cache}lapack-3.11.tar.gz -C ${app_extract_cache} >> $tmp_log
+tar zvxf ${app_cache}lapack-3.11.tar.gz -C ${app_extract_cache} >> ${2}
 echo -e "[ STEP 1 ] Building LAPACK, BLAS, CBLAS, LAPACKE ... This step usually takes minutes."
 cd ${app_extract_cache}lapack-3.11/
 /bin/cp make.inc.example make.inc
-make -j$num_processors >> $tmp_log
-cd ${app_extract_cache}lapack-3.11/LAPACKE && make -j$num_processors >> $tmp_log
-cd ${app_extract_cache}lapack-3.11/BLAS && make -j$num_processors >> $tmp_log
-cd ${app_extract_cache}lapack-3.11/CBLAS && make -j$num_processors >> $tmp_log
+make -j$num_processors >> ${2}
+cd ${app_extract_cache}lapack-3.11/LAPACKE && make -j$num_processors >> ${2}
+cd ${app_extract_cache}lapack-3.11/BLAS && make -j$num_processors >> ${2}
+cd ${app_extract_cache}lapack-3.11/CBLAS && make -j$num_processors >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build ScaLAPACK. Please check the log file for more details. Exit now."
   exit 3

@@ -13,7 +13,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_paraview_${current_user}.log"
 
 if [ $current_user = 'root' ]; then
   app_root="/opt/"
@@ -57,14 +56,14 @@ if [ -z $centos_v ] || [ $centos_v -ne 7 ]; then
   if [ ! -f ${app_cache}ParaView5.tar.gz ]; then
     wget ${url_pkgs}ParaView-5.10.1-MPI-Linux-Python3.9-x86_64.tar.gz -O ${app_cache}ParaView5.tar.gz
   fi
-  tar zvxf ${app_cache}ParaView5.tar.gz -C ${app_root} >> ${tmp_log}
+  tar zvxf ${app_cache}ParaView5.tar.gz -C ${app_root} >> ${2}
   mv ${app_root}ParaView-5.10.1-MPI-Linux-Python3.9-x86_64 ${app_root}ParaView
 else
   echo -e "[ -INFO- ] Downloading and extracting files ..."
   if [ ! -f ${app_cache}ParaView4.tar.gz ]; then
     wget ${url_pkgs}ParaView-4.0.1-Linux-64bit-glibc-2.3.6.tar.gz -O ${app_cache}ParaView4.tar.gz
   fi
-  tar zvxf ${app_cache}ParaView4.tar.gz -C ${app_root} >> ${tmp_log}
+  tar zvxf ${app_cache}ParaView4.tar.gz -C ${app_root} >> ${2}
   mv ${app_root}ParaView-4.0.1-Linux-64bit ${app_root}ParaView
 fi
 

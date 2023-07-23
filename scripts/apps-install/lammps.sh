@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_lammps_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -126,7 +125,7 @@ done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] Building MPI Libraries now ..."
-  hpcmgr install mpich4 >> ${tmp_log}
+  hpcmgr install mpich4 >> ${2}
   if [ $current_user = 'root' ]; then
     module load mpich-4.0.2
     mpi_env="mpich-4.0.2"
@@ -139,7 +138,7 @@ fi
 echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 
 echo -e "[ -INFO- ] Checking and Installing the fftw3 libraries ... "
-hpcmgr install fftw3 >> $tmp_log
+hpcmgr install fftw3 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build fftw3. Exit now."
   exit 5
@@ -158,24 +157,24 @@ fi
 # Install adios2 now
 echo -e "[ -INFO- ] Checking and Installing ADIOS2 now ... "
 if [ ! -f ${app_cache}ADIOS2-master.zip ]; then
-  wget ${url_pkgs}ADIOS2-master.zip -O ${app_cache}ADIOS2-master.zip -o $tmp_log
+  wget ${url_pkgs}ADIOS2-master.zip -O ${app_cache}ADIOS2-master.zip -o ${2}
 fi
-unzip -o ${app_cache}ADIOS2-master.zip -d ${app_extract_cache} >> $tmp_log
+unzip -o ${app_cache}ADIOS2-master.zip -d ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}
 rm -rf ADIOS2 && mv ADIOS2-master ADIOS2
 mkdir -p adios2-build && cd adios2-build
-cmake -DCMAKE_INSTALL_PREFIX=${app_root}lammps/ADIOS2 ../ADIOS2  >> $tmp_log 2>&1
-make -j$num_processors >> $tmp_log 2>&1
-make install >> $tmp_log 2>&1
+cmake -DCMAKE_INSTALL_PREFIX=${app_root}lammps/ADIOS2 ../ADIOS2  >> ${2} 2>&1
+make -j$num_processors >> ${2} 2>&1
+make install >> ${2} 2>&1
 export PATH=${app_root}lammps/ADIOS2/bin:$PATH
 export LD_LIBRARY_PATH=${app_root}lammps/ADIOS2/lib64:$LD_LIBRARY_PATH
 export C_INCLUDE_PATH=${app_root}lammps/ADIOS2/include:$C_INCLUDE_PATH
 
 echo -e "[ -INFO- ] Downloading and extracting source files ..."
 if [ ! -f ${app_cache}lammps.zip ]; then
-  wget ${url_pkgs}lammps-develop.zip -O ${app_cache}lammps.zip -o $tmp_log
+  wget ${url_pkgs}lammps-develop.zip -O ${app_cache}lammps.zip -o ${2}
 fi
-unzip -o -q ${app_cache}lammps.zip -d ${app_extract_cache} >> $tmp_log
+unzip -o -q ${app_cache}lammps.zip -d ${app_extract_cache} >> ${2}
 if [ ! -f ${app_extract_cache}lammps-develop/src/MAKE/OPTIONS/Makefile.g++_mpich.orig ]; then 
   /bin/cp ${app_extract_cache}lammps-develop/src/MAKE/OPTIONS/Makefile.g++_mpich ${app_extract_cache}lammps-develop/src/MAKE/OPTIONS/Makefile.g++_mpich.orig
 else
@@ -202,8 +201,8 @@ sed -i "s@FFT_PATH =@FFT_PATH = -L${fftw3_root}lib@g" $makefile_g_mpich
 sed -i "s@FFT_LIB =@FFT_LIB = -lfftw3@g" $makefile_g_mpich
 echo -e "[ -INFO- ] Start compiling Lammps: lmp_g++_mpich now, this step may take minutes ..."
 cd  ${app_extract_cache}lammps-develop/src
-make yes-most >> $tmp_log 2>&1
-make -j$num_processors g++_mpich >> $tmp_log 2>&1
+make yes-most >> ${2} 2>&1
+make -j$num_processors g++_mpich >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build LAMMPS. Please check the log file for details. Exit now."
   exit 7

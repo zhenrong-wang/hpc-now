@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_openblas_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -96,19 +95,19 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Started building OpenBLAS-0.3.21."
 echo -e "[ STEP 1 ] $time_current Downloading and extracting source packages ..."
 if [ ! -f ${app_cache}OpenBLAS-0.3.21.tar.gz ]; then
-  wget ${url_pkgs}OpenBLAS-0.3.21.tar.gz -O ${app_cache}OpenBLAS-0.3.21.tar.gz -o ${tmp_log}
+  wget ${url_pkgs}OpenBLAS-0.3.21.tar.gz -O ${app_cache}OpenBLAS-0.3.21.tar.gz -o ${2}
 fi
-tar zvxf ${app_cache}OpenBLAS-0.3.21.tar.gz -C ${app_extract_cache} >> ${tmp_log}
+tar zvxf ${app_cache}OpenBLAS-0.3.21.tar.gz -C ${app_extract_cache} >> ${2}
 echo -e "[ -INFO- ] Building *SINGLE_THREAD* libs now..."
 cd ${app_extract_cache}OpenBLAS-0.3.21
-make -j$num_processors USE_THREAD=0 USE_LOCKING=1 >> $tmp_log
+make -j$num_processors USE_THREAD=0 USE_LOCKING=1 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build OpenBLAS-0.3.21. Please check the log file for details. Exit now."
   exit 1
 fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 3 ] $time_current Installing now, this step is quick ..."
-make PREFIX=${app_root}openblas install >> $tmp_log
+make PREFIX=${app_root}openblas install >> ${2}
 echo -e "#%Module1.0\nprepend-path PATH ${app_root}openblas/bin\nprepend-path LD_LIBRARY_PATH ${app_root}openblas/lib\n" > ${envmod_root}openblas
 if [ $current_user = 'root' ]; then
   echo -e "< openblas >" >> $public_app_registry

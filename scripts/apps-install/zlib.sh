@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_zlib_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -45,19 +44,19 @@ fi
 mkdir -p $app_cache
 echo -e "[ START: ] Downloading and Extracting source code ..."
 if [ ! -f ${app_cache}zlib-1.2.13.tar.gz ]; then
-  wget ${url_pkgs}zlib-1.2.13.tar.gz -O ${app_cache}zlib-1.2.13.tar.gz -o $tmp_log
+  wget ${url_pkgs}zlib-1.2.13.tar.gz -O ${app_cache}zlib-1.2.13.tar.gz -o ${2}
 fi
 tar zxf ${app_cache}zlib-1.2.13.tar.gz -C ${app_cache} >> /dev/null 2>&1
 
 echo -e "[ STEP 1 ] Building zlib-1.2.13 ... This step usually takes seconds."
 cd ${app_cache}zlib-1.2.13
-./configure --prefix=${app_root}zlib-1.2.13 >> $tmp_log 2>&1
-make -j${num_processors} >> $tmp_log
+./configure --prefix=${app_root}zlib-1.2.13 >> ${2} 2>&1
+make -j${num_processors} >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build zlib-1.2.13. Please check the log file for more details. Exit now."
   exit 5
 fi
-make install >> $tmp_log
+make install >> ${2}
 echo -e "#%Module1.0\nprepend-path LD_LIBRARY_PATH ${app_root}zlib-1.2.13/lib\nprepend-path C_INCLUDE_PATH ${app_root}zlib-1.2.13/include" > ${envmod_root}zlib-1.2.13
 if [ $current_user = 'root' ]; then
   echo -e "< zlib >" >> $public_app_registry

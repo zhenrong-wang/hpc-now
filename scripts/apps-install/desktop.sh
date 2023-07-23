@@ -10,18 +10,15 @@ if [ $1 = 'remove' ]; then
   echo -e "[ FATAL: ] This is an internal & global component. Cannot be removed."
   exit 0
 fi
-
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/desktop/
-tmp_log="/tmp/hpcmgr_install_desktop_${current_user}.log"
-public_app_registry="/hpc_apps/.public_apps.reg"
-
 current_user=`whoami`
 if [ $current_user != 'root' ]; then
   echo -e "[ FATAL: ] ONLY root user or user1 with sudo can install this app."
   echo -e "           Please contact the administrator. Exit now."
   exit 1
 fi
+url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
+url_pkgs=${url_root}packages/desktop/
+public_app_registry="/hpc_apps/.public_apps.reg"
 
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
@@ -30,28 +27,28 @@ fi
 
 centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
-  yum -y install ntpdate >> $tmp_log 2>&1
-  ntpdate ntp.ntsc.ac.cn >> $tmp_log 2>&1
+  yum -y install ntpdate >> ${2} 2>&1
+  ntpdate ntp.ntsc.ac.cn >> ${2} 2>&1
   cp -r /etc/profile /etc/profile.orig
   yum grouplist installed -q | grep "GNOME Desktop" >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "[ -INFO- ] OS: CentOS 7. Installing Desktop now ... "
-    yum -y update >> $tmp_log 2>&1 && yum -y groupinstall "GNOME Desktop" >> $tmp_log 2>&1
+    yum -y update >> ${2} 2>&1 && yum -y groupinstall "GNOME Desktop" >> ${2} 2>&1
   fi
   echo -e "[ -INFO- ] Setting desktop now ... "
-  systemctl disable firewalld >> $tmp_log 2>&1
+  systemctl disable firewalld >> ${2} 2>&1
   systemctl stop firewalld
-  systemctl set-default graphical.target >> $tmp_log 2>&1
+  systemctl set-default graphical.target >> ${2} 2>&1
   echo -e "[ -INFO- ] Installing RDP service now ... "
-  yum -y install tigervnc tigervnc-server xrdp gcc-c++ gfortran -q >> $tmp_log 2>&1
-  yum -y install ibus ibus-libpinyin -q >> $tmp_log 2>&1
-  yum -y install kde-l10n-Chinese -q >> $tmp_log 2>&1
-  systemctl start ntpd.service && systemctl enable ntpd.service >> $tmp_log 2>&1
+  yum -y install tigervnc tigervnc-server xrdp gcc-c++ gfortran -q >> ${2} 2>&1
+  yum -y install ibus ibus-libpinyin -q >> ${2} 2>&1
+  yum -y install kde-l10n-Chinese -q >> ${2} 2>&1
+  systemctl start ntpd.service && systemctl enable ntpd.service >> ${2} 2>&1
   sed -i 's/; (1 = ExtendedDesktopSize)/ (1 = ExtendedDesktopSize)/g' /etc/xrdp/xrdp.ini
   sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
   #localectl set-locale LANG=zh_CN.UTF-8
   systemctl start xrdp
-  systemctl enable xrdp >> $tmp_log 2>&1
+  systemctl enable xrdp >> ${2} 2>&1
   echo -e "[ -DONE- ] Desktop environment installed."
   echo -e "#! /bin/bash\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true" > /etc/g_ini.sh
   chmod +x /etc/g_ini.sh
@@ -75,30 +72,30 @@ if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
   done < /tmp/bashrc_dirs.txt
   rm -rf /tmp/bashrc_dirs.txt
 else
-  yum -y install chrony >> $tmp_log 2>&1
+  yum -y install chrony >> ${2} 2>&1
   systemctl start chronyd && systemctl enable chronyd
   cp -r /etc/profile /etc/profile.orig
   echo -e "[ -INFO- ] OS: CentOS Stream 9. "
   echo -e "[ -INFO- ] Updating the system now ..."
-  yum -y update >> $tmp_log 2>&1 && yum -y install epel-release >> $tmp_log 2>&1
+  yum -y update >> ${2} 2>&1 && yum -y install epel-release >> ${2} 2>&1
   yum grouplist installed -q | grep "Server with GUI" >> /dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo -e "[ -INFO- ] Installing Desktop now ..."
-    yum -y groupinstall "Server with GUI" >> $tmp_log 2>&1
+    yum -y groupinstall "Server with GUI" >> ${2} 2>&1
   fi
   systemctl enable gdm --now
-  systemctl disable firewalld >> $tmp_log 2>&1
+  systemctl disable firewalld >> ${2} 2>&1
   systemctl stop firewalld
-  systemctl set-default graphical.target >> $tmp_log 2>&1
+  systemctl set-default graphical.target >> ${2} 2>&1
   echo -e "[ -INFO- ] Installing RDP service now ... "
-  yum -y install tigervnc tigervnc-server xrdp gcc-c++ gfortran -q >> $tmp_log 2>&1
-  yum -y install langpacks-zh_CN ibus ibus-libpinyin -q >> $tmp_log 2>&1
+  yum -y install tigervnc tigervnc-server xrdp gcc-c++ gfortran -q >> ${2} 2>&1
+  yum -y install langpacks-zh_CN ibus ibus-libpinyin -q >> ${2} 2>&1
   #echo LANG=zh_CN.UTF-8 > /etc/locale.conf
   source /etc/locale.conf
   sed -i 's/; (1 = ExtendedDesktopSize)/ (1 = ExtendedDesktopSize)/g' /etc/xrdp/xrdp.ini
   sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
   systemctl start xrdp
-  systemctl enable xrdp >> $tmp_log 2>&1
+  systemctl enable xrdp >> ${2} 2>&1
   if [ ! -f /usr/share/backgrounds/wallpapers.zip ]; then
     rm -rf /usr/share/backgrounds/*.png
     rm -rf /usr/share/backgrounds/*.jpg

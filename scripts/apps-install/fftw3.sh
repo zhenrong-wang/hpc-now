@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_fftw3_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -46,17 +45,17 @@ fi
 mkdir -p $app_cache
 echo -e "[ -INFO- ] Downloading and extracting packages ..."
 if [ ! -f ${app_cache}fftw-3.3.10.tar.gz ]; then
-  wget ${url_pkgs}fftw-3.3.10.tar.gz -O ${app_cache}fftw-3.3.10.tar.gz -o ${tmp_log}
+  wget ${url_pkgs}fftw-3.3.10.tar.gz -O ${app_cache}fftw-3.3.10.tar.gz -o ${2}
 fi
 rm -rf ${app_cache}fftw-3.3.10
-tar zvxf ${app_cache}fftw-3.3.10.tar.gz -C ${app_extract_cache} >> ${tmp_log}
+tar zvxf ${app_cache}fftw-3.3.10.tar.gz -C ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}fftw-3.3.10
 echo -e "[ -INFO- ] Configuring build options ..."
-./configure --prefix=${app_root}fftw3 --enable-sse2 --enable-avx --enable-avx2 --enable-shared >> ${tmp_log} 2>&1
+./configure --prefix=${app_root}fftw3 --enable-sse2 --enable-avx --enable-avx2 --enable-shared >> ${2} 2>&1
 echo -e "[ -INFO- ] Compiling in progress ..."
-make -j${num_processors} >> $tmp_log
+make -j${num_processors} >> ${2}
 echo -e "[ -INFO- ] Installing the binaries and libraries to the destination ..."
-make install >> $tmp_log
+make install >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build FFTW-3. Please check the log file for details. Exit now."
   exit

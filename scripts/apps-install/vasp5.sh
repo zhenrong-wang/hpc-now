@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_vasp5_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -128,7 +127,7 @@ do
 done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  hpcmgr install ompi4 >> $tmp_log
+  hpcmgr install ompi4 >> ${2}
   if [ $current_user = 'root' ]; then
     module load ompi-4.1.2
     mpi_env=ompi-4.1.2
@@ -141,7 +140,7 @@ fi
 echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: LAPACK-3.11.0 ..."
-hpcmgr install lapack311 >> $tmp_log 2>&1
+hpcmgr install lapack311 >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build lapack-3.11.0. Exit now."
   exit 5
@@ -157,7 +156,7 @@ else
   lapack_env="${current_user}_env/lapack-3.11"
 fi
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: ScaLAPACK ..."
-hpcmgr install slpack2 >> $tmp_log 2>&1
+hpcmgr install slpack2 >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build ScaLAPACK. Exit now."
   exit 7
@@ -173,7 +172,7 @@ else
   scalapack_env="${current_user}_env/scalapack"
 fi
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: FFTW-3.3.10 ..."
-hpcmgr install fftw3 >> ${tmp_log} 2>&1
+hpcmgr install fftw3 >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build fftw3. Exit now."
   exit 7
@@ -190,7 +189,7 @@ else
 fi
 echo -e "[ -INFO- ] Prerequisition Checked. Will start building VASP-5.4.4."
 echo -e "[ START: ] Extracting the source code at ${app_root}vasp.5.4.4.zip..."
-unzip -o ${app_root}vasp.5.4.4.zip -d ${app_extract_cache} >> $tmp_log
+unzip -o ${app_root}vasp.5.4.4.zip -d ${app_extract_cache} >> ${2}
 echo -e "[ -INFO- ] Building binaries from the source code, this step usually take minutes..."
 cd ${app_extract_cache}vasp.5.4.4
 /bin/cp arch/makefile.include.linux_gnu makefile.include
@@ -206,19 +205,19 @@ sed -i "s@MPI_INC    = /opt/gfortran/openmpi-1.10.2/install/ompi-1.10.2-GFORTRAN
 echo -e "CPP_OPTIONS += -DLAPACK36" >> ${app_extract_cache}vasp.5.4.4/makefile.include
 echo -e "! routines replaced in LAPACK >=3.6\n#ifdef LAPACK36\n#define DGEGV DGGEV\n#endif" >> ${app_extract_cache}vasp.5.4.4/src/symbol.inc
 cd ${app_extract_cache}vasp.5.4.4 && rm -rf build/*
-make std >> $tmp_log 2>&1
+make std >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build vasp_std. Please check the log file and retry. Exit now."
   exit 3
 fi
 echo -e "[ -INFO- ] vasp_std built."
-make gam >> $tmp_log 2>&1
+make gam >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build vasp_gam. Please check the log file and retry. Exit now."
   exit 3
 fi
 echo -e "[ -INFO- ] vasp_gam built."
-make ncl >> $tmp_log 2>&1
+make ncl >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build vasp_ncl. Please check the log file and retry. Exit now."
   exit 3

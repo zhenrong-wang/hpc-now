@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_netcdf4_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -104,11 +103,11 @@ else
     if [ $? -eq 0 ]; then
       hdf5_root="${app_root}hdf5-1.10.9/"
     else
-      hpcmgr install hdf5 >> $tmp_log
+      hpcmgr install hdf5 >> ${2}
       hdf5_root="${app_root}hdf5-1.10.9/"
     fi
   else
-    hpcmgr install hdf5 >> $tmp_log
+    hpcmgr install hdf5 >> ${2}
     hdf5_root="${app_root}hdf5-1.10.9/"
   fi
 fi
@@ -117,40 +116,40 @@ mpi_root=`grep mpi_root ${hdf5_root}build_info.txt | awk '{print $2}'`
 zlib_path=`grep zlib ${hdf5_root}build_info.txt | awk '{print $2}'`
 cppflags="-I${hdf5_root}include -I${zlib_path}include -I${mpi_root}include"
 ldflags="-L${hdf5_root}lib -L${zlib_path}lib"
-#yum -y install m4 >> $tmp_log 2>&1
-#yum -y install libxml2-devel >> $tmp_log 2>&1
+#yum -y install m4 >> ${2} 2>&1
+#yum -y install libxml2-devel >> ${2} 2>&1
 echo -e "[ -INFO- ] netCDF-C and netCDF-Fortran will be built with GNU Compiler Collections."
 echo -e "[ START: ] Downloading and Extracting source code ..."
 if [ ! -f ${app_cache}netcdf-c-4.9.0.zip ]; then
-  wget ${url_pkgs}netcdf-c-4.9.0.zip -O ${app_cache}netcdf-c-4.9.0.zip -o $tmp_log
+  wget ${url_pkgs}netcdf-c-4.9.0.zip -O ${app_cache}netcdf-c-4.9.0.zip -o ${2}
 fi
 if [ ! -f ${app_cache}netcdf-fortran-4.5.3.tar.gz ]; then
-  wget ${url_pkgs}netcdf-fortran-4.5.3.tar.gz -O ${app_cache}netcdf-fortran-4.5.3.tar.gz -o $tmp_log
+  wget ${url_pkgs}netcdf-fortran-4.5.3.tar.gz -O ${app_cache}netcdf-fortran-4.5.3.tar.gz -o ${2}
 fi
-unzip -o ${app_cache}netcdf-c-4.9.0.zip -d ${app_extract_cache} >> $tmp_log
-tar zvxf ${app_cache}netcdf-fortran-4.5.3.tar.gz -C ${app_extract_cache} >> $tmp_log
+unzip -o ${app_cache}netcdf-c-4.9.0.zip -d ${app_extract_cache} >> ${2}
+tar zvxf ${app_cache}netcdf-fortran-4.5.3.tar.gz -C ${app_extract_cache} >> ${2}
 
 echo -e "[ STEP 1 ] Building netCDF-C-4.9.0 & netCDF-fortran-4.5.3 ... This step usually takes minutes."
 
 cd ${app_extract_cache}netcdf-c-4.9.0
-CPPFLAGS="${cppflags}" LDFLAGS="${ldflags}" CC=gcc ./configure --prefix=${app_root}netcdf4 >> $tmp_log 2>&1
-make -j$num_processors >> $tmp_log
+CPPFLAGS="${cppflags}" LDFLAGS="${ldflags}" CC=gcc ./configure --prefix=${app_root}netcdf4 >> ${2} 2>&1
+make -j$num_processors >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build netCDF-C-4.9.0. Please check the log file for more details. Exit now."
   exit 3
 fi
-make install >> $tmp_log
+make install >> ${2}
 echo -e "[ -INFO- ] netCDF-C-4.9.0 has been built. Installing netCDF-fortran-4.5.3 now ..."
 cd ${app_extract_cache}netcdf-fortran-4.5.3
 export LD_LIBRARY_PATH=${app_root}netcdf4/lib:$LD_LIBRARY_PATH
 export C_INCLUDE_PATH=${app_root}netcdf4/include:$C_INCLUDE_PATH
-CPPFLAGS="-I${app_root}netcdf4/include" LDFLAGS="-L${app_root}netcdf4/lib" ./configure --prefix=${app_root}netcdf4 >> $tmp_log 2>&1
-make -j$num_processors >> $tmp_log
+CPPFLAGS="-I${app_root}netcdf4/include" LDFLAGS="-L${app_root}netcdf4/lib" ./configure --prefix=${app_root}netcdf4 >> ${2} 2>&1
+make -j$num_processors >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build netCDF-fortran-4.5.3. Please check the log file for more details. Exit now."
   exit 3
 fi
-make install >> $tmp_log
+make install >> ${2}
 echo -e "[ -INFO- ] netCDF-C-4.9.0 and netCDF-fortran-4.5.3 has been built from the source code."
 echo -e "[ STEP 2 ] Setting up system environments now ..."
 echo -e "#%Module1.0\nprepend-path PATH ${app_root}netcdf4/bin" > ${envmod_root}netcdf4

@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_ompi4_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -96,21 +95,21 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Started building OpenMPI-4.1.2."
 echo -e "[ STEP 1 ] $time_current Downloading and extracting source packages ..."
 if [ ! -f ${app_cache}openmpi-4.1.2.tar.gz ]; then
-  wget ${url_pkgs}openmpi-4.1.2.tar.gz -O ${app_cache}openmpi-4.1.2.tar.gz -o ${tmp_log}
+  wget ${url_pkgs}openmpi-4.1.2.tar.gz -O ${app_cache}openmpi-4.1.2.tar.gz -o ${2}
 fi
-tar zvxf ${app_cache}openmpi-4.1.2.tar.gz -C ${app_extract_cache} >> $tmp_log
+tar zvxf ${app_cache}openmpi-4.1.2.tar.gz -C ${app_extract_cache} >> ${2}
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 2 ] $time_current Building libraries and binaries from the source packages ..."
 cd ${app_extract_cache}openmpi-4.1.2
-./configure --prefix=${app_root}ompi-4.1.2 --enable-mpi-cxx >> $tmp_log 2>&1
-make -j$num_processors >> $tmp_log
+./configure --prefix=${app_root}ompi-4.1.2 --enable-mpi-cxx >> ${2} 2>&1
+make -j$num_processors >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build OpenMPI-4.1.2. Please check the log file for details. Exit now."
   exit 1
 fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 3 ] $time_current Installing now, this step is quick ..."
-make install >> $tmp_log
+make install >> ${2}
 echo -e "#%Module1.0\nprepend-path PATH ${app_root}ompi-4.1.2/bin\nprepend-path LD_LIBRARY_PATH ${app_root}ompi-4.1.2/lib\nprepend-path C_INCLUDE_PATH ${app_root}ompi-4.1.2/include\nprepend-path CPLUS_INCLUDE_PATH ${app_root}ompi-4.1.2/include\n" > ${envmod_root}ompi-4.1.2
 echo -e "setenv OMPI_ALLOW_RUN_AS_ROOT 1\nsetenv OMPI_ALLOW_RUN_AS_ROOT_CONFIRM 1" >> ${envmod_root}ompi-4.1.2
 if [ $current_user = 'root' ]; then

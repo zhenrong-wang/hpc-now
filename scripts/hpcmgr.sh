@@ -633,6 +633,8 @@ elif [ $1 = 'applist' ]; then
     exit 36
   fi
 elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
+  app_tmp_log_root="/tmp/app_tmp_logs/"
+  mkdir -p ${app_tmp_log_root} && chmod -R 777 ${app_tmp_log_root}
   if [ -z "$2" ]; then
     echo -e "[ -INFO- ] Please specify an app to $1 ."
     exit 37
@@ -669,7 +671,9 @@ elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
       fi
     fi
   fi
-  curl -s ${url_instscripts_root}${2}.sh | bash -s $1
+  app_tmp_log="${app_tmp_log_root}${current_user}_${1}_${2}.log"
+  touch ${app_tmp_log} && chmod 644 ${app_tmp_log}
+  curl -s ${url_instscripts_root}${2}.sh | bash -s $1 ${app_tmp_log}
   exit 0
 elif [ $1 = 'submit' ]; then
   if [ -z $2 ]; then
@@ -689,6 +693,10 @@ elif [ $1 = 'submit' ]; then
   duration_hours=`grep "Duration Hours" ${job_info_tmp} | awk -F"::" '{print $2}'`
   job_exec=`grep "Job Executable" ${job_info_tmp} | awk -F"::" '{print $2}'`
   data_directory=`grep "Data Directory" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  if [ ! -d ${data_directory} ]; then
+    echo -e "[ FATAL: ] Failed to find/open the Data Directory: ${data_directory}. Exit now."
+    exit 53
+  fi
   echo -e '#!/bin/bash' > ${data_directory}/job_submit.sh
   echo -e "#SBATCH --account=hpc_users\n#SBATCH --cluster=cluster\n#SBATCH --partition=debug" >> ${data_directory}/job_submit.sh
   echo -e "#SBATCH --nodes=${job_nodes}\n#SBATCH --ntasks-per-node=${cores_per_node}" >> ${data_directory}/job_submit.sh
@@ -699,10 +707,9 @@ elif [ $1 = 'submit' ]; then
   ${app_name}.env
   if [ $? -ne 0 ]; then
     echo -e "[ FATAL: ] Failed to load the running environment for ${app_name}. Exit now."
-    exit 53
+    exit 55
   fi
   sbatch job_submit.sh
-  rm -rf ${job_info_tmp}
   if [ $? -eq 0 ]; then
     echo -e "[ -INFO- ] Job submitted successfully."
     exit 0

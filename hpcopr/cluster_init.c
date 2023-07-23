@@ -165,7 +165,7 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     return 0;
 }
 
-int get_tf_prep_conf(char* conf_file, char* cluster_id, char* region_id, char* zone_id, int* node_num, int* hpc_user_num, char* master_init_param, char* master_passwd, char* compute_passwd, char* master_inst, char* master_bandwidth, char* compute_inst, char* os_image_raw, char* ht_flag){
+int get_tf_prep_conf(char* conf_file, char* reconf_list, char* cluster_id, char* region_id, char* zone_id, int* node_num, int* hpc_user_num, char* master_init_param, char* master_passwd, char* compute_passwd, char* master_inst, char* master_bandwidth, char* compute_inst, char* os_image_raw, char* ht_flag){
     if(file_exist_or_not(conf_file)!=0){
         return -3; // If the conf file doesn't exist, exit.
     }
@@ -174,6 +174,7 @@ int get_tf_prep_conf(char* conf_file, char* cluster_id, char* region_id, char* z
     char header[64]="";
     char tail[32]="";
     char tail_ext[32]="";
+    char node_inst_ext[64]="";
     int read_conf_lines=0;
     int sum_temp=0;
     while(!feof(file_p)){
@@ -224,6 +225,10 @@ int get_tf_prep_conf(char* conf_file, char* cluster_id, char* region_id, char* z
             read_conf_lines++;
         }
         else if(strcmp(header,"master_inst")==0){
+            sprintf(node_inst_ext," %s ",tail);
+            if(find_multi_keys(reconf_list,node_inst_ext,"","","","")<1){
+                return 2;
+            }
             strcpy(master_inst,tail);
             read_conf_lines++;
         }
@@ -238,6 +243,10 @@ int get_tf_prep_conf(char* conf_file, char* cluster_id, char* region_id, char* z
             read_conf_lines++;
         }
         else if(strcmp(header,"compute_inst")==0){
+            sprintf(node_inst_ext," %s ",tail);
+            if(find_multi_keys(reconf_list,node_inst_ext,"","","","")<1){
+                return 2;
+            }
             strcpy(compute_inst,tail);
             read_conf_lines++;
         }
@@ -507,13 +516,17 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         system(cmdline);
         return 2;
     }
-    read_conf_flag=get_tf_prep_conf(conf_file,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,conf_param_buffer,compute_inst,os_image_raw,htflag);
+    sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
+    read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,conf_param_buffer,compute_inst,os_image_raw,htflag);
     if(read_conf_flag!=0){
         if(read_conf_flag==-3){
             printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now.\n" RESET_DISPLAY);
         }
         else if(read_conf_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now.\n" RESET_DISPLAY);
+        }
+        else if(read_conf_flag==2){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now.\n" RESET_DISPLAY);
         }
         else if(read_conf_flag==3){
             printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now.\n" RESET_DISPLAY);
@@ -1091,17 +1104,19 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         system(cmdline);
         return 2;
     }
-
     sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
-    
-    read_conf_flag=get_tf_prep_conf(conf_file,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,master_bandwidth,compute_inst,os_image,conf_param_buffer);
+    sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
+    read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,master_bandwidth,compute_inst,os_image,conf_param_buffer);
     if(read_conf_flag!=0){
         if(read_conf_flag==-3){
             printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now.\n" RESET_DISPLAY);
         }
         else if(read_conf_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now.\n" RESET_DISPLAY);
+        }
+        else if(read_conf_flag==2){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now.\n" RESET_DISPLAY);
         }
         else if(read_conf_flag==3){
             printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now.\n" RESET_DISPLAY);
@@ -1611,7 +1626,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
-
+    sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
     read_conf_flag=get_tf_prep_conf(conf_file,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,master_bandwidth,compute_inst,os_image,conf_param_buffer);
     if(read_conf_flag!=0){
         if(read_conf_flag==-3){
@@ -1619,6 +1634,9 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         }
         else if(read_conf_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now.\n" RESET_DISPLAY);
+        }
+        else if(read_conf_flag==2){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now.\n" RESET_DISPLAY);
         }
         else if(read_conf_flag==3){
             printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now.\n" RESET_DISPLAY);

@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_gromacs_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -127,7 +126,7 @@ done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] Building MPI Libraries now ..."
-  hpcmgr install mpich4 >> ${tmp_log}
+  hpcmgr install mpich4 >> ${2}
   if [ $current_user = 'root' ]; then
     module load mpich-4.0.2
     mpi_env="mpich-4.0.2"
@@ -140,7 +139,7 @@ fi
 echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 
 echo -e "[ -INFO- ] Checking and Installing the fftw3 libraries ... "
-hpcmgr install fftw3 >> $tmp_log
+hpcmgr install fftw3 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build fftw3. Exit now."
   exit 5
@@ -158,23 +157,23 @@ fi
 
 echo -e "[ -INFO- ] Downloading and extracting source files ..."
 if [ ! -f ${app_cache}gromacs-2022.2.tar.gz ]; then
-  wget ${url_pkgs}gromacs-2022.2.tar.gz -O ${app_cache}gromacs-2022.2.tar.gz -o $tmp_log
+  wget ${url_pkgs}gromacs-2022.2.tar.gz -O ${app_cache}gromacs-2022.2.tar.gz -o ${2}
 fi
-tar zvxf ${app_cache}gromacs-2022.2.tar.gz -C ${app_extract_cache} >> $tmp_log
+tar zvxf ${app_cache}gromacs-2022.2.tar.gz -C ${app_extract_cache} >> ${2}
 echo -e "[ -INFO- ] Building GROMACS-2022 now...This step may take minutes."
 cd ${app_extract_cache}gromacs-2022.2
 rm -rf build && mkdir -p build && cd build
-cmake .. -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=${app_root}gromacs2022 -DGMX_FFT_LIBRARY=fftw3 -DFFTW_LIBRARY=${fftw3_root}lib/libfftw3.a -DFFTW_INCLUDE_DIR=${fftw3_root}include -DGMX_DOUBLE=on >> ${tmp_log} 2>&1
+cmake .. -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=${app_root}gromacs2022 -DGMX_FFT_LIBRARY=fftw3 -DFFTW_LIBRARY=${fftw3_root}lib/libfftw3.a -DFFTW_INCLUDE_DIR=${fftw3_root}include -DGMX_DOUBLE=on >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] CMake processing error. Exit now."
   exit 7
 fi
-make -j $num_processors >> ${tmp_log}
+make -j $num_processors >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build GROMACS. Please check the log file for details. Exit now."
   exit 9
 fi
-make install >> ${tmp_log}
+make install >> ${2}
 if [ $current_user = 'root' ]; then
   grep "alias gromacs.env" /etc/profile >> /dev/null 2>&1
   if [ $? -ne 0 ]; then

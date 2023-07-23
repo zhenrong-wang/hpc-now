@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_of9_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -124,7 +123,7 @@ done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] Building MPI Libraries now ..."
-  hpcmgr install mpich4 >> ${tmp_log}
+  hpcmgr install mpich4 >> ${2}
   if [ $current_user = 'root' ]; then
     module load mpich-4.0.2
     mpi_env="mpich-4.0.2"
@@ -142,14 +141,14 @@ mkdir -p ${of_root}
 rm -rf ${of_root}*
 echo -e "[ -INFO- ] $time_current Downloading & extracting source packages ..."
 if [ ! -f ${app_cache}OpenFOAM-9.zip ]; then
-  wget ${url_pkgs}OpenFOAM-9.zip -O ${app_cache}OpenFOAM-9.zip -o ${tmp_log}
+  wget ${url_pkgs}OpenFOAM-9.zip -O ${app_cache}OpenFOAM-9.zip -o ${2}
 fi  
 if [ ! -f ${app_cache}ThirdParty-9.zip ]; then
-  wget ${url_pkgs}ThirdParty-9.zip -O ${app_cache}ThirdParty-9.zip -o ${tmp_log}
+  wget ${url_pkgs}ThirdParty-9.zip -O ${app_cache}ThirdParty-9.zip -o ${2}
 fi
 cd ${app_cache}
-unzip -o OpenFOAM-9.zip -d ${of_cache} >> ${tmp_log}
-unzip -o ThirdParty-9.zip -d ${of_cache} >> ${tmp_log}
+unzip -o OpenFOAM-9.zip -d ${of_cache} >> ${2}
+unzip -o ThirdParty-9.zip -d ${of_cache} >> ${2}
 cd ${of_cache}
 rm -rf OpenFOAM-9 && rm -rf ThirdParty-9
 mv OpenFOAM-9-master OpenFOAM-9 && mv ThirdParty-9-master ThirdParty-9

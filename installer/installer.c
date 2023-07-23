@@ -667,12 +667,14 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
     if(system("dir c:\\programdata\\hpc-now | findstr .now-ssh > nul 2>&1")!=0){ // For compatibility
         printf("[ -INFO- ] Moving previous keys to the new directory ...\n");
+        system("icacls c:\\hpc-now\\.now-ssh /remove Administrators > nul 2>&1");
         system("move /y c:\\.now-ssh c:\\programdata\\hpc-now\\ > nul 2>&1");
     }
     system("takeown /f c:\\hpc-now\\hpcopr.exe /d y > nul 2>&1");
     system("icacls c:\\hpc-now\\hpcopr.exe /grant Administrators:F > nul 2>&1");
     if(system("dir c:\\hpc-now | findstr utils > nul 2>&1")!=0){ // For compatibility
         printf("[ -INFO- ] Moving previous utilities to the new directory ...\n");
+        system("icacls c:\\programdata\\hpc-now\\bin /remove Administrators > nul 2>&1");
         system("move /y c:\\programdata\\hpc-now\\bin c:\\hpc-now\\utils > nul 2>&1");
     }
     system("takeown /f c:\\hpc-now\\utils\\now-crypto.exe /d y > nul 2>&1");

@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_of2112_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -124,7 +123,7 @@ done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] Building MPI Libraries now ..."
-  hpcmgr install mpich4 >> ${tmp_log}
+  hpcmgr install mpich4 >> ${2}
   if [ $current_user = 'root' ]; then
     module load mpich-4.0.2
     mpi_env="mpich-4.0.2"
@@ -142,16 +141,16 @@ mkdir -p ${of_root}
 rm -rf ${of_root}*
 echo -e "[ -INFO- ] $time_current Downloading & extracting source packages ..."
 if [ ! -f ${app_cache}OpenFOAM-v2112.tgz ]; then
-  wget ${url_pkgs}OpenFOAM-v2112.tgz -O ${app_cache}OpenFOAM-v2112.tgz -o ${tmp_log}
+  wget ${url_pkgs}OpenFOAM-v2112.tgz -O ${app_cache}OpenFOAM-v2112.tgz -o ${2}
 fi  
 if [ ! -f ${app_cache}ThirdParty-v2112.tgz ]; then
-  wget ${url_pkgs}ThirdParty-v2112.tgz -O ${app_cache}ThirdParty-v2112.tgz -o ${tmp_log}
+  wget ${url_pkgs}ThirdParty-v2112.tgz -O ${app_cache}ThirdParty-v2112.tgz -o ${2}
 fi
 cd ${app_cache}
-tar zvxf OpenFOAM-v2112.tgz -C ${of_cache} >> $tmp_log
-tar zvxf ThirdParty-v2112.tgz -C ${of_cache} >> $tmp_log 
+tar zvxf OpenFOAM-v2112.tgz -C ${of_cache} >> ${2}
+tar zvxf ThirdParty-v2112.tgz -C ${of_cache} >> ${2} 
 if [ ! -f ${of_cache}ThirdParty-v2112/sources/ADIOS2-2.6.0.zip ]; then
-  wget ${url_pkgs}ADIOS2-2.6.0.zip -O ${of_cache}ThirdParty-v2112/sources/ADIOS2-2.6.0.zip >> $tmp_log 2>&1
+  wget ${url_pkgs}ADIOS2-2.6.0.zip -O ${of_cache}ThirdParty-v2112/sources/ADIOS2-2.6.0.zip >> ${2} 2>&1
 fi
 if [ ! -f ${of_cache}ThirdParty-v2112/sources/metis-5.1.0.tar.gz ]; then
   wget ${url_pkgs}metis-5.1.0.tar.gz -O ${of_cache}ThirdParty-v2112/sources/metis-5.1.0.tar.gz -q

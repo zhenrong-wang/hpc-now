@@ -14,10 +14,8 @@ if [ $current_user != 'root' ]; then
   echo -e "           Please contact the administrator. Exit now."
   exit 1
 fi
-
 public_app_registry="/hpc_apps/.public_apps.reg"
 app_cache="/hpc_apps/.cache/"
-tmp_log="/tmp/hpcmgr_install_baidu_${current_user}.log"
 
 if [ $1 = 'remove' ]; then
   rpm -e baidunetdisk-patch
@@ -40,7 +38,7 @@ mkdir -p $app_cache
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
-  hpcmgr install desktop >> ${tmp_log}.desktop
+  hpcmgr install desktop >> $2.desktop
   if [ $? -ne 0 ]; then
     echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
     exit 5
@@ -50,9 +48,9 @@ fi
 centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
   echo -e "[ -INFO- ] Downloading and installing Baidu Netdisk now ..."
-  yum -y install libXScrnSaver >> $tmp_log
+  yum -y install libXScrnSaver >> ${2}
   if [ ! -f ${app_cache}baidunetdisk-4.3.0.x86_64.rpm ]; then
-    wget ${url_pkgs}baidunetdisk-4.3.0.x86_64.rpm -O ${app_cache}baidunetdisk-4.3.0.x86_64.rpm -o $tmp_log
+    wget ${url_pkgs}baidunetdisk-4.3.0.x86_64.rpm -O ${app_cache}baidunetdisk-4.3.0.x86_64.rpm -o ${2}
   fi
   rpm -ivh ${app_cache}baidunetdisk-4.3.0.x86_64.rpm
   grep "alias baidu='/opt/baidunetdisk/baidunetdisk --no-sandbox'" /etc/profile >> /dev/null 2>&1
@@ -62,18 +60,18 @@ if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
   echo -e "#! /bin/bash\n/opt/baidunetdisk/baidunetdisk --no-sandbox" > /opt/baidunetdisk/baidu.sh
   chmod +x /opt/baidunetdisk/baidu.sh
 else
-  yum -y install libXScrnSaver libcloudproviders >> $tmp_log
+  yum -y install libXScrnSaver libcloudproviders >> ${2}
   echo -e "[ -INFO- ] Downloading and installing Baidu Netdisk now ..."
   if [ ! -f ${app_cache}baidunetdisk-4.15.5.x86_64.rpm ]; then
-    wget ${url_pkgs}baidunetdisk-4.15.5.x86_64.rpm -O ${app_cache}baidunetdisk-4.15.5.x86_64.rpm -o $tmp_log
+    wget ${url_pkgs}baidunetdisk-4.15.5.x86_64.rpm -O ${app_cache}baidunetdisk-4.15.5.x86_64.rpm -o ${2}
   fi
   if [ ! -f ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm ]; then
-    wget ${url_pkgs}baidunetdisk-patch-1.0.1-1.x86_64.rpm -O ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm -o $tmp_log
+    wget ${url_pkgs}baidunetdisk-patch-1.0.1-1.x86_64.rpm -O ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm -o ${2}
   fi
   rpm -ivh ${app_cache}baidunetdisk-4.15.5.x86_64.rpm 
   rpm -ivh ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm
   if [ ! -f ${app_cache}libgdkpatch.so ]; then
-    wget ${url_pkgs}libgdkpatch.so -O ${app_cache}libgdkpatch.so -o $tmp_log
+    wget ${url_pkgs}libgdkpatch.so -O ${app_cache}libgdkpatch.so -o ${2}
   fi
   /bin/cp ${app_cache}libgdkpatch.so /opt/baidunetdisk/
   grep "alias baidu='LD_PRELOAD=/opt/baidunetdisk/libgdkpatch.so /opt/baidunetdisk/baidunetdisk --no-sandbox'" /etc/profile >> /dev/null 2>&1

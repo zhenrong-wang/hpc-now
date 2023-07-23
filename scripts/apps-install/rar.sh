@@ -13,7 +13,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_rar_${current_user}.log"
 
 if [ $current_user = 'root' ]; then
   app_root="/opt/"
@@ -46,10 +45,10 @@ mkdir -p $app_cache
 echo -e "[ -INFO- ] Software: RAR for Linux "
 if [ ! -f ${app_cache}rarlinux-x64-612.tar.gz ]; then
   echo -e "[ -INFO- ] Downloading package(s) ..."
-  wget ${url_pkgs}rarlinux-x64-612.tar.gz -O ${app_cache}rarlinux-x64-612.tar.gz >> ${tmp_log}
+  wget ${url_pkgs}rarlinux-x64-612.tar.gz -O ${app_cache}rarlinux-x64-612.tar.gz >> ${2}
 fi
 echo -e "[ -INFO- ] Extracting packages ..."
-tar zvxf ${app_cache}rarlinux-x64-612.tar.gz -C ${app_root} >> ${tmp_log}
+tar zvxf ${app_cache}rarlinux-x64-612.tar.gz -C ${app_root} >> ${2}
 if [ $current_user = 'root' ]; then
   mkdir -p /usr/local/bin
   mkdir -p /usr/local/lib

@@ -11,7 +11,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-tmp_log="/tmp/hpcmgr_install_gcc4_${current_user}.log"
 
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
@@ -62,21 +61,21 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Building GNU Compiler Collections - Version 4.9.2  now ... "
 echo -e "[ STEP 1 ] $time_current Downloading and extracting source packages, this step usually takes minutes ... "
 if [ ! -f ${app_cache}gcc-4.9.2-full.tar.gz ]; then
-  wget ${url_pkgs}gcc-4.9.2-full.tar.gz -O ${app_cache}gcc-4.9.2-full.tar.gz -o $tmp_log
+  wget ${url_pkgs}gcc-4.9.2-full.tar.gz -O ${app_cache}gcc-4.9.2-full.tar.gz -o ${2}
 fi
-tar zvxf ${app_cache}gcc-4.9.2-full.tar.gz -C ${app_extract_cache} >> $tmp_log
+tar zvxf ${app_cache}gcc-4.9.2-full.tar.gz -C ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}gcc-4.9.2
-./configure --prefix=${app_root}gcc-4.9.2 --enable-checking=release --enable-languages=c,c++,fortran --disable-multilib >> $tmp_log 2>&1
+./configure --prefix=${app_root}gcc-4.9.2 --enable-checking=release --enable-languages=c,c++,fortran --disable-multilib >> ${2} 2>&1
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 2 ] $time_current Making gcc-4.9.2 now, this step usually takes more than 2 hours with 8 cores..."
-make -j$num_processors >> $tmp_log
+make -j$num_processors >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build gcc-4.9.2. Please check the log file for details. Exit now."
   exit 1
 fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 3 ] $time_current Installing gcc-4.9.2 now, this step is quick ..."
-make install >> $tmp_log 
+make install >> ${2} 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "#%Module1.0\nprepend-path PATH ${app_root}gcc-4.9.2/bin\nprepend-path LD_LIBRARY_PATH ${app_root}gcc-4.9.2/lib64\n" > ${envmod_root}gcc-4.9.2
 if [ $current_user = 'root' ]; then
