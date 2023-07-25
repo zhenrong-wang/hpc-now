@@ -12,17 +12,20 @@
 
 logfile='/root/cluster_init.log'
 public_app_registry="/hpc_apps/.public_apps.reg"
-
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Initialization started." >> ${logfile}
-grep openEuler /etc/system-release
-if [ $? -eq 0 ]; then
-  distro_type="oE"
+distro_type=`head -n 3 /etc/os-release | grep NAME= | awk -F"\"" '{print $2}' | awk '{print $1}'`
+distro_vers=`head -n 3 /etc/os-release | grep VERSION= | awk -F"\"" '{print $2}' | awk '{print $1}'`
+if [ $distro_type != 'CentOS' ]; then
+  centos_vers='NULL'
+else
+  centos_vers=$distro_vers
 fi
-centos_version=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
-echo -e "export CENTOS_V=$centos_version" >> /etc/profile
-echo -e "alias sudo='sudo -E'" >> /etc/profile
+echo -e "export GNU_LINUX_DISTRO=${distro_type}" >> /etc/profile
+echo -e "export GNU_LINUX_DISTRO_VERSION=${distro_vers}" >> /etc/profile
+echo -e "export CENTOS_VERSION=${centos_vers}" >> /etc/profile
 
+echo -e "alias sudo='sudo -E'" >> /etc/profile
 source /etc/profile 
 # The system global env INITUTILS_REPO_ROOT must be set and written in /etc/profile befor execution
 if [ -z $INITUTILS_REPO_ROOT ]; then
@@ -205,7 +208,7 @@ if [ -f /root/hostfile ]; then
   yum remove -y `rpm -aq mariadb*`
   rm -rf /etc/my.cnf
   rm -rf /var/lib/mysql
-  if [ $centos_version -eq 7 ]; then
+  if [ ! -z $centos_version ] && [ $centos_version -eq 7 ]; then
     yum -y install mariadb mariadb-devel mariadb-server
     yum -y install mariadb-libs
   else
@@ -383,32 +386,32 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 if [ -f /root/hostfile ]; then
   echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
-  if [ $centos_version -eq 7 ]; then
-    yum -y groupinstall "GNOME Desktop"
-    if [ -f /root/hostfile ]; then
+  if [ $distro_type != 'CentOS' ]; then
+    echo -e "# $time_current GNU/Linux Distro: ${distro_type}. Installing GUI now." >> ${logfile}
+    dnf -y install gnome-shell gdm gnome-session
+    systemctl enable gdm.service
+  else
+    echo -e "# $time_current CENTOS VERSION $centos_version. Installing GUI now." >> ${logfile}
+    if [ $centos_version -eq 7 ]; then
+      yum -y groupinstall "GNOME Desktop"
       wget ${url_utils}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26
       rm -rf /usr/lib64/libstdc++.so.6
       ln -s /usr/lib64/libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6
+      systemctl disable firewalld
+      systemctl stop firewalld
+      echo -e "#! /bin/bash\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true" > /etc/g_ini.sh
+      chmod +x /etc/g_ini.sh
+      sed -i '/gini/d' /etc/profile
+      echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
+    else
+      yum grouplist installed -q | grep "Server with GUI" >> /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        yum -y groupinstall "Server with GUI"
+      fi
+      systemctl enable gdm --now
+      systemctl disable firewalld
+      systemctl stop firewalld
     fi
-    systemctl disable firewalld
-    systemctl stop firewalld
-    echo -e "#! /bin/bash\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true" > /etc/g_ini.sh
-    chmod +x /etc/g_ini.sh
-    sed -i '/gini/d' /etc/profile
-    echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
-  elif [ $centos_version -eq 9 ]; then
-    echo -e "# $time_current CENTOS VERSION $centos_version. Installing GUI now." >> ${logfile}
-    yum grouplist installed -q | grep "Server with GUI" >> /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-      yum -y groupinstall "Server with GUI"
-    fi
-    systemctl enable gdm --now
-    systemctl disable firewalld
-    systemctl stop firewalld
-  elif [ $distro_type = 'oE' ]; then
-    dnf install gnome-shell gdm gnome-session
-    systemctl enable gdm.service
-    systemctl set-default graphical.target
   fi
   systemctl set-default graphical.target
   yum -y install tigervnc tigervnc-server

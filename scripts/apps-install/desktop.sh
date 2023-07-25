@@ -25,8 +25,7 @@ if [ $? -eq 0 ]; then
   echo -e "[ -WARN- ] It seem the desktop environment has already been installed. Reinstalling now ..."
 fi
 
-centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
-if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
+if [ ! -z $CENTOS_VERSION ] && [ $CENTOS_VERSION = '7' ]; then
   yum -y install ntpdate >> ${2} 2>&1
   ntpdate ntp.ntsc.ac.cn >> ${2} 2>&1
   cp -r /etc/profile /etc/profile.orig

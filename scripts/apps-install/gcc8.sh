@@ -51,9 +51,8 @@ unset LIBRARY_PATH #Only for gcc, we have to do this
 unset LD_LIBRARY_PATH
 unset CPATH
 
-centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
-if [ -z $centos_ver ] || [ $centos_ver -ne 7 ]; then
-  echo -e "[ -INFO- ] GNU Compiler Collections - Version 4.9.2 is *ONLY* for CentOS 7.x to upgrade. Exit now."
+if [ -z $CENTOS_VERSION ] || [ $CENTOS_VERSION != '7' ]; then
+  echo -e "[ -INFO- ] GNU Compiler Collections - Version 8.2.0 is *ONLY* for CentOS 7.x to upgrade. Exit now."
   exit 3
 fi
 

@@ -15,7 +15,6 @@ fi
 url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
 url_pkgs=${url_root}packages/
 num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
-centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
@@ -51,7 +50,7 @@ fi
 gcc_vers=('gcc12' 'gcc9' 'gcc8' 'gcc4')
 gcc_code=('gcc-12.1.0' 'gcc-9.5.0' 'gcc-8.2.0' 'gcc-4.9.2')
 systemgcc='true'
-if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
+if [ ! -z $CENTOS_VERSION ] && [ $CENTOS_VERSION = '7' ]; then
   for i in $(seq 0 3)
   do
 	  grep "< ${gcc_vers[i]} >" $public_app_registry >> /dev/null 2>&1
@@ -101,7 +100,7 @@ fi
 tar zvxf ${app_cache}mpich-3.2.1.tar.gz -C ${app_extract_cache} >> ${2}
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ STEP 2 ] $time_current Configuring and making binaries ... "
-if [ $gcc_vnum -gt 10 ]; then
+if [ $gcc_vnum -gt 9 ]; then
   export FFLAGS="-w -fallow-argument-mismatch -O2"
   export FCFLAGS="-w -fallow-argument-mismatch -O2"
 fi

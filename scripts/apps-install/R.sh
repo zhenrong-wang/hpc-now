@@ -23,8 +23,7 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 app_root="/hpc_apps/"
 app_cache="/hpc_apps/.cache/"
 app_extract_cache="/root/.app_extract_cache/"
-centos_v=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
-if [ $centos_v -eq 7 ]; then
+if [ ! -z $CENTOS_VERSION ] && [ $CENTOS_VERSION = '7' ]; then
   echo -e "[ FATAL: ] R & RStudio can not be installed to CentOS 7.x. Exit now."
   exit 3
 fi

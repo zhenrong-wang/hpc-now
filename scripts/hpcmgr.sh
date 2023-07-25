@@ -160,7 +160,7 @@ elif [ $1 = 'users' ]; then
           echo -e "username: $3 $4 ENABLED" >> ${user_registry}
         else
           echo -e "Generate random string for password." 
-          if [ $CENTOS_V -eq 7 ]; then
+          if [ ! -z $CENTOS_VERSION ] && [ $CENTOS_VERSION -eq 7 ]; then
             openssl rand 8 -base64 -out /root/.cluster_secrets/secret_$3.txt
           else
             openssl rand -base64 -out /root/.cluster_secrets/secret_$3.txt 8
@@ -287,7 +287,7 @@ elif [ $1 = 'quick' ]; then
       echo -e "\n Node ${i} is unreachable." >> ${logfile}
       continue
     fi
-    ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged" >> $logfile 2>&1
+    ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged" >> $logfile 2>&1 
     ssh compute${i} "systemctl restart slurmd && systemctl enable slurmd" >> $logfile 2>&1
     scontrol update NodeName=compute${i} State=DOWN Reason=hung_completing
     scontrol update NodeName=compute${i} State=RESUME
@@ -440,8 +440,11 @@ elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
   echo -e "[ STEP 1 ] Checking the authentication of the master node ..."
   ps -aux | grep slurm | grep munged >> ${logfile}
   if [ $? -ne 0 ]; then
-    mkdir -p /run/munge
-    chown -R slurm:slurm /run/munge
+    mkdir -p /run/munge && chown -R slurm:slurm /run/munge
+    mkdir -p /etc/munge && chown -R slurm:slurm /etc/munge
+    mkdir -p /var/run/munge && chown -R slurm:slurm /var/run/munge
+    mkdir -p /var/lib/munge && chown -R slurm:slurm /var/lib/munge
+    mkdir -p /var/log/munge && chown -R slurm:slurm /var/log/munge
     sudo -u slurm munged
     if [ $? -ne 0 ]; then
       echo -e "[ FATAL: ] FAILED to start munge daemon on Master Node! Please check the installation of munge.\nExit now."
@@ -454,8 +457,7 @@ elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
   for i in $(seq 1 $NODE_NUM )
   do
     ssh compute${i} "ps -aux | grep slurm | grep munged | cut -c 9-16 | xargs kill -9 >> /dev/null 2>&1"
-    ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && chown -R slurm:slurm /etc/munge"    
-    ssh compute${i} "sudo -u slurm munged"
+    ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && mkdir -p /etc/munge && chown -R slurm:slurm /etc/munge && mkdir -p /var/run/munge && chown -R slurm:slurm /var/run/munge && mkdir -p /var/lib/munge && chown -R slurm:slurm /var/lib/munge && mkdir -p /var/log/munge && chown -R slurm:slurm /var/log/munge && sudo -u slurm munged" >> $logfile 2>&1  
     if [ $? -ne 0 ]; then
       echo -e "[ FATAL: ] FAILED to start munge daemon on Compute${i} Node! Please check the installation of munge.\nExit now."
       echo -e "[ FATAL: ] FAILED to start munge daemon on Compute${i} Node! Please check the installation of munge.\nExit now." >> ${logfile}

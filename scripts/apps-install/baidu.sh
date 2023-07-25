@@ -45,8 +45,7 @@ if [ $? -ne 0 ]; then
   fi
 fi
 
-centos_ver=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
-if [ ! -z $centos_ver ] && [ $centos_ver -eq 7 ]; then
+if [ ! -z $CENTOS_VERSION ] && [ $CENTOS_VERSION = '7' ]; then
   echo -e "[ -INFO- ] Downloading and installing Baidu Netdisk now ..."
   yum -y install libXScrnSaver >> ${2}
   if [ ! -f ${app_cache}baidunetdisk-4.3.0.x86_64.rpm ]; then

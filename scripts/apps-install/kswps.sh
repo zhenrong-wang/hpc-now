@@ -39,7 +39,7 @@ if [ $? -ne 0 ]; then
   fi
 fi
 centos_v=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
-if [ ! -z $centos_v ] && [ $centos_v -eq 7 ]; then
+if [ ! -z $CENTOS_VERSION ] && [ $CENTOS_VERSION = '7' ]; then
   yum -y install libXScrnSaver -q
   if [ ! -f ${app_cache}wps-office-10.1.0.6634-1.x86_64.rpm ]; then
     echo -e "[ -INFO- ] Downloading package(s) ..."
