@@ -464,7 +464,7 @@ if [ -f /root/hostfile ]; then
     fi
     grep "< oss >" $public_app_registry
     if [ $? -ne 0 ]; then
-      echo -e "< oos >" >> $public_app_registry
+      echo -e "< oss >" >> $public_app_registry
     fi
   fi
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
