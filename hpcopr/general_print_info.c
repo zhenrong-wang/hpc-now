@@ -464,6 +464,7 @@ void print_jobmgr_info(void){
     printf("|     --jexec EXECUTABLE_NAME  ~ Executable name for this job.\n");
     printf("|     --jdata DATA_DIRECTORY   ~ The data directory for this job.\n");
     printf("|                              ~ MUST use @d/ or @p/ as the prefix.\n");
+    printf("|     --echo                   ~ View the job console output.\n");
     printf("|   --jcmd list    ~ List out all the jobs.\n");
     printf("|   --jcmd cancel  ~ Cancel a job with specified ID\n");
     printf("|     --jid   JOB_ID           ~ A valid job ID.\n");
