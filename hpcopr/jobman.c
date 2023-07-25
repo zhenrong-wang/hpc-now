@@ -52,6 +52,9 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     cluster_node_num=string_to_positive_num(cluster_node_num_string);
     cluster_node_cores=string_to_positive_num(cluster_node_cores_string);
 
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Current cluster cores status:\n");
+    remote_exec_general(workdir,sshkey_dir,user_name,"tail -n 1 /usr/hpc-now/mon_cores.dat","",0,2,"","");
+
     if(strcmp(user_name,"root")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The root user cannot submit jobs, please specify another user." RESET_DISPLAY "\n");
         hpc_user_list(workdir,crypto_keyfile,0);
@@ -169,7 +172,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         *(string_temp+i)=*(job_data+i);
     }
     if(strcmp(string_temp,"@d/")!=0&&strcmp(string_temp,"@p/")!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified data directory " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",string_temp);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified data directory " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",job_data);
         return -5;
     }
     else{

@@ -908,8 +908,8 @@ int direct_path_check(char* path_string, char* hpc_user, char* real_path){
         *(header+i)=*(path_string+i);
         i++;
     }
-    for(j=i;j<strlen(path_string);j++){
-        *(tail+j-i)=*(path_string+j);
+    for(j=i+1;j<strlen(path_string);j++){
+        *(tail+j-i-1)=*(path_string+j);
     }
     if(strcmp(header,"@h")==0){
         if(strcmp(hpc_user,"root")==0){
