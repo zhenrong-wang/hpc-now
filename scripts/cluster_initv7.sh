@@ -155,7 +155,7 @@ do
   chown -R ${user_name}:${user_name} /home/${user_name}
 done < /root/user_secrets.txt
 
-yum -y install gcc openssl openssl-devel unzip curl make perl sshpass gtk2 gtk2-devel
+yum -y install gcc bc openssl openssl-devel unzip curl make perl sshpass gtk2 gtk2-devel
 # stop firewall and SELinux 
 systemctl stop firewalld && systemctl disable firewalld
 if [ $SELINUX_STATUS != Disabled ]; then
