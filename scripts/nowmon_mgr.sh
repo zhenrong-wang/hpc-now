@@ -24,10 +24,10 @@ do
         ssh compute$i ". /usr/hpc-now/nowmon_agt.sh"
         scp root@compute$i:/usr/hpc-now/mon_data_compute$i.csv /tmp/ >> /dev/null 2>&1
         cat /tmp/mon_data_compute$i.csv >> $cluster_mon_data
-	idle_cores_i=`awk -F"," '{print $12}' /tmp/mon_data_compute$i.csv`
-    low_cores_i=`awk -F"," '{print $13}' /tmp/mon_data_compute$i.csv`
-	idle_cores=$((idle_cores+idle_cores_i))
-    low_cores=$((low_cores+low_cores_i))
+	    idle_cores_i=`awk -F"," '{print $12}' /tmp/mon_data_compute$i.csv`
+        low_cores_i=`awk -F"," '{print $13}' /tmp/mon_data_compute$i.csv`
+	    idle_cores=$((idle_cores+idle_cores_i))
+        low_cores=$((low_cores+low_cores_i))
     else
         echo -e "${header}compute${i},$NODE_CORES,null,null,null,null,null,null,null,null,null,null,null,null" >> $cluster_mon_data
     fi

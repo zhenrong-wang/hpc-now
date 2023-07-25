@@ -511,7 +511,7 @@ if [ -f /root/hostfile ]; then
 fi
 
 yum -y update
-yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel
+yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname
 
 # Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
 if [ $cloud_flag = 'CLOUD_B' ]; then
