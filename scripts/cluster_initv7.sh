@@ -273,12 +273,11 @@ echo -e "ALL the secrets are stored in the directory /root/.cluster_secrets/ ."
 echo -e "# $time_current ALL the secrets are stored in the directory /root/.cluster_secrets/ ." >> ${logfile}
 
 # Change owners of directories 
-mkdir -p /run/munge
-chown -R slurm:slurm /run/munge
-chown -R slurm:slurm /etc/munge
-chown -R slurm:slurm /var/run/munge
-chown -R slurm:slurm /var/lib/munge
-chown -R slurm:slurm /var/log/munge
+mkdir -p /run/munge && chown -R slurm:slurm /run/munge
+mkdir -p /etc/munge && chown -R slurm:slurm /etc/munge
+mkdir -p /var/run/munge && chown -R slurm:slurm /var/run/munge
+mkdir -p /var/lib/munge && chown -R slurm:slurm /var/lib/munge
+mkdir -p /var/log/munge && chown -R slurm:slurm /var/log/munge
 
 # munge 
 if [ -f /root/hostfile ]; then
