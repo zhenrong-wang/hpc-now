@@ -105,6 +105,7 @@ echo -e "source /etc/profile" >> /root/.bashrc
 if [ -f /root/hostfile ]; then
   mkdir -p /hpc_data/cluster_data
   chmod -R 644 /hpc_data/cluster_data
+  chmod 755 /hpc_data/cluster_data
   mkdir -p /hpc_data/public
   chmod -R 777 /hpc_data/public
 fi
