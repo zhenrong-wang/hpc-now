@@ -26,7 +26,7 @@ if [ ! -f $mon_data ] && [ $hostname = 'master' ]; then
     echo -e "date,time_m,time_s,node_name,cpu_tot_cores,mem_tot_gb,mem_used_gb,mem_util_%,stor_app,stor_data,cpu_util,idle_cores,low_cores,mid_low_cores,mid_high_cores,high_cores,full_cores" >> $mon_data
 fi
 
-top 1 -bn 1 -i -c -w 512 > $mon_cores
+top -1 -bn 1 -i -c -w 512 > $mon_cores
 top -bn 1 -i -c > $mon_all
 
 core_num=`lscpu | grep CPU\(s\): | awk '{print $2}' | head -n1`
