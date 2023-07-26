@@ -388,8 +388,8 @@ if [ -f /root/hostfile ]; then
   echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
   if [ $distro_type != 'CentOS' ]; then
     echo -e "# $time_current GNU/Linux Distro: ${distro_type}. Installing GUI now." >> ${logfile}
-    dnf -y install gnome-shell gdm gnome-session gnome-terminal gnome-shell-extensions gnome-system-monitor gnome-tweaks
-    yum -y install xfce4-terminal
+    dnf -y install gnome-shell gdm gnome-session gnome-terminal gnome-shell-extensions gnome-system-monitor gnome-tweaks 
+    yum -y install firefox ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
     systemctl enable gdm.service --now
   else
     echo -e "# $time_current CENTOS VERSION $centos_version. Installing GUI now." >> ${logfile}
