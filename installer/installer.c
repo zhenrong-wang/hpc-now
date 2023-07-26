@@ -462,7 +462,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     system(cmdline1);
     system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /home/hpc-now >> /dev/null 2>&1");
-    system("chmod -R 700 /home/hpc-now >> /dev/null 2>&1");
+    system("chmod 711 /home/hpc-now >> /dev/null 2>&1");
     system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
     sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
@@ -511,7 +511,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     system(cmdline1);
     system("mkdir -p '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chmod -R 755 '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chown -R hpc-now:hpc-now '/Library/Application Support/io.terraform' >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Users/hpc-now >> /dev/null 2>&1");
-    system("chmod -R 700 /Users/hpc-now >> /dev/null 2>&1");
+    system("chmod 711 /Users/hpc-now >> /dev/null 2>&1");
     system("chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
     sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
@@ -683,7 +683,6 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     if(system("ls -la /home/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
         printf("[ -INFO- ] Moving previous utilities to the new directory ...\n");
         system("mv /usr/.hpc-now/.bin /home/hpc-now/.bin/utils >> /dev/null 2>&1");
-        system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
         system("chown -R hpc-now:hpc-now /home/hpc-now/.bin/utils >> /dev/null 2>&1");
     }
     if(system("ls -la /usr/.hpc-now | grep .now-ssh >> /dev/null 2>&1")!=0){
@@ -800,10 +799,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     system("chown -R hpc-now:hpc-now /home/hpc-now >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
-    if(system("ls -la /home | grep hpc-now | grep drwx >> /dev/null 2>&1")!=0){
-        system("chmod -R 700 /home/hpc-now/ >> /dev/null 2>&1");
+    if(system("ls -la /home | grep hpc-now | grep \"drwx--x--x\" >> /dev/null 2>&1")!=0){
+        system("chmod 711 /home/hpc-now/ >> /dev/null 2>&1");
     }
-    if(system("ls -la /usr | grep .hpc-now | grep drwx >> /dev/null 2>&1")!=0){
+    if(system("ls -la /usr | grep .hpc-now | grep \"drwx--x--x\" >> /dev/null 2>&1")!=0){
         system("chmod -R 700 /usr/.hpc-now/ >> /dev/null 2>&1");
     }
     system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
@@ -820,10 +819,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     system("chown -R hpc-now:hpc-now /Users/hpc-now >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
-    if(system("ls -la /Users | grep hpc-now | grep drwx >> /dev/null 2>&1")!=0){
-        system("chmod -R 700 /Users/hpc-now/ >> /dev/null 2>&1");
+    if(system("ls -la /Users | grep hpc-now | grep \"drwx--x--x\" >> /dev/null 2>&1")!=0){
+        system("chmod 711 /Users/hpc-now/ >> /dev/null 2>&1");
     }
-    if(system("ls -la /Applications | grep hpc-now | grep drwx >> /dev/null 2>&1")!=0){
+    if(system("ls -la /Applications | grep hpc-now | grep \"drwx--x--x\" >> /dev/null 2>&1")!=0){
         system("chmod -R 700 /Applications/.hpc-now/ >> /dev/null 2>&1");
     }
     system("chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
