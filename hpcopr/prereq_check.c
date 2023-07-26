@@ -117,7 +117,7 @@ int install_bucket_clis(int silent_flag){
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp_zip[FILENAME_LENGTH]="";
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 1/3 ..." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "|        . Checking & installing the dataman components: 1/3 ..." RESET_DISPLAY "\n");
     }
     sprintf(filename_temp,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
     sprintf(filename_temp_zip,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
@@ -584,7 +584,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_ali_tf_var);
     if(file_check_flag==1){
-        printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/3) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/3) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_ali_tf_zip_var);
         if(file_check_flag==1){
@@ -609,7 +609,7 @@ int check_and_install_prerequisitions(int repair_flag){
 //            printf("%s,,,,,\"\n",cmdline);
             flag=system(cmdline);
             if(flag!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
                 printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
                 return 3;
             }
@@ -621,7 +621,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #endif
         flag=system(cmdline);
         if(flag!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
+            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
             return 3;
         }
     }
@@ -645,7 +645,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_qcloud_tf_var);
     if(file_check_flag==1){
-        printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (2/3) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (2/3) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_qcloud_tf_zip_var);
         if(file_check_flag==1){
@@ -669,7 +669,7 @@ int check_and_install_prerequisitions(int repair_flag){
             }
             flag=system(cmdline);
             if(flag!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
                 printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
                 return 3;
             }
@@ -681,7 +681,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #endif
         flag=system(cmdline);
         if(flag!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
+            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
             return 3;
         }
     }
@@ -705,7 +705,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_aws_tf_var);
     if(file_check_flag==1){
-        printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (3/3) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (3/3) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_aws_tf_zip_var);
         if(file_check_flag==1){
@@ -729,7 +729,7 @@ int check_and_install_prerequisitions(int repair_flag){
             }
             flag=system(cmdline);
             if(flag!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
                 printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
                 return 3;
             }
@@ -741,7 +741,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #endif
         flag=system(cmdline);
         if(flag!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
+            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
             return 3;
         }
     }
