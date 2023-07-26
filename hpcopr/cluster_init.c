@@ -292,6 +292,32 @@ int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bu
     return 0;
 }
 
+void clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int condition_flag){
+    char cmdline[CMDLINE_LENGTH]="";
+    if(condition_flag==1){
+        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    else if(condition_flag==2){
+        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.failed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    else{
+        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%s*.tmp %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%s*.tf %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%sUCID_LATEST.txt %s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+}
+
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile){
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -396,8 +422,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -409,7 +434,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
     global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,0)!=0){
-        sprintf(cmdline,"%s %s%sregion_valid.tf %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 1;
     }
     if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,0)!=0){
@@ -417,8 +442,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,0)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair may be invalid. Please use 'hpcopr new-keypair' to update with a\n");
             printf("|          valid keypair. Exit now." RESET_DISPLAY "\n");
-            sprintf(cmdline,"%s %s%sregion_valid.tf %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            clear_if_failed(stackdir,confdir,vaultdir,1);
             return 1;
         }
         region_valid_flag=1;
@@ -436,8 +460,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         }
         if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-            sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            clear_if_failed(stackdir,confdir,vaultdir,1);
             return 2;
         }
         if(region_valid_flag==1){
@@ -452,8 +475,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -464,8 +486,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -476,8 +497,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -488,8 +508,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -500,8 +519,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -512,8 +530,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
@@ -531,8 +548,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         else if(read_conf_flag==3){
             printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
         }
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
     if(node_num>MAXIMUM_ADD_NODE_NUMBER){
@@ -565,11 +581,13 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("|          If you'd like to use NOW Cluster in other AWS regions,\n");
         printf("|          Please contact info@hpc-now.com\n\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
     if(contain_or_not(zone_id,region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
     if(strcmp(region_id,"cn-northwest-1")==0){
@@ -577,6 +595,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now." RESET_DISPLAY "\n");
+            clear_if_failed(stackdir,confdir,vaultdir,2);
             return 4;
         }
         strcpy(region_flag,"cn_regions");
@@ -589,6 +608,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now." RESET_DISPLAY "\n");
+            clear_if_failed(stackdir,confdir,vaultdir,2);
             return 4;
         }
         strcpy(region_flag,"cn_regions");
@@ -601,6 +621,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now." RESET_DISPLAY "\n");
+            clear_if_failed(stackdir,confdir,vaultdir,2);
             return 4;
         }
         strcpy(region_flag,"global_regions");
@@ -613,6 +634,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now." RESET_DISPLAY "\n");
+            clear_if_failed(stackdir,confdir,vaultdir,2);
             return 4;
         }
         strcpy(region_flag,"global_regions");
@@ -798,16 +820,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back and exit now ...\n");
         if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,1)==0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%s*.tmp %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%s*.tf %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%sUCID_LATEST.txt %s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
             printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
             return 7;
@@ -1012,8 +1025,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         }
             if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-            sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            clear_if_failed(stackdir,confdir,vaultdir,1);
             return 2;
         }
     }
@@ -1028,8 +1040,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1040,8 +1051,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1052,8 +1062,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1064,8 +1073,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1076,8 +1084,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1088,8 +1095,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1100,8 +1106,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
@@ -1121,8 +1126,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         else if(read_conf_flag==3){
             printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
         }
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
     if(node_num>MAXIMUM_ADD_NODE_NUMBER){
@@ -1152,6 +1156,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     if(contain_or_not(zone_id,region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
     reset_string(database_root_passwd);
@@ -1329,16 +1334,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back and exit now ...\n");
         if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,1)==0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%s*.tmp %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%s*.tf %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%sUCID_LATEST.txt %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
             printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
             return 7;
@@ -1532,8 +1528,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         }
         if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-            sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            clear_if_failed(stackdir,confdir,vaultdir,1);
             return 2;
         }
     }
@@ -1548,8 +1543,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1560,8 +1554,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1572,8 +1565,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1584,8 +1576,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1596,8 +1587,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1608,8 +1598,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     if(code_loc_flag_var==1){
@@ -1620,8 +1609,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
     sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
@@ -1641,8 +1629,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         else if(read_conf_flag==3){
             printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
         }
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
     if(node_num>MAXIMUM_ADD_NODE_NUMBER){
@@ -1672,6 +1659,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     if(contain_or_not(zone_id,region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
     reset_string(database_root_passwd);
@@ -1844,16 +1832,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back and exit now ...\n");
         if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,1)==0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%s*.tmp %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%s*.tf %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%sUCID_LATEST.txt %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
             printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
             return 7;
