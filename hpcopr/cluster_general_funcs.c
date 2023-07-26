@@ -371,7 +371,7 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     char decrypted_file_name[FILENAME_LENGTH]="";
     FILE* decrypted_file=NULL;
     if(get_crypto_key(crypto_key_file,md5)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     sprintf(cmdline,"%s decrypt %s %s.dat %s %s", now_crypto_exec, secret_file, secret_file, md5,SYSTEM_CMD_REDIRECT);
@@ -860,7 +860,7 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, char*
         total_minutes=3;
     }
     else{
-        printf(FATAL_RED_BOLD "[ FATAL: ] TF_OPTION_NOT_SUPPORTED.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] TF_OPTION_NOT_SUPPORTED." RESET_DISPLAY "\n");
         return -127;
     }
     while(find_multi_keys(tf_realtime_log,findkey,"","","","")<1&&i<MAXIMUM_WAIT_TIME){
@@ -877,7 +877,7 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, char*
             }
             else{
                 if(silent_flag!=0){
-                    printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_ERROR.\n" RESET_DISPLAY);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_ERROR." RESET_DISPLAY "\n");
                 }
                 return 127;
             }
@@ -885,7 +885,7 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, char*
     }
     if(i==MAXIMUM_WAIT_TIME){
         if(silent_flag!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_TIMEOUT.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_TIMEOUT." RESET_DISPLAY "\n");
         }
         return 1;
     }
@@ -1228,11 +1228,11 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
         return -3;
     }
     get_state_value(workdir,"master_public_ip:",master_address);
-    printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+\n" RESET_DISPLAY);
+    printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD "| Unique Cluster ID: " RESET_DISPLAY "%s\n",unique_cluster_id);
-    printf(WARN_YELLO_BOLD "+-------------- CLUSTER PORTAL AND *CREDENTIALS* ----------------+\n" RESET_DISPLAY);
+    printf(WARN_YELLO_BOLD "+-------------- CLUSTER PORTAL AND *CREDENTIALS* ----------------+" RESET_DISPLAY "\n");
     if(strlen(master_address)<7){
-        printf(GENERAL_BOLD "| Cluster IP Address: " RESET_DISPLAY WARN_YELLO_BOLD "NOT_RUNNING\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "| Cluster IP Address: " RESET_DISPLAY WARN_YELLO_BOLD "NOT_RUNNING" RESET_DISPLAY "\n");
     }
     else{
         printf(GENERAL_BOLD "| Cluster IP Address: " RESET_DISPLAY "%s\n",master_address);
@@ -1243,13 +1243,13 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
         printf(GENERAL_BOLD "| Bucket AccessKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_ak);
         printf(GENERAL_BOLD "| Bucket SecretKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_sk);
     }
-    printf(WARN_YELLO_BOLD "+---------------- CLUSTER USERS AND *PASSWORDS* -----------------+\n" RESET_DISPLAY);
+    printf(WARN_YELLO_BOLD "+---------------- CLUSTER USERS AND *PASSWORDS* -----------------+" RESET_DISPLAY "\n");
     if(rootflag==1){
         sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
         decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
         sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
         if(file_exist_or_not(filename_temp)!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] You are not an operator or administrator.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] You are not an operator or administrator." RESET_DISPLAY "\n");
         }
         else{
             find_and_get(filename_temp,"Master Node Root Password:","","",1,"Master Node Root Password:","","",':',2,password);
@@ -1279,7 +1279,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
             }
         }
     }
-    printf(WARN_YELLO_BOLD "+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+\n" RESET_DISPLAY);
+    printf(WARN_YELLO_BOLD "+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+" RESET_DISPLAY "\n");
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -1457,7 +1457,7 @@ int tail_f_for_windows(char* filename){
         return -1;
     }
     fseek(file_p,-1,SEEK_END);
-    printf(WARN_YELLO_BOLD "[ -INFO- ] MAXIMUM DURATION: 30s.\n" RESET_DISPLAY);
+    printf(WARN_YELLO_BOLD "[ -INFO- ] MAXIMUM DURATION: 30s." RESET_DISPLAY "\n");
     while(1){
         time(&current_time);
         if((ch=fgetc(file_p))!=EOF){
@@ -1671,17 +1671,17 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
             return -3;
         }
         else if(username_check_flag==3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Do *NOT* begin with '-' .\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Do *NOT* begin with '-' ." RESET_DISPLAY "\n");
             delete_decrypted_user_passwords(workdir);
             return -3;
         }
         else if(username_check_flag==5){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Illegal character(s) found, only A-Z | a-z | - are valid.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Illegal character(s) found, only A-Z | a-z | - are valid." RESET_DISPLAY "\n");
             delete_decrypted_user_passwords(workdir);
             return -3;
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Username duplicated. Current users:\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Username duplicated. Current users:" RESET_DISPLAY "\n");
             hpc_user_list(workdir,crypto_keyfile,1);
             delete_decrypted_user_passwords(workdir);
             return -3;
@@ -1692,7 +1692,7 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
     if(strlen(password)==0){
         password_temp=GETPASS_FUNC(password_prompt);
         if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The password is too long.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The password is too long." RESET_DISPLAY "\n");
             delete_decrypted_user_passwords(workdir);
             return -5;
         }
@@ -1700,7 +1700,7 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
         reset_string(password_temp);
         password_temp=GETPASS_FUNC("|          Re-type the Password   : ");                            
         if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password." RESET_DISPLAY "\n");
             printf(FATAL_RED_BOLD "|" RESET_DISPLAY GREY_LIGHT "          %s" RESET_DISPLAY WARN_YELLO_BOLD " !=" RESET_DISPLAY GREY_LIGHT " %s \n" RESET_DISPLAY,password_input,password_temp);
             delete_decrypted_user_passwords(workdir);
             return -5;
@@ -1708,7 +1708,7 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
         strcpy(password_confirm,password_temp);
         reset_string(password_temp);
         if(strcmp(password_input,password_confirm)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password." RESET_DISPLAY "\n");
             printf(FATAL_RED_BOLD "|" RESET_DISPLAY GREY_LIGHT "          %s" RESET_DISPLAY WARN_YELLO_BOLD " !=" RESET_DISPLAY GREY_LIGHT " %s \n" RESET_DISPLAY,password_input,password_confirm);
             delete_decrypted_user_passwords(workdir);
             return -5;
@@ -1803,12 +1803,12 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
         strcpy(username_input,username);
     }
     if(strcmp(username_input,"root")==0||strcmp(username_input,"user1")==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected and cannot be deleted.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected and cannot be deleted." RESET_DISPLAY "\n");
         delete_decrypted_user_passwords(workdir);
         return -3;
     }
     if(username_check(user_registry_file,username_input)!=7){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified user is not in the cluster.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified user is not in the cluster." RESET_DISPLAY "\n");
         hpc_user_list(workdir,crypto_keyfile,1);
         delete_decrypted_user_passwords(workdir);
         return -3;
@@ -1831,7 +1831,7 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
         }
     }
     else{
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to the cluster. Please check the cluster status.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to the cluster. Please check the cluster status." RESET_DISPLAY "\n");
         delete_decrypted_user_passwords(workdir);
         return 3;
     }
@@ -1872,12 +1872,12 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
         strcpy(username_input,username);
     }
     if(strcmp(username_input,"root")==0||strcmp(username_input,"user1")==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected, cannot be enabled/disabled.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected, cannot be enabled/disabled." RESET_DISPLAY "\n");
         delete_decrypted_user_passwords(workdir);
         return -3;
     }
     if(username_check(user_registry_file,username_input)!=7){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid username. Valid cluster users:\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid username. Valid cluster users:" RESET_DISPLAY "\n");
         hpc_user_list(workdir,crypto_keyfile,1);
         delete_decrypted_user_passwords(workdir);
         return -3;
@@ -1901,7 +1901,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
         return 0;
     }
     else{
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to the cluster. Please check the cluster status.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to the cluster. Please check the cluster status." RESET_DISPLAY "\n");
         delete_decrypted_user_passwords(workdir);
         return 3;
     }
@@ -1936,12 +1936,12 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
         strcpy(username_input,username);
     }
     if(strcmp(username_input,"root")==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Modifying root user password is not allowed.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Modifying root user password is not allowed." RESET_DISPLAY "\n");
         delete_decrypted_user_passwords(workdir);
         return -3;
     }
     if(username_check(user_registry_file,username_input)!=7){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid username. Valid cluster users:\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid username. Valid cluster users:" RESET_DISPLAY "\n");
         hpc_user_list(workdir,crypto_keyfile,1);
         delete_decrypted_user_passwords(workdir);
         return -3;
@@ -1951,7 +1951,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
     if(strlen(password)==0){
         password_temp=GETPASS_FUNC(password_prompt);
         if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The password is too long.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The password is too long." RESET_DISPLAY "\n");
             delete_decrypted_user_passwords(workdir);
             return -5;
         }
@@ -1959,7 +1959,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
         reset_string(password_temp);
         password_temp=GETPASS_FUNC("|          Re-type the Password   : ");                            
         if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password." RESET_DISPLAY "\n");
             printf(FATAL_RED_BOLD "|" RESET_DISPLAY GREY_LIGHT "          %s" RESET_DISPLAY WARN_YELLO_BOLD " !=" RESET_DISPLAY GREY_LIGHT " %s \n" RESET_DISPLAY,password_input,password_temp);
             delete_decrypted_user_passwords(workdir);
             return -5;
@@ -1967,7 +1967,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
         strcpy(password_confirm,password_temp);
         reset_string(password_temp);
         if(strcmp(password_input,password_confirm)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password." RESET_DISPLAY "\n");
             printf(FATAL_RED_BOLD "|" RESET_DISPLAY GREY_LIGHT "          %s" RESET_DISPLAY WARN_YELLO_BOLD " !=" RESET_DISPLAY GREY_LIGHT " %s \n" RESET_DISPLAY,password_input,password_confirm);
             delete_decrypted_user_passwords(workdir);
             return -5;
@@ -1993,7 +1993,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
         return 0;
     }
     else{
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to the cluster. Please check the cluster status.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to the cluster. Please check the cluster status." RESET_DISPLAY "\n");
         delete_decrypted_user_passwords(workdir);
         return 3;
     }
@@ -2002,15 +2002,15 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
 int usrmgr_prereq_check(char* workdir, char* ucmd){
     char confirm[64]="";
     if(cluster_asleep_or_not(workdir)==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not running. Please wake up first\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not running. Please wake up first" RESET_DISPLAY "\n");
         return -1;
     }
     int i=check_down_nodes(workdir);
     if(i!=0){
         if(strcmp(ucmd,"delete")==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] There are down nodes. When deleting users, although not required, it is\n");
-            printf(WARN_YELLO_BOLD "|          *strongly* recommended to wake up the whole cluster first.\n" RESET_DISPLAY);
-            printf(GENERAL_BOLD "[ -INFO- ] You can exit now, run" RESET_DISPLAY HIGH_GREEN_BOLD " 'hpcopr wakeup --all'" RESET_DISPLAY GENERAL_BOLD " to wake up all nodes.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "|          *strongly* recommended to wake up the whole cluster first." RESET_DISPLAY "\n");
+            printf(GENERAL_BOLD "[ -INFO- ] You can exit now, run" RESET_DISPLAY HIGH_GREEN_BOLD " 'hpcopr wakeup --all'" RESET_DISPLAY GENERAL_BOLD " to wake up all nodes." RESET_DISPLAY "\n");
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to continue *WITHOUT* waking up? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted.\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
@@ -2035,7 +2035,7 @@ void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_fla
     remote_exec(workdir,sshkey_folder,"all",2);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     if(prereq_check_flag!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster user has been updated with down nodes.\n" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster user has been updated with down nodes." RESET_DISPLAY "\n");
     }
 }
 
@@ -2118,7 +2118,7 @@ int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int 
     FILE* file_p=NULL;
     if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)==0){
         if(silent_flag!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Currently you are not operating any cluster.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Currently you are not operating any cluster." RESET_DISPLAY "\n");
         }
         return 1;
     }
@@ -2189,7 +2189,7 @@ int check_and_cleanup(char* prev_workdir){
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(strlen(prev_workdir)!=0){
         if(show_current_cluster(current_workdir,current_cluster_name,0)==1){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no switched cluster.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no switched cluster." RESET_DISPLAY "\n");
         }
         else{
             if(strcmp(current_workdir,prev_workdir)!=0){
@@ -2225,7 +2225,7 @@ int list_all_cluster_names(int header_flag){
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
 //    int getline_flag=0;
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the registry. Please repair the HPC-NOW services.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the registry. Please repair the HPC-NOW services." RESET_DISPLAY "\n");
         return -1;
     }
     if(file_empty_or_not(ALL_CLUSTER_REGISTRY)==0){

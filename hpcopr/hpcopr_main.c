@@ -296,7 +296,7 @@ int main(int argc, char* argv[]){
         printf(FATAL_RED_BOLD "[ FATAL: ] The key directory C:\\hpc-now\\ is missing. The services cannot start.\n");
         printf("|          Please switch to Administrator and re-install the services to fix.\n");
         printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
-        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         print_tail();
         return 119;
     }
@@ -307,7 +307,7 @@ int main(int argc, char* argv[]){
         printf("|          sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
         printf("|          sudo YOUR_INSTALLER_FULL_PATH install\n");
         printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
-        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         print_tail();
         return 119;
     }
@@ -318,7 +318,7 @@ int main(int argc, char* argv[]){
         printf("|          sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
         printf("|          sudo YOUR_INSTALLER_FULL_PATH install\n");
         printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
-        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         print_tail();
         return 119;
     }
@@ -469,7 +469,7 @@ int main(int argc, char* argv[]){
             return 0;
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Internal error, failed to reset the locations.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Internal error, failed to reset the locations." RESET_DISPLAY "\n");
             write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
             check_and_cleanup("");
             return 127;
@@ -591,7 +591,7 @@ int main(int argc, char* argv[]){
         }
         else{
             if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0&&show_current_cluster(workdir,cluster_name,0)!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
+                printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster." RESET_DISPLAY "\n");
                 list_all_cluster_names(1);
                 write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
                 check_and_cleanup(workdir);
@@ -605,7 +605,7 @@ int main(int argc, char* argv[]){
             return 127;
         }
         else if(run_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster." RESET_DISPLAY "\n");
             write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
             check_and_cleanup(workdir);
             return 25;
@@ -653,7 +653,7 @@ int main(int argc, char* argv[]){
             return 0;
         }
         else{
-            printf(FATAL_RED_BOLD "[ -INFO- ] Failed to exit the switched cluster. Please retry later.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ -INFO- ] Failed to exit the switched cluster. Please retry later." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"OPERATION_FAILED",35);
             check_and_cleanup("");
             return 35;
@@ -759,7 +759,7 @@ int main(int argc, char* argv[]){
             return 0;
         }
         if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY WARN_YELLO_BOLD "-c CLUSTER_NAME" RESET_DISPLAY FATAL_RED_BOLD " .\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY WARN_YELLO_BOLD "-c CLUSTER_NAME" RESET_DISPLAY FATAL_RED_BOLD " ." RESET_DISPLAY "\n");
             list_all_cluster_names(1);
             write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
             check_and_cleanup(workdir);
@@ -864,7 +864,7 @@ int main(int argc, char* argv[]){
         }
         run_flag=cluster_ssh(workdir,user_name,cluster_role);
         if(run_flag==-1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the ssh key. You can still try to use password to login.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the ssh key. You can still try to use password to login." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"FILE_I/O_ERROR",127);
             check_and_cleanup(workdir);
             return 127;
@@ -984,7 +984,7 @@ int main(int argc, char* argv[]){
 
     if(get_cloud_flag(workdir,cloud_flag)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag. Have you switched to any cluster?\n");
-        printf("|          Exit now.\n" RESET_DISPLAY);
+        printf("|          Exit now." RESET_DISPLAY "\n");
         write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FLAG_CHECK_FAILED",7);
         check_and_cleanup(workdir);
         return 7;
@@ -992,7 +992,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"export")==0){
         if(cluster_empty_or_not(workdir)==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is empty, nothing to be exported.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is empty, nothing to be exported." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_EMPTY",49);
             check_and_cleanup(workdir);
             return 49;
@@ -1134,7 +1134,7 @@ int main(int argc, char* argv[]){
         }
         else{
             if(run_flag==3){
-                printf(FATAL_RED_BOLD "[ FATAL: ] The source and dest path must include @ prefixes.\n" RESET_DISPLAY);
+                printf(FATAL_RED_BOLD "[ FATAL: ] The source and dest path must include @ prefixes." RESET_DISPLAY "\n");
             }
             printf(WARN_YELLO_BOLD "\n[ -WARN- ] Data operation failed or canceled. Check the console output above.\n");
             printf("|      <>  Command: %s | Cluster: %s | User: %s\n" RESET_DISPLAY,data_cmd,cluster_name,user_name);
@@ -1146,7 +1146,7 @@ int main(int argc, char* argv[]){
 
     if(check_pslock(workdir)==1){
         printf(FATAL_RED_BOLD "[ FATAL: ] Another process is operating this cluster, please wait and retry.\n");
-        printf("|          Exit now.\n" RESET_DISPLAY);
+        printf("|          Exit now." RESET_DISPLAY "\n");
         write_operation_log(cluster_name,operation_log,argc,argv,"PROCESS_LOCKED",53);
         check_and_cleanup(workdir);
         return 53;
@@ -1154,7 +1154,7 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"get-conf")==0){
         if(cluster_empty_or_not(workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
-            printf("|          this operation is not allowed. Exit now.\n" RESET_DISPLAY);
+            printf("|          this operation is not allowed. Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_NOT_EMPTY",51);
             check_and_cleanup(workdir);
             return 51;
@@ -1166,7 +1166,7 @@ int main(int argc, char* argv[]){
         }
         run_flag=get_default_conf(cluster_name,crypto_keyfile,1);
         if(run_flag==1||run_flag==127){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"INTERNAL_ERROR",125);
             check_and_cleanup(workdir);
             return 125;
@@ -1182,7 +1182,7 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"edit-conf")==0||strcmp(argv[1],"rm-conf")==0){
         if(cluster_empty_or_not(workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
-            printf("|          this operation is not allowed. Exit now.\n" RESET_DISPLAY);
+            printf("|          this operation is not allowed. Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_NOT_EMPTY",51);
             check_and_cleanup(workdir);
             return 51;
@@ -1200,7 +1200,7 @@ int main(int argc, char* argv[]){
         }
         if(run_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] No configuration file found. You can run " WARN_YELLO_BOLD "hpcopr get-conf" RESET_DISPLAY FATAL_RED_BOLD " first.\n");
-            printf("|          Exit now.\n" RESET_DISPLAY);
+            printf("|          Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"NO_CONFIG_FILE",55);
             check_and_cleanup(workdir);
             return 55;
@@ -1217,7 +1217,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"init")==0){
         if(cluster_empty_or_not(workdir)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster has already been initialized. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster has already been initialized. Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"ALREADY_INITED",57);
             check_and_cleanup(workdir);
             return 57;
@@ -1229,28 +1229,28 @@ int main(int argc, char* argv[]){
         }
         run_flag=cluster_init_conf(cluster_name,argc,argv);
         if(run_flag==-5){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid cloud vendor. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid cloud vendor. Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"FATAL_INTERNAL_ERROR",125);
             check_and_cleanup(workdir);
             return 125;
         }
         else if(run_flag==-1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a configuration file. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a configuration file. Exit now." RESET_DISPLAY "\n");
             write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
             check_and_cleanup(workdir);
             return 127;
         }
         else if(run_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for the --nn and/or --un. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for the --nn and/or --un. Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
         }
         else if(run_flag==-3){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file found. Omitted all the specified params.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file found. Omitted all the specified params." RESET_DISPLAY "\n");
         }
         else{
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file not found. Using the specified or default params.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file not found. Using the specified or default params." RESET_DISPLAY "\n");
         }
         if(strcmp(cloud_flag,"CLOUD_C")==0){
             run_flag=aws_cluster_init(cluster_name,workdir,crypto_keyfile);
@@ -1262,7 +1262,7 @@ int main(int argc, char* argv[]){
             run_flag=alicloud_cluster_init(cluster_name,workdir,crypto_keyfile);
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now." RESET_DISPLAY "\n");
             check_and_cleanup(workdir);
             return 59;
         }
@@ -1360,7 +1360,7 @@ int main(int argc, char* argv[]){
         }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Please specify '--mc', '--mcdb', or '--all' as the second param.\n");
-            printf("|          Run 'hpcopr help --cmd rebuild' for more details. Exit now.\n" RESET_DISPLAY);
+            printf("|          Run 'hpcopr help --cmd rebuild' for more details. Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
@@ -1377,7 +1377,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"sleep")==0){
         if(cluster_state_flag==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is " RESET_DISPLAY HIGH_CYAN_BOLD "not running" RESET_DISPLAY FATAL_RED_BOLD ". No need to hibernate.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is " RESET_DISPLAY HIGH_CYAN_BOLD "not running" RESET_DISPLAY FATAL_RED_BOLD ". No need to hibernate." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
             check_and_cleanup("");
             return 43;
@@ -1394,15 +1394,15 @@ int main(int argc, char* argv[]){
     }
     if(strcmp(argv[1],"wakeup")==0){
         if(cluster_full_running_or_not(workdir)==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "fully running" RESET_DISPLAY FATAL_RED_BOLD ". No need to wake up.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "fully running" RESET_DISPLAY FATAL_RED_BOLD ". No need to wake up." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"RUNNING_STATE",38);
             check_and_cleanup(workdir);
             return 38;
         }
         if(cluster_state_flag!=0){
             if(cmd_flag_check(argc,argv,"--all")!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "minimal running" RESET_DISPLAY FATAL_RED_BOLD ". Please try \n" RESET_DISPLAY);
-                printf(FATAL_RED_BOLD "|          " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD " to wake up the whole cluster.\n" RESET_DISPLAY);
+                printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "minimal running" RESET_DISPLAY FATAL_RED_BOLD ". Please try " RESET_DISPLAY "\n");
+                printf(FATAL_RED_BOLD "|          " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD " to wake up the whole cluster." RESET_DISPLAY "\n");
                 write_operation_log(cluster_name,operation_log,argc,argv,"RUNNING_STATE",38);
                 check_and_cleanup(workdir);
                 return 38;
@@ -1430,16 +1430,16 @@ int main(int argc, char* argv[]){
         if(cmd_keyword_check(argc,argv,"--conf",string_temp)!=0||cmd_flag_check(argc,argv,"--list")==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Available configuration list:\n|\n");
             if(check_reconfigure_list(workdir)!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the list. Have you inited this cluster?\n" RESET_DISPLAY);
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the list. Have you inited this cluster?" RESET_DISPLAY "\n");
                 write_operation_log(cluster_name,operation_log,argc,argv,"FATAL_INTERNAL_ERROR",125);
                 check_and_cleanup(workdir);
                 return 125;
             }
             if(strcmp(argv[1],"reconfc")==0&&check_down_nodes(workdir)!=0&&strcmp(cloud_flag,"CLOUD_B")==0){
-                printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You need to turn on all the compute nodes first.\n" RESET_DISPLAY);
+                printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You need to turn on all the compute nodes first." RESET_DISPLAY "\n");
             }
             if(strcmp(argv[1],"reconfm")==0&&cluster_state_flag==0){
-                printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You need to wake up the cluster first.\n" RESET_DISPLAY);
+                printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You need to wake up the cluster first." RESET_DISPLAY "\n");
             }
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
@@ -1471,7 +1471,7 @@ int main(int argc, char* argv[]){
         if(strcmp(user_cmd,"list")==0){
             run_flag=hpc_user_list(workdir,crypto_keyfile,0);
             if(cluster_state_flag==0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] The specified/switched cluster is not running.\n" RESET_DISPLAY);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The specified/switched cluster is not running." RESET_DISPLAY "\n");
             }
             write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
             check_and_cleanup(workdir);
@@ -1552,10 +1552,10 @@ int main(int argc, char* argv[]){
             printf(FATAL_RED_BOLD "[ FATAL: ] The switched cluster is not running. Please wake up first.\n");
         }
         if(strcmp(argv[1],"addc")==0){
-            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY);
+            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now." RESET_DISPLAY "\n");
         }
         else{
-            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --min | --all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY);
+            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --min | --all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now." RESET_DISPLAY "\n");
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_IS_ASLEEP",43);
         check_and_cleanup(workdir);
@@ -1688,7 +1688,7 @@ int main(int argc, char* argv[]){
             run_flag=delete_compute_node(workdir,crypto_keyfile,node_num_string);
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or '--nn NODE_NUM'. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or '--nn NODE_NUM'. Exit now." RESET_DISPLAY "\n");
             run_flag=9;
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
@@ -1698,13 +1698,13 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"addc")==0){
         if(check_down_nodes(workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to turn all compute node(s) on before adding new nodes.\n");
-            printf("|          Exit now.\n" RESET_DISPLAY);
+            printf("|          Exit now." RESET_DISPLAY "\n");
             check_and_cleanup(workdir);
             return 1;
         }
         if(cmd_keyword_check(argc,argv,"--nn",node_num_string)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a number (range: 1-%d) as the second parameter.\n",MAXIMUM_ADD_NODE_NUMBER);
-            printf("|          Exit now.\n" RESET_DISPLAY);
+            printf("|          Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
             check_and_cleanup(workdir);
             return 5;
@@ -1732,7 +1732,7 @@ int main(int argc, char* argv[]){
             run_flag=shutdown_compute_nodes(workdir,crypto_keyfile,node_num_string);
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or '--nn NODE_NUM'. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or '--nn NODE_NUM'. Exit now." RESET_DISPLAY "\n");
             run_flag=9;
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
@@ -1752,7 +1752,7 @@ int main(int argc, char* argv[]){
             run_flag=turn_on_compute_nodes(workdir,crypto_keyfile,node_num_string);
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or '--nn NODE_NUM'. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or '--nn NODE_NUM'. Exit now." RESET_DISPLAY "\n");
             run_flag=9;
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
@@ -1763,7 +1763,7 @@ int main(int argc, char* argv[]){
         if(strcmp(cloud_flag,"CLOUD_B")==0){
             if(check_down_nodes(workdir)!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] You need to turn all compute node(s) on before reconfiguring them.\n");
-                printf("|          Exit now.\n" RESET_DISPLAY);
+                printf("|          Exit now." RESET_DISPLAY "\n");
                 check_and_cleanup(workdir);
                 return 1;
             }

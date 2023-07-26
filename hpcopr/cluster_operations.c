@@ -45,7 +45,7 @@ int switch_to_cluster(char* target_cluster_name){
     }
     file_p=fopen(current_cluster,"w+");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create current cluster indicator. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create current cluster indicator. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     fprintf(file_p,"%s",target_cluster_name);
@@ -63,7 +63,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     char cluster_role[16]="";
     int i=0;
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     if(strlen(target_cluster_name)==0){
@@ -115,7 +115,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         }
         fclose(file_p);
         if(i==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The registry is empty. Have you created any clusters?\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The registry is empty. Have you created any clusters?" RESET_DISPLAY "\n");
             return 0;
         }
         return 0;
@@ -150,11 +150,11 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
 int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_flag){
     char target_cluster_workdir[DIR_LENGTH]="";
     if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     if(cluster_name_check(target_cluster_name)!=-127){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not in the registry. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not in the registry. Exit now." RESET_DISPLAY "\n");
         return -3;
     }
     get_workdir(target_cluster_workdir,target_cluster_name);
@@ -169,12 +169,12 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
     }
     else{
         if(cluster_empty_or_not(target_cluster_workdir)==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster cannot be refreshed (in init progress or empty).\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster cannot be refreshed (in init progress or empty)." RESET_DISPLAY "\n");
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please run " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY " to check. Exit now.\n");
             return -5;
         }
         if(check_pslock(target_cluster_workdir)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is in operation progress and cannot be refreshed.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is in operation progress and cannot be refreshed." RESET_DISPLAY "\n");
             return 3;
         }
     }
@@ -231,20 +231,20 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
         goto remove_files;
     }
     if(strcmp(force_flag,"force")==0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Removing the specified cluster *WITHOUT* state or resource check.\n" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Removing the specified cluster *WITHOUT* state or resource check." RESET_DISPLAY "\n");
         goto destroy_cluster;
     }
     if(cluster_empty_or_not(cluster_workdir)!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is *NOT* empty!\n" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is *NOT* empty!" RESET_DISPLAY "\n");
         glance_clusters(target_cluster_name,crypto_keyfile);
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? This operation is *NOT* recoverable!\n" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? This operation is *NOT* recoverable!" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: " );
         fflush(stdin);
         scanf("%s",doubleconfirm);
         getchar();
         if(strcmp(doubleconfirm,CONFIRM_STRING)==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
-            printf("|          absolutely *NOT* recoverable!\n" RESET_DISPLAY);
+            printf("|          absolutely *NOT* recoverable!" RESET_DISPLAY "\n");
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
             fflush(stdin);
             scanf("%s",doubleconfirm);
@@ -330,7 +330,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     }
     file_p=fopen(cluster_registry,"a+");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open/write to the cluster registry. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open/write to the cluster registry. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     fclose(file_p);
@@ -346,22 +346,22 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     cluster_name_check_flag=cluster_name_check(input_cluster_name);
     if(cluster_name_check_flag==-1){
         printf(FATAL_RED_BOLD "[ FATAL: ] The cluster name cannot begin with '-'. Your input: %s\n",input_cluster_name);
-        printf("|          Please check and retry. Exit now.\n" RESET_DISPLAY);
+        printf("|          Please check and retry. Exit now." RESET_DISPLAY "\n");
         return 1;
     }
     else if(cluster_name_check_flag==-127){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " already exists in the registry.\n",input_cluster_name);
-        printf("|          Please check and retry. Exit now.\n" RESET_DISPLAY);
+        printf("|          Please check and retry. Exit now." RESET_DISPLAY "\n");
         return 1;
     }
     else if(cluster_name_check_flag==-3){
         printf(FATAL_RED_BOLD "[ FATAL: ] The length of " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " of out of range %d - %d.\n",input_cluster_name,CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
-        printf("|          Please check and retry. Exit now.\n" RESET_DISPLAY);
+        printf("|          Please check and retry. Exit now." RESET_DISPLAY "\n");
         return 1;
     }
     else if(cluster_name_check_flag==-5){
         printf(FATAL_RED_BOLD "[ FATAL: ] The cluster name %s contains illegal characters.\n",input_cluster_name);
-        printf("|          Please check and retry. Exit now.\n" RESET_DISPLAY);
+        printf("|          Please check and retry. Exit now." RESET_DISPLAY "\n");
         return 1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the cluster name %s.\n",input_cluster_name);
@@ -411,7 +411,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         fclose(file_p);
     }
     else{
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now." RESET_DISPLAY "\n");
         fclose(file_p);
         sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
@@ -471,7 +471,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     FILE* file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a temporary file in your system.\n");
-        printf("|          Please check the available disk space. Exit now.\n" RESET_DISPLAY);
+        printf("|          Please check the available disk space. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     create_and_get_vaultdir(workdir,vaultdir);
@@ -479,7 +479,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     if(file_exist_or_not(filename_temp2)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently there is no secrets keypair. This working directory may be\n");
         printf("|          corrputed, which is very unusual. Please contact us via:\n");
-        printf("|          info@hpc-now.com for troubleshooting. Exit now.\n" RESET_DISPLAY);
+        printf("|          info@hpc-now.com for troubleshooting. Exit now." RESET_DISPLAY "\n");
         return -3;
     }
     printf(GENERAL_BOLD "\n");
@@ -496,7 +496,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n" RESET_DISPLAY);
+    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
     getchar();
@@ -533,7 +533,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("|          Switching cloud vendors for a working directory is not permitted.\n");
             printf("|          Current Vendor: AliCloud (HPC-NOW code: CLOUD_A).\n");
             printf("|          Please rotate a keypair from an AliCloud account.\n");
-            printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+            printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
             return 3;
         }
         fprintf(file_p,"%s\n%s\nCLOUD_A",access_key,secret_key);
@@ -547,7 +547,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("|          Switching cloud vendors for a working directory is not permitted.\n");
             printf("|          Current Vendor: TencentCloud (HPC-NOW code: CLOUD_B).\n");
             printf("|          Please rotate a keypair from an TencentCloud account.\n");
-            printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+            printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
             return 3;
         }
         fprintf(file_p,"%s\n%s\nCLOUD_B",access_key,secret_key);
@@ -561,14 +561,14 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("|          Switching cloud vendors for a working directory is not permitted.\n");
             printf("|          Current Vendor: Amazon Web Services (HPC-NOW code: CLOUD_C).\n");
             printf("|          Please rotate a keypair from an Amazon Web Services account.\n");
-            printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+            printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
             return 3;
         }
         fprintf(file_p,"%s\n%s\nCLOUD_C",access_key,secret_key);
         fclose(file_p);
     }
     else{
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now." RESET_DISPLAY "\n");
         fclose(file_p);
         sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
@@ -620,10 +620,10 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
     if(strcmp(force_flag,"force")==0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Destroying the current cluster *WITHOUT* confirmation.\n" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Destroying the current cluster *WITHOUT* confirmation." RESET_DISPLAY "\n");
     }
     else{
-        printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to double confirm this operation:\n" RESET_DISPLAY);
+        printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to double confirm this operation:" RESET_DISPLAY "\n");
         fflush(stdin);
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         scanf("%s",doubleconfirm);
@@ -641,16 +641,16 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
     sprintf(dot_terraform,"%s%s.terraform",stackdir,PATH_SLASH);
     if(folder_exist_or_not(dot_terraform)==0){
         if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,1)!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (1/2)...\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (1/2)..." RESET_DISPLAY "\n");
             sleep(2);
             if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,1)!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (2/2)...\n" RESET_DISPLAY);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (2/2)..." RESET_DISPLAY "\n");
                 sleep(2);
                 if(terraform_execution(tf_exec,"destroy",workdir,crypto_keyfile,1)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to destroy your cluster. This usually caused by either Terraform or\n");
                     printf("|          the providers developed and maintained by cloud service providers.\n");
                     printf("|          You *MUST* manually destroy the remaining cloud resources of this cluster.\n");
-                    printf("|          Exit now.\n" RESET_DISPLAY);
+                    printf("|          Exit now." RESET_DISPLAY "\n");
                     delete_decrypted_files(workdir,crypto_keyfile);
                     return -1;
                 }
@@ -725,13 +725,13 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
     delete_decrypted_files(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(filename_temp,"all");
     if(compute_node_num==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing deleted. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing deleted. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     if(strcmp(param,"all")!=0){
         del_num=string_to_positive_num(param);
         if(del_num==0||del_num<0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or a positive number. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or a positive number. Exit now." RESET_DISPLAY "\n");
             return 1;
         }
         if(del_num>compute_node_num){
@@ -764,7 +764,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
-                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
                     return -127;
                 }
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -806,7 +806,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -843,7 +843,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     char* sshkey_dir=SSHKEY_DIR;
     if(strlen(add_number_string)>2||strlen(add_number_string)<1){
         printf(FATAL_RED_BOLD "[ FATAL: ] The number of nodes to be added is invalid. A number (1-%d) is needed.\n",MAXIMUM_ADD_NODE_NUMBER);
-        printf("           Exit now.\n" RESET_DISPLAY);
+        printf("           Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     add_number=string_to_positive_num(add_number_string);
@@ -875,7 +875,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -931,13 +931,13 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     delete_decrypted_files(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(filename_temp,"all");
     if(compute_node_num==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing to be shutdown. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing to be shutdown. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     if(strcmp(param,"all")!=0){
         down_num=string_to_positive_num(param);
         if(down_num<0||down_num==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or a positive number. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or a positive number. Exit now." RESET_DISPLAY "\n");
             return 1;
         }
         if(down_num>compute_node_num){
@@ -968,7 +968,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
-                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
                     return -127;
                 }
                 delete_decrypted_files(workdir,crypto_keyfile);
@@ -1004,7 +1004,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
         }        
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1059,20 +1059,20 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     compute_node_num=get_compute_node_num(filename_temp,"all");
     compute_node_num_on=get_compute_node_num(filename_temp,"on");
     if(compute_node_num==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing to be turned on. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing to be turned on. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
 
     if(compute_node_num==compute_node_num_on){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently, all the compute nodes are in the state of running.\n");
-        printf("|          No compute node needs to be turned on. Exit now.\n" RESET_DISPLAY);
+        printf("|          No compute node needs to be turned on. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
 
     if(strcmp(param,"all")!=0){
         on_num=string_to_positive_num(param);
         if(on_num<0||on_num==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or a positive number. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or a positive number. Exit now." RESET_DISPLAY "\n");
             return 1;
         }
         if(on_num+compute_node_num_on>compute_node_num){
@@ -1103,7 +1103,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
-                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
                     return -127;
                 }
                 delete_decrypted_files(workdir,crypto_keyfile);
@@ -1140,7 +1140,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1203,7 +1203,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     compute_node_num=get_compute_node_num(filename_temp,"all");
     compute_node_down_num=get_compute_node_num(filename_temp,"down");
     if(compute_node_num==0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no compute nodes in your cluster. Exit now.\n" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no compute nodes in your cluster. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
 
@@ -1211,7 +1211,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     sprintf(string_temp,"\"%s\"",new_config);
     if(find_multi_keys(filename_temp,string_temp,"","","","")==0||find_multi_keys(filename_temp,string_temp,"","","","")<0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid compute configuration. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid compute configuration. Exit now." RESET_DISPLAY "\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
@@ -1276,7 +1276,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 }
                 if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
-                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
                     return -127;
                 }
                 delete_decrypted_files(workdir,crypto_keyfile);
@@ -1350,7 +1350,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1371,7 +1371,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
     if(compute_node_down_num!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Please turn on all the cluster nodes, log on to the master\n");
-        printf("|          node, and run: " HIGH_GREEN_BOLD "sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY WARN_YELLO_BOLD "\n" RESET_DISPLAY);
+        printf("|          node, and run: " HIGH_GREEN_BOLD "sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY WARN_YELLO_BOLD "" RESET_DISPLAY "\n");
     }
     else{
         if(reinit_flag==0){
@@ -1417,7 +1417,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     sprintf(string_temp,"\"%s\"",new_config);
     if(find_multi_keys(filename_temp,string_temp,"","","","")==0||find_multi_keys(filename_temp,string_temp,"","","","")<0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid master node configuration. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid master node configuration. Exit now." RESET_DISPLAY "\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
@@ -1440,7 +1440,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         system(cmdline);
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1498,7 +1498,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     if(find_multi_keys(filename_temp,"running","","","","")==0&&find_multi_keys(filename_temp,"Running","","","","")==0&&find_multi_keys(filename_temp,"RUNNING","","","","")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
-        printf("|          Command: hpcopr wakeup --all | --min . Exit now.\n" RESET_DISPLAY);
+        printf("|          Command: hpcopr wakeup --all | --min . Exit now." RESET_DISPLAY "\n");
         return 1;
     }
     decrypt_files(workdir,crypto_keyfile);
@@ -1523,7 +1523,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1550,7 +1550,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
 int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     if(strcmp(option,"all")!=0&&strcmp(option,"minimal")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'minimal' or 'all' as the second parameter.\n");
-        printf("|          Exit now.\n" RESET_DISPLAY);
+        printf("|          Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     char string_temp[128]="";
@@ -1612,7 +1612,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
         }
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -1835,7 +1835,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     printf("|*   AND RE-INIT ! Usually we do not recommend users to do this operation.   \n");
     printf("|*                                                                           \n");
     printf("|*                                C A U T I O N !                            \n");
-    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
+    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
     getchar();
@@ -1872,7 +1872,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     decrypt_files(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing previous nodes ...\n");
     if(terraform_execution(TERRAFORM_EXEC,"apply",workdir,crypto_keyfile,1)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the previous nodes. Rolling back now ...\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the previous nodes. Rolling back now ..." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%stmp%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,stackdir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(cmdline,"%s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -1905,7 +1905,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
 
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully removed previous nodes. Rebuilding new nodes ...\n");
     if(terraform_execution(TERRAFORM_EXEC,"apply",workdir,crypto_keyfile,1)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rebuild the nodes. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rebuild the nodes. Exit now." RESET_DISPLAY "\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return 5;
     }
@@ -1977,7 +1977,7 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
     char statefile[FILENAME_LENGTH]="";
     if(cluster_name_check(cluster_name)!=-127){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " already exists in the registry.\n",cluster_name);
-        printf("|          Please check and retry. Exit now.\n" RESET_DISPLAY);
+        printf("|          Please check and retry. Exit now." RESET_DISPLAY "\n");
         return 1;
     }
     get_workdir(workdir,cluster_name);
@@ -2073,7 +2073,7 @@ int view_run_log(char* workdir, char* stream, char* run_option, char* view_optio
     else{
 #ifdef _WIN32
         if(tail_f_for_windows(logfile)==1){
-            printf(WARN_YELLO_BOLD "[ -INFO- ] Time is up. Please run this command again.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -INFO- ] Time is up. Please run this command again." RESET_DISPLAY "\n");
         }
 #else
         sprintf(cmdline,"tail -f %s",logfile);

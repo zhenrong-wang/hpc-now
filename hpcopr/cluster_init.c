@@ -395,7 +395,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %sregion_valid.tf -o %s%sregion_valid.tf -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -416,7 +416,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         global_replace(region_valid,"cn-northwest-1","us-east-1");
         if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,0)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair may be invalid. Please use 'hpcopr new-keypair' to update with a\n");
-            printf("|          valid keypair. Exit now.\n" RESET_DISPLAY);
+            printf("|          valid keypair. Exit now." RESET_DISPLAY "\n");
             sprintf(cmdline,"%s %s%sregion_valid.tf %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             return 1;
@@ -427,7 +427,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     system(cmdline);
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(conf_file)==1){
-        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one.\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one." RESET_DISPLAY "\n");
         if(code_loc_flag_var==1){
             sprintf(cmdline,"%s %s%stf_prep.conf %s %s", COPY_FILE_CMD,url_aws_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
         }
@@ -435,7 +435,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_aws_root,conf_file);
         }
         if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
             sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             return 2;
@@ -451,7 +451,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %shpc_stack_aws.base -o %s%shpc_stack.base -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -463,7 +463,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %shpc_stack_aws.master -o %s%shpc_stack.master -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -475,7 +475,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %shpc_stack_aws.compute -o %s%shpc_stack.compute -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -487,7 +487,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %shpc_stack_aws.database -o %s%shpc_stack.database -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -499,7 +499,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %shpc_stack_aws.natgw -o %s%shpc_stack.natgw -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -511,7 +511,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -520,16 +520,16 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,conf_param_buffer,compute_inst,os_image_raw,htflag);
     if(read_conf_flag!=0){
         if(read_conf_flag==-3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
         }
         else if(read_conf_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
         }
         else if(read_conf_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
         }
         else if(read_conf_flag==3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
         }
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
@@ -564,19 +564,19 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf("|          cn-northwest-1 | cn-north-1 | us-east-1 | us-east-2\n");
         printf("|          If you'd like to use NOW Cluster in other AWS regions,\n");
         printf("|          Please contact info@hpc-now.com\n\n");
-        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         return 3;
     }
     if(contain_or_not(zone_id,region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         return 3;
     }
     if(strcmp(region_id,"cn-northwest-1")==0){
         if(region_valid_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
-            printf("|          Exit now.\n" RESET_DISPLAY);
+            printf("|          Exit now." RESET_DISPLAY "\n");
             return 4;
         }
         strcpy(region_flag,"cn_regions");
@@ -588,7 +588,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         if(region_valid_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
-            printf("|          Exit now.\n" RESET_DISPLAY);
+            printf("|          Exit now." RESET_DISPLAY "\n");
             return 4;
         }
         strcpy(region_flag,"cn_regions");
@@ -600,7 +600,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         if(region_valid_flag==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
-            printf("|          Exit now.\n" RESET_DISPLAY);
+            printf("|          Exit now." RESET_DISPLAY "\n");
             return 4;
         }
         strcpy(region_flag,"global_regions");
@@ -612,7 +612,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         if(region_valid_flag==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
-            printf("|          Exit now.\n" RESET_DISPLAY);
+            printf("|          Exit now." RESET_DISPLAY "\n");
             return 4;
         }
         strcpy(region_flag,"global_regions");
@@ -1003,7 +1003,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(conf_file)==1){
-        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. \n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. " RESET_DISPLAY "\n");
         if(code_loc_flag_var==1){
             sprintf(cmdline,"%s %s%stf_prep.conf %s %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
         }
@@ -1011,7 +1011,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
             sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_qcloud_root,conf_file);
         }
             if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
             sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             return 2;
@@ -1027,7 +1027,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %shpc_stack_qcloud.base -o %s%shpc_stack.base -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1039,7 +1039,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %shpc_stack_qcloud.master -o %s%shpc_stack.master -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1051,7 +1051,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %shpc_stack_qcloud.compute -o %s%shpc_stack.compute -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1063,7 +1063,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %shpc_stack_qcloud.database -o %s%shpc_stack.database -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1075,7 +1075,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %shpc_stack_qcloud.natgw -o %s%shpc_stack.natgw -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1087,7 +1087,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %sNAS_Zones_QCloud.txt -o %s%sNAS_Zones_QCloud.txt -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1099,7 +1099,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_qcloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1110,16 +1110,16 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,master_bandwidth,compute_inst,os_image,conf_param_buffer);
     if(read_conf_flag!=0){
         if(read_conf_flag==-3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
         }
         else if(read_conf_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
         }
         else if(read_conf_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
         }
         else if(read_conf_flag==3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
         }
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
@@ -1151,7 +1151,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
  
     if(contain_or_not(zone_id,region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         return 3;
     }
     reset_string(database_root_passwd);
@@ -1523,7 +1523,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(conf_file)==1){
-        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. \n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. " RESET_DISPLAY "\n");
         if(code_loc_flag_var==1){
             sprintf(cmdline,"%s %s%stf_prep.conf %s %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
         }
@@ -1531,7 +1531,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
             sprintf(cmdline,"curl %stf_prep.conf -s -o %s",url_alicloud_root,conf_file);
         }
         if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
             sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             return 2;
@@ -1547,7 +1547,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %shpc_stackv2.base -o %s%shpc_stack.base -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1559,7 +1559,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %shpc_stackv2.master -o %s%shpc_stack.master -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1571,7 +1571,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %shpc_stackv2.compute -o %s%shpc_stack.compute -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1583,7 +1583,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %shpc_stackv2.database -o %s%shpc_stack.database -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1595,7 +1595,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %shpc_stackv2.natgw -o %s%shpc_stack.natgw -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1607,7 +1607,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %sNAS_Zones_ALI.txt -o %s%sNAS_Zones_ALI.txt -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1619,7 +1619,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_alicloud_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 2;
@@ -1630,16 +1630,16 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,master_bandwidth,compute_inst,os_image,conf_param_buffer);
     if(read_conf_flag!=0){
         if(read_conf_flag==-3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
         }
         else if(read_conf_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
         }
         else if(read_conf_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
         }
         else if(read_conf_flag==3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
         }
         sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
@@ -1671,7 +1671,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     if(contain_or_not(zone_id,region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now.\n" RESET_DISPLAY);
+        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         return 3;
     }
     reset_string(database_root_passwd);

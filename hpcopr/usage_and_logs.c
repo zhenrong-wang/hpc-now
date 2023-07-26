@@ -24,7 +24,7 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
     int run_flag;
     if(file_exist_or_not(logfile)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the specified log. Either you haven't init your first\n");
-        printf("|          cluster, or there are internal errors. Exit now.\n" RESET_DISPLAY);
+        printf("|          cluster, or there are internal errors. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     sprintf(cmdline,"%s %s %s.tmp %s",COPY_FILE_CMD,logfile,logfile,SYSTEM_CMD_REDIRECT_NULL);
@@ -48,7 +48,7 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
         run_flag=system(cmdline);
         if(run_flag!=0){
             printf(FATAL_RED_BOLD "\n[ FATAL: ] Failed to export the log to " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " .\n",export_dest);
-            printf("|          Please check the path. Exit now.\n" RESET_DISPLAY);
+            printf("|          Please check the path. Exit now." RESET_DISPLAY "\n");
             return 1;
         }
         else{
@@ -76,7 +76,7 @@ int write_operation_log(char* cluster_name, char* operation_logfile, int argc, c
     FILE* file_p=fopen(operation_logfile,"a+");
     if(file_p==NULL){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to write operation log to the records. The cluster operation may\n");
-        printf("|          not be affected, but will not be recorded to your system.\n" RESET_DISPLAY);
+        printf("|          not be affected, but will not be recorded to your system." RESET_DISPLAY "\n");
         return -1;
     }
     fprintf(file_p,"%d-%d-%d,%d:%d:%d,%s,%s,%s,%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec,cluster_name,cmdline,description,runflag);
