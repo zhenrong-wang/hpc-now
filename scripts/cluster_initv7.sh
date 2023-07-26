@@ -103,8 +103,8 @@ SELINUX_STATUS=`getenforce`
 echo -e "source /etc/profile" >> /root/.bashrc
 
 if [ -f /root/hostfile ]; then
-  mkdir -p /hpc_data/root_data
-  chmod -R 750 /hpc_data/root_data
+  mkdir -p /hpc_data/cluster_data/mon_data
+  chmod -R 754 /hpc_data/cluster_data
   mkdir -p /hpc_data/public
   chmod -R 777 /hpc_data/public
 fi
@@ -113,6 +113,7 @@ mkdir -p /usr/hpc-now
 wget ${SCRIPTS_URL_ROOT}nowmon_agt.sh -O /usr/hpc-now/nowmon_agt.sh && chmod +x /usr/hpc-now/nowmon_agt.sh
 if [ -f /root/hostfile ]; then
   wget ${SCRIPTS_URL_ROOT}nowmon_mgr.sh -O /usr/hpc-now/nowmon_mgr.sh && chmod +x /usr/hpc-now/nowmon_mgr.sh
+  wget ${SCRIPTS_URL_ROOT}profile_bkup_rstr.sh -O /usr/hpc-now/profile_bkup_rstr.sh && chmod +x /usr/hpc-now/profile_bkup_rstr.sh
 fi
 touch $public_app_registry # Only root user can modify this file
 
@@ -157,6 +158,9 @@ do
   fi
   chown -R ${user_name}:${user_name} /home/${user_name}
 done < /root/user_secrets.txt
+mv /root/user_secrets.txt /root/.cluster_secrets/
+mv /root/master_passwd.txt /root/.cluster_secrets/
+mv /root/compute_passwd.txt /root/.cluster_secrets/
 
 yum -y install gcc bc openssl openssl-devel unzip curl make perl sshpass gtk2 gtk2-devel
 # stop firewall and SELinux 
@@ -264,12 +268,7 @@ if [ -f /root/hostfile ]; then
     mv /root/mariadb_slurm_acct_db_pw.txt /root/.cluster_secrets/
   fi
 fi
-
 # Move sensative file to .cluster_secrets folder 
-rm -rf /root/secret_user*
-mv /root/user_secrets.txt /root/.cluster_secrets/
-mv /root/master_passwd.txt /root/.cluster_secrets/
-mv /root/compute_passwd.txt /root/.cluster_secrets/
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "ALL the secrets are stored in the directory /root/.cluster_secrets/ ."
@@ -388,8 +387,9 @@ if [ -f /root/hostfile ]; then
   echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
   if [ $distro_type != 'CentOS' ]; then
     echo -e "# $time_current GNU/Linux Distro: ${distro_type}. Installing GUI now." >> ${logfile}
-    dnf -y install gnome-shell gdm gnome-session
-    systemctl enable gdm.service
+    dnf -y install gnome-shell gdm gnome-session gnome-terminal gnome-shell-extensions gnome-system-monitor gnome-tweaks
+    yum -y install xfce4-terminal
+    systemctl enable gdm.service --now
   else
     echo -e "# $time_current CENTOS VERSION $centos_version. Installing GUI now." >> ${logfile}
     if [ $centos_version -eq 7 ]; then
@@ -477,7 +477,8 @@ fi
 if [ -f /root/hostfile ]; then
   mkdir -p /root/Desktop
   ln -s /hpc_apps /root/Desktop/
-  ln -s /hpc_data/root_data /root/Desktop/
+  ln -s /hpc_data /root/Desktop/
+  ln -s /hpc_data/cluster_data /root/Desktop/
   wget ${url_utils}pics/app.png -O /opt/app.png
   wget ${url_utils}pics/logo.png -O /opt/logo.png
   if [ $cloud_flag = 'CLOUD_A' ]; then

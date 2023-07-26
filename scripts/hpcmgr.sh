@@ -71,9 +71,9 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-main_menu=('quick' 'master' 'connect' 'all' 'clear' 'applist' 'build' 'install' 'remove' 'submit')
+main_menu=('quick' 'master' 'connect' 'all' 'clear' 'applist' 'build' 'install' 'remove' 'submit' 'users')
 command_flag='false'
-for i in $(seq 0 9)
+for i in $(seq 0 10)
 do
   if [ $1 = ${main_menu[i]} ]; then
     command_flag='true'

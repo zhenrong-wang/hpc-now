@@ -43,7 +43,7 @@ int get_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* mon_data_fi
             return -3;
         }
     }
-    remote_copy(workdir,sshkey_dir,mon_data_file,"/usr/hpc-now/mon_data.csv","root","get","",0);
+    remote_copy(workdir,sshkey_dir,mon_data_file,"/hpc_data/cluster_data/mon_data.csv","root","get","",0);
     if(file_empty_or_not(mon_data_file)<1){
         strcpy(mon_data_file,"");
         return 1;

@@ -53,7 +53,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     cluster_node_cores=string_to_positive_num(cluster_node_cores_string);
 
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Current cluster cores status:\n");
-    remote_exec_general(workdir,sshkey_dir,user_name,"tail -n 1 /usr/hpc-now/mon_cores.dat","",0,2,"","");
+    remote_exec_general(workdir,sshkey_dir,user_name,"tail -n 1 /hpc_data/cluster_data/mon_cores.dat","",0,2,"","");
 
     if(strcmp(user_name,"root")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The root user cannot submit jobs, please specify another user." RESET_DISPLAY "\n");
@@ -76,7 +76,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         return -5;
     }
     if(cmd_keyword_check(argc,argv,"--nn",node_num_string)!=0){
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify compute node num (<=%d) for this job:",cluster_node_num);
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify compute node num (<=%d) for this job: ",cluster_node_num);
         fflush(stdin);
         scanf("%s",node_num_string);
         getchar();
@@ -88,7 +88,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
 
     if(cmd_keyword_check(argc,argv,"--tn",node_cores_string)!=0){
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify threads per node (<=%d) for this job:",cluster_node_cores);
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify threads per node (<=%d) for this job: ",cluster_node_cores);
         fflush(stdin);
         scanf("%s",node_cores_string);
         getchar();

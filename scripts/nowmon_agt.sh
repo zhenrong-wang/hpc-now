@@ -16,9 +16,9 @@ mon_cores=/tmp/mon-cores-$curr_time.dat
 mon_all=/tmp/mon-all-$curr_time.dat
 mkdir -p /usr/hpc-now >> /dev/null 2>&1
 if [ $hostname = 'master' ]; then
-    mon_data=/usr/hpc-now/mon_data.csv
+    mon_data=/hpc_data/cluster_data/mon_data.csv
 else
-    mon_data=/usr/hpc-now/mon_data_$hostname.csv
+    mon_data=/hpc_data/cluster_data/mon_data_$hostname.csv
 fi
 
 if [ ! -f $mon_data ] && [ $hostname = 'master' ]; then

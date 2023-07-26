@@ -844,7 +844,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/usr/hpc-now/.bucket.info","root","put","",0);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: s3:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -1364,7 +1364,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/usr/hpc-now/.bucket.info","root","put","",0);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: cos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
@@ -1882,7 +1882,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/usr/hpc-now/.bucket.info","root","put","",0);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: oss:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);

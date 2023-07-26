@@ -1811,7 +1811,6 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    char remote_commands[128]="";
     char filename_temp[FILENAME_LENGTH]="";
     char base_tf[FILENAME_LENGTH]="";
     char master_tf[FILENAME_LENGTH]="";
@@ -1820,8 +1819,6 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     char cloud_flag[16]="";
     char node_name[16]="";
     char doubleconfirm[64]="";
-    char bucket_info[FILENAME_LENGTH]="";
-    char bucket_id[32]="";
     char cluster_name[64]="";
     char username_temp[64]="";
     char user_status_temp[32]="";
@@ -1871,6 +1868,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
         sprintf(cmdline,"%s %s%shpc_stack_natgw.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
+    remote_exec_general(workdir,sshkey_folder,"root","/usr/hpc-now/profile_bkup_rstr.sh backup","-n",0,0,"","");
     decrypt_files(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing previous nodes ...\n");
     if(terraform_execution(TERRAFORM_EXEC,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1938,27 +1936,15 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
     else{
         return -127;
     }
-    get_cluster_bucket_id(workdir,crypto_keyfile,bucket_id);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    decrypt_bucket_info(workdir,crypto_keyfile,bucket_info);
-    remote_copy(workdir,sshkey_folder,bucket_info,"/usr/hpc-now/.bucket.info","root","put","",0);
-    if(strcmp(cloud_flag,"CLOUD_A")==0){
-        sprintf(remote_commands,"echo -e \"export BUCKET=oss://%s\" >> /etc/profile",bucket_id);
-    }
-    else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        sprintf(remote_commands,"echo -e \"export BUCKET=cos://%s\" >> /etc/profile",bucket_id);
-    }
-    else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        sprintf(remote_commands,"echo -e \"export BUCKET=s3://%s\" >> /etc/profile",bucket_id);
-    }
-    remote_exec_general(workdir,sshkey_folder,"root",remote_commands,"-n",0,0,"","");
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
     sync_statefile(workdir,sshkey_folder);
+    remote_exec_general(workdir,sshkey_folder,"root","/usr/hpc-now/profile_bkup_rstr.sh restore","-n",0,0,"","");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rebuilding the cluster users now ...\n");
     file_p=fopen(user_passwords,"r");
     get_cluster_name(cluster_name,workdir);
