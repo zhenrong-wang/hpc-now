@@ -349,7 +349,7 @@ void print_about(void){
 int read_license(char* option){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    sprintf(filename_temp,"%s%sGPL-2",NOW_LIC_DIR,PATH_SLASH);
+    sprintf(filename_temp,"%s%sMIT.LICENSE",NOW_LIC_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
         if(strcmp(option,"print")==0){
             sprintf(cmdline,"%s %s",CAT_FILE_CMD,filename_temp);
@@ -366,17 +366,7 @@ int read_license(char* option){
     else{
         sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
     }
-    if(system(cmdline)!=0){
-        if(strcmp(option,"print")==0){
-            sprintf(cmdline,"curl -s %s",URL_LICENSE_FSF);
-        }
-        else{
-            sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
-        }
-        if(system(cmdline)!=0){
-            return 1;
-        }
-    }
+    system(cmdline);
     return 0;
 }
 

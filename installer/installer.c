@@ -132,18 +132,17 @@ int check_current_user_root(void){
 int license_confirmation(void){
     char cmdline[CMDLINE_LENGTH]="";
     char confirmation[64]="";
+    printf("\n");
     sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please read the following important information before continuing.\n");
     printf("|          You can press 'Enter' to continue reading, or press 'q' to quit reading.\n");
     if(system(cmdline)!=0){
-        sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
-        if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Currently the installer failed to download or print out the license.\n");
-            printf("|          Please double check your internet connectivity and retry. If this issue\n");
-            printf("|          still occurs, please report to us via info@hpc-now.com . Exit now." RESET_DISPLAY "\n");
-            return 1;
-        }
+        printf(FATAL_RED_BOLD "[ FATAL: ] Currently the installer failed to download or print out the license.\n");
+        printf("|          Please double check your internet connectivity and retry. If this issue\n");
+        printf("|          still occurs, please report to us via info@hpc-now.com . Exit now." RESET_DISPLAY "\n");
+        return 1;
     }
+    printf("\n");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " If you accept the terms and conditions above, please input 'accept',\n");
     printf("|          If you do not accept, this installation will exit immediately.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please input ( case-sensitive ): ");

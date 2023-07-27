@@ -201,8 +201,7 @@
 #define CMD_KWDS_NUM 39
 
 /* Usually you don't need to modify the macros in this section.*/
-#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/LICENSE"
-#define URL_LICENSE_FSF "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+#define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/COPYING"
 #define PASSWORD_LENGTH 19
 #define PASSWORD_STRING_LENGTH 20
 #define RANDSTR_LENGTH_PLUS 11
