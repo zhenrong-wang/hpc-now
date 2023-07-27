@@ -312,7 +312,7 @@ void print_header(void){
     time_p=localtime(&current_time_long);
     printf(GENERAL_BOLD "|   /HPC->  Welcome to HPC-NOW Cluster Operator! Version: %s\n",CORE_VERSION_CODE);
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd     LICENSE: MIT\n" RESET_DISPLAY "\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd  LICENSE: MIT\n" RESET_DISPLAY "\n");
 }
 
 void print_tail(void){
