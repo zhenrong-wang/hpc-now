@@ -2,14 +2,14 @@
  * This code is written and maintained by Zhenrong WANG
  * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * This code is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: MIT License
  * Bug report: info@hpc-now.com
  */
 
 #ifndef INSTALLER_H
 #define INSTALLER_H
 
-#define INSTALLER_VERSION_CODE "0.2.0.0122"
+#define INSTALLER_VERSION_CODE "0.2.0.0127"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/hpcopr-0.2.1/"
 
 int check_internet_installer(void);

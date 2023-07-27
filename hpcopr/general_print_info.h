@@ -2,7 +2,7 @@
  * This code is written and maintained by Zhenrong WANG
  * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * This code is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: MIT License
  * Bug report: info@hpc-now.com
  */
 
@@ -18,6 +18,8 @@ void print_tail(void);
 void print_about(void);
 int read_license(char* option);
 void print_usrmgr_info(void);
-void print_dataman_info(void);
+void print_datamgr_info(void);
+void print_appmgr_info(void);
+void print_jobmgr_info(void);
 
 #endif

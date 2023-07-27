@@ -2,7 +2,7 @@
  * This code is written and maintained by Zhenrong WANG
  * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * This code is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: MIT License
  * Bug report: info@hpc-now.com
  */
 
@@ -31,21 +31,21 @@ void print_cluster_init_done(void){
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congratulations! The cluster is initializing now. " WARN_YELLO_BOLD "This step may take at\n");
     printf("|          least *7* minutes. *DO NOT* operate the cluster during this period." RESET_DISPLAY " \n"); 
     printf("|          You can now log on the master node by 'hpcopr ssh -u USERNAME'.\n");
-    printf("|          " HIGH_CYAN_BOLD "The desktop will be ready after the init process.\n" RESET_DISPLAY);
+    printf("|          " HIGH_CYAN_BOLD "The desktop will be ready after the init process." RESET_DISPLAY "\n");
 }
 
 void print_help(char* cmd_name){
     printf(GENERAL_BOLD "[ -INFO- ] Usage: hpcopr" HIGH_GREEN_BOLD " Command " GENERAL_BOLD "CMD_FLAG ..." RESET_DISPLAY " [ " HIGH_CYAN_BOLD "KEY_WORD1" RESET_DISPLAY " KEY_STRING1 ] ...\n");
-    printf("|          Global key word & string pair: " GENERAL_BOLD "-c CLUSTER_NAME\n\n" RESET_DISPLAY);
+    printf("|          Global key word & string pair: " GENERAL_BOLD "-c CLUSTER_NAME\n" RESET_DISPLAY "\n");
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "| Command Instructions\n\n" RESET_DISPLAY);
-        printf(GENERAL_BOLD "+ 0    . Get-Started:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "| Command Instructions\n" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "+ 0    . Get-Started:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"envcheck")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "envcheck" RESET_DISPLAY "    :~ Quickly check the running environment.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ I    . Multi-Cluster Management:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ I    . Multi-Cluster Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"new-cluster")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "new-cluster" RESET_DISPLAY " :~ Create a new cluster to initialize.\n");
@@ -94,7 +94,7 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "exit-current" RESET_DISPLAY ":~ Exit the current cluster.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ II   . Global Management:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ II   . Global Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"help")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "help" RESET_DISPLAY "        :~ Show this page and the information here.\n");
@@ -148,7 +148,7 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "resetloc" RESET_DISPLAY "    :~ Reset to the default locations.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ III  . Cluster Initialization: \n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ III  . Cluster Initialization: " RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"new-keypair")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "new-keypair" RESET_DISPLAY " :~ *Rotate* a new keypair for an existing cluster. The new keypair\n");
@@ -186,7 +186,7 @@ void print_help(char* cmd_name){
         printf("|   --all             ~ All the nodes above + nat node.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ IV   . Cluster Management:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ IV   . Cluster Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"vault")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "vault" RESET_DISPLAY "       :~ Check the sensitive information of the current cluster.\n");
@@ -206,7 +206,7 @@ void print_help(char* cmd_name){
         printf("|    -d   EXPORT_DEST  ~ Export the log to a specified folder or file.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ V  . Cluster Operation:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ V  . Cluster Operation:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"delc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "delc" RESET_DISPLAY "        :~ Delete specified compute nodes:\n");
@@ -261,19 +261,31 @@ void print_help(char* cmd_name){
         printf("|   --month       ~ Switch to Monthly-pay method.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ VI   . Cluster User Management:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ VI   . Cluster User Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"userman")==0||strcmp(cmd_name,"all")==0){
         print_usrmgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ VII  . Cluster Data Management:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ VII  . Cluster Data Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"dataman")==0||strcmp(cmd_name,"all")==0){
-        print_dataman_info();
+        print_datamgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ VIII . Others:\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "+ VIII . Cluster App Management:" RESET_DISPLAY "\n");
+    }
+    if(strcmp(cmd_name,"appman")==0||strcmp(cmd_name,"all")==0){
+        print_appmgr_info();
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ IX   . Cluster Job Management:" RESET_DISPLAY "\n");
+    }
+    if(strcmp(cmd_name,"jobman")==0||strcmp(cmd_name,"all")==0){
+        print_jobmgr_info();
+    }
+    if(strcmp(cmd_name,"all")==0){
+        printf(GENERAL_BOLD "+ X    . Others:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"about")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       :~ About this software and HPC-NOW project.\n");
@@ -300,7 +312,7 @@ void print_header(void){
     time_p=localtime(&current_time_long);
     printf(GENERAL_BOLD "|   /HPC->  Welcome to HPC-NOW Cluster Operator! Version: %s\n",CORE_VERSION_CODE);
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n" RESET_DISPLAY "\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd     LICENSE: MIT\n" RESET_DISPLAY "\n");
 }
 
 void print_tail(void){
@@ -326,7 +338,7 @@ void print_about(void){
     printf("|   5. SLURM    : an open source cluster management and job scheduling system.\n");
     printf("|   6. MUNGE    : an authentication service for creating and validating credentials.\n");
     printf("|      ......\n");
-    printf("| Therefore, we also made this software public under the GPL-2.0 license.\n");
+    printf("| Therefore, we also made this software public under the MIT License.\n");
     printf("| Please check the source code here: https://gitee.com/zhenrong-wang/hpc-now/\n");
     printf("| If you encounter any issues about this software, please feel free to contact us\n");
     printf("| via info@hpc-now.com or other channels.\n");
@@ -386,7 +398,7 @@ void print_usrmgr_info(void){
     printf("|     -p     PASSWORD   ~ New password string.\n");
 }
 
-void print_dataman_info(void){
+void print_datamgr_info(void){
     printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "dataman" RESET_DISPLAY " CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...\n");
     printf("| General Flags    :~ -r, -rf, --recursive, --force, -f.\n");
     printf("|    -s SOURCE_PATH  ~ Source path of the binary operations. i.e. cp\n");
@@ -418,5 +430,42 @@ void print_dataman_info(void){
     printf("|     @a/ to specify the /hpc_apps/ prefix, only for root or user1.\n");
     printf("|     @p/ to specify the public folder prefix " WARN_YELLO_BOLD "( INSECURE !)" RESET_DISPLAY ".\n");
     printf("|     @R/ to specify the / prefix, only for root or user1.\n");
+    printf("|     @t/ to specify the /tmp prefix.\n");
     printf("|    Example: hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1\n");
+}
+
+void print_appmgr_info(void){
+    printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "appman" RESET_DISPLAY " --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...\n");
+    printf("| * The cluster must be in running state (minimal or all). *\n");
+    printf("| * -u USERNAME    ~ A valid user name. Use 'root' for all users.\n");
+    printf("| *                ~ " WARN_YELLO_BOLD "Admin or Operator role is required for root." RESET_DISPLAY "\n");
+    printf("|   --acmd store   ~ List out the apps in store.\n");
+    printf("|   --acmd avail   ~ List out all the installed apps.\n");
+    printf("|   --acmd check   ~ Check whether an app is available.\n");
+    printf("|     --app  APP_NAME   ~ The app name to be installed.\n");
+    printf("|   --acmd install ~ Install an app to all users or a specified user.\n");
+    printf("|     --app  APP_NAME   ~ The app name to be installed.\n");
+    printf("|   --acmd build   ~ Compile and build an app to all users or a specified user.\n");
+    printf("|     --app  APP_NAME   ~ The app name to be compiled and built.\n");
+    printf("|   --acmd remove  ~ Remove an app from the cluster.\n");
+    printf("|     --app  APP_NAME   ~ The app name to be removed.\n");
+}
+
+void print_jobmgr_info(void){
+    printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "jobman" RESET_DISPLAY " --jcmd APP_CMD [ KEY_WORD1 KEY_STRING1 ] ...\n");
+    printf("| * The cluster must be in running state (minimal or all). *\n");
+    printf("| * -u USERNAME    ~ A valid user name. " WARN_YELLO_BOLD "The root user CANNOT submit jobs." RESET_DISPLAY "\n");
+    printf("|   --jcmd submit  ~ Submit a job to the cluster.\n");
+    printf("|     --app   APP_NAME         ~ The app name for this job.\n");
+    printf("|     --nn    NODE_NUM         ~ The number of compute nodes for this job.\n");
+    printf("|     --tn    THREADS_PER_NODE ~ Threads per node for this job.\n");
+    printf("|     --jname JOB_NAME         ~ Job name. 'y' for the default name.\n");
+    printf("|     --jtime DURATION_HOURS   ~ Duration hours. 'y' for INFINITE.\n");
+    printf("|     --jexec EXECUTABLE_NAME  ~ Executable name for this job.\n");
+    printf("|     --jdata DATA_DIRECTORY   ~ The data directory for this job.\n");
+    printf("|                              ~ MUST use @d/ or @p/ as the prefix.\n");
+    printf("|     --echo                   ~ View the job console output.\n");
+    printf("|   --jcmd list    ~ List out all the jobs.\n");
+    printf("|   --jcmd cancel  ~ Cancel a job with specified ID\n");
+    printf("|     --jid   JOB_ID           ~ A valid job ID.\n");
 }

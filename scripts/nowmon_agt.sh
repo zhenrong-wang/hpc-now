@@ -3,7 +3,7 @@
 # This code is written and maintained by Zhenrong WANG
 # mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
 # The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
-# This code is distributed under the license: GNU Public License - v2.0
+# This code is distributed under the license: MIT License
 # Bug report: info@hpc-now.com
 
 curr_time=$(date "+%Y-%m-%d-%H-%M-%S")
@@ -16,9 +16,9 @@ mon_cores=/tmp/mon-cores-$curr_time.dat
 mon_all=/tmp/mon-all-$curr_time.dat
 mkdir -p /usr/hpc-now >> /dev/null 2>&1
 if [ $hostname = 'master' ]; then
-    mon_data=/usr/hpc-now/mon_data.csv
+    mon_data=/hpc_data/cluster_data/mon_data.csv
 else
-    mon_data=/usr/hpc-now/mon_data_$hostname.csv
+    mon_data=/hpc_data/cluster_data/mon_data_$hostname.csv
 fi
 
 if [ ! -f $mon_data ] && [ $hostname = 'master' ]; then
@@ -26,7 +26,7 @@ if [ ! -f $mon_data ] && [ $hostname = 'master' ]; then
     echo -e "date,time_m,time_s,node_name,cpu_tot_cores,mem_tot_gb,mem_used_gb,mem_util_%,stor_app,stor_data,cpu_util,idle_cores,low_cores,mid_low_cores,mid_high_cores,high_cores,full_cores" >> $mon_data
 fi
 
-top 1 -bn 1 -i -c -w 512 > $mon_cores
+top -1 -bn 1 -i -c -w 512 > $mon_cores
 top -bn 1 -i -c > $mon_all
 
 core_num=`lscpu | grep CPU\(s\): | awk '{print $2}' | head -n1`

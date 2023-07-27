@@ -2,7 +2,7 @@
  * This code is written and maintained by Zhenrong WANG
  * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * This code is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: MIT License
  * Bug report: info@hpc-now.com
  */
 
@@ -43,7 +43,7 @@ int get_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* mon_data_fi
             return -3;
         }
     }
-    remote_copy(workdir,sshkey_dir,mon_data_file,"/usr/hpc-now/mon_data.csv","root","get","",0);
+    remote_copy(workdir,sshkey_dir,mon_data_file,"/hpc_data/cluster_data/mon_data.csv","root","get","",0);
     if(file_empty_or_not(mon_data_file)<1){
         strcpy(mon_data_file,"");
         return 1;
@@ -133,9 +133,15 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
         i=3;
         day_num=curr_mday;
     }
-    if(day_num>28&&month_num==2&&year_num%4!=0){
-        i=4;
-        day_num=curr_mday;
+    if(day_num>28&&month_num==2){
+        if(year_num%4!=0){
+            i=4;
+            day_num=curr_mday;
+        }
+        else if(year_num%400!=0){
+            i=4;
+            day_num=curr_mday;
+        } 
     }
     if(day_num>30&&month_num!=1&&month_num!=3&&month_num!=5&&month_num!=7&&month_num!=8&&month_num!=10&&month_num!=12){
         i=4;
@@ -200,7 +206,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
     }
     run_flag=valid_time_format_or_not(start_datetime,0,start_date,start_time);
     if(run_flag==-1){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] No start date&time specified. Will start from the first timestamp.\n" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] No start date&time specified. Will start from the first timestamp." RESET_DISPLAY "\n");
     }
     else if(run_flag==1){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Start date&time: Using the current year.\n");
@@ -224,7 +230,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
     time1=mktime(&time_tm1);
     run_flag=valid_time_format_or_not(end_datetime,1,end_date,end_time);
     if(run_flag==-1){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] No end date&time specified. Will end with the last timestamp.\n" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] No end date&time specified. Will end with the last timestamp." RESET_DISPLAY "\n");
     }
     else if(run_flag==1){
         printf(WARN_YELLO_BOLD "[ -WARN- ] End date&time: Using the current year.\n");
@@ -245,7 +251,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
         datetime_to_num(end_date,end_time,&time_tm2);
         time2=mktime(&time_tm2);
         if(time1>time2){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] The specified end date&time is earlier than the start date&time. Skipping it.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The specified end date&time is earlier than the start date&time. Skipping it." RESET_DISPLAY "\n");
             valid_time_format_or_not("",1,end_date,end_time);
         }
         else{
@@ -323,7 +329,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
     }
     system(cmdline);
     if(strlen(export_dest)==0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] No export destination path specified. Will not export.\n" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] No export destination path specified. Will not export." RESET_DISPLAY "\n");
     }
     else{
         local_path_parser(export_dest,real_export_dest);

@@ -2,7 +2,7 @@
  * This code is written and maintained by Zhenrong WANG
  * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * This code is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: MIT License
  * Bug report: info@hpc-now.com
  */
 
@@ -36,6 +36,8 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--force",
     "--recursive",
     "--print", // print contents
+    "--installed",
+    "--verbose",
     "--read", // read contents
     "--std", // standard info
     "--err", // error info
@@ -64,6 +66,14 @@ char command_keywords[CMD_KWDS_NUM][16]={
     "--cmd",
     "--dcmd",
     "--ucmd",
+    "--acmd",
+    "--app",
+    "--jcmd",
+    "--jname", //Job Name
+    "--jid",
+    "--jtime",
+    "--jexec",
+    "--jdata",
     "--level",
     "--cname", //cluster_name
     "--ak",
@@ -73,6 +83,7 @@ char command_keywords[CMD_KWDS_NUM][16]={
     "--rg",
     "--az",
     "--nn", //node_num
+    "--tn", //tasks per node
     "--un", //user_num
     "--mi",
     "--ci",
@@ -674,20 +685,68 @@ int folder_exist_or_not(char* foldername){
     }
 }
 
+int password_complexity_check(char* password){
+    int i,length=strlen(password);
+    int uppercase_flag=0;
+    int lowercase_flag=0;
+    int number_flag=0;
+    int special_ch_flag=0;
+    for(i=0;i<length;i++){
+        if(*(password+i)=='A'||*(password+i)=='Z'){
+            uppercase_flag=1;
+        }
+        else if(*(password+i)>'A'&&*(password+i)<'Z'){
+            uppercase_flag=1;
+        }
+        else if(*(password+i)=='a'||*(password+i)=='z'){
+            lowercase_flag=1;
+        }
+        else if(*(password+i)>'a'&&*(password+i)<'z'){
+            lowercase_flag=1;
+        }
+        else if(*(password+i)=='0'||*(password+i)=='9'){
+            number_flag=1;
+        }
+        else if(*(password+i)>'0'&&*(password+i)<'9'){
+            number_flag=1;
+        }
+        else{
+            special_ch_flag=1;
+        }
+    }
+//    printf(" ------%d   %d    %d    %d    %d\n\n",length,uppercase_flag,lowercase_flag,number_flag,special_ch_flag);
+    if((uppercase_flag+lowercase_flag+number_flag+special_ch_flag)<3){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
 int generate_random_passwd(char* password){
-    int i,rand_num;
+    int i,total_times,rand_num;
     struct timeval current_time;
     char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
+    char password_temp[PASSWORD_STRING_LENGTH]="";
     unsigned int seed_num;
-    for(i=0;i<PASSWORD_LENGTH;i++){
-        GETTIMEOFDAY_FUNC(&current_time,NULL);
-        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
-        srand(seed_num);
-        rand_num=rand()%72;
-        *(password+i)=*(ch_table+rand_num);
-        usleep(5000);
+    for(total_times=0;total_times<10;total_times++){
+        for(i=0;i<PASSWORD_LENGTH;i++){
+            GETTIMEOFDAY_FUNC(&current_time,NULL);
+            seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+            srand(seed_num);
+            rand_num=rand()%72;
+            *(password_temp+i)=*(ch_table+rand_num);
+            usleep(5000);
+        }
+//        printf(":::   %s \n",password_temp);
+        if(password_complexity_check(password_temp)==0){
+//            printf(":::   %s \n",password_temp);
+            strcpy(password,password_temp);
+            return 0;
+        }
+        reset_string(password_temp);
     }
-    return 0;
+    return 1;
 }
 
 int generate_random_db_passwd(char* password){
@@ -838,6 +897,68 @@ int local_path_parser(char* path_string, char* path_final){
         strcpy(path_final,path_string);
     }
     return 0;
+}
+
+int direct_path_check(char* path_string, char* hpc_user, char* real_path){
+    char header[256]="";
+    char tail[DIR_LENGTH]="";
+    int i=0;
+    int j;
+    while(*(path_string+i)!='/'&&i<strlen(path_string)){
+        *(header+i)=*(path_string+i);
+        i++;
+    }
+    for(j=i+1;j<strlen(path_string);j++){
+        *(tail+j-i-1)=*(path_string+j);
+    }
+    if(strcmp(header,"@h")==0){
+        if(strcmp(hpc_user,"root")==0){
+            sprintf(real_path,"/root/%s",tail);
+        }
+        else{
+            sprintf(real_path,"/home/%s/%s",hpc_user,tail);
+        }
+        return 0;
+    }
+    else if(strcmp(header,"@d")==0){
+        if(strcmp(hpc_user,"root")==0){
+            sprintf(real_path,"/hpc_data/%s",tail);
+        }
+        else{
+            sprintf(real_path,"/hpc_data/%s_data/%s",hpc_user,tail);
+        }
+        return 0;
+    }
+    else if(strcmp(header,"@a")==0){
+        if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
+            sprintf(real_path,"/hpc_apps/%s",tail);
+        }
+        else{
+            sprintf(real_path,"/home/%s/%s",hpc_user,tail);
+        }
+        return 0;
+    }
+    else if(strcmp(header,"@p")==0){
+        sprintf(real_path,"/hpc_data/public/%s",tail);
+        return 0;
+    }
+    else if(strcmp(header,"@R")==0){
+        if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
+            sprintf(real_path,"/%s",tail);
+        }
+        else{
+            sprintf(real_path,"/home/%s/%s",hpc_user,tail);
+        }
+        return 0;
+    }
+    else if(strcmp(header,"@t")==0){
+        sprintf(real_path,"/tmp/%s",tail);
+        return 0;
+    }
+    else{
+        strcpy(real_path,path_string);
+        return 1;
+    }
 }
 
 int file_creation_test(char* filename){

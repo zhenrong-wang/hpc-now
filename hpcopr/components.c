@@ -2,7 +2,7 @@
  * This code is written and maintained by Zhenrong WANG
  * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * This code is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: MIT License
  * Bug report: info@hpc-now.com
  */
 
@@ -472,7 +472,7 @@ int configure_locations(void){
     printf("|*   THE DEFAULT LOCATIONS IF YOUR LOCATIONS FAIL TO WORK PROPERLY!                \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n\n" RESET_DISPLAY);
+    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n" RESET_DISPLAY "\n");
     fflush(stdin);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     scanf("%s",doubleconfirm);
@@ -492,7 +492,7 @@ int configure_locations(void){
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location." RESET_DISPLAY "\n");
         }
         else{
             strcpy(url_tf_root_var,loc_string);
@@ -508,7 +508,7 @@ int configure_locations(void){
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location." RESET_DISPLAY "\n");
         }
         else{
             strcpy(url_code_root_var,loc_string);
@@ -524,10 +524,10 @@ int configure_locations(void){
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location." RESET_DISPLAY "\n");
         }
         else if(format_flag==1){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify." RESET_DISPLAY "\n");
         }
         else{
             strcpy(url_shell_scripts_var,loc_string);
@@ -543,7 +543,7 @@ int configure_locations(void){
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location." RESET_DISPLAY "\n");
         }
         else{
             strcpy(url_now_crypto_var,loc_string);
@@ -559,10 +559,10 @@ int configure_locations(void){
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
         if(format_flag==-1){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location." RESET_DISPLAY "\n");
         }
         else if(format_flag==1){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify." RESET_DISPLAY "\n");
         }
         else{
             strcpy(url_initutils_root_var,loc_string);
@@ -572,7 +572,7 @@ int configure_locations(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Updating the location configuration file now ... \n");
     file_p=fopen(LOCATION_CONF_FILE,"w+");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create or modify the target file. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create or modify the target file. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");

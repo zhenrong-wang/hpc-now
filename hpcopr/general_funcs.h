@@ -2,7 +2,7 @@
  * This code is written and maintained by Zhenrong WANG
  * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * This code is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: MIT License
  * Bug report: info@hpc-now.com
  */
 
@@ -26,11 +26,13 @@ int file_exist_or_not(char* filename);
 int file_empty_or_not(char* filename);
 int folder_exist_or_not(char* foldername);
 int generate_random_passwd(char* password);
+int password_complexity_check(char* password);
 int generate_random_db_passwd(char* password);
 int generate_random_string(char* random_string);
 char* getpass_win(char* prompt);
 int insert_lines(char* filename, char* keyword, char* insert_string);
 int local_path_parser(char* path_string, char* path_final);
+int direct_path_check(char* path_string, char* real_path, char* hpc_user);
 int file_creation_test(char* filename);
 int file_cr_clean(char* filename);
 int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overwrite_flag);
