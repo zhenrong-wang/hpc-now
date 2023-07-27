@@ -351,6 +351,11 @@ int read_license(char* option){
     char filename_temp[FILENAME_LENGTH]="";
     sprintf(filename_temp,"%s%sMIT.LICENSE",NOW_LIC_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
+#ifdef _WIN32
+        sprintf(cmdline,"notepad %s",filename_temp);
+        system(cmdline);
+        return 0;
+#else
         if(strcmp(option,"print")==0){
             sprintf(cmdline,"%s %s",CAT_FILE_CMD,filename_temp);
         }
@@ -359,7 +364,13 @@ int read_license(char* option){
         }
         system(cmdline);
         return 0;
+#endif
     }
+#ifdef _WIN32
+    sprintf(cmdline,"curl -s %s",URL_LICENSE);
+    system(cmdline);
+    return 0;
+#else
     if(strcmp(option,"print")==0){
         sprintf(cmdline,"curl -s %s",URL_LICENSE);
     }
@@ -368,6 +379,7 @@ int read_license(char* option){
     }
     system(cmdline);
     return 0;
+#endif
 }
 
 void print_usrmgr_info(void){
