@@ -124,6 +124,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char cluster_name_flag_tmp[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp_2[FILENAME_LENGTH]="";
+    char filename_temp_3[FILENAME_LENGTH]="";
     char username_temp[USERNAME_LENGTH_MAX]="";
     char username_temp_2[USERNAME_LENGTH_MAX]="";
     char* password_temp;
@@ -285,8 +286,13 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
             }
 next_user:
             fclose(file_p);
-            sprintf(cmdline,"%s %s%s%s.key %s%s %s",COPY_FILE_CMD,current_sshdir,PATH_SLASH,username_temp,tmp_sshdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            sprintf(filename_temp_3,"%s%s%s.key",current_sshdir,PATH_SLASH,username_temp);
+            sprintf(cmdline,"%s %s %s%s %s",COPY_FILE_CMD,filename_temp_3,tmp_sshdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
+            sprintf(filename_temp_3,"%s%s%s.key",tmp_sshdir,PATH_SLASH,username_temp);
+//            printf("%s ----\n%s .......\n",filename_temp,md5sum_trans);
+//            printf("%s .......\n",md5sum_trans);
+            encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp_3,md5sum_trans);
         }while(strlen(username_temp)!=0);
         fclose(file_p_tmp);
     }
@@ -492,8 +498,12 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile){
     }
     
     sprintf(cluster_sshkey_dir,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,cluster_name_buffer);
-    sprintf(filename_temp,"%s%sroot.key",cluster_sshkey_dir,PATH_SLASH);
+    sprintf(filename_temp,"%s%sroot.key.tmp",cluster_sshkey_dir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
+        decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(filename_temp,"%s%sroot.key",cluster_sshkey_dir,PATH_SLASH);
         activate_sshkey(filename_temp);
         admin_flag=1;
     }
@@ -507,9 +517,14 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile){
     while(!feof(file_p)){
         fgetline(file_p,user_line_buffer);
         get_seq_string(user_line_buffer,' ',2,username_temp);
+        sprintf(filename_temp_2,"%s%s%s.key.tmp",cluster_sshkey_dir,PATH_SLASH,username_temp);
+        decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp_2,md5sum);
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp_2,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
         sprintf(filename_temp_2,"%s%s%s.key",cluster_sshkey_dir,PATH_SLASH,username_temp);
         activate_sshkey(filename_temp_2);
     }
+    fclose(file_p);
     delete_decrypted_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);

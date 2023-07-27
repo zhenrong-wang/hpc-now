@@ -76,6 +76,7 @@ source /etc/profile
 /bin/cp /etc/hosts /etc/hosts-clean
 mkdir -p /root/.cluster_secrets
 mkdir -p /root/.sshkey_deleted
+
 time1=$(date)
 echo -e  "\n${time1}" >> ${logfile}
 if [ -z "$1" ] || [ -z "$2" ]; then
@@ -224,7 +225,7 @@ if [ -f /root/hostfile ]; then
     mv /root/mariadb_root_passwd.txt /root/.cluster_secrets/
     mv /root/mariadb_slurm_acct_db_pw.txt /root/.cluster_secrets/
     db_address=`cat /root/mariadb_private_ip.txt | awk -F"\t" '{print $1}'`
-    echo -e "# $time_current Mariadb has been installed to the host $db_address. Will not build mariadb on localhost." >> ${logfile}
+    echo -e "# $time_current MariaDB Server address: $db_address. Installing MariaDB Client ..." >> ${logfile}
   else
     if [ $2 != db ]; then
       time_current=`date "+%Y-%m-%d %H:%M:%S"`
@@ -269,11 +270,8 @@ if [ -f /root/hostfile ]; then
     mv /root/mariadb_slurm_acct_db_pw.txt /root/.cluster_secrets/
   fi
 fi
-# Move sensative file to .cluster_secrets folder 
-
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "ALL the secrets are stored in the directory /root/.cluster_secrets/ ."
-echo -e "# $time_current ALL the secrets are stored in the directory /root/.cluster_secrets/ ." >> ${logfile}
+echo -e "# $time_current MariaDB installed." >> ${logfile}
 
 # Change owners of directories 
 mkdir -p /run/munge && chown -R slurm:slurm /run/munge
@@ -382,6 +380,7 @@ if [ -f /root/hostfile ]; then
     echo -e "< envmod >" >> $public_app_registry
   fi
 fi
+
 # Install Desktop Env-NECESSARY
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 if [ -f /root/hostfile ]; then
