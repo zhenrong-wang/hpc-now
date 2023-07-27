@@ -2,7 +2,7 @@
  * This code is written and maintained by Zhenrong WANG
  * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * This code is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: MIT License
  * Bug report: info@hpc-now.com
  */
 
@@ -43,7 +43,7 @@ void print_header_hpcmgr(void){
   time_p=localtime(&current_time_long);
   printf("|   /HPC->  Welcome to HPC-NOW Cluster Manager! Version: %s\n",HPCMGR_VERSION);
   printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-  printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd LICENSE: GPL-2.0\n\n");
+  printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd    LICENSE: MIT\n\n");
 }
 
 void print_tail_hpcmgr(void){
