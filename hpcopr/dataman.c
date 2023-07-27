@@ -213,64 +213,6 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
     }
 }
 
-int direct_path_check(char* path_string, char* hpc_user, char* real_path){
-    char header[256]="";
-    char tail[DIR_LENGTH]="";
-    int i=0;
-    int j;
-    while(*(path_string+i)!='/'&&i<strlen(path_string)){
-        *(header+i)=*(path_string+i);
-        i++;
-    }
-    for(j=i;j<strlen(path_string);j++){
-        *(tail+j-i)=*(path_string+j);
-    }
-    if(strcmp(header,"@h")==0){
-        if(strcmp(hpc_user,"root")==0){
-            sprintf(real_path,"/root/%s",tail);
-        }
-        else{
-            sprintf(real_path,"/home/%s/%s",hpc_user,tail);
-        }
-        return 0;
-    }
-    else if(strcmp(header,"@d")==0){
-        if(strcmp(hpc_user,"root")==0){
-            sprintf(real_path,"/hpc_data/%s",tail);
-        }
-        else{
-            sprintf(real_path,"/hpc_data/%s_data/%s",hpc_user,tail);
-        }
-        return 0;
-    }
-    else if(strcmp(header,"@a")==0){
-        if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
-            sprintf(real_path,"/hpc_apps/%s",tail);
-        }
-        else{
-            sprintf(real_path,"/home/%s/%s",hpc_user,tail);
-        }
-        return 0;
-    }
-    else if(strcmp(header,"@p")==0){
-        sprintf(real_path,"/hpc_data/public/%s",tail);
-        return 0;
-    }
-    else if(strcmp(header,"@R")==0){
-        if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
-            sprintf(real_path,"/%s",tail);
-        }
-        else{
-            sprintf(real_path,"/home/%s/%s",hpc_user,tail);
-        }
-        return 0;
-    }
-    else{
-        strcpy(real_path,path_string);
-        return 1;
-    }
-}
-
 int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_path, char* target_path, char* recursive_flag, char* force_flag, char* cmd_type){
     if(strcmp(cmd_type,"mv")!=0&&strcmp(cmd_type,"cp")!=0){
         return -1;
@@ -327,7 +269,7 @@ int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_p
                     sprintf(remote_commands,"mv /home/%s/%s /home/%s/%s %s &",hpc_user,real_source_path,hpc_user,real_target_path,real_rf_flag);
                 }
             }
-            run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,0,1);
+            run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
         }
         else{
             return 3;
@@ -341,7 +283,7 @@ int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_p
             else{
                 sprintf(remote_commands,"/bin/cp %s %s %s &",real_source_path,real_target_path,real_rf_flag);
             }
-            run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,0,1);
+            run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
         }
         else if(path_flag1==1&&path_flag2==0){
             run_flag=remote_copy(workdir,sshkey_dir,real_source_path,real_target_path,hpc_user,"put",real_rf_flag,1);
@@ -408,7 +350,7 @@ int direct_rm_ls_mkdir(char* workdir, char* hpc_user, char* sshkey_dir, char* re
             sprintf(remote_commands,"mkdir -p %s",real_remote_path);
         }
     }
-    run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,0,1);
+    run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
     if(run_flag!=0){
         return 1;
     }
@@ -441,7 +383,7 @@ int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char
             sprintf(remote_commands,"%s -f %s",cmd_type,real_remote_path);
         }
     }
-    run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,0,1);
+    run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
     if(run_flag!=0){
         return 1;
     }
@@ -485,10 +427,10 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"ossutil64.exe -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s %s %s",region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"ossutil64 -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s %s %s",region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"ossutil64.exe -e oss-%s.aliyuncs.com -i %s -k %s cp %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            sprintf(remote_commands,"ossutil64 -e oss-%s.aliyuncs.com -i %s -k %s cp %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
@@ -508,7 +450,7 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
         }
     }
 //    printf("%s ---\n",remote_commands);
-    run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,0,1);
+    run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
     if(run_flag!=0){
         return 1;
     }

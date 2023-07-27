@@ -8,34 +8,18 @@
 
 # This script is used by 'hpcmgr' command line tool.
 
-CURRENT_USER=`whoami`
-if [ $CURRENT_USER != 'root' ]; then
-  echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr'. "
-  echo -e "           Please make sure you use either user1 with 'sudo' privilege, OR"
-  echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now."
-  exit 1
-fi
-#CRITICAL: Environment Variable $NODE_NUM and $NODE_CORES MUST be written to /etc/profile IN ADVANCE!
-source /etc/profile
-if [ ! -z $APPS_INSTALL_SCRIPTS_URL ]; then
-  URL_INSTSCRIPTS_ROOT=$APPS_INSTALL_SCRIPTS_URL
-fi
-rm -rf ~/.ssh/known_hosts
-user_registry=/root/.cluster_secrets/user_secrets.txt
-logfile='/var/log/hpcmgr.log'
-time1=$(date)
-
-echo -e "${time1}: HPC-NOW Cluster Manager task started." >> ${logfile}
-
 function help_info() {
-  echo -e "[ FATAL: ] The command parameter is invalid. Valid parameters are:"
+  echo -e "[ -INFO- ] Valid options/commands:"
   echo -e "           quick   - quick config"
   echo -e "           master  - refresh only master node"
   echo -e "           connect - check cluster connectivity"
   echo -e "           all     - refresh the whole cluster"
   echo -e "           clear   - clear the hostfile_dead_nodes list"
+  echo -e "           applist - List out the apps in the store"
+  echo -e "           build   - build software from source"
   echo -e "           install - install software"
-  echo -e "[ FATAL: ] Please double check your input. Exit now."
+  echo -e "           remove  - remove software"
+  echo -e "           submit  - submit a job"
 }
 
 function node_invalid_info() {
@@ -51,10 +35,18 @@ function add_a_user() {
   cat /home/$1/.ssh/id_rsa.pub >> /home/$1/.ssh/authorized_keys
   cat /etc/now-pubkey.txt >> /home/$1/.ssh/authorized_keys
   cp -r /root/Desktop/*.desktop /home/$1/Desktop/
-  mkdir -p /hpc_data/${1}_data && chmod -R 750 /hpc_data/${1}_data 
+  mkdir -p /hpc_data/${1}_data
+  chmod -R 750 /hpc_data/${1}_data
+  mkdir -p /hpc_apps/${1}_apps
+  touch /hpc_apps/${1}_apps/.private_apps.reg
+  chmod -R 750 /hpc_apps/${1}_apps
+  mkdir -p /hpc_apps/envmod/${1}_env
+  chmod -R 750 /hpc_apps/envmod/${1}_env
   chown -R $1:$1 /hpc_data/${1}_data
+  chown -R $1:$1 /hpc_apps/${1}_apps
+  chown -R $1:$1 /hpc_apps/envmod/${1}_env
   ln -s /hpc_data/${1}_data /home/$1/Desktop/ >> /dev/null 2>&1
-  ln -s /hpc_apps /home/$1/Desktop/ >> /dev/null 2>&1
+  ln -s /hpc_apps/${1}_apps /home/$1/Desktop/ >> /dev/null 2>&1
   chown -R $1:$1 /home/$1
   for i in $(seq 1 $NODE_NUM )
   do
@@ -68,27 +60,53 @@ function add_a_user() {
   done
 }
 
-#function bucket_conf() {
-#  if [ -f /root/.cos.conf ] && [ ! -f /home/$1/.cos.conf ]; then
-#    cp /root/.cos.conf /home/$1/ && chown -R $1:$1 /home/$1/.cos.conf
-#  fi
-#  if [ -f /root/.ossutilconfig ] && [ ! -f /home/$1/.ossutilconfig ]; then
-#    cp /root/.ossutilconfig /home/$1/ && chown -R $1:$1 /home/$1/.ossutilconfig
-#  fi
-#  if [ -f /root/.s3cfg ] && [ ! -f /home/$1/.s3cfg ]; then
-#    cp /root/.s3cfg /home/$1/ && chown -R $1:$1 /home/$1/.s3cfg
-#  fi
-#}
-
-if [ ! -n "$1" ]; then
+if [ -z "$1" ]; then
   help_info
   exit 3
 fi
 
-if [ $1 != 'quick' ] && [ $1 != 'master' ] && [ $1 != 'all' ] && [ $1 != 'clear' ] && [ $1 != 'users' ] && [ $1 != 'connect' ] && [ $1 != 'install' ]; then
-  help_info
-  exit 3
+current_user=`whoami`
+public_app_registry="/hpc_apps/.public_apps.reg"
+if [ $current_user != 'root' ]; then
+  private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
+
+main_menu=('quick' 'master' 'connect' 'all' 'clear' 'applist' 'build' 'install' 'remove' 'submit' 'users')
+command_flag='false'
+for i in $(seq 0 10)
+do
+  if [ $1 = ${main_menu[i]} ]; then
+    command_flag='true'
+    break
+  fi
+done
+
+if [ $command_flag = 'false' ]; then
+  echo -e "[ FATAL: ] The command $1 is incorrect. Exit now."
+  help_info
+  exit 51
+fi
+
+if [ $current_user != 'root' ] && [ $1 != 'applist' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 != 'submit' ]; then
+  echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr $1'. "
+  echo -e "           Please make sure you use either user1 with 'sudo' privilege, OR"
+  echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now."
+  exit 1
+fi
+#CRITICAL: Environment Variable $NODE_NUM and $NODE_CORES MUST be written to /etc/profile IN ADVANCE!
+source /etc/profile
+if [ ! -z $APPS_INSTALL_SCRIPTS_URL ]; then
+  url_instscripts_root=$APPS_INSTALL_SCRIPTS_URL
+fi
+rm -rf ~/.ssh/known_hosts
+user_registry=/root/.cluster_secrets/user_secrets.txt
+if [ $current_user = 'root' ]; then
+  logfile="/var/log/hpcmgr.log"
+else
+  logfile="$HOME/.hpcmgr.log"
+fi
+time1=$(date)
+echo -e "${time1}: HPC-NOW Cluster Manager task started." >> ${logfile}
 
 if [ $1 = 'clear' ]; then
   if [ ! -f /root/hostfile ]; then
@@ -99,16 +117,13 @@ if [ $1 = 'clear' ]; then
   echo -e "[ -INFO- ] The hostfile_dead_nodes list had been emptied. Exit now."
   echo -e "[ -INFO- ] The hostfile_dead_nodes list had been emptied." >> ${logfile}
   exit 0
-fi
-
-##### USER MANAGEMENT #####################
-if [ $1 = 'users' ]; then
+elif [ $1 = 'users' ]; then
   mkdir -p /root/.sshkey_deleted >> ${logfile} 2>&1
   if [ ! -f /root/hostfile ]; then
     node_invalid_info
     exit 5
   fi
-  if [ ! -n "$2" ]; then
+  if [ -z "$2" ]; then
     echo -e "Usage: \n\thpcmgr users list\n\thpcmgr users add your_user_name your_password\n\thpcmgr users delete your_user_name\nPlease check your parameters. Exit now.\n"
     exit 3
   fi
@@ -121,7 +136,7 @@ if [ $1 = 'users' ]; then
     exit 0
   fi
   if [ $2 = 'add' ]; then
-    if [ ! -n "$3" ]; then
+    if [ -z "$3" ]; then
       echo -e "Usage: \n\thpcmgr users add your_user_name your_password\nPlease check your parameters. Exit now.\n"
       exit 3
     else
@@ -145,7 +160,7 @@ if [ $1 = 'users' ]; then
           echo -e "username: $3 $4 ENABLED" >> ${user_registry}
         else
           echo -e "Generate random string for password." 
-          if [ $CENTOS_V -eq 7 ]; then
+          if [ ! -z $CENTOS_VERSION ] && [ $CENTOS_VERSION -eq 7 ]; then
             openssl rand 8 -base64 -out /root/.cluster_secrets/secret_$3.txt
           else
             openssl rand -base64 -out /root/.cluster_secrets/secret_$3.txt 8
@@ -164,7 +179,7 @@ if [ $1 = 'users' ]; then
     fi
   fi
   if [ $2 = 'delete' ]; then
-    if [ ! -n "$3" ]; then
+    if [ -z "$3" ]; then
       echo -e "Usage: \n\thpcmgr users delete your_user_name\n\thpcmgr users delete your_user_name os\nPlease check your parameters. Exit now."
       exit 3
     fi
@@ -173,7 +188,7 @@ if [ $1 = 'users' ]; then
       exit 13
     fi
     sacctmgr list user $3 | grep hpc_users >> /dev/null 2>&1
-    if [ ! -n "$4" ] || [ $4 != 'os' ]; then
+    if [ -z "$4" ] || [ $4 != 'os' ]; then
       if [ $? -ne 0 ]; then
         echo -e "$3 is not in the cluster. Nothing deleted, exit now."
         exit 15
@@ -185,14 +200,17 @@ if [ $1 = 'users' ]; then
       echo -e "$3 is not in the cluster. Nothing deleted, exit now."
       exit 15
     fi
-    if [[ ! -n "$4" || $4 != "os" ]]; then
+    if [[ -z "$4" || $4 != "os" ]]; then
       echo -e "User $3 has been deleted from the cluster, but still in the OS."
       sed -i "/$3/,+0 s/ENABLED/DISABLED/g" ${user_registry}
       mv /home/$3/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$3 >> ${logfile} 2>&1
       exit 0
     else
       echo -e "[ -WARN- ] User $3 will be erased from the Operating System permenantly!"
-      userdel -f -r $3 && mv /hpc_data/${3}_data /hpc_data/${3}_data_deleted_user
+      userdel -f -r $3
+      mv /hpc_data/${3}_data /hpc_data/${3}_data_deleted_user
+      rm -rf /hpc_apps/${3}_apps
+      rm -rf /hpc_apps/envmod/${3}_env
       for i in $(seq 1 $NODE_NUM )
       do
         ping -c 1 -W 1 -q compute${i} >> ${logfile} 2>&1
@@ -232,10 +250,8 @@ if [ $1 = 'users' ]; then
       fi
     done < ${user_registry}
   fi
-fi
-
-# quick mode - quickly restart all the services in master and compute nodes
-if [ $1 = 'quick' ]; then
+  exit 0
+elif [ $1 = 'quick' ]; then
   if [ ! -f /root/hostfile ]; then
     node_invalid_info
     exit 3
@@ -254,11 +270,13 @@ if [ $1 = 'quick' ]; then
   echo -e "[ STEP 1 ] Restarting services on the master node ..."
   mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged >> $logfile 2>&1
   systemctl restart slurmdbd >> $logfile 2>&1
+  systemctl enable slurmdbd >> $logfile 2>&1
   for i in $(seq 1 2 )
   do
     sleep 1
   done
   systemctl restart slurmctld >> $logfile 2>&1
+  systemctl enable slurmctld >> $logfile 2>&1
   systemctl status slurmdbd >> ${logfile}
   systemctl status slurmctld >> ${logfile}
   echo -e "[ STEP 2 ] Restarting services on the compute node(s) ..."
@@ -269,8 +287,8 @@ if [ $1 = 'quick' ]; then
       echo -e "\n Node ${i} is unreachable." >> ${logfile}
       continue
     fi
-    ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged" >> $logfile 2>&1
-    ssh compute${i} "systemctl restart slurmd" >> $logfile 2>&1
+    ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && sudo -u slurm munged" >> $logfile 2>&1 
+    ssh compute${i} "systemctl restart slurmd && systemctl enable slurmd" >> $logfile 2>&1
     scontrol update NodeName=compute${i} State=DOWN Reason=hung_completing
     scontrol update NodeName=compute${i} State=RESUME
     echo -e "\nSlurmd Status of Node ${i}:" >> ${logfile}
@@ -280,10 +298,7 @@ if [ $1 = 'quick' ]; then
   echo -e "[ -DONE- ] HPC-NOW Cluster Status:\n"
   sinfo -N
   exit 0
-fi
-
-####### Check connectivities ###########################
-if [ $1 = 'connect' ]; then
+elif [ $1 = 'connect' ]; then
   if [ ! -f /root/hostfile ]; then
     node_invalid_info
     exit 3
@@ -404,9 +419,7 @@ if [ $1 = 'connect' ]; then
   echo -e "[ STEP 5 ] Users are ready."
   echo -e "[ -DONE- ] Connectivety check finished! \n[ -DONE- ] You need to run the command 'hpcmgr all' on the master node.\n[ -DONE- ] Exit now."
   exit 0
-fi
-# all mode: restart services on all nodes
-if [[ $1 = 'master' || $1 = 'all' ]]; then
+elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
   if [ ! -f /root/hostfile ]; then
     node_invalid_info
     exit 3
@@ -423,12 +436,15 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
       exit 17
     fi
   fi
-# To make sure the munged is up
+  # To make sure the munged is up
   echo -e "[ STEP 1 ] Checking the authentication of the master node ..."
   ps -aux | grep slurm | grep munged >> ${logfile}
   if [ $? -ne 0 ]; then
-    mkdir -p /run/munge
-    chown -R slurm:slurm /run/munge
+    mkdir -p /run/munge && chown -R slurm:slurm /run/munge
+    mkdir -p /etc/munge && chown -R slurm:slurm /etc/munge
+    mkdir -p /var/run/munge && chown -R slurm:slurm /var/run/munge
+    mkdir -p /var/lib/munge && chown -R slurm:slurm /var/lib/munge
+    mkdir -p /var/log/munge && chown -R slurm:slurm /var/log/munge
     sudo -u slurm munged
     if [ $? -ne 0 ]; then
       echo -e "[ FATAL: ] FAILED to start munge daemon on Master Node! Please check the installation of munge.\nExit now."
@@ -441,8 +457,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   for i in $(seq 1 $NODE_NUM )
   do
     ssh compute${i} "ps -aux | grep slurm | grep munged | cut -c 9-16 | xargs kill -9 >> /dev/null 2>&1"
-    ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && chown -R slurm:slurm /etc/munge"    
-    ssh compute${i} "sudo -u slurm munged"
+    ssh compute${i} "mkdir -p /run/munge && chown -R slurm:slurm /run/munge && mkdir -p /etc/munge && chown -R slurm:slurm /etc/munge && mkdir -p /var/run/munge && chown -R slurm:slurm /var/run/munge && mkdir -p /var/lib/munge && chown -R slurm:slurm /var/lib/munge && mkdir -p /var/log/munge && chown -R slurm:slurm /var/log/munge && sudo -u slurm munged" >> $logfile 2>&1  
     if [ $? -ne 0 ]; then
       echo -e "[ FATAL: ] FAILED to start munge daemon on Compute${i} Node! Please check the installation of munge.\nExit now."
       echo -e "[ FATAL: ] FAILED to start munge daemon on Compute${i} Node! Please check the installation of munge.\nExit now." >> ${logfile}
@@ -452,6 +467,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
   echo -e "[ STEP 2 ] Authentication of Compute node(s) is OK."
   echo -e "[ STEP 3 ] Pulling the master node up ..."  
   systemctl restart slurmdbd
+  systemctl enable slurmdbd >> ${logfile}
   systemctl status slurmdbd | grep "Active: active" >> ${logfile}
   if [ $? -eq 0 ]; then
     for i in $( seq 1 2)
@@ -459,6 +475,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
       sleep 1
     done
     systemctl restart slurmctld
+    systemctl enable slurmctld >> ${logfile}
     echo -e "[ STEP 3 ] The master node is up."
   else
     echo -e "[ FATAL: ] SLURMDBD is not properly started. Exit now."
@@ -479,7 +496,7 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
       scp -q /root/hostfile root@compute${i}:/etc/
       scp -q /opt/slurm/etc/slurm.conf root@compute${i}:/opt/slurm/etc/
       ssh compute${i} "sed -i '/master/d' /etc/hosts && sed -i '/compute/d' /etc/hosts"
-      ssh compute${i} "cat /etc/hostfile >> /etc/hosts && rm -rf /etc/hostfile && systemctl restart slurmd"
+      ssh compute${i} "cat /etc/hostfile >> /etc/hosts && rm -rf /etc/hostfile && systemctl restart slurmd && systemctl enable slurmd" >> ${logfile}
       echo -e "\nSlurmd Status of Node ${i}:" >> ${logfile}
       ssh compute${i} "systemctl status slurmd" >> ${logfile}
       echo -e "\n" >> ${logfile}
@@ -489,7 +506,6 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
     echo -e "[ STEP 4 ] Compute nodes are ready."
     sinfo -N >> ${logfile}
   fi
-  
   echo -e "[ STEP 5 ] Checking cluster users ... "
   sacctmgr list account hpc_users | grep -w hpc_users >> ${logfile} 2>&1
   if [ $? -ne 0 ]; then
@@ -503,23 +519,24 @@ if [[ $1 = 'master' || $1 = 'all' ]]; then
       echo "y" | sacctmgr delete user $user_name >> ${logfile} 2>&1
       mv /home/$user_name/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$user_name >> ${logfile} 2>&1
     else
-      echo "y" | sacctmgr add user ${user_name} account=hpc_users >> ${logfile} 2>&1
+      if [ $user_name = 'user1' ]; then
+        echo "y" | sacctmgr add user ${user_name} account=hpc_users adminlevel=admin >> ${logfile} 2>&1
+      else
+        echo "y" | sacctmgr add user ${user_name} account=hpc_users >> ${logfile} 2>&1
+      fi
       mv /root/.sshkey_deleted/id_rsa.$user_name /home/$user_name/.ssh/id_rsa >> ${logfile} 2>&1
     fi
   done < ${user_registry}
   echo -e "[ STEP 5 ] Cluster users are ready."
   echo -e "[ -DONE- ] HPC-NOW Cluster Status:\n"
   sinfo -N
-fi
-
-if [ $1 = 'install' ]; then
-  if [ -z $URL_INSTSCRIPTS_ROOT ]; then
+  exit 0
+elif [ $1 = 'applist' ]; then
+  if [ -z $url_instscripts_root ]; then
     echo -e "[ FATAL: ] Failed to connect to a valid appstore repo. Exit now."
-    exit 35
+    exit 34
   fi
-  if [[ ! -n "$2" || $2 = 'list' ]]; then
-    echo -e "[ -INFO- ] Usage: hpcmgr install software_to_be_installed"
-    echo -e "[ -INFO- ] Please specify the software you'd like to build:\n"
+  if [ -z $2 ]; then
     echo -e "1. Applications:"
     echo -e "\tof7       - OpenFOAM-v7"
     echo -e "\tof9       - OpenFOAM-v9"
@@ -527,12 +544,13 @@ if [ $1 = 'install' ]; then
     echo -e "\tlammps    - LAMMPS dev latest"
     echo -e "\tgromacs   - GROMACS"
     echo -e "\twrf       - WRF & WPS -4.4"
-    echo -e "\tvasp5     - VASP-5.4.4 (BRING YOUR OWN LICENSE)"
-    echo -e "\tvasp6.1   - VASP-6.1.0 (BRING YOUR OWN LICENSE)"
+    echo -e "\tvasp5     - VASP-5.4.4 (BRING YOUR OWN SOURCE AND LICENSE)"
+    echo -e "\tvasp6.1   - VASP-6.1.0 (BRING YOUR OWN SOURCE AND LICENSE)"
+    echo -e "\tvasp6.3   - VASP-6.1.0 (BRING YOUR OWN SOURCE AND LICENSE)"
     echo -e "\tR         - R & RStudio (in development)"
-    echo -e "\tpview     - ParaView-5"
+    echo -e "\tparaview  - ParaView-5"
     echo -e "\thdf5      - HDF5-1.10.9"
-    echo -e "\tncdf4     - netCDF-C-4.9.0 & netCDF-fortran-4.5.3"
+    echo -e "\tnetcdf4   - netCDF-C-4.9.0 & netCDF-fortran-4.5.3"
     echo -e "\tabinit    - ABINIT-9.6.2"
     echo -e "2. MPI Toolkits:"
     echo -e "\tmpich3    - MPICH-3.2.1"
@@ -547,96 +565,172 @@ if [ $1 = 'install' ]; then
     echo -e "\tintel     - Intel(R) HPC Toolkit Latest"
     echo -e "4. Important Libraries:"
     echo -e "\tfftw3     - FFTW 3"
-    echo -e "\tlapk311   - LAPACK-3.11.0"
+    echo -e "\tlapack311 - LAPACK-3.11.0"
     echo -e "\tzlib      - zlib-1.2.13"
     echo -e "\tslpack2   - ScaLAPACK-2.1.0"
-    echo -e "\toblas     - OpenBLAS 0.3.15 *SINGLE THREAD*"
+    echo -e "\topenblas  - OpenBLAS 0.3.15 *SINGLE THREAD*"
     echo -e "5. Other Tools:"
     echo -e "\tdesktop   - Desktop Environment" 
     echo -e "\tbaidu     - Baidu Netdisk"
-    echo -e "\tnowdisk   - COSBrowser (RECOMMENDED)" 
+    echo -e "\tcos       - COSBrowser (RECOMMENDED)" 
     echo -e "\trar       - RAR for Linux (RECOMMENDED)" 
     echo -e "\tkswps     - WPS Office Suite for Linux (RECOMMENDED)" 
     echo -e "\tenvmod    - Environment Modules" 
-    echo -e "\tvscode    - Visual Studio Code" 
+    echo -e "\tvscode    - Visual Studio Code"
     exit 0
-  elif [[ -n $2 && $2 = 'of7' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_of7.sh | bash
-  elif [[ -n $2 && $2 = 'of2112' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_of2112.sh | bash
-  elif [[ -n $2 && $2 = 'mpich4' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_mpich4.sh | bash
-  elif [[ -n $2 && $2 = 'mpich3' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_mpich3.sh | bash
-  elif [[ -n $2 && $2 = 'gcc4' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_gcc4.sh | bash
-  elif [[ -n $2 && $2 = 'gcc8' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_gcc8.sh | bash
-  elif [[ -n $2 && $2 = 'gcc9' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_gcc9.sh | bash
-  elif [[ -n $2 && $2 = 'gcc12' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_gcc12.sh | bash
-  elif [[ -n $2 && $2 = 'nowdisk' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_cos.sh | bash
-  elif [[ -n $2 && $2 = 'baidu' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_baidu.sh | bash
-  elif [[ -n $2 && $2 = 'fftw3' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_fftw3.sh | bash
-  elif [[ -n $2 && $2 = 'lammps' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_lammps.sh | bash
-  elif [[ -n $2 && $2 = 'intel' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_intel.sh | bash
-  elif [[ -n $2 && $2 = 'gromacs' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_gromacs.sh | bash
-  elif [[ -n $2 && $2 = 'pview' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_paraview.sh | bash
-  elif [[ -n $2 && $2 = 'of9' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_of9.sh | bash
-  elif [[ -n $2 && $2 = 'ompi3' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_ompi3.sh | bash
-  elif [[ -n $2 && $2 = 'ompi4' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_ompi4.sh | bash
-  elif [[ -n $2 && $2 = 'lapk311' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_lapack311.sh | bash
-  elif [[ -n $2 && $2 = 'R' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_R.sh | bash
-  elif [[ -n $2 && $2 = 'slpack2' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_slpack2.sh | bash
-  elif [[ -n $2 && $2 = 'vasp6.1' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_vasp6.1.sh | bash
-  elif [[ -n $2 && $2 = 'vasp6.3' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_vasp6.3.sh | bash
-  elif [[ -n $2 && $2 = 'vasp5' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_vasp5.sh | bash
-  elif [[ -n $2 && $2 = 'hdf5' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_hdf5.sh | bash
-  elif [[ -n $2 && $2 = 'zlib' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_zlib.sh | bash
-  elif [[ -n $2 && $2 = 'ncdf4' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_netcdf4.sh | bash
-  elif [[ -n $2 && $2 = 'desktop' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_desktop.sh | bash
-  elif [[ -n $2 && $2 = 'envmod' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_module.sh | bash
-  elif [[ -n $2 && $2 = 'rar' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_rar.sh | bash
-  elif [[ -n $2 && $2 = 'kswps' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_wps.sh | bash
-  elif [[ -n $2 && $2 = 'vscode' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_vscode.sh | bash
-  elif [[ -n $2 && $2 = 'oblas' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_openblas.sh | bash
-  elif [[ -n $2 && $2 = 'abinit' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_abinit.sh | bash
-  elif [[ -n $2 && $2 = 'wrf' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_wrf.sh | bash
-  elif [[ -n $2 && $2 = 'vasp6.3' ]]; then
-    curl -s ${URL_INSTSCRIPTS_ROOT}install_vasp6.3.sh | bash
+  elif [ $2 = 'avail' ]; then
+    echo -e "|       +- Available(Installed) Apps ~ Public:"
+    while read public_reg_row
+    do
+      echo -e "|          ${public_reg_row}"
+    done < $public_app_registry
+    echo -e "|       +- Available(Installed) Apps ~ Private:"
+    if [ $current_user = 'root' ]; then
+      while read user_row
+      do
+        user_name_tmp=`echo $user_row | awk '{print $2}'`
+        while read private_reg_row
+        do
+          echo -e "|          ${private_reg_row}"
+        done < /hpc_apps/${user_name_tmp}_apps/.private_apps.reg
+      done < /root/.cluster_secrets/user_secrets.txt
+    else
+      while read private_reg_row
+      do
+        echo -e "|          ${private_reg_row}"
+      done < /hpc_apps/${current_user}_apps/.private_apps.reg
+    fi
+    exit 0
+  elif [ $2 = 'check' ]; then
+    if [ -z $3 ]; then
+      echo -e "[ FATAL: ] Please provide an app name to check."
+      exit 35
+    else
+      grep "< $3 >" $public_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        echo -e "[ -INFO- ] The app $3 is available for all users."
+        exit 0
+      else
+        if [ $current_user = 'root' ]; then
+          while read user_row
+          do
+            user_name_tmp=`echo $user_row | awk '{print $2}'`
+            grep "< $3 >" /hpc_apps/${user_name_tmp}_apps/.private_apps.reg
+            if [ $? -eq 0 ]; then
+              echo -e "[ -INFO- ] The app $3 is available for ${user_name_tmp}."
+              exit 0
+            fi
+          done < /root/.cluster_secrets/user_secrets.txt
+          echo -e "[ -INFO- ] The app $3 is not available for any users."
+          exit 0
+        else
+          grep "< $3 >" ${private_app_registry}
+          if [ $? -eq 0 ]; then
+            echo -e "[ -INFO- ] The app $3 is available for the current user ${current_user}."
+          else
+            echo -e "[ -INFO- ] The app $3 is not available for the current user ${current_user}"
+          fi
+          exit 0
+        fi
+      fi
+    fi
   else
-    echo -e "[ FATAL: ] Unknown software. Please run 'hpcmgr install list' command to show all currently available software."
-    echo -e "[ -INFO- ] If your software is not in the list, please describe your requirements and send email to info@hpc-now.com."
-    echo -e "[ -INFO- ] Exit now."
+    echo -e "[ FATAL: ] Invalid applist sub-commands. Valid commands: avail, check."
+    exit 36
   fi
-fi  
-time1=$(date)
-echo -e  "End Time: ${time1}\n" >> ${logfile}
+elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
+  app_tmp_log_root="/tmp/app_tmp_logs/"
+  mkdir -p ${app_tmp_log_root} && chmod -R 777 ${app_tmp_log_root}
+  if [ -z "$2" ]; then
+    echo -e "[ -INFO- ] Please specify an app to $1 ."
+    exit 37
+  fi
+  if [ $1 = 'install' ] || [ $1 = 'build' ]; then
+    curl -s ${url_instscripts_root}_app_list.txt | grep "< ${2} >" >> /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      echo -e "[ FATAL: ] The software ${2} is not in the store. Exit now."
+      exit 39
+    fi
+    grep "< $2 >" $public_app_registry >> /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
+      exit 0
+    else
+      grep "< $2 > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
+        exit 0
+      fi
+    fi
+  else
+    if [ $current_user = 'root' ]; then
+      grep "< $2 >" $public_app_registry >> /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        echo -e "[ -INFO- ] This app has not been installed to all users."
+        exit 4
+      fi
+    else
+      grep "< $2 > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        echo -e "[ -INFO- ] This app has not been installed to the current user."
+        exit 4
+      fi
+    fi
+  fi
+  app_tmp_log="${app_tmp_log_root}${current_user}_${1}_${2}.log"
+  touch ${app_tmp_log} && chmod 644 ${app_tmp_log}
+  curl -s ${url_instscripts_root}${2}.sh | bash -s $1 ${app_tmp_log}
+  exit 0
+elif [ $1 = 'submit' ]; then
+  if [ -z $2 ]; then
+    job_info_tmp="/tmp/job_submit_info_${current_user}.tmp"
+  else
+    job_info_tmp=$2
+  fi
+  if [ ! -f ${job_info_tmp} ]; then
+    echo -e "[ FATAL: ] Job submit info file $2 is absent. Exit now."
+    exit 51
+  fi
+  app_name=`grep "App Name" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  job_nodes=`grep "Job Nodes" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  cores_per_node=`grep "Cores Per Node" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  total_cores=`grep "Total Cores" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  job_name=`grep "Job Name" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  duration_hours=`grep "Duration Hours" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  job_exec=`grep "Job Executable" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  data_directory=`grep "Data Directory" ${job_info_tmp} | awk -F"::" '{print $2}'`
+  if [ ! -d ${data_directory} ]; then
+    echo -e "[ FATAL: ] Failed to find/open the Data Directory: ${data_directory}. Exit now."
+    exit 53
+  fi
+  echo -e '#!/bin/bash' > ${data_directory}/job_submit.sh
+  echo -e "#SBATCH --account=hpc_users\n#SBATCH --cluster=cluster\n#SBATCH --partition=debug" >> ${data_directory}/job_submit.sh
+  echo -e "#SBATCH --nodes=${job_nodes}\n#SBATCH --ntasks-per-node=${cores_per_node}" >> ${data_directory}/job_submit.sh
+  echo -e "#SBATCH --job-name=${job_name}\n#SBATCH --output=output.%j.${job_name}.out" >> ${data_directory}/job_submit.sh
+  echo -e "#SBATCH --time=${duration_hours}:00:00\n" >> ${data_directory}/job_submit.sh
+  echo -e "mpirun -np ${total_cores} -bind-to numa ${job_exec} -parallel > ${data_directory}/${job_name}_run.log 2>&1" >> ${data_directory}/job_submit.sh
+  cd ${data_directory}
+  grep "< ${app_name} >" $public_app_registry >> /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    app_env=`grep ${app_name}.env /etc/profile | awk -F"'" '{print $2}' | awk '{print $2}'`
+  else
+    app_env=`grep ${app_name}.env ${HOME}/.bashrc | awk -F"'" '{print $2}'| awk '{print $2}'`
+  fi
+  source ${app_env}
+  if [ $? -ne 0 ]; then
+    echo -e "[ FATAL: ] Failed to load the running environment for ${app_name}. Exit now."
+    exit 55
+  fi
+  sbatch job_submit.sh
+  if [ $? -eq 0 ]; then
+    echo -e "[ -INFO- ] Job submitted successfully. Console output: ${data_directory}/${job_name}_run.log ."
+    exit 0
+  else
+    echo -e "[ -INFO- ] Failed to submit the job."
+    exit 55
+  fi
+else
+  echo -e "[ FATAL ] The command $1 is invalid."
+  help_info
+  exit 3
+fi

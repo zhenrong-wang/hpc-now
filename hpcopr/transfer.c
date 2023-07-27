@@ -124,6 +124,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char cluster_name_flag_tmp[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp_2[FILENAME_LENGTH]="";
+    char filename_temp_3[FILENAME_LENGTH]="";
     char username_temp[USERNAME_LENGTH_MAX]="";
     char username_temp_2[USERNAME_LENGTH_MAX]="";
     char* password_temp;
@@ -155,7 +156,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
 
     get_workdir(workdir,cluster_name);
     if(strlen(user_list)==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the username(s) to be exported. i.e. " HIGH_CYAN_BOLD "user1:user2.\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the username(s) to be exported. i.e. " HIGH_CYAN_BOLD "user1:user2." RESET_DISPLAY "\n");
         hpc_user_list(workdir,crypto_keyfile,0);
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
@@ -174,7 +175,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     else{
         export_user_num=user_list_check(cluster_name,user_list_buffer,real_user_list,&user1_flag);
         if(export_user_num==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The specified user list is invalid. Exit now.\n" RESET_DISPLAY);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The specified user list is invalid. Exit now." RESET_DISPLAY "\n");
             return -1;
         }
         if(user1_flag==1&&strcmp(admin_flag,"admin")==0){
@@ -197,7 +198,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     password_hash(real_password,md5sum_trans);
     local_path_parser(export_target_file,filename_temp);
     if(strlen(filename_temp)==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a path (folder or file) to export. i.e. " HIGH_CYAN_BOLD "/home/hpc-now/\n" RESET_DISPLAY);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a path (folder or file) to export. i.e. " HIGH_CYAN_BOLD "/home/hpc-now/" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
         scanf("%s",filename_temp_2);
@@ -236,7 +237,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     sprintf(cluster_name_flag_tmp,"%s%scluster_name_flag.txt.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
     file_p=fopen(cluster_name_flag,"w+");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create cluster name flag file. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create cluster name flag file. Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,tmp_root,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return -5;
@@ -285,8 +286,13 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
             }
 next_user:
             fclose(file_p);
-            sprintf(cmdline,"%s %s%s%s.key %s%s %s",COPY_FILE_CMD,current_sshdir,PATH_SLASH,username_temp,tmp_sshdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            sprintf(filename_temp_3,"%s%s%s.key",current_sshdir,PATH_SLASH,username_temp);
+            sprintf(cmdline,"%s %s %s%s %s",COPY_FILE_CMD,filename_temp_3,tmp_sshdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
+            sprintf(filename_temp_3,"%s%s%s.key",tmp_sshdir,PATH_SLASH,username_temp);
+//            printf("%s ----\n%s .......\n",filename_temp,md5sum_trans);
+//            printf("%s .......\n",md5sum_trans);
+            encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp_3,md5sum_trans);
         }while(strlen(username_temp)!=0);
         fclose(file_p_tmp);
     }
@@ -297,13 +303,13 @@ next_user:
             system(cmdline);
         }
         else{
-            printf(WARN_YELLO_BOLD "[ -WARN- ] The admin file is missing. Root/Admin privilege is disabled.\n" RESET_DISPLAY);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The admin file is missing. Root/Admin privilege is disabled." RESET_DISPLAY "\n");
         }
         sprintf(cmdline,"%s %s%sroot.key %s%s %s",COPY_FILE_CMD,current_sshdir,PATH_SLASH,tmp_sshdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     else{
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Not exporting Root/Admin privilege.\n" RESET_DISPLAY);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Not exporting Root/Admin privilege." RESET_DISPLAY "\n");
     }
     sprintf(cmdline,"%s %s%scloud_flag.flg %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -314,7 +320,7 @@ next_user:
     sprintf(filename_temp,"%s%sterraform.tfstate",tmp_stackdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create cluster state flag file. Exit now.\n" RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create cluster state flag file. Exit now." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,tmp_root,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         delete_decrypted_files(workdir,crypto_keyfile);
@@ -492,8 +498,12 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile){
     }
     
     sprintf(cluster_sshkey_dir,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,cluster_name_buffer);
-    sprintf(filename_temp,"%s%sroot.key",cluster_sshkey_dir,PATH_SLASH);
+    sprintf(filename_temp,"%s%sroot.key.tmp",cluster_sshkey_dir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
+        decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(filename_temp,"%s%sroot.key",cluster_sshkey_dir,PATH_SLASH);
         activate_sshkey(filename_temp);
         admin_flag=1;
     }
@@ -507,9 +517,14 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile){
     while(!feof(file_p)){
         fgetline(file_p,user_line_buffer);
         get_seq_string(user_line_buffer,' ',2,username_temp);
+        sprintf(filename_temp_2,"%s%s%s.key.tmp",cluster_sshkey_dir,PATH_SLASH,username_temp);
+        decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp_2,md5sum);
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp_2,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
         sprintf(filename_temp_2,"%s%s%s.key",cluster_sshkey_dir,PATH_SLASH,username_temp);
         activate_sshkey(filename_temp_2);
     }
+    fclose(file_p);
     delete_decrypted_files(workdir,crypto_keyfile);
     create_and_get_stackdir(workdir,stackdir);
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);

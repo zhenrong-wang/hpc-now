@@ -21,7 +21,7 @@ int activate_sshkey(char* ssh_privkey);
 void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir);
 void create_and_get_vaultdir(char* workdir, char* vaultdir);
 int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes);
-int remote_exec_general(char* workdir, char* sshkey_folder, char* remote_user, char* commands, int delay_minutes, int silent_flag);
+int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char* commands, char* extra_options, int delay_minutes, int silent_flag, char* std_redirect, char* err_redirect);
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag);
 int get_cpu_num(const char* vm_model);
 int get_compute_node_num(char* currentstate_file, char* option);
