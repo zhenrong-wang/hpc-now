@@ -45,7 +45,7 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "envcheck" RESET_DISPLAY "    :~ Quickly check the running environment.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ I    . Multi-Cluster Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ I    . Multi-Cluster Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"new-cluster")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "new-cluster" RESET_DISPLAY " :~ Create a new cluster to initialize.\n");
@@ -94,7 +94,7 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "exit-current" RESET_DISPLAY ":~ Exit the current cluster.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ II   . Global Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ II   . Global Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"help")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "help" RESET_DISPLAY "        :~ Show this page and the information here.\n");
@@ -148,7 +148,7 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "resetloc" RESET_DISPLAY "    :~ Reset to the default locations.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ III  . Cluster Initialization: " RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ III  . Cluster Initialization: " RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"new-keypair")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "new-keypair" RESET_DISPLAY " :~ *Rotate* a new keypair for an existing cluster. The new keypair\n");
@@ -186,7 +186,7 @@ void print_help(char* cmd_name){
         printf("|   --all             ~ All the nodes above + nat node.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ IV   . Cluster Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ IV   . Cluster Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"vault")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "vault" RESET_DISPLAY "       :~ Check the sensitive information of the current cluster.\n");
@@ -206,7 +206,7 @@ void print_help(char* cmd_name){
         printf("|    -d   EXPORT_DEST  ~ Export the log to a specified folder or file.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ V  . Cluster Operation:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ V  . Cluster Operation:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"delc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "delc" RESET_DISPLAY "        :~ Delete specified compute nodes:\n");
@@ -261,31 +261,31 @@ void print_help(char* cmd_name){
         printf("|   --month       ~ Switch to Monthly-pay method.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ VI   . Cluster User Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ VI   . Cluster User Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"userman")==0||strcmp(cmd_name,"all")==0){
         print_usrmgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ VII  . Cluster Data Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ VII  . Cluster Data Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"dataman")==0||strcmp(cmd_name,"all")==0){
         print_datamgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ VIII . Cluster App Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ VIII . Cluster App Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"appman")==0||strcmp(cmd_name,"all")==0){
         print_appmgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ IX   . Cluster Job Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ IX   . Cluster Job Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"jobman")==0||strcmp(cmd_name,"all")==0){
         print_jobmgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ X    . Others:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ X    . Others:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"about")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       :~ About this software and HPC-NOW project.\n");
