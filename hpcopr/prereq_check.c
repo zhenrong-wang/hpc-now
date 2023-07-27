@@ -2,7 +2,7 @@
  * This code is written and maintained by Zhenrong WANG
  * mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
  * The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
- * This code is distributed under the license: GNU Public License - v2.0
+ * This code is distributed under the license: MIT License
  * Bug report: info@hpc-now.com
  */
 
@@ -195,11 +195,13 @@ awscli:
     sprintf(filename_temp_zip,"%s%sawscliv2.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         printf("|          Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        sprintf(cmdline,"%s %s%saws* %s",DELETE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
         if(file_exist_or_not(filename_temp_zip)!=0){
             sprintf(cmdline,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/3." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/3." RESET_DISPLAY "\n");
                 }
                 return 1;
             }
@@ -208,16 +210,17 @@ awscli:
         system(cmdline);
         sprintf(cmdline,"/tmp/aws/install -i %s%sawscli -b %s %s",NOW_BINARY_DIR,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
+        printf(RESET_DISPLAY);
     }
 #elif __APPLE__
     sprintf(filename_temp_zip,"%s%sAWSCLIV2.pkg",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf("[ -INFO- ] Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf("|          Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
             sprintf(cmdline,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/3." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/3." RESET_DISPLAY "\n");
                 }
                 return 1;
             }
@@ -226,7 +229,7 @@ awscli:
             FILE* file_p=fopen("/tmp/choices.xml","w+");
             if(file_p==NULL){
                 if(silent_flag!=0){
-                    printf(FATAL_RED_BOLD "[ FATAL: ] File I/O error. Failed to create tmp files.t" RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] File I/O error. Failed to create tmp files.t" RESET_DISPLAY "\n");
                 }
                 return -1;
             }
@@ -241,12 +244,12 @@ awscli:
             system(cmdline);
             int i=0;
             while(file_exist_or_not("/Applications/aws-cli/aws")!=0||file_exist_or_not("/Applications/aws-cli/aws_completer")!=0){
-                printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
+                printf(RESET_DISPLAY GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
                 fflush(stdout);
                 i++;
                 sleep(1);
                 if(i==120){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
                     return 1;
                 }
             }
@@ -258,6 +261,7 @@ awscli:
         system(cmdline);
         sprintf(cmdline,"ln -s %s%saws-cli%saws_completer %s%saws_completer %s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
+        printf(RESET_DISPLAY);
     }
 #elif _WIN32
     if(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
