@@ -34,6 +34,7 @@ function add_a_user() {
   ssh-keygen -t rsa -N '' -f /home/$1/.ssh/id_rsa -q
   cat /home/$1/.ssh/id_rsa.pub >> /home/$1/.ssh/authorized_keys
   cat /etc/now-pubkey.txt >> /home/$1/.ssh/authorized_keys
+  rm -rf /home/$1/.ssh/id_rsa.pub
   mkdir -p /home/$1/Desktop
   cp -r /root/Desktop/*.desktop /home/$1/Desktop/
   mkdir -p /hpc_data/${1}_data

@@ -147,6 +147,7 @@ do
     ssh-keygen -t rsa -N '' -f /home/${user_name}/.ssh/id_rsa -q
     cat /home/${user_name}/.ssh/id_rsa.pub >> /home/${user_name}/.ssh/authorized_keys
     cat /etc/now-pubkey.txt >> /home/${user_name}/.ssh/authorized_keys
+    rm -rf /home/${user_name}/.ssh/id_rsa.pub
     mkdir -p /hpc_data/${user_name}_data
     mkdir -p /hpc_apps/${user_name}_apps
     mkdir -p /hpc_apps/envmod/${user_name}_env
