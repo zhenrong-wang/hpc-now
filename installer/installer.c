@@ -133,9 +133,13 @@ int license_confirmation(void){
     char cmdline[CMDLINE_LENGTH]="";
     char confirmation[64]="";
     printf("\n");
+#ifdef _WIN32
+    sprintf(cmdline,"curl -s %s",URL_LICENSE);
+#else
     sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please read the following important information before continuing.\n");
     printf("|          You can press 'Enter' to continue reading, or press 'q' to quit reading.\n");
+#endif
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently the installer failed to download or print out the license.\n");
         printf("|          Please double check your internet connectivity and retry. If this issue\n");
