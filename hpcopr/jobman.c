@@ -231,6 +231,7 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
     fprintf(file_p,"Job Executable ::%s\n",job_info->job_exec);
     fprintf(file_p,"Data Directory ::%s\n",job_info->job_data);
     fclose(file_p);
+    file_cr_clean(filename_temp);
     sprintf(remote_filename_temp,"/tmp/job_submit_info_%s.tmp",user_name);
     remote_copy(workdir,sshkey_dir,filename_temp,remote_filename_temp,user_name,"put","",0);
     sprintf(remote_commands,"hpcmgr submit %s",remote_filename_temp);
