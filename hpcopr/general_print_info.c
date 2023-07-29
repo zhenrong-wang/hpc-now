@@ -45,7 +45,7 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "envcheck" RESET_DISPLAY "    :~ Quickly check the running environment.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ I    . Multi-Cluster Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ I    . Multi-Cluster Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"new-cluster")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "new-cluster" RESET_DISPLAY " :~ Create a new cluster to initialize.\n");
@@ -94,7 +94,7 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "exit-current" RESET_DISPLAY ":~ Exit the current cluster.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ II   . Global Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ II   . Global Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"help")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "help" RESET_DISPLAY "        :~ Show this page and the information here.\n");
@@ -148,7 +148,7 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "resetloc" RESET_DISPLAY "    :~ Reset to the default locations.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ III  . Cluster Initialization: " RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ III  . Cluster Initialization: " RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"new-keypair")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "new-keypair" RESET_DISPLAY " :~ *Rotate* a new keypair for an existing cluster. The new keypair\n");
@@ -186,7 +186,7 @@ void print_help(char* cmd_name){
         printf("|   --all             ~ All the nodes above + nat node.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ IV   . Cluster Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ IV   . Cluster Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"vault")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "vault" RESET_DISPLAY "       :~ Check the sensitive information of the current cluster.\n");
@@ -206,7 +206,7 @@ void print_help(char* cmd_name){
         printf("|    -d   EXPORT_DEST  ~ Export the log to a specified folder or file.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ V  . Cluster Operation:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ V  . Cluster Operation:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"delc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "delc" RESET_DISPLAY "        :~ Delete specified compute nodes:\n");
@@ -261,31 +261,31 @@ void print_help(char* cmd_name){
         printf("|   --month       ~ Switch to Monthly-pay method.\n");
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ VI   . Cluster User Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ VI   . Cluster User Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"userman")==0||strcmp(cmd_name,"all")==0){
         print_usrmgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ VII  . Cluster Data Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ VII  . Cluster Data Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"dataman")==0||strcmp(cmd_name,"all")==0){
         print_datamgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ VIII . Cluster App Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ VIII . Cluster App Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"appman")==0||strcmp(cmd_name,"all")==0){
         print_appmgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ IX   . Cluster Job Management:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ IX   . Cluster Job Management:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"jobman")==0||strcmp(cmd_name,"all")==0){
         print_jobmgr_info();
     }
     if(strcmp(cmd_name,"all")==0){
-        printf(GENERAL_BOLD "+ X    . Others:" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "\n+ X    . Others:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"about")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "about" RESET_DISPLAY "       :~ About this software and HPC-NOW project.\n");
@@ -312,7 +312,7 @@ void print_header(void){
     time_p=localtime(&current_time_long);
     printf(GENERAL_BOLD "|   /HPC->  Welcome to HPC-NOW Cluster Operator! Version: %s\n",CORE_VERSION_CODE);
     printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd     LICENSE: MIT\n" RESET_DISPLAY "\n");
+    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd  LICENSE: MIT\n" RESET_DISPLAY "\n");
 }
 
 void print_tail(void){
@@ -349,8 +349,13 @@ void print_about(void){
 int read_license(char* option){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    sprintf(filename_temp,"%s%sGPL-2",NOW_LIC_DIR,PATH_SLASH);
+    sprintf(filename_temp,"%s%sMIT.LICENSE",NOW_LIC_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
+#ifdef _WIN32
+        sprintf(cmdline,"notepad %s",filename_temp);
+        system(cmdline);
+        return 0;
+#else
         if(strcmp(option,"print")==0){
             sprintf(cmdline,"%s %s",CAT_FILE_CMD,filename_temp);
         }
@@ -359,25 +364,22 @@ int read_license(char* option){
         }
         system(cmdline);
         return 0;
+#endif
     }
+#ifdef _WIN32
+    sprintf(cmdline,"curl -s %s",URL_LICENSE);
+    system(cmdline);
+    return 0;
+#else
     if(strcmp(option,"print")==0){
         sprintf(cmdline,"curl -s %s",URL_LICENSE);
     }
     else{
         sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
     }
-    if(system(cmdline)!=0){
-        if(strcmp(option,"print")==0){
-            sprintf(cmdline,"curl -s %s",URL_LICENSE_FSF);
-        }
-        else{
-            sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
-        }
-        if(system(cmdline)!=0){
-            return 1;
-        }
-    }
+    system(cmdline);
     return 0;
+#endif
 }
 
 void print_usrmgr_info(void){

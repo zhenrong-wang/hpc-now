@@ -34,6 +34,8 @@ function add_a_user() {
   ssh-keygen -t rsa -N '' -f /home/$1/.ssh/id_rsa -q
   cat /home/$1/.ssh/id_rsa.pub >> /home/$1/.ssh/authorized_keys
   cat /etc/now-pubkey.txt >> /home/$1/.ssh/authorized_keys
+  rm -rf /home/$1/.ssh/id_rsa.pub
+  mkdir -p /home/$1/Desktop
   cp -r /root/Desktop/*.desktop /home/$1/Desktop/
   mkdir -p /hpc_data/${1}_data
   chmod -R 750 /hpc_data/${1}_data
@@ -691,6 +693,7 @@ elif [ $1 = 'submit' ]; then
     echo -e "[ FATAL: ] Job submit info file $2 is absent. Exit now."
     exit 51
   fi
+  dos2unix ${job_info_tmp}
   app_name=`grep "App Name" ${job_info_tmp} | awk -F"::" '{print $2}'`
   job_nodes=`grep "Job Nodes" ${job_info_tmp} | awk -F"::" '{print $2}'`
   cores_per_node=`grep "Cores Per Node" ${job_info_tmp} | awk -F"::" '{print $2}'`

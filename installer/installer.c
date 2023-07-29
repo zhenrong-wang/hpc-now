@@ -132,18 +132,21 @@ int check_current_user_root(void){
 int license_confirmation(void){
     char cmdline[CMDLINE_LENGTH]="";
     char confirmation[64]="";
+    printf("\n");
+#ifdef _WIN32
+    sprintf(cmdline,"curl -s %s",URL_LICENSE);
+#else
     sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please read the following important information before continuing.\n");
     printf("|          You can press 'Enter' to continue reading, or press 'q' to quit reading.\n");
+#endif
     if(system(cmdline)!=0){
-        sprintf(cmdline,"curl -s %s | more",URL_LICENSE_FSF);
-        if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Currently the installer failed to download or print out the license.\n");
-            printf("|          Please double check your internet connectivity and retry. If this issue\n");
-            printf("|          still occurs, please report to us via info@hpc-now.com . Exit now." RESET_DISPLAY "\n");
-            return 1;
-        }
+        printf(FATAL_RED_BOLD "[ FATAL: ] Currently the installer failed to download or print out the license.\n");
+        printf("|          Please double check your internet connectivity and retry. If this issue\n");
+        printf("|          still occurs, please report to us via info@hpc-now.com . Exit now." RESET_DISPLAY "\n");
+        return 1;
     }
+    printf("\n");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " If you accept the terms and conditions above, please input 'accept',\n");
     printf("|          If you do not accept, this installation will exit immediately.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please input ( case-sensitive ): ");
@@ -397,7 +400,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
         system("net user hpc-now /delete > nul 2>&1");
         return -1;
     }
-    sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\GPL-2",URL_LICENSE);
+    sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE",URL_LICENSE);
     system(cmdline1);
     system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
@@ -458,7 +461,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating other key running directories ...\n");
     system("mkdir -p /home/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
     system("mkdir -p /usr/.hpc-now/.now-ssh/ >> /dev/null 2>&1");
-    sprintf(cmdline1,"curl -s %s -o /home/hpc-now/hpc-now.licenses/GPL-2",URL_LICENSE);
+    sprintf(cmdline1,"curl -s %s -o /home/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
     system(cmdline1);
     system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /home/hpc-now >> /dev/null 2>&1");
@@ -507,7 +510,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating other key running directories ...\n");
     system("mkdir -p /Users/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
     system("mkdir -p /Applications/.hpc-now/.now-ssh/ >> /dev/null 2>&1");
-    sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/GPL-2",URL_LICENSE);
+    sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
     system(cmdline1);
     system("mkdir -p '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chmod -R 755 '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chown -R hpc-now:hpc-now '/Library/Application Support/io.terraform' >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Users/hpc-now >> /dev/null 2>&1");
@@ -763,8 +766,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
 #ifdef _WIN32
     system("mkdir c:\\hpc-now\\hpc-now.licenses > nul 2>&1");
-    if(file_exist_or_not("C:\\hpc-now\\hpc-now.licenses\\GPL-2")!=0){
-        sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\GPL-2",URL_LICENSE);
+    if(file_exist_or_not("C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE")!=0){
+        sprintf(cmdline1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE",URL_LICENSE);
         system(cmdline1);
     }
     system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
@@ -793,8 +796,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     printf("\n");
 #elif __linux__
     system("mkdir -p /home/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
-    if(file_exist_or_not("/home/hpc-now/hpc-now.licenses/GPL-2")!=0){
-        sprintf(cmdline1,"curl -s %s -o /home/hpc-now/hpc-now.licenses/GPL-2",URL_LICENSE);
+    if(file_exist_or_not("/home/hpc-now/hpc-now.licenses/MIT.LICENSE")!=0){
+        sprintf(cmdline1,"curl -s %s -o /home/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
         system(cmdline1);
     }
     system("chown -R hpc-now:hpc-now /home/hpc-now >> /dev/null 2>&1");
@@ -813,8 +816,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system(cmdline1);
 #elif __APPLE__
     system("mkdir -p /Users/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
-    if(file_exist_or_not("/Users/hpc-now/hpc-now.licenses/GPL-2")!=0){
-        sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/GPL-2",URL_LICENSE);
+    if(file_exist_or_not("/Users/hpc-now/hpc-now.licenses/MIT.LICENSE")!=0){
+        sprintf(cmdline1,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
         system(cmdline1);
     }
     system("chown -R hpc-now:hpc-now /Users/hpc-now >> /dev/null 2>&1");

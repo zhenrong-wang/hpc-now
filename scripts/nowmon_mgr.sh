@@ -21,7 +21,7 @@ for i in $(seq 1 $NODE_NUM)
 do
     flag=`cat $statefile | grep compute${i}_status | awk '{print $2}'`
     if [ $flag = 'Running' ] || [ $flag = 'running' ] || [ $flag = 'RUNNING' ]; then
-        ssh compute$i ". /usr/hpc-now/nowmon_agt.sh"
+        ssh compute$i "bash /usr/hpc-now/nowmon_agt.sh"
         cat /hpc_data/cluster_data/mon_data_compute$i.csv >> $cluster_mon_data
 	    idle_cores_i=`awk -F"," '{print $12}' /hpc_data/cluster_data/mon_data_compute$i.csv`
         low_cores_i=`awk -F"," '{print $13}' /hpc_data/cluster_data/mon_data_compute$i.csv`
@@ -37,4 +37,3 @@ total_nodes=`grep total_compute_nodes: $statefile | awk '{print $2}'`
 running_cores=$((node_cores*running_nodes))
 total_cores=$((node_cores*total_nodes))
 echo -e "|          Date Time: $date_time\tTotal|Running|*IDLE|~LOW Cores : ${total_cores}|${running_cores}|*${idle_cores}|~${low_cores}" >> $cluster_core_summary
-rm -rf /hpc_data/cluster_data/mon_data_compute*
