@@ -164,6 +164,7 @@ else
 fi
 export MPI_ARCH_INC="-I$MPI_ROOT/include"
 export MPI_ARCH_LIBS="-L$MPI_ROOT/lib -lmpi"
+echo $MPI_ROOT $MPI_ARCH_FLAGS $MPI_ARCH_INC $MPI_ARCH_LIBS
 if [ ! -f ${of_cache}OpenFOAM-7/etc/config.sh/settings-orig ]; then
   cp ${of_cache}OpenFOAM-7/etc/config.sh/settings ${of_cache}OpenFOAM-7/etc/config.sh/settings-orig
 else
@@ -187,7 +188,7 @@ fi
 if [ $gcc_vnum -gt 10 ]; then
   cat /proc/cpuinfo | grep "model name" | grep "AMD EPYC"  >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
-    cpu_model=`cat /proc/cpuinfo | grep "model name" | grep "AMD EPYC" | head -n1`
+    cpu_model=`cat /proc/cpuinfo | grep "model name" | grep "AMD EPYC" | head -n1 | awk '{print $6}'`
     cpu_gen=${cpu_model: -1}
     if [ $cpu_gen = '3' ]; then
       line1=`sed = ${of_cache}OpenFOAM-7/etc/config.sh/settings | sed 'N;s/\n/:/' | sed -n '/x86_64)/,+20p' | grep CFLAGS | tail -n1 | awk '{print $1}' | awk -F":" '{print $1}'`
@@ -207,7 +208,7 @@ if [ $gcc_vnum -gt 10 ]; then
   fi
 fi
 sed -i 's/export WM_MPLIB=SYSTEMOPENMPI/export WM_MPLIB=SYSTEMMPI/g' ${of_cache}OpenFOAM-7/etc/bashrc
-. ${of_cache}OpenFOAM-7/etc/bashrc
+source ${of_cache}OpenFOAM-7/etc/bashrc
 echo -e "[ -INFO- ] Building OpenFOAM in progress ... It takes really long time (for example, 2.5 hours with 8 vCPUs)"
 echo -e "[ -INFO- ] Please check the log files: Build_OF7.log."
 nohup ${of_cache}OpenFOAM-7/Allwmake -j$num_processors > ${of_cache}Build_OF7.log 2>&1
