@@ -693,6 +693,7 @@ elif [ $1 = 'submit' ]; then
     echo -e "[ FATAL: ] Job submit info file $2 is absent. Exit now."
     exit 51
   fi
+  dos2unix ${job_info_tmp}
   app_name=`grep "App Name" ${job_info_tmp} | awk -F"::" '{print $2}'`
   job_nodes=`grep "Job Nodes" ${job_info_tmp} | awk -F"::" '{print $2}'`
   cores_per_node=`grep "Cores Per Node" ${job_info_tmp} | awk -F"::" '{print $2}'`
