@@ -8,10 +8,17 @@
 
 
 /* 
- * Port: 19885
+ * Default Port: 19885
+ *
  * Socket API Format: 
+ * API_CLIENT_EXEC hpcopr_cmd args ...
+ * Example: ./myhpcopr graph -c test0001
  * 
+ * Server Init Format:
+ * SERVER_EXEC (Optional)--client-io (Optional)port_number(10001~65535)
+ * Example: ./myserver --client-io 25535
  * 
+ * Press Ctrl+C to exit the server.
  */
 
 #include <stdio.h>
