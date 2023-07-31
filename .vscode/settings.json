@@ -21,7 +21,10 @@
         "components.h": "c",
         "prereq_check.h": "c",
         "unistd.h": "c",
-        "cmath": "c"
+        "cmath": "c",
+        "types.h": "c",
+        "socket.h": "c",
+        "in.h": "c"
     },
     "C_Cpp.dimInactiveRegions": true
 }

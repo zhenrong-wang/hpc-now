@@ -17,7 +17,7 @@ if [ ! -n "$1" ]; then
 	echo -e "[ -DONE- ] Exit now."
     exit 1
 elif [ "$1" = "build" ]; then
-    echo -e "[ START: ] Building the binaries now (including hpcmgr) ..."
+    echo -e "[ START: ] Building the binaries now (including hpcmgr and now-server) ..."
     mkdir -p ./build
     rm -rf ./build/*
     gcc ./hpcopr/*.c -Wall -lm -o ./build/hpcopr-lin-${hpcopr_version_code}.exe
@@ -29,6 +29,7 @@ elif [ "$1" = "build" ]; then
 #    gcc ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto-lin.exe
     gcc ./now-crypto/now-crypto-v2.c -Wall -lm -o ./build/now-crypto-lin.exe
     gcc ./hpcmgr/hpcmgr.c -Wall -lm -o ./build/hpcmgr.exe
+    gcc ./now-server/now-server.c -Wall -o ./build/now-server.exe
     chmod +x ./build/*
     mv ./installer/libgfuncs.a ./build/
 elif [ "$1" = "delete" ]; then
