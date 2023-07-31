@@ -78,4 +78,4 @@ if [ $current_user = 'root' ]; then
 else
   echo -e "< gcc9 > < ${current_user} >" >> $private_app_registry
 fi
-echo -e "# $time_current GCC-9.5.0 has been built." >> ${logfile}
+echo -e "# $time_current GCC-9.5.0 has been built."
