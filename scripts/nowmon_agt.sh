@@ -55,16 +55,16 @@ do
     else
         cpu_j=`cat $mon_cores | grep Cpu$j | awk -F"C" '{print $3}' | awk '{print $3}'`
     fi
-    if [ $cpu_j = 0.0 ]; then
+    if [ "$cpu_j" = '0.0' ]; then
         ((idle_cores++))
-    elif [ $cpu_j = 100.0 ]; then
+    elif [ "$cpu_j" = '100.0' ]; then
         ((full_cores++))
     else
-        if [ `expr $cpu_j \< $low_flag` -eq 0 ]; then
+        if [ `expr "$cpu_j" \< $low_flag` -eq 0 ]; then
             ((low_cores++))
-        elif [ `expr $cpu_j \< $mid_flag` -eq 0 ]; then
+        elif [ `expr "$cpu_j" \< $mid_flag` -eq 0 ]; then
             ((mid_low_cores++))
-        elif [ `expr $cpu_j \< $high_flag` -eq 0 ]; then
+        elif [ `expr "$cpu_j" \< $high_flag` -eq 0 ]; then
             ((mid_high_cores++))
         else
             ((high_cores++))

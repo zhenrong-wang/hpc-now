@@ -73,8 +73,8 @@ make install >> ${2}
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "#%Module1.0\nprepend-path PATH ${app_root}gcc-12.1.0/bin\nprepend-path LD_LIBRARY_PATH ${app_root}gcc-12.1.0/lib64\n" > ${envmod_root}gcc-12.1.0
 if [ $current_user = 'root' ]; then
-  echo -e "< gcc9 >" >> $public_app_registry
+  echo -e "< gcc12 >" >> $public_app_registry
 else
-  echo -e "< gcc9 > < ${current_user} >" >> $private_app_registry
+  echo -e "< gcc12 > < ${current_user} >" >> $private_app_registry
 fi
 echo -e "[ STEP 4 ] $time_current Comgratulations! GCC-12.1.0 has been built."
