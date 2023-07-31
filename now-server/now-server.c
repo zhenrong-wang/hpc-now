@@ -19,13 +19,15 @@
 #define BUFFER_SIZE 1024
 #define CMDLINE_LENGTH 2048
 
+#define SERVER_VERSION_CODE "0.2.0.0001"
+
 int main(int argc, char* argv[]){
     int socket_fd,connect_fd;
     int socket_opt_val=1;
     struct sockaddr_in server_address;
     char buffer[BUFFER_SIZE]="";
     char cmdline[CMDLINE_LENGTH]="";
-
+    printf("[ -INFO- ] Module: HPC-NOW Server (Port: %d) -+- Version: %s\n",DEFAULT_PORT,SERVER_VERSION_CODE);
     if(system("whoami | grep -w hpc-now >> /dev/null 2>&1")!=0){
         printf("[ FATAL: ] Please run this service as the OS user 'hpc-now'.\n");
         return 127;
