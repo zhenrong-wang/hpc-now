@@ -47,6 +47,27 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ $1 = 'install' ]; then
+  echo -e "[ -INFO- ] Downloading the prebuilt package ..."
+  if [ ! -f ${app_cache}gcc9.tar.gz ]; then
+    wget ${url_pkgs}prebuilds-9/gcc9.tar.gz -O ${app_cache}gcc9.tar.gz -o ${2}
+  fi
+  echo -e "[ -INFO- ] Extracting the binaries and libraries ..."
+  tar zvxf ${app_cache}gcc9.tar.gz -C ${app_root} >> ${2}
+  if [ $? -ne 0 ]; then
+    echo -e "[ FATAL: ] Failed to install GCC-9.5.0. Please check the log file for details. Exit now."
+    exit 1
+  fi
+  echo -e "#%Module1.0\nprepend-path PATH ${app_root}gcc-9.5.0/bin\nprepend-path LD_LIBRARY_PATH ${app_root}gcc-9.5.0/lib64\n" > ${envmod_root}gcc-9.5.0
+  if [ $current_user = 'root' ]; then
+    echo -e "< gcc9 >" >> $public_app_registry
+  else
+    echo -e "< gcc9 > < ${current_user} >" >> $private_app_registry
+  fi
+  echo -e "[ -DONE- ] GCC-9.5.0 has been installed."
+  exit 0
+fi
+
 unset LIBRARY_PATH #Only for gcc, we have to do this
 unset LD_LIBRARY_PATH
 unset CPATH

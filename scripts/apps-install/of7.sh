@@ -135,6 +135,55 @@ if [ $? -ne 0 ]; then
 fi
 echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 
+if [ $1 = 'install' ]; then
+  echo -e "[ -INFO- ] Downloading the prebuilt package ..."
+  if [ ! -f ${of_cache}of7.tar.gz ]; then
+    wget ${url_pkgs}prebuilds-9/of7.tar.gz -O ${of_cache}of7.tar.gz -o ${2}
+  fi
+  echo -e "[ -INFO- ] Extracting the binaries and libraries ..."
+  tar zvxf ${of_cache}of7.tar.gz -C ${of_cache} >> ${2}
+  if [ $? -ne 0 ]; then
+    echo -e "[ FATAL: ] Failed to install OpenFOAM-7. Please check the log file for details. Exit now."
+    exit 1
+  fi
+  echo -e "[ -INFO- ] Copying files ..."
+  rsync -a --info=progress2 ${of_cache} ${of_root}
+  export MPI_ROOT=${mpi_root}
+  echo "${mpi_env}" | grep ompi >> /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    export MPI_ARCH_FLAGS="-DOMPI_SKIP_MPICXX"
+  else
+    export MPI_ARCH_FLAGS="-DMPICH_SKIP_MPICXX"
+  fi
+  export MPI_ARCH_INC="-I$MPI_ROOT/include"
+  export MPI_ARCH_LIBS="-L$MPI_ROOT/lib -lmpi"
+  echo -e "#! /bin/bash\nmodule purge" > ${of_root}of7.sh
+  echo -e "export MPI_ROOT=\"${MPI_ROOT}\"" >> ${of_root}of7.sh
+  echo -e "export MPI_ARCH_FLAGS=\"${MPI_ARCH_FLAGS}\"" >> ${of_root}of7.sh
+  echo -e "export MPI_ARCH_INC=\"${MPI_ARCH_INC}\"" >> ${of_root}of7.sh
+  echo -e "export MPI_ARCH_LIBS=\"${MPI_ARCH_LIBS}\"" >> ${of_root}of7.sh
+  echo -e "module load ${mpi_env}" >> ${of_root}of7.sh
+  if [ $systemgcc = 'false' ]; then
+    echo -e "module load ${gcc_env}" >> ${of_root}of7.sh
+  fi 
+  echo -e "source ${of_root}OpenFOAM-7/etc/bashrc" >> ${of_root}of7.sh
+  echo -e "echo -e \"OpenFOAM7 with ${mpi_env} and ${gcc_v} is ready for running.\"" >> ${of_root}of7.sh
+  if [ $current_user = 'root' ]; then
+    grep of7 /etc/profile >> /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      echo -e "alias of7.env='source ${of_root}of7.sh'" >> /etc/profile
+    fi
+    echo -e "< of7 >" >> $public_app_registry
+  else
+    grep of7 $HOME/.bashrc >> /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      echo -e "alias of7.env='source ${of_root}of7.sh'" >> $HOME/.bashrc
+    fi
+    echo -e "< of7 > < ${current_user} >" >> $private_app_registry
+  fi
+  exit 0
+fi
+
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Building OpenFOAM-7 now ... "
 mkdir -p ${of_root}
