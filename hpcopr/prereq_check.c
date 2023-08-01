@@ -321,6 +321,9 @@ int check_and_install_prerequisitions(int repair_flag){
         force_repair_flag=repair_flag;
     }
 
+    sprintf(cmdline,"%s %s%sworkdir %s",MKDIR_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+
     if(repair_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Start checking and repairing the HPC-NOW services now ... \n");
         printf("|        . Checking and repairing the registry now ...\n");
