@@ -47,6 +47,28 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ $1 = 'install' ]; then
+  echo -e "[ -INFO- ] Downloading the prebuilt package ..."
+  if [ ! -f ${app_cache}ompi4.tar.gz ]; then
+    wget ${url_pkgs}prebuilds-9/ompi4.tar.gz -O ${app_cache}ompi4.tar.gz -o ${2}
+  fi
+  echo -e "[ -INFO- ] Extracting the binaries and libraries ..."
+  tar zvxf ${app_cache}ompi4.tar.gz -C ${app_root} >> ${2}
+  if [ $? -ne 0 ]; then
+    echo -e "[ FATAL: ] Failed to install OpenMPI-4.1.2. Please check the log file for details. Exit now."
+    exit 1
+  fi
+  echo -e "#%Module1.0\nprepend-path PATH ${app_root}ompi-4.1.2/bin\nprepend-path LD_LIBRARY_PATH ${app_root}ompi-4.1.2/lib\nprepend-path C_INCLUDE_PATH ${app_root}ompi-4.1.2/include\nprepend-path CPLUS_INCLUDE_PATH ${app_root}ompi-4.1.2/include\n" > ${envmod_root}ompi-4.1.2
+  echo -e "setenv OMPI_ALLOW_RUN_AS_ROOT 1\nsetenv OMPI_ALLOW_RUN_AS_ROOT_CONFIRM 1" >> ${envmod_root}ompi-4.1.2
+  if [ $current_user = 'root' ]; then
+    echo -e "< ompi4 >" >> $public_app_registry
+  else
+    echo -e "< ompi4 > < ${current_user} >" >> $private_app_registry
+  fi
+  echo -e "[ -DONE- ] OpenMPI-4.1.2 has been installed."
+  exit 0
+fi
+
 gcc_vers=('gcc12' 'gcc9' 'gcc8' 'gcc4')
 gcc_code=('gcc-12.1.0' 'gcc-9.5.0' 'gcc-8.2.0' 'gcc-4.9.2')
 systemgcc='true'

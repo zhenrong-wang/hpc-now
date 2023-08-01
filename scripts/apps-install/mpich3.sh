@@ -47,6 +47,27 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ $1 = 'install' ]; then
+  echo -e "[ -INFO- ] Downloading the prebuilt package ..."
+  if [ ! -f ${app_cache}mpich3.tar.gz ]; then
+    wget ${url_pkgs}prebuilds-9/mpich3.tar.gz -O ${app_cache}mpich3.tar.gz -o ${2}
+  fi
+  echo -e "[ -INFO- ] Extracting the binaries and libraries ..."
+  tar zvxf ${app_cache}mpich3.tar.gz -C ${app_root} >> ${2}
+  if [ $? -ne 0 ]; then
+    echo -e "[ FATAL: ] Failed to install MPICH-3.2.1. Please check the log file for details. Exit now."
+    exit 1
+  fi
+  echo -e "#%Module1.0\nprepend-path PATH ${app_root}mpich-3.2.1/bin\nprepend-path LD_LIBRARY_PATH ${app_root}mpich-3.2.1/lib\nprepend-path C_INCLUDE_PATH ${app_root}mpich-3.2.1/include\nprepend-path CPLUS_INCLUDE_PATH ${app_root}mpich-3.2.1/include\n" > ${envmod_root}mpich-3.2.1
+  if [ $current_user = 'root' ]; then
+    echo -e "< mpich3 >" >> $public_app_registry
+  else
+    echo -e "< mpich3 > < ${current_user} >" >> $private_app_registry
+  fi
+  echo -e "[ -DONE- ] MPICH-3.2.1 has been installed. "
+  exit 0
+fi
+
 gcc_vers=('gcc12' 'gcc9' 'gcc8' 'gcc4')
 gcc_code=('gcc-12.1.0' 'gcc-9.5.0' 'gcc-8.2.0' 'gcc-4.9.2')
 systemgcc='true'
