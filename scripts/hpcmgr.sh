@@ -73,7 +73,7 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 app_tmp_log_root="/tmp/app_tmp_logs/"
-mkdir -p ${app_tmp_log_root} && chmod -R 777 ${app_tmp_log_root}
+mkdir -p ${app_tmp_log_root} && chmod 777 ${app_tmp_log_root}
 
 main_menu=('quick' 'master' 'connect' 'all' 'clear' 'applist' 'build' 'install' 'remove' 'submit' 'users')
 command_flag='false'
