@@ -122,8 +122,9 @@ int main(int argc, char* argv[]){
             dup2(connect_fd,STDOUT_FILENO);
             dup2(connect_fd,STDERR_FILENO);
         }
+        memset(ingress_buffer,0,sizeof(char)*BUFFER_SIZE);
         recv(connect_fd,ingress_buffer,BUFFER_SIZE,0);
-        sprintf(cmdline,"hpcopr %s",ingress_buffer);
+        sprintf(cmdline,"echo y-e-s | hpcopr %s",ingress_buffer);
         system(cmdline);
         system("tail -n 1 /usr/.hpc-now/.now-cluster-operation.log > /tmp/now-server-output.tmp 2>&1");
         file_p=fopen("/tmp/now-server-output.tmp","r");
