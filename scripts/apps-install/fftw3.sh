@@ -42,6 +42,27 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ $1 = 'install' ]; then
+  echo -e "[ -INFO- ] Downloading the prebuilt package ..."
+  if [ ! -f ${app_cache}fftw3.tar.gz ]; then
+    wget ${url_pkgs}prebuilds-9/fftw3.tar.gz -O ${app_cache}fftw3.tar.gz -o ${2}
+  fi
+  echo -e "[ -INFO- ] Extracting the binaries and libraries ..."
+  tar zvxf ${app_cache}fftw3.tar.gz -C ${app_root} >> ${2}
+  if [ $? -ne 0 ]; then
+    echo -e "[ FATAL: ] Failed to install FFTW-3.3.10. Please check the log file for details. Exit now."
+    exit 1
+  fi
+  echo -e "#%Module1.0\nprepend-path PATH ${app_root}fftw3/bin\nprepend-path LD_LIBRARY_PATH ${app_root}fftw3/lib\n" > ${envmod_root}fftw3
+  if [ $current_user = 'root' ]; then
+    echo -e "< fftw3 >" >> $public_app_registry
+  else
+    echo -e "< fftw3 > < ${current_user} >" >> $private_app_registry
+  fi
+  echo -e "[ -DONE- ] FFTW-3.3.10 has been installed."
+  exit 0
+fi
+
 mkdir -p $app_cache
 echo -e "[ -INFO- ] Downloading and extracting packages ..."
 if [ ! -f ${app_cache}fftw-3.3.10.tar.gz ]; then
