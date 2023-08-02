@@ -12,9 +12,9 @@
 
 logfile='/root/cluster_init.log'
 public_app_registry="/hpc_apps/.public_apps.reg"
+time_current=`date "+%Y-%m-%d %H:%M:%S"`
 app_tmp_log_root="/tmp/app_tmp_logs/"
 
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Initialization started." >> ${logfile}
 distro_type=`head -n 3 /etc/os-release | grep NAME= | awk -F"\"" '{print $2}' | awk '{print $1}'`
 distro_vers=`head -n 3 /etc/os-release | grep VERSION= | awk -F"\"" '{print $2}' | awk '{print $1}'`
