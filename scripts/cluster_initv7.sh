@@ -518,7 +518,12 @@ if [ -f /root/hostfile ]; then
 fi
 
 yum -y update
-yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix 
+yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname 
+if [ -f /root/hostfile ]; then
+  yum -y install dos2unix ncurses-compat-libs
+  wget ${url_utils}progress-0.13-1.el7.x86_64.rpm -O /root/progress-0.13-1.el7.x86_64.rpm
+  rpm -ivh /root/progress-0.13-1.el7.x86_64.rpm
+fi
 
 # Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
 if [ $cloud_flag = 'CLOUD_B' ]; then

@@ -27,6 +27,8 @@ else
   app_extract_cache="/home/${current_user}/.app_extract_cache/"
   envmod_root="/hpc_apps/envmod/${current_user}_env/"
 fi
+mkdir -p ${app_cache}
+mkdir -p ${app_extract_cache}
 
 if [ $1 = 'remove' ]; then
   rm -rf ${app_root}fftw3
@@ -63,8 +65,6 @@ if [ $1 = 'install' ]; then
   exit 0
 fi
 
-mkdir -p $app_cache
-mkdir -p $app_extract_cache
 echo -e "[ -INFO- ] Downloading and extracting packages ..."
 if [ ! -f ${app_cache}fftw-3.3.10.tar.gz ]; then
   wget ${url_pkgs}fftw-3.3.10.tar.gz -O ${app_cache}fftw-3.3.10.tar.gz -o ${2}
