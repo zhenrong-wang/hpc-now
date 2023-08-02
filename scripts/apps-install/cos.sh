@@ -62,7 +62,9 @@ if [ $? -ne 0 ]; then
 fi
 
 echo -e "[ -INFO- ] Downloading package(s) ..."
-wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O ${app_cache}/cosbrowser.zip -q
+if [ ! -f ${app_cache}/cosbrowser.zip ]; then
+  wget https://cos5.cloud.tencent.com/cosbrowser/cosbrowser-latest-linux.zip -O ${app_cache}/cosbrowser.zip -q
+fi
 unzip -o ${app_cache}/cosbrowser.zip -d $app_root
 chmod +x ${app_root}/cosbrowser.AppImage
 echo -e "[ -INFO- ] Creating a shortcut on the desktop ..."
@@ -100,5 +102,5 @@ else
     echo -e "alias cos='${app_root}cosbrowser.AppImage --no-sandbox'" >> $HOME/.bashrc
   fi
   echo -e "< cos > < ${current_user} >" >> $private_app_registry
+  echo -e "[ -DONE- ] COS has been installed to the current user."
 fi
-echo -e "[ -DONE- ] COS has been installed to the current user."

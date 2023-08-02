@@ -106,6 +106,7 @@ SELINUX_STATUS=`getenforce`
 echo -e "source /etc/profile" >> /root/.bashrc
 
 if [ -f /root/hostfile ]; then
+  mkdir -p /hpc_apps/root_apps
   mkdir -p /hpc_data/cluster_data
   chmod -R 644 /hpc_data/cluster_data
   chmod 755 /hpc_data/cluster_data

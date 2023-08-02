@@ -64,6 +64,7 @@ if [ $1 = 'install' ]; then
 fi
 
 mkdir -p $app_cache
+mkdir -p $app_extract_cache
 echo -e "[ -INFO- ] Downloading and extracting packages ..."
 if [ ! -f ${app_cache}fftw-3.3.10.tar.gz ]; then
   wget ${url_pkgs}fftw-3.3.10.tar.gz -O ${app_cache}fftw-3.3.10.tar.gz -o ${2}
