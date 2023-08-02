@@ -12,6 +12,8 @@
 
 logfile='/root/cluster_init.log'
 public_app_registry="/hpc_apps/.public_apps.reg"
+app_tmp_log_root="/tmp/app_tmp_logs/"
+
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Initialization started." >> ${logfile}
 distro_type=`head -n 3 /etc/os-release | grep NAME= | awk -F"\"" '{print $2}' | awk '{print $1}'`
@@ -109,6 +111,8 @@ if [ -f /root/hostfile ]; then
   chmod 755 /hpc_data/cluster_data
   mkdir -p /hpc_data/public
   chmod -R 777 /hpc_data/public
+  mkdir -p ${app_tmp_log_root}
+  chmod 777 ${app_tmp_log_root}
 fi
 
 mkdir -p /usr/hpc-now
