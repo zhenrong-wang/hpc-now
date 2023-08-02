@@ -69,9 +69,10 @@ fi
 
 current_user=`whoami`
 public_app_registry="/hpc_apps/.public_apps.reg"
-if [ $current_user != 'root' ]; then
-  private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
-fi
+app_tmp_log_root="/tmp/app_tmp_logs/"
+#if [ $current_user != 'root' ]; then
+private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
+#fi
 
 main_menu=('quick' 'master' 'connect' 'all' 'clear' 'applist' 'build' 'install' 'remove' 'submit' 'users')
 command_flag='false'
@@ -641,8 +642,6 @@ elif [ $1 = 'applist' ]; then
     exit 36
   fi
 elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
-  app_tmp_log_root="/tmp/app_tmp_logs/"
-  mkdir -p ${app_tmp_log_root} && chmod -R 777 ${app_tmp_log_root}
   if [ -z "$2" ]; then
     echo -e "[ -INFO- ] Please specify an app to $1 ."
     exit 37

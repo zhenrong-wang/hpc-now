@@ -30,8 +30,8 @@ fi
 
 mkdir -p $app_cache
 mkdir -p $of_cache
-
 of_root="${app_root}OpenFOAM/"
+mkdir -p ${of_root}
 
 if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Removing binaries and libraries, this may take minutes ..."
@@ -147,7 +147,8 @@ if [ $1 = 'install' ]; then
     exit 1
   fi
   echo -e "[ -INFO- ] Copying files ..."
-  rsync -a --info=progress2 ${of_cache} ${of_root}
+  rsync -a --info=progress2 ${of_cache}OpenFOAM-7 ${of_root}
+  rsync -a --info=progress2 ${of_cache}ThirdParty-7 ${of_root}
   export MPI_ROOT=${mpi_root}
   echo "${mpi_env}" | grep ompi >> /dev/null 2>&1
   if [ $? -eq 0 ]; then
@@ -185,8 +186,7 @@ if [ $1 = 'install' ]; then
 fi
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "[ START: ] $time_current Building OpenFOAM-7 now ... "
-mkdir -p ${of_root}
+echo -e "[ START: ] $time_current Removing previous builds ... "
 rm -rf ${of_root}OpenFOAM-7
 rm -rf ${of_root}ThirdParty-7
 echo -e "[ -INFO- ] $time_current Downloading & extracting source packages ..."
@@ -266,7 +266,8 @@ if [ $? -ne 0 ]; then
   exit
 fi
 echo -e "[ -INFO- ] Copying files ..."
-rsync -a --info=progress2 ${of_cache} ${of_root}
+rsync -a --info=progress2 ${of_cache}OpenFOAM-7 ${of_root}
+rsync -a --info=progress2 ${of_cache}ThirdParty-7 ${of_root}
 echo -e "#! /bin/bash\nmodule purge" > ${of_root}of7.sh
 echo -e "export MPI_ROOT=\"${MPI_ROOT}\"" >> ${of_root}of7.sh
 echo -e "export MPI_ARCH_FLAGS=\"${MPI_ARCH_FLAGS}\"" >> ${of_root}of7.sh

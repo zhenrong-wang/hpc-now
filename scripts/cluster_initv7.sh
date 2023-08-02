@@ -13,6 +13,8 @@
 logfile='/root/cluster_init.log'
 public_app_registry="/hpc_apps/.public_apps.reg"
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
+app_tmp_log_root="/tmp/app_tmp_logs/"
+
 echo -e "# $time_current Initialization started." >> ${logfile}
 distro_type=`head -n 3 /etc/os-release | grep NAME= | awk -F"\"" '{print $2}' | awk '{print $1}'`
 distro_vers=`head -n 3 /etc/os-release | grep VERSION= | awk -F"\"" '{print $2}' | awk '{print $1}'`
@@ -104,11 +106,14 @@ SELINUX_STATUS=`getenforce`
 echo -e "source /etc/profile" >> /root/.bashrc
 
 if [ -f /root/hostfile ]; then
+  mkdir -p /hpc_apps/root_apps
   mkdir -p /hpc_data/cluster_data
   chmod -R 644 /hpc_data/cluster_data
   chmod 755 /hpc_data/cluster_data
   mkdir -p /hpc_data/public
   chmod -R 777 /hpc_data/public
+  mkdir -p ${app_tmp_log_root}
+  chmod 777 ${app_tmp_log_root}
 fi
 
 mkdir -p /usr/hpc-now
@@ -513,7 +518,13 @@ if [ -f /root/hostfile ]; then
 fi
 
 yum -y update
-yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix 
+yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix
+#if [ -f /root/hostfile ]; then
+#  yum -y install dos2unix ncurses-compat-libs
+#  wget ${url_utils}progress-0.13-1.el7.x86_64.rpm -O /root/progress-0.13-1.el7.x86_64.rpm
+#  rpm -ivh /root/progress-0.13-1.el7.x86_64.rpm
+#  rm -rf /root/progress-0.13-1.el7.x86_64.rpm
+#fi
 
 # Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
 if [ $cloud_flag = 'CLOUD_B' ]; then
