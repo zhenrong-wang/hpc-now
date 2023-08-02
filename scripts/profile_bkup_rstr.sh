@@ -51,6 +51,6 @@ else
       /bin/cp -r ${backup_dir}${user_name}/.bashrc /home/${user_name}/.bashrc
     done < /root/.cluster_secrets/user_secrets.txt
     mkdir -p ${backup_dir_trash}
-    mv ${backup_dir} ${backup_dir_trash}
+    mv -f ${backup_dir} ${backup_dir_trash}
     exit 0
 fi
