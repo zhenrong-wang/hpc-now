@@ -930,11 +930,11 @@ int direct_path_check(char* path_string, char* hpc_user, char* real_path){
         return 0;
     }
     else if(strcmp(header,"@a")==0){
-        if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
+        if(strcmp(hpc_user,"root")==0){
             sprintf(real_path,"/hpc_apps/%s",tail);
         }
         else{
-            sprintf(real_path,"/home/%s/%s",hpc_user,tail);
+            sprintf(real_path,"/hpc_apps/%s_apps/%s",hpc_user,tail);
         }
         return 0;
     }

@@ -30,9 +30,8 @@ fi
 
 mkdir -p $app_cache
 mkdir -p $of_cache
-mkdir -p ${of_root}
-
 of_root="${app_root}OpenFOAM/"
+mkdir -p ${of_root}
 
 if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] Removing binaries and libraries, this may take minutes ..."
