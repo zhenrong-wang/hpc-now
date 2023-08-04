@@ -19,6 +19,8 @@
 
 希望与您共同携手打造开源、开放的 Cloud HPC 生态！
 
+本项目基于 MIT 协议开源，协议条款详见 COPYING 。
+
 ### 2. 核心组件
 
 首先，在此鸣谢卓越、开源、面向多云的 IaC（ 基础设施即代码 ）平台 [Terraform](http://www.terraform.io)。正是 Terraform 强大的功能和良好的生态为 HPC-NOW 提供了坚实的基础，我们可以不必重复造轮子。本项目的核心工作，在于如何驱动 Terraform 来构建和管理一个或多个 Cloud HPC 集群。

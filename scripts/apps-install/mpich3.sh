@@ -1,9 +1,10 @@
+# Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+# This code is distributed under the license: MIT License
+# Originally written by Zhenrong WANG
+# mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+
 #!/bin/bash
 
-# Shanghai HPC-NOW Technologies Co., Ltd
-# All rights reserved, Year 2023
-# https://www.hpc-now.com
-# mailto: info@hpc-now.com 
 # This script is used by 'hpcmgr' command to build *MPICH-3.2.1* to HPC-NOW cluster.
 
 current_user=`whoami`
