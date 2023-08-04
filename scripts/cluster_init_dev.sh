@@ -1,18 +1,14 @@
-#!/bin/bash
-
-# This code is written and maintained by Zhenrong WANG
-# mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
-# The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+# Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
 # This code is distributed under the license: MIT License
-# Bug report: info@hpc-now.com
+# Originally written by Zhenrong WANG
+# mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+
+#!/bin/bash
 
 # This script initializes the master and compute node(s). Terraform templates run this scripts after creating the master and compute node(s).
 
 #arg1: # of users to be created
 #arg2: db - whether reinstall mariadb or not
-#arg3: mpi - whether install openmpi or not
-#arg4: gcc8 - whether install gcc8 - Deprecated
-#arg5: of7 - Whether install OpenFOAM7 to /hpc_apps or not - Deprecated
 
 # Define URL prefixes for the 'wget' command
 

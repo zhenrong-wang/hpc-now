@@ -1,10 +1,9 @@
-#!/bin/bash
-
-# This code is written and maintained by Zhenrong WANG
-# mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
-# The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+# Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
 # This code is distributed under the license: MIT License
-# Bug report: info@hpc-now.com
+# Originally written by Zhenrong WANG
+# mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+
+#!/bin/bash
 
 hpcopr_version_code=`cat ./hpcopr/now_macros.h | grep CORE_VERSION_CODE | awk -F"\"" '{print $2}'`
 installer_version_code=`cat ./installer/installer.h | grep INSTALLER_VERSION_CODE | awk -F"\"" '{print $2}'`

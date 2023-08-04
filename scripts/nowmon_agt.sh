@@ -1,10 +1,9 @@
-#!/bin/bash
-
-# This code is written and maintained by Zhenrong WANG
-# mailto: zhenrongwang@live.com (*preferred*) | wangzhenrong@hpc-now.com
-# The founder of Shanghai HPC-NOW Technologies Co., Ltd (website: https://www.hpc-now.com)
+# Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
 # This code is distributed under the license: MIT License
-# Bug report: info@hpc-now.com
+# Originally written by Zhenrong WANG
+# mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+
+#!/bin/bash
 
 curr_time=$(date "+%Y-%m-%d-%H-%M-%S")
 curr_date=`echo $curr_time | awk -F"-" '{print $1"-"$2"-"$3}'`
