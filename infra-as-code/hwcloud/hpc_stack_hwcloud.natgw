@@ -26,7 +26,7 @@ resource "huaweicloud_compute_instance" "natgw" {
   availability_zone = "DEFAULT_ZONE_ID"
   security_group_ids = [huaweicloud_networking_secgroup.natgw_transparent.id]
   image_id = data.huaweicloud_images_images.centos7.images[0].id
-  flavor_id = data.huaweicloud_compute_flavors.i1c1g.ids[0]
+  flavor_id = data.huaweicloud_compute_flavors.i1c2g.ids[0]
   system_disk_type = "GPSSD"
   system_disk_size = 40
   network {

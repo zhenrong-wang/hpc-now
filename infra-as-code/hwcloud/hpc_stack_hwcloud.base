@@ -143,7 +143,7 @@ data "huaweicloud_compute_flavors" "i2c4g" {
   memory_size = 4
 }
 
-data "huaweicloud_compute_flavors" "i1c1g" {
+data "huaweicloud_compute_flavors" "i1c2g" {
   availability_zone = "DEFAULT_ZONE_ID"
   generation = "s6"
   cpu_core_count = 1
