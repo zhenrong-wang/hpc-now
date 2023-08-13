@@ -250,6 +250,10 @@ void print_help(char* cmd_name){
         printf("|   --minimal      ~ Turn on the management nodes of the cluster.\n");
         printf("|   --all          ~ Turn on the management and compute nodes of the cluster.\n");
     }
+    if(strcmp(cmd_name,"nfsup")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "wakeup" RESET_DISPLAY "      :~ Increase the NFS volume. " HIGH_CYAN_BOLD "Only for CLOUD_D/huaweicloud." RESET_DISPLAY "\n");
+        printf("|   --vol NEW_VOLUME  ~ Specify a positive number as the new volume.\n");
+    }
     if(strcmp(cmd_name,"destroy")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "destroy" RESET_DISPLAY "     :~ *DESTROY* the whole cluster - including all the resources & data.\n");
         printf("|   --force        ~ Do force-destroy " WARN_YELLO_BOLD "( DANGER! )" RESET_DISPLAY ".\n");

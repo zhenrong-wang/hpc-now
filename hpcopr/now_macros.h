@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0147"
+#define CORE_VERSION_CODE "0.2.0.0149"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -58,10 +58,12 @@
 #define URL_COSCLI "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-windows.exe"
 #define URL_OSSUTIL "https://gosspublic.alicdn.com/ossutil/1.7.16/ossutil-v1.7.16-windows-amd64.zip"
 #define URL_AWSCLI "https://awscli.amazonaws.com/AWSCLIV2.msi"
+#define URL_OBSUTIL "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_windows_amd64.zip"
 
 #define S3CLI_EXEC "\"c:\\program files\\amazon\\awscliv2\\aws.exe\""
 #define COSCLI_EXEC "c:\\hpc-now\\utils\\coscli.exe"
 #define OSSUTIL_EXEC "c:\\hpc-now\\utils\\ossutil64.exe"
+#define OBSUTIL_EXEC "c:\\hpc-now\\utils\\obsutil.exe"
 
 #elif __linux__
 #define PATH_SLASH "/"
@@ -111,10 +113,12 @@
 #define URL_COSCLI "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-linux"
 #define URL_OSSUTIL "https://gosspublic.alicdn.com/ossutil/1.7.16/ossutil-v1.7.16-linux-amd64.zip"
 #define URL_AWSCLI "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+#define URL_OBSUTIL "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz"
 
 #define S3CLI_EXEC "/home/hpc-now/.bin/utils/aws"
 #define COSCLI_EXEC "/home/hpc-now/.bin/utils/coscli.exe"
 #define OSSUTIL_EXEC "/home/hpc-now/.bin/utils/ossutil64.exe"
+#define OBSUTIL_EXEC "/home/hpc-now/.bin/utils/obsutil.exe"
 
 #elif __APPLE__
 #define PATH_SLASH "/"
@@ -164,10 +168,12 @@
 #define URL_COSCLI "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-mac"
 #define URL_OSSUTIL "https://gosspublic.alicdn.com/ossutil/1.7.16/ossutil-v1.7.16-mac-amd64.zip"
 #define URL_AWSCLI "https://awscli.amazonaws.com/AWSCLIV2.pkg"
+#define URL_OBSUTIL "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_darwin_amd64.tar.gz"
 
 #define S3CLI_EXEC "/Users/hpc-now/.bin/utils/aws"
 #define COSCLI_EXEC "/Users/hpc-now/.bin/utils/coscli.exe"
 #define OSSUTIL_EXEC "/Users/hpc-now/.bin/utils/ossutil64.exe"
+#define OBSUTIL_EXEC "/Users/hpc-now/.bin/utils/obsutil.exe"
 
 #endif
 
@@ -192,12 +198,12 @@
 #define LINE_LENGTH_SHORT 256
 #define AKSK_LENGTH 128
 #define CONF_STRING_LENTH 64
-#define COMMAND_NUM 47
+#define COMMAND_NUM 48
 #define DATAMAN_COMMAND_NUM 17
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 12
 #define CMD_FLAG_NUM 25
-#define CMD_KWDS_NUM 39
+#define CMD_KWDS_NUM 40
 
 /* Usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/COPYING"

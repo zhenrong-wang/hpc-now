@@ -527,10 +527,10 @@ resource "baiducloud_iam_user" "hpc_user" {
 }
 
 resource "baiducloud_iam_policy" "hpc_bucket_access_policy" {
-  name = "BUCKET_ACCESS_POLICY"
+  name = "BUCKET_USER_ID"
   document = <<EOF
   {
-    "id": "BUCKET_ACCESS_POLICY",
+    "id": "BUCKET_USER_ID",
     "version": "v2",
     "accessControlList": [
         {
