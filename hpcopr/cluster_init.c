@@ -2353,9 +2353,9 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);
     find_and_get(filename_temp,"access_key","","",20,"\"id\":","","",'\"',4,bucket_ak);
     find_and_get(filename_temp,"access_key","","",20,"\"secret\":","","",'\"',4,bucket_sk);
-    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",QCLOUD_SLEEP_TIME);
-    for(i=0;i<QCLOUD_SLEEP_TIME;i++){
-        printf("[ -WAIT- ] Still need to wait %d seconds ... \r",QCLOUD_SLEEP_TIME-i);
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
+    for(i=0;i<GENERAL_SLEEP_TIME;i++){
+        printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
         fflush(stdout);
         sleep(1);
     }
