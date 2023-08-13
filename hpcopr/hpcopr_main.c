@@ -48,6 +48,7 @@ char terraform_version_var[16]="";
 char ali_tf_plugin_version_var[16]="";
 char qcloud_tf_plugin_version_var[16]="";
 char aws_tf_plugin_version_var[16]="";
+char hw_tf_plugin_version_var[16]="";
 
 char md5_tf_exec_var[64]="";
 char md5_tf_zip_var[64]="";
@@ -58,6 +59,8 @@ char md5_qcloud_tf_var[64]="";
 char md5_qcloud_tf_zip_var[64]="";
 char md5_aws_tf_var[64]="";
 char md5_aws_tf_zip_var[64]="";
+char md5_hw_tf_var[64]="";
+char md5_hw_tf_zip_var[64]="";
 
 /*
  * GEN: GENERAL COMMANDS
@@ -102,6 +105,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "turnonc,opr,CNAME",
     "reconfc,opr,CNAME",
     "reconfm,opr,CNAME",
+    "nfsup,opr,CNAME",
     "sleep,opr,CNAME",
     "wakeup,opr,CNAME",
     "destroy,opr,CNAME",
@@ -157,6 +161,7 @@ char jobman_commands[3][COMMAND_STRING_LENGTH_MAX]={
 3 USER_DENIED
 5 LACK_PARAMS
 7 MISSING_CLOUD_FLAG_FILE
+8 CLOUD_FLAG_NOT_APPLICABLE
 9 PARAM_FORMAT_ERROR
 
 11 Prereq - Components Download and install failed
@@ -1260,6 +1265,9 @@ int main(int argc, char* argv[]){
         else if(strcmp(cloud_flag,"CLOUD_A")==0){
             run_flag=alicloud_cluster_init(cluster_name,workdir,crypto_keyfile);
         }
+        else if(strcmp(cloud_flag,"CLOUD_D")==0){
+            run_flag=hwcloud_cluster_init(cluster_name,workdir,crypto_keyfile);
+        }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now." RESET_DISPLAY "\n");
             check_and_cleanup(workdir);
@@ -1372,6 +1380,62 @@ int main(int argc, char* argv[]){
         write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",34);
         check_and_cleanup(workdir);
         return 0;
+    }
+
+    if(strcmp(argv[1],"nfsup")==0){
+        if(strcmp(cloud_flag,"CLOUD_D")!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] This command is only applicable to CLOUD_D, i.e. huaweicloud." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FLAG_NOT_APPLICABLE",8);
+            check_and_cleanup(workdir);
+            return 8;
+        }
+        if(cluster_empty_or_not(workdir)==0){
+            print_empty_cluster_info();
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_EMPTY",49);
+            check_and_cleanup(workdir);
+            return 49;
+        }
+        if(cluster_state_flag==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please wake up the cluster first." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
+            check_and_cleanup(workdir);
+            return 43;
+        }
+        if(cmd_keyword_check(argc,argv,"--vol",string_temp)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a positive number as the new volume." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
+            check_and_cleanup(workdir);
+            return 5;
+        }
+        if(string_to_positive_num(string_temp)<1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a positive number as the new volume." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
+            check_and_cleanup(workdir);
+            return 9;
+        }
+        get_state_value(workdir,"shared_volume_gb:",string_temp2);
+        if(string_to_positive_num(string_temp)<string_to_positive_num(string_temp2)){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a new volume larger than the previous volume %s." RESET_DISPLAY "\n",string_temp2);
+            write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
+            check_and_cleanup(workdir);
+            return 9;
+        }
+        if(confirm_to_operate_cluster(cluster_name)!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
+            check_and_cleanup(workdir);
+            return 3;
+        }
+        run_flag=nfs_volume_up(workdir,crypto_keyfile,string_temp);
+        if(run_flag!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"NFS_VOLUME_UP_FAILED",10);
+            check_and_cleanup(workdir);
+            return 10;
+        }
+        else{
+            write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
+            check_and_cleanup(workdir);
+            return 0;
+        }
     }
 
     if(strcmp(argv[1],"sleep")==0){

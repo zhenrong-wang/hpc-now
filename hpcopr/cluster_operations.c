@@ -405,7 +405,12 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         fclose(file_p);
     }
     else if(ak_length==20&&sk_length==40){
-        strcpy(cloud_flag,"CLOUD_C");
+        if(*(access_key+0)=='A'&&*(access_key+1)=='K'&&*(access_key+2)=='I'&&*(access_key+3)=='A'){
+            strcpy(cloud_flag,"CLOUD_C");
+        }
+        else{
+            strcpy(cloud_flag,"CLOUD_D");
+        }
         fprintf(file_p,"%s\n%s\n%s\n",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
@@ -535,7 +540,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
             return 3;
         }
-        fprintf(file_p,"%s\n%s\nCLOUD_A",access_key,secret_key);
+        fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
     else if(ak_length==36&&sk_length==32){
@@ -549,21 +554,32 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
             return 3;
         }
-        fprintf(file_p,"%s\n%s\nCLOUD_B",access_key,secret_key);
+        fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
     else if(ak_length==20&&sk_length==40){
-        strcpy(cloud_flag,"CLOUD_C");
+        if(*(access_key+0)=='A'&&*(access_key+1)=='K'&&*(access_key+2)=='I'&&*(access_key+3)=='A'){
+            strcpy(cloud_flag,"CLOUD_C");
+        }
+        else{
+            strcpy(cloud_flag,"CLOUD_D");
+        }
         if(strcmp(cloud_flag_prev,cloud_flag)!=0){
             fclose(file_p);
             printf(FATAL_RED_BOLD "[ FATAL: ] The new keypair comes from a different Cloud Service Vendor.\n");
             printf("|          Switching cloud vendors for a working directory is not permitted.\n");
-            printf("|          Current Vendor: Amazon Web Services (HPC-NOW code: CLOUD_C).\n");
-            printf("|          Please rotate a keypair from an Amazon Web Services account.\n");
+            if(strcmp(cloud_flag_prev,"CLOUD_C")==0){
+                printf("|          Current Vendor: Amazon Web Services (HPC-NOW code: CLOUD_C).\n");
+                printf("|          Please rotate a keypair from an Amazon Web Services account.\n");
+            }
+            else{
+                printf("|          Current Vendor: Huawei Cloud (HPC-NOW code: CLOUD_D).\n");
+                printf("|          Please rotate a keypair from an Huawei Cloud account.\n");
+            }
             printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
             return 3;
         }
-        fprintf(file_p,"%s\n%s\nCLOUD_C",access_key,secret_key);
+        fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
     else{
@@ -921,7 +937,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
         return -1;
     }
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -1048,7 +1064,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
         return -1;
     }
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -1196,6 +1212,10 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     int cpu_core_num=0;
     int reinit_flag=0;
     char cmdline[CMDLINE_LENGTH]="";
+    get_cloud_flag(workdir,cloud_flag);
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
+        return -5;
+    }
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -1203,9 +1223,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     compute_node_down_num=get_compute_node_num(filename_temp,"down");
     if(compute_node_num==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no compute nodes in your cluster. Exit now." RESET_DISPLAY "\n");
-        return -1;
+        return -3;
     }
-
     decrypt_files(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     sprintf(string_temp,"\"%s\"",new_config);
@@ -1214,17 +1233,16 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
-    get_cloud_flag(workdir,cloud_flag);
     sprintf(filename_temp,"%s%scompute_template",stackdir,PATH_SLASH);
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
     if(strcmp(prev_config,new_config)==0){
-        if(strcmp(cloud_flag,"CLOUD_A")==0||strcmp(cloud_flag,"CLOUD_B")==0){
+        if(strcmp(cloud_flag,"CLOUD_A")==0||strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_D")==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
             printf("|          Nothing changed. Exit now.\n");
             delete_decrypted_files(workdir,crypto_keyfile);
             return 1;
         }
-        else if(strcmp(cloud_flag,"CLOUD_C")==0){
+        else{
             if(strlen(htflag)==0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
                 printf("|          Nothing changed. Exit now.\n");
@@ -1280,7 +1298,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 }
                 delete_decrypted_files(workdir,crypto_keyfile);
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
-                return -1;
+                return 3;
             }
             for(i=1;i<compute_node_num+1;i++){
                 sprintf(node_name_temp,"compute%d",i);
@@ -1305,7 +1323,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             return 0;
         }
     }
-    if(strcmp(cloud_flag,"CLOUD_A")==0||strcmp(cloud_flag,"CLOUD_B")==0){
+    if(strcmp(cloud_flag,"CLOUD_A")==0||strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_D")==0){
         for(i=1;i<compute_node_num+1;i++){
             sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
             sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
@@ -1313,7 +1331,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             global_replace(filename_temp,prev_config,new_config);
         }
     }
-    else if(strcmp(cloud_flag,"CLOUD_C")==0){
+    else{
         for(i=1;i<compute_node_num+1;i++){
             sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
             sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
@@ -1354,7 +1372,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
-        return -1;
+        return 3;
     }
     for(i=1;i<compute_node_num+1;i++){
         sprintf(node_name_temp,"compute%d",i);
@@ -1470,6 +1488,67 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     return 0;
 }
 
+int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume){
+    char stackdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char prev_volume[16]="";
+    int prev_volume_num;
+    int new_volume_num;
+    char cloud_flag[16]="";
+    char* sshkey_dir=SSHKEY_DIR;
+    char* tf_exec=TERRAFORM_EXEC;
+    get_cloud_flag(workdir,cloud_flag);
+    if(strcmp(cloud_flag,"CLOUD_D")!=0){
+        return 1;
+    }
+    if(cluster_empty_or_not(workdir)==0){
+        print_empty_cluster_info();
+        return -1;
+    }
+    new_volume_num=string_to_positive_num(new_volume);
+    if(new_volume_num<1){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a positive number as the new volume." RESET_DISPLAY "\n");
+        return 3;
+    }
+    get_state_value(workdir,"shared_volume_gb:",prev_volume);
+    prev_volume_num=string_to_positive_num(prev_volume);
+    if(new_volume_num<prev_volume_num){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a new volume larger than the previous volume %d." RESET_DISPLAY "\n",prev_volume_num);
+        return 3;
+    }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Expanding the volume from %d to %d GB, this operation is not reversible.\n",prev_volume_num,new_volume_num);
+    create_and_get_stackdir(workdir,stackdir);
+    decrypt_files(workdir,crypto_keyfile);
+    sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
+    sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    find_and_replace(filename_temp,"#-#-#","","","","",prev_volume,new_volume);
+    if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
+        sprintf(cmdline,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){
+            delete_decrypted_files(workdir,crypto_keyfile);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
+            return -127;
+        }
+        delete_decrypted_files(workdir,crypto_keyfile);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
+        return -3;
+    }
+    sprintf(cmdline,"%s %s.bak %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
+    getstate(workdir,crypto_keyfile);
+    graph(workdir,crypto_keyfile,0);
+    printf("|\n");
+    sync_statefile(workdir,sshkey_dir);
+    delete_decrypted_files(workdir,crypto_keyfile);
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The master node has been reconfigured.\n");
+    return 0;
+}
+
 int cluster_sleep(char* workdir, char* crypto_keyfile){
     char string_temp[128]="";
     char unique_cluster_id[64]="";
@@ -1491,7 +1570,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
         return -1;
     }
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -1573,7 +1652,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
         return -1;
     }
     if(strcmp(option,"minimal")==0&&cluster_asleep_or_not(workdir)!=0){
@@ -1675,6 +1754,7 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag){
     char url_aws_root[LOCATION_LENGTH_EXTENDED]="";
     char url_alicloud_root[LOCATION_LENGTH_EXTENDED]="";
     char url_qcloud_root[LOCATION_LENGTH_EXTENDED]="";
+    char url_hwcloud_root[LOCATION_LENGTH_EXTENDED]="";
     char confdir[DIR_LENGTH+16]="";
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -1684,11 +1764,13 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag){
         sprintf(url_aws_root,"%s%saws%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
         sprintf(url_qcloud_root,"%s%sqcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
         sprintf(url_alicloud_root,"%s%salicloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        sprintf(url_hwcloud_root,"%s%shwcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
     }
     else{
         sprintf(url_aws_root,"%saws/",url_code_root_var);
         sprintf(url_qcloud_root,"%sqcloud/",url_code_root_var);
         sprintf(url_alicloud_root,"%salicloud/",url_code_root_var);
+        sprintf(url_hwcloud_root,"%shwcloud/",url_code_root_var);
     }
     get_cloud_flag(workdir,cloud_flag);
     sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
@@ -1727,6 +1809,17 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag){
         }
         else{
             sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_aws_root,confdir,PATH_SLASH);
+        }
+        if(system(cmdline)!=0){
+            return 1;
+        }
+    }
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
+        if(code_loc_flag_var==1){
+            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_hwcloud_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -1932,6 +2025,14 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
             sleep(1);
         }
     }
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
+        printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
+        for(i=0;i<GENERAL_SLEEP_TIME;i++){
+            printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
+            fflush(stdout);
+            sleep(1);
+        }
+    }
     else{
         return -127;
     }
@@ -1981,7 +2082,7 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
     }
     get_workdir(workdir,cluster_name);
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
         return -5;
     }
     if(strcmp(cloud_flag,"CLOUD_C")==0){

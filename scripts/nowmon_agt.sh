@@ -29,8 +29,13 @@ top -1 -bn 1 -i -c -w 512 > $mon_cores
 top -bn 1 -i -c > $mon_all
 
 core_num=`lscpu | grep CPU\(s\): | awk '{print $2}' | head -n1`
-stor_app=`df -TH | grep /hpc_apps | awk '{print $4}'`
-stor_data=`df -TH | grep /hpc_data | awk '{print $4}'`
+if [ -f /root/CLOUD_D ]; then
+    stor_app=`du -sh /hpc_apps/ | awk '{print $1}'`
+    stor_data=`du -sh /hpc_data/ | awk '{print $1}'`
+else
+    stor_app=`df -TH | grep /hpc_apps | awk '{print $4}'`
+    stor_data=`df -TH | grep /hpc_data | awk '{print $4}'`
+fi
 cpu_util=`cat $mon_all | grep Cpu\(s\) | awk '{print $2}'`
 memtot=`cat $mon_all | grep "MiB Mem" | awk '{print $4}'`
 memused=`cat $mon_all | grep "MiB Mem" | awk '{print $8}'`

@@ -14,6 +14,7 @@ typedef struct {
     char zone_id[128];
     int node_num;
     int hpc_user_num;
+    int hpc_nfs_volume;
     char master_init_param[32];
     char master_passwd[32];
     char compute_passwd[32];
@@ -31,5 +32,6 @@ void clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int conditio
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
+int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 
 #endif

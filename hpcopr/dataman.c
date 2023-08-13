@@ -70,7 +70,7 @@ void rf_flag_parser(const char* rflag, const char* fflag, char* real_rflag, char
 }
 
 int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_path, char* rflag, char* fflag, char* crypto_keyfile, char* cloud_flag, char* cmd_type){
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
         return -3;
     }
     if(strcmp(cmd_type,"put")!=0&&strcmp(cmd_type,"get")!=0&&strcmp(cmd_type,"copy")!=0){
@@ -91,6 +91,14 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
     rf_flag_parser(rflag,fflag,real_rflag,real_fflag);
     if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
         strcpy(real_fflag,"");
+    }
+    if(strcmp(cloud_flag,"CLOUD_D")==0){
+        if(strlen(real_rflag)!=0){
+            strcpy(real_rflag,"-r");
+        }
+        if(strlen(real_fflag)!=0){
+            strcpy(real_fflag,"-f");
+        }
     }
     if(strcmp(cmd_type,"put")==0){
         local_path_parser(source_path,real_source_path);
@@ -126,7 +134,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
             sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s cp %s%s %s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
         }
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(strcmp(cmd_type,"copy")==0){
             sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 cp %s%s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
@@ -135,6 +143,17 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         }
         else{
             sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 cp %s%s %s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
+        }
+    }
+    else{
+        if(strcmp(cmd_type,"copy")==0){
+            sprintf(cmdline,"%s cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s%s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+        }
+        else if(strcmp(cmd_type,"put")==0){
+            sprintf(cmdline,"%s cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s %s%s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+        }
+        else{
+            sprintf(cmdline,"%s cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
         }
     }
     if(system(cmdline)!=0){
@@ -152,7 +171,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
 }
 
 int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, char* fflag, char* crypto_keyfile, char* cloud_flag, char* cmd_type){
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
         return -3;
     }
     if(strcmp(cmd_type,"delete")!=0&&strcmp(cmd_type,"list")!=0){
@@ -173,6 +192,14 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
     if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
         strcpy(real_fflag,"");
     }
+    if(strcmp(cloud_flag,"CLOUD_D")==0){
+        if(strlen(real_rflag)!=0){
+            strcpy(real_rflag,"-r");
+        }
+        if(strlen(real_fflag)!=0){
+            strcpy(real_fflag,"-f");
+        }
+    }
     bucket_path_check(remote_path,hpc_user,real_remote_path);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"delete")==0){
@@ -190,12 +217,20 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
             sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s ls %s%s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag);
         }
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(strcmp(cmd_type,"delete")==0){
             sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 rm %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag);
         }
         else{
             sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 ls %s%s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag);
+        }
+    }
+    else{
+        if(strcmp(cmd_type,"delete")==0){
+            sprintf(cmdline,"%s rm -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
+        }
+        else{
+            sprintf(cmdline,"%s ls -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag);
         }
     }
     if(system(cmdline)!=0){
@@ -392,7 +427,7 @@ int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char
 }
 
 int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* source_path, char* dest_path, char* rflag, char* fflag, char* cloud_flag, char* crypto_keyfile, char* cmd_type){
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
         return -3;
     }
     if(strcmp(cmd_type,"rput")!=0&&strcmp(cmd_type,"rget")!=0){
@@ -440,12 +475,20 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
             sprintf(remote_commands,"coscli -e cos.%s.myqcloud.com -i %s -k %s cp %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(strcmp(cmd_type,"rget")==0){
             sprintf(remote_commands,"export AWS_ACCESS_KEY_ID=%s&&export AWS_SECRET_ACCESS_KEY=%s&&export AWS_DEFAULT_REGION=%s&&aws s3 cp %s%s %s %s %s",bucket_ak,bucket_sk,region_id,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
             sprintf(remote_commands,"export AWS_ACCESS_KEY_ID=%s&&export AWS_SECRET_ACCESS_KEY=%s&&export AWS_DEFAULT_REGION=%s&&aws s3 cp %s %s%s %s %s",bucket_ak,bucket_sk,region_id,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+        }
+    }
+    else{
+        if(strcmp(cmd_type,"rget")==0){
+            sprintf(remote_commands,"obscli cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s %s",region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+        }
+        else{
+            sprintf(remote_commands,"obscli cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
 //    printf("%s ---\n",remote_commands);

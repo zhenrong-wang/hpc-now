@@ -22,6 +22,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param);
 int check_reconfigure_list(char* workdir);
 int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_config, char* htflag);
 int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_config);
+int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume);
 int cluster_sleep(char* workdir, char* crypto_keyfile);
 int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option);
 int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag);

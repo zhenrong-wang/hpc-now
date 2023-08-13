@@ -572,7 +572,7 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
 int getstate(char* workdir, char* crypto_filename){
     char cloud_flag[16]="";
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
         return -3;
     }
     char stackdir[DIR_LENGTH]="";
@@ -638,8 +638,14 @@ int getstate(char* workdir, char* crypto_filename){
         fclose(file_p_statefile);
         return -1;
     }
-    find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
-    find_and_get(compute_template,"instance_type","","",1,"instance_type","","",'.',3,compute_config);
+    if(strcmp(cloud_flag,"CLOUD_D")==0){
+        find_and_get(master_tf,"flavor_id","","",1,"flavor_id","","",'.',3,master_config);
+        find_and_get(compute_template,"flavor_id","","",1,"flavor_id","","",'.',3,compute_config);
+    }
+    else{
+        find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
+        find_and_get(compute_template,"instance_type","","",1,"instance_type","","",'.',3,compute_config);
+    }
     if(find_multi_keys(compute_template,"cpu_threads_per_core = 1","","","","")!=0){
         strcpy(ht_flag,"htoff");
     }
@@ -692,7 +698,7 @@ int getstate(char* workdir, char* crypto_filename){
             }
         }
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_C")==0){
         node_num_gs=find_multi_keys(tfstate,"\"name\": \"compute","","","","");
         find_and_get(tfstate,"\"name\": \"master","","",90,"\"public_ip\"","","",'\"',4,string_temp);
         fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
@@ -715,6 +721,46 @@ int getstate(char* workdir, char* crypto_filename){
                 node_num_on_gs++;
             }
         }
+    }
+    else{
+        node_num_gs=find_multi_keys(tfstate,"\"type\": \"huaweicloud_compute_instance\",","","","","")-3;
+        find_and_get(tfstate,"\"name\": \"master_eip\",","","",20,"\"address\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"master\",","","",20,"\"access_ip_v4\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
+        fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"master\",","","",50,"\"power_action\":","","",'\"',4,string_temp);
+        if(strcmp(string_temp,"ON")==0){
+            fprintf(file_p_statefile,"master_status: Running\n");
+        }
+        else{
+            fprintf(file_p_statefile,"master_status: Stopped\n");
+        } 
+        find_and_get(tfstate,"\"name\": \"database\",","","",50,"\"power_action\":","","",'\"',4,string_temp);
+        if(strcmp(string_temp,"ON")==0){
+            fprintf(file_p_statefile,"database_status: Running\n");
+        }
+        else{
+            fprintf(file_p_statefile,"database_status: Stopped\n");
+        }
+        for(i=0;i<node_num_gs;i++){
+            sprintf(string_temp2,"\"name\": \"compute%d\",",i+1);
+            find_and_get(tfstate,string_temp2,"","",50,"\"access_ip_v4\":","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
+            fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
+            find_and_get(tfstate,string_temp2,"","",50,"\"power_action\":","","",'\"',4,string_temp);
+            if(strcmp(string_temp,"ON")==0){
+                fprintf(file_p_statefile,"compute%d_status: Running\n",i+1);
+                node_num_on_gs++;
+            }
+            else{
+                fprintf(file_p_statefile,"compute%d_status: Stopped\n",i+1);
+            }
+        }
+        find_and_get(tfstate,"\"type\": \"huaweicloud_evs_volume\",","","",50,"\"size\":","","",'\"',3,string_temp);
+        get_seq_string(string_temp,' ',2,string_temp2);
+        get_seq_string(string_temp2,',',1,string_temp);
+        fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
     }
     fprintf(file_p_statefile,"total_compute_nodes: %d\n",node_num_gs);
     fprintf(file_p_statefile,"running_compute_nodes: %d\n",node_num_on_gs);
@@ -827,6 +873,9 @@ void single_file_to_running(char* filename_temp, char* cloud_flag){
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         global_replace(filename_temp,"stopped","running");
     }
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
+        global_replace(filename_temp,"\"OFF\"","\"ON\"");
+    }
 }
 
 void update_compute_template(char* stackdir, char* cloud_flag){
@@ -897,9 +946,6 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, char*
 }
 
 int graph(char* workdir, char* crypto_keyfile, int graph_level){
-/*    if(getstate(workdir,crypto_keyfile)!=0){
-        return -1;
-    }*/
     char cluster_name[64]="";
     char master_address[32]="";
     char master_status[16]="";
@@ -907,6 +953,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char db_status[16]="";
     char cloud_flag[16]="";
     char cluster_role[16]="";
+    char shared_volume[16]="";
     char string_temp[32]="";
     char compute_address[32]="";
     char compute_status[16]="";
@@ -936,6 +983,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     get_key_value(statefile,"ht_flag:",' ',ht_status);
     get_key_value(statefile,"total_compute_nodes:",' ',node_num_string);
     get_key_value(statefile,"payment_method:",' ',payment_method);
+    get_key_value(statefile,"shared_volume_gb:",' ',shared_volume);
     node_num=string_to_positive_num(node_num_string);
     get_key_value(statefile,"running_compute_nodes:",' ',running_node_num_string);
     running_node_num=string_to_positive_num(running_node_num_string);
@@ -965,20 +1013,23 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             }
         }
     }
+    if(graph_level==0&&strcmp(cloud_flag,"CLOUD_D")==0){
+        printf("|          +-shared_storage(%s GB)\n",shared_volume);
+    }
     if(graph_level==1){
-        if(strlen(ht_status)!=0){
-            printf("%s %s | %s | %s %s %s | %d/%d | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
+        if(strlen(shared_volume)!=0){
+            printf("%s %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,shared_volume,payment_method);
         }
         else{
-            printf("%s %s | %s | %s %s %s | %d/%d | %s | %s \n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,payment_method);
+            printf("%s %s | %s | %s %s %s | %d/%d | %s | %s | %s \n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
         }
     }
     else if(graph_level==2){
-        if(strlen(ht_status)!=0){
-            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
+        if(strlen(shared_volume)!=0){
+            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,shared_volume,payment_method);
         }
         else{
-            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,payment_method);
+            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
         }
     }
     printf(RESET_DISPLAY);
@@ -1062,9 +1113,9 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     char vaultdir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char* usage_file=USAGE_LOG_FILE;
-    char randstr[32]="";
+    char randstr[30]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char cluster_id[32]="";
+    char cluster_id[30]="";
     char cloud_region[16]="";
     char cloud_vendor[16]="";
     char unique_cluster_id[64]="";
@@ -1094,11 +1145,10 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     fclose(file_p);
     sprintf(filename_temp,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
     find_and_get(filename_temp,"CLUSTER_ID","","",1,"CLUSTER_ID","","",' ',3,cluster_id);
-    sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
-    find_and_get(filename_temp,"master_inst","","",1,"master_inst","","",' ',3,master_config);
     find_and_get(filename_temp,"REGION_ID","","",1,"REGION_ID","","",' ',3,cloud_region);
-    sprintf(filename_temp,"%s%scompute_template",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,compute_config);
+    sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+    get_state_value(workdir,"master_config:",master_config);
+    get_state_value(workdir,"compute_config:",compute_config);
     get_cloud_flag(workdir,cloud_vendor);
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
@@ -1344,6 +1394,12 @@ int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag){
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         global_replace(filename_temp,"stopped","running");
     }
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
+        global_replace(filename_temp,"\"OFF\"","\"ON\"");
+    }
+    else{
+        return 1;
+    }
     return 0;
 }
 
@@ -1358,6 +1414,12 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         global_replace(filename_temp,"running","stopped");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
+        global_replace(filename_temp,"\"ON\"","\"OFF\"");
+    }
+    else{
+        return 1;
     }
     return 0;
 }
@@ -2363,6 +2425,12 @@ int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag){
         strcpy(line_buffer2,"  instance_charge_type_prepaid_period = 1");
         strcpy(line_buffer3,"  force_delete = true");
         strcpy(line_buffer4,"instance_charge_type_prepaid_renew_flag = \"NOTIFY_AND_AUTO_RENEW\"");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
+        strcpy(line_buffer1,"  charging_mode = \"prePaid\"");
+        strcpy(line_buffer2,"  period_unit = \"month\"");
+        strcpy(line_buffer3,"  period = 1");
+        strcpy(line_buffer4,"  auto_renew = true");
     }
     else{
         return -3;

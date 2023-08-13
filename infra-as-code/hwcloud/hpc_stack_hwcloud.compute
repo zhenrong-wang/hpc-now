@@ -1,0 +1,32 @@
+resource "huaweicloud_compute_instance" "COMPUTE_NODE_N" {
+  name = "COMPUTE_NODE_N-RESOURCETAG"
+  availability_zone = "DEFAULT_ZONE_ID"
+  security_group_ids = [huaweicloud_networking_secgroup.group_intra.id]
+  image_id = data.huaweicloud_images_images.OS_IMAGE.images[0].id
+  flavor_id = data.huaweicloud_compute_flavors.COMPUTE_INST.ids[0]
+  system_disk_type = "GPSSD"
+  system_disk_size = 40
+  network {
+    uuid = huaweicloud_vpc_subnet.hpc_stack_subnet.id
+  }
+  tags = {
+    key = "resource_group"
+    value = "RESOURCETAG"
+  }
+  power_action = "ON"
+  user_data = <<EOF
+#!/bin/bash
+hostnamectl set-hostname COMPUTE_NODE_N
+echo "${var.compute_passwd}" | passwd root --stdin >> /dev/null 2>&1
+touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+mkdir -p /hpc_apps && mkdir -p /hpc_data
+yum -y install rpcbind nfs-utils
+mount -t nfs -o vers=4.0 ${huaweicloud_compute_instance.master.access_ip_v4}:/mnt/sdb/hpc_apps /hpc_apps
+mount -t nfs -o vers=4.0 ${huaweicloud_compute_instance.master.access_ip_v4}:/mnt/sdb/hpc_data /hpc_data
+echo -e "${huaweicloud_compute_instance.master.access_ip_v4}:/mnt/sdb/hpc_apps /hpc_apps nfs vers=4,minorversion=0,hard,timeo=600,retrans=2 0 0" >> /etc/fstab
+echo -e "${huaweicloud_compute_instance.master.access_ip_v4}:/mnt/sdb/hpc_data /hpc_data nfs vers=4,minorversion=0,hard,timeo=600,retrans=2 0 0" >> /etc/fstab
+rm -rf /root/.ssh 
+echo -e "${huaweicloud_compute_instance.master.access_ip_v4}" > /root/master_ip.txt
+nohup curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.compute_init_parameters} > /var/log/cluster_COMPUTE_NODE_N_init_raw.log 2>&1 &
+EOF
+}
