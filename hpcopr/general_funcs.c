@@ -74,6 +74,7 @@ char command_keywords[CMD_KWDS_NUM][16]={
     "--jexec",
     "--jdata",
     "--level",
+    "--vol",
     "--cname", //cluster_name
     "--ak",
     "--sk",

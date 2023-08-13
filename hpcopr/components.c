@@ -26,6 +26,7 @@ extern char terraform_version_var[16];
 extern char ali_tf_plugin_version_var[16];
 extern char qcloud_tf_plugin_version_var[16];
 extern char aws_tf_plugin_version_var[16];
+extern char hw_tf_plugin_version_var[16];
 
 extern char md5_tf_exec_var[64];
 extern char md5_tf_zip_var[64];
@@ -36,6 +37,8 @@ extern char md5_qcloud_tf_var[64];
 extern char md5_qcloud_tf_zip_var[64];
 extern char md5_aws_tf_var[64];
 extern char md5_aws_tf_zip_var[64];
+extern char md5_hw_tf_var[64];
+extern char md5_hw_tf_zip_var[64];
 
 int valid_md5_or_not(char* md5_input){
     if(strlen(md5_input)!=32){
@@ -112,6 +115,7 @@ int get_vers_md5_vars(void){
     get_seq_string(vers_md5_line,'\t',2,ali_tf_plugin_version_var);
     get_seq_string(vers_md5_line,'\t',3,qcloud_tf_plugin_version_var);
     get_seq_string(vers_md5_line,'\t',4,aws_tf_plugin_version_var);
+    get_seq_string(vers_md5_line,'\t',5,hw_tf_plugin_version_var);
     if(valid_ver_or_not(terraform_version_var)!=0||valid_ver_or_not(ali_tf_plugin_version_var)!=0||valid_ver_or_not(qcloud_tf_plugin_version_var)!=0||valid_ver_or_not(aws_tf_plugin_version_var)!=0){
 //        printf("%s||%s||%s||%sERROR HERE!.2.\n",terraform_version_var,ali_tf_plugin_version_var,qcloud_tf_plugin_version_var,aws_tf_plugin_version_var);
 //        printf("ERROR HERE!.1.\n");
@@ -183,6 +187,20 @@ int get_vers_md5_vars(void){
                 return 1;
             }
             strcpy(md5_aws_tf_zip_var,tail);
+        }
+        else if(strcmp(header,"HW_TF:")==0){
+            if(valid_md5_or_not(tail)!=0){
+//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
+                return 1;
+            }
+            strcpy(md5_hw_tf_var,tail);
+        }
+        else if(strcmp(header,"HW_TF_ZIP:")==0){
+            if(valid_md5_or_not(tail)!=0){
+//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
+                return 1;
+            }
+            strcpy(md5_hw_tf_zip_var,tail);
         }
         else{
             continue;

@@ -1,0 +1,26 @@
+#CREATE_DATABASE_NODE
+resource "huaweicloud_compute_instance" "database" {
+  name = "database-RESOURCETAG"
+  availability_zone = "DEFAULT_ZONE_ID"
+  security_group_ids = [huaweicloud_networking_secgroup.mysql_intra.id]
+  image_id = data.huaweicloud_images_images.centos7.images[0].id
+  flavor_id = data.huaweicloud_compute_flavors.i1c1g.ids[0]
+  system_disk_type = "GPSSD"
+  system_disk_size = 40
+  network {
+    uuid = huaweicloud_vpc_subnet.hpc_stack_subnet.id
+  }
+  tags = {
+    key = "resource_group"
+    value = "RESOURCETAG"
+  }
+  power_action = "ON"
+  user_data = <<EOF
+#!/bin/bash
+hostnamectl set-hostname database
+echo "${huaweicloud_vpc_route.route_to_natgw.id}" >> /dev/null
+echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
+echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
+curl ${var.db_init_scripts} | bash
+EOF
+}

@@ -43,12 +43,15 @@ url_utils=${INITUTILS_REPO_ROOT}
 #CLOUD_A: Alicloud
 #CLOUD_B: QCloud/TencentCloud
 #CLOUD_C: Amazon Web Services
+#CLOUD_D: Huawei Cloud
 if [ -f /root/CLOUD_A ]; then
   cloud_flag="CLOUD_A"
 elif [ -f /root/CLOUD_B ]; then
   cloud_flag="CLOUD_B"
 elif [ -f /root/CLOUD_C ]; then
   cloud_flag="CLOUD_C"
+elif [ -f /root/CLOUD_D ]; then
+  cloud_flag="CLOUD_D"
 else
   echo -e "# $time_current [ FATAL: ] Cloud flag is missing. Initialization abort." >> ${logfile}
   exit 1
@@ -356,7 +359,11 @@ if [ -f /root/hostfile ]; then
     #yum -y install s3cmd
     curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -q -o /tmp/awscli.zip
     unzip -o /tmp/awscli.zip -d /tmp
-    /tmp/aws/install 
+    /tmp/aws/install
+  elif [ $cloud_flag = 'CLOUD_D' ]; then
+    curl https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz -o /tmp/obsutil_linux_amd64.tar.gz
+    tar zvxf /tmp/obsutil_linux_amd64.tar.gz -C /tmp/
+    /bin/cp -r /tmp/obsutil_linux_amd64*/obsutil /usr/local/bin/
   fi
 fi
 
@@ -388,9 +395,10 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 if [ -f /root/hostfile ]; then
   echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
-  if [ $distro_type != 'CentOS' ]; then
+  if [ $distro_type != 'CentOS' ] && [ $distro_type != 'Rocky' ]; then
     echo -e "# $time_current GNU/Linux Distro: ${distro_type}. Installing GUI now." >> ${logfile}
-    dnf -y install gnome-shell gdm gnome-session gnome-terminal gnome-shell-extensions gnome-system-monitor gnome-tweaks 
+    yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks 
+    yum -y install gnome-shell-extensions 
     yum -y install firefox ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
     systemctl enable gdm.service --now
   else
@@ -516,12 +524,6 @@ fi
 
 yum -y update
 yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix
-#if [ -f /root/hostfile ]; then
-#  yum -y install dos2unix ncurses-compat-libs
-#  wget ${url_utils}progress-0.13-1.el7.x86_64.rpm -O /root/progress-0.13-1.el7.x86_64.rpm
-#  rpm -ivh /root/progress-0.13-1.el7.x86_64.rpm
-#  rm -rf /root/progress-0.13-1.el7.x86_64.rpm
-#fi
 
 # Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
 if [ $cloud_flag = 'CLOUD_B' ]; then

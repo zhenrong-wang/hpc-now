@@ -1,0 +1,408 @@
+terraform {
+  required_providers {
+    huaweicloud = {
+      source  = "huaweicloud/huaweicloud"
+      version = "~> 1.53.0"
+    }
+  }
+}
+
+provider "huaweicloud" {
+  access_key = "BLANK_ACCESS_KEY_ID"
+  secret_key = "BLANK_SECRET_KEY"
+  region = "DEFAULT_REGION_ID"
+}
+
+variable "shared_storage" {
+  type = number
+  default = DEFAULT_STORAGE_VOLUME #-#-#
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "NODE_NUM" {
+  type = number
+  default = DEFAULT_NODE_NUM
+}
+
+variable "HPC_USER_NUM" {
+  type = number
+  default = DEFAULT_USER_NUM
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+
+variable "cluster_init_scripts" {
+  type = string
+  default = "BLANK_URL_SHELL_SCRIPTScluster_initv7.sh"
+}
+
+variable "db_init_scripts" {
+  type = string
+  default = "BLANK_URL_SHELL_SCRIPTScluster_db_init.sh"
+}
+
+variable "master_init_parameters" {
+  type = string
+  default = "DEFAULT_MASTERINI"
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "compute_init_parameters" {
+  type = string
+  default = "skip skip"
+}  
+
+variable "master_passwd" {
+  type = string
+  default = "DEFAULT_MASTER_PASSWD"
+}
+
+variable "compute_passwd" {
+  type = string
+  default = "DEFAULT_COMPUTE_PASSWD"
+}
+
+variable "database_root_passwd" {
+  type = string
+  default = "DEFAULT_DB_ROOT_PASSWD"
+}
+
+variable "database_acct_passwd" {
+  type = string
+  default = "DEFAULT_DB_ACCT_PASSWD"
+}
+
+#define some data
+data "huaweicloud_compute_flavors" "i128c256g" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  generation = "c7"
+  cpu_core_count = 128
+  memory_size = 256
+}
+
+data "huaweicloud_compute_flavors" "i96c192g" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  generation = "c7"
+  cpu_core_count = 96
+  memory_size = 192
+}
+
+data "huaweicloud_compute_flavors" "i64c128g" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  generation = "c7"
+  cpu_core_count = 64
+  memory_size = 128
+}
+
+data "huaweicloud_compute_flavors" "i48c96g" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  generation = "c7"
+  cpu_core_count = 48
+  memory_size = 96
+}
+
+data "huaweicloud_compute_flavors" "i32c64g" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  generation = "c7"
+  cpu_core_count = 32
+  memory_size = 64
+}
+
+data "huaweicloud_compute_flavors" "i24c48g" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  generation = "c7"
+  cpu_core_count = 24
+  memory_size = 48
+}
+
+data "huaweicloud_compute_flavors" "i16c32g" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  generation = "c7"
+  cpu_core_count = 16
+  memory_size = 32
+}
+
+data "huaweicloud_compute_flavors" "i8c16g" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  generation = "c7"
+  cpu_core_count = 8
+  memory_size = 16
+}
+
+data "huaweicloud_compute_flavors" "i4c8g" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  generation = "c7"
+  cpu_core_count = 4
+  memory_size = 8
+}
+
+data "huaweicloud_compute_flavors" "i2c4g" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  generation = "c7"
+  cpu_core_count = 2
+  memory_size = 4
+}
+
+data "huaweicloud_compute_flavors" "i1c1g" {
+  availability_zone = "DEFAULT_ZONE_ID"
+  generation = "s6"
+  cpu_core_count = 1
+  memory_size = 2
+}
+
+data "huaweicloud_images_images" "rocky9" {
+  visibility = "public"
+  os_version = "Rocky Linux 9.0 64bit"
+  architecture = "x86"
+}
+
+data "huaweicloud_images_images" "centos7" {
+  architecture = "x86"
+  os_version   = "CentOS 7.9 64bit"
+  visibility   = "public"
+}
+
+#create vpc
+resource "huaweicloud_vpc" "hpc_stack" {
+  name = "DEFAULT_VPC_NAME"
+  cidr = "10.0.0.0/12"
+}
+
+resource "huaweicloud_vpc_subnet" "hpc_stack_subnet" {
+  name = "DEFAULT_SUBNET_NAME"
+  availability_zone = "DEFAULT_ZONE_ID"
+  gateway_ip = "10.0.0.255"
+  vpc_id = huaweicloud_vpc.hpc_stack.id
+  cidr = "10.0.0.0/20"
+}
+
+resource "huaweicloud_vpc_subnet" "hpc_stack_pub_subnet" {
+  name = "DEFAULT_PUB_SUBNET_NAME"
+  availability_zone = "DEFAULT_ZONE_ID"
+  gateway_ip = "10.15.255.14"
+  vpc_id = huaweicloud_vpc.hpc_stack.id
+  cidr = "10.15.255.0/28"
+}
+
+resource "huaweicloud_networking_secgroup" "natgw_transparent" {
+  name = "SECURITY_GROUP_NATGW"
+  delete_default_rules = true
+}
+
+resource "huaweicloud_networking_secgroup_rule" "natgw_rules_ingress" {
+  security_group_id = huaweicloud_networking_secgroup.natgw_transparent.id
+  direction  = "ingress"
+  action  = "allow"
+  ethertype  = "IPv4"
+  remote_ip_prefix = "0.0.0.0/0"
+}
+
+resource "huaweicloud_networking_secgroup_rule" "natgw_rules_egress" {
+  security_group_id = huaweicloud_networking_secgroup.natgw_transparent.id
+  direction  = "egress"
+  action  = "allow"
+  ethertype  = "IPv4"
+  remote_ip_prefix = "0.0.0.0/0"
+}
+
+resource "huaweicloud_networking_secgroup" "group" {
+  name = "SECURITY_GROUP_PUBLIC"
+  delete_default_rules = true
+}
+
+resource "huaweicloud_networking_secgroup_rule" "group_rule_all" {
+  security_group_id = huaweicloud_networking_secgroup.group.id
+  direction  = "egress"
+  action  = "allow"
+  ethertype  = "IPv4"
+  remote_ip_prefix = "0.0.0.0/0"
+}
+
+resource "huaweicloud_networking_secgroup_rule" "group_rule_ingress" {
+  security_group_id = huaweicloud_networking_secgroup.group.id
+  direction  = "ingress"
+  action  = "allow"
+  ethertype  = "IPv4"
+  ports = "22,3389,6817-6819"
+  protocol = "tcp"
+  remote_ip_prefix = "0.0.0.0/0"
+}
+
+resource "huaweicloud_networking_secgroup_rule" "group_rule_ingress2" {
+  security_group_id = huaweicloud_networking_secgroup.group.id
+  direction  = "ingress"
+  action  = "allow"
+  ethertype  = "IPv4"
+  ports = "1-65535"
+  protocol = "tcp"
+  remote_ip_prefix = "10.0.0.0/12"
+}
+
+resource "huaweicloud_networking_secgroup_rule" "group_rule_icmp" {
+  security_group_id = huaweicloud_networking_secgroup.group.id
+  protocol = "icmp"
+  direction  = "ingress"
+  ethertype  = "IPv4"
+  remote_ip_prefix = "0.0.0.0/0"
+}
+
+resource "huaweicloud_networking_secgroup" "group_intra" {
+  name = "SECURITY_GROUP_INTRA"
+  delete_default_rules = true
+}
+
+resource "huaweicloud_networking_secgroup_rule" "group_intra_rule_all" {
+  security_group_id = huaweicloud_networking_secgroup.group_intra.id
+  direction  = "egress"
+  action  = "allow"
+  ethertype  = "IPv4"
+  remote_ip_prefix = "0.0.0.0/0"
+}
+
+resource "huaweicloud_networking_secgroup_rule" "group_intra_rule_ingress" {
+  security_group_id = huaweicloud_networking_secgroup.group_intra.id
+  direction  = "ingress"
+  protocol = "tcp"
+  action  = "allow"
+  ethertype  = "IPv4"
+  remote_ip_prefix = "10.0.0.0/12"
+}
+
+resource "huaweicloud_networking_secgroup_rule" "group_intra_rule_icmp" {
+  security_group_id = huaweicloud_networking_secgroup.group_intra.id
+  protocol = "icmp"
+  direction  = "ingress"
+  ethertype  = "IPv4"
+  remote_ip_prefix = "10.0.0.0/12"
+}
+
+resource "huaweicloud_networking_secgroup" "mysql_intra" {
+  name = "SECURITY_GROUP_MYSQL"
+  delete_default_rules = true
+}
+
+resource "huaweicloud_networking_secgroup_rule" "mysql_intra_rule_all" {
+  security_group_id = huaweicloud_networking_secgroup.mysql_intra.id
+  direction  = "egress"
+  action  = "allow"
+  ethertype  = "IPv4"
+  remote_ip_prefix = "0.0.0.0/0"
+}
+
+resource "huaweicloud_networking_secgroup_rule" "mysql_intra_rule" {
+  security_group_id = huaweicloud_networking_secgroup.mysql_intra.id
+  protocol = "tcp"
+  ports = "3306"
+  ethertype = "IPv4"
+  direction = "ingress"
+  remote_ip_prefix = "10.0.0.0/12"
+}
+
+resource "huaweicloud_evs_volume" "shared_volume" {
+  name = "shared_volume"
+  volume_type = "SAS"
+  size = "${var.shared_storage}"
+  availability_zone = "DEFAULT_ZONE_ID"
+  tags = {
+    key = "resource_group"
+    value = "RESOURCETAG"
+  }
+}
+
+#CREATE a bucket for data storage
+resource "huaweicloud_obs_bucket" "hpc_data_storage" {
+  bucket = "BUCKET_ID"
+  force_destroy = true
+  acl = "private"
+  multi_az = false
+  tags = {
+    key = "resource_group"
+    value = "RESOURCETAG"
+  }
+}
+
+data "huaweicloud_identity_group" "admin_group" {
+  name = "admin"
+}
+resource "huaweicloud_obs_bucket_policy" "hpc_data_storage_policy" {
+  bucket = huaweicloud_obs_bucket.hpc_data_storage.id
+  policy = <<POLICY
+{
+  "Statement": [
+    {
+      "Sid": "AddPerm",
+      "Effect": "Allow",
+      "Principal": {"ID": "domain/${data.huaweicloud_identity_group.admin_group.domain_id}:user/${huaweicloud_identity_user.hpc_user.id}"},
+      "NotAction": [
+        "DeleteBucket",
+        "PutBucketPolicy",
+        "PutBucketAcl"
+      ],
+      "Resource": [
+        "BUCKET_ID/*",
+        "BUCKET_ID"
+      ]
+    }
+  ]
+}
+POLICY
+}
+
+#create an iam user with the policy to only access the bucket, nothing else
+data "huaweicloud_identity_projects" "hpc_project" {
+  name = "DEFAULT_REGION_ID"
+}
+
+resource "huaweicloud_identity_group" "hpc_user_group" {
+  name = "BUCKET_USER_ID"
+}
+
+resource "huaweicloud_identity_user" "hpc_user" {
+  name = "BUCKET_USER_ID"
+  access_type = "programmatic"
+  pwd_reset = false
+}
+
+resource "huaweicloud_identity_group_membership" "hpc_user_group_mem" {
+  group = huaweicloud_identity_group.hpc_user_group.id
+  users = [
+    huaweicloud_identity_user.hpc_user.id
+  ]
+}
+
+resource "huaweicloud_identity_access_key" "hpc_user_key" {
+  user_id = huaweicloud_identity_user.hpc_user.id
+  secret_file = "/NULL/NULL/NULL/NULL.NULL"
+}
+
+resource "huaweicloud_identity_role" "hpc_group_role" {
+  name = "BUCKET_USER_ID"
+  type  = "AX"
+  description = "BUCKET_USER_ID_access"
+  policy  = <<EOF
+  {
+    "Version": "1.1",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "obs:object:GetObject",
+          "obs:object:DeleteObject",
+          "obs:object:PutObject",
+          "obs:bucket:GetBucketStorage"
+        ],
+        "Resource": [
+          "OBS:*:*:object:BUCKET_ID/*",
+          "OBS:*:*:bucket:BUCKET_ID"
+        ]
+      }
+    ]
+  }
+EOF
+}
+
+resource "huaweicloud_identity_role_assignment" "hpc_role_attach" {
+  group_id = huaweicloud_identity_group.hpc_user_group.id
+  role_id = huaweicloud_identity_role.hpc_group_role.id
+  project_id = data.huaweicloud_identity_projects.hpc_project.projects[0].id
+}
