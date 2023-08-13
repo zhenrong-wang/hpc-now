@@ -147,7 +147,7 @@ data "huaweicloud_compute_flavors" "i1c1g" {
   availability_zone = "DEFAULT_ZONE_ID"
   generation = "s6"
   cpu_core_count = 1
-  memory_size = 1
+  memory_size = 2
 }
 
 data "huaweicloud_images_images" "rocky9" {
