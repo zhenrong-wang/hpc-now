@@ -484,6 +484,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently there is no secrets keypair. This working directory may be\n");
         printf("|          corrputed, which is very unusual. Please contact us via:\n");
         printf("|          info@hpc-now.com for troubleshooting. Exit now." RESET_DISPLAY "\n");
+        fclose(file_p);
         return -3;
     }
     printf(GENERAL_BOLD "\n");
@@ -507,6 +508,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
+        fclose(file_p);
         return 1;
     }
     get_ak_sk(filename_temp2,crypto_keyfile,access_key_prev,secret_key_prev,cloud_flag_prev);

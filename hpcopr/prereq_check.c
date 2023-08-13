@@ -81,7 +81,7 @@ int check_current_user(void){
 #ifdef _WIN32
     char current_user_full[128]="";
     char current_user[128]="";
-    int i,slash;
+    int i,slash=0;
     if(system("whoami > c:\\programdata\\current_user.txt.tmp")!=0){
         return 1;
     }

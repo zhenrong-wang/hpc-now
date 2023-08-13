@@ -236,6 +236,7 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     sprintf(filename_temp,"%s.tmp",filename);
     file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
+        fclose(file_p);
         return -1;
     }
     while(fgetline(file_p,single_line)==0){
@@ -296,6 +297,7 @@ int line_replace(char* orig_line, char* new_line, char* orig_string, char* new_s
         for(i=0;i<length;i++){
             *(new_line+i)=*(orig_line+i);
         }
+        free(temp_string);
         return length;
     }
     reset_string(new_line);
@@ -848,7 +850,7 @@ int insert_lines(char* filename, char* keyword, char* insert_string){
     fseek(file_p,0,SEEK_SET);
     sprintf(filename_temp,"%s.tmp",filename);
     file_p_2=fopen(filename_temp,"w+");
-    if(file_p==NULL){
+    if(file_p_2==NULL){
         fclose(file_p);
         return -1;
     }

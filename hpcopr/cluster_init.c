@@ -298,6 +298,7 @@ int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bu
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
+        fclose(file_p);
         return -3;
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
@@ -361,7 +362,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char cloud_flag[16]="";
     int read_conf_flag=0;
     char conf_param_buffer[32]="";
-    char cluster_id_temp[16]="";
+    char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
     char cluster_id[CONF_STRING_LENTH]="";
@@ -969,7 +970,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char cloud_flag[16]="";
     int read_conf_flag=0;
     char conf_param_buffer[32]="";
-    char cluster_id_temp[16]="";
+    char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
     char cluster_id[CONF_STRING_LENTH]="";
@@ -1472,7 +1473,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char cloud_flag[16]="";
     char conf_param_buffer[32]="";
     int read_conf_flag=0;
-    char cluster_id_temp[16]="";
+    char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
     char cluster_id[CONF_STRING_LENTH]="";
@@ -1973,7 +1974,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     char cloud_flag[16]="";
     int read_conf_flag=0;
     char conf_param_buffer[32]="";
-    char cluster_id_temp[16]="";
+    char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
     char cluster_id[CONF_STRING_LENTH]="";
