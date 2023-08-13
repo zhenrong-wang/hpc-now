@@ -1234,7 +1234,12 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         return -1;
     }
     sprintf(filename_temp,"%s%scompute_template",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
+    if(strcmp(cloud_flag,"CLOUD_D")==0){
+        find_and_get(filename_temp,"flavor_id","","",1,"flavor_id","","",'.',3,prev_config);
+    }
+    else{
+        find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
+    }
     if(strcmp(prev_config,new_config)==0){
         if(strcmp(cloud_flag,"CLOUD_A")==0||strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_D")==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
@@ -1440,7 +1445,12 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     }
     get_cloud_flag(workdir,cloud_flag);
     sprintf(filename_temp,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
+    if(strcmp(cloud_flag,"CLOUD_D")==0){
+        find_and_get(filename_temp,"flavor_id","","",1,"flavor_id","","",'.',3,prev_config);
+    }
+    else{
+        find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
+    }
     if(strcmp(prev_config,new_config)==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
         printf("|          Nothing changed. Exit now.\n");
