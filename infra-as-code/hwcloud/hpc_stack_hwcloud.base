@@ -156,6 +156,12 @@ data "huaweicloud_images_images" "rocky9" {
   architecture = "x86"
 }
 
+data "huaweicloud_images_images" "euleros" {
+  architecture = "x86"
+  os_version = "EulerOS 2.0"
+  visibility = "public"
+}
+
 data "huaweicloud_images_images" "centos7" {
   architecture = "x86"
   os_version   = "CentOS 7.9 64bit"
