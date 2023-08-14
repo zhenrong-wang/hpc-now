@@ -69,7 +69,7 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     char* default_compute_inst_hwcloud="i4c8g";
     char real_compute_inst[128]="";
     char* default_os_image="centoss9";
-    char* default_os_image_hwcloud="euleros";
+    char* default_os_image_hwcloud="rocky9";
     char real_os_image[128]="";
     char* default_ht_flag="ON";
     char real_ht_flag[128]="";

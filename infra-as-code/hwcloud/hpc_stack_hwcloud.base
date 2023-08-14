@@ -158,7 +158,8 @@ data "huaweicloud_images_images" "rocky9" {
 
 data "huaweicloud_images_images" "euleros" {
   architecture = "x86"
-  os_version = "EulerOS 2.0"
+  name = "Huawei Cloud EulerOS 2.0 Standard 64 bit"
+  os_version = "Huawei Cloud EulerOS 2.0 64bit"
   visibility = "public"
 }
 
