@@ -112,7 +112,7 @@ if [ -f /root/hostfile ]; then
   mkdir -p /hpc_data/cluster_data
   chmod -R 644 /hpc_data/cluster_data
   chmod 755 /hpc_data/cluster_data
-  if [ cloud_flag = 'CLOUD_E' ]; then
+  if [ $cloud_flag = 'CLOUD_E' ]; then
     mkdir -p /hpc_data/cluster_data/.bucket_creds
     chmod -R 644 /hpc_data/cluster_data/.bucket_creds
   fi
