@@ -64,12 +64,28 @@ int add_to_cluster_registry(char* new_cluster_name, char* import_flag){
     return 0;
 }
 
-void create_and_get_stackdir(char* workdir, char* stackdir){
+int create_and_get_stackdir(char* workdir, char* stackdir){
+    int base_length=strlen(HPC_NOW_ROOT_DIR)+7;
+    if(strlen(workdir)<base_length){
+        strcpy(stackdir,"");
+        return 1;
+    }
     char cmdline[CMDLINE_LENGTH]="";
+    int run_flag;
     sprintf(stackdir,"%s%sstack",workdir,PATH_SLASH);
     if(folder_exist_or_not(stackdir)!=0){
         sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            strcpy(stackdir,"");
+            return 3;
+        }
+        else{
+            return 0;
+        }
+    }
+    else{
+        return 0;
     }
 }
 
@@ -244,12 +260,28 @@ void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
     system(cmdline);
 }
 
-void create_and_get_vaultdir(char* workdir, char* vaultdir){
+int create_and_get_vaultdir(char* workdir, char* vaultdir){
+    int base_length=strlen(HPC_NOW_ROOT_DIR)+7;
+    if(strlen(workdir)<base_length){
+        strcpy(vaultdir,"");
+        return 1;
+    }
     char cmdline[CMDLINE_LENGTH]="";
+    int run_flag;
     sprintf(vaultdir,"%s%svault",workdir,PATH_SLASH);
     if(folder_exist_or_not(vaultdir)!=0){
         sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            strcpy(vaultdir,"");
+            return 3;
+        }
+        else{
+            return 0;
+        }
+    }
+    else{
+        return 0;
     }
 }
 

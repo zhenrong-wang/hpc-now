@@ -10,7 +10,7 @@
 
 int cluster_role_detect(char* workdir, char* cluster_role);
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag);
-void create_and_get_stackdir(char* workdir, char* stackdir);
+int create_and_get_stackdir(char* workdir, char* stackdir);
 void get_latest_hosts(char* stackdir, char* hostfile_latest);
 int decrypt_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_info);
 int get_cloud_flag(char* workdir, char* cloud_flag);
@@ -18,7 +18,7 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
 int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char* sshkey_dir);
 int activate_sshkey(char* ssh_privkey);
 void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir);
-void create_and_get_vaultdir(char* workdir, char* vaultdir);
+int create_and_get_vaultdir(char* workdir, char* vaultdir);
 int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes);
 int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char* commands, char* extra_options, int delay_minutes, int silent_flag, char* std_redirect, char* err_redirect);
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag);
