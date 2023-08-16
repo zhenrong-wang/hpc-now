@@ -375,14 +375,6 @@ resource "baiducloud_security_group_rule" "mysql_intra_rule1" {
   source_ip = "10.0.0.0/12"
 }
 
-resource "baiducloud_security_group_rule" "mysql_intra_rule2" {
-  security_group_id = "${baiducloud_security_group.mysql_intra.id}"
-  protocol = "tcp"
-  port_range = "22"
-  direction  = "ingress"
-  source_ip = "10.0.0.0/12"
-}
-
 resource "baiducloud_cfs" "hpc_apps" {
   name = "hpc_apps-NFSID"
   zone = "DEFAULT_NAS_ZONE" #such as zoneA, not cn-bj-a !
