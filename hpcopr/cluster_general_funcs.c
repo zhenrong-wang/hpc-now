@@ -526,8 +526,8 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
-//    sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
-//    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%scredentials",vaultdir,PATH_SLASH);
+    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
@@ -2509,4 +2509,37 @@ int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag){
         modify_payment_single_line(filename_temp,modify_flag,line_buffer4);
     }
     return 0;
+}
+
+int generate_bceconfig(char* vaultdir, char* region_id, char* bucket_ak, char* bucket_sk){
+    char config[FILENAME_LENGTH]="";
+    char credentials[FILENAME_LENGTH]="";
+    FILE* file_p1=NULL;
+    FILE* file_p2=NULL;
+    sprintf(config,"%s%sconfig",vaultdir,PATH_SLASH);
+    sprintf(credentials,"%s%scredentials",vaultdir,PATH_SLASH);
+    file_p1=fopen(config,"w+");
+    if(file_p1==NULL){
+        return -1;
+    }
+    file_p2=fopen(credentials,"w+");
+    if(file_p2==NULL){
+        fclose(file_p1);
+        return -1;
+    }
+    fprintf(file_p1,"[Defaults]\nDomain = %s.bceos.com\nRegion = %s\nAutoSwitchDomain = \nBreakpointFileExpiration = 10000\nHttps = yes\nMultiUploadThreadNum = \nSyncProcessingNum = \nMultiUploadPartSize = \nProxyHost =\n",region_id,region_id);
+    fclose(file_p1);
+    fprintf(file_p2,"[Defaults]\nAk = %s\nSk = %s\nSts = ",bucket_ak,bucket_sk);
+    fclose(file_p2);
+    return 0;
+}
+
+int decrypt_bcecredentials(char* workdir){
+    char md5sum[64]="";
+    char vaultdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    get_crypto_key(CRYPTO_KEY_FILE,md5sum);
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(filename_temp,"%s%scredentials.tmp",vaultdir,PATH_SLASH);
+    return decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
 }

@@ -14,7 +14,6 @@ resource "baiducloud_instance" "database" {
   auto_renew_time_length = 1
   user_data = base64encode(<<EOF
 #!/bin/bash
-echo "test2022!" | passwd root --stdin >> /dev/null 2>&1
 echo "${baiducloud_instance.natgw.internal_ip}" >> /dev/null
 echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
 echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt

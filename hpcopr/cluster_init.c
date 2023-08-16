@@ -2812,9 +2812,9 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     system(cmdline);
     getstate(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);
-    find_and_get(filename_temp,"access_key","","",20,"\"id\":","","",'\"',4,bucket_ak);
-    find_and_get(filename_temp,"access_key","","",20,"\"secret\":","","",'\"',4,bucket_sk);
+    find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);// Doesn't work! 
+    find_and_get(filename_temp,"access_key","","",20,"\"id\":","","",'\"',4,bucket_ak); //Desn't work!
+    find_and_get(filename_temp,"access_key","","",20,"\"secret\":","","",'\"',4,bucket_sk); //Desn't work!
     printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
@@ -2891,6 +2891,11 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
         get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
+    generate_bceconfig(vaultdir,region_id,bucket_ak,bucket_sk);
+    sprintf(filename_temp,"%s%scredentials",vaultdir,PATH_SLASH);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/credentials","root","put","",0);
+    sprintf(filename_temp,"%s%sconfig",vaultdir,PATH_SLASH);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/credentials","root","put","",0);
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }

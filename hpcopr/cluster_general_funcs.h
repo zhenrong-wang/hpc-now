@@ -81,21 +81,18 @@ int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords);
 
 int modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer);
 int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag);
+int generate_bceconfig(char* vaultdir, char* region_id, char* bucket_ak, char* bucket_sk);
+int decrypt_bcecredentials(char* workdir);
 
-/*  
+/*
  * If silent_flag==1, verbose. Will tell the user which cluster is active
  * If silent_flag==0, silent. Will print nothing
  * If silent_flag== other_number, Will only show the warning
  */
+
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag);
 int current_cluster_or_not(char* current_indicator, char* cluster_name);
 int cluster_name_check(char* cluster_name);
 int check_and_cleanup(char* prev_workdir);
-
-//int create_protection(char* workdir, int minutes);
-//int check_protection(char* workdir);
-//int delete_protection(char* workdir);
-//void backup_tf_files(char* stackdir);
-//void delete_backups(char* stackdir);
 
 #endif
