@@ -2527,7 +2527,7 @@ int generate_bceconfig(char* vaultdir, char* region_id, char* bucket_ak, char* b
         fclose(file_p1);
         return -1;
     }
-    fprintf(file_p1,"[Defaults]\nDomain = %s.bceos.com\nRegion = %s\nAutoSwitchDomain = \nBreakpointFileExpiration = 10000\nHttps = yes\nMultiUploadThreadNum = \nSyncProcessingNum = \nMultiUploadPartSize = \nProxyHost =\n",region_id,region_id);
+    fprintf(file_p1,"[Defaults]\nDomain = %s.bcebos.com\nRegion = %s\nAutoSwitchDomain = \nBreakpointFileExpiration = 10000\nHttps = yes\nMultiUploadThreadNum = \nSyncProcessingNum = \nMultiUploadPartSize = \nProxyHost =\n",region_id,region_id);
     fclose(file_p1);
     fprintf(file_p2,"[Defaults]\nAk = %s\nSk = %s\nSts = ",bucket_ak,bucket_sk);
     fclose(file_p2);

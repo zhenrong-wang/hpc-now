@@ -2895,7 +2895,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     sprintf(filename_temp,"%s%scredentials",vaultdir,PATH_SLASH);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/credentials","root","put","",0);
     sprintf(filename_temp,"%s%sconfig",vaultdir,PATH_SLASH);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/credentials","root","put","",0);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/config","root","put","",0);
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
