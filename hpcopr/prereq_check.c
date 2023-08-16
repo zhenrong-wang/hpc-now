@@ -314,7 +314,11 @@ obsutil:
                 goto bcecmd;
             }
         }
+#ifdef __APPLE__
+        sprintf(cmdline,"tar zxf '%s' -C %s",filename_temp_zip,NOW_BINARY_DIR);
+#else
         sprintf(cmdline,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+#endif
         system(cmdline);
 #ifndef _WIN32
         sprintf(cmdline,"chmod -R 711 %s%sobsutil_* %s",NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -989,7 +993,7 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v The Terraform Providers have been repaired.\n");
     }
-
+    printf(RESET_DISPLAY);
     flag=install_bucket_clis(force_repair_flag);
     if(flag!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] IMPORTANT! The dataman component %d may not work properly." RESET_DISPLAY "\n",flag);
