@@ -1,0 +1,24 @@
+#CREATE_DATABASE_NODE
+resource "baiducloud_instance" "database" {
+  name = "database-RESOURCETAG"
+  hostname = "database"
+  availability_zone = "DEFAULT_ZONE_ID"
+  image_id = data.baiducloud_images.centoss9.images[0].id
+  instance_spec = data.baiducloud_specs.a2c4g.specs[0].spec
+  action = "start"
+  subnet_id = baiducloud_subnet.hpc_stack_subnet.id
+  security_groups = [baiducloud_security_group.mysql_intra.id]
+  root_disk_size_in_gb = 40
+  root_disk_storage_type = "cloud_hp1"
+  auto_renew_time_unit = "month"
+  auto_renew_time_length = 1
+  user_data = base64encode(<<EOF
+#!/bin/bash
+echo "test2022!" | passwd root --stdin >> /dev/null 2>&1
+echo "${baiducloud_instance.natgw.internal_ip}" >> /dev/null
+echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
+echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
+curl ${var.db_init_scripts} | bash
+EOF
+)
+}

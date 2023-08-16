@@ -49,6 +49,7 @@ char ali_tf_plugin_version_var[16]="";
 char qcloud_tf_plugin_version_var[16]="";
 char aws_tf_plugin_version_var[16]="";
 char hw_tf_plugin_version_var[16]="";
+char bd_tf_plugin_version_var[16]="";
 
 char md5_tf_exec_var[64]="";
 char md5_tf_zip_var[64]="";
@@ -61,6 +62,8 @@ char md5_aws_tf_var[64]="";
 char md5_aws_tf_zip_var[64]="";
 char md5_hw_tf_var[64]="";
 char md5_hw_tf_zip_var[64]="";
+char md5_bd_tf_var[64]="";
+char md5_bd_tf_zip_var[64]="";
 
 /*
  * GEN: GENERAL COMMANDS
@@ -1267,6 +1270,9 @@ int main(int argc, char* argv[]){
         }
         else if(strcmp(cloud_flag,"CLOUD_D")==0){
             run_flag=hwcloud_cluster_init(cluster_name,workdir,crypto_keyfile);
+        }
+        else if(strcmp(cloud_flag,"CLOUD_E")==0){
+            run_flag=baiducloud_cluster_init(cluster_name,workdir,crypto_keyfile);
         }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now." RESET_DISPLAY "\n");

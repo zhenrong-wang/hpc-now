@@ -52,6 +52,8 @@ elif [ -f /root/CLOUD_C ]; then
   cloud_flag="CLOUD_C"
 elif [ -f /root/CLOUD_D ]; then
   cloud_flag="CLOUD_D"
+elif [ -f /root/CLOUD_E ]; then
+  cloud_flag="CLOUD_E"
 else
   echo -e "# $time_current [ FATAL: ] Cloud flag is missing. Initialization abort." >> ${logfile}
   exit 1
@@ -217,7 +219,7 @@ echo -e "# $time_current Munge installed." >> ${logfile}
 
 # Re-Install mariadb Be careful!
 if [ -f /root/hostfile ]; then
-  yum remove -y `rpm -aq mariadb*`
+  yum remove -y `rpm -aq mariadb`
   rm -rf /etc/my.cnf
   rm -rf /var/lib/mysql
   if [ ! -z $centos_version ] && [ $centos_version -eq 7 ]; then
@@ -364,6 +366,12 @@ if [ -f /root/hostfile ]; then
     curl https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz -o /tmp/obsutil_linux_amd64.tar.gz
     tar zvxf /tmp/obsutil_linux_amd64.tar.gz -C /tmp/
     /bin/cp -r /tmp/obsutil_linux_amd64*/obsutil /usr/local/bin/
+    chmod +x /usr/local/bin/obsutil
+  elif [ $cloud_flag = 'CLOUD_E' ]; then
+    curl https://doc.bce.baidu.com/bce-documentation/BOS/linux-bcecmd-0.4.1.zip -o /tmp/bcecmd.zip
+    unzip -o /tmp/bcecmd.zip -d /tmp
+    mv /tmp/linux-bcecmd-0.4.1/bcecmd /usr/local/bin/
+    chmod +x /usr/local/bin/bcecmd
   fi
 fi
 

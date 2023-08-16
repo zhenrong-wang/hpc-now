@@ -2,11 +2,12 @@ terraform {
   required_providers {
     baiducloud = {
       source  = "baidubce/baiducloud"
-      version = "1.19.9"
+      version = "~> 1.19.11"
     }
   }
 }
 
+#cn-bj,cn-bd,cn-gz,cn-su
 provider "baiducloud" {
   access_key = "BLANK_ACCESS_KEY_ID"
   secret_key = "BLANK_SECRET_KEY"
@@ -70,256 +71,141 @@ variable "database_acct_passwd" {
 #define some data
 data "baiducloud_specs" "a80c160g" {
   filter {
-    name   = "cpu_count"
-    values = ["80"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["160"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["AMD EPYC 7W83"]
+    name   = "spec"
+    values = ["bcc.ca2.c80m160"]
   }
 }
 
 data "baiducloud_specs" "a64c128g" {
   filter {
-    name   = "cpu_count"
-    values = ["64"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["128"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["AMD EPYC 7W83"]
+    name   = "spec"
+    values = ["bcc.ca2.c64m128"]
   }
 }
 
 data "baiducloud_specs" "a48c96g" {
   filter {
-    name   = "cpu_count"
-    values = ["48"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["96"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["AMD EPYC 7502"]
+    name   = "spec"
+    values = ["bcc.ca2.c48m96"]
   }
 }
 
 data "baiducloud_specs" "a32c64g" {
   filter {
-    name   = "cpu_count"
-    values = ["32"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["64"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["AMD EPYC 7W83"]
+    name   = "spec"
+    values = ["bcc.ca2.c32m64"]
   }
 }
 
 data "baiducloud_specs" "a16c32g" {
   filter {
-    name   = "cpu_count"
-    values = ["16"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["32"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["AMD EPYC 7W83"]
+    name   = "spec"
+    values = ["bcc.ca2.c16m32"]
   }
 }
 
 data "baiducloud_specs" "a8c16g" {
   filter {
-    name   = "cpu_count"
-    values = ["8"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["16"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["AMD EPYC 7W83"]
+    name   = "spec"
+    values = ["bcc.ca2.c8m16"]
   }
 }
 
 data "baiducloud_specs" "a4c8g" {
   filter {
-    name   = "cpu_count"
-    values = ["4"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["8"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["AMD EPYC 7W83"]
+    name   = "spec"
+    values = ["bcc.ca2.c4m8"]
   }
 }
 
 data "baiducloud_specs" "a2c4g" {
   filter {
-    name   = "cpu_count"
-    values = ["2"]
+    name   = "spec"
+    values = ["bcc.ca2.c2m4"]
   }
+}
+
+data "baiducloud_specs" "a2c2g" {
   filter {
-    name   = "memory_capacity_in_gb"
-    values = ["4"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["AMD EPYC 7W83"]
+    name   = "spec"
+    values = ["bcc.ica2.c2m2"]
   }
 }
 
 data "baiducloud_specs" "a112c476g" {
   filter {
-    name   = "cpu_count"
-    values = ["112"]
+    name   = "spec"
+    values = ["bcc.ga1.c112m476"]
   }
+}
+
+data "baiducloud_specs" "i112c476g" {
   filter {
-    name   = "memory_capacity_in_gb"
-    values = ["476"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["AMD EPYC 7502"]
+    name   = "spec"
+    values = ["bcc.g5.c112m476"]
   }
 }
 
 data "baiducloud_specs" "i64c128g" {
   filter {
-    name   = "cpu_count"
-    values = ["64"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["128"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["Intel Xeon Platinum 8350C"]
+    name   = "spec"
+    values = ["bcc.c5.c64m128"]
   }
 }
 
 data "baiducloud_specs" "i48c96g" {
   filter {
-    name   = "cpu_count"
-    values = ["48"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["96"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["Intel Xeon Platinum 8350C"]
+    name   = "spec"
+    values = ["bcc.c5.c48m96"]
   }
 }
 
 data "baiducloud_specs" "i32c64g" {
   filter {
-    name   = "cpu_count"
-    values = ["32"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["64"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["Intel Xeon Platinum 8350C"]
+    name   = "spec"
+    values = ["bcc.c5.c32m64"]
   }
 }
 
 data "baiducloud_specs" "i24c48g" {
   filter {
-    name   = "cpu_count"
-    values = ["24"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["48"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["Intel Xeon Platinum 8350C"]
+    name   = "spec"
+    values = ["bcc.c5.c24m48"]
   }
 }
 
 data "baiducloud_specs" "i16c32g" {
   filter {
-    name   = "cpu_count"
-    values = ["16"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["32"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["Intel Xeon Platinum 8350C"]
+    name   = "spec"
+    values = ["bcc.c5.c16m32"]
   }
 }
 
 data "baiducloud_specs" "i8c16g" {
   filter {
-    name   = "cpu_count"
-    values = ["8"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["16"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["Intel Xeon Platinum 8350C"]
+    name   = "spec"
+    values = ["bcc.c5.c8m16"]
   }
 }
 
 data "baiducloud_specs" "i4c8g" {
   filter {
-    name   = "cpu_count"
-    values = ["4"]
-  }
-  filter {
-    name   = "memory_capacity_in_gb"
-    values = ["8"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["Intel Xeon Platinum 8350C"]
+    name   = "spec"
+    values = ["bcc.c5.c4m8"]
   }
 }
 
 data "baiducloud_specs" "i2c4g" {
   filter {
-    name   = "cpu_count"
-    values = ["2"]
+    name   = "spec"
+    values = ["bcc.c5.c2m4"]
   }
+}
+
+data "baiducloud_specs" "i2c2g" {
   filter {
-    name   = "memory_capacity_in_gb"
-    values = ["4"]
-  }
-  filter {
-    name   = "cpu_model"
-    values = ["Intel Xeon Platinum 8350C"]
+    name   = "spec"
+    values = ["bcc.ic4.c2m2"]
   }
 }
 
@@ -332,7 +218,11 @@ data "baiducloud_images" "centos7" {
     name   = "name"
     values = ["7.9 x86_64 (64bit)"]
   }
-  image_type = "System"
+  filter {
+    name   = "type"
+    values = ["System"]
+  }
+  image_type = "ALL"
 }
 
 data "baiducloud_images" "centoss9" {
@@ -344,7 +234,11 @@ data "baiducloud_images" "centoss9" {
     name   = "name"
     values = ["9 x86_64 (64bit)"]
   }
-  image_type = "System"
+  filter {
+    name   = "type"
+    values = ["System"]
+  }
+  image_type = "ALL"
 }
 
 #create vpc
@@ -369,6 +263,7 @@ resource "baiducloud_subnet" "hpc_stack_pub_subnet" {
 
 resource "baiducloud_security_group" "natgw_transparent" {
   name = "SECURITY_GROUP_NATGW"
+  vpc_id = baiducloud_vpc.hpc_stack.id
 }
 
 resource "baiducloud_security_group_rule" "natgw_rules_ingress" {
@@ -389,6 +284,7 @@ resource "baiducloud_security_group_rule" "natgw_rules_egress" {
 
 resource "baiducloud_security_group" "group" {
   name = "SECURITY_GROUP_PUBLIC"
+  vpc_id = baiducloud_vpc.hpc_stack.id
 }
 
 resource "baiducloud_security_group_rule" "group_rule_all" {
@@ -432,6 +328,7 @@ resource "baiducloud_security_group_rule" "group_rule4" {
 
 resource "baiducloud_security_group" "group_intra" {
   name = "SECURITY_GROUP_INTRA"
+  vpc_id = baiducloud_vpc.hpc_stack.id
 }
 
 resource "baiducloud_security_group_rule" "group_intra_rule_all" {
@@ -447,7 +344,7 @@ resource "baiducloud_security_group_rule" "group_intra_rule1" {
   protocol = "tcp"
   port_range = "1-65535"
   direction  = "ingress"
-  source_ip = "10.0.0.0/20"
+  source_ip = "10.0.0.0/12"
 }
 
 resource "baiducloud_security_group_rule" "group_intra_rule2" {
@@ -459,6 +356,7 @@ resource "baiducloud_security_group_rule" "group_intra_rule2" {
 
 resource "baiducloud_security_group" "mysql_intra" {
   name = "SECURITY_GROUP_MYSQL"
+  vpc_id = baiducloud_vpc.hpc_stack.id
 }
 
 resource "baiducloud_security_group_rule" "mysql_intra_rule_all" {
@@ -477,8 +375,16 @@ resource "baiducloud_security_group_rule" "mysql_intra_rule1" {
   source_ip = "10.0.0.0/12"
 }
 
+resource "baiducloud_security_group_rule" "mysql_intra_rule2" {
+  security_group_id = "${baiducloud_security_group.mysql_intra.id}"
+  protocol = "tcp"
+  port_range = "22"
+  direction  = "ingress"
+  source_ip = "10.0.0.0/12"
+}
+
 resource "baiducloud_cfs" "hpc_apps" {
-  name = "hpc_apps-CFSID"
+  name = "hpc_apps-NFSID"
   zone = "DEFAULT_NAS_ZONE" #such as zoneA, not cn-bj-a !
   protocol = "nfs"
 }
@@ -496,7 +402,7 @@ resource "baiducloud_cfs_mount_target" "apps_pubnet" {
 }
 
 resource "baiducloud_cfs" "hpc_data" {
-  name  = "hpc_data-CFSID"
+  name  = "hpc_data-NFSID"
   zone = "DEFAULT_NAS_ZONE"
   protocol = "nfs"
 }
@@ -515,7 +421,7 @@ resource "baiducloud_cfs_mount_target" "data_pubnet" {
 
 #CREATE a bucket for data storage
 resource "baiducloud_bos_bucket" "hpc_data_storage" {
-  bucket = "this-hpc-now-buckt"
+  bucket = "BUCKET_ID"
   force_destroy = true
   acl = "private"
 }
@@ -537,8 +443,8 @@ resource "baiducloud_iam_policy" "hpc_bucket_access_policy" {
             "service": "bce:bos",
             "region": "*",
             "resource": [
-                "this-hpc-now-buckt",
-                "this-hpc-now-buckt/*"
+                "BUCKET_ID",
+                "BUCKET_ID/*"
             ],
             "effect": "Allow",
             "permission": [
