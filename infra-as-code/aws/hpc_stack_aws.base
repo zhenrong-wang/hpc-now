@@ -83,14 +83,30 @@ variable "centos7global" {
   default = ["ami-02c073b6f8c9e1803", "ami-0e5fa27acebc2bd70"]
 }
 
-//not validated
 variable "centoss9global" {
   type = list(string)
   default = ["ami-0b3af296cf8dc9094", "ami-0e72a99409d46ccd8"]
 }
 
-#define some data
+data "aws_ami" "al2023_x86" {
+  name_regex = "^al2023"
+  owners = ["amazon"]
+  most_recent = true
+  filter {
+    name = "architecture"
+    values = ["x86_64"]
+  }
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
 
+#define some data
 data "aws_ec2_instance_types" "i128c256g" {
   filter {
     name   = "instance-type"

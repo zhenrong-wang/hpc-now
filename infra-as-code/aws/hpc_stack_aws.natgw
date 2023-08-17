@@ -5,10 +5,11 @@ resource "aws_instance" "natgw" {
   source_dest_check = "false"
   vpc_security_group_ids = [aws_security_group.natgw_transparent.id]
   ami = "${var.NAT_OS_IMAGE}"
+#  ami = data.aws_ami.al2023_x86.image_id
 #  associate_public_ip_address = "true"
   instance_type = data.aws_ec2_instance_types.t2c4g.instance_types.0
   root_block_device {
-    volume_size = 20
+    volume_size = 30
   }
   tags = {
     Name = "natgw-RG_NAME"

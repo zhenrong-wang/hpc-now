@@ -60,7 +60,7 @@ else
 fi
 
 # Sync Time among cluster nodes
-if [ $centos_version -eq 7 ]; then
+if [ ! -z $centos_version ] && [ $centos_version -eq 7 ]; then
   yum -y install ntpdate
   ntpdate ntp.ntsc.ac.cn
 fi

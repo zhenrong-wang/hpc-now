@@ -4,9 +4,10 @@ resource "aws_instance" "database" {
   subnet_id = aws_subnet.hpc_stack_subnet.id
   vpc_security_group_ids = [aws_security_group.group_intra.id]
   ami = "${var.DB_OS_IMAGE}"
+#  ami = data.aws_ami.al2023_x86.image_id
   instance_type = data.aws_ec2_instance_types.t2c4g.instance_types.0
   root_block_device {
-    volume_size = 20
+    volume_size = 30
   }
   tags = {
     Name = "database-RG_NAME"

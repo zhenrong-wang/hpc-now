@@ -1,13 +1,14 @@
 resource "aws_instance" "COMPUTE_NODE_N" {
   availability_zone = "DEFAULT_ZONE_ID"
   ami = "${var.OS_IMAGE}"
+#  ami = data.aws_ami.al2023_x86.image_id
   instance_type = data.aws_ec2_instance_types.COMPUTE_INST.instance_types.0
   subnet_id = aws_subnet.hpc_stack_subnet.id
   vpc_security_group_ids = [aws_security_group.group_intra.id]
   cpu_core_count = CPU_CORE_NUM
   cpu_threads_per_core = THREADS_PER_CORE
   root_block_device {
-    volume_size = 40
+    volume_size = 30
   }
   tags = {
     Name = "COMPUTE_NODE_N-RG_NAME"
@@ -16,14 +17,14 @@ resource "aws_instance" "COMPUTE_NODE_N" {
   user_data = <<EOF
 #!/bin/bash
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+hostnamectl set-hostname COMPUTE_NODE_N
+echo -e "${var.compute_passwd}" | passwd root --stdin >> /dev/null 2>&1
 userdel -f ec2-user
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config
 echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
 systemctl restart sshd
-echo -e "${var.compute_passwd}" | passwd root --stdin >> /dev/null 2>&1
 mkdir /hpc_apps && mkdir /hpc_data
-hostnamectl set-hostname COMPUTE_NODE_N
 yum -y install nfs-utils
 mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${aws_efs_mount_target.hpc_apps_mount_target.ip_address}:/ /hpc_apps
 mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${aws_efs_mount_target.hpc_data_mount_target.ip_address}:/ /hpc_data

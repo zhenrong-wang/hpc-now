@@ -16,11 +16,11 @@ resource "alicloud_instance" "COMPUTE_NODE_N" {
   user_data = <<EOF
 #!/bin/bash
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
-sudo mkdir /hpc_apps && sudo mkdir /hpc_data
+mkdir /hpc_apps && mkdir /hpc_data
 hostnamectl set-hostname COMPUTE_NODE_N
-sudo yum -y install nfs-utils
-sudo mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${alicloud_nas_mount_target.hpc_apps_mount.mount_target_domain}:/ /hpc_apps
-sudo mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${alicloud_nas_mount_target.hpc_data_mount.mount_target_domain}:/ /hpc_data
+yum -y install nfs-utils
+mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${alicloud_nas_mount_target.hpc_apps_mount.mount_target_domain}:/ /hpc_apps
+mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${alicloud_nas_mount_target.hpc_data_mount.mount_target_domain}:/ /hpc_data
 echo -e "${alicloud_nas_mount_target.hpc_apps_mount.mount_target_domain}:/ /hpc_apps nfs vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
 echo -e "${alicloud_nas_mount_target.hpc_data_mount.mount_target_domain}:/ /hpc_data nfs vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
 rm -rf /root/.ssh

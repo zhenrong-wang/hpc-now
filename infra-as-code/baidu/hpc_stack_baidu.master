@@ -30,10 +30,10 @@ resource "baiducloud_instance" "master" {
 #!/bin/bash
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
-sudo yum -y install at
+yum -y install at
 systemctl start atd && systemctl enable atd
-sudo mkdir /hpc_apps
-sudo mkdir /hpc_data
+mkdir /hpc_apps
+mkdir /hpc_data
 rm -rf /root/.ssh/id_rsa.pub
 rm -rf /root/.ssh/id_rsa
 rm -rf /root/.ssh/authorized_keys

@@ -20,11 +20,11 @@ resource "tencentcloud_instance" "COMPUTE_NODE_N" {
   user_data_raw = <<EOF
 #!/bin/bash
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
-sudo mkdir /hpc_apps && sudo mkdir /hpc_data
+mkdir /hpc_apps && sudo mkdir /hpc_data
 hostnamectl set-hostname COMPUTE_NODE_N
-sudo yum -y install nfs-utils
-sudo mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_apps.mount_ip}:/ /hpc_apps
-sudo mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_data.mount_ip}:/ /hpc_data
+yum -y install nfs-utils
+mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_apps.mount_ip}:/ /hpc_apps
+mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_data.mount_ip}:/ /hpc_data
 echo -e "${tencentcloud_cfs_file_system.hpc_apps.mount_ip}:/ /hpc_apps nfs vers=4,minorversion=0,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
 echo -e "${tencentcloud_cfs_file_system.hpc_data.mount_ip}:/ /hpc_data nfs vers=4,minorversion=0,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
 rm -rf /root/.ssh 
