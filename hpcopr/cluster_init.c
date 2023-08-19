@@ -373,7 +373,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char secret_file[FILENAME_LENGTH]="";
-    char region_valid[FILENAME_LENGTH]="";
+//    char region_valid[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char user_passwords[FILENAME_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
@@ -460,7 +460,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(url_aws_root,"%saws/",url_code_root_var);
     }
 
-    if(code_loc_flag_var==1){
+/*    if(code_loc_flag_var==1){
         sprintf(cmdline,"%s %s%sregion_valid.tf %s%sregion_valid.tf %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     }
     else{
@@ -470,13 +470,13 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
-    }
+    }*/
     printf("[ STEP 1 ] Creating initialization files now ...\n");
     sprintf(cmdline,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
-    sprintf(region_valid,"%s%sregion_valid.tf",stackdir,PATH_SLASH);
+/*    sprintf(region_valid,"%s%sregion_valid.tf",stackdir,PATH_SLASH);
     global_replace(region_valid,"BLANK_ACCESS_KEY_ID",access_key);
     global_replace(region_valid,"BLANK_SECRET_KEY",secret_key);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,0)!=0){
@@ -494,7 +494,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         region_valid_flag=1;
     }
     sprintf(cmdline,"%s %s%sregion_valid.tf %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    system(cmdline);*/
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(conf_file)==1){
         printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one." RESET_DISPLAY "\n");
@@ -621,15 +621,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     else{
         threads=2;
     }
-    if(strcmp(region_id,"cn-north-1")!=0&&strcmp(region_id,"cn-northwest-1")!=0&&strcmp(region_id,"us-east-1")!=0&&strcmp(region_id,"us-east-2")!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Currently the NOW Cluster Service only support AWS Regions below:\n");
-        printf("|          cn-northwest-1 | cn-north-1 | us-east-1 | us-east-2\n");
-        printf("|          If you'd like to use NOW Cluster in other AWS regions,\n");
-        printf("|          Please contact info@hpc-now.com\n\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,2);
-        return 3;
-    }
     if(contain_or_not(zone_id,region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
@@ -637,32 +628,38 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return 3;
     }
     if(strcmp(region_id,"cn-northwest-1")==0){
-        if(region_valid_flag==1){
+/*        if(region_valid_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now." RESET_DISPLAY "\n");
             clear_if_failed(stackdir,confdir,vaultdir,2);
             return 4;
-        }
+        }*/
         strcpy(region_flag,"cn_regions");
-        sprintf(os_image,"%scn.0",os_image_raw);
-        strcpy(db_os_image,"centos7cn.0");
-        strcpy(nat_os_image,"centos7cn.0");
+        sprintf(os_image,"ami = \"${var.%scn.0}\"",os_image_raw);
+        strcpy(db_os_image,"ami = \"${var.centos7cn.0}\"");
+        strcpy(nat_os_image,"ami = \"${var.centos7cn.0}\"");
     }
     else if(strcmp(region_id,"cn-north-1")==0){
-        if(region_valid_flag==1){
+/*        if(region_valid_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS China regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
             printf("|          Exit now." RESET_DISPLAY "\n");
             clear_if_failed(stackdir,confdir,vaultdir,2);
             return 4;
-        }
+        }*/
         strcpy(region_flag,"cn_regions");
-        sprintf(os_image,"%scn.1",os_image_raw);
-        strcpy(db_os_image,"centos7cn.1");
-        strcpy(nat_os_image,"centos7cn.1");
+        sprintf(os_image,"ami = \"${var.%scn.1}\"",os_image_raw);
+        strcpy(db_os_image,"ami = \"${var.centos7cn.1}\"");
+        strcpy(nat_os_image,"ami = \"${var.centos7cn.1}\"");
     }
-    else if(strcmp(region_id,"us-east-1")==0){
+    else{
+        strcpy(region_flag,"global_regions");
+        sprintf(os_image,"ami = data.aws_ami.%s_x86_glb.image_id",os_image_raw);
+        strcpy(db_os_image,"ami = data.aws_ami.centos7_x86_glb.image_id");
+        strcpy(nat_os_image,"ami = data.aws_ami.centos7_x86_glb.image_id");
+    }
+/*    else if(strcmp(region_id,"us-east-1")==0){
         if(region_valid_flag==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The keypair is not valid to operate clusters in AWS global regions.\n");
             printf("|          Please run 'hpcopr new-keypair' command to update with a valid keypair.\n");
@@ -671,9 +668,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             return 4;
         }
         strcpy(region_flag,"global_regions");
-        sprintf(os_image,"%sglobal.0",os_image_raw);
-        strcpy(db_os_image,"centos7global.0");
-        strcpy(nat_os_image,"centos7global.0");
+        sprintf(os_image,"%sglobal",os_image_raw);
+        strcpy(db_os_image,"centos7global");
+        strcpy(nat_os_image,"centos7global");
     }
     else if(strcmp(region_id,"us-east-2")==0){
         if(region_valid_flag==0){
@@ -684,10 +681,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             return 4;
         }
         strcpy(region_flag,"global_regions");
-        sprintf(os_image,"%sglobal.1",os_image_raw);
-        strcpy(db_os_image,"centos7global.1");
-        strcpy(nat_os_image,"centos7global.1");
-    }
+        sprintf(os_image,"%sglobal",os_image_raw);
+        strcpy(db_os_image,"centos7global");
+        strcpy(nat_os_image,"centos7global");
+    }*/
     reset_string(database_root_passwd);
     generate_random_db_passwd(database_root_passwd);
     usleep(10000);
@@ -750,6 +747,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf("|          Compute Node Instance: %s\n",compute_inst);
     printf("|          OS Image:              %s\n" RESET_DISPLAY,os_image_raw);
     generate_sshkey(sshkey_folder,pubkey);
+
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
     global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
@@ -785,7 +783,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
-
+    if(strcmp(region_flag,"global_regions")==0){
+        delete_lines_by_kwd(filename_temp,"DELETE_FOR_CN_REGIONS",1);
+    }
     file_p=fopen(filename_temp,"a");
     sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
@@ -801,7 +801,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
     global_replace(filename_temp,"MASTER_INST",master_inst);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    insert_lines(filename_temp,"#INSERT_AMI_HERE",os_image);
+    //global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
@@ -816,7 +817,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
     global_replace(filename_temp,"COMPUTE_INST",compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    insert_lines(filename_temp,"#INSERT_AMI_HERE",os_image);
+    //global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     sprintf(string_temp,"%d",cpu_core_num);
     global_replace(filename_temp,"CPU_CORE_NUM",string_temp);
@@ -827,12 +829,14 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"DB_OS_IMAGE",db_os_image);
+    insert_lines(filename_temp,"#INSERT_AMI_HERE",db_os_image);
+    //global_replace(filename_temp,"DB_OS_IMAGE",db_os_image);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"NAT_OS_IMAGE",nat_os_image);
+    insert_lines(filename_temp,"#INSERT_AMI_HERE",nat_os_image);
+    //global_replace(filename_temp,"NAT_OS_IMAGE",nat_os_image);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     for(i=0;i<node_num;i++){
         sprintf(cmdline,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
@@ -844,10 +848,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         global_replace(filename_temp,"NUMBER",string_temp);
         sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
         insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        /*for(j=0;j<hpc_user_num;j++){
-            sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
-            insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        }*/
     }
     generate_tf_files(stackdir);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,0)!=0){

@@ -71,21 +71,71 @@ variable "centos7cn" {
   type = list(string)
   default = ["ami-0ee38a9c5b0041790", "ami-07b25971c84bdb99c"]
 }
-
 variable "centoss9cn" {
   type = list(string)
   default = ["ami-07d77cc6035050dd4", "ami-0e574877e2ad223ae"]
 }
 
-// us-east-1 & us-east-2
-variable "centos7global" {
-  type = list(string)
-  default = ["ami-02c073b6f8c9e1803", "ami-0e5fa27acebc2bd70"]
+/*DELETE_FOR_CN_REGIONS
+data "aws_ami" "centos7_x86_glb" {
+  most_recent = true  
+  owners = ["aws-marketplace"]
+  filter {
+    name = "architecture"
+    values = ["x86_64"]
+  }
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+  filter {
+    name = "name"
+    values = ["CentOS-7-2111*"]
+  }
 }
 
-variable "centoss9global" {
-  type = list(string)
-  default = ["ami-0b3af296cf8dc9094", "ami-0e72a99409d46ccd8"]
+data "aws_ami" "centoss9_x86_glb" {
+  most_recent = true
+  owners = ["aws-marketplace"]
+  filter {
+    name = "architecture"
+    values = ["x86_64"]
+  }
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+  filter {
+    name = "name"
+    values = ["CentOS-Stream-ec2-9-2*"]
+  }
+}
+DELETE_FOR_CN_REGIONS*/
+
+data "aws_ami" "al2_x86_glb" {
+  name_regex = "^al2"
+  owners = ["amazon"]
+  most_recent = true
+  filter {
+    name = "architecture"
+    values = ["x86_64"]
+  }
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
 }
 
 data "aws_ami" "al2023_x86" {
@@ -181,6 +231,13 @@ data "aws_ec2_instance_types" "i2c4g" {
   filter {
     name   = "instance-type"
     values = ["c6i.large"]
+  }
+}
+
+data "aws_ec2_instance_types" "a128c256g" {
+  filter {
+    name   = "instance-type"
+    values = ["c6a.32xlarge"]
   }
 }
 

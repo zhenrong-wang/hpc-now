@@ -4,8 +4,7 @@ resource "aws_instance" "master" {
   subnet_id = aws_subnet.hpc_stack_pub_subnet.id
 #  associate_public_ip_address = "true"
   vpc_security_group_ids = [aws_security_group.group.id]
-  ami = "${var.OS_IMAGE}"
-#  ami = data.aws_ami.al2023_x86.image_id
+#INSERT_AMI_HERE
   instance_type = data.aws_ec2_instance_types.MASTER_INST.instance_types.0
   root_block_device {
     volume_size = 30
