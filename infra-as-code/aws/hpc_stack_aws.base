@@ -290,10 +290,10 @@ data "aws_ec2_instance_types" "a2c4g" {
   }
 }
 
-data "aws_ec2_instance_types" "t2c4g" {
+data "aws_ec2_instance_types" "t2c1g" {
   filter {
     name = "instance-type"
-    values = ["t2.medium"]
+    values = ["t3.micro"]
   }
 }
 

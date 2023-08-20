@@ -6,7 +6,7 @@ resource "aws_instance" "natgw" {
   vpc_security_group_ids = [aws_security_group.natgw_transparent.id]
 #INSERT_AMI_HERE
 #  associate_public_ip_address = "true"
-  instance_type = data.aws_ec2_instance_types.t2c4g.instance_types.0
+  instance_type = data.aws_ec2_instance_types.t2c1g.instance_types.0
   root_block_device {
     volume_size = 30
   }
