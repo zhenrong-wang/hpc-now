@@ -348,7 +348,7 @@ resource "aws_main_route_table_association" "main_rt_as" {
 resource "aws_subnet" "hpc_stack_subnet" {
   availability_zone = "DEFAULT_ZONE_ID"
   vpc_id = aws_vpc.hpc_stack.id
-  cidr_block = "10.0.0.0/24"
+  cidr_block = "10.0.0.0/20"
   tags = {
     Name = "DEFAULT_SUBNET_NAME"
   }

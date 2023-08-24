@@ -60,6 +60,7 @@
 #define URL_AWSCLI "https://awscli.amazonaws.com/AWSCLIV2.msi"
 #define URL_OBSUTIL "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_windows_amd64.zip"
 #define URL_BCECMD "https://doc.bce.baidu.com/bce-documentation/BOS/windows-bcecmd-0.4.1.zip"
+#define URL_AZCOPY "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_windows_amd64_10.20.1.zip"
 
 #define S3CLI_EXEC "\"c:\\program files\\amazon\\awscliv2\\aws.exe\""
 #define COSCLI_EXEC "c:\\hpc-now\\utils\\coscli.exe"
@@ -117,6 +118,7 @@
 #define URL_AWSCLI "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
 #define URL_OBSUTIL "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz"
 #define URL_BCECMD "https://doc.bce.baidu.com/bce-documentation/BOS/linux-bcecmd-0.4.1.zip"
+#define URL_AZCOPY "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_linux_amd64_10.20.1.tar.gz"
 
 #define S3CLI_EXEC "/home/hpc-now/.bin/utils/aws"
 #define COSCLI_EXEC "/home/hpc-now/.bin/utils/coscli.exe"
@@ -174,6 +176,7 @@
 #define URL_AWSCLI "https://awscli.amazonaws.com/AWSCLIV2.pkg"
 #define URL_OBSUTIL "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_darwin_amd64.tar.gz"
 #define URL_BCECMD "https://doc.bce.baidu.com/bce-documentation/BOS/mac-bcecmd-0.4.1.zip"
+#define URL_AZCOPY "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_darwin_amd64_10.20.1.zip"
 
 #define S3CLI_EXEC "/Users/hpc-now/.bin/utils/aws"
 #define COSCLI_EXEC "/Users/hpc-now/.bin/utils/coscli.exe"

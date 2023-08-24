@@ -50,6 +50,8 @@ char qcloud_tf_plugin_version_var[16]="";
 char aws_tf_plugin_version_var[16]="";
 char hw_tf_plugin_version_var[16]="";
 char bd_tf_plugin_version_var[16]="";
+char azrm_tf_plugin_version_var[16]="";
+char azad_tf_plugin_version_var[16]="";
 
 char md5_tf_exec_var[64]="";
 char md5_tf_zip_var[64]="";
@@ -64,6 +66,10 @@ char md5_hw_tf_var[64]="";
 char md5_hw_tf_zip_var[64]="";
 char md5_bd_tf_var[64]="";
 char md5_bd_tf_zip_var[64]="";
+char md5_azrm_tf_var[64]="";
+char md5_azrm_tf_zip_var[64]="";
+char md5_azad_tf_var[64]="";
+char md5_azad_tf_zip_var[64]="";
 
 /*
  * GEN: GENERAL COMMANDS

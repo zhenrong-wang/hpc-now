@@ -35,5 +35,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
 int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
+int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 
 #endif

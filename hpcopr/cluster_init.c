@@ -2899,3 +2899,10 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
+
+int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile){
+
+
+    
+    return 0;
+}
