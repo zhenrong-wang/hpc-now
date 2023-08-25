@@ -75,6 +75,7 @@ int file_validity_check(char* filename, int repair_flag, char* target_md5){
     else{
         if(repair_flag==1){
             get_crypto_key(filename,md5sum);
+//            printf("-------%s\n\n------%s\n\n-----%s\n\n",md5sum,target_md5,filename);
             if(strcmp(md5sum,target_md5)!=0){
                 return 1;
             }
@@ -676,7 +677,7 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v The Terraform executable has been repaired.\n");
     }
-
+//    printf("\n###%s   \n\n",md5_now_crypto_var);
     file_check_flag=file_validity_check(crypto_exec,repair_flag,md5_now_crypto_var);
     if(file_check_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the now-crypto.exe ...\n");
@@ -1130,11 +1131,11 @@ int check_and_install_prerequisitions(int repair_flag){
         sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_azad_tf_var);
+    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_azrm_tf_var);
     if(file_check_flag==1){
         printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (6b/6) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_azad_tf_zip_var);
+        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_azrm_tf_zip_var);
         if(file_check_flag==1){
             if(tf_loc_flag_var==1){
 #ifdef _WIN32

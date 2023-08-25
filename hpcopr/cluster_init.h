@@ -28,6 +28,7 @@ typedef struct {
 int cluster_init_conf(char* cluster_name, int argc, char* argv[]);
 int get_tf_prep_conf(char* conf_file, char* reconf_list, char* cluster_id, char* region_id, char* zone_id, int* node_num, int* hpc_user_num, char* master_init_param, char* master_passwd, char* compute_passwd, char* master_inst, char* master_bandwidth, char* compute_inst, char* os_image_raw, char* ht_flag);
 int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bucket_sk, char* bucket_info_file, char* cloud_flag);
+void node_user_num_fix(int* node_num, int* hpc_user_num);
 void clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int condition_flag);
 void generate_tf_files(char* stackdir);
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);

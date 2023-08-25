@@ -54,6 +54,8 @@ elif [ -f /root/CLOUD_D ]; then
   cloud_flag="CLOUD_D"
 elif [ -f /root/CLOUD_E ]; then
   cloud_flag="CLOUD_E"
+elif [ -f /root/CLOUD_F ]; then
+  cloud_flag="CLOUD_F"
 else
   echo -e "# $time_current [ FATAL: ] Cloud flag is missing. Initialization abort." >> ${logfile}
   exit 1

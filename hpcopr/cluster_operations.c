@@ -308,18 +308,22 @@ remove_files:
     return 0;
 }
 
-int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* echo_flag){
+int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* az_subscription, char* az_tenant, char* echo_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char input_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp_2[FILENAME_LENGTH]="";
     int cluster_name_check_flag=0;
     char cloud_flag[16]="";
     FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
     char new_workdir[DIR_LENGTH]="";
     char new_vaultdir[DIR_LENGTH]="";
     char* keypair_temp=NULL;
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
+    char az_subscription_id[AKSK_LENGTH]="";
+    char az_tenant_id[AKSK_LENGTH]="";
     char md5sum[33]="";
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     int ak_length,sk_length;
@@ -366,10 +370,13 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the cluster name %s.\n",input_cluster_name);
 #ifdef _WIN32
     strcpy(filename_temp,"c:\\programdata\\hpc-now\\secret.tmp.txt");
+    strcpy(filename_temp_2,"c:\\programdata\\hpc-now\\az_extra_info.txt");
 #elif __linux__
     strcpy(filename_temp,"/home/hpc-now/.secret.tmp.txt");
+    strcpy(filename_temp_2,"/home/hpc-now/az_extra_info.txt");
 #elif __APPLE__
     strcpy(filename_temp,"/Users/hpc-now/.secret.tmp.txt");
+    strcpy(filename_temp_2,"/Users/hpc-now/az_extra_info.txt");
 #endif
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
@@ -419,6 +426,37 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         fprintf(file_p,"%s\n%s\n%s\n",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
+    else if(ak_length==36&&sk_length==40){
+        strcpy(cloud_flag,"CLOUD_F");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are using Azure Cloud Service. Subscription and tenant id are needed.\n");
+        file_p_2=fopen(filename_temp_2,"w+");
+        if(file_p_2==NULL){
+            fclose(file_p);
+            return -1;
+        }
+        if(strlen(az_subscription)!=36){
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Subscription id: ");
+            fflush(stdin);
+            scanf("%s",az_subscription_id);
+            getchar();
+        }
+        else{
+            strcpy(az_subscription_id,az_subscription);
+        }
+        if(strlen(az_tenant)!=36){
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Tenant id      : ");
+            fflush(stdin);
+            scanf("%s",az_tenant_id);
+            getchar();
+        }
+        else{
+            strcpy(az_tenant_id,az_tenant);
+        }
+        fprintf(file_p,"%s\n%s\n%s\n",access_key,secret_key,cloud_flag);
+        fclose(file_p);
+        fprintf(file_p_2,"azure_subscription_id: %s\nazure_tenant_id: %s\n",az_subscription_id,az_tenant_id);
+        fclose(file_p_2);
+    }
     else{
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now." RESET_DISPLAY "\n");
         fclose(file_p);
@@ -435,6 +473,10 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     system(cmdline);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    if(strcmp(cloud_flag,"CLOUD_F")==0){
+        sprintf(cmdline,"%s %s %s%s %s",MOVE_FILE_CMD,filename_temp_2,new_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
     sprintf(filename_temp,"%s%scloud_flag.flg",new_vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     if(file_p!=NULL){
@@ -446,7 +488,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The secrets key pair has been encrypted and stored locally. You can either:\n");
     printf("|          1. run 'hpcopr init' to create a default cluster. OR\n");
     printf("|          2. run 'hpcopr get-conf' to get the default cluster configuration, and run\n");
-    printf("|              'hpcopr init' to create a customized cluster.\n");
+    printf("|             'hpcopr init' to create a customized cluster.\n");
     printf("|          You can also switch to this cluster name and operate this cluster later.\n");
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Exit now.\n");
     return 0;
@@ -596,7 +638,21 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf(FATAL_RED_BOLD "[ FATAL: ] The new keypair comes from a different Cloud Service Vendor.\n");
             printf("|          Switching cloud vendors for a working directory is not permitted.\n");
             printf("|          Current Vendor: BaiduCloud (HPC-NOW code: CLOUD_E).\n");
-            printf("|          Please rotate a keypair from an BaiduCloud account.\n");
+            printf("|          Please rotate a keypair from a BaiduCloud account.\n");
+            printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+            return 3;
+        }
+        fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
+        fclose(file_p);
+    }
+    else if(ak_length==36&&sk_length==40){
+        strcpy(cloud_flag,"CLOUD_F");
+        if(strcmp(cloud_flag,cloud_flag_prev)!=0){
+            fclose(file_p);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The new keypair comes from a different Cloud Service Vendor.\n");
+            printf("|          Switching cloud vendors for a working directory is not permitted.\n");
+            printf("|          Current Vendor: Azure (HPC-NOW code: CLOUD_F).\n");
+            printf("|          Please rotate a keypair from an Azure account and subscription.\n");
             printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
             return 3;
         }

@@ -419,6 +419,22 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     return 0;
 }
 
+int get_azure_info(char* workdir, char* az_subscription_id, char* az_tenant_id){
+    char vaultdir[DIR_LENGTH]="";
+    char az_extra_info_file[FILENAME_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(az_extra_info_file,"%s%saz_extra_info.txt",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(az_extra_info_file)!=0){
+        return -1;
+    }
+    get_key_value(az_extra_info_file,"azure_subscription_id:",' ',az_subscription_id);
+    get_key_value(az_extra_info_file,"azure_tenant_id:",' ',az_tenant_id);
+    if(strlen(az_subscription_id)==0||strlen(az_tenant_id)==0){
+        return 1;
+    }
+    return 0;
+}
+
 int get_cpu_num(const char* vm_model){
     int length=strlen(vm_model);
     int i,c_index=0;

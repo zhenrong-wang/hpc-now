@@ -78,6 +78,8 @@ char command_keywords[CMD_KWDS_NUM][16]={
     "--cname", //cluster_name
     "--ak",
     "--sk",
+    "--az-sid",
+    "--az-tid",
     "--ul", // user list
     "--key", //key file
     "--rg",

@@ -550,11 +550,13 @@ int main(int argc, char* argv[]){
         cmd_keyword_check(argc,argv,"--cname",new_cluster_name);
         cmd_keyword_check(argc,argv,"--ak",cloud_ak);
         cmd_keyword_check(argc,argv,"--sk",cloud_sk);
+        cmd_keyword_check(argc,argv,"--az-sid",string_temp);
+        cmd_keyword_check(argc,argv,"--az-tid",string_temp2);
         if(cmd_flag_check(argc,argv,"--echo")==0){
-            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,"echo");
+            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"echo");
         }
         else{
-            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,"");
+            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"");
         }
         if(run_flag==-1){
             write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
@@ -1279,6 +1281,9 @@ int main(int argc, char* argv[]){
         }
         else if(strcmp(cloud_flag,"CLOUD_E")==0){
             run_flag=baiducloud_cluster_init(cluster_name,workdir,crypto_keyfile);
+        }
+        else if(strcmp(cloud_flag,"CLOUD_F")==0){
+            run_flag=azure_cluster_init(cluster_name,workdir,crypto_keyfile);
         }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now." RESET_DISPLAY "\n");

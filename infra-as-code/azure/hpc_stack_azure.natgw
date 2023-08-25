@@ -59,8 +59,10 @@ resource "azurerm_linux_virtual_machine" "natgw" {
 
   custom_data = base64encode(<<EOF
 #!/bin/bash
-userdel -f adminuser
+#userdel -f adminuser
 yum -y install iptables-services
+systemctl restart firewalld
+systemctl enable firewalld
 private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
 cat /etc/sysctl.conf | grep net.ipv4.ip_forward
 if [ $? -ne 0 ]; then
@@ -72,9 +74,7 @@ fi
 sysctl -p /etc/sysctl.conf
 iptables -t nat -A POSTROUTING -o eth0 -s 10.0.0.0/20 -j SNAT --to $private_ip
 service iptables save
-systemctl start firewalld
-systemctl enable firewalld
-systemctl start iptables
+systemctl restart iptables
 systemctl enable iptables
 EOF
 )
