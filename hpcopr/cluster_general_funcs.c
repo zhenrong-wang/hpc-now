@@ -620,7 +620,7 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
 int getstate(char* workdir, char* crypto_filename){
     char cloud_flag[16]="";
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
         return -3;
     }
     char stackdir[DIR_LENGTH]="";
@@ -693,6 +693,12 @@ int getstate(char* workdir, char* crypto_filename){
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         find_and_get(master_tf,"instance_spec","","",1,"instance_spec","","",'.',3,master_config);
         find_and_get(compute_template,"instance_spec","","",1,"instance_spec","","",'.',3,compute_config);
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        find_and_get(master_tf,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,master_config);
+        find_and_get(compute_template,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,compute_config);
     }
     else{
         find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
@@ -814,7 +820,7 @@ int getstate(char* workdir, char* crypto_filename){
         get_seq_string(string_temp2,',',1,string_temp);
         fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
         node_num_gs=find_multi_keys(tfstate,"\"type\": \"baiducloud_instance\",","","","","")-3;
         find_and_get(tfstate,"\"name\": \"master_eip\",","","",20,"\"eip\":","","",'\"',4,string_temp);
         fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
@@ -836,6 +842,27 @@ int getstate(char* workdir, char* crypto_filename){
                 node_num_on_gs++;
             }
         }
+    }
+    else{
+        node_num_gs=find_multi_keys(tfstate,"\"azurerm_linux_virtual_machine\"","","","","")-3;
+        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"public_ip_address\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"private_ip_address\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
+        fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
+        fprintf(file_p_statefile,"master_status: Running\ndatabase_status: Running\n");
+        for(i=0;i<node_num_gs;i++){
+            sprintf(string_temp2,"\"name\": \"compute%d\",",i+1);
+            find_and_get(tfstate,string_temp2,"","",80,"\"private_ip_address\":","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
+            fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
+            fprintf(file_p_statefile,"compute%d_status: Running\n",i+1);
+            node_num_on_gs++;
+        }
+        find_and_get(tfstate,"\"name\": \"shared_volume\",","","",50,"\"disk_size_gb\":","","",'\"',3,string_temp);
+        get_seq_string(string_temp,' ',2,string_temp2);
+        get_seq_string(string_temp2,',',1,string_temp);
+        fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
     }
     fprintf(file_p_statefile,"total_compute_nodes: %d\n",node_num_gs);
     fprintf(file_p_statefile,"running_compute_nodes: %d\n",node_num_on_gs);
@@ -1091,7 +1118,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             }
         }
     }
-    if(graph_level==0&&strcmp(cloud_flag,"CLOUD_D")==0){
+    if(graph_level==0&&(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0)){
         printf("|          +-shared_storage(%s GB)\n",shared_volume);
     }
     if(graph_level==1){
@@ -1533,7 +1560,7 @@ int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, c
             i++;
         }
         else if(strcmp(header,"REGION:")==0){
-            strcpy(region_id,tail);
+            get_seq_string(line_buffer,'\"',2,region_id);
             i++;
         }
         else if(strcmp(header,"BUCKET_AK:")==0){

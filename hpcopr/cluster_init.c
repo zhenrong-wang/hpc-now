@@ -325,7 +325,7 @@ int get_tf_prep_conf(char* conf_file, char* reconf_list, char* cluster_id, char*
     }
 }
 
-int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bucket_sk, char* bucket_info_file, char* cloud_flag){
+int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bucket_sk, char* az_subscription_id, char* az_tenant_id, char* bucket_info_file, char* cloud_flag){
     FILE* file_p=fopen(bucket_info_file,"w+");
     if(file_p==NULL){
         return -1;
@@ -335,22 +335,22 @@ int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bu
         return -3;
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
-        fprintf(file_p,"BUCKET: oss://%s\nREGION: %s\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
+        fprintf(file_p,"BUCKET: oss://%s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
-        fprintf(file_p,"BUCKET: cos://%s\nREGION: %s\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
+        fprintf(file_p,"BUCKET: cos://%s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        fprintf(file_p,"BUCKET: s3://%s\nREGION: %s\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
+        fprintf(file_p,"BUCKET: s3://%s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
-        fprintf(file_p,"BUCKET: obs://%s\nREGION: %s\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
+        fprintf(file_p,"BUCKET: obs://%s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
-        fprintf(file_p,"BUCKET: bos://%s\nREGION: %s\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
+        fprintf(file_p,"BUCKET: bos://%s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
     }
     else{
-        fprintf(file_p,"BUCKET: %s\nREGION: %s\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
+        fprintf(file_p,"BUCKET: %s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\nAZ_SUBSCRIPTION_ID: %s\nAZ_TENANT_ID: %s\n",bucket_id,region_id,bucket_ak,bucket_sk,az_subscription_id,az_tenant_id);
     }
     fclose(file_p);
     return 0;
@@ -775,7 +775,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -855,7 +855,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
@@ -1266,7 +1266,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -1334,7 +1334,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
@@ -1738,7 +1738,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -1810,7 +1810,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     system(cmdline);
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
@@ -2200,7 +2200,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -2266,7 +2266,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
@@ -2661,7 +2661,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -2725,7 +2725,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
@@ -3101,7 +3101,7 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport HPCMGR_SCRIPT_URL=%shpcmgr.sh\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -3145,30 +3145,28 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     }
     sprintf(cmdline,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);   
     system(cmdline);
-    return 0;
 
-
-
-    
     getstate(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);// Doesn't work! 
-    find_and_get(filename_temp,"access_key","","",20,"\"id\":","","",'\"',4,bucket_ak); //Desn't work!
-    find_and_get(filename_temp,"access_key","","",20,"\"secret\":","","",'\"',4,bucket_sk); //Desn't work!
-    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
-    for(i=0;i<GENERAL_SLEEP_TIME;i++){
-        printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
+    find_and_get(filename_temp,"\"type\": \"azurerm_storage_container\",","","",20,"\"id\": \"","","",'\"',4,bucket_id);
+    find_and_get(filename_temp,"\"type\": \"azuread_application\",","","",20,"\"application_id\":","","",'\"',4,bucket_ak);
+    find_and_get(filename_temp,"\"type\": \"azuread_application_password\",","","",20,"\"value\":","","",'\"',4,bucket_sk);
+    
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",2*GENERAL_SLEEP_TIME);
+    for(i=0;i<2*GENERAL_SLEEP_TIME;i++){
+        printf("[ -WAIT- ] Still need to wait %d seconds ... \r",2*GENERAL_SLEEP_TIME-i);
         fflush(stdout);
         sleep(1);
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,subscription_id,tenant_id,filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: bos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
+    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
+    fprintf(file_p,"Azure Subscription ID: %s\nAzure Tenant ID: %s\n",subscription_id,tenant_id);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
@@ -3190,15 +3188,8 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     sprintf(current_time,"%d:%d:%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
     master_vcpu=get_cpu_num(master_inst);
     compute_vcpu=get_cpu_num(compute_inst);
-    sprintf(filename_temp,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
-    reset_string(string_temp);
-    find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,string_temp);
-    database_vcpu=get_cpu_num(string_temp);
-    reset_string(string_temp);
-    sprintf(filename_temp,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,string_temp);
-    natgw_vcpu=get_cpu_num(string_temp);
-    reset_string(string_temp);
+    database_vcpu=1;
+    natgw_vcpu=1;
     if(*(master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
@@ -3231,11 +3222,6 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
         get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
-    generate_bceconfig(vaultdir,region_id,bucket_ak,bucket_sk);
-    sprintf(filename_temp,"%s%scredentials",vaultdir,PATH_SLASH);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/credentials","root","put","",0);
-    sprintf(filename_temp,"%s%sconfig",vaultdir,PATH_SLASH);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/config","root","put","",0);
-    delete_decrypted_files(workdir,crypto_keyfile);
+//    delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }

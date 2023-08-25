@@ -31,10 +31,6 @@ if [ -z $INITUTILS_REPO_ROOT ]; then
   echo -e "# $time_current [ FATAL: ] The critical environment var INITUTILS_REPO_ROOT is not set. Init abort." >> ${logfile}
   exit 1
 fi
-if [[ -f /root/hostfile && -z $HPCMGR_SCRIPT_URL ]]; then
-  echo -e "# $time_current [ FATAL: ] The critical environment var HPCMGR_SCRIPT_URL is not set. Init abort." >> ${logfile}
-  exit 1
-fi
 if [ -z $SCRIPTS_URL_ROOT ]; then
   echo -e "# $time_current [ FATAL: ] The critical environment var SCRIPTS_URL_ROOT is not set. Init abort." >> ${logfile}
   exit 1
@@ -44,6 +40,8 @@ url_utils=${INITUTILS_REPO_ROOT}
 #CLOUD_B: QCloud/TencentCloud
 #CLOUD_C: Amazon Web Services
 #CLOUD_D: Huawei Cloud
+#CLOUD_E: BaiduCloud
+#CLOUD_F: Azure(GLOBAL)
 if [ -f /root/CLOUD_A ]; then
   cloud_flag="CLOUD_A"
 elif [ -f /root/CLOUD_B ]; then
@@ -147,6 +145,7 @@ wget ${SCRIPTS_URL_ROOT}nowmon_agt.sh -O /usr/hpc-now/nowmon_agt.sh && chmod +x 
 if [ -f /root/hostfile ]; then
   wget ${SCRIPTS_URL_ROOT}nowmon_mgr.sh -O /usr/hpc-now/nowmon_mgr.sh && chmod +x /usr/hpc-now/nowmon_mgr.sh
   wget ${SCRIPTS_URL_ROOT}profile_bkup_rstr.sh -O /usr/hpc-now/profile_bkup_rstr.sh && chmod +x /usr/hpc-now/profile_bkup_rstr.sh
+  wget ${SCRIPTS_URL_ROOT}hpcmgr.sh -O /usr/hpc-now/.hpcmgr_main.sh
 fi
 touch $public_app_registry # Only root user can modify this file
 
@@ -368,7 +367,8 @@ if [ -f /root/hostfile ]; then
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "# $time_current Slurm built and configured in path /opt/slurm." >> ${logfile}
   if [ ! -z $centos_vers ] && [ $centos_vers -eq 7 ]; then
-    wget ${HPCMGR_SCRIPT_URL} -o /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr # This is a workaround. CentOS-7 will be deprecated in the future
+     # This is a workaround. CentOS-7 will be deprecated in the future
+     mv /usr/hpc-now/.hpcmgr_main.sh /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr
   else
     /bin/cp -r ${utils_path}hpcmgr.exe /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr
   fi
@@ -394,6 +394,10 @@ if [ -f /root/hostfile ]; then
     unzip -o /tmp/bcecmd.zip -d /tmp
     mv /tmp/linux-bcecmd-0.4.1/bcecmd /usr/local/bin/
     chmod +x /usr/local/bin/bcecmd
+  elif [ $cloud_flag = 'CLOUD_F' ]; then
+    curl https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_linux_amd64_10.20.1.tar.gz -o /tmp/azcopy.tar.gz
+    tar zvxf /tmp/azcopy.tar.gz -C /tmp/
+    /bin/cp -r /tmp/azcopy_linux_amd64_10.20.1/azcopy /usr/local/bin/
   fi
 fi
 
