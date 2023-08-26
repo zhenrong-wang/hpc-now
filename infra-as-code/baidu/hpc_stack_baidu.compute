@@ -1,3 +1,10 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
 resource "baiducloud_instance" "COMPUTE_NODE_N" {
   name = "COMPUTE_NODE_N-RESOURCETAG"
   hostname = "COMPUTE_NODE_N"

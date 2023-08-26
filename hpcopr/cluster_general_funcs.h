@@ -52,7 +52,6 @@ int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
 void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);
 int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, char* region_id, char* bucket_ak, char* bucket_sk);
-int get_cluster_bucket_id(char* workdir, char* crypto_keyfilke, char* bucket_id);
 int tail_f_for_windows(char* filename);
 int get_ucid(char* workdir, char* ucid_string);
 

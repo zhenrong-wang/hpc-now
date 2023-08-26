@@ -438,7 +438,7 @@ variable "shared_storage" {
 }
 
 resource "azurerm_managed_disk" "shared_volume" {
-  name = "shared_volume"
+  name = "shared_RANDOM_STRING"
   location = azurerm_resource_group.hpc_resources.location
   resource_group_name = azurerm_resource_group.hpc_resources.name
   storage_account_type = "StandardSSD_LRS"

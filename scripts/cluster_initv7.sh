@@ -83,6 +83,7 @@ else
 fi
 
 utils_path='/tmp/utils/'
+scripts_path='/tmp/scripts/'
 
 sed -i 's/#   StrictHostKeyChecking ask/StrictHostKeyChecking no/g' /etc/ssh/ssh_config
 echo -e "LogLevel QUIET" >> /etc/ssh/ssh_config
@@ -140,15 +141,14 @@ if [ -f /root/hostfile ]; then
   chmod 777 ${app_tmp_log_root}
 fi
 
-mkdir -p /usr/hpc-now
-wget ${SCRIPTS_URL_ROOT}nowmon_agt.sh -O /usr/hpc-now/nowmon_agt.sh && chmod +x /usr/hpc-now/nowmon_agt.sh
+mkdir -p /usr/hpc-now/
+/bin/cp -r ${scripts_path}* /usr/hpc-now/
+chmod +x /usr/hpc-now/*.sh
 if [ -f /root/hostfile ]; then
-  wget ${SCRIPTS_URL_ROOT}nowmon_mgr.sh -O /usr/hpc-now/nowmon_mgr.sh && chmod +x /usr/hpc-now/nowmon_mgr.sh
-  wget ${SCRIPTS_URL_ROOT}profile_bkup_rstr.sh -O /usr/hpc-now/profile_bkup_rstr.sh && chmod +x /usr/hpc-now/profile_bkup_rstr.sh
-  wget ${SCRIPTS_URL_ROOT}hpcmgr.sh -O /usr/hpc-now/.hpcmgr_main.sh
+  mv /usr/hpc-now/hpcmgr.sh /usr/hpc-now/.hpcmgr_main.sh
 fi
-touch $public_app_registry # Only root user can modify this file
 
+touch $public_app_registry # Only root user can modify this file
 # Add user slurm 
 id -u slurm
 if [ $? -ne 0 ]; then
@@ -429,7 +429,7 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 if [ -f /root/hostfile ]; then
   echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
-  if [ $distro_type != 'CentOS' ] && [ $distro_type != 'Rocky' ]; then
+  if [ $distro_type != 'CentOS' ] && [ $distro_type != 'Rocky' ] && [ $distro_type != 'Oracle' ]; thenm
     echo -e "# $time_current GNU/Linux Distro: ${distro_type}. Installing GUI now." >> ${logfile}
     yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks 
     yum -y install gnome-shell-extensions 

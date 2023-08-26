@@ -59,7 +59,7 @@ resource "azurerm_linux_virtual_machine" "natgw" {
 
   custom_data = base64encode(<<EOF
 #!/bin/bash
-#userdel -f adminuser
+userdel -f adminuser
 yum -y install iptables-services
 systemctl restart firewalld
 systemctl enable firewalld

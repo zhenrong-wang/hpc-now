@@ -1367,7 +1367,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     char password[32]="";
     char enable_flag[16]="";
     char master_address[32]="";
-    char bucket_address[32]="";
+    char bucket_address[128]="";
     char bucket_ak[128]="";
     char bucket_sk[128]="";
     char region_id[32]="";
@@ -1588,35 +1588,6 @@ int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, c
     else{
         return 0;
     }
-}
-
-int get_cluster_bucket_id(char* workdir, char* crypto_keyfile, char* bucket_id){
-    char vaultdir[DIR_LENGTH]="";
-    char bucket_ak[128]="";
-    char bucket_sk[128]="";
-    char bucket_region[32]="";
-    char bucket_address[32]="";
-    char filename_temp[FILENAME_LENGTH]="";
-    char md5sum[64]="";
-    create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%sbucket_info.txt.tmp",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)==0){
-        if(get_bucket_info(workdir,crypto_keyfile,bucket_address,bucket_region,bucket_ak,bucket_sk)==0){
-            if(get_seq_string(bucket_address,'/',2,bucket_id)==0){
-                return 0;
-            }
-        }
-    }
-    get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        return -1;
-    }
-    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
-    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_id);
-    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
-    return 0;
 }
 
 int tail_f_for_windows(char* filename){

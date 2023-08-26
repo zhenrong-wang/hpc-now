@@ -51,7 +51,7 @@ resource "azurerm_linux_virtual_machine" "COMPUTE_NODE_N" {
 
   custom_data = base64encode(<<EOF
 #!/bin/bash
-#userdel -f adminuser
+userdel -f adminuser
 systemctl stop firewalld
 systemctl disable firewalld
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG

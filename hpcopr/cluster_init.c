@@ -424,7 +424,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char secret_file[FILENAME_LENGTH]="";
-//    char region_valid[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char user_passwords[FILENAME_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
@@ -477,7 +476,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char compute_cpu_vendor[8]="";
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
-    int region_valid_flag=0;
     int i;
     if(folder_exist_or_not(workdir)==1){
         return -1;
@@ -529,9 +527,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
             clear_if_failed(stackdir,confdir,vaultdir,1);
             return 2;
-        }
-        if(region_valid_flag==1){
-            global_replace(conf_file,"cn-northwest-1","us-east-1");
         }
     }
     if(code_loc_flag_var==1){
@@ -3222,6 +3217,6 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
         get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
-//    delete_decrypted_files(workdir,crypto_keyfile);
+    delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }

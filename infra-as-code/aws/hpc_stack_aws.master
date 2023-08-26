@@ -1,3 +1,10 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
 #create master and compute nodes
 resource "aws_instance" "master" {
   availability_zone = "DEFAULT_ZONE_ID"

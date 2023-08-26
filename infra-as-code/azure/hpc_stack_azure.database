@@ -51,7 +51,7 @@ resource "azurerm_linux_virtual_machine" "database" {
 
   custom_data = base64encode(<<EOF
 #!/bin/bash
-#userdel -f adminuser
+userdel -f adminuser
 systemctl stop firewalld
 systemctl disable firewalld
 echo "${azurerm_linux_virtual_machine.natgw.private_ip_address}" >> /dev/null
