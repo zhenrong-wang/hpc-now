@@ -379,6 +379,7 @@ if [ -f /root/hostfile ]; then
     #pip install coscmd
     curl https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-linux -o /usr/bin/coscli
     chmod +x /usr/bin/coscli
+    chmod 755 /usr/bin/coscli
   elif [ $cloud_flag = 'CLOUD_C' ]; then 
     #yum -y install s3cmd
     curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -q -o /tmp/awscli.zip
@@ -389,15 +390,18 @@ if [ -f /root/hostfile ]; then
     tar zvxf /tmp/obsutil_linux_amd64.tar.gz -C /tmp/
     /bin/cp -r /tmp/obsutil_linux_amd64*/obsutil /usr/local/bin/
     chmod +x /usr/local/bin/obsutil
+    chmod 755 /usr/local/bin/obsutil
   elif [ $cloud_flag = 'CLOUD_E' ]; then
     curl https://doc.bce.baidu.com/bce-documentation/BOS/linux-bcecmd-0.4.1.zip -o /tmp/bcecmd.zip
     unzip -o /tmp/bcecmd.zip -d /tmp
     mv /tmp/linux-bcecmd-0.4.1/bcecmd /usr/local/bin/
     chmod +x /usr/local/bin/bcecmd
+    chmod 755 /usr/local/bin/bcecmd
   elif [ $cloud_flag = 'CLOUD_F' ]; then
     curl https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_linux_amd64_10.20.1.tar.gz -o /tmp/azcopy.tar.gz
     tar zvxf /tmp/azcopy.tar.gz -C /tmp/
     /bin/cp -r /tmp/azcopy_linux_amd64_10.20.1/azcopy /usr/local/bin/
+    chmod 755 /usr/local/bin/azcopy
   fi
 fi
 
