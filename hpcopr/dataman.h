@@ -8,7 +8,7 @@
 #ifndef DATAMAN_H
 #define DATAMAN_H
 
-void unset_aws_bucket_envs(void);
+void unset_bucket_envs(char* cloud_flag);
 void bucket_path_check(char* path_string, char* hpc_user, char* real_path);
 void rf_flag_parser(const char* rflag, const char* fflag, char* real_rflag, char* real_fflag);
 

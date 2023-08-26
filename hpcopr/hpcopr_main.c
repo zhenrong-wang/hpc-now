@@ -49,6 +49,9 @@ char ali_tf_plugin_version_var[16]="";
 char qcloud_tf_plugin_version_var[16]="";
 char aws_tf_plugin_version_var[16]="";
 char hw_tf_plugin_version_var[16]="";
+char bd_tf_plugin_version_var[16]="";
+char azrm_tf_plugin_version_var[16]="";
+char azad_tf_plugin_version_var[16]="";
 
 char md5_tf_exec_var[64]="";
 char md5_tf_zip_var[64]="";
@@ -61,6 +64,12 @@ char md5_aws_tf_var[64]="";
 char md5_aws_tf_zip_var[64]="";
 char md5_hw_tf_var[64]="";
 char md5_hw_tf_zip_var[64]="";
+char md5_bd_tf_var[64]="";
+char md5_bd_tf_zip_var[64]="";
+char md5_azrm_tf_var[64]="";
+char md5_azrm_tf_zip_var[64]="";
+char md5_azad_tf_var[64]="";
+char md5_azad_tf_zip_var[64]="";
 
 /*
  * GEN: GENERAL COMMANDS
@@ -160,6 +169,7 @@ char jobman_commands[3][COMMAND_STRING_LENGTH_MAX]={
 1 NOT_A_VALID_COMMAND
 3 USER_DENIED
 5 LACK_PARAMS
+6 CLOUD_FUNCTION_UNSUPPORTED
 7 MISSING_CLOUD_FLAG_FILE
 8 CLOUD_FLAG_NOT_APPLICABLE
 9 PARAM_FORMAT_ERROR
@@ -541,11 +551,13 @@ int main(int argc, char* argv[]){
         cmd_keyword_check(argc,argv,"--cname",new_cluster_name);
         cmd_keyword_check(argc,argv,"--ak",cloud_ak);
         cmd_keyword_check(argc,argv,"--sk",cloud_sk);
+        cmd_keyword_check(argc,argv,"--az-sid",string_temp);
+        cmd_keyword_check(argc,argv,"--az-tid",string_temp2);
         if(cmd_flag_check(argc,argv,"--echo")==0){
-            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,"echo");
+            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"echo");
         }
         else{
-            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,"");
+            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"");
         }
         if(run_flag==-1){
             write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
@@ -1256,17 +1268,23 @@ int main(int argc, char* argv[]){
         else{
             printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file not found. Using the specified or default params." RESET_DISPLAY "\n");
         }
-        if(strcmp(cloud_flag,"CLOUD_C")==0){
-            run_flag=aws_cluster_init(cluster_name,workdir,crypto_keyfile);
+        if(strcmp(cloud_flag,"CLOUD_A")==0){
+            run_flag=alicloud_cluster_init(cluster_name,workdir,crypto_keyfile);
         }
         else if(strcmp(cloud_flag,"CLOUD_B")==0){
             run_flag=qcloud_cluster_init(cluster_name,workdir,crypto_keyfile);
         }
-        else if(strcmp(cloud_flag,"CLOUD_A")==0){
-            run_flag=alicloud_cluster_init(cluster_name,workdir,crypto_keyfile);
+        else if(strcmp(cloud_flag,"CLOUD_C")==0){
+            run_flag=aws_cluster_init(cluster_name,workdir,crypto_keyfile);
         }
         else if(strcmp(cloud_flag,"CLOUD_D")==0){
             run_flag=hwcloud_cluster_init(cluster_name,workdir,crypto_keyfile);
+        }
+        else if(strcmp(cloud_flag,"CLOUD_E")==0){
+            run_flag=baiducloud_cluster_init(cluster_name,workdir,crypto_keyfile);
+        }
+        else if(strcmp(cloud_flag,"CLOUD_F")==0){
+            run_flag=azure_cluster_init(cluster_name,workdir,crypto_keyfile);
         }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now." RESET_DISPLAY "\n");
@@ -1439,6 +1457,12 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"sleep")==0){
+        if(strcmp(cloud_flag,"CLOUD_F")==0){
+            printf(WARN_YELLO_BOLD "[ -INFO- ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FUNCTION_UNSUPPORTED",6);
+            check_and_cleanup("");
+            return 6;
+        }
         if(cluster_state_flag==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is " RESET_DISPLAY HIGH_CYAN_BOLD "not running" RESET_DISPLAY FATAL_RED_BOLD ". No need to hibernate." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
@@ -1456,6 +1480,12 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     if(strcmp(argv[1],"wakeup")==0){
+        if(strcmp(cloud_flag,"CLOUD_F")==0){
+            printf(WARN_YELLO_BOLD "[ -INFO- ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FUNCTION_UNSUPPORTED",6);
+            check_and_cleanup("");
+            return 6;
+        }
         if(cluster_full_running_or_not(workdir)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "fully running" RESET_DISPLAY FATAL_RED_BOLD ". No need to wake up." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"RUNNING_STATE",38);
@@ -1783,6 +1813,12 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     if(strcmp(argv[1],"shutdownc")==0){
+        if(strcmp(cloud_flag,"CLOUD_F")==0){
+            printf(WARN_YELLO_BOLD "[ -INFO- ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FUNCTION_UNSUPPORTED",6);
+            check_and_cleanup("");
+            return 6;
+        }
         if(confirm_to_operate_cluster(cluster_name)!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);
@@ -1803,6 +1839,12 @@ int main(int argc, char* argv[]){
         return run_flag;
     }
     if(strcmp(argv[1],"turnonc")==0){
+        if(strcmp(cloud_flag,"CLOUD_F")==0){
+            printf(WARN_YELLO_BOLD "[ -INFO- ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FUNCTION_UNSUPPORTED",6);
+            check_and_cleanup("");
+            return 6;
+        }
         if(confirm_to_operate_cluster(cluster_name)!=0){
             write_operation_log(workdir,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);

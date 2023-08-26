@@ -1,0 +1,62 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
+#CREATE_NATGW_NODE
+resource "baiducloud_eip" "natgw_eip" {
+  name = "natgw_eip-RESOURCETAG"
+  bandwidth_in_mbps = MASTER_BANDWIDTH
+  payment_timing = "Postpaid"
+  billing_method = "ByTraffic"
+}
+
+resource "baiducloud_eip_association" "natgw_eip_attach" {
+  eip = baiducloud_eip.natgw_eip.eip
+  instance_type = "BCC"
+  instance_id = baiducloud_instance.natgw.id
+}
+
+resource "baiducloud_instance" "natgw" {
+  name = "natgw-RESOURCETAG"
+  hostname = "natgw"
+  availability_zone = "DEFAULT_ZONE_ID"
+  image_id = data.baiducloud_images.centoss9.images[0].id
+  instance_spec = data.baiducloud_specs.a2c2g.specs[0].spec
+  action = "start"
+  subnet_id = baiducloud_subnet.hpc_stack_pub_subnet.id
+  security_groups = [baiducloud_security_group.natgw_transparent.id]
+  root_disk_size_in_gb = 40
+  root_disk_storage_type = "cloud_hp1"
+  auto_renew_time_unit = "month"
+  auto_renew_time_length = 1
+  user_data = base64encode(<<EOF
+#!/bin/bash
+echo "test2022!" | passwd root --stdin >> /dev/null 2>&1
+yum -y install iptables-services
+private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
+cat /etc/sysctl.conf | grep net.ipv4.ip_forward
+if [ $? -ne 0 ]; then
+  echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
+else
+  sed -i '/net.ipv4.ip_forward/d' /etc/sysctl.conf
+  echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
+fi
+sysctl -p /etc/sysctl.conf
+iptables -t nat -A POSTROUTING -o eth0 -s 10.0.0.0/20 -j SNAT --to $private_ip
+service iptables save
+systemctl start iptables
+systemctl enable iptables
+EOF
+)
+}
+
+resource "baiducloud_route_rule" "route_to_natgw" {
+  route_table_id = baiducloud_vpc.hpc_stack.route_table_id
+  source_address = "10.0.0.0/20"
+  destination_address = "0.0.0.0/0"
+  next_hop_id = "${baiducloud_instance.natgw.id}"
+  next_hop_type = "custom"
+}

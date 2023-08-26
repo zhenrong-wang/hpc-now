@@ -1,0 +1,95 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
+resource "azurerm_network_interface" "natgw_nic" {
+  name = "natgw_nic_RANDOM_STRING"
+  location = azurerm_resource_group.hpc_resources.location
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+
+  ip_configuration {
+    name = "natgw_ip_RANDOM_STRING"
+    subnet_id = azurerm_subnet.hpc_stack_pub_subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id = azurerm_public_ip.natgw_public_ip.id
+  }
+}
+
+resource "azurerm_public_ip" "natgw_public_ip" {
+  name = "natgw_public_ip_RANDOM_STRING"
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+  location = azurerm_resource_group.hpc_resources.location
+  allocation_method = "Dynamic"
+}
+
+resource "azurerm_network_interface_security_group_association" "natgw_sg_attach" {
+  network_interface_id = azurerm_network_interface.natgw_nic.id
+  network_security_group_id = azurerm_network_security_group.natgw_transparent.id
+}
+
+resource "azurerm_linux_virtual_machine" "natgw" {
+  name = "natgw_RANDOM_STRING"
+  computer_name = "natgw"
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+  location = azurerm_resource_group.hpc_resources.location
+  size = "${var.i1c1g}"
+  admin_username = "adminuser"
+  admin_password = "Null2023~"
+  disable_password_authentication = false
+
+  network_interface_ids = [
+    azurerm_network_interface.natgw_nic.id,
+  ]
+
+  os_disk {
+    caching = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    disk_size_gb = 30
+  }
+
+  source_image_reference {
+    publisher = "oracle"
+    offer = "oracle-linux"
+    sku = "ol92-lvm"
+    version = "latest"
+  }
+
+  custom_data = base64encode(<<EOF
+#!/bin/bash
+userdel -f adminuser
+yum -y install iptables-services
+systemctl restart firewalld
+systemctl enable firewalld
+private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
+cat /etc/sysctl.conf | grep net.ipv4.ip_forward
+if [ $? -ne 0 ]; then
+  echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
+else
+  sed -i '/net.ipv4.ip_forward/d' /etc/sysctl.conf
+  echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
+fi
+sysctl -p /etc/sysctl.conf
+iptables -t nat -A POSTROUTING -o eth0 -s 10.0.0.0/20 -j SNAT --to $private_ip
+service iptables save
+systemctl restart iptables
+systemctl enable iptables
+EOF
+)
+}
+
+resource "azurerm_subnet_route_table_association" "subnet_attach" {
+  subnet_id = azurerm_subnet.hpc_stack_subnet.id
+  route_table_id = azurerm_route_table.subnet_rt.id
+}
+
+resource "azurerm_route" "route_to_natgw" {
+  name = "route_to_natgw"
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+  route_table_name = azurerm_route_table.subnet_rt.name
+  address_prefix = "0.0.0.0/0"
+  next_hop_type = "VirtualAppliance"
+  next_hop_in_ip_address = azurerm_linux_virtual_machine.natgw.private_ip_address
+}

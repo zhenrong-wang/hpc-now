@@ -1,10 +1,17 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
 #CREATE_DATABASE_NODE
 resource "huaweicloud_compute_instance" "database" {
   name = "database-RESOURCETAG"
   availability_zone = "DEFAULT_ZONE_ID"
   security_group_ids = [huaweicloud_networking_secgroup.mysql_intra.id]
   image_id = data.huaweicloud_images_images.centos7.images[0].id
-  flavor_id = data.huaweicloud_compute_flavors.i1c1g.ids[0]
+  flavor_id = data.huaweicloud_compute_flavors.i1c2g.ids[0]
   system_disk_type = "GPSSD"
   system_disk_size = 40
   network {

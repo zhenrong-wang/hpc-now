@@ -31,10 +31,6 @@ if [ -z $INITUTILS_REPO_ROOT ]; then
   echo -e "# $time_current [ FATAL: ] The critical environment var INITUTILS_REPO_ROOT is not set. Init abort." >> ${logfile}
   exit 1
 fi
-if [[ -f /root/hostfile && -z $HPCMGR_SCRIPT_URL ]]; then
-  echo -e "# $time_current [ FATAL: ] The critical environment var HPCMGR_SCRIPT_URL is not set. Init abort." >> ${logfile}
-  exit 1
-fi
 if [ -z $SCRIPTS_URL_ROOT ]; then
   echo -e "# $time_current [ FATAL: ] The critical environment var SCRIPTS_URL_ROOT is not set. Init abort." >> ${logfile}
   exit 1
@@ -44,6 +40,8 @@ url_utils=${INITUTILS_REPO_ROOT}
 #CLOUD_B: QCloud/TencentCloud
 #CLOUD_C: Amazon Web Services
 #CLOUD_D: Huawei Cloud
+#CLOUD_E: BaiduCloud
+#CLOUD_F: Azure(GLOBAL)
 if [ -f /root/CLOUD_A ]; then
   cloud_flag="CLOUD_A"
 elif [ -f /root/CLOUD_B ]; then
@@ -52,16 +50,40 @@ elif [ -f /root/CLOUD_C ]; then
   cloud_flag="CLOUD_C"
 elif [ -f /root/CLOUD_D ]; then
   cloud_flag="CLOUD_D"
+elif [ -f /root/CLOUD_E ]; then
+  cloud_flag="CLOUD_E"
+elif [ -f /root/CLOUD_F ]; then
+  cloud_flag="CLOUD_F"
 else
   echo -e "# $time_current [ FATAL: ] Cloud flag is missing. Initialization abort." >> ${logfile}
   exit 1
 fi
 
 # Sync Time among cluster nodes
-if [ $centos_version -eq 7 ]; then
+if [ ! -z $centos_vers ] && [ $centos_vers -eq 7 ]; then
   yum -y install ntpdate
   ntpdate ntp.ntsc.ac.cn
 fi
+
+yum -y install wget
+if [ -f /root/hostfile ]; then
+  if [ ! -f /hpc_apps/root_apps/init_master.tar.gz ]; then
+    mkdir -p /hpc_apps/root_apps
+    wget ${url_utils}init_master.tar.gz -O /hpc_apps/root_apps/init_master.tar.gz
+  fi
+  rm -rf /tmp/utils
+  tar zvxf /hpc_apps/root_apps/init_master.tar.gz -C /tmp
+else
+  if [ ! -f /hpc_apps/root_apps/init_compute.tar.gz ]; then
+    mkdir -p /hpc_apps/root_apps
+    wget ${url_utils}init_compute.tar.gz -O /hpc_apps/root_apps/init_compute.tar.gz
+  fi
+  rm -rf /tmp/utils
+  tar zvxf /hpc_apps/root_apps/init_compute.tar.gz -C /tmp
+fi
+
+utils_path='/tmp/utils/'
+scripts_path='/tmp/scripts/'
 
 sed -i 's/#   StrictHostKeyChecking ask/StrictHostKeyChecking no/g' /etc/ssh/ssh_config
 echo -e "LogLevel QUIET" >> /etc/ssh/ssh_config
@@ -100,7 +122,6 @@ fi
 echo -e "# Plan to create $1 users."
 echo -e "# Plan create $1 users." >> ${logfile} 
 
-yum -y install wget
 NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
 SELINUX_STATUS=`getenforce`
 echo -e "source /etc/profile" >> /root/.bashrc
@@ -110,20 +131,24 @@ if [ -f /root/hostfile ]; then
   mkdir -p /hpc_data/cluster_data
   chmod -R 644 /hpc_data/cluster_data
   chmod 755 /hpc_data/cluster_data
+  if [ $cloud_flag = 'CLOUD_E' ]; then
+    mkdir -p /hpc_data/cluster_data/.bucket_creds
+    chmod -R 644 /hpc_data/cluster_data/.bucket_creds
+  fi
   mkdir -p /hpc_data/public
   chmod -R 777 /hpc_data/public
   mkdir -p ${app_tmp_log_root}
   chmod 777 ${app_tmp_log_root}
 fi
 
-mkdir -p /usr/hpc-now
-wget ${SCRIPTS_URL_ROOT}nowmon_agt.sh -O /usr/hpc-now/nowmon_agt.sh && chmod +x /usr/hpc-now/nowmon_agt.sh
+mkdir -p /usr/hpc-now/
+/bin/cp -r ${scripts_path}* /usr/hpc-now/
+chmod +x /usr/hpc-now/*.sh
 if [ -f /root/hostfile ]; then
-  wget ${SCRIPTS_URL_ROOT}nowmon_mgr.sh -O /usr/hpc-now/nowmon_mgr.sh && chmod +x /usr/hpc-now/nowmon_mgr.sh
-  wget ${SCRIPTS_URL_ROOT}profile_bkup_rstr.sh -O /usr/hpc-now/profile_bkup_rstr.sh && chmod +x /usr/hpc-now/profile_bkup_rstr.sh
+  mv /usr/hpc-now/hpcmgr.sh /usr/hpc-now/.hpcmgr_main.sh
 fi
-touch $public_app_registry # Only root user can modify this file
 
+touch $public_app_registry # Only root user can modify this file
 # Add user slurm 
 id -u slurm
 if [ $? -ne 0 ]; then
@@ -199,15 +224,13 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Utils installed." >> ${logfile}
 
 # Build munge
-yum -y install rpm-build bzip2-devel zlib-devel m4 libxml2-devel
+yum -y install rpm-build bzip2-devel zlib-devel m4 libxml2-devel net-tools
 cd /root
 if ! command -v munge >/dev/null 2>&1; then
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "# $time_current Start building munge." >> ${logfile}
   if [ ! -f munge-0.5.14* ]; then
-    wget ${url_utils}munge/dun.gpg
-    wget ${url_utils}munge/munge-0.5.14.tar.xz
-    wget ${url_utils}munge/munge-0.5.14.tar.xz.asc
+    /bin/cp -r ${utils_path}munge/* .
   fi
   rpmbuild -tb munge-0.5.14.tar.xz
   cd /rpmbuild/RPMS/x86_64 && rpm -ivh munge*
@@ -217,10 +240,10 @@ echo -e "# $time_current Munge installed." >> ${logfile}
 
 # Re-Install mariadb Be careful!
 if [ -f /root/hostfile ]; then
-  yum remove -y `rpm -aq mariadb*`
+  yum remove -y `rpm -aq mariadb`
   rm -rf /etc/my.cnf
   rm -rf /var/lib/mysql
-  if [ ! -z $centos_version ] && [ $centos_version -eq 7 ]; then
+  if [ ! -z $centos_vers ] && [ $centos_vers -eq 7 ]; then
     yum -y install mariadb mariadb-devel mariadb-server
     yum -y install mariadb-libs
   else
@@ -242,7 +265,7 @@ if [ -f /root/hostfile ]; then
     time_current=`date "+%Y-%m-%d %H:%M:%S"`
     echo -e "# $time_current Mariadb installation on localhost started." >> ${logfile}
     
-    if [ $centos_version -eq 7 ]; then
+    if [ ! -z $centos_vers ] && [ $centos_vers -eq 7 ]; then
       openssl rand 8 -base64 -out /root/mariadb_root_passwd.txt
       openssl rand 8 -base64 -out /root/mariadb_slurm_acct_db_pw.txt
     else
@@ -297,7 +320,7 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Started building Slurm 21.08.8." >> ${logfile}
 cd /root
 if [ ! -f slurm-21.08.8-2.tar.bz2 ]; then
-  wget ${url_utils}slurm/slurm-21.08.8-2.tar.bz2
+  /bin/cp -r ${utils_path}slurm/slurm-21.08.8-2.tar.bz2 .
 fi
 tar xf slurm-21.08.8-2.tar.bz2
 cd slurm-21.08.8-2
@@ -317,10 +340,10 @@ mkdir -p /opt/slurm/etc/
 
 if [ -f /root/hostfile ]; then
   if [ ! -f /opt/slurm/etc/slurm.conf.128 ]; then
-    wget ${url_utils}slurm/slurm.conf.128 -O /opt/slurm/etc/slurm.conf.128
+    /bin/cp -r ${utils_path}slurm/slurm.conf.128 /opt/slurm/etc/
   fi
   if [ ! -f /opt/slurm/etc/slurmdbd.conf ]; then
-    wget ${url_utils}slurm/slurmdbd.conf -O /opt/slurm/etc/slurmdbd.conf
+    /bin/cp -r ${utils_path}slurm/slurmdbd.conf /opt/slurm/etc/
   fi
   if [ $db_address != "LOCALHOST" ]; then
     sed -i "s@STORAGE_HOST@$db_address@g" /opt/slurm/etc/slurmdbd.conf
@@ -343,10 +366,11 @@ if [ -f /root/hostfile ]; then
   mkdir -p /opt/slurm/archive
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "# $time_current Slurm built and configured in path /opt/slurm." >> ${logfile}
-  if [ $centos_version -eq 7 ]; then
-    wget ${HPCMGR_SCRIPT_URL} -o /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr # This is a workaround. CentOS-7 will be deprecated in the future
+  if [ ! -z $centos_vers ] && [ $centos_vers -eq 7 ]; then
+     # This is a workaround. CentOS-7 will be deprecated in the future
+     mv /usr/hpc-now/.hpcmgr_main.sh /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr
   else
-    wget ${url_utils}hpcmgr.exe -O /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr
+    /bin/cp -r ${utils_path}hpcmgr.exe /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr
   fi
   yum -y install git python-devel
   if [ $cloud_flag = 'CLOUD_A' ]; then
@@ -364,6 +388,16 @@ if [ -f /root/hostfile ]; then
     curl https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz -o /tmp/obsutil_linux_amd64.tar.gz
     tar zvxf /tmp/obsutil_linux_amd64.tar.gz -C /tmp/
     /bin/cp -r /tmp/obsutil_linux_amd64*/obsutil /usr/local/bin/
+    chmod +x /usr/local/bin/obsutil
+  elif [ $cloud_flag = 'CLOUD_E' ]; then
+    curl https://doc.bce.baidu.com/bce-documentation/BOS/linux-bcecmd-0.4.1.zip -o /tmp/bcecmd.zip
+    unzip -o /tmp/bcecmd.zip -d /tmp
+    mv /tmp/linux-bcecmd-0.4.1/bcecmd /usr/local/bin/
+    chmod +x /usr/local/bin/bcecmd
+  elif [ $cloud_flag = 'CLOUD_F' ]; then
+    curl https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_linux_amd64_10.20.1.tar.gz -o /tmp/azcopy.tar.gz
+    tar zvxf /tmp/azcopy.tar.gz -C /tmp/
+    /bin/cp -r /tmp/azcopy_linux_amd64_10.20.1/azcopy /usr/local/bin/
   fi
 fi
 
@@ -372,7 +406,7 @@ cd /root
 if ! command -v module >/dev/null 2>&1; then
   yum install tcl-devel -y
   if [ ! -f modules-5.1.0.tar.gz ]; then
-    wget ${url_utils}modules-5.1.0.tar.gz
+    /bin/cp -r ${utils_path}modules-5.1.0.tar.gz .
   fi
   tar zvxf modules-5.1.0.tar.gz
   cd modules-5.1.0
@@ -395,17 +429,17 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 if [ -f /root/hostfile ]; then
   echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
-  if [ $distro_type != 'CentOS' ] && [ $distro_type != 'Rocky' ]; then
+  if [ $distro_type != 'CentOS' ] && [ $distro_type != 'Rocky' ] && [ $distro_type != 'Oracle' ]; thenm
     echo -e "# $time_current GNU/Linux Distro: ${distro_type}. Installing GUI now." >> ${logfile}
     yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks 
     yum -y install gnome-shell-extensions 
     yum -y install firefox ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
     systemctl enable gdm.service --now
   else
-    echo -e "# $time_current CENTOS VERSION $centos_version. Installing GUI now." >> ${logfile}
-    if [ $centos_version -eq 7 ]; then
+    echo -e "# $time_current CENTOS VERSION $centos_vers. Installing GUI now." >> ${logfile}
+    if [ ! -z $centos_vers ] && [ $centos_vers -eq 7 ]; then
       yum -y groupinstall "GNOME Desktop"
-      wget ${url_utils}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26
+      /bin/cp -r ${utils_path}libstdc++.so.6.0.26 /usr/lib64/
       rm -rf /usr/lib64/libstdc++.so.6
       ln -s /usr/lib64/libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6
       systemctl disable firewalld
@@ -436,7 +470,7 @@ if [ -f /root/hostfile ]; then
   yum -y install autoconf libtool automake pam-devel
   cd /root
   if [ ! -f /root/xrdp-0.9.zip ]; then
-    wget ${url_utils}xrdp-0.9.zip
+    /bin/cp -r ${utils_path}xrdp-0.9.zip .
   fi
   unzip -o xrdp-0.9.zip && rpm -ivh nasm-2.16.rpm
   chmod +x /root/xrdp-0.9/bootstrap && chmod +x /root/xrdp-0.9/librfxcodec/src/nasm_lt.sh && chmod +x /root/xrdp-0.9/instfiles/pam.d/mkpamrules
@@ -490,12 +524,11 @@ if [ -f /root/hostfile ]; then
   ln -s /hpc_apps /root/Desktop/
   ln -s /hpc_data /root/Desktop/
   ln -s /hpc_data/cluster_data /root/Desktop/
-  wget ${url_utils}pics/app.png -O /opt/app.png
-  wget ${url_utils}pics/logo.png -O /opt/logo.png
+  /bin/cp -r ${utils_path}pics/* /opt/
   if [ $cloud_flag = 'CLOUD_A' ]; then
-    wget ${url_utils}shortcuts/oss-.desktop -O /root/Desktop/oss-.desktop
+    /bin/cp -r ${utils_path}shortcuts/oss-.desktop /root/Desktop/
   elif [ $cloud_flag = 'CLOUD_B' ]; then
-    wget ${url_utils}shortcuts/cos.desktop -O /root/Desktop/cos.desktop
+    /bin/cp -r ${utils_path}shortcuts/cos.desktop /root/Desktop/
   fi
   while read user_row
   do
@@ -508,9 +541,9 @@ if [ -f /root/hostfile ]; then
   done < /root/.cluster_secrets/user_secrets.txt
   rm -rf /usr/share/backgrounds/*.png
   rm -rf /usr/share/backgrounds/*.jpg
-  wget ${url_utils}pics/wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
+  /bin/cp -r ${utils_path}pics/wallpapers.zip /usr/share/backgrounds/
   cd /usr/share/backgrounds && unzip wallpapers.zip
-  if [ -z $centos_version ] || [ $centos_version -ne 7 ]; then
+  if [ -z $centos_vers ] || [ $centos_vers -ne 7 ]; then
     sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm/custom.conf
     yum -y install gnome-tweaks gnome-extensions-app.x86_64
     echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options centered\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/day.jpg" > /etc/g_ini.sh
@@ -518,27 +551,23 @@ if [ -f /root/hostfile ]; then
     echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
   fi
   if [ ! -f /hpc_data/sbatch_sample.sh ]; then
-    wget ${url_utils}slurm/sbatch_sample.sh -O /hpc_data/sbatch_sample.sh
+    /bin/cp -r ${utils_path}slurm/sbatch_sample.sh /hpc_data/
   fi
 fi
 
 yum -y update
 yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix
-
 # Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
 if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete
 fi
-time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "# $time_current Necassary scripts has been downloaded to /root." >> ${logfile}
+# Clean up
+echo -e "Cleaning Up ..."
 rm -rf /root/slurm*
 rm -rf /root/munge*
 rm -rf /root/modules*
 rm -rf /root/dun.gpg
 rm -rf /rpmbuild
-# Clean up
-echo -e "Cleaning Up ..."
-rm -rf /root/openmpi*
 echo -e "Installation Finished."
 echo "*/1 * * * *  /usr/hpc-now/nowmon_mgr.sh " >> /var/spool/cron/root
 time_current=`date "+%Y-%m-%d %H:%M:%S"`

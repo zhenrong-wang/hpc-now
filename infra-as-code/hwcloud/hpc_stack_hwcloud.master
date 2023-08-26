@@ -1,5 +1,10 @@
-#create master and compute nodes
-#IMPORTANT: Make sure the NODE_CORE refers to the same data with the one in Compute1!
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+
 resource "huaweicloud_vpc_eip" "master_eip" {
   region = "DEFAULT_REGION_ID"
   publicip {

@@ -27,6 +27,9 @@ extern char ali_tf_plugin_version_var[16];
 extern char qcloud_tf_plugin_version_var[16];
 extern char aws_tf_plugin_version_var[16];
 extern char hw_tf_plugin_version_var[16];
+extern char bd_tf_plugin_version_var[16];
+extern char azrm_tf_plugin_version_var[16];
+extern char azad_tf_plugin_version_var[16];
 
 extern char md5_tf_exec_var[64];
 extern char md5_tf_zip_var[64];
@@ -39,6 +42,12 @@ extern char md5_aws_tf_var[64];
 extern char md5_aws_tf_zip_var[64];
 extern char md5_hw_tf_var[64];
 extern char md5_hw_tf_zip_var[64];
+extern char md5_bd_tf_var[64];
+extern char md5_bd_tf_zip_var[64];
+extern char md5_azrm_tf_var[64];
+extern char md5_azrm_tf_zip_var[64];
+extern char md5_azad_tf_var[64];
+extern char md5_azad_tf_zip_var[64];
 
 extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
 
@@ -66,6 +75,7 @@ int file_validity_check(char* filename, int repair_flag, char* target_md5){
     else{
         if(repair_flag==1){
             get_crypto_key(filename,md5sum);
+//            printf("-------%s\n\n------%s\n\n-----%s\n\n",md5sum,target_md5,filename);
             if(strcmp(md5sum,target_md5)!=0){
                 return 1;
             }
@@ -81,7 +91,7 @@ int check_current_user(void){
 #ifdef _WIN32
     char current_user_full[128]="";
     char current_user[128]="";
-    int i,slash;
+    int i,slash=0;
     if(system("whoami > c:\\programdata\\current_user.txt.tmp")!=0){
         return 1;
     }
@@ -120,7 +130,7 @@ int install_bucket_clis(int silent_flag){
     char filename_temp_zip[FILENAME_LENGTH]="";
     int inst_flag=0;
     if(silent_flag!=0){
-        printf(RESET_DISPLAY GENERAL_BOLD "|        . Checking & installing the dataman components: 1/4 ..." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "|        . Checking & installing the dataman components: 1/6 ..." RESET_DISPLAY "\n");
     }
     sprintf(filename_temp,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
     sprintf(filename_temp_zip,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
@@ -134,7 +144,7 @@ int install_bucket_clis(int silent_flag){
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 1/4." RESET_DISPLAY "\n");
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 1/6." RESET_DISPLAY "\n");
                 }
                 inst_flag=1;
                 goto coscli;
@@ -164,12 +174,12 @@ int install_bucket_clis(int silent_flag){
         system(cmdline);  
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 1/4 .\n");
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 1/6 .\n");
     }
 
 coscli:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 2/4 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 2/6 ..." RESET_DISPLAY "\n");
     }
     sprintf(filename_temp,"%s%scoscli.exe",NOW_BINARY_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
@@ -177,9 +187,9 @@ coscli:
         sprintf(cmdline,"curl %s -o %s",URL_COSCLI,filename_temp);
         if(system(cmdline)!=0){
             if(silent_flag!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/4." RESET_DISPLAY "\n");
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/6." RESET_DISPLAY "\n");
             }
-            inst_flag=1;
+            inst_flag=2;
             goto awscli;
         }
 #ifndef _WIN32
@@ -188,12 +198,12 @@ coscli:
 #endif
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 2/4 .\n");
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 2/6 .\n");
     }
 
 awscli: 
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 3/4 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 3/6 ..." RESET_DISPLAY "\n");
     }
     sprintf(filename_temp,"%s%saws",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef __linux__
@@ -206,9 +216,9 @@ awscli:
             sprintf(cmdline,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/4." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/6." RESET_DISPLAY "\n");
                 }
-                inst_flag=1;
+                inst_flag=3;
                 goto obsutil;
             }
         }
@@ -226,9 +236,9 @@ awscli:
             sprintf(cmdline,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/4." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/6." RESET_DISPLAY "\n");
                 }
-                inst_flag=1;
+                inst_flag=3;
                 goto obsutil;
             }
         }
@@ -238,7 +248,7 @@ awscli:
                 if(silent_flag!=0){
                     printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] File I/O error. Failed to create tmp files." RESET_DISPLAY "\n");
                 }
-                inst_flag=1;
+                inst_flag=3;
                 goto obsutil;
             }
             fprintf(file_p,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -258,7 +268,7 @@ awscli:
                 sleep(1);
                 if(i==120){
                     printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
-                    inst_flag=1;
+                    inst_flag=3;
                     goto obsutil;
                 }
             }
@@ -277,17 +287,17 @@ awscli:
         if(silent_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Please run the installer update to fix this issue." RESET_DISPLAY "\n");
         }
-        inst_flag=1;
+        inst_flag=3;
         goto obsutil;
     }
 #endif
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 3/4 .\n");
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 3/6 .\n");
     }
 
 obsutil:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 4/4 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 4/6 ..." RESET_DISPLAY "\n");
     }
     sprintf(filename_temp,"%s%sobsutil.exe",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef _WIN32
@@ -305,13 +315,17 @@ obsutil:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 4/4." RESET_DISPLAY "\n");
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 4/6." RESET_DISPLAY "\n");
                 }
-                inst_flag=1;
-                goto end_return;
+                inst_flag=4;
+                goto bcecmd;
             }
         }
+#ifdef __APPLE__
+        sprintf(cmdline,"tar zxf '%s' -C %s",filename_temp_zip,NOW_BINARY_DIR);
+#else
         sprintf(cmdline,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+#endif
         system(cmdline);
 #ifndef _WIN32
         sprintf(cmdline,"chmod -R 711 %s%sobsutil_* %s",NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -327,7 +341,111 @@ obsutil:
         system(cmdline);
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 4/4 .\n");
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 4/6 .\n");
+    }
+bcecmd:
+    if(silent_flag!=0){
+        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 5/6 ..." RESET_DISPLAY "\n");
+    }
+    sprintf(filename_temp,"%s%sbcecmd.exe",NOW_BINARY_DIR,PATH_SLASH);
+#ifdef _WIN32
+    sprintf(filename_temp_zip,"%s%swindows-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+#elif __linux__
+    sprintf(filename_temp_zip,"%s%slinux-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+#elif __APPLE__
+    sprintf(filename_temp_zip,"%s%smac-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+#endif
+    if(file_exist_or_not(filename_temp)!=0){
+        printf("|          Dataman component 5 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        if(file_exist_or_not(filename_temp_zip)!=0){
+#ifdef _WIN32
+            sprintf(cmdline,"curl %s -o %s",URL_BCECMD,filename_temp_zip);
+#else
+            sprintf(cmdline,"curl %s -o '%s'",URL_BCECMD,filename_temp_zip);
+#endif
+            if(system(cmdline)!=0){
+                if(silent_flag!=0){
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 5/6." RESET_DISPLAY "\n");
+                }
+                inst_flag=5;
+                goto azcopy;
+            }
+        }
+#ifdef _WIN32
+        sprintf(cmdline,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%swindows-bcecmd-0.4.1%sbcecmd.exe %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+#elif __linux__
+        sprintf(cmdline,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%slinux-bcecmd-0.4.1%sbcecmd %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"chmod +x %s",filename_temp);
+        system(cmdline);
+#elif __APPLE__
+        sprintf(cmdline,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%smac-bcecmd-0.4.1%sbcecmd %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"chmod +x %s",filename_temp);
+        system(cmdline);
+#endif
+    }
+    if(silent_flag!=0){
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 5/6 .\n");
+    }
+azcopy:
+    if(silent_flag!=0){
+        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 6/6 ..." RESET_DISPLAY "\n");
+    }
+    sprintf(filename_temp,"%s%sazcopy.exe",NOW_BINARY_DIR,PATH_SLASH);
+#ifdef _WIN32
+    sprintf(filename_temp_zip,"%s%sazcopy_windows_amd64_10.20.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+#elif __linux__
+    sprintf(filename_temp_zip,"%s%sazcopy_linux_amd64_10.20.1.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
+#elif __APPLE__
+    sprintf(filename_temp_zip,"%s%sazcopy_darwin_amd64_10.20.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+#endif
+    if(file_exist_or_not(filename_temp)!=0){
+        printf("|          Dataman component 6 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        if(file_exist_or_not(filename_temp_zip)!=0){
+#ifdef _WIN32
+            sprintf(cmdline,"curl %s -o %s",URL_AZCOPY,filename_temp_zip);
+#else
+            sprintf(cmdline,"curl %s -o '%s'",URL_AZCOPY,filename_temp_zip);
+#endif
+            if(system(cmdline)!=0){
+                if(silent_flag!=0){
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 6/6." RESET_DISPLAY "\n");
+                }
+                inst_flag=6;
+                goto end_return;
+            }
+        }
+#ifdef _WIN32
+        sprintf(cmdline,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%sazcopy_windows_amd64_10.20.1%sazcopy.exe %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+#elif __linux__
+        sprintf(cmdline,"tar zxf '%s' -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%sazcopy_linux_amd64_10.20.1%sazcopy %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"chmod +x %s",filename_temp);
+        system(cmdline);
+#elif __APPLE__
+        sprintf(cmdline,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"%s %s%sazcopy_darwin_amd64_10.20.1%sazcopy %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(cmdline,"chmod +x %s",filename_temp);
+        system(cmdline);
+#endif
+    }
+    if(silent_flag!=0){
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 6/6 .\n");
     }
 end_return:
     return inst_flag;
@@ -341,11 +459,17 @@ int check_and_install_prerequisitions(int repair_flag){
     int flag=0;
     int file_check_flag=0;
     int force_repair_flag;
+
     FILE* file_p=NULL;
+
     char* ali_plugin_version=ali_tf_plugin_version_var;
     char* qcloud_plugin_version=qcloud_tf_plugin_version_var;
     char* aws_plugin_version=aws_tf_plugin_version_var;
     char* hw_plugin_version=hw_tf_plugin_version_var;
+    char* bd_plugin_version=bd_tf_plugin_version_var;
+    char* azrm_plugin_version=azrm_tf_plugin_version_var;
+    char* azad_plugin_version=azad_tf_plugin_version_var;
+
     char* usage_logfile=USAGE_LOG_FILE;
     char* operation_logfile=OPERATION_LOG_FILE;
     char* sshkey_dir=SSHKEY_DIR;
@@ -553,7 +677,7 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v The Terraform executable has been repaired.\n");
     }
-
+//    printf("\n###%s   \n\n",md5_now_crypto_var);
     file_check_flag=file_validity_check(crypto_exec,repair_flag,md5_now_crypto_var);
     if(file_check_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the now-crypto.exe ...\n");
@@ -638,9 +762,9 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
     sprintf(filename_temp_zip,"%s/terraform-provider-alicloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
 #elif __APPLE__
-    sprintf(dirname_temp,"%splugins/registry.terraform.io/aliyun/alicloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,ali_plugin_version);
-    sprintf(filename_temp,"%sterraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
-    sprintf(filename_temp_zip,"%sterraform-provider-alicloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/aliyun/alicloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,ali_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-alicloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
         sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
@@ -648,7 +772,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_ali_tf_var);
     if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/4) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/6) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_ali_tf_zip_var);
         if(file_check_flag==1){
@@ -699,9 +823,9 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
     sprintf(filename_temp_zip,"%s/terraform-provider-tencentcloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
 #elif __APPLE__
-    sprintf(dirname_temp,"%splugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,qcloud_plugin_version);
-    sprintf(filename_temp,"%sterraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
-    sprintf(filename_temp_zip,"%sterraform-provider-tencentcloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,qcloud_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-tencentcloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
         sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
@@ -709,7 +833,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_qcloud_tf_var);
     if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (2/4) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (2/6) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_qcloud_tf_zip_var);
         if(file_check_flag==1){
@@ -759,9 +883,9 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
     sprintf(filename_temp_zip,"%s/terraform-provider-aws_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
 #elif __APPLE__
-    sprintf(dirname_temp,"%splugins/registry.terraform.io/hashicorp/aws/%s/darwin_amd64/",TF_LOCAL_PLUGINS,aws_plugin_version);
-    sprintf(filename_temp,"%sterraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
-    sprintf(filename_temp_zip,"%sterraform-provider-aws_%s_x5_darwin_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/aws/%s/darwin_amd64/",TF_LOCAL_PLUGINS,aws_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-aws_%s_x5_darwin_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
         sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
@@ -769,7 +893,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_aws_tf_var);
     if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (3/4) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (3/6) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_aws_tf_zip_var);
         if(file_check_flag==1){
@@ -810,7 +934,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
 
-    #ifdef _WIN32
+#ifdef _WIN32
     sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\huaweicloud\\huaweicloud\\%s\\windows_amd64\\",appdata_dir,hw_plugin_version);
     sprintf(filename_temp,"%s\\terraform-provider-huaweicloud_v%s.exe",dirname_temp,hw_plugin_version);
     sprintf(filename_temp_zip,"%s\\terraform-provider-huaweicloud_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,hw_plugin_version);
@@ -819,9 +943,9 @@ int check_and_install_prerequisitions(int repair_flag){
     sprintf(filename_temp,"%s/terraform-provider-huaweicloud_v%s",dirname_temp,hw_plugin_version);
     sprintf(filename_temp_zip,"%s/terraform-provider-huaweicloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,hw_plugin_version);
 #elif __APPLE__
-    sprintf(dirname_temp,"%splugins/registry.terraform.io/huaweicloud/huaweicloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,hw_plugin_version);
-    sprintf(filename_temp,"%sterraform-provider-huaweicloud_v%s",dirname_temp,hw_plugin_version);
-    sprintf(filename_temp_zip,"%sterraform-provider-huaweicloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,hw_plugin_version);
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/huaweicloud/huaweicloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,hw_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-huaweicloud_v%s",dirname_temp,hw_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-huaweicloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,hw_plugin_version);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
         sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
@@ -829,7 +953,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_hw_tf_var);
     if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (4/4) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (4/6) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_hw_tf_zip_var);
         if(file_check_flag==1){
@@ -870,13 +994,193 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
 
+#ifdef _WIN32
+    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\baidubce\\baiducloud\\%s\\windows_amd64\\",appdata_dir,bd_plugin_version);
+    sprintf(filename_temp,"%s\\terraform-provider-baiducloud_v%s.exe",dirname_temp,bd_plugin_version);
+    sprintf(filename_temp_zip,"%s\\terraform-provider-baiducloud_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,bd_plugin_version);
+#elif __linux__
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/baidubce/baiducloud/%s/linux_amd64/",TF_LOCAL_PLUGINS,bd_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-baiducloud_v%s",dirname_temp,bd_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-baiducloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,bd_plugin_version);
+#elif __APPLE__
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/baidubce/baiducloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,bd_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-baiducloud_v%s",dirname_temp,bd_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-baiducloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,bd_plugin_version);
+#endif
+    if(folder_exist_or_not(dirname_temp)!=0){
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_bd_tf_var);
+    if(file_check_flag==1){
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (5/6) ...\n");
+        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_bd_tf_zip_var);
+        if(file_check_flag==1){
+            if(tf_loc_flag_var==1){
+#ifdef _WIN32
+                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-baiducloud_%s_windows_amd64.zip %s",url_tf_root_var,bd_plugin_version,filename_temp_zip);
+#elif __linux__
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-baiducloud_%s_linux_amd64.zip '%s'",url_tf_root_var,bd_plugin_version,filename_temp_zip);
+#elif __APPLE__
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-baiducloud_%s_darwin_amd64.zip '%s'",url_tf_root_var,bd_plugin_version,filename_temp_zip);
+#endif
+            }
+            else{
+#ifdef _WIN32
+                sprintf(cmdline,"curl %stf-win/terraform-provider-baiducloud_%s_windows_amd64.zip -o %s",url_tf_root_var,bd_plugin_version,filename_temp_zip);
+#elif __linux__
+                sprintf(cmdline,"curl %stf-linux/terraform-provider-baiducloud_%s_linux_amd64.zip -o '%s'",url_tf_root_var,bd_plugin_version,filename_temp_zip);
+#elif __APPLE__
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-baiducloud_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,bd_plugin_version,filename_temp_zip);
+#endif
+            }
+            flag=system(cmdline);
+            if(flag!=0){
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
+                return 3;
+            }
+        }
+#ifdef _WIN32
+        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+#else
+        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+#endif
+        flag=system(cmdline);
+        if(flag!=0){
+            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
+            return 3;
+        }
+    }
+
+#ifdef _WIN32
+    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\hashicorp\\azuread\\%s\\windows_amd64\\",appdata_dir,azad_plugin_version);
+    sprintf(filename_temp,"%s\\terraform-provider-azuread_v%s_x5.exe",dirname_temp,azad_plugin_version);
+    sprintf(filename_temp_zip,"%s\\terraform-provider-azuread_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,azad_plugin_version);
+#elif __linux__
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/azuread/%s/linux_amd64/",TF_LOCAL_PLUGINS,azad_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-azuread_v%s_x5",dirname_temp,azad_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-azuread_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,azad_plugin_version);
+#elif __APPLE__
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/azuread/%s/darwin_amd64/",TF_LOCAL_PLUGINS,azad_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-azuread_v%s_x5",dirname_temp,azad_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-azuread_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,azad_plugin_version);
+#endif
+    if(folder_exist_or_not(dirname_temp)!=0){
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_azad_tf_var);
+    if(file_check_flag==1){
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (6a/6) ...\n");
+        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_azad_tf_zip_var);
+        if(file_check_flag==1){
+            if(tf_loc_flag_var==1){
+#ifdef _WIN32
+                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-azuread_%s_windows_amd64.zip %s",url_tf_root_var,azad_plugin_version,filename_temp_zip);
+#elif __linux__
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-azuread_%s_linux_amd64.zip '%s'",url_tf_root_var,azad_plugin_version,filename_temp_zip);
+#elif __APPLE__
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-azuread_%s_darwin_amd64.zip '%s'",url_tf_root_var,azad_plugin_version,filename_temp_zip);
+#endif
+            }
+            else{
+#ifdef _WIN32
+                sprintf(cmdline,"curl %stf-win/terraform-provider-azuread_%s_windows_amd64.zip -o %s",url_tf_root_var,azad_plugin_version,filename_temp_zip);
+#elif __linux__
+                sprintf(cmdline,"curl %stf-linux/terraform-provider-azuread_%s_linux_amd64.zip -o '%s'",url_tf_root_var,azad_plugin_version,filename_temp_zip);
+#elif __APPLE__
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-azuread_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,azad_plugin_version,filename_temp_zip);
+#endif
+            }
+            flag=system(cmdline);
+            if(flag!=0){
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
+                return 3;
+            }
+        }
+#ifdef _WIN32
+        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+#else
+        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+#endif
+        flag=system(cmdline);
+        if(flag!=0){
+            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
+            return 3;
+        }
+    }
+
+    #ifdef _WIN32
+    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\hashicorp\\azurerm\\%s\\windows_amd64\\",appdata_dir,azrm_plugin_version);
+    sprintf(filename_temp,"%s\\terraform-provider-azurerm_v%s_x5.exe",dirname_temp,azrm_plugin_version);
+    sprintf(filename_temp_zip,"%s\\terraform-provider-azurerm_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,azrm_plugin_version);
+#elif __linux__
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/azurerm/%s/linux_amd64/",TF_LOCAL_PLUGINS,azrm_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-azurerm_v%s_x5",dirname_temp,azrm_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-azurerm_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,azrm_plugin_version);
+#elif __APPLE__
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/azurerm/%s/darwin_amd64/",TF_LOCAL_PLUGINS,azrm_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-azurerm_v%s_x5",dirname_temp,azrm_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-azurerm_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,azrm_plugin_version);
+#endif
+    if(folder_exist_or_not(dirname_temp)!=0){
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_azrm_tf_var);
+    if(file_check_flag==1){
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (6b/6) ...\n");
+        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_azrm_tf_zip_var);
+        if(file_check_flag==1){
+            if(tf_loc_flag_var==1){
+#ifdef _WIN32
+                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-azurerm_%s_windows_amd64.zip %s",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
+#elif __linux__
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-azurerm_%s_linux_amd64.zip '%s'",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
+#elif __APPLE__
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-azurerm_%s_darwin_amd64.zip '%s'",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
+#endif
+            }
+            else{
+#ifdef _WIN32
+                sprintf(cmdline,"curl %stf-win/terraform-provider-azurerm_%s_windows_amd64.zip -o %s",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
+#elif __linux__
+                sprintf(cmdline,"curl %stf-linux/terraform-provider-azurerm_%s_linux_amd64.zip -o '%s'",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
+#elif __APPLE__
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-azurerm_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
+#endif
+            }
+            flag=system(cmdline);
+            if(flag!=0){
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
+                return 3;
+            }
+        }
+#ifdef _WIN32
+        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+#else
+        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+#endif
+        flag=system(cmdline);
+        if(flag!=0){
+            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
+            return 3;
+        }
+    }
+
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v The Terraform Providers have been repaired.\n");
     }
-
+    printf(RESET_DISPLAY);
     flag=install_bucket_clis(force_repair_flag);
     if(flag!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] IMPORTANT! The dataman services may not work properly." RESET_DISPLAY "\n");
+        printf(WARN_YELLO_BOLD "[ -WARN- ] IMPORTANT! The dataman component %d may not work properly." RESET_DISPLAY "\n",flag);
     }
     if(folder_exist_or_not(sshkey_dir)!=0){
         sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,sshkey_dir,SYSTEM_CMD_REDIRECT);
@@ -931,7 +1235,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked and repaired." RESET_DISPLAY "\n");
     }
     else{
-        printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked." RESET_DISPLAY "\n");
     }
     return 0;
 }

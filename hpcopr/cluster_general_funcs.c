@@ -64,12 +64,28 @@ int add_to_cluster_registry(char* new_cluster_name, char* import_flag){
     return 0;
 }
 
-void create_and_get_stackdir(char* workdir, char* stackdir){
+int create_and_get_stackdir(char* workdir, char* stackdir){
+    int base_length=strlen(HPC_NOW_ROOT_DIR)+7;
+    if(strlen(workdir)<base_length){
+        strcpy(stackdir,"");
+        return 1;
+    }
     char cmdline[CMDLINE_LENGTH]="";
+    int run_flag;
     sprintf(stackdir,"%s%sstack",workdir,PATH_SLASH);
     if(folder_exist_or_not(stackdir)!=0){
         sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            strcpy(stackdir,"");
+            return 3;
+        }
+        else{
+            return 0;
+        }
+    }
+    else{
+        return 0;
     }
 }
 
@@ -244,12 +260,28 @@ void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
     system(cmdline);
 }
 
-void create_and_get_vaultdir(char* workdir, char* vaultdir){
+int create_and_get_vaultdir(char* workdir, char* vaultdir){
+    int base_length=strlen(HPC_NOW_ROOT_DIR)+7;
+    if(strlen(workdir)<base_length){
+        strcpy(vaultdir,"");
+        return 1;
+    }
     char cmdline[CMDLINE_LENGTH]="";
+    int run_flag;
     sprintf(vaultdir,"%s%svault",workdir,PATH_SLASH);
     if(folder_exist_or_not(vaultdir)!=0){
         sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            strcpy(vaultdir,"");
+            return 3;
+        }
+        else{
+            return 0;
+        }
+    }
+    else{
+        return 0;
     }
 }
 
@@ -384,6 +416,23 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     fclose(decrypted_file);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,decrypted_file_name,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    return 0;
+}
+
+int get_azure_info(char* workdir, char* az_subscription_id, char* az_tenant_id){
+    char vaultdir[DIR_LENGTH]="";
+    char az_extra_info_file[FILENAME_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(az_extra_info_file,"%s%s.az_extra.info",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(az_extra_info_file)!=0){
+        return -1;
+    }
+    get_key_value(az_extra_info_file,"azure_subscription_id:",' ',az_subscription_id);
+    get_key_value(az_extra_info_file,"azure_tenant_id:",' ',az_tenant_id);
+    if(strlen(az_subscription_id)==0||strlen(az_tenant_id)==0){
+        return 1;
+    }
+//    printf("\n%s\n%s\n",az_subscription_id,az_tenant_id);
     return 0;
 }
 
@@ -526,8 +575,8 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
-//    sprintf(filename_temp,"%s%sbucket.conf",vaultdir,PATH_SLASH);
-//    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%scredentials",vaultdir,PATH_SLASH);
+    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
@@ -572,7 +621,7 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
 int getstate(char* workdir, char* crypto_filename){
     char cloud_flag[16]="";
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
         return -3;
     }
     char stackdir[DIR_LENGTH]="";
@@ -642,6 +691,16 @@ int getstate(char* workdir, char* crypto_filename){
         find_and_get(master_tf,"flavor_id","","",1,"flavor_id","","",'.',3,master_config);
         find_and_get(compute_template,"flavor_id","","",1,"flavor_id","","",'.',3,compute_config);
     }
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
+        find_and_get(master_tf,"instance_spec","","",1,"instance_spec","","",'.',3,master_config);
+        find_and_get(compute_template,"instance_spec","","",1,"instance_spec","","",'.',3,compute_config);
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        find_and_get(master_tf,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,master_config);
+        find_and_get(compute_template,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,compute_config);
+    }
     else{
         find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
         find_and_get(compute_template,"instance_type","","",1,"instance_type","","",'.',3,compute_config);
@@ -652,7 +711,7 @@ int getstate(char* workdir, char* crypto_filename){
     else{
         strcpy(ht_flag,"hton");
     }
-    if(find_multi_keys(compute_template,"instance_charge_type = \"PrePaid\"","","","","")>0||find_multi_keys(compute_template,"instance_charge_type = \"PREPAID\"","","","","")>0){
+    if(find_multi_keys(compute_template,"instance_charge_type = \"PrePaid\"","","","","")>0||find_multi_keys(compute_template,"instance_charge_type = \"PREPAID\"","","","","")>0||find_multi_keys(compute_template,"charging_mode = \"prePaid\"","","","","")>0||find_multi_keys(compute_template,"payment_timing = \"Prepaid\"","","","","")>0){
         strcpy(pay_method,"month");
     }
     else{
@@ -722,7 +781,7 @@ int getstate(char* workdir, char* crypto_filename){
             }
         }
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
         node_num_gs=find_multi_keys(tfstate,"\"type\": \"huaweicloud_compute_instance\",","","","","")-3;
         find_and_get(tfstate,"\"name\": \"master_eip\",","","",20,"\"address\":","","",'\"',4,string_temp);
         fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
@@ -758,6 +817,50 @@ int getstate(char* workdir, char* crypto_filename){
             }
         }
         find_and_get(tfstate,"\"type\": \"huaweicloud_evs_volume\",","","",50,"\"size\":","","",'\"',3,string_temp);
+        get_seq_string(string_temp,' ',2,string_temp2);
+        get_seq_string(string_temp2,',',1,string_temp);
+        fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
+    }
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
+        node_num_gs=find_multi_keys(tfstate,"\"type\": \"baiducloud_instance\",","","","","")-3;
+        find_and_get(tfstate,"\"name\": \"master_eip\",","","",20,"\"eip\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"master\",","","",50,"\"internal_ip\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
+        fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"master\",","","",100,"\"status\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_status: %s\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"database\",","","",100,"\"status\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"database_status: %s\n",string_temp);
+        for(i=0;i<node_num_gs;i++){
+            sprintf(string_temp2,"\"name\": \"compute%d\",",i+1);
+            find_and_get(tfstate,string_temp2,"","",50,"\"internal_ip\":","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
+            fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
+            find_and_get(tfstate,string_temp2,"","",100,"\"status\":","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"compute%d_status: %s\n",i+1,string_temp);
+            if(strcmp(string_temp,"Running")==0){
+                node_num_on_gs++;
+            }
+        }
+    }
+    else{
+        node_num_gs=find_multi_keys(tfstate,"\"azurerm_linux_virtual_machine\"","","","","")-3;
+        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"public_ip_address\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"private_ip_address\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
+        fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
+        fprintf(file_p_statefile,"master_status: Running\ndatabase_status: Running\n");
+        for(i=0;i<node_num_gs;i++){
+            sprintf(string_temp2,"\"name\": \"compute%d\",",i+1);
+            find_and_get(tfstate,string_temp2,"","",80,"\"private_ip_address\":","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
+            fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
+            fprintf(file_p_statefile,"compute%d_status: Running\n",i+1);
+            node_num_on_gs++;
+        }
+        find_and_get(tfstate,"\"name\": \"shared_volume\",","","",50,"\"disk_size_gb\":","","",'\"',3,string_temp);
         get_seq_string(string_temp,' ',2,string_temp2);
         get_seq_string(string_temp2,',',1,string_temp);
         fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
@@ -875,6 +978,9 @@ void single_file_to_running(char* filename_temp, char* cloud_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
         global_replace(filename_temp,"\"OFF\"","\"ON\"");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
+        global_replace(filename_temp,"stop","start");
     }
 }
 
@@ -1013,7 +1119,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             }
         }
     }
-    if(graph_level==0&&strcmp(cloud_flag,"CLOUD_D")==0){
+    if(graph_level==0&&(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0)){
         printf("|          +-shared_storage(%s GB)\n",shared_volume);
     }
     if(graph_level==1){
@@ -1262,7 +1368,9 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     char password[32]="";
     char enable_flag[16]="";
     char master_address[32]="";
-    char bucket_address[32]="";
+    char bucket_address[128]="";
+    char az_tenant_id[128]="";
+    char az_subscription_id[128]="";
     char bucket_ak[128]="";
     char bucket_sk[128]="";
     char region_id[32]="";
@@ -1276,6 +1384,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
         return -3;
     }
+    get_azure_info(workdir,az_subscription_id,az_tenant_id);
     get_state_value(workdir,"master_public_ip:",master_address);
     printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD "| Unique Cluster ID: " RESET_DISPLAY "%s\n",unique_cluster_id);
@@ -1288,6 +1397,9 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     }
     printf(GENERAL_BOLD "| Bucket Address:" RESET_DISPLAY " %s\n",bucket_address);
     printf(GENERAL_BOLD "| Cloud Region: " RESET_DISPLAY "%s\n",region_id);
+    if(strlen(az_tenant_id)>0){
+        printf(GENERAL_BOLD "| Azure Tenant ID: " RESET_DISPLAY "%s\n",az_tenant_id);
+    }
     if(bucketflag==1){
         printf(GENERAL_BOLD "| Bucket AccessKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_ak);
         printf(GENERAL_BOLD "| Bucket SecretKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_sk);
@@ -1397,6 +1509,9 @@ int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag){
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
         global_replace(filename_temp,"\"OFF\"","\"ON\"");
     }
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
+        global_replace(filename_temp,"stop","start");
+    }
     else{
         return 1;
     }
@@ -1417,6 +1532,9 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
         global_replace(filename_temp,"\"ON\"","\"OFF\"");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
+        global_replace(filename_temp,"start","stop");
     }
     else{
         return 1;
@@ -1449,7 +1567,7 @@ int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, c
             i++;
         }
         else if(strcmp(header,"REGION:")==0){
-            strcpy(region_id,tail);
+            get_seq_string(line_buffer,'\"',2,region_id);
             i++;
         }
         else if(strcmp(header,"BUCKET_AK:")==0){
@@ -1477,35 +1595,6 @@ int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, c
     else{
         return 0;
     }
-}
-
-int get_cluster_bucket_id(char* workdir, char* crypto_keyfile, char* bucket_id){
-    char vaultdir[DIR_LENGTH]="";
-    char bucket_ak[128]="";
-    char bucket_sk[128]="";
-    char bucket_region[32]="";
-    char bucket_address[32]="";
-    char filename_temp[FILENAME_LENGTH]="";
-    char md5sum[64]="";
-    create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%sbucket_info.txt.tmp",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)==0){
-        if(get_bucket_info(workdir,crypto_keyfile,bucket_address,bucket_region,bucket_ak,bucket_sk)==0){
-            if(get_seq_string(bucket_address,'/',2,bucket_id)==0){
-                return 0;
-            }
-        }
-    }
-    get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        return -1;
-    }
-    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
-    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    find_and_get(filename_temp,"NetDisk Address:","","",1,"NetDisk Address:","","",' ',4,bucket_id);
-    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
-    return 0;
 }
 
 int tail_f_for_windows(char* filename){
@@ -2392,13 +2481,17 @@ int delete_protection(char* workdir){
     return 0;
 }*/
 
-void modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer){
+int modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer){
+    if(strlen(line_buffer)==0){
+        return 1;
+    }
     if(strcmp(modify_flag,"add")==0){
         insert_lines(filename_temp,"user_data",line_buffer);
     }
     else{
         delete_lines_by_kwd(filename_temp,line_buffer,1);
     }
+    return 0;
 }
 
 int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag){
@@ -2432,6 +2525,12 @@ int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag){
         strcpy(line_buffer3,"  period = 1");
         strcpy(line_buffer4,"  auto_renew = true");
     }
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
+        strcpy(line_buffer1,"  payment_timing = \"Prepaid\"");
+        strcpy(line_buffer2,"");
+        strcpy(line_buffer3,"");
+        strcpy(line_buffer4,"");
+    }
     else{
         return -3;
     }
@@ -2463,4 +2562,37 @@ int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag){
         modify_payment_single_line(filename_temp,modify_flag,line_buffer4);
     }
     return 0;
+}
+
+int generate_bceconfig(char* vaultdir, char* region_id, char* bucket_ak, char* bucket_sk){
+    char config[FILENAME_LENGTH]="";
+    char credentials[FILENAME_LENGTH]="";
+    FILE* file_p1=NULL;
+    FILE* file_p2=NULL;
+    sprintf(config,"%s%sconfig",vaultdir,PATH_SLASH);
+    sprintf(credentials,"%s%scredentials",vaultdir,PATH_SLASH);
+    file_p1=fopen(config,"w+");
+    if(file_p1==NULL){
+        return -1;
+    }
+    file_p2=fopen(credentials,"w+");
+    if(file_p2==NULL){
+        fclose(file_p1);
+        return -1;
+    }
+    fprintf(file_p1,"[Defaults]\nDomain = %s.bcebos.com\nRegion = %s\nAutoSwitchDomain = \nBreakpointFileExpiration = 10000\nHttps = yes\nMultiUploadThreadNum = \nSyncProcessingNum = \nMultiUploadPartSize = \nProxyHost =\n",region_id,region_id);
+    fclose(file_p1);
+    fprintf(file_p2,"[Defaults]\nAk = %s\nSk = %s\nSts = ",bucket_ak,bucket_sk);
+    fclose(file_p2);
+    return 0;
+}
+
+int decrypt_bcecredentials(char* workdir){
+    char md5sum[64]="";
+    char vaultdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    get_crypto_key(CRYPTO_KEY_FILE,md5sum);
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(filename_temp,"%s%scredentials.tmp",vaultdir,PATH_SLASH);
+    return decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
 }
