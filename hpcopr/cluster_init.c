@@ -25,6 +25,7 @@
 extern char url_code_root_var[LOCATION_LENGTH];
 extern char url_shell_scripts_var[LOCATION_LENGTH];
 extern char url_initutils_root_var[LOCATION_LENGTH];
+extern char az_environment[16];
 extern int code_loc_flag_var;
 
 /*
@@ -236,6 +237,12 @@ int get_tf_prep_conf(char* conf_file, char* reconf_list, char* cluster_id, char*
                     else{
                         *(region_id+i-3)=*(tail+i);
                     }
+                }
+                if(contain_or_not(tail,"China")==0){
+                    strcpy(az_environment,"china");
+                }
+                else{
+                    strcpy(az_environment,"public");
                 }
             }
             else{
@@ -3060,6 +3067,7 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     global_replace(filename_temp,"BLANK_SECRET_KEY",secret_key);
     global_replace(filename_temp,"DEFAULT_TENANT_ID",tenant_id);
     global_replace(filename_temp,"DEFAULT_SUBCRIPTION_ID",subscription_id);
+    global_replace(filename_temp,"ENVIRONMENT_OPTION",az_environment);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
     global_replace(filename_temp,"RANDOM_STORAGE_ACCOUNT",random_storage_account);
     global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);

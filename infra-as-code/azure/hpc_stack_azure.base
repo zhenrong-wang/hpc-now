@@ -22,6 +22,7 @@ provider "azurerm" {
     }
   }
   skip_provider_registration = true
+  environment = "ENVIRONMENT_OPTION"
   client_id = "BLANK_CLIENT_ID"
   client_secret = "BLANK_SECRET_KEY"
   tenant_id = "DEFAULT_TENANT_ID"

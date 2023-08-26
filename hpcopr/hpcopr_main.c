@@ -52,6 +52,7 @@ char hw_tf_plugin_version_var[16]="";
 char bd_tf_plugin_version_var[16]="";
 char azrm_tf_plugin_version_var[16]="";
 char azad_tf_plugin_version_var[16]="";
+char az_environment[16]="";
 
 char md5_tf_exec_var[64]="";
 char md5_tf_zip_var[64]="";
