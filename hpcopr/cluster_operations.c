@@ -370,13 +370,13 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the cluster name %s.\n",input_cluster_name);
 #ifdef _WIN32
     strcpy(filename_temp,"c:\\programdata\\hpc-now\\secret.tmp.txt");
-    strcpy(filename_temp_2,"c:\\programdata\\hpc-now\\az_extra_info.txt");
+    strcpy(filename_temp_2,"c:\\programdata\\hpc-now\\.az_extra.info");
 #elif __linux__
     strcpy(filename_temp,"/home/hpc-now/.secret.tmp.txt");
-    strcpy(filename_temp_2,"/home/hpc-now/az_extra_info.txt");
+    strcpy(filename_temp_2,"/home/hpc-now/.az_extra.info");
 #elif __APPLE__
     strcpy(filename_temp,"/Users/hpc-now/.secret.tmp.txt");
-    strcpy(filename_temp_2,"/Users/hpc-now/az_extra_info.txt");
+    strcpy(filename_temp_2,"/Users/hpc-now/.az_extra.info");
 #endif
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
@@ -1290,7 +1290,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     int reinit_flag=0;
     char cmdline[CMDLINE_LENGTH]="";
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
         return -5;
     }
     create_and_get_stackdir(workdir,stackdir);
@@ -1511,6 +1511,10 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         print_empty_cluster_info();
         return -1;
     }
+    get_cloud_flag(workdir,cloud_flag);
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
+        return -5;
+    }
 
     decrypt_files(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
@@ -1520,7 +1524,6 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
-    get_cloud_flag(workdir,cloud_flag);
     sprintf(filename_temp,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
     if(strcmp(cloud_flag,"CLOUD_D")==0){
         find_and_get(filename_temp,"flavor_id","","",1,"flavor_id","","",'.',3,prev_config);
@@ -1586,7 +1589,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume){
     char* sshkey_dir=SSHKEY_DIR;
     char* tf_exec=TERRAFORM_EXEC;
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_D")!=0){
+    if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
         return 1;
     }
     if(cluster_empty_or_not(workdir)==0){
@@ -1632,7 +1635,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume){
     printf("|\n");
     sync_statefile(workdir,sshkey_dir);
     delete_decrypted_files(workdir,crypto_keyfile);
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The master node has been reconfigured.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The shared volume has been expanded from %d to %d GB.\n",prev_volume_num,new_volume_num);
     return 0;
 }
 
@@ -2126,10 +2129,18 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
             sleep(1);
         }
     }
-    else if(strcmp(cloud_flag,"CLOUD_D")==0){
+    else if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_E")==0){
         printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
         for(i=0;i<GENERAL_SLEEP_TIME;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
+            fflush(stdout);
+            sleep(1);
+        }
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",2*GENERAL_SLEEP_TIME);
+        for(i=0;i<2*GENERAL_SLEEP_TIME;i++){
+            printf("[ -WAIT- ] Still need to wait %d seconds ... \r",2*GENERAL_SLEEP_TIME-i);
             fflush(stdout);
             sleep(1);
         }
@@ -2183,11 +2194,8 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
     }
     get_workdir(workdir,cluster_name);
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
-        return -5;
-    }
-    if(strcmp(cloud_flag,"CLOUD_C")==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] This operation is not valid for AWS. Exit now." RESET_DISPLAY "\n");
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] This operation is not valid for the current Cloud %s. Exit now." RESET_DISPLAY "\n",cloud_flag);
         return -5;
     }
     if(strcmp(new_payment_method,"od")!=0&&strcmp(new_payment_method,"month")!=0){

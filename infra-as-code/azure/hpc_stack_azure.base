@@ -462,9 +462,41 @@ resource "azuread_application_password" "hpc_storage_access_key" {
   end_date_relative = "8640h"
 }
 
+data "azurerm_subscription" "this_subscription" {}
+
 resource "azurerm_role_assignment" "container_role" {
-  scope = "${azurerm_storage_account.hpc_storage.id}"
-  role_definition_name = "Contributor"
+  scope = "${data.azurerm_subscription.this_subscription.id}"
+  role_definition_name = "Storage Blob Data Contributor"
   principal_id = azuread_service_principal.hpc_storage_access.object_id
   skip_service_principal_aad_check = true
+  condition_version = "2.0"
+  condition = <<EOF
+(
+ (
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read'} AND NOT SubOperationMatches{'Blob.List'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read'} AND SubOperationMatches{'Blob.List'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'} AND SubOperationMatches{'Blob.Write.Tier'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'} AND SubOperationMatches{'Blob.Write.WithTagHeaders'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action'} AND SubOperationMatches{'Blob.Write.WithTagHeaders'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/move/action'})
+ )
+ OR 
+ (
+  @Resource[Microsoft.Storage/storageAccounts/blobServices/containers:name] StringEquals 'RANDOM_STORAGE_ACCOUNT'
+ )
+)
+EOF
 }

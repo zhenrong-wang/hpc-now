@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0151"
+#define CORE_VERSION_CODE "0.2.0.0152"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -67,6 +67,7 @@
 #define OSSUTIL_EXEC "c:\\hpc-now\\utils\\ossutil64.exe"
 #define OBSUTIL_EXEC "c:\\hpc-now\\utils\\obsutil.exe"
 #define BCECMD_EXEC "c:\\hpc-now\\utils\\bcecmd.exe"
+#define AZCOPY_EXEC "c:\\hpc-now\\utils\\azcopy.exe"
 
 #elif __linux__
 #define PATH_SLASH "/"
@@ -125,6 +126,7 @@
 #define OSSUTIL_EXEC "/home/hpc-now/.bin/utils/ossutil64.exe"
 #define OBSUTIL_EXEC "/home/hpc-now/.bin/utils/obsutil.exe"
 #define BCECMD_EXEC "/home/hpc-now/.bin/utils/bcecmd.exe"
+#define AZCOPY_EXEC "/home/hpc-now/.bin/utils/azcopy.exe"
 
 #elif __APPLE__
 #define PATH_SLASH "/"
@@ -183,6 +185,7 @@
 #define OSSUTIL_EXEC "/Users/hpc-now/.bin/utils/ossutil64.exe"
 #define OBSUTIL_EXEC "/Users/hpc-now/.bin/utils/obsutil.exe"
 #define BCECMD_EXEC "/Users/hpc-now/.bin/utils/bcecmd.exe"
+#define AZCOPY_EXEC "/Users/hpc-now/.bin/utils/azcopy.exe"
 
 #endif
 

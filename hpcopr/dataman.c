@@ -23,7 +23,8 @@
 #include "general_print_info.h"
 #include "dataman.h"
 
-void unset_aws_bucket_envs(void){
+void unset_bucket_envs(char* cloud_flag){
+    if(strcmp(cloud_flag,"CLOUD_C")==0){
 #ifdef _WIN32
     system("set AWS_ACCESS_KEY_ID=");
     system("set AWS_SECRET_ACCESS_KEY=");
@@ -33,6 +34,21 @@ void unset_aws_bucket_envs(void){
     system("unset AWS_SECRET_ACCESS_KEY");
     system("unset AWS_DEFAULT_REGION");
 #endif
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+#ifdef _WIN32
+    system("set AZCOPY_AUTO_LOGIN_TYPE=");
+    system("set AZCOPY_SPA_APPLICATION_ID=");
+    system("set AZCOPY_SPA_CLIENT_SECRET=");
+    system("set AZCOPY_TENANT_ID=");
+#else 
+    system("unset AZCOPY_AUTO_LOGIN_TYPE");
+    system("unset AZCOPY_SPA_APPLICATION_ID");
+    system("unset AZCOPY_SPA_CLIENT_SECRET");
+    system("unset AZCOPY_TENANT_ID");
+#endif
+    }
+
 }
 
 void bucket_path_check(char* path_string, char* hpc_user, char* real_path){
@@ -70,18 +86,20 @@ void rf_flag_parser(const char* rflag, const char* fflag, char* real_rflag, char
 }
 
 int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_path, char* rflag, char* fflag, char* crypto_keyfile, char* cloud_flag, char* cmd_type){
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
         return -3;
     }
     if(strcmp(cmd_type,"put")!=0&&strcmp(cmd_type,"get")!=0&&strcmp(cmd_type,"copy")!=0){
         return -5;
     }
-    char bucket_address[64]="";
+    char bucket_address[128]="";
     char region_id[32]="";
     char bucket_ak[128]="";
     char bucket_sk[128]="";
-    char real_rflag[16]="";
-    char real_fflag[16]="";
+    char az_subscription_id[128]="";
+    char az_tenant_id[128]="";
+    char real_rflag[32]="";
+    char real_fflag[32]="";
     char real_source_path[DIR_LENGTH]="";
     char real_target_path[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -93,7 +111,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
     if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
         strcpy(real_fflag,"");
     }
-    if(strcmp(cloud_flag,"CLOUD_D")==0){
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
         if(strlen(real_rflag)!=0){
             strcpy(real_rflag,"-r");
         }
@@ -101,9 +119,14 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
             strcpy(real_fflag,"-f");
         }
     }
-    if(strcmp(cloud_flag,"CLOUD_E")==0){
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
         if(strlen(real_fflag)!=0){
             strcpy(real_fflag,"--yes");
+        }
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        if(strlen(real_fflag)!=0){
+            strcpy(real_fflag,"--force-if-read-only");
         }
     }
     if(strcmp(cmd_type,"put")==0){
@@ -162,7 +185,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
             sprintf(cmdline,"%s cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
         }
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
         if(decrypt_bcecredentials(workdir)!=0){
             return -1;
         }
@@ -177,10 +200,21 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
             sprintf(cmdline,"%s bos cp %s%s %s %s %s --conf-path %s",BCECMD_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag,vaultdir);
         }
     }
-    if(system(cmdline)!=0){
-        if(strcmp(cloud_flag,"CLOUD_C")==0){
-            unset_aws_bucket_envs();
+    else{
+        get_azure_info(workdir,az_subscription_id,az_tenant_id);
+        if(strcmp(cmd_type,"copy")==0){
+            sprintf(cmdline,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s%s %s%s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
+        else if(strcmp(cmd_type,"put")==0){
+            sprintf(cmdline,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s %s%s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+        }
+        else{
+            sprintf(cmdline,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s%s %s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
+        }
+    }
+    printf("\n\n%s\n\n",cmdline);
+    if(system(cmdline)!=0){
+        unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
             sprintf(cmdline,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
@@ -188,9 +222,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         return 1;
     }
     else{
-        if(strcmp(cloud_flag,"CLOUD_C")==0){
-            unset_aws_bucket_envs();
-        }
+        unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
             sprintf(cmdline,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
@@ -200,18 +232,20 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
 }
 
 int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, char* fflag, char* crypto_keyfile, char* cloud_flag, char* cmd_type){
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
         return -3;
     }
     if(strcmp(cmd_type,"delete")!=0&&strcmp(cmd_type,"list")!=0){
         return -5;
     }
-    char bucket_address[64]="";
+    char bucket_address[128]="";
     char region_id[32]="";
     char bucket_ak[128]="";
     char bucket_sk[128]="";
-    char real_rflag[16]="";
-    char real_fflag[16]="";
+    char az_subscription_id[128]="";
+    char az_tenant_id[128]="";
+    char real_rflag[32]="";
+    char real_fflag[32]="";
     char real_remote_path[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -222,7 +256,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
     if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
         strcpy(real_fflag,"");
     }
-    if(strcmp(cloud_flag,"CLOUD_D")==0){
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
         if(strlen(real_rflag)!=0){
             strcpy(real_rflag,"-r");
         }
@@ -230,9 +264,14 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
             strcpy(real_fflag,"-f");
         }
     }
-    if(strcmp(cloud_flag,"CLOUD_E")==0){
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
         if(strlen(real_fflag)!=0){
             strcpy(real_fflag,"--yes");
+        }
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        if(strlen(real_fflag)!=0){
+            strcpy(real_fflag,"--force-if-read-only");
         }
     }
     bucket_path_check(remote_path,hpc_user,real_remote_path);
@@ -268,7 +307,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
             sprintf(cmdline,"%s ls -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag);
         }
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
         if(decrypt_bcecredentials(workdir)!=0){
             return -1;
         }
@@ -280,10 +319,19 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
             sprintf(cmdline,"%s bos ls %s%s %s --summerize --conf-path %s",BCECMD_EXEC,bucket_address,real_remote_path,real_rflag,vaultdir);
         }
     }
-    if(system(cmdline)!=0){
-        if(strcmp(cloud_flag,"CLOUD_C")==0){
-            unset_aws_bucket_envs();
+    else{
+        if(get_azure_info(workdir,az_subscription_id,az_tenant_id)!=0){
+            return -1;
         }
+        if(strcmp(cmd_type,"delete")==0){
+            sprintf(cmdline,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s remove %s%s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag);
+        }
+        else{
+            sprintf(cmdline,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s list %s%s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_remote_path);
+        }
+    }
+    if(system(cmdline)!=0){
+        unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
             sprintf(cmdline,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
@@ -291,9 +339,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
         return 1;
     }
     else{
-        if(strcmp(cloud_flag,"CLOUD_C")==0){
-            unset_aws_bucket_envs();
-        }
+        unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
             sprintf(cmdline,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
@@ -482,22 +528,24 @@ int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char
 }
 
 int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* source_path, char* dest_path, char* rflag, char* fflag, char* cloud_flag, char* crypto_keyfile, char* cmd_type){
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
         return -3;
     }
     if(strcmp(cmd_type,"rput")!=0&&strcmp(cmd_type,"rget")!=0){
         return -5;
     }
     int run_flag=0;
-    char real_rflag[16]="";
-    char real_fflag[16]="";
+    char real_rflag[32]="";
+    char real_fflag[32]="";
     char real_source_path[DIR_LENGTH]="";
     char real_dest_path[DIR_LENGTH]="";
     char remote_commands[CMDLINE_LENGTH]="";
-    char bucket_address[32]="";
+    char bucket_address[128]="";
     char region_id[32]="";
     char bucket_ak[128]="";
     char bucket_sk[128]="";
+    char az_subscription_id[128]="";
+    char az_tenant_id[128]="";
     if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
         return -1;
     }
@@ -505,7 +553,7 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
     if(strcmp(cloud_flag,"CLOUD_B")==0||strcmp(cloud_flag,"CLOUD_C")==0){
         strcpy(real_fflag,"");
     }
-    if(strcmp(cloud_flag,"CLOUD_D")==0){
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
         if(strlen(real_rflag)!=0){
             strcpy(real_rflag,"-r");
         }
@@ -513,9 +561,14 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
             strcpy(real_fflag,"-f");
         }
     }
-    if(strcmp(cloud_flag,"CLOUD_E")==0){
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
         if(strlen(real_fflag)!=0){
             strcpy(real_fflag,"--yes");
+        }
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        if(strlen(real_fflag)!=0){
+            strcpy(real_fflag,"--force-if-read-only");
         }
     }
     if(strcmp(cmd_type,"rput")==0){
@@ -558,12 +611,23 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
             sprintf(remote_commands,"obscli cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
         if(strcmp(cmd_type,"rget")==0){
             sprintf(remote_commands,"bcecmd bos cp %s%s %s %s %s --conf-path /hpc_data/cluster_data/.bucket_creds/",bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
             sprintf(remote_commands,"bcecmd bos cp %s %s%s %s %s --conf-path /hpc_data/cluster_data/.bucket_creds/",real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+        }
+    }
+    else{
+        if(get_azure_info(workdir,az_subscription_id,az_tenant_id)!=0){
+            return -1;
+        }
+        if(strcmp(cmd_type,"rget")==0){
+            sprintf(remote_commands,"export AZCOPY_AUTO_LOGIN_TYPE=SPN&&export AZCOPY_SPA_APPLICATION_ID=%s&&export AZCOPY_SPA_CLIENT_SECRET=%s&&export AZCOPY_TENANT_ID=%s&&azcopy cp %s%s %s %s %s --log-level=ERROR",bucket_ak,bucket_sk,az_tenant_id,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+        }
+        else{
+            sprintf(remote_commands,"export AZCOPY_AUTO_LOGIN_TYPE=SPN&&export AZCOPY_SPA_APPLICATION_ID=%s&&export AZCOPY_SPA_CLIENT_SECRET=%s&&export AZCOPY_TENANT_ID=%s&&azcopy cp %s %s%s %s %s --log-level=ERROR",bucket_ak,bucket_sk,az_tenant_id,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");

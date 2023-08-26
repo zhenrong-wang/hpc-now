@@ -423,7 +423,7 @@ int get_azure_info(char* workdir, char* az_subscription_id, char* az_tenant_id){
     char vaultdir[DIR_LENGTH]="";
     char az_extra_info_file[FILENAME_LENGTH]="";
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(az_extra_info_file,"%s%saz_extra_info.txt",vaultdir,PATH_SLASH);
+    sprintf(az_extra_info_file,"%s%s.az_extra.info",vaultdir,PATH_SLASH);
     if(file_exist_or_not(az_extra_info_file)!=0){
         return -1;
     }
@@ -432,6 +432,7 @@ int get_azure_info(char* workdir, char* az_subscription_id, char* az_tenant_id){
     if(strlen(az_subscription_id)==0||strlen(az_tenant_id)==0){
         return 1;
     }
+//    printf("\n%s\n%s\n",az_subscription_id,az_tenant_id);
     return 0;
 }
 
@@ -1368,6 +1369,8 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     char enable_flag[16]="";
     char master_address[32]="";
     char bucket_address[128]="";
+    char az_tenant_id[128]="";
+    char az_subscription_id[128]="";
     char bucket_ak[128]="";
     char bucket_sk[128]="";
     char region_id[32]="";
@@ -1381,6 +1384,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
         return -3;
     }
+    get_azure_info(workdir,az_subscription_id,az_tenant_id);
     get_state_value(workdir,"master_public_ip:",master_address);
     printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD "| Unique Cluster ID: " RESET_DISPLAY "%s\n",unique_cluster_id);
@@ -1393,6 +1397,9 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     }
     printf(GENERAL_BOLD "| Bucket Address:" RESET_DISPLAY " %s\n",bucket_address);
     printf(GENERAL_BOLD "| Cloud Region: " RESET_DISPLAY "%s\n",region_id);
+    if(strlen(az_tenant_id)>0){
+        printf(GENERAL_BOLD "| Azure Tenant ID: " RESET_DISPLAY "%s\n",az_tenant_id);
+    }
     if(bucketflag==1){
         printf(GENERAL_BOLD "| Bucket AccessKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_ak);
         printf(GENERAL_BOLD "| Bucket SecretKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_sk);
