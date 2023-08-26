@@ -1,0 +1,63 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+
+resource "azurerm_network_interface" "database_nic" {
+  name = "database_nic_RANDOM_STRING"
+  location = azurerm_resource_group.hpc_resources.location
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+
+  ip_configuration {
+    name = "database_ip_RANDOM_STRING"
+    subnet_id = azurerm_subnet.hpc_stack_subnet.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+resource "azurerm_network_interface_security_group_association" "database_sg_attach" {
+  network_interface_id = azurerm_network_interface.database_nic.id
+  network_security_group_id = azurerm_network_security_group.mysql_intra.id
+}
+
+resource "azurerm_linux_virtual_machine" "database" {
+  name = "database_RANDOM_STRING"
+  computer_name = "database"
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+  location = azurerm_resource_group.hpc_resources.location
+  size = "${var.i1c1g}"
+  admin_username = "adminuser"
+  admin_password = "Null2023~"
+  disable_password_authentication = false
+
+  network_interface_ids = [
+    azurerm_network_interface.database_nic.id,
+  ]
+
+  os_disk {
+    caching = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    disk_size_gb = 30
+  }
+
+  source_image_reference {
+    publisher = "oracle"
+    offer = "oracle-linux"
+    sku = "ol92-lvm"
+    version = "latest"
+  }
+
+  custom_data = base64encode(<<EOF
+#!/bin/bash
+userdel -f adminuser
+systemctl stop firewalld
+systemctl disable firewalld
+echo "${azurerm_linux_virtual_machine.natgw.private_ip_address}" >> /dev/null
+echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
+echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
+curl ${var.db_init_scripts} | bash
+EOF
+)
+}

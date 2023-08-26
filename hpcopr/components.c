@@ -27,6 +27,9 @@ extern char ali_tf_plugin_version_var[16];
 extern char qcloud_tf_plugin_version_var[16];
 extern char aws_tf_plugin_version_var[16];
 extern char hw_tf_plugin_version_var[16];
+extern char bd_tf_plugin_version_var[16];
+extern char azrm_tf_plugin_version_var[16];
+extern char azad_tf_plugin_version_var[16];
 
 extern char md5_tf_exec_var[64];
 extern char md5_tf_zip_var[64];
@@ -39,6 +42,12 @@ extern char md5_aws_tf_var[64];
 extern char md5_aws_tf_zip_var[64];
 extern char md5_hw_tf_var[64];
 extern char md5_hw_tf_zip_var[64];
+extern char md5_bd_tf_var[64];
+extern char md5_bd_tf_zip_var[64];
+extern char md5_azrm_tf_var[64];
+extern char md5_azrm_tf_zip_var[64];
+extern char md5_azad_tf_var[64];
+extern char md5_azad_tf_zip_var[64];
 
 int valid_md5_or_not(char* md5_input){
     if(strlen(md5_input)!=32){
@@ -116,91 +125,117 @@ int get_vers_md5_vars(void){
     get_seq_string(vers_md5_line,'\t',3,qcloud_tf_plugin_version_var);
     get_seq_string(vers_md5_line,'\t',4,aws_tf_plugin_version_var);
     get_seq_string(vers_md5_line,'\t',5,hw_tf_plugin_version_var);
-    if(valid_ver_or_not(terraform_version_var)!=0||valid_ver_or_not(ali_tf_plugin_version_var)!=0||valid_ver_or_not(qcloud_tf_plugin_version_var)!=0||valid_ver_or_not(aws_tf_plugin_version_var)!=0){
-//        printf("%s||%s||%s||%sERROR HERE!.2.\n",terraform_version_var,ali_tf_plugin_version_var,qcloud_tf_plugin_version_var,aws_tf_plugin_version_var);
-//        printf("ERROR HERE!.1.\n");
+    get_seq_string(vers_md5_line,'\t',6,bd_tf_plugin_version_var);
+    get_seq_string(vers_md5_line,'\t',7,azrm_tf_plugin_version_var);
+    get_seq_string(vers_md5_line,'\t',8,azad_tf_plugin_version_var);
+    if(valid_ver_or_not(terraform_version_var)!=0||valid_ver_or_not(ali_tf_plugin_version_var)!=0||valid_ver_or_not(qcloud_tf_plugin_version_var)!=0||valid_ver_or_not(aws_tf_plugin_version_var)!=0||valid_ver_or_not(hw_tf_plugin_version_var)!=0||valid_ver_or_not(bd_tf_plugin_version_var)!=0||valid_ver_or_not(azrm_tf_plugin_version_var)!=0||valid_ver_or_not(azad_tf_plugin_version_var)!=0){
         return 1;
     }
-    while(fgetline(file_p,vers_md5_line)==0){
+    while(!feof(file_p)){
+        fgetline(file_p,vers_md5_line);
         get_seq_string(vers_md5_line,' ',1,header);
         get_seq_string(vers_md5_line,' ',2,tail);
-//        printf("%s||%s||%sCHECKIT HERE!.2.\n\n",vers_md5_line,header,tail);
         if(strcmp(header,"TF_EXEC:")==0){
             if(valid_md5_or_not(tail)!=0){
-//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
                 return 1;
             }
             strcpy(md5_tf_exec_var,tail);
         }
         else if(strcmp(header,"TF_EXEC_ZIP:")==0){
             if(valid_md5_or_not(tail)!=0){
-//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
                 return 1;
             }            
             strcpy(md5_tf_zip_var,tail);
         }
         else if(strcmp(header,"NOW_CRYPTO:")==0){
             if(valid_md5_or_not(tail)!=0){
-//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
                 return 1;
             }
             strcpy(md5_now_crypto_var,tail);
         }
         else if(strcmp(header,"ALI_TF:")==0){
             if(valid_md5_or_not(tail)!=0){
-//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
                 return 1;
             }
             strcpy(md5_ali_tf_var,tail);
         }
         else if(strcmp(header,"ALI_TF_ZIP:")==0){
             if(valid_md5_or_not(tail)!=0){
-//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
                 return 1;
             }
             strcpy(md5_ali_tf_zip_var,tail);
         }
         else if(strcmp(header,"QCLOUD_TF:")==0){
             if(valid_md5_or_not(tail)!=0){
-//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
                 return 1;
             }
             strcpy(md5_qcloud_tf_var,tail);
         }
         else if(strcmp(header,"QCLOUD_TF_ZIP:")==0){
             if(valid_md5_or_not(tail)!=0){
-//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
                 return 1;
             }
             strcpy(md5_qcloud_tf_zip_var,tail);
         }
         else if(strcmp(header,"AWS_TF:")==0){
             if(valid_md5_or_not(tail)!=0){
-//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
                 return 1;
             }
             strcpy(md5_aws_tf_var,tail);
         }
         else if(strcmp(header,"AWS_TF_ZIP:")==0){
             if(valid_md5_or_not(tail)!=0){
-//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
                 return 1;
             }
             strcpy(md5_aws_tf_zip_var,tail);
         }
         else if(strcmp(header,"HW_TF:")==0){
             if(valid_md5_or_not(tail)!=0){
-//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
                 return 1;
             }
             strcpy(md5_hw_tf_var,tail);
         }
         else if(strcmp(header,"HW_TF_ZIP:")==0){
             if(valid_md5_or_not(tail)!=0){
-//                printf("%s||%s||%sERROR HERE!.4.\n",vers_md5_line,header,tail);
                 return 1;
             }
             strcpy(md5_hw_tf_zip_var,tail);
+        }
+        else if(strcmp(header,"BD_TF:")==0){
+            if(valid_md5_or_not(tail)!=0){
+                return 1;
+            }
+            strcpy(md5_bd_tf_var,tail);
+        }
+        else if(strcmp(header,"BD_TF_ZIP:")==0){
+            if(valid_md5_or_not(tail)!=0){
+                return 1;
+            }
+            strcpy(md5_bd_tf_zip_var,tail);
+        }
+        else if(strcmp(header,"AZRM_TF:")==0){
+            if(valid_md5_or_not(tail)!=0){
+                return 1;
+            }
+            strcpy(md5_azrm_tf_var,tail);
+        }
+        else if(strcmp(header,"AZRM_TF_ZIP:")==0){
+            if(valid_md5_or_not(tail)!=0){
+                return 1;
+            }
+            strcpy(md5_azrm_tf_zip_var,tail);
+        }
+        else if(strcmp(header,"AZAD_TF:")==0){
+            if(valid_md5_or_not(tail)!=0){
+                return 1;
+            }
+            strcpy(md5_azad_tf_var,tail);
+        }
+        else if(strcmp(header,"AZAD_TF_ZIP:")==0){
+            if(valid_md5_or_not(tail)!=0){
+                return 1;
+            }
+            strcpy(md5_azad_tf_zip_var,tail);
         }
         else{
             continue;

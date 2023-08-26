@@ -1,0 +1,70 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
+#create master and compute nodes
+resource "baiducloud_eip" "master_eip" {
+  name = "master_eip-RESOURCETAG"
+  bandwidth_in_mbps = MASTER_BANDWIDTH
+  payment_timing = "Postpaid"
+  billing_method = "ByTraffic"
+}
+
+resource "baiducloud_eip_association" "master_eip_attach" {
+  eip = "${baiducloud_eip.master_eip.eip}"
+  instance_type = "BCC"
+  instance_id = "${baiducloud_instance.master.id}"
+}
+
+#IMPORTANT: Make sure the NODE_CORE refers to the same data with the one in Compute1!
+resource "baiducloud_instance" "master" {
+  name = "master-RESOURCETAG"
+  hostname = "master"
+  availability_zone = "DEFAULT_ZONE_ID"
+  image_id = data.baiducloud_images.OS_IMAGE.images[0].id
+  instance_spec = data.baiducloud_specs.MASTER_INST.specs[0].spec
+  action = "start"
+  subnet_id = baiducloud_subnet.hpc_stack_pub_subnet.id
+  security_groups = [baiducloud_security_group.group.id]
+  root_disk_size_in_gb = 40
+  root_disk_storage_type = "cloud_hp1"
+  auto_renew_time_unit = "month"
+  auto_renew_time_length = 1
+  user_data = base64encode(<<EOF
+#!/bin/bash
+touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
+yum -y install at
+systemctl start atd && systemctl enable atd
+mkdir /hpc_apps
+mkdir /hpc_data
+rm -rf /root/.ssh/id_rsa.pub
+rm -rf /root/.ssh/id_rsa
+rm -rf /root/.ssh/authorized_keys
+rm -rf /root/.ssh/known_hosts
+ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa -q
+cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
+systemctl restart sshd
+yum -y install nfs-utils
+mount -t nfs4 -o minorversion=1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${baiducloud_cfs_mount_target.apps_pubnet.domain}:/ /hpc_apps
+mount -t nfs4 -o minorversion=1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${baiducloud_cfs_mount_target.data_pubnet.domain}:/ /hpc_data
+echo -e "${baiducloud_cfs_mount_target.apps_pubnet.domain}:/ /hpc_apps nfs4 minorversion=1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,_netdev 0 0" >> /etc/fstab
+echo -e "${baiducloud_cfs_mount_target.data_pubnet.domain}:/ /hpc_data nfs4 minorversion=1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,_netdev 0 0" >> /etc/fstab
+master_private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
+if [ ! -f /root/hostfile ]; then
+  echo -e "$master_private_ip\tmaster" > /root/hostfile
+fi
+echo -e "export HPC_USER_NUM=${var.HPC_USER_NUM}" >> /etc/profile
+echo -e "${baiducloud_instance.database.internal_ip}\tmariadb" > /root/mariadb_private_ip.txt
+echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
+echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
+echo -e "${var.master_passwd}" > /root/master_passwd.txt && echo -e "${var.compute_passwd}" > /root/compute_passwd.txt
+yum -y install sshpass readhat-lsb
+curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.master_init_parameters} > /var/log/cluster_init_master_raw.log 2>&1
+EOF
+)
+}

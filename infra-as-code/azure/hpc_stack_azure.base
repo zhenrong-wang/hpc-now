@@ -1,0 +1,502 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = "~> 3.70"
+    }
+  }
+}
+
+# Configure the Microsoft Azure Provider
+provider "azurerm" {
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
+  skip_provider_registration = true
+  client_id = "BLANK_CLIENT_ID"
+  client_secret = "BLANK_SECRET_KEY"
+  tenant_id = "DEFAULT_TENANT_ID"
+  subscription_id = "DEFAULT_SUBCRIPTION_ID"
+}
+
+resource "azurerm_resource_group" "hpc_resources" {
+  name = "rg_RANDOM_STRING"
+  location = "DEFAULT_REGION_ID"
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "NODE_NUM" {
+  type = number
+  default = DEFAULT_NODE_NUM
+}
+
+variable "HPC_USER_NUM" {
+  type = number
+  default = DEFAULT_USER_NUM
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "cluster_init_scripts" {
+  type = string
+  default = "BLANK_URL_SHELL_SCRIPTScluster_initv7.sh"
+}
+
+variable "db_init_scripts" {
+  type = string
+  default = "BLANK_URL_SHELL_SCRIPTScluster_db_init.sh"
+}
+
+variable "master_init_parameters" {
+  type = string
+  default = "DEFAULT_MASTERINI"
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "compute_init_parameters" {
+  type = string
+  default = "skip skip"
+}  
+
+variable "master_passwd" {
+  type = string
+  default = "DEFAULT_MASTER_PASSWD"
+}
+
+variable "compute_passwd" {
+  type = string
+  default = "DEFAULT_COMPUTE_PASSWD"
+}
+
+variable "database_root_passwd" {
+  type = string
+  default = "DEFAULT_DB_ROOT_PASSWD"
+}
+
+variable "database_acct_passwd" {
+  type = string
+  default = "DEFAULT_DB_ACCT_PASSWD"
+}
+
+#define some data
+variable "i96c192g" {
+  type = string
+  default = "Standard_D96ls_v5"
+}
+
+variable "i96c384g" {
+  type = string
+  default = "Standard_D96s_v5"
+}
+
+variable "i64c128g" {
+  type = string
+  default = "Standard_D64ls_v5"
+}
+
+variable "i64c256g" {
+  type = string
+  default = "Standard_D64s_v5"
+}
+
+variable "i48c96g" {
+  type = string
+  default = "Standard_D48ls_v5"
+}
+
+variable "i48c192g" {
+  type = string
+  default = "Standard_D48s_v5"
+}
+
+variable "i32c64g" {
+  type = string
+  default = "Standard_D32ls_v5"
+}
+
+variable "i32c128g" {
+  type = string
+  default = "Standard_D32s_v5"
+}
+
+variable "i16c32g" {
+  type = string
+  default = "Standard_D16ls_v5"
+}
+
+variable "i16c64g" {
+  type = string
+  default = "Standard_D16s_v5"
+}
+
+variable "i8c16g" {
+  type = string
+  default = "Standard_D8ls_v5"
+}
+
+variable "i4c8g" {
+  type = string
+  default = "Standard_D4ls_v5"
+}
+
+variable "i2c4g" {
+  type = string
+  default = "Standard_D2ls_v5"
+}
+
+variable "i1c1g" {
+  type = string
+  default = "Standard_B1s"
+}
+
+variable "a96c384g" {
+  type = string
+  default = "Standard_D96as_v5"
+}
+
+variable "a64c256g" {
+  type = string
+  default = "Standard_D64as_v5"
+}
+
+variable "a48c192g" {
+  type = string
+  default = "Standard_D48as_v5"
+}
+
+variable "a32c128g" {
+  type = string
+  default = "Standard_D32as_v5"
+}
+
+variable "a16c64g" {
+  type = string
+  default = "Standard_D16as_v5"
+}
+
+variable "a8c32g" {
+  type = string
+  default = "Standard_D8as_v5"
+}
+
+variable "a4c16g" {
+  type = string
+  default = "Standard_D4as_v5"
+}
+
+variable "a2c8g" {
+  type = string
+  default = "Standard_D2as_v5"
+}
+
+#create vpc
+resource "azurerm_virtual_network" "hpc_stack" {
+  name = "vpc_RANDOM_STRING"
+  location = azurerm_resource_group.hpc_resources.location
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+  address_space = ["10.0.0.0/16"]
+}
+
+resource "azurerm_subnet" "hpc_stack_subnet" {
+  name = "subnet_RANDOM_STRING"
+  resource_group_name  = azurerm_resource_group.hpc_resources.name
+  virtual_network_name = azurerm_virtual_network.hpc_stack.name
+  address_prefixes = ["10.0.0.0/20"]
+}
+
+resource "azurerm_subnet" "hpc_stack_pub_subnet" {
+  name = "pubnet_RANDOM_STRING"
+  resource_group_name  = azurerm_resource_group.hpc_resources.name
+  virtual_network_name = azurerm_virtual_network.hpc_stack.name
+  address_prefixes = ["10.0.255.240/28"]
+}
+
+resource "azurerm_network_security_group" "natgw_transparent" {
+  name = "natgw_sg_RANDOM_STRING"
+  location = azurerm_resource_group.hpc_resources.location
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+
+  security_rule {
+    name = "allow_ingress"
+    priority = 100
+    direction = "Inbound"
+    access = "Allow"
+    protocol = "*"
+    source_port_range = "*"
+    destination_port_range = "*"
+    source_address_prefix = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name = "allow_egress"
+    priority = 100
+    direction = "Outbound"
+    access = "Allow"
+    protocol = "*"
+    source_port_range = "*"
+    destination_port_range = "*"
+    source_address_prefix = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_route_table" "subnet_rt" {
+  name = "rt_RANDOM_STRING"
+  location = azurerm_resource_group.hpc_resources.location
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+  disable_bgp_route_propagation = false
+}
+
+resource "azurerm_network_security_group" "group" {
+  name = "group_sg_RANDOM_STRING"
+  location = azurerm_resource_group.hpc_resources.location
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+
+  security_rule {
+    name = "allow_ingress_ssh"
+    priority = 100
+    direction = "Inbound"
+    access = "Allow"
+    protocol = "Tcp"
+    source_port_range = "*"
+    destination_port_range = "22"
+    source_address_prefix = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name = "allow_ingress_rdp"
+    priority = 101
+    direction = "Inbound"
+    access = "Allow"
+    protocol = "Tcp"
+    source_port_range = "*"
+    destination_port_range = "3389"
+    source_address_prefix = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name = "allow_ingress_slurm"
+    priority = 102
+    direction = "Inbound"
+    access = "Allow"
+    protocol = "Tcp"
+    source_port_range = "*"
+    destination_port_range = "6817-6819"
+    source_address_prefix = "10.0.0.0/16"
+    destination_address_prefix = "10.0.0.0/16"
+  }
+
+  security_rule {
+    name = "allow_ingress_internal"
+    priority = 103
+    direction = "Inbound"
+    access = "Allow"
+    protocol = "Tcp"
+    source_port_range = "*"
+    destination_port_range = "1-65535"
+    source_address_prefix = "10.0.0.0/16"
+    destination_address_prefix = "10.0.0.0/16"
+  }
+
+  security_rule {
+    name = "allow_ingress_ping"
+    priority = 104
+    direction = "Inbound"
+    access = "Allow"
+    protocol = "Icmp"
+    source_port_range = "*"
+    destination_port_range = "*"
+    source_address_prefix = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name = "allow_egress"
+    priority = 100
+    direction = "Outbound"
+    access = "Allow"
+    protocol = "*"
+    source_port_range = "*"
+    destination_port_range = "*"
+    source_address_prefix = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_network_security_group" "group_intra" {
+  name = "group_intra_RANDOM_STRING"
+  location = azurerm_resource_group.hpc_resources.location
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+
+  security_rule {
+    name = "allow_ingress_internal"
+    priority = 100
+    direction = "Inbound"
+    access = "Allow"
+    protocol = "Tcp"
+    source_port_range = "*"
+    destination_port_range = "1-65535"
+    source_address_prefix = "10.0.0.0/16"
+    destination_address_prefix = "10.0.0.0/16"
+  }
+
+  security_rule {
+    name = "allow_ingress_ping"
+    priority = 101
+    direction = "Inbound"
+    access = "Allow"
+    protocol = "Icmp"
+    source_port_range = "*"
+    destination_port_range = "*"
+    source_address_prefix = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name = "allow_egress"
+    priority = 100
+    direction = "Outbound"
+    access = "Allow"
+    protocol = "*"
+    source_port_range = "*"
+    destination_port_range = "*"
+    source_address_prefix = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_network_security_group" "mysql_intra" {
+  name = "mysql_sg_RANDOM_STRING"
+  location = azurerm_resource_group.hpc_resources.location
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+
+  security_rule {
+    name = "allow_ingress_internal"
+    priority = 100
+    direction = "Inbound"
+    access = "Allow"
+    protocol = "Tcp"
+    source_port_range = "*"
+    destination_port_range = "3306"
+    source_address_prefix = "10.0.0.0/16"
+    destination_address_prefix = "10.0.0.0/16"
+  }
+
+  security_rule {
+    name = "allow_ingress_ping"
+    priority = 101
+    direction = "Inbound"
+    access = "Allow"
+    protocol = "Icmp"
+    source_port_range = "*"
+    destination_port_range = "*"
+    source_address_prefix = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name = "allow_egress"
+    priority = 100
+    direction = "Outbound"
+    access = "Allow"
+    protocol = "*"
+    source_port_range = "*"
+    destination_port_range = "*"
+    source_address_prefix = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_storage_account" "hpc_storage" {
+  name = "RANDOM_STORAGE_ACCOUNT"
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+  location = azurerm_resource_group.hpc_resources.location
+  account_tier = "Standard"
+  account_replication_type = "LRS"
+}
+
+resource "azurerm_storage_container" "hpc_storage" {
+  name = "RANDOM_STORAGE_ACCOUNT"
+  storage_account_name = azurerm_storage_account.hpc_storage.name
+  container_access_type = "private"
+}
+
+variable "shared_storage" {
+  type = number
+  default = DEFAULT_STORAGE_VOLUME #-#-#
+}
+
+resource "azurerm_managed_disk" "shared_volume" {
+  name = "shared_RANDOM_STRING"
+  location = azurerm_resource_group.hpc_resources.location
+  resource_group_name = azurerm_resource_group.hpc_resources.name
+  storage_account_type = "StandardSSD_LRS"
+  create_option = "Empty"
+  disk_size_gb = "${var.shared_storage}"
+}
+
+resource "azuread_application" "hpc_storage_access" {
+  display_name = "RANDOM_STRING"
+  sign_in_audience = "AzureADMyOrg"
+  web {}
+}
+
+resource "azuread_service_principal" "hpc_storage_access" {
+  application_id = azuread_application.hpc_storage_access.application_id
+  app_role_assignment_required = false
+}
+
+resource "azuread_application_password" "hpc_storage_access_key" {
+  application_object_id = azuread_application.hpc_storage_access.object_id
+  end_date_relative = "8640h"
+}
+
+data "azurerm_subscription" "this_subscription" {}
+
+resource "azurerm_role_assignment" "container_role" {
+  scope = "${data.azurerm_subscription.this_subscription.id}"
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id = azuread_service_principal.hpc_storage_access.object_id
+  skip_service_principal_aad_check = true
+  condition_version = "2.0"
+  condition = <<EOF
+(
+ (
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read'} AND NOT SubOperationMatches{'Blob.List'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read'} AND SubOperationMatches{'Blob.List'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'} AND SubOperationMatches{'Blob.Write.Tier'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'} AND SubOperationMatches{'Blob.Write.WithTagHeaders'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action'} AND SubOperationMatches{'Blob.Write.WithTagHeaders'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete'})
+  AND
+  !(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/move/action'})
+ )
+ OR 
+ (
+  @Resource[Microsoft.Storage/storageAccounts/blobServices/containers:name] StringEquals 'RANDOM_STORAGE_ACCOUNT'
+ )
+)
+EOF
+}

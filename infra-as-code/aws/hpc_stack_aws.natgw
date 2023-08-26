@@ -1,14 +1,21 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
 #CREATE_NATGW_NODE
 resource "aws_instance" "natgw" {
   availability_zone = "DEFAULT_ZONE_ID"
   subnet_id = aws_subnet.hpc_stack_pub_subnet.id
   source_dest_check = "false"
   vpc_security_group_ids = [aws_security_group.natgw_transparent.id]
-  ami = "${var.NAT_OS_IMAGE}"
+#INSERT_AMI_HERE
 #  associate_public_ip_address = "true"
-  instance_type = data.aws_ec2_instance_types.t2c4g.instance_types.0
+  instance_type = data.aws_ec2_instance_types.t2c1g.instance_types.0
   root_block_device {
-    volume_size = 20
+    volume_size = 30
   }
   tags = {
     Name = "natgw-RG_NAME"
@@ -26,7 +33,7 @@ else
   echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
 fi
 sysctl -p /etc/sysctl.conf
-iptables -t nat -A POSTROUTING -o eth0 -s 10.0.0.0/24 -j SNAT --to $private_ip
+iptables -t nat -A POSTROUTING -o eth0 -s 10.0.0.0/20 -j SNAT --to $private_ip
 service iptables save
 systemctl start iptables
 systemctl enable iptables

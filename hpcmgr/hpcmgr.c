@@ -16,19 +16,12 @@
 #include <string.h>
 #include <time.h>
 
-#define HPCMGR_VERSION "0.2.0.0015"
+#define HPCMGR_VERSION "0.2.0.0016"
 
-int env_ready_or_not(void){
-  int mgr_flag=system("cat /etc/profile | grep HPCMGR_SCRIPT_URL= >> /dev/null 2>&1");
+int appstore_env_check(void){
   int appstore_flag=system("cat /etc/profile | grep APPS_INSTALL_SCRIPTS_URL= >> /dev/null 2>&1");
-  if(mgr_flag!=0&&appstore_flag!=0){
-    return -1;
-  }
-  else if(mgr_flag==0&&appstore_flag!=0){
+  if(appstore_flag!=0){
     return 1;
-  }
-  else if(mgr_flag!=0&&appstore_flag!=0){
-    return 3;
   }
   else{
     return 0;
@@ -51,22 +44,18 @@ void print_tail_hpcmgr(void){
 }
 
 int main(int argc,char *argv[]){
-  int env_flag=env_ready_or_not();
-  if(env_flag==-1||env_flag==3){
-    printf("[ FATAL: ] The environment variables are absent.\n");
-    return 3;
-  }
-  else if(env_flag==1){
+  int env_flag=appstore_env_check();
+  if(env_flag==1){
     printf("[ -WARN- ] The HPC appstore may not work properly.\n");
   }
   int i,j;
   int position=0;
   int system_run_flag=0;
-  char* cmd_dl="wget -q $HPCMGR_SCRIPT_URL -O /tmp/.thread-";
+  char* cmd_cp="/bin/cp -r /usr/hpc-now/.hpcmgr_main.sh /tmp/.thread-";
   char* cmd_chmod="chmod +x /tmp/.thread-";
   char* cmd_base="/tmp/.thread-";
   char* cmd_dele="rm -rf /tmp/.thread-";
-  char final_cmd_dl[256]="";
+  char final_cmd_cp[256]="";
   char final_cmd_chmod[128]="";
   char cmd_run[128]="";
   char final_cmd_run[512]="";
@@ -81,7 +70,7 @@ int main(int argc,char *argv[]){
     rand_num=rand_num%1000000;
   }
 
-  sprintf(final_cmd_dl,"%s%d",cmd_dl,rand_num);
+  sprintf(final_cmd_cp,"%s%d >> /dev/null 2>&1",cmd_cp,rand_num);
   sprintf(final_cmd_chmod,"%s%d",cmd_chmod,rand_num);
   sprintf(cmd_run,"%s%d",cmd_base,rand_num);
   sprintf(final_cmd_dele,"%s%d",cmd_dele,rand_num);
@@ -121,7 +110,7 @@ int main(int argc,char *argv[]){
       return 1;
     }
   }
-  system_run_flag=system(final_cmd_dl);
+  system_run_flag=system(final_cmd_cp);
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 1.\n");
 //    print_tail_hpcmgr();

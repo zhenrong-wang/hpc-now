@@ -1,0 +1,37 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
+resource "baiducloud_instance" "COMPUTE_NODE_N" {
+  name = "COMPUTE_NODE_N-RESOURCETAG"
+  hostname = "COMPUTE_NODE_N"
+  availability_zone = "DEFAULT_ZONE_ID"
+  image_id = data.baiducloud_images.OS_IMAGE.images[0].id
+  instance_spec = data.baiducloud_specs.COMPUTE_INST.specs[0].spec
+  action = "start"
+  subnet_id = baiducloud_subnet.hpc_stack_subnet.id
+  security_groups = [baiducloud_security_group.group_intra.id]
+  root_disk_size_in_gb = 40
+  root_disk_storage_type = "cloud_hp1"
+  auto_renew_time_unit = "month"
+  auto_renew_time_length = 1
+  user_data = base64encode(<<EOF
+#!/bin/bash
+touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+echo "${var.compute_passwd}" | passwd root --stdin >> /dev/null 2>&1
+mkdir -p /hpc_apps
+mkdir -p /hpc_data
+yum -y install nfs-utils rpcbind
+mount -t nfs4 -o minorversion=1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${baiducloud_cfs_mount_target.apps_subnet.domain}:/ /hpc_apps
+mount -t nfs4 -o minorversion=1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${baiducloud_cfs_mount_target.data_subnet.domain}:/ /hpc_data
+echo -e "${baiducloud_cfs_mount_target.apps_subnet.domain}:/ /hpc_apps nfs4 minorversion=1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,_netdev 0 0" >> /etc/fstab
+echo -e "${baiducloud_cfs_mount_target.data_subnet.domain}:/ /hpc_data nfs4 minorversion=1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,_netdev 0 0" >> /etc/fstab
+rm -rf /root/.ssh 
+echo -e "${baiducloud_instance.master.internal_ip}" > /root/master_ip.txt
+nohup curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.compute_init_parameters} > /var/log/cluster_COMPUTE_NODE_N_init_raw.log 2>&1 &
+EOF
+)
+}

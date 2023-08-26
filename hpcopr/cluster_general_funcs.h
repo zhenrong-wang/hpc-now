@@ -10,7 +10,7 @@
 
 int cluster_role_detect(char* workdir, char* cluster_role);
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag);
-void create_and_get_stackdir(char* workdir, char* stackdir);
+int create_and_get_stackdir(char* workdir, char* stackdir);
 void get_latest_hosts(char* stackdir, char* hostfile_latest);
 int decrypt_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_info);
 int get_cloud_flag(char* workdir, char* cloud_flag);
@@ -18,10 +18,11 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
 int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char* sshkey_dir);
 int activate_sshkey(char* ssh_privkey);
 void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir);
-void create_and_get_vaultdir(char* workdir, char* vaultdir);
+int create_and_get_vaultdir(char* workdir, char* vaultdir);
 int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes);
 int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char* commands, char* extra_options, int delay_minutes, int silent_flag, char* std_redirect, char* err_redirect);
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag);
+int get_azure_info(char* workdir, char* az_subscription_id, char* az_tenant_id);
 int get_cpu_num(const char* vm_model);
 int get_compute_node_num(char* currentstate_file, char* option);
 int decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum);
@@ -51,7 +52,6 @@ int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
 void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);
 int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, char* region_id, char* bucket_ak, char* bucket_sk);
-int get_cluster_bucket_id(char* workdir, char* crypto_keyfilke, char* bucket_id);
 int tail_f_for_windows(char* filename);
 int get_ucid(char* workdir, char* ucid_string);
 
@@ -79,23 +79,20 @@ int exit_current_cluster(void);
 int delete_from_cluster_registry(char* deleted_cluster_name);
 int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords);
 
-void modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer);
+int modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer);
 int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag);
+int generate_bceconfig(char* vaultdir, char* region_id, char* bucket_ak, char* bucket_sk);
+int decrypt_bcecredentials(char* workdir);
 
-/*  
+/*
  * If silent_flag==1, verbose. Will tell the user which cluster is active
  * If silent_flag==0, silent. Will print nothing
  * If silent_flag== other_number, Will only show the warning
  */
+
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag);
 int current_cluster_or_not(char* current_indicator, char* cluster_name);
 int cluster_name_check(char* cluster_name);
 int check_and_cleanup(char* prev_workdir);
-
-//int create_protection(char* workdir, int minutes);
-//int check_protection(char* workdir);
-//int delete_protection(char* workdir);
-//void backup_tf_files(char* stackdir);
-//void delete_backups(char* stackdir);
 
 #endif

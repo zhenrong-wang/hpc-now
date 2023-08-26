@@ -1,3 +1,10 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
 terraform {
   required_providers {
     huaweicloud = {
@@ -143,7 +150,7 @@ data "huaweicloud_compute_flavors" "i2c4g" {
   memory_size = 4
 }
 
-data "huaweicloud_compute_flavors" "i1c1g" {
+data "huaweicloud_compute_flavors" "i1c2g" {
   availability_zone = "DEFAULT_ZONE_ID"
   generation = "s6"
   cpu_core_count = 1
@@ -154,6 +161,13 @@ data "huaweicloud_images_images" "rocky9" {
   visibility = "public"
   os_version = "Rocky Linux 9.0 64bit"
   architecture = "x86"
+}
+
+data "huaweicloud_images_images" "euleros" {
+  architecture = "x86"
+  name = "Huawei Cloud EulerOS 2.0 Standard 64 bit"
+  os_version = "Huawei Cloud EulerOS 2.0 64bit"
+  visibility = "public"
 }
 
 data "huaweicloud_images_images" "centos7" {
