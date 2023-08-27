@@ -446,7 +446,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
     char region_flag[16]="";
-    char os_image[64]="";
+    char os_image[128]="";
     char db_os_image[64]="";
     char nat_os_image[64]="";
     char zone_id[CONF_STRING_LENTH]="";
