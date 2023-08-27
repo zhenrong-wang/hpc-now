@@ -11,6 +11,10 @@ terraform {
       source = "hashicorp/azurerm"
       version = "~> 3.70"
     }
+    azuread = {
+      source = "hashicorp/azuread"
+      version = "~> 2.41"
+    }
   }
 }
 
@@ -27,6 +31,13 @@ provider "azurerm" {
   client_secret = "BLANK_SECRET_KEY"
   tenant_id = "DEFAULT_TENANT_ID"
   subscription_id = "DEFAULT_SUBCRIPTION_ID"
+}
+
+provider "azuread" {
+  environment = "ENVIRONMENT_OPTION"
+  client_id = "BLANK_CLIENT_ID"
+  client_secret = "BLANK_SECRET_KEY"
+  tenant_id = "DEFAULT_TENANT_ID"
 }
 
 resource "azurerm_resource_group" "hpc_resources" {
