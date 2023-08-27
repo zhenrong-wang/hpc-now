@@ -1302,6 +1302,7 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
         return -1;
     }
     char role_flag[16]="";
+    char cluster_role_ext[32]="";
     char cu_flag[16]="";
     int interactive_flag=cmd_flag_check(argc,argv,"-i");
     command_flag=command_name_check(argv[1],command_name_prompt,role_flag,cu_flag);
@@ -1354,7 +1355,7 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " cluster name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",cluster_name_source,temp_cluster_name);
         strcpy(cluster_name,temp_cluster_name);
         get_workdir(workdir,cluster_name);
-        cluster_role_detect(workdir,cluster_role);
+        cluster_role_detect(workdir,cluster_role,cluster_role_ext);
         if(strcmp(role_flag,"opr")==0&&strcmp(cluster_role,"opr")!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " needs the " WARN_YELLO_BOLD "operator" FATAL_RED_BOLD " to execute.\n",argv[1]);
             printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Current role: %s . Please contact the operator.\n",cluster_role);

@@ -22,7 +22,7 @@
 #include "cluster_general_funcs.h"
 #include "general_print_info.h"
 
-int cluster_role_detect(char* workdir, char* cluster_role){
+int cluster_role_detect(char* workdir, char* cluster_role, char* cluster_role_ext){
     char vaultdir[DIR_LENGTH]="";
     char cloud_secret_file[FILENAME_LENGTH]="";
     char cluster_summary[FILENAME_LENGTH]="";
@@ -33,17 +33,21 @@ int cluster_role_detect(char* workdir, char* cluster_role){
     sprintf(user_passwords,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
     if(file_empty_or_not(cloud_secret_file)>1){
         strcpy(cluster_role,"opr");
+        strcpy(cluster_role_ext,"opr  ");
         return 0;
     }
     if(file_empty_or_not(cluster_summary)>1){
         strcpy(cluster_role,"admin");
+        strcpy(cluster_role_ext,"admin");
         return 0;
     }
     if(file_empty_or_not(user_passwords)>1){
         strcpy(cluster_role,"user");
+        strcpy(cluster_role_ext,"user ");
         return 0;
     }
-    strcpy(cluster_role,"invalid");
+    strcpy(cluster_role,"inval");
+    strcpy(cluster_role_ext,"inval");
     return 1;
 }
 
@@ -310,9 +314,10 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char
     char remote_address[32]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char cluster_role[16]="";
+    char cluster_role_ext[32]="";
     get_state_value(workdir,"master_public_ip:",remote_address);
     get_cluster_name(cluster_name,workdir);
-    cluster_role_detect(workdir,cluster_role);
+    cluster_role_detect(workdir,cluster_role,cluster_role_ext);
     if(strcmp(username,"root")==0&&strcmp(cluster_role,"opr")==0){
         sprintf(private_key,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
     }
@@ -1052,6 +1057,9 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, char*
 }
 
 int graph(char* workdir, char* crypto_keyfile, int graph_level){
+    if(graph_level<0||graph_level>3){
+        return -1;
+    }
     char cluster_name[64]="";
     char master_address[32]="";
     char master_status[16]="";
@@ -1059,6 +1067,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char db_status[16]="";
     char cloud_flag[16]="";
     char cluster_role[16]="";
+    char cluster_role_ext[32]="";
     char shared_volume[16]="";
     char string_temp[32]="";
     char compute_address[32]="";
@@ -1068,19 +1077,23 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char payment_method_long[64]="";
     char statefile[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
+    char cluster_name_column[LINE_LENGTH_SHORT]="";
     char ht_status[16]="";
     int node_num=0;
     char node_num_string[4]="";
     int running_node_num=0;
     char running_node_num_string[4]="";
+    int max_cluster_name_length=get_max_cluster_name_length();
+    int current_cluster_name_length=0;
     int i;
+    int j;
     create_and_get_stackdir(workdir,stackdir);
     get_cluster_name(cluster_name,workdir);
     sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
     if(file_empty_or_not(statefile)<1||get_cloud_flag(workdir,cloud_flag)==-1){
         return 1;
     }
-    cluster_role_detect(workdir,cluster_role);
+    cluster_role_detect(workdir,cluster_role,cluster_role_ext);
     get_key_value(statefile,"master_public_ip:",' ',master_address);
     get_key_value(statefile,"master_status:",' ',master_status);
     get_key_value(statefile,"database_status:",' ',db_status);
@@ -1104,13 +1117,11 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         printf("|        " RESET_DISPLAY "+-" GENERAL_BOLD "Payment Method: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "-" HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",payment_method,payment_method_long);
         printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
         printf("|          +-+-db(%s)\n",db_status);
-    }
-    for(i=0;i<node_num;i++){
-        sprintf(string_temp,"compute%d_private_ip:",i+1);
-        get_key_value(statefile,string_temp,' ',compute_address);
-        sprintf(string_temp,"compute%d_status:",i+1);
-        get_key_value(statefile,string_temp,' ',compute_status);
-        if(graph_level==0){
+        for(i=0;i<node_num;i++){
+            sprintf(string_temp,"compute%d_private_ip:",i+1);
+            get_key_value(statefile,string_temp,' ',compute_address);
+            sprintf(string_temp,"compute%d_status:",i+1);
+            get_key_value(statefile,string_temp,' ',compute_status);
             if(strlen(ht_status)!=0){
                 printf("|            +-+-compute%d(%s,%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config,ht_status);
             }
@@ -1118,16 +1129,16 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
                 printf("|            +-+-compute%d(%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config);
             }
         }
+        if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0){
+            printf("|          +-shared_storage(%s GB)\n",shared_volume);
+        }
     }
-    if(graph_level==0&&(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0)){
-        printf("|          +-shared_storage(%s GB)\n",shared_volume);
-    }
-    if(graph_level==1){
+    else if(graph_level==1){
         if(strlen(shared_volume)!=0){
-            printf("%s %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,shared_volume,payment_method);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,shared_volume,payment_method);
         }
         else{
-            printf("%s %s | %s | %s %s %s | %d/%d | %s | %s | %s \n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s \n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
         }
     }
     else if(graph_level==2){
@@ -1136,6 +1147,26 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         }
         else{
             printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
+        }
+    }
+    else{
+        current_cluster_name_length=strlen(cluster_name);
+        if(current_cluster_name_length<max_cluster_name_length){
+            for(j=0;j<current_cluster_name_length;j++){
+                *(cluster_name_column+j)=*(cluster_name+j);
+            }
+            for(j=current_cluster_name_length;j<max_cluster_name_length;j++){
+                *(cluster_name_column+j)=' ';
+            }
+        }
+        else{
+            strcpy(cluster_name_column,cluster_name);
+        }
+        if(strlen(shared_volume)!=0){
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,shared_volume,payment_method);
+        }
+        else{
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s \n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
         }
     }
     printf(RESET_DISPLAY);
@@ -2595,4 +2626,24 @@ int decrypt_bcecredentials(char* workdir){
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%scredentials.tmp",vaultdir,PATH_SLASH);
     return decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+}
+
+int get_max_cluster_name_length(void){
+    char registry_single_line[LINE_LENGTH_SHORT]="";
+    char cluster_name_temp[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    int max_length=0;
+    int temp_length=0;
+    FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
+    if(file_p==NULL){
+        return 0;
+    }
+    while(!feof(file_p)){
+        fgetline(file_p,registry_single_line);
+        get_seq_string(registry_single_line,' ',4,cluster_name_temp);
+        temp_length=strlen(cluster_name_temp);
+        if(temp_length>max_length){
+            max_length=temp_length;
+        }
+    }
+    return max_length;
 }

@@ -8,7 +8,7 @@
 #ifndef CLUSTER_GENERAL_FUNCS_H
 #define CLUSTER_GENERAL_FUNCS_H
 
-int cluster_role_detect(char* workdir, char* cluster_role);
+int cluster_role_detect(char* workdir, char* cluster_role, char* cluster_role_ext);
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag);
 int create_and_get_stackdir(char* workdir, char* stackdir);
 void get_latest_hosts(char* stackdir, char* hostfile_latest);
@@ -94,5 +94,6 @@ int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int 
 int current_cluster_or_not(char* current_indicator, char* cluster_name);
 int cluster_name_check(char* cluster_name);
 int check_and_cleanup(char* prev_workdir);
+int get_max_cluster_name_length(void);
 
 #endif
