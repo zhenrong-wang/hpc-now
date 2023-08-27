@@ -57,10 +57,15 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
     char registry_line[LINE_LENGTH_SHORT]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    int temp_cluster_name_length=0;
+    char temp_cluster_name_column[LINE_LENGTH_SHORT]="";
     char temp_cluster_workdir[DIR_LENGTH]="";
     char cloud_flag[32]="";
     char cluster_role[16]="";
+    char cluster_role_ext[32]="";
+    int max_cluster_name_length=0;
     int i=0;
+    int j=0;
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now." RESET_DISPLAY "\n");
         return -1;
@@ -71,43 +76,57 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             return 1;
         }
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
-        cluster_role_detect(temp_cluster_workdir,cluster_role);
+        cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext);
         if(check_pslock(temp_cluster_workdir)!=0){
-            printf(GENERAL_BOLD "| switch : <> %s %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+            printf(GENERAL_BOLD "| switch : <> %s | %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
             fclose(file_p);
             return 0;
         }
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
         printf(GENERAL_BOLD "| switch : <> ");
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-            printf("%s %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+            printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
         }
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         fclose(file_p);
         return 0;
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
+        max_cluster_name_length=get_max_cluster_name_length();
         while(fgetline(file_p,registry_line)==0){
             if(strlen(registry_line)!=0){
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 get_cloud_flag(temp_cluster_workdir,cloud_flag);
-                cluster_role_detect(temp_cluster_workdir,cluster_role);
+                cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
                     printf(GENERAL_BOLD "| switch : <> ");
                 }
                 else{
                     printf(RESET_DISPLAY "|        : <> ");
                 }
+                temp_cluster_name_length=strlen(temp_cluster_name);
+                reset_string(temp_cluster_name_column);
+                if(temp_cluster_name_length<max_cluster_name_length){
+                    for(j=0;j<temp_cluster_name_length;j++){
+                        *(temp_cluster_name_column+j)=*(temp_cluster_name+j);
+                    }
+                    for(j=temp_cluster_name_length;j<max_cluster_name_length;j++){
+                        *(temp_cluster_name_column+j)=' ';
+                    }
+                }
+                else{
+                    strcpy(temp_cluster_name_column,temp_cluster_name);
+                }
                 if(check_pslock(temp_cluster_workdir)!=0){
-                    printf("%s %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+                    printf("%s | %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
                     i++;
                     continue;
                 }
                 decrypt_files(temp_cluster_workdir,crypto_keyfile);
                 i++;
-                if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-                    printf("%s %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+                if(graph(temp_cluster_workdir,crypto_keyfile,3)!=0){
+                    printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
                 }
                 delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }
@@ -126,7 +145,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     else{
         get_workdir(temp_cluster_workdir,target_cluster_name);
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
-        cluster_role_detect(temp_cluster_workdir,cluster_role);
+        cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext);
         if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,target_cluster_name)==0){
             printf(GENERAL_BOLD "| switch : <> ");
         }
@@ -134,12 +153,12 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             printf(RESET_DISPLAY "|        : <> ");
         }
         if(check_pslock(temp_cluster_workdir)!=0){
-            printf("%s %s | %s | * OPERATION-IN-PROGRESS * " RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
+            printf("%s | %s | %s | * OPERATION-IN-PROGRESS * " RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
             return 0;
         }
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-            printf("%s %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
+            printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
         }
         delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;

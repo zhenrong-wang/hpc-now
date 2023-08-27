@@ -915,6 +915,11 @@ int main(int argc, char* argv[]){
                 check_and_cleanup(workdir);
                 return 47;
             }
+            else if(run_flag==-1){
+                write_operation_log(cluster_name,operation_log,argc,argv,"FATAL_INTERNAL_ERROR",125);
+                check_and_cleanup(workdir);
+                return 125;
+            }
             write_operation_log(cluster_name,operation_log,argc,argv,"GRAPH_NOT_UPDATED",47);
             check_and_cleanup(workdir);
             return 47;
@@ -928,6 +933,11 @@ int main(int argc, char* argv[]){
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_EMPTY",49);
             check_and_cleanup(workdir);
             return 49;
+        }
+        else if(run_flag==-1){
+            write_operation_log(cluster_name,operation_log,argc,argv,"FATAL_INTERNAL_ERROR",125);
+            check_and_cleanup(workdir);
+            return 125;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
