@@ -433,7 +433,7 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 if [ -f /root/hostfile ]; then
   echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
-  if [ $distro_type != 'CentOS' ] && [ $distro_type != 'Rocky' ] && [ $distro_type != 'Oracle' ]; thenm
+  if [ $distro_type != 'CentOS' ] && [ $distro_type != 'Rocky' ] && [ $distro_type != 'Oracle' ]; then
     echo -e "# $time_current GNU/Linux Distro: ${distro_type}. Installing GUI now." >> ${logfile}
     yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks 
     yum -y install gnome-shell-extensions 
