@@ -509,6 +509,8 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     char doubleconfirm[32]="";
     char access_key_prev[AKSK_LENGTH]="";
     char secret_key_prev[AKSK_LENGTH]="";
+    char az_subscription_id[AKSK_LENGTH]="";
+    char az_tenant_id[AKSK_LENGTH]="";
     char cloud_flag_prev[32]="";
     char md5sum[33]="";
 
@@ -540,9 +542,11 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     printf("|*   YOU ARE ROTATING THE CLOUD KEYPAIR, WHICH MAY DAMAGE THIS CLUSTER.            \n");
     printf("|*   BEFORE PROCEEDING, PLEASE MAKE SURE:                                          \n");
     printf("|*                                                                                 \n");
-    printf("|*   1. Your new key pair comes from the *SAME* cloud vendor and account.          \n");
-    printf("|*      This is * !!! EXTREMELY IMPORTANT !!! *                                    \n");
-    printf("|*   2. Your new key pair is valid and able to manage cloud resources.             \n");
+    printf("|*   1. If the current cluster is NOT empty, your new key pair *MUST* comes from   \n");
+    printf("|*      the *SAME* cloud vendor AND account. This is *EXTREMELY IMPORTANT* !!!     \n");
+    printf("|*   2. If the current cluster is empty, your new key pair can come from another   \n");
+    printf("|*      account of the *SAME* vendor.                                              \n");
+    printf("|*   3. Your new key pair is valid and able to manage cloud resources.             \n");
     printf("|*      This is * !!! VERY IMPORTANT !!! *                                         \n");
     printf("|*                                                                                 \n");
     printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
@@ -599,7 +603,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf(FATAL_RED_BOLD "[ FATAL: ] The new keypair comes from a different Cloud Service Vendor.\n");
             printf("|          Switching cloud vendors for a working directory is not permitted.\n");
             printf("|          Current Vendor: TencentCloud (HPC-NOW code: CLOUD_B).\n");
-            printf("|          Please rotate a keypair from an TencentCloud account.\n");
+            printf("|          Please rotate a keypair from the a TencentCloud account.\n");
             printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
             return 3;
         }
@@ -623,7 +627,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             }
             else{
                 printf("|          Current Vendor: Huawei Cloud (HPC-NOW code: CLOUD_D).\n");
-                printf("|          Please rotate a keypair from an Huawei Cloud account.\n");
+                printf("|          Please rotate a keypair from a Huawei Cloud account.\n");
             }
             printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
             return 3;
@@ -652,10 +656,13 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf(FATAL_RED_BOLD "[ FATAL: ] The new keypair comes from a different Cloud Service Vendor.\n");
             printf("|          Switching cloud vendors for a working directory is not permitted.\n");
             printf("|          Current Vendor: Azure (HPC-NOW code: CLOUD_F).\n");
-            printf("|          Please rotate a keypair from an Azure account and subscription.\n");
+            printf("|          Please rotate a keypair from the *SAME* subscription and tenant.\n");
             printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
             return 3;
         }
+        printf("|       -> Current subscription ID: %s\n",az_subscription_id);
+        printf("|       -> Current tenant ID      : %s\n",az_tenant_id);
+        printf("[ -INFO- ] The new key pair MUST come from the subscription and tenant above.\n");
         fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
