@@ -80,84 +80,104 @@ data "alicloud_instance_types" "i128c256g" {
   cpu_core_count = 128
   memory_size = 256
   instance_type_family = "ecs.c7"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "a128c256g" {
   cpu_core_count = 128
   memory_size = 256
   instance_type_family = "ecs.c7a"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "i64c128g" {
   cpu_core_count = 64
   memory_size = 128
   instance_type_family = "ecs.c7"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "a64c128g" {
   cpu_core_count = 64
   memory_size = 128
   instance_type_family = "ecs.c7a"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "i32c64g" {
   cpu_core_count = 32
   memory_size = 64
   instance_type_family = "ecs.c7"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "a32c64g" {
   cpu_core_count = 32
   memory_size = 64
   instance_type_family = "ecs.c7a"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "i16c32g" {
   cpu_core_count = 16
   memory_size = 32
   instance_type_family = "ecs.c7"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "a16c32g" {
   cpu_core_count = 16
   memory_size = 32
   instance_type_family = "ecs.c7a"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "i8c16g" {
   cpu_core_count = 8
   memory_size = 16
   instance_type_family = "ecs.c7"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "a8c16g" {
   cpu_core_count = 8
   memory_size = 16
   instance_type_family = "ecs.c7a"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "i4c8g" {
   cpu_core_count = 4
   memory_size = 8
   instance_type_family = "ecs.c7"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "a4c8g" {
   cpu_core_count = 4
   memory_size = 8
   instance_type_family = "ecs.c7a"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "i2c4g" {
   cpu_core_count = 2
   memory_size = 4
   instance_type_family = "ecs.c7"
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_instance_types" "a2c4g" {
   cpu_core_count = 2
   memory_size = 4
   instance_type_family = "ecs.c7a"
+  availability_zone = "DEFAULT_ZONE_ID"
+}
+
+data "alicloud_instance_types" "i2c2g" {
+  cpu_core_count = 2
+  memory_size = 2
+  availability_zone = "DEFAULT_ZONE_ID"
 }
 
 data "alicloud_images" "centos7" {

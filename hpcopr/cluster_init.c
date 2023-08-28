@@ -2392,6 +2392,8 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     char master_cpu_vendor[8]="";
     char compute_cpu_vendor[8]="";
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
+    char natgw_inst[16]="";
+    char db_inst[16]="";
     char usage_logfile[FILENAME_LENGTH]="";
     int i;
     if(folder_exist_or_not(workdir)==1){
@@ -2588,6 +2590,14 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
+    if(strcmp(region_id,"hk")==0){
+        strcpy(db_inst,"i2c2g-hk");
+        strcpy(natgw_inst,"i2c2g-hk");
+    }
+    else{
+        strcpy(db_inst,"i2c2g");
+        strcpy(natgw_inst,"i2c2g");
+    }
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
     printf("|          Cluster ID:            %s\n",cluster_id);
     printf("|          Region:                %s\n",region_id);
@@ -2678,11 +2688,13 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    global_replace(filename_temp,"DB_INST",db_inst);
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
     global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    global_replace(filename_temp,"NATGW_INST",natgw_inst);
 
     for(i=0;i<node_num;i++){
         sprintf(cmdline,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);

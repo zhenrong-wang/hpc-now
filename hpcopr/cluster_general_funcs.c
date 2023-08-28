@@ -1232,7 +1232,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     sprintf(tf_error_log_archive,"%s%slog%stf_prep.err.log.archive",workdir,PATH_SLASH,PATH_SLASH);
     archive_log(tf_realtime_log_archive,tf_realtime_log);
     archive_log(tf_error_log_archive,tf_error_log);
-    sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
+    sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s -lock=false > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
     system(cmdline);
     if(silent_flag!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);

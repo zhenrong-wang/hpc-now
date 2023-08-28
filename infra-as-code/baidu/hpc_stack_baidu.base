@@ -216,6 +216,13 @@ data "baiducloud_specs" "i2c2g" {
   }
 }
 
+data "baiducloud_specs" "i2c2g-hk" {
+  filter {
+    name   = "spec"
+    values = ["bcc.ic3.c2m2"]
+  }
+}
+
 data "baiducloud_images" "centos7" {
   filter {
     name   = "os_name"
