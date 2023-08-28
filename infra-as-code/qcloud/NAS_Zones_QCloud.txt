@@ -24,3 +24,16 @@ ap-beijing-3
 ap-beijing-5
 ap-beijing-6
 ap-beijing-7
+ap-singapore-1
+ap-singapore-3
+ap-singapore-4
+ap-bangkok-1
+na-siliconvalley-1
+na-ashburn-2
+eu-frankfurt-1
+eu-frankfurt-2
+ap-seoul-1
+ap-mumbai-1
+ap-tokyo-1
+ap-hongkong-1
+na-toronto-1
