@@ -10,7 +10,7 @@ resource "alicloud_instance" "database" {
   #cn-hangzhou
   availability_zone = "DEFAULT_ZONE_ID"
   security_groups = alicloud_security_group.mysql_intra.*.id
-  instance_type = "${data.alicloud_instance_types.a2c4g.instance_types.0.id}"
+  instance_type = "${data.alicloud_instance_types.i2c2g.instance_types.0.id}"
   system_disk_category = "cloud_essd"
   system_disk_size = 60
   image_id = "${data.alicloud_images.centos7.images.0.id}"
