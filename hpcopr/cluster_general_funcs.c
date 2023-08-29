@@ -1114,7 +1114,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     }
     if(graph_level==0){
         printf(GENERAL_BOLD "|        " RESET_DISPLAY "+-" GENERAL_BOLD "Cluster name: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY " +-" GENERAL_BOLD "Cluster role: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "\n",cluster_name,cluster_role);
-        printf("|        " RESET_DISPLAY "+-" GENERAL_BOLD "Payment Method: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "-" HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",payment_method,payment_method_long);
+        printf("|        " RESET_DISPLAY "+-" GENERAL_BOLD "Payment method: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "-" HIGH_CYAN_BOLD "%s" RESET_DISPLAY " +-" GENERAL_BOLD "Cloud flag: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY"\n",payment_method,payment_method_long,cloud_flag);
         printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
         printf("|          +-+-db(%s)\n",db_status);
         for(i=0;i<node_num;i++){
