@@ -80,107 +80,113 @@ variable "database_acct_passwd" {
 }
 
 #define some data
+
+#C7_SPECIFIC
 data "huaweicloud_compute_flavors" "i128c256g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "c7"
+  generation = "INTEL_GENERATION"
   cpu_core_count = 128
   memory_size = 256
 }
 
+#C7N_SPECIFIC
 data "huaweicloud_compute_flavors" "i96c192g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "c7"
+  generation = "INTEL_GENERATION"
   cpu_core_count = 96
   memory_size = 192
 }
 
+#C6S_SPECIFIC
 data "huaweicloud_compute_flavors" "i64c128g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "c7"
+  generation = "INTEL_GENERATION"
   cpu_core_count = 64
   memory_size = 128
 }
 
 data "huaweicloud_compute_flavors" "i48c96g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "c7"
+  generation = "INTEL_GENERATION"
   cpu_core_count = 48
   memory_size = 96
 }
 
 data "huaweicloud_compute_flavors" "i32c64g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "c7"
+  generation = "INTEL_GENERATION"
   cpu_core_count = 32
   memory_size = 64
 }
 
 data "huaweicloud_compute_flavors" "i24c48g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "c7"
+  generation = "INTEL_GENERATION"
   cpu_core_count = 24
   memory_size = 48
 }
 
 data "huaweicloud_compute_flavors" "i16c32g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "c7"
+  generation = "INTEL_GENERATION"
   cpu_core_count = 16
   memory_size = 32
 }
 
 data "huaweicloud_compute_flavors" "i8c16g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "c7"
+  generation = "INTEL_GENERATION"
   cpu_core_count = 8
   memory_size = 16
 }
 
 data "huaweicloud_compute_flavors" "i4c8g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "c7"
+  generation = "INTEL_GENERATION"
   cpu_core_count = 4
   memory_size = 8
 }
 
 data "huaweicloud_compute_flavors" "i2c4g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "c7"
+  generation = "INTEL_GENERATION"
   cpu_core_count = 2
   memory_size = 4
 }
+#INTEL_MACHINE_END
 
+#AMD_MACHINE_START
 data "huaweicloud_compute_flavors" "a128c256g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "ac7"
+  generation = "AMD_GENERATION"
   cpu_core_count = 128
   memory_size = 256
 }
 
 data "huaweicloud_compute_flavors" "a96c192g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "ac7"
+  generation = "AMD_GENERATION"
   cpu_core_count = 96
   memory_size = 192
 }
 
 data "huaweicloud_compute_flavors" "a64c128g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "ac7"
+  generation = "AMD_GENERATION"
   cpu_core_count = 64
   memory_size = 128
 }
 
 data "huaweicloud_compute_flavors" "a48c96g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "ac7"
+  generation = "AMD_GENERATION"
   cpu_core_count = 48
   memory_size = 96
 }
 
 data "huaweicloud_compute_flavors" "a32c64g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "ac7"
+  generation = "AMD_GENERATION"
   cpu_core_count = 32
   memory_size = 64
 }
@@ -194,31 +200,32 @@ data "huaweicloud_compute_flavors" "a24c48g" {
 
 data "huaweicloud_compute_flavors" "a16c32g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "ac7"
+  generation = "AMD_GENERATION"
   cpu_core_count = 16
   memory_size = 32
 }
 
 data "huaweicloud_compute_flavors" "a8c16g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "ac7"
+  generation = "AMD_GENERATION"
   cpu_core_count = 8
   memory_size = 16
 }
 
 data "huaweicloud_compute_flavors" "a4c8g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "ac7"
+  generation = "AMD_GENERATION"
   cpu_core_count = 4
   memory_size = 8
 }
 
 data "huaweicloud_compute_flavors" "a2c4g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "ac7"
+  generation = "AMD_GENERATION"
   cpu_core_count = 2
   memory_size = 4
 }
+#AMD_MACHINE_END
 
 data "huaweicloud_compute_flavors" "i1c2g" {
   availability_zone = "DEFAULT_ZONE_ID"
