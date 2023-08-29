@@ -30,6 +30,7 @@ resource "baiducloud_instance" "natgw" {
   security_groups = [baiducloud_security_group.natgw_transparent.id]
   root_disk_size_in_gb = 40
   root_disk_storage_type = "cloud_hp1"
+  stop_with_no_charge = true
   auto_renew_time_unit = "month"
   auto_renew_time_length = 1
   user_data = base64encode(<<EOF

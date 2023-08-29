@@ -1893,16 +1893,20 @@ int hw_intel_amd_generation(const char* region_id, char* intel_generation, char*
         strcpy(amd_generation,"");
     }
     if(strcmp(region_id,"na-mexico-1")==0||strcmp(region_id,"na-mexico-2")==0||strcmp(region_id,"sa-brazil-1")==0||strcmp(region_id,"la-south-2")==0||strcmp(region_id,"af-south-1")==0){
-        strcpy(intel_generation,"c6s");
+        strcpy(intel_generation,"c6");
         return 1;
     }
-    else if(strcmp(region_id,"tr-west-1")==0||strcmp(region_id,"ap-southeast-4")==0||strcmp(region_id,"ap-southeast-3")==0||strcmp(region_id,"ap-southeast-2")==0||strcmp(region_id,"ap-southeast-1")==0){
-        strcpy(intel_generation,"c7n");
+    else if(strcmp(region_id,"ap-southeast-1")==0){
+        strcpy(intel_generation,"c7");
         return 2;
+    }
+    else if(strcmp(region_id,"tr-west-1")==0||strcmp(region_id,"ap-southeast-4")==0||strcmp(region_id,"ap-southeast-3")==0||strcmp(region_id,"ap-southeast-2")==0){
+        strcpy(intel_generation,"c7");
+        return 3;
     }
     else{
         strcpy(intel_generation,"c7");
-        return 3;
+        return 4;
     }
 }
 
@@ -2211,13 +2215,13 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     else{
         global_replace(filename_temp,"AMD_GENERATION",amd_generation);
     }
-    if(intel_flavor_flag==1){
+    if(intel_flavor_flag==1||intel_flavor_flag==3){
         insert_lines(filename_temp,"#C7_SPECIFIC","/*");
         insert_lines(filename_temp,"#C6S_SPECIFIC","*/");
     }
     else if(intel_flavor_flag==2){
         insert_lines(filename_temp,"#C7_SPECIFIC","/*");
-        insert_lines(filename_temp,"#C7N_SPECIFIC","*/");
+        insert_lines(filename_temp,"#C7N_HK_SPECIFIC","*/");
     }
     global_replace(filename_temp,"INTEL_GENERATION",intel_generation);
 
@@ -2771,9 +2775,12 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     system(cmdline);
     getstate(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);// Doesn't work! 
-    find_and_get(filename_temp,"access_key","","",20,"\"id\":","","",'\"',4,bucket_ak); //Desn't work!
-    find_and_get(filename_temp,"access_key","","",20,"\"secret\":","","",'\"',4,bucket_sk); //Desn't work!
+    find_and_get(filename_temp,"\"bucket\":","","",1,"\"bucket\":","","",'\"',4,bucket_id); 
+    sprintf(filename_temp,"%s%saccess-key.txt",stackdir,PATH_SLASH);
+    find_and_get(filename_temp,"AccessKeyId","","",1,"AccessKeyId","","",'\"',4,bucket_ak);
+    find_and_get(filename_temp,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
     printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
