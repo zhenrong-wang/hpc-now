@@ -212,7 +212,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
             sprintf(cmdline,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s%s %s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
         }
     }
-    printf("\n\n%s\n\n",cmdline);
+//    printf("\n\n%s\n\n",cmdline);
     if(system(cmdline)!=0){
         unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
