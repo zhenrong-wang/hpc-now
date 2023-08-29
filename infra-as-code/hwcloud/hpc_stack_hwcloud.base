@@ -89,7 +89,7 @@ data "huaweicloud_compute_flavors" "i128c256g" {
   memory_size = 256
 }
 
-#C7N_SPECIFIC
+#C7N_HK_SPECIFIC
 data "huaweicloud_compute_flavors" "i96c192g" {
   availability_zone = "DEFAULT_ZONE_ID"
   generation = "INTEL_GENERATION"
@@ -193,7 +193,7 @@ data "huaweicloud_compute_flavors" "a32c64g" {
 
 data "huaweicloud_compute_flavors" "a24c48g" {
   availability_zone = "DEFAULT_ZONE_ID"
-  generation = "Ac7"
+  generation = "AMD_GENERATION"
   cpu_core_count = 24
   memory_size = 48
 }

@@ -60,7 +60,7 @@ else
 fi
 
 # Sync Time among cluster nodes
-if [ ! -z $centos_vers ] && [ $centos_vers -eq 7 ]; then
+if [ ! -z $centos_vers ] && [ $centos_vers = 7 ]; then
   yum -y install ntpdate
   ntpdate ntp.ntsc.ac.cn
 fi
@@ -243,7 +243,7 @@ if [ -f /root/hostfile ]; then
   yum remove -y `rpm -aq mariadb`
   rm -rf /etc/my.cnf
   rm -rf /var/lib/mysql
-  if [ ! -z $centos_vers ] && [ $centos_vers -eq 7 ]; then
+  if [ ! -z $centos_vers ] && [ $centos_vers = 7 ]; then
     yum -y install mariadb mariadb-devel mariadb-server
     yum -y install mariadb-libs
   else
@@ -265,7 +265,7 @@ if [ -f /root/hostfile ]; then
     time_current=`date "+%Y-%m-%d %H:%M:%S"`
     echo -e "# $time_current Mariadb installation on localhost started." >> ${logfile}
     
-    if [ ! -z $centos_vers ] && [ $centos_vers -eq 7 ]; then
+    if [ ! -z $centos_vers ] && [ $centos_vers = 7 ]; then
       openssl rand 8 -base64 -out /root/mariadb_root_passwd.txt
       openssl rand 8 -base64 -out /root/mariadb_slurm_acct_db_pw.txt
     else
@@ -366,7 +366,7 @@ if [ -f /root/hostfile ]; then
   mkdir -p /opt/slurm/archive
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "# $time_current Slurm built and configured in path /opt/slurm." >> ${logfile}
-  if [ ! -z $centos_vers ] && [ $centos_vers -eq 7 ]; then
+  if [ ! -z $centos_vers ] && [ $centos_vers = 7 ]; then
      # This is a workaround. CentOS-7 will be deprecated in the future
      mv /usr/hpc-now/.hpcmgr_main.sh /usr/bin/hpcmgr && chmod +x /usr/bin/hpcmgr
   else
@@ -441,7 +441,7 @@ if [ -f /root/hostfile ]; then
     systemctl enable gdm.service --now
   else
     echo -e "# $time_current CENTOS VERSION $centos_vers. Installing GUI now." >> ${logfile}
-    if [ ! -z $centos_vers ] && [ $centos_vers -eq 7 ]; then
+    if [ ! -z $centos_vers ] && [ $centos_vers = 7 ]; then
       yum -y groupinstall "GNOME Desktop"
       /bin/cp -r ${utils_path}libstdc++.so.6.0.26 /usr/lib64/
       rm -rf /usr/lib64/libstdc++.so.6
@@ -547,7 +547,7 @@ if [ -f /root/hostfile ]; then
   rm -rf /usr/share/backgrounds/*.jpg
   /bin/cp -r ${utils_path}pics/wallpapers.zip /usr/share/backgrounds/
   cd /usr/share/backgrounds && unzip wallpapers.zip
-  if [ -z $centos_vers ] || [ $centos_vers -ne 7 ]; then
+  if [ -z $centos_vers ] || [ $centos_vers != 7 ]; then
     sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm/custom.conf
     yum -y install gnome-tweaks gnome-extensions-app.x86_64
     echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options centered\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/day.jpg" > /etc/g_ini.sh
