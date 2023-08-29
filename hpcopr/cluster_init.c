@@ -1893,16 +1893,20 @@ int hw_intel_amd_generation(const char* region_id, char* intel_generation, char*
         strcpy(amd_generation,"");
     }
     if(strcmp(region_id,"na-mexico-1")==0||strcmp(region_id,"na-mexico-2")==0||strcmp(region_id,"sa-brazil-1")==0||strcmp(region_id,"la-south-2")==0||strcmp(region_id,"af-south-1")==0){
-        strcpy(intel_generation,"c6s");
+        strcpy(intel_generation,"c6");
         return 1;
     }
-    else if(strcmp(region_id,"tr-west-1")==0||strcmp(region_id,"ap-southeast-4")==0||strcmp(region_id,"ap-southeast-3")==0||strcmp(region_id,"ap-southeast-2")==0||strcmp(region_id,"ap-southeast-1")==0){
-        strcpy(intel_generation,"c7n");
+    else if(strcmp(region_id,"ap-southeast-1")==0){
+        strcpy(intel_generation,"c7");
         return 2;
+    }
+    else if(strcmp(region_id,"tr-west-1")==0||strcmp(region_id,"ap-southeast-4")==0||strcmp(region_id,"ap-southeast-3")==0||strcmp(region_id,"ap-southeast-2")==0){
+        strcpy(intel_generation,"c7");
+        return 3;
     }
     else{
         strcpy(intel_generation,"c7");
-        return 3;
+        return 4;
     }
 }
 
@@ -2211,13 +2215,13 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     else{
         global_replace(filename_temp,"AMD_GENERATION",amd_generation);
     }
-    if(intel_flavor_flag==1){
+    if(intel_flavor_flag==1||intel_flavor_flag==3){
         insert_lines(filename_temp,"#C7_SPECIFIC","/*");
         insert_lines(filename_temp,"#C6S_SPECIFIC","*/");
     }
     else if(intel_flavor_flag==2){
         insert_lines(filename_temp,"#C7_SPECIFIC","/*");
-        insert_lines(filename_temp,"#C7N_SPECIFIC","*/");
+        insert_lines(filename_temp,"#C7N_HK_SPECIFIC","*/");
     }
     global_replace(filename_temp,"INTEL_GENERATION",intel_generation);
 
