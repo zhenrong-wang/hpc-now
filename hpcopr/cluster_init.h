@@ -34,6 +34,7 @@ void generate_tf_files(char* stackdir);
 int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
+int hw_intel_amd_generation(const char* region_id, char* intel_generation, char* amd_generation, int* amd_flag);
 int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
