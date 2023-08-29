@@ -2775,9 +2775,12 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     system(cmdline);
     getstate(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);// Doesn't work! 
-    find_and_get(filename_temp,"access_key","","",20,"\"id\":","","",'\"',4,bucket_ak); //Desn't work!
-    find_and_get(filename_temp,"access_key","","",20,"\"secret\":","","",'\"',4,bucket_sk); //Desn't work!
+    find_and_get(filename_temp,"\"bucket\":","","",1,"\"bucket\":","","",'\"',4,bucket_id); 
+    sprintf(filename_temp,"%s%saccess-key.txt",stackdir,PATH_SLASH);
+    find_and_get(filename_temp,"AccessKeyId","","",1,"AccessKeyId","","",'\"',4,bucket_ak);
+    find_and_get(filename_temp,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
     printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);

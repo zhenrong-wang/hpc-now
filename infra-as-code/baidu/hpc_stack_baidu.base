@@ -9,7 +9,7 @@ terraform {
   required_providers {
     baiducloud = {
       source  = "baidubce/baiducloud"
-      version = "~> 1.19.11"
+      version = "~> 1.19.14"
     }
   }
 }
@@ -436,6 +436,11 @@ resource "baiducloud_bos_bucket" "hpc_data_storage" {
 resource "baiducloud_iam_user" "hpc_user" {
   name = "BUCKET_USER_ID"
   force_destroy = true
+}
+
+resource "baiducloud_iam_access_key" "example" {
+  username = baiducloud_iam_user.hpc_user.name
+  secret_file = "access-key.txt"
 }
 
 resource "baiducloud_iam_policy" "hpc_bucket_access_policy" {
