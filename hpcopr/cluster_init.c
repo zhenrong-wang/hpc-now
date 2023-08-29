@@ -1883,6 +1883,29 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     return 0;
 }
 
+int hw_intel_amd_generation(const char* region_id, char* intel_generation, char* amd_generation, int* amd_flag){
+    if(strcmp(region_id,"cn-north-4")==0||strcmp(region_id,"cn-east-3")==0||strcmp(region_id,"cn-south-1")==0){
+        *amd_flag=0;
+        strcpy(amd_generation,"ac7");
+    }
+    else{
+        *amd_flag=1;
+        strcpy(amd_generation,"");
+    }
+    if(strcmp(region_id,"na-mexico-1")==0||strcmp(region_id,"na-mexico-2")==0||strcmp(region_id,"sa-brazil-1")==0||strcmp(region_id,"la-south-2")==0||strcmp(region_id,"af-south-1")==0){
+        strcpy(intel_generation,"c6s");
+        return 1;
+    }
+    else if(strcmp(region_id,"tr-west-1")==0||strcmp(region_id,"ap-southeast-4")==0||strcmp(region_id,"ap-southeast-3")==0||strcmp(region_id,"ap-southeast-2")==0||strcmp(region_id,"ap-southeast-1")==0){
+        strcpy(intel_generation,"c7n");
+        return 2;
+    }
+    else{
+        strcpy(intel_generation,"c7");
+        return 3;
+    }
+}
+
 int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile){
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -1936,6 +1959,10 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     char master_cpu_vendor[8]="";
     char compute_cpu_vendor[8]="";
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
+    int amd_flavor_flag=1;
+    char intel_generation[8]="";
+    char amd_generation[8]="";
+    int intel_flavor_flag=0;
     char usage_logfile[FILENAME_LENGTH]="";
     int i;
     if(folder_exist_or_not(workdir)==1){
@@ -2141,8 +2168,9 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     printf("|          Master Node Instance:  %s\n",master_inst);
     printf("|          Compute Node Instance: %s\n",compute_inst);
     printf("|          OS Image:              %s\n" RESET_DISPLAY,os_image);
-    generate_sshkey(sshkey_folder,pubkey);
 
+    intel_flavor_flag=hw_intel_amd_generation(region_id,intel_generation,amd_generation,&amd_flavor_flag);
+    generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
     global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
@@ -2176,6 +2204,22 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    if(amd_flavor_flag==1){
+        insert_lines(filename_temp,"#AMD_MACHINE_START","/*");
+        insert_lines(filename_temp,"#AMD_MACHINE_END","*/");
+    }
+    else{
+        global_replace(filename_temp,"AMD_GENERATION",amd_generation);
+    }
+    if(intel_flavor_flag==1){
+        insert_lines(filename_temp,"#C7_SPECIFIC","/*");
+        insert_lines(filename_temp,"#C6S_SPECIFIC","*/");
+    }
+    else if(intel_flavor_flag==2){
+        insert_lines(filename_temp,"#C7_SPECIFIC","/*");
+        insert_lines(filename_temp,"#C7N_SPECIFIC","*/");
+    }
+    global_replace(filename_temp,"INTEL_GENERATION",intel_generation);
 
     file_p=fopen(filename_temp,"a");
     sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
