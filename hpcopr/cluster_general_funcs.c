@@ -1546,7 +1546,7 @@ int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag){
         global_replace(filename_temp,"\"OFF\"","\"ON\"");
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
-        global_replace(filename_temp,"stop","start");
+        global_replace(filename_temp,"\"stop\"","\"start\"");
     }
     else{
         return 1;
@@ -1570,7 +1570,7 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag){
         global_replace(filename_temp,"\"ON\"","\"OFF\"");
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
-        global_replace(filename_temp,"start","stop");
+        global_replace(filename_temp,"\"start\"","\"stop\"");
     }
     else{
         return 1;

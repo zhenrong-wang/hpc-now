@@ -1340,6 +1340,13 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     if(strcmp(cloud_flag,"CLOUD_D")==0){
         find_and_get(filename_temp,"flavor_id","","",1,"flavor_id","","",'.',3,prev_config);
     }
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
+        find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,prev_config);
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        find_and_get(filename_temp,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,prev_config);
+    }
     else{
         find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
     }
@@ -1553,6 +1560,13 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     sprintf(filename_temp,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
     if(strcmp(cloud_flag,"CLOUD_D")==0){
         find_and_get(filename_temp,"flavor_id","","",1,"flavor_id","","",'.',3,prev_config);
+    }
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
+        find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,prev_config);
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        find_and_get(filename_temp,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,prev_config);
     }
     else{
         find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
