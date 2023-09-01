@@ -871,7 +871,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param){
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
                 sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
                 system(cmdline);
-                sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,i,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+                sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf* %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,i,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
                 system(cmdline);
             }
             if(terraform_execution(tf_exec,"apply",workdir,crypto_keyfile,1)!=0){ 
