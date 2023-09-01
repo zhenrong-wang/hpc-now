@@ -252,7 +252,7 @@ fi
 export MPI_ARCH_INC="-I${mpi_root}include" 
 export MPI_ARCH_LIBS="-L${mpi_root}lib -lmpi"
 source ${of_cache}OpenFOAM-v1912/etc/bashrc
-export FOAM_EXTRA_LDFLAGS="-L${of_cache}ThirdParty-v1912/platforms/linux64Gcc/fftw-3.3.10/lib -lfftw3"
+export FOAM_EXTRA_LDFLAGS="-L${of_cache}ThirdParty-v1912/platforms/linux64Gcc/fftw-3.3.7/lib -lfftw3"
 echo -e "[ -INFO- ] Building OpenFOAM in progress ... It takes really long time (for example, 2.5 hours with 8 vCPUs)"
 echo -e "[ -INFO- ] Please check the log files: Build_OF1912.log."
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
