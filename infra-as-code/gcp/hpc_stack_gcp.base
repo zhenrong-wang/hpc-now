@@ -176,6 +176,7 @@ resource "google_compute_firewall" "allow_public_ingress" {
     protocol = "all"
   }
   source_ranges = ["0.0.0.0/0"]
+  target_tags = ["natgw"]
 }
 
 resource "google_compute_firewall" "allow_egress" {
@@ -187,7 +188,7 @@ resource "google_compute_firewall" "allow_egress" {
   }
 }
 
-resource "google_compute_firewall" "allow_public_ping" {
+resource "google_compute_firewall" "allow_ping" {
   name = "ping-RANDOM_STRING"
   network = google_compute_network.hpc_stack.name
   direction = "INGRESS"
@@ -205,6 +206,7 @@ resource "google_compute_firewall" "allow_intra_ingress" {
     protocol = "all"
   }
   source_ranges = ["10.0.0.0/16"]
+  target_tags = ["master","database","compute"]
 }
 
 resource "google_compute_firewall" "allow_public_ssh_rdp" {
@@ -216,6 +218,7 @@ resource "google_compute_firewall" "allow_public_ssh_rdp" {
     ports = ["22","3389"]
   }
   source_ranges = ["0.0.0.0/0"]
+  target_tags = ["master"]
 }
 
 resource "google_compute_firewall" "allow_intra_slurm" {
@@ -228,6 +231,7 @@ resource "google_compute_firewall" "allow_intra_slurm" {
   }
   source_ranges = ["10.0.0.0/16"]
   destination_ranges = ["10.0.0.0/16"]
+  target_tags = ["master","compute"]
 }
 
 resource "google_compute_firewall" "allow_intra_mysql" {
@@ -239,10 +243,42 @@ resource "google_compute_firewall" "allow_intra_mysql" {
     ports = ["3306"]
   }
   source_ranges = ["10.0.0.0/16"]
+  target_tags = ["database"]
+}
+
+variable "shared_storage" {
+  type = number
+  default = DEFAULT_STORAGE_VOLUME #-#-#
 }
 
 resource "google_storage_bucket" "hpc_storage" {
   name = "RANDOM_STRING"
   location = "DEFAULT_REGION_ID"
   force_destroy = true
+}
+
+resource "google_service_account" "hpc_storage_account" {
+  account_id = "RANDOM_STRING"
+  display_name = "hpc-now-RANDOM_STRING"
+}
+
+resource "google_project_iam_binding" "hpc_storage_binding" {
+  project = "BLANK_PROJECT"
+  role = "roles/storage.admin"
+  members = ["serviceAccount:${google_service_account.hpc_storage_account.email}"]
+  condition {
+    title = "only-bucket-RANDOM_STRING"
+    description = "only-bucket-RANDOM_STRING"
+    expression  = "resource.name.startsWith(\"projects/_/buckets/RANDOM_STRING\")"
+  }
+}
+
+resource "google_service_account_key" "hpc_storage_key" {
+  service_account_id = google_service_account.hpc_storage_account.name
+}
+
+resource "google_compute_disk" "shared_volume" {
+  name = "shared-RANDOM_STRING"
+  type = "pd-ssd"
+  size = "${var.shared_storage}"
 }

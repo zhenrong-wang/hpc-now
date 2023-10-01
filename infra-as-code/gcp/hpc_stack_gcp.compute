@@ -1,0 +1,52 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+
+resource "google_compute_instance" "COMPUTE_NODE_N" {
+  name = "COMPUTE_NODE_N-RANDOM_STRING"
+  machine_type = "${var.COMPUTE_INST}"
+  allow_stopping_for_update = true
+  desired_status = "RUNNING"
+  can_ip_forward = true
+  tags = ["compute"]
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.OS_IMAGE.self_link
+      size = 30
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.hpc_stack_subnet.self_link
+  }
+
+  metadata_startup_script = <<EOF
+#!/bin/bash
+systemctl stop firewalld
+systemctl disable firewalld
+touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+hostnamectl set-hostname COMPUTE_NODE_N
+echo -e "${var.compute_passwd}" | passwd root --stdin >> /dev/null 2>&1
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config
+echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
+systemctl restart sshd
+mkdir -p /mnt/sdb/hpc_apps
+mkdir -p /mnt/sdb/hpc_data
+rm -rf /hpc_apps && rm -rf /hpc_data
+ln -s /mnt/sdb/hpc_apps /hpc_apps
+ln -s /mnt/sdb/hpc_data /hpc_data
+yum -y install rpcbind nfs-utils
+mount -t nfs -o vers=4.0 ${google_compute_instance.master.network_interface.0.network_ip}:/mnt/sdb/hpc_apps /mnt/sdb/hpc_apps
+mount -t nfs -o vers=4.0 ${google_compute_instance.master.network_interface.0.network_ip}:/mnt/sdb/hpc_data /mnt/sdb/hpc_data
+echo -e "${google_compute_instance.master.network_interface.0.network_ip}:/mnt/sdb/hpc_apps /mnt/sdb/hpc_apps nfs vers=4,minorversion=0,hard,timeo=600,retrans=2 0 0" >> /etc/fstab
+echo -e "${google_compute_instance.master.network_interface.0.network_ip}:/mnt/sdb/hpc_data /mnt/sdb/hpc_data nfs vers=4,minorversion=0,hard,timeo=600,retrans=2 0 0" >> /etc/fstab
+rm -rf /root/.ssh 
+echo -e "${google_compute_instance.master.network_interface.0.network_ip}" > /root/master_ip.txt
+nohup curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.compute_init_parameters} > /var/log/cluster_COMPUTE_NODE_N_init_raw.log 2>&1 &
+EOF
+}

@@ -38,5 +38,6 @@ int hw_intel_amd_generation(const char* region_id, char* intel_generation, char*
 int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
+int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
 
 #endif

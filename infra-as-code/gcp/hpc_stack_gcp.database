@@ -1,0 +1,37 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+
+resource "google_compute_instance" "database" {
+  name = "database-RANDOM_STRING"
+  machine_type = "${var.e2c2g}"
+  allow_stopping_for_update = true
+  desired_status = "RUNNING"
+  can_ip_forward = true
+  tags = ["database"]
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.centos7.self_link
+      size = 30
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.hpc_stack_subnet.self_link
+  }
+
+  metadata_startup_script = <<EOF
+#!/bin/bash
+systemctl stop firewalld
+systemctl disable firewalld
+hostnamectl set-hostname database
+echo "${google_compute_instance.natgw.network_interface.0.network_ip}" >> /dev/null
+echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
+echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
+curl ${var.db_init_scripts} | bash
+EOF
+}

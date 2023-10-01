@@ -53,6 +53,7 @@ char bd_tf_plugin_version_var[16]="";
 char azrm_tf_plugin_version_var[16]="";
 char azad_tf_plugin_version_var[16]="";
 char az_environment[16]="";
+char gcp_tf_plugin_version_var[16]="";
 
 char md5_tf_exec_var[64]="";
 char md5_tf_zip_var[64]="";
@@ -71,6 +72,8 @@ char md5_azrm_tf_var[64]="";
 char md5_azrm_tf_zip_var[64]="";
 char md5_azad_tf_var[64]="";
 char md5_azad_tf_zip_var[64]="";
+char md5_gcp_tf_var[64]="";
+char md5_gcp_tf_zip_var[64]="";
 
 /*
  * GEN: GENERAL COMMANDS
@@ -245,8 +248,8 @@ int main(int argc, char* argv[]){
     char workdir[DIR_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX]="";
     char new_cluster_name[128]="";
-    char cloud_ak[128]="";
-    char cloud_sk[128]="";
+    char cloud_ak[AKSK_LENGTH]="";
+    char cloud_sk[AKSK_LENGTH]="";
     char stream_name[128]="";
     char log_type[128]="";
     char user_name[128]="";
@@ -554,11 +557,16 @@ int main(int argc, char* argv[]){
         cmd_keyword_check(argc,argv,"--sk",cloud_sk);
         cmd_keyword_check(argc,argv,"--az-sid",string_temp);
         cmd_keyword_check(argc,argv,"--az-tid",string_temp2);
-        if(cmd_flag_check(argc,argv,"--echo")==0){
-            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"echo");
+        if(cmd_flag_check(argc,argv,"--gcp")==0){
+            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,"",cloud_sk,"","","","gcp");
         }
         else{
-            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"");
+            if(cmd_flag_check(argc,argv,"--echo")==0){
+                run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"echo","");
+            }
+            else{
+                run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"","");
+            }
         }
         if(run_flag==-1){
             write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
@@ -571,7 +579,7 @@ int main(int argc, char* argv[]){
             return 21;
         }
         else if(run_flag==3){
-            write_operation_log("NULL",operation_log,argc,argv,"USER_DENIED",3);
+            write_operation_log("NULL",operation_log,argc,argv,"INVALID_GCP_KEY_FILE",3);
             check_and_cleanup(workdir);
             return 3;
         }

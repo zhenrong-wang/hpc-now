@@ -327,7 +327,7 @@ remove_files:
     return 0;
 }
 
-int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* az_subscription, char* az_tenant, char* echo_flag){
+int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* az_subscription, char* az_tenant, char* echo_flag, char* gcp_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char input_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -372,7 +372,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return 1;
     }
     else if(cluster_name_check_flag==-127){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " already exists in the registry.\n",input_cluster_name);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " already exists in the registry.\n",input_cluster_name);
         printf("|          Please check and retry. Exit now." RESET_DISPLAY "\n");
         return 1;
     }
@@ -382,11 +382,58 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return 1;
     }
     else if(cluster_name_check_flag==-5){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The cluster name %s contains illegal characters.\n",input_cluster_name);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " contains illegal characters.\n",input_cluster_name);
         printf("|          Please check and retry. Exit now." RESET_DISPLAY "\n");
         return 1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the cluster name %s.\n",input_cluster_name);
+    
+    if(strcmp(gcp_flag,"gcp")==0){
+        if(strlen(cloud_sk)==0){
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " The JSON-format key file *ABSOLUTE* path: ");
+            fflush(stdin);
+            scanf("%s",secret_key);
+            getchar();
+        }
+        else{
+            strcpy(secret_key,cloud_sk);
+        }
+        file_p_2=fopen(secret_key,"r");
+        if(file_p_2==NULL){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the key file %s. Exit now." RESET_DISPLAY "\n",secret_key);
+            return -1;
+        }
+        if(find_multi_keys(secret_key,"\"project_id\":","","","","")<1||find_multi_keys(secret_key,"\"private_key\":","","","","")<1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid. Exit now." RESET_DISPLAY "\n",secret_key);
+            fclose(file_p_2);
+            return 3;
+        }
+        fclose(file_p_2);
+        sprintf(new_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,input_cluster_name,PATH_SLASH);
+        sprintf(cmdline,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        create_and_get_vaultdir(new_workdir,new_vaultdir);
+        get_crypto_key(crypto_keyfile,md5sum);
+        sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,secret_key,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        sprintf(filename_temp,"%s%scloud_flag.flg",new_vaultdir,PATH_SLASH);
+        file_p=fopen(filename_temp,"w+");
+        if(file_p!=NULL){
+            fprintf(file_p,"CLOUD_G\n");
+            fclose(file_p);
+        }
+        add_to_cluster_registry(input_cluster_name,"");
+        switch_to_cluster(input_cluster_name);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The key file has been encrypted and stored locally. We recommend you\n");
+        printf("|          to delete the original key file to avoid key leakage. Now you can either:\n");
+        printf("|          1. run 'hpcopr init' to create a default cluster. OR\n");
+        printf("|          2. run 'hpcopr get-conf' to get the default cluster configuration, and run\n");
+        printf("|             'hpcopr init' to create a customized cluster.\n");
+        printf("|          You can also switch to this cluster name and operate this cluster later.\n");
+        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Exit now.\n");
+        return 0;
+    }
+
 #ifdef _WIN32
     strcpy(filename_temp,"c:\\programdata\\hpc-now\\secret.tmp.txt");
     strcpy(filename_temp_2,"c:\\programdata\\hpc-now\\.az_extra.info");

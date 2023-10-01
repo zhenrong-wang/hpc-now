@@ -3291,3 +3291,8 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
+
+int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile){
+    //In-development
+    return 0;
+}

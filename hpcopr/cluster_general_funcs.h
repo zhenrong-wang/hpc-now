@@ -89,7 +89,6 @@ int decrypt_bcecredentials(char* workdir);
  * If silent_flag==0, silent. Will print nothing
  * If silent_flag== other_number, Will only show the warning
  */
-
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag);
 int current_cluster_or_not(char* current_indicator, char* cluster_name);
 int cluster_name_check(char* cluster_name);

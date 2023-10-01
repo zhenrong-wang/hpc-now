@@ -1,0 +1,86 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+
+resource "google_compute_attached_disk" "master_disk_attach" {
+  disk = google_compute_disk.shared_volume.id
+  instance = google_compute_instance.master.id
+}
+
+resource "google_compute_instance" "master" {
+  name = "master-RANDOM_STRING"
+  machine_type = "${var.MASTER_INST}"
+  allow_stopping_for_update = true
+  desired_status = "RUNNING"
+  tags = ["master"]
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.OS_IMAGE.self_link
+      size = 30
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.hpc_stack_pub_subnet.self_link
+    access_config {
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [attached_disk]
+  }
+
+  metadata_startup_script = <<EOF
+#!/bin/bash
+systemctl stop firewalld
+systemctl disable firewalld
+hostnamectl set-hostname COMPUTE_NODE_N
+echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
+touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config
+echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
+rm -rf /root/.ssh/id_rsa.pub
+rm -rf /root/.ssh/id_rsa
+rm -rf /root/.ssh/authorized_keys
+rm -rf /root/.ssh/known_hosts
+ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa -q
+cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
+systemctl restart sshd
+mkfs -t ext4 /dev/sdb
+mkdir -p /mnt/sdb
+block_id=`blkid /dev/sdb | awk -F"\"" '{print $2}'`
+echo -e "UUID=$block_id /mnt/sdb                ext4    defaults        0 2" >> /etc/fstab
+mount -a
+mkdir -p /mnt/sdb/hpc_apps
+mkdir -p /mnt/sdb/hpc_data
+rm -rf /hpc_apps && rm -rf /hpc_data
+ln -s /mnt/sdb/hpc_apps /hpc_apps
+ln -s /mnt/sdb/hpc_data /hpc_data
+yum -y install rpcbind nfs-utils
+echo -e "/mnt/sdb/hpc_apps/ 10.0.0.0/16(rw,no_root_squash,no_all_squash,sync)" >> /etc/exports
+echo -e "/mnt/sdb/hpc_data/ 10.0.0.0/16(rw,no_root_squash,no_all_squash,sync)" >> /etc/exports
+systemctl start rpcbind
+systemctl start nfs-server
+systemctl enable rpcbind
+systemctl enable nfs-server
+yum -y install at
+systemctl start atd && systemctl enable atd
+master_private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
+if [ ! -f /root/hostfile ]; then
+  echo -e "$master_private_ip\tmaster" > /root/hostfile
+fi
+echo -e "export HPC_USER_NUM=${var.HPC_USER_NUM}" >> /etc/profile
+echo -e "${google_compute_instance.database.network_interface.0.network_ip}\tmariadb" > /root/mariadb_private_ip.txt
+echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
+echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
+echo -e "${var.master_passwd}" > /root/master_passwd.txt && echo -e "${var.compute_passwd}" > /root/compute_passwd.txt
+yum -y install sshpass readhat-lsb
+curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.master_init_parameters} > /var/log/cluster_init_master_raw.log 2>&1
+EOF
+}
