@@ -580,8 +580,8 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
     if(file_p==NULL){
         return -1;
     }
-    char single_line[LINE_LENGTH]="";
-    char get_string_buffer[LINE_LENGTH_SHORT]="";
+    char single_line[LINE_LENGTH_EXT]="";
+    char get_string_buffer[LINE_LENGTH]="";
     int flag_primary1=0,flag_primary2=0,flag_primary3=0;
     int flag_primary=1;
     int flag1=0,flag2=0,flag3=0;

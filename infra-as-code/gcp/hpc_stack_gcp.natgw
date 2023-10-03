@@ -12,6 +12,9 @@ resource "google_compute_instance" "natgw" {
   desired_status = "RUNNING"
   can_ip_forward = true
   tags = ["natgw"]
+  labels = {
+    resource_label = "RESOURCE_LABEL"
+  }
 
   boot_disk {
     initialize_params {

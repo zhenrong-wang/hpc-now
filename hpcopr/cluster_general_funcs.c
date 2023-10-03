@@ -448,7 +448,7 @@ int get_cpu_num(const char* vm_model){
     if(length<5||length>9){
         return -1;
     }
-    if(*(vm_model)!='a'&&*(vm_model)!='i'&&*(vm_model)!='t'){
+    if(*(vm_model)!='a'&&*(vm_model)!='i'&&*(vm_model)!='t'&&*(vm_model)!='e'){
         return -1;
     }
     if(*(vm_model+length-1)!='g'){
@@ -584,6 +584,8 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%sbucket_key.txt",vaultdir,PATH_SLASH);
+    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
@@ -626,7 +628,7 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
 int getstate(char* workdir, char* crypto_filename){
     char cloud_flag[16]="";
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -3;
     }
     char stackdir[DIR_LENGTH]="";
@@ -704,6 +706,12 @@ int getstate(char* workdir, char* crypto_filename){
         find_and_get(master_tf,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
         get_seq_string(string_temp,'}',1,master_config);
         find_and_get(compute_template,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,compute_config);
+    }
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
+        find_and_get(master_tf,"machine_type","","",1,"machine_type","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,master_config);
+        find_and_get(compute_template,"machine_type","","",1,"machine_type","","",'.',2,string_temp);
         get_seq_string(string_temp,'}',1,compute_config);
     }
     else{
@@ -849,7 +857,7 @@ int getstate(char* workdir, char* crypto_filename){
             }
         }
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
         node_num_gs=find_multi_keys(tfstate,"\"azurerm_linux_virtual_machine\"","","","","")-3;
         find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"public_ip_address\":","","",'\"',4,string_temp);
         fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
@@ -870,6 +878,34 @@ int getstate(char* workdir, char* crypto_filename){
         get_seq_string(string_temp2,',',1,string_temp);
         fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
     }
+    else{
+        node_num_gs=find_multi_keys(tfstate,"\"google_compute_instance\"","","","","")-3;
+        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"nat_ip\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"network_ip\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
+        fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"current_status\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"master_status: %s\n",string_temp);
+        find_and_get(tfstate,"\"name\": \"database\",","","",80,"\"current_status\":","","",'\"',4,string_temp);
+        fprintf(file_p_statefile,"database_status: %s\n",string_temp);
+        for(i=0;i<node_num_gs;i++){
+            sprintf(string_temp2,"\"name\": \"compute%d\",",i+1);
+            find_and_get(tfstate,string_temp2,"","",80,"\"network_ip\":","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
+            fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
+            find_and_get(tfstate,string_temp2,"","",80,"\"current_status\":","","",'\"',4,string_temp);
+            fprintf(file_p_statefile,"compute%d_status: %s\n",i+1,string_temp);
+            if(strcmp(string_temp,"RUNNING")==0){
+                node_num_on_gs++;
+            }
+        }
+        find_and_get(tfstate,"\"name\": \"shared_volume\",","","",30,"\"size\":","","",'\"',3,string_temp);
+        get_seq_string(string_temp,' ',2,string_temp2);
+        get_seq_string(string_temp2,',',1,string_temp);
+        fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
+    }
+
     fprintf(file_p_statefile,"total_compute_nodes: %d\n",node_num_gs);
     fprintf(file_p_statefile,"running_compute_nodes: %d\n",node_num_on_gs);
     fprintf(file_p_statefile,"down_compute_nodes: %d\n",node_num_gs-node_num_on_gs);
@@ -1224,8 +1260,13 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     char tf_realtime_log_archive[FILENAME_LENGTH];
     char tf_error_log[FILENAME_LENGTH];
     char tf_error_log_archive[FILENAME_LENGTH];
+    char cloud_flag[16]="";
 
     create_and_get_stackdir(workdir,stackdir);
+    get_cloud_flag(workdir,cloud_flag);
+    if(strcmp(cloud_flag,"CLOUD_G")==0){
+        gcp_credential_convert(workdir,"decrypt");
+    }
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_realtime_log_archive,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_error_log,"%s%slog%stf_prep.err.log",workdir,PATH_SLASH,PATH_SLASH);
@@ -1246,7 +1287,13 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     if(wait_for_complete(tf_realtime_log,execution_name,tf_error_log,tf_error_log_archive,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,tf_error_log);
+        if(strcmp(cloud_flag,"CLOUD_G")==0){
+            gcp_credential_convert(workdir,"delete");
+        }
         return -1;
+    }
+    if(strcmp(cloud_flag,"CLOUD_G")==0){
+        gcp_credential_convert(workdir,"delete");
     }
     return 0;
 }
@@ -2631,6 +2678,35 @@ int decrypt_bcecredentials(char* workdir){
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%scredentials.tmp",vaultdir,PATH_SLASH);
     return decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+}
+
+int gcp_credential_convert(char* workdir, const char* operation){
+    char md5sum[64]="";
+    char vaultdir[DIR_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char keyfile_encrypted[FILENAME_LENGTH]="";
+    char keyfile_decrypted[FILENAME_LENGTH]="";
+    get_crypto_key(CRYPTO_KEY_FILE,md5sum);
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(keyfile_encrypted,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    sprintf(keyfile_decrypted,"%s%s.key.json",vaultdir,PATH_SLASH);
+    if(strcmp(operation,"decrypt")==0){
+        if(file_exist_or_not(keyfile_decrypted)!=0){
+            return decrypt_single_file_general(NOW_CRYPTO_EXEC,keyfile_encrypted,keyfile_decrypted,md5sum);
+        }
+        else{
+            return 0;
+        }
+    }
+    else{
+        if(file_exist_or_not(keyfile_decrypted)==0){
+            sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,keyfile_decrypted,SYSTEM_CMD_REDIRECT_NULL);
+            return system(cmdline);
+        }
+        else{
+            return 0;
+        }
+    }
 }
 
 int get_max_cluster_name_length(void){

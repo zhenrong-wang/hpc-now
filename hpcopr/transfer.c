@@ -312,6 +312,8 @@ next_user:
     }
     sprintf(cmdline,"%s %s%scloud_flag.flg %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    sprintf(cmdline,"%s %s%s.az_extra.info %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
     sprintf(cmdline,"%s %s%sUCID_LATEST.txt %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s%scurrentstate %s%s %s",COPY_FILE_CMD,current_stackdir,PATH_SLASH,tmp_stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);

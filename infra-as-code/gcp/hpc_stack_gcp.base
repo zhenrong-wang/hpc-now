@@ -10,6 +10,7 @@ provider "google" {
   project = "BLANK_PROJECT"
   region  = "DEFAULT_REGION_ID"
   zone    = "DEFAULT_ZONE_ID"
+  user_project_override = true
 }
 
 #MUST BE CHANGED TO ACTUAL PLAN!
@@ -255,6 +256,9 @@ resource "google_storage_bucket" "hpc_storage" {
   name = "RANDOM_STRING"
   location = "DEFAULT_REGION_ID"
   force_destroy = true
+  labels = {
+    resource_label = "RESOURCE_LABEL"
+  }
 }
 
 resource "google_service_account" "hpc_storage_account" {
@@ -281,4 +285,7 @@ resource "google_compute_disk" "shared_volume" {
   name = "shared-RANDOM_STRING"
   type = "pd-ssd"
   size = "${var.shared_storage}"
+  labels = {
+    cluster_ucid = "RANDOM_STRING"
+  }
 }

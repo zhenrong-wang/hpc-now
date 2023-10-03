@@ -37,8 +37,9 @@ rm -rf ~/.ssh/authorized_keys
 rm -rf /root/.ssh/known_hosts
 ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa -q
 cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
-echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
+echo -e "\nPUBLIC_KEY" >> /root/.ssh/authorized_keys
 systemctl restart sshd
+echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
 mkdir /hpc_apps && mkdir /hpc_data
 yum -y install nfs-utils
 mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${aws_efs_mount_target.hpc_apps_mount_target.ip_address}:/ /hpc_apps

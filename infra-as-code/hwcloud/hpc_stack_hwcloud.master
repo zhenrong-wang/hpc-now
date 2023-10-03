@@ -53,6 +53,15 @@ resource "huaweicloud_compute_instance" "master" {
 hostnamectl set-hostname master
 echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+rm -rf /root/.ssh/id_rsa.pub
+rm -rf /root/.ssh/id_rsa
+rm -rf /root/.ssh/authorized_keys
+rm -rf /root/.ssh/known_hosts
+ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa -q
+cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+echo -e "\nPUBLIC_KEY" >> /root/.ssh/authorized_keys
+systemctl restart sshd
+echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
 yum -y install at
 systemctl start atd && systemctl enable atd
 mkfs -t ext4 /dev/sdb
@@ -72,14 +81,6 @@ systemctl start rpcbind
 systemctl start nfs-server
 systemctl enable rpcbind
 systemctl enable nfs-server
-rm -rf /root/.ssh/id_rsa.pub
-rm -rf /root/.ssh/id_rsa
-rm -rf /root/.ssh/authorized_keys
-rm -rf /root/.ssh/known_hosts
-ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa -q
-cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
-echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
-systemctl restart sshd
 master_private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
 if [ ! -f /root/hostfile ]; then
   echo -e "$master_private_ip\tmaster" > /root/hostfile

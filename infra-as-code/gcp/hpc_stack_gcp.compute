@@ -12,6 +12,9 @@ resource "google_compute_instance" "COMPUTE_NODE_N" {
   desired_status = "RUNNING"
   can_ip_forward = true
   tags = ["compute"]
+  labels = {
+    resource_label = "RESOURCE_LABEL"
+  }
 
   boot_disk {
     initialize_params {

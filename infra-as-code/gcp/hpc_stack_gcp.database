@@ -12,7 +12,10 @@ resource "google_compute_instance" "database" {
   desired_status = "RUNNING"
   can_ip_forward = true
   tags = ["database"]
-
+  labels = {
+    resource_label = "RESOURCE_LABEL"
+  }
+  
   boot_disk {
     initialize_params {
       image = data.google_compute_image.centos7.self_link

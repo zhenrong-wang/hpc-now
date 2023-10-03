@@ -1676,7 +1676,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume){
     char* sshkey_dir=SSHKEY_DIR;
     char* tf_exec=TERRAFORM_EXEC;
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
+    if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return 1;
     }
     if(cluster_empty_or_not(workdir)==0){
@@ -1694,7 +1694,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a new volume larger than the previous volume %d." RESET_DISPLAY "\n",prev_volume_num);
         return 3;
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Expanding the volume from %d to %d GB, this operation is not reversible.\n",prev_volume_num,new_volume_num);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Expanding the volume from %d to %d GB, this operation is NOT reversible!\n",prev_volume_num,new_volume_num);
     create_and_get_stackdir(workdir,stackdir);
     decrypt_files(workdir,crypto_keyfile);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
@@ -1716,6 +1716,13 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume){
     }
     sprintf(cmdline,"%s %s.bak %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    if(strcmp(cloud_flag,"CLOUD_F")==0){
+        strcpy(cmdline,"resize2fs /dev/sdc");
+    }
+    else{
+        strcpy(cmdline,"resize2fs /dev/sdb");
+    }
+    remote_exec_general(workdir,sshkey_dir,"root",cmdline,"-n",0,0,"","");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);

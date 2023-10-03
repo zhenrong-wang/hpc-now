@@ -83,6 +83,7 @@ int modify_payment_single_line(char* filename_temp, char* modify_flag, char* lin
 int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag);
 int generate_bceconfig(char* vaultdir, char* region_id, char* bucket_ak, char* bucket_sk);
 int decrypt_bcecredentials(char* workdir);
+int gcp_credential_convert(char* workdir, const char* operation);
 
 /*
  * If silent_flag==1, verbose. Will tell the user which cluster is active

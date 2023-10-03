@@ -31,8 +31,9 @@ rm -rf /root/.ssh/authorized_keys
 rm -rf /root/.ssh/known_hosts
 ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa -q
 cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
-echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
+echo -e "\nPUBLIC_KEY" >> /root/.ssh/authorized_keys
 systemctl restart sshd
+echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
 systemctl start atd && systemctl enable atd
 mkdir /hpc_apps && mkdir /hpc_data
 yum -y install nfs-utils

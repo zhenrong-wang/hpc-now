@@ -42,6 +42,7 @@ url_utils=${INITUTILS_REPO_ROOT}
 #CLOUD_D: Huawei Cloud
 #CLOUD_E: BaiduCloud
 #CLOUD_F: Azure(GLOBAL)
+#CLOUD_G: Google Cloud Platform
 if [ -f /root/CLOUD_A ]; then
   cloud_flag="CLOUD_A"
 elif [ -f /root/CLOUD_B ]; then
@@ -54,6 +55,8 @@ elif [ -f /root/CLOUD_E ]; then
   cloud_flag="CLOUD_E"
 elif [ -f /root/CLOUD_F ]; then
   cloud_flag="CLOUD_F"
+elif [ -f /root/CLOUD_G ]; then
+  cloud_flag="CLOUD_G"
 else
   echo -e "# $time_current [ FATAL: ] Cloud flag is missing. Initialization abort." >> ${logfile}
   exit 1
@@ -87,7 +90,6 @@ scripts_path='/tmp/scripts/'
 
 sed -i 's/#   StrictHostKeyChecking ask/StrictHostKeyChecking no/g' /etc/ssh/ssh_config
 echo -e "LogLevel QUIET" >> /etc/ssh/ssh_config
-cat /etc/now-pubkey.txt >> /root/.ssh/authorized_keys
 sed -i '/ClientAliveInterval/,+0d' /etc/ssh/sshd_config
 sed -i '/ClientAliveCountMax/,+0d' /etc/ssh/sshd_config
 echo -e "ClientAliveInterval 60\nClientAliveCountMax 3" >> /etc/ssh/sshd_config

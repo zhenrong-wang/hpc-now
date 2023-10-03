@@ -1305,6 +1305,9 @@ int main(int argc, char* argv[]){
         else if(strcmp(cloud_flag,"CLOUD_F")==0){
             run_flag=azure_cluster_init(cluster_name,workdir,crypto_keyfile);
         }
+        else if(strcmp(cloud_flag,"CLOUD_G")==0){
+            run_flag=gcp_cluster_init(cluster_name,workdir,crypto_keyfile);
+        }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now." RESET_DISPLAY "\n");
             check_and_cleanup(workdir);
@@ -1420,8 +1423,8 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"nfsup")==0){
-        if(strcmp(cloud_flag,"CLOUD_D")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] This command is only applicable to CLOUD_D, i.e. huaweicloud." RESET_DISPLAY "\n");
+        if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] This command is only applicable to CLOUD_D, CLOUD_F, and CLOUD_G." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FLAG_NOT_APPLICABLE",8);
             check_and_cleanup(workdir);
             return 8;
