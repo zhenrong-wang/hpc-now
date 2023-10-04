@@ -259,6 +259,9 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     sprintf(source_file,"%s%sbucket_info.txt.tmp",current_vaultdir,PATH_SLASH);
     sprintf(target_file,"%s%sbucket_info.txt",tmp_vaultdir,PATH_SLASH);
     decrypt_single_file_general(NOW_CRYPTO_EXEC,source_file,target_file,md5sum_current);
+    sprintf(source_file,"%s%sbucket_key.txt.tmp",current_vaultdir,PATH_SLASH);
+    sprintf(target_file,"%s%sbucket_key.txt",tmp_vaultdir,PATH_SLASH);
+    decrypt_single_file_general(NOW_CRYPTO_EXEC,source_file,target_file,md5sum_current);
     
     sprintf(filename_temp,"%s%suser_passwords.txt.tmp",current_vaultdir,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_current);
@@ -336,6 +339,8 @@ next_user:
     sprintf(filename_temp,"%s%suser_passwords.txt",tmp_vaultdir,PATH_SLASH);
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum_trans);
     sprintf(filename_temp,"%s%sbucket_info.txt",tmp_vaultdir,PATH_SLASH);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum_trans);
+    sprintf(filename_temp,"%s%sbucket_key.txt",tmp_vaultdir,PATH_SLASH);
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum_trans);
     sprintf(filename_temp,"%s%sterraform.tfstate",tmp_stackdir,PATH_SLASH);
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum_trans);
@@ -485,6 +490,8 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile){
     system(cmdline);
     sprintf(tmp_workdir,"%s%sexport%s%s",tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer);
     sprintf(filename_temp,"%s%svault%sbucket_info.txt.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%svault%sbucket_key.txt.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%svault%suser_passwords.txt.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);

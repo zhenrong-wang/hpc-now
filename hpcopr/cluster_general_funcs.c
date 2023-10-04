@@ -1482,7 +1482,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     if(get_ucid(workdir,unique_cluster_id)!=0){
         return -1;
     }
-    if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
+    if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
         return -3;
     }
     get_azure_info(workdir,az_subscription_id,az_tenant_id);
@@ -1509,10 +1509,10 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
         else{
             sprintf(filename_temp,"%s%sbucket_key.txt.tmp",vaultdir,PATH_SLASH);
             decrypt_single_file_general(NOW_CRYPTO_EXEC,filename_temp,"/home/hpc-now/gcloud-bucket-key.json",md5sum);
-            printf(GENERAL_BOLD "| Bucket Access JSON-Format Key: /home/hpc-now/gcloud-bucket-key.json" RESET_DISPLAY "\n");
-            printf(WARN_YELLO_BOLD "| CAUTION! The file above contains sensitive private key in plain text!\n");
-            printf("|          We *strongly* recommend you to delete the file if you do not use it!\n");
-            printf("|          You can copy it and use the gcloud cli to manage your storage bucket." RESET_DISPLAY "\n");
+            printf(GENERAL_BOLD "| Bucket JSON-Format Key: /home/hpc-now/gcloud-bucket-key.json" RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "| CAUTION! The file contains sensitive private key in plain text!\n");
+            printf("| We *strongly* recommend you to delete this file after using it!\n");
+            printf("| You can use the gcloud to manage your storage bucket and files." RESET_DISPLAY "\n");
         }
     }
     printf(WARN_YELLO_BOLD "+---------------- CLUSTER USERS AND *PASSWORDS* -----------------+" RESET_DISPLAY "\n");

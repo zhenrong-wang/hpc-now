@@ -374,7 +374,7 @@ int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bu
     if(file_p==NULL){
         return -1;
     }
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         fclose(file_p);
         return -3;
     }
@@ -393,8 +393,11 @@ int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bu
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         fprintf(file_p,"BUCKET: bos://%s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
         fprintf(file_p,"BUCKET: %s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\nAZ_SUBSCRIPTION_ID: %s\nAZ_TENANT_ID: %s\n",bucket_id,region_id,bucket_ak,bucket_sk,az_subscription_id,az_tenant_id);
+    }
+    else{
+        fprintf(file_p,"BUCKET: gs://%s\nREGION: \"%s\"\nBUCKET_LINK: %s\n",bucket_id,region_id,bucket_ak);
     }
     fclose(file_p);
     return 0;
@@ -3703,9 +3706,15 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     find_and_get(filename_temp,"\"name\": \"hpc_storage\",","","",20,"\"self_link\":","","",'\"',4,bucket_selflink);
     find_and_get(filename_temp,"\"name\": \"hpc_storage_key\",","","",20,"\"private_key\":","","",'\"',4,bucket_private_key);
+
     sprintf(filename_temp,"%s%sbucket_key.txt",vaultdir,PATH_SLASH);
     base64decode(bucket_private_key,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.key","root","put","",0);
+
+    sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
+    save_bucket_info(randstr,region_id,bucket_selflink,"","","",filename_temp,cloud_flag);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
+    
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");

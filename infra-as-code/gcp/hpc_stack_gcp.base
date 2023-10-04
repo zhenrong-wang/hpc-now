@@ -149,7 +149,27 @@ variable "a4c8g" {
 
 variable "e2c2g" {
   type = string
-  default = "e2-small"
+  default = "e2-highcpu-2"
+}
+
+variable "e4c4g" {
+  type = string
+  default = "e2-highcpu-4"
+}
+
+variable "e8c8g" {
+  type = string
+  default = "e2-highcpu-8"
+}
+
+variable "e16c16g" {
+  type = string
+  default = "e2-highcpu-16"
+}
+
+variable "e32c32g" {
+  type = string
+  default = "e2-highcpu-32"
 }
 
 resource "google_compute_network" "hpc_stack" {
