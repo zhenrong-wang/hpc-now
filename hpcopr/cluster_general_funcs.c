@@ -886,17 +886,30 @@ int getstate(char* workdir, char* crypto_filename){
         fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
         fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
         find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"current_status\":","","",'\"',4,string_temp);
-        fprintf(file_p_statefile,"master_status: %s\n",string_temp);
+        if(strcmp(string_temp,"TERMINATED")==0){
+            fprintf(file_p_statefile,"master_status: STOPPED\n");
+        }
+        else{
+            fprintf(file_p_statefile,"master_status: RUNNING\n");
+        }
         find_and_get(tfstate,"\"name\": \"database\",","","",80,"\"current_status\":","","",'\"',4,string_temp);
-        fprintf(file_p_statefile,"database_status: %s\n",string_temp);
+        if(strcmp(string_temp,"TERMINATED")==0){
+            fprintf(file_p_statefile,"database_status: STOPPED\n");
+        }
+        else{
+            fprintf(file_p_statefile,"database_status: RUNNING\n");
+        }
         for(i=0;i<node_num_gs;i++){
             sprintf(string_temp2,"\"name\": \"compute%d\",",i+1);
             find_and_get(tfstate,string_temp2,"","",80,"\"network_ip\":","","",'\"',4,string_temp);
             fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
             fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
             find_and_get(tfstate,string_temp2,"","",80,"\"current_status\":","","",'\"',4,string_temp);
-            fprintf(file_p_statefile,"compute%d_status: %s\n",i+1,string_temp);
-            if(strcmp(string_temp,"RUNNING")==0){
+            if(strcmp(string_temp,"TERMINATED")==0){
+                fprintf(file_p_statefile,"compute%d_status: STOPPED\n",i+1);
+            }
+            else{
+                fprintf(file_p_statefile,"compute%d_status: RUNNING\n",i+1);
                 node_num_on_gs++;
             }
         }
@@ -1022,6 +1035,9 @@ void single_file_to_running(char* filename_temp, char* cloud_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         global_replace(filename_temp,"stop","start");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
+        global_replace(filename_temp,"TERMINATED","RUNNING");
     }
 }
 
@@ -1457,14 +1473,16 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     char bucket_ak[128]="";
     char bucket_sk[128]="";
     char region_id[32]="";
+    char cloud_flag[16]="";
 
     get_crypto_key(crypto_keyfile,md5sum);
+    get_cloud_flag(workdir,cloud_flag);
     create_and_get_vaultdir(workdir,vaultdir);
     create_and_get_stackdir(workdir,stackdir);
     if(get_ucid(workdir,unique_cluster_id)!=0){
         return -1;
     }
-    if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
+    if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -3;
     }
     get_azure_info(workdir,az_subscription_id,az_tenant_id);
@@ -1484,8 +1502,18 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
         printf(GENERAL_BOLD "| Azure Tenant ID: " RESET_DISPLAY "%s\n",az_tenant_id);
     }
     if(bucketflag==1){
-        printf(GENERAL_BOLD "| Bucket AccessKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_ak);
-        printf(GENERAL_BOLD "| Bucket SecretKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_sk);
+        if(strcmp(cloud_flag,"CLOUD_G")!=0){
+            printf(GENERAL_BOLD "| Bucket AccessKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_ak);
+            printf(GENERAL_BOLD "| Bucket SecretKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_sk);
+        }
+        else{
+            sprintf(filename_temp,"%s%sbucket_key.txt.tmp",vaultdir,PATH_SLASH);
+            decrypt_single_file_general(NOW_CRYPTO_EXEC,filename_temp,"/home/hpc-now/gcloud-bucket-key.json",md5sum);
+            printf(GENERAL_BOLD "| Bucket Access JSON-Format Key: /home/hpc-now/gcloud-bucket-key.json" RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "| CAUTION! The file above contains sensitive private key in plain text!\n");
+            printf("|          We *strongly* recommend you to delete the file if you do not use it!\n");
+            printf("|          You can copy it and use the gcloud cli to manage your storage bucket." RESET_DISPLAY "\n");
+        }
     }
     printf(WARN_YELLO_BOLD "+---------------- CLUSTER USERS AND *PASSWORDS* -----------------+" RESET_DISPLAY "\n");
     if(rootflag==1){
@@ -1595,6 +1623,9 @@ int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag){
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         global_replace(filename_temp,"\"stop\"","\"start\"");
     }
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
+        global_replace(filename_temp,"\"TERMINATED\"","\"RUNNING\"");
+    }
     else{
         return 1;
     }
@@ -1618,6 +1649,9 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         global_replace(filename_temp,"\"start\"","\"stop\"");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
+        global_replace(filename_temp,"\"RUNNING\"","\"TERMINATED\"");
     }
     else{
         return 1;

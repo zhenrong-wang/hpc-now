@@ -65,13 +65,13 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     char real_user_num_string[128]="";
     char* default_master_inst="a8c16g";
     char* default_master_inst_hwcloud="i8c16g";
-    char* default_master_inst_azure="i1c1g";
-    char* default_master_inst_gcp="e2c2g";
+    char* default_master_inst_azure="i4c8g";
+    char* default_master_inst_gcp="a4c8g";
     char real_master_inst[128]="";
     char* default_compute_inst="a4c8g";
     char* default_compute_inst_hwcloud="i4c8g";
-    char* default_compute_inst_azure="i1c1g";
-    char* default_compute_inst_gcp="e2c2g";
+    char* default_compute_inst_azure="i4c8g";
+    char* default_compute_inst_gcp="a4c8g";
     char real_compute_inst[128]="";
     char* default_os_image="centoss9";
     char* default_os_image_hwcloud="rocky9";
@@ -3705,7 +3705,6 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     find_and_get(filename_temp,"\"name\": \"hpc_storage_key\",","","",20,"\"private_key\":","","",'\"',4,bucket_private_key);
     sprintf(filename_temp,"%s%sbucket_key.txt",vaultdir,PATH_SLASH);
     base64decode(bucket_private_key,filename_temp);
-//    printf("-------1\n");
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.key","root","put","",0);
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);

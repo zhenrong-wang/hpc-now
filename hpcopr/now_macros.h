@@ -193,6 +193,7 @@
 
 /* Usually you don't need to modify the macros in this section.*/
 #define CMDLINE_LENGTH 2048
+#define CMDLINE_LENGTH_EXT 8192
 #define CLUSTER_ID_LENGTH_MAX 24
 #define CLUSTER_ID_LENGTH_MIN 8
 #define USERNAME_LENGTH_MAX 16

@@ -40,6 +40,7 @@ touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
 yum -y install at
 systemctl start atd && systemctl enable atd
+mkdir -p /usr/hpc-now/
 mkdir /hpc_apps
 mkdir /hpc_data
 rm -rf /root/.ssh/id_rsa.pub

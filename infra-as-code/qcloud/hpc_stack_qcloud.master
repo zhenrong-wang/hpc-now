@@ -29,7 +29,8 @@ resource "tencentcloud_instance" "master" {
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 yum -y install at
 systemctl start atd && systemctl enable atd
-sudo mkdir /hpc_apps && sudo mkdir /hpc_data
+mkdir /hpc_apps && mkdir /hpc_data
+mkdir -p /usr/hpc-now/
 hostnamectl set-hostname master
 rm -rf /root/.ssh/id_rsa.pub
 rm -rf /root/.ssh/id_rsa
@@ -40,9 +41,9 @@ cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 echo -e "\nPUBLIC_KEY" >> /root/.ssh/authorized_keys
 systemctl restart sshd
 echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
-sudo yum -y install nfs-utils
-sudo mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_apps.mount_ip}:/ /hpc_apps
-sudo mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_data.mount_ip}:/ /hpc_data
+yum -y install nfs-utils
+mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_apps.mount_ip}:/ /hpc_apps
+mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_data.mount_ip}:/ /hpc_data
 echo -e "${tencentcloud_cfs_file_system.hpc_apps.mount_ip}:/ /hpc_apps nfs vers=4,minorversion=0,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
 echo -e "${tencentcloud_cfs_file_system.hpc_data.mount_ip}:/ /hpc_data nfs vers=4,minorversion=0,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
 master_private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`

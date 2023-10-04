@@ -87,6 +87,7 @@ mkfs -t ext4 /dev/sdc
 mkdir -p /mnt/sdb
 block_id=`blkid /dev/sdc | awk -F"\"" '{print $2}'`
 echo -e "UUID=$block_id /mnt/sdb                ext4    defaults        0 2" >> /etc/fstab
+mkdir -p /usr/hpc-now/
 mount -a
 mkdir -p /mnt/sdb/hpc_apps
 mkdir -p /mnt/sdb/hpc_data

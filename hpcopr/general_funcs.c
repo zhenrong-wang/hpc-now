@@ -1255,7 +1255,7 @@ int base64decode(char* encoded_string, char* export_path){
     if(file_creation_test(export_path)!=0){
         return 1;
     }
-    char cmdline[CMDLINE_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH_EXT]=""; // Stack Overflow will occur if the encoded string exceeds 4096
     int run_flag;
 #ifdef _WIN32
     char filename_temp[FILENAME_LENGTH]="";

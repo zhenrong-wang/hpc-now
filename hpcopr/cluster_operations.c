@@ -1087,7 +1087,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -1214,7 +1214,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param){
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -1363,7 +1363,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     int reinit_flag=0;
     char cmdline[CMDLINE_LENGTH]="";
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -5;
     }
     create_and_get_stackdir(workdir,stackdir);
@@ -1392,6 +1392,10 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
         find_and_get(filename_temp,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,prev_config);
+    }
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
+        find_and_get(filename_temp,"machine_type","","",1,"machine_type","","",'.',2,string_temp);
         get_seq_string(string_temp,'}',1,prev_config);
     }
     else{
@@ -1592,7 +1596,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         return -1;
     }
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -5;
     }
 
@@ -1613,6 +1617,10 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
         find_and_get(filename_temp,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,prev_config);
+    }
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
+        find_and_get(filename_temp,"machine_type","","",1,"machine_type","","",'.',2,string_temp);
         get_seq_string(string_temp,'}',1,prev_config);
     }
     else{
@@ -1754,7 +1762,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -1836,7 +1844,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
     if(strcmp(option,"minimal")==0&&cluster_asleep_or_not(workdir)!=0){
@@ -1940,24 +1948,30 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag){
     char url_qcloud_root[LOCATION_LENGTH_EXTENDED]="";
     char url_hwcloud_root[LOCATION_LENGTH_EXTENDED]="";
     char url_baiducloud_root[LOCATION_LENGTH_EXTENDED]="";
+    char url_azure_root[LOCATION_LENGTH_EXTENDED]="";
+    char url_gcp_root[LOCATION_LENGTH_EXTENDED]="";
     char confdir[DIR_LENGTH+16]="";
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
 
     create_and_get_vaultdir(workdir,vaultdir);
     if(code_loc_flag_var==1){
-        sprintf(url_aws_root,"%s%saws%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-        sprintf(url_qcloud_root,"%s%sqcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
         sprintf(url_alicloud_root,"%s%salicloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        sprintf(url_qcloud_root,"%s%sqcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        sprintf(url_aws_root,"%s%saws%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
         sprintf(url_hwcloud_root,"%s%shwcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
         sprintf(url_baiducloud_root,"%s%sbaidu%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        sprintf(url_azure_root,"%s%sazure%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        sprintf(url_gcp_root,"%s%sgcp%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
     }
     else{
-        sprintf(url_aws_root,"%saws/",url_code_root_var);
-        sprintf(url_qcloud_root,"%sqcloud/",url_code_root_var);
         sprintf(url_alicloud_root,"%salicloud/",url_code_root_var);
+        sprintf(url_qcloud_root,"%sqcloud/",url_code_root_var);
+        sprintf(url_aws_root,"%saws/",url_code_root_var);
         sprintf(url_hwcloud_root,"%shwcloud/",url_code_root_var);
         sprintf(url_baiducloud_root,"%sbaidu/",url_code_root_var);
+        sprintf(url_azure_root,"%sazure/",url_code_root_var);
+        sprintf(url_gcp_root,"%sgcp/",url_code_root_var);
     }
     get_cloud_flag(workdir,cloud_flag);
     sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
@@ -2018,6 +2032,28 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag){
         }
         else{
             sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_baiducloud_root,confdir,PATH_SLASH);
+        }
+        if(system(cmdline)!=0){
+            return 1;
+        }
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        if(code_loc_flag_var==1){
+            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_azure_root,confdir,PATH_SLASH);
+        }
+        if(system(cmdline)!=0){
+            return 1;
+        }
+    }
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
+        if(code_loc_flag_var==1){
+            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_gcp_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2231,7 +2267,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option){
             sleep(1);
         }
     }
-    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+    else if(strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0){
         printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",2*GENERAL_SLEEP_TIME);
         for(i=0;i<2*GENERAL_SLEEP_TIME;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",2*GENERAL_SLEEP_TIME-i);
