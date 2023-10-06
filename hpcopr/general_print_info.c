@@ -51,7 +51,7 @@ void print_help(char* cmd_name){
         printf("|   --cname  CLUSTER_NAME           ~ A-Z | a-z | 0-9 | - , %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
         printf("|   --ak     ACCESS_KEY             ~ Cloud access key id\n");
         printf("|   --sk     SECRET_KEY             ~ cloud access secret id\n");
-        printf("|            GCP_KEY_FILE_PATH      ~ For GCP, specify the path of a JSON-Format key file.");
+        printf("|            GCP_KEY_FILE_PATH      " HIGH_CYAN_BOLD "~ Only for GCP:" RESET_DISPLAY ", specify the path of a JSON-Format key file.\n");
         printf("|   --az-sid AZURE_SUBSCRIPTION_ID  " HIGH_CYAN_BOLD "~ Only for Azure:" RESET_DISPLAY " Subscription ID\n");
         printf("|   --az-tid AZURE_TENANT_ID        " HIGH_CYAN_BOLD "~ Only for Azure:" RESET_DISPLAY " Tenant ID\n");
         printf("|   --echo                          ~ Specify 'echo' to echo the ak/sk.\n");
@@ -153,8 +153,8 @@ void print_help(char* cmd_name){
     if(strcmp(cmd_name,"all")==0){
         printf(GENERAL_BOLD "\n+ III  . Cluster Initialization: " RESET_DISPLAY "\n");
     }
-    if(strcmp(cmd_name,"new-keypair")==0||strcmp(cmd_name,"all")==0){
-        printf("|  " HIGH_GREEN_BOLD "new-keypair" RESET_DISPLAY " :~ *Rotate* a new keypair for an existing cluster. The new keypair\n");
+    if(strcmp(cmd_name,"rotate-key")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "rotate-key" RESET_DISPLAY " :~ *Rotate* a new keypair for an existing cluster. The new keypair\n");
         printf("|              :~  should be valid and comes from the same cloud vendor.\n");
         printf("|   --ak     ACCESS_KEY   ~ Cloud access key id\n");
         printf("|   --sk     SECRET_KEY   ~ cloud access secret id\n");

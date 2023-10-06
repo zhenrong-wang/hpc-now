@@ -103,7 +103,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "showloc,gen,NULL",
     "resetloc,gen,NULL",
     "showmd5,gen,NULL",
-    "new-keypair,opr,CNAME",
+    "rotate-key,opr,CNAME",
     "get-conf,opr,CNAME",
     "edit-conf,opr,CNAME",
     "rm-conf,opr,CNAME",
@@ -978,7 +978,7 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    if(strcmp(argv[1],"new-keypair")==0){
+    if(strcmp(argv[1],"rotate-key")==0){
         if(confirm_to_operate_cluster(cluster_name)!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);

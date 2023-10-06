@@ -579,29 +579,9 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     char az_tenant_id[AKSK_LENGTH]="";
     char cloud_flag_prev[32]="";
     char md5sum[33]="";
-
-#ifdef _WIN32
-    strcpy(filename_temp,"c:\\programdata\\hpc-now\\secret.tmp.txt");
-#elif __linux__
-    strcpy(filename_temp,"/home/hpc-now/.secret.tmp.txt");
-#elif __APPLE__
-    strcpy(filename_temp,"/Users/hpc-now/.secret.tmp.txt");
-#endif
-    FILE* file_p=fopen(filename_temp,"w+");
-    if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a temporary file in your system.\n");
-        printf("|          Please check the available disk space. Exit now." RESET_DISPLAY "\n");
-        return -1;
-    }
-    create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp2,"%s%s.secrets.key",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp2)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Currently there is no secrets keypair. This working directory may be\n");
-        printf("|          corrputed, which is very unusual. Please contact us via:\n");
-        printf("|          info@hpc-now.com for troubleshooting. Exit now." RESET_DISPLAY "\n");
-        fclose(file_p);
-        return -3;
-    }
+    FILE* file_p=NULL;
+    int run_flag;
+    
     printf(GENERAL_BOLD "\n");
     printf("|*                                C A U T I O N !                                  \n");
     printf("|*                                                                                 \n");
@@ -625,8 +605,63 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
-        fclose(file_p);
         return 1;
+    }
+    get_cloud_flag(workdir,cloud_flag_prev);
+    create_and_get_vaultdir(workdir,vaultdir);
+    if(strcmp(cloud_flag_prev,"CLOUD_G")==0){
+        if(strlen(cloud_sk)==0){
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " The JSON-format key file *ABSOLUTE* path: ");
+            fflush(stdin);
+            scanf("%s",secret_key);
+            getchar();
+        }
+        else{
+            strcpy(secret_key,cloud_sk);
+        }
+        file_p=fopen(secret_key,"r");
+        if(file_p==NULL){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the key file %s. Exit now." RESET_DISPLAY "\n",secret_key);
+            return -1;
+        }
+        if(find_multi_keys(secret_key,"\"project_id\":","","","","")<1||find_multi_keys(secret_key,"\"private_key\":","","","","")<1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid. Exit now." RESET_DISPLAY "\n",secret_key);
+            fclose(file_p);
+            return -1;
+        }
+        fclose(file_p);
+        get_crypto_key(crypto_keyfile,md5sum);
+        sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,secret_key,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. The key keeps unchanged." RESET_DISPLAY "\n");
+            return 5;
+        }
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally.\n");
+        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Exit now.\n");
+        return 0;
+    }
+
+#ifdef _WIN32
+    strcpy(filename_temp,"c:\\programdata\\hpc-now\\secret.tmp.txt");
+#elif __linux__
+    strcpy(filename_temp,"/home/hpc-now/.secret.tmp.txt");
+#elif __APPLE__
+    strcpy(filename_temp,"/Users/hpc-now/.secret.tmp.txt");
+#endif
+    file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a temporary file in your system.\n");
+        printf("|          Please check the available disk space. Exit now." RESET_DISPLAY "\n");
+        return -1;
+    }
+    sprintf(filename_temp2,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp2)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Currently there is no secrets keypair. This working directory may be\n");
+        printf("|          corrputed, which is very unusual. Please contact us via:\n");
+        printf("|          info@hpc-now.com for troubleshooting. Exit now." RESET_DISPLAY "\n");
+        fclose(file_p);
+        return -3;
     }
     get_ak_sk(filename_temp2,crypto_keyfile,access_key_prev,secret_key_prev,cloud_flag_prev);
     if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
