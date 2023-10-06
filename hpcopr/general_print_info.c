@@ -51,9 +51,11 @@ void print_help(char* cmd_name){
         printf("|   --cname  CLUSTER_NAME           ~ A-Z | a-z | 0-9 | - , %d<=length<=%d\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
         printf("|   --ak     ACCESS_KEY             ~ Cloud access key id\n");
         printf("|   --sk     SECRET_KEY             ~ cloud access secret id\n");
+        printf("|            GCP_KEY_FILE_PATH      ~ For GCP, specify the path of a JSON-Format key file.");
         printf("|   --az-sid AZURE_SUBSCRIPTION_ID  " HIGH_CYAN_BOLD "~ Only for Azure:" RESET_DISPLAY " Subscription ID\n");
         printf("|   --az-tid AZURE_TENANT_ID        " HIGH_CYAN_BOLD "~ Only for Azure:" RESET_DISPLAY " Tenant ID\n");
         printf("|   --echo                          ~ Specify 'echo' to echo the ak/sk.\n");
+        printf("|   --gcp                           ~ Specify Google Cloud Platform cluster.\n");
     }
     if(strcmp(cmd_name,"ls-clusters")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "ls-clusters" RESET_DISPLAY " :~ List all the current clusters.\n");
@@ -178,6 +180,7 @@ void print_help(char* cmd_name){
         printf("|   --mi MASTER_INST  ~ Master node instance type\n");
         printf("|   --ci COMPUTE_INST ~ Compute node instance type\n");
         printf("|   --ht ON | OFF     ~ Hyperthreading option for AWS\n");
+        printf("|   --vol             ~ Shared Volume in GB (for Huaweicloud, Azure and GCP)\n");
         printf("|   --force           ~ Remove existed conf file\n");
     }
     if(strcmp(cmd_name,"rebuild")==0||strcmp(cmd_name,"all")==0){
