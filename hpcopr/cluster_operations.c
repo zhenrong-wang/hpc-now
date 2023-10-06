@@ -1338,7 +1338,9 @@ int check_reconfigure_list(char* workdir){
         return -1;
     }
     while(fgetline(file_p,single_line)==0){
-        printf("|          %s\n",single_line);
+        if(*(single_line+0)=='+'||*(single_line+0)=='|'){
+            printf("|          %s\n",single_line);
+        }
     }
     return 0;
 }

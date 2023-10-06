@@ -5,12 +5,14 @@
 
 #!/bin/bash
 
-#arg1: # of users to be created
-# Define URL prefixes for the 'wget' command
+# arg1: # of users to be created
+
 logfile='/root/cluster_init.log'
 public_app_registry="/hpc_apps/.public_apps.reg"
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 app_tmp_log_root="/tmp/app_tmp_logs/"
+utils_path='/tmp/utils/'
+scripts_path='/tmp/scripts/'
 
 echo -e "# $time_current Initialization started." >> ${logfile}
 distro_type=`head -n 3 /etc/os-release | grep NAME= | awk -F"\"" '{print $2}' | awk '{print $1}'`
@@ -23,9 +25,9 @@ fi
 echo -e "export GNU_LINUX_DISTRO=${distro_type}" >> /etc/profile
 echo -e "export GNU_LINUX_DISTRO_VERSION=${distro_vers}" >> /etc/profile
 echo -e "export CENTOS_VERSION=${centos_vers}" >> /etc/profile
-
 echo -e "alias sudo='sudo -E'" >> /etc/profile
 source /etc/profile 
+
 # The system global env INITUTILS_REPO_ROOT must be set and written in /etc/profile befor execution
 if [ -z $INITUTILS_REPO_ROOT ]; then
   echo -e "# $time_current [ FATAL: ] The critical environment var INITUTILS_REPO_ROOT is not set. Init abort." >> ${logfile}
@@ -36,6 +38,7 @@ if [ -z $SCRIPTS_URL_ROOT ]; then
   exit 1
 fi
 url_utils=${INITUTILS_REPO_ROOT}
+
 #CLOUD_A: Alicloud
 #CLOUD_B: QCloud/TencentCloud
 #CLOUD_C: Amazon Web Services
@@ -43,21 +46,9 @@ url_utils=${INITUTILS_REPO_ROOT}
 #CLOUD_E: BaiduCloud
 #CLOUD_F: Azure(GLOBAL)
 #CLOUD_G: Google Cloud Platform
-if [ -f /root/CLOUD_A ]; then
-  cloud_flag="CLOUD_A"
-elif [ -f /root/CLOUD_B ]; then
-  cloud_flag="CLOUD_B"
-elif [ -f /root/CLOUD_C ]; then
-  cloud_flag="CLOUD_C"
-elif [ -f /root/CLOUD_D ]; then
-  cloud_flag="CLOUD_D"
-elif [ -f /root/CLOUD_E ]; then
-  cloud_flag="CLOUD_E"
-elif [ -f /root/CLOUD_F ]; then
-  cloud_flag="CLOUD_F"
-elif [ -f /root/CLOUD_G ]; then
-  cloud_flag="CLOUD_G"
-else
+
+cloud_flag=`find /root/ -name "CLOUD_*" | awk -F"/" '{print $NF}'`
+if [ -z $cloud_flag ]; then
   echo -e "# $time_current [ FATAL: ] Cloud flag is missing. Initialization abort." >> ${logfile}
   exit 1
 fi
@@ -67,26 +58,6 @@ if [ ! -z $centos_vers ] && [ $centos_vers = 7 ]; then
   yum -y install ntpdate
   ntpdate ntp.ntsc.ac.cn
 fi
-
-yum -y install wget
-if [ -f /root/hostfile ]; then
-  if [ ! -f /hpc_apps/root_apps/init_master.tar.gz ]; then
-    mkdir -p /hpc_apps/root_apps
-    wget ${url_utils}init_master.tar.gz -O /hpc_apps/root_apps/init_master.tar.gz
-  fi
-  rm -rf /tmp/utils
-  tar zvxf /hpc_apps/root_apps/init_master.tar.gz -C /tmp
-else
-  if [ ! -f /hpc_apps/root_apps/init_compute.tar.gz ]; then
-    mkdir -p /hpc_apps/root_apps
-    wget ${url_utils}init_compute.tar.gz -O /hpc_apps/root_apps/init_compute.tar.gz
-  fi
-  rm -rf /tmp/utils
-  tar zvxf /hpc_apps/root_apps/init_compute.tar.gz -C /tmp
-fi
-
-utils_path='/tmp/utils/'
-scripts_path='/tmp/scripts/'
 
 sed -i 's/#   StrictHostKeyChecking ask/StrictHostKeyChecking no/g' /etc/ssh/ssh_config
 echo -e "LogLevel QUIET" >> /etc/ssh/ssh_config
@@ -124,8 +95,8 @@ fi
 echo -e "# Plan to create $1 users."
 echo -e "# Plan create $1 users." >> ${logfile} 
 
-NUM_PROCESSORS=`cat /proc/cpuinfo| grep "processor"| wc -l`
-SELINUX_STATUS=`getenforce`
+num_processors=`cat /proc/cpuinfo| grep "processor" | wc -l`
+selinux_status=`getenforce`
 echo -e "source /etc/profile" >> /root/.bashrc
 
 if [ -f /root/hostfile ]; then
@@ -144,13 +115,8 @@ if [ -f /root/hostfile ]; then
 fi
 
 mkdir -p /usr/hpc-now/
-/bin/cp -r ${scripts_path}* /usr/hpc-now/
-chmod +x /usr/hpc-now/*.sh
-if [ -f /root/hostfile ]; then
-  mv /usr/hpc-now/hpcmgr.sh /usr/hpc-now/.hpcmgr_main.sh
-fi
-
 touch $public_app_registry # Only root user can modify this file
+
 # Add user slurm 
 id -u slurm
 if [ $? -ne 0 ]; then
@@ -197,11 +163,34 @@ mv /root/user_secrets.txt /root/.cluster_secrets/
 mv /root/master_passwd.txt /root/.cluster_secrets/
 mv /root/compute_passwd.txt /root/.cluster_secrets/
 
+yum -y install wget
+if [ -f /root/hostfile ]; then
+  if [ ! -f /hpc_apps/root_apps/init_master.tar.gz ]; then
+    mkdir -p /hpc_apps/root_apps
+    wget ${url_utils}init_master.tar.gz -O /hpc_apps/root_apps/init_master.tar.gz
+  fi
+  rm -rf /tmp/utils
+  tar zvxf /hpc_apps/root_apps/init_master.tar.gz -C /tmp
+else
+  if [ ! -f /hpc_apps/root_apps/init_compute.tar.gz ]; then
+    mkdir -p /hpc_apps/root_apps
+    wget ${url_utils}init_compute.tar.gz -O /hpc_apps/root_apps/init_compute.tar.gz
+  fi
+  rm -rf /tmp/utils
+  tar zvxf /hpc_apps/root_apps/init_compute.tar.gz -C /tmp
+fi
+
+/bin/cp -r ${scripts_path}* /usr/hpc-now/
+chmod +x /usr/hpc-now/*.sh
+if [ -f /root/hostfile ]; then
+  mv /usr/hpc-now/hpcmgr.sh /usr/hpc-now/.hpcmgr_main.sh
+fi
+
 yum -y install gcc bc openssl openssl-devel unzip curl make perl sshpass gtk2 gtk2-devel
 # stop firewall and SELinux 
 systemctl stop firewalld
 systemctl disable firewalld
-if [ $SELINUX_STATUS != Disabled ]; then
+if [ $selinux_status != 'Disabled' ]; then
   sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
@@ -209,19 +198,16 @@ echo -e "# $time_current SELINUX Disabled." >> ${logfile}
 
 # The update step really takes time, trying to avoid it.
 if [ $cloud_flag = 'CLOUD_B' ]; then
-#  yum -y update
   yum -y install https://mirrors.cloud.tencent.com/epel/epel-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.cloud.tencent.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 elif [ $cloud_flag = 'CLOUD_A' ]; then
-#  yum -y update
   yum -y install https://mirrors.aliyun.com/epel/epel-release-latest-9.noarch.rpm
   sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.aliyun.com|' /etc/yum.repos.d/epel*
   sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
 else
-  yum -y install epel-release # epel release is really slow for China region
+  yum -y install epel-release 
 fi
-# yum -y makecache # make cache needs time. Let's skip it.
 yum -y install python 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "# $time_current Utils installed." >> ${logfile}
@@ -241,7 +227,7 @@ fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`  
 echo -e "# $time_current Munge installed." >> ${logfile}
 
-# Re-Install mariadb Be careful!
+# Re-Install mariadb
 if [ -f /root/hostfile ]; then
   yum remove -y `rpm -aq mariadb`
   rm -rf /etc/my.cnf
@@ -328,7 +314,7 @@ fi
 tar xf slurm-21.08.8-2.tar.bz2
 cd slurm-21.08.8-2
 ./configure --prefix=/opt/slurm --sysconfdir=/opt/slurm/etc
-make -j$NUM_PROCESSORS && make install
+make -j$num_processors && make install
 /bin/cp etc/{slurmctld.service,slurmdbd.service,slurmd.service} /usr/lib/systemd/system
 cat /etc/profile | grep slurm/bin
 if [ $? -ne 0 ]; then
@@ -419,7 +405,7 @@ if ! command -v module >/dev/null 2>&1; then
   cd modules-5.1.0
   mkdir -p /etc/modulefiles
   ./configure --prefix=/opt/environment-modules --modulefilesdir=/hpc_apps/envmod
-  make -j$NUM_PROCESSORS && make install
+  make -j$num_processors && make install
   ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.sh
   ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.csh
 fi
@@ -460,9 +446,9 @@ if [ -f /root/hostfile ]; then
     else
       if [ $cloud_flag != "CLOUD_G" ]; then
         yum -y groupinstall "Server with GUI"
-      # For some reasons, Google Compute Instance fails to restart after installing "Server with GUI". 
-      # Therefore, we have to avoid installing "Server with GUI"
       else
+        # For some reasons, Google Compute Instance fails to restart after installing "Server with GUI". 
+        # Therefore, we have to avoid installing "Server with GUI"
         yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks 
         yum -y install gnome-shell-*
         yum -y install firefox
@@ -491,18 +477,18 @@ if [ -f /root/hostfile ]; then
   unzip -o xrdp-0.9.zip && rpm -ivh nasm-2.16.rpm
   chmod +x /root/xrdp-0.9/bootstrap && chmod +x /root/xrdp-0.9/librfxcodec/src/nasm_lt.sh && chmod +x /root/xrdp-0.9/instfiles/pam.d/mkpamrules
   cd /root/xrdp-0.9/ && ./bootstrap && ./configure
-  make -j$NUM_PROCESSORS && make install
+  make -j$num_processors && make install
   rm -rf /root/xrdp-0.9*
   rm -rf /root/nasm-2.16.rpm
   /bin/cp /etc/xrdp/xrdp.ini /etc/xrdp/xrdp.ini.bkup
   sed -i '/\[Xorg\]/,+7d' /etc/xrdp/xrdp.ini
   sed -i '/\[vnc-any\]/,+7d' /etc/xrdp/xrdp.ini
   sed -i '/\[neutrinordp-any\]/,+8d' /etc/xrdp/xrdp.ini
-# Building xrdp really takes time. Hope the xrdp can fix the usability problem ASAP.
   sed -i 's/; (1 = ExtendedDesktopSize)/ (1 = ExtendedDesktopSize)/g' /etc/xrdp/xrdp.ini
   sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
   systemctl start xrdp
   systemctl enable xrdp
+
   yum -y install rpcbind flex GConf2 cmake cmake3 tcsh
   yum -y install ibus libXScrnSaver
   yum -y install gmp-devel mpfr-devel 
@@ -573,11 +559,11 @@ fi
 yum -y update
 yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix bash-completion
 systemctl mask firewalld
-# Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
+
 if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete
 fi
-# Clean up
+
 echo -e "Cleaning Up ..."
 rm -rf /root/slurm*
 rm -rf /root/munge*
@@ -587,4 +573,4 @@ rm -rf /rpmbuild
 echo -e "Installation Finished."
 echo "*/1 * * * *  /usr/hpc-now/nowmon_mgr.sh " >> /var/spool/cron/root
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
-echo -e "# $time_current Extra packages have been removed." >> ${logfile}
+echo -e "# $time_current Initialization Finished." >> ${logfile}
