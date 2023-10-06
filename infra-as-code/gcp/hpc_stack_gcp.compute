@@ -43,6 +43,10 @@ mkdir -p /mnt/sdb/hpc_data
 rm -rf /hpc_apps && rm -rf /hpc_data
 ln -s /mnt/sdb/hpc_apps /hpc_apps
 ln -s /mnt/sdb/hpc_data /hpc_data
+for i in $( seq 1 15)
+do
+  sleep 1
+done
 yum -y install rpcbind nfs-utils
 mount -t nfs -o vers=4.0 ${google_compute_instance.master.network_interface.0.network_ip}:/mnt/sdb/hpc_apps /mnt/sdb/hpc_apps
 mount -t nfs -o vers=4.0 ${google_compute_instance.master.network_interface.0.network_ip}:/mnt/sdb/hpc_data /mnt/sdb/hpc_data

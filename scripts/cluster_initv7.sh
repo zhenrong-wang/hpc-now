@@ -199,7 +199,8 @@ mv /root/compute_passwd.txt /root/.cluster_secrets/
 
 yum -y install gcc bc openssl openssl-devel unzip curl make perl sshpass gtk2 gtk2-devel
 # stop firewall and SELinux 
-systemctl stop firewalld && systemctl disable firewalld
+systemctl stop firewalld
+systemctl disable firewalld
 if [ $SELINUX_STATUS != Disabled ]; then
   sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 fi
@@ -438,8 +439,10 @@ if [ -f /root/hostfile ]; then
   if [ $distro_type != 'CentOS' ] && [ $distro_type != 'Rocky' ] && [ $distro_type != 'Oracle' ]; then
     echo -e "# $time_current GNU/Linux Distro: ${distro_type}. Installing GUI now." >> ${logfile}
     yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks 
-    yum -y install gnome-shell-extensions 
-    yum -y install firefox ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
+    yum -y install gnome-shell-*
+    yum -y install firefox
+    yum -y install nautilus
+    yum -y install ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
     systemctl enable gdm.service --now
   else
     echo -e "# $time_current CENTOS VERSION $centos_vers. Installing GUI now." >> ${logfile}
@@ -455,9 +458,16 @@ if [ -f /root/hostfile ]; then
       sed -i '/gini/d' /etc/profile
       echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
     else
-      yum grouplist installed -q | grep "Server with GUI" >> /dev/null 2>&1
-      if [ $? -ne 0 ]; then
+      if [ $cloud_flag != "CLOUD_G" ]; then
         yum -y groupinstall "Server with GUI"
+      # For some reasons, Google Compute Instance fails to restart after installing "Server with GUI". 
+      # Therefore, we have to avoid installing "Server with GUI"
+      else
+        yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks 
+        yum -y install gnome-shell-*
+        yum -y install firefox
+        yum -y install nautilus
+        yum -y install ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
       fi
       systemctl enable gdm --now
       systemctl disable firewalld
@@ -560,9 +570,9 @@ if [ -f /root/hostfile ]; then
     /bin/cp -r ${utils_path}slurm/sbatch_sample.sh /hpc_data/
   fi
 fi
-
 yum -y update
-yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix
+yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix bash-completion
+systemctl mask firewalld
 # Tencent Cloud exposes sensitive information in /dev/sr0. The block device must be deleted.
 if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete

@@ -1396,6 +1396,12 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"rebuild")==0){
+        if(cluster_state_flag==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please wake up the cluster first." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
+            check_and_cleanup(workdir);
+            return 43;
+        }
         if(cmd_flag_check(argc,argv,"--mc")==0){
             run_flag=rebuild_nodes(workdir,crypto_keyfile,"mc");
         }

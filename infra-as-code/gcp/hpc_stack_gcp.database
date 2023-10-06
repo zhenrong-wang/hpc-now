@@ -35,6 +35,10 @@ hostnamectl set-hostname database
 echo "${google_compute_instance.natgw.network_interface.0.network_ip}" >> /dev/null
 echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
 echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
+for i in $( seq 1 15)
+do
+  sleep 1
+done
 curl ${var.db_init_scripts} | bash
 EOF
 }

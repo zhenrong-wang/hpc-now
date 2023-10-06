@@ -140,7 +140,7 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     }
     else{
         strcpy(default_region,"us-central1");
-        strcpy(default_zone,"us-central1-c");
+        strcpy(default_zone,"us-central1-a");
     }
 
     if(strlen(real_region)==0){
@@ -3696,15 +3696,15 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     sprintf(cmdline,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);   
     system(cmdline);
     getstate(workdir,crypto_keyfile);
-    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME+30);
-    for(i=0;i<GENERAL_SLEEP_TIME+30;i++){
-        printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME+30-i);
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME*3);
+    for(i=0;i<GENERAL_SLEEP_TIME*3;i++){
+        printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME*3-i);
         fflush(stdout);
         sleep(1);
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"name\": \"hpc_storage\",","","",20,"\"self_link\":","","",'\"',4,bucket_selflink);
+    find_and_get(filename_temp,"\"name\": \"hpc_storage\",","","",40,"\"self_link\":","","",'\"',4,bucket_selflink);
     find_and_get(filename_temp,"\"name\": \"hpc_storage_key\",","","",20,"\"private_key\":","","",'\"',4,bucket_private_key);
 
     sprintf(filename_temp,"%s%sbucket_key.txt",vaultdir,PATH_SLASH);

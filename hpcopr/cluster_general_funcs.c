@@ -1496,10 +1496,13 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     else{
         printf(GENERAL_BOLD "| Cluster IP Address: " RESET_DISPLAY "%s\n",master_address);
     }
-    printf(GENERAL_BOLD "| Bucket Address:" RESET_DISPLAY " %s\n",bucket_address);
     printf(GENERAL_BOLD "| Cloud Region: " RESET_DISPLAY "%s\n",region_id);
     if(strlen(az_tenant_id)>0){
         printf(GENERAL_BOLD "| Azure Tenant ID: " RESET_DISPLAY "%s\n",az_tenant_id);
+    }
+    printf(GENERAL_BOLD "| Bucket Address:" RESET_DISPLAY " %s\n",bucket_address);
+    if(strcmp(cloud_flag,"CLOUD_G")==0){
+        printf(GENERAL_BOLD "| Bucket URL Link:" RESET_DISPLAY " %s\n",bucket_ak); 
     }
     if(bucketflag==1){
         if(strcmp(cloud_flag,"CLOUD_G")!=0){
@@ -1512,7 +1515,8 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
             printf(GENERAL_BOLD "| Bucket JSON-Format Key: /home/hpc-now/gcloud-bucket-key.json" RESET_DISPLAY "\n");
             printf(WARN_YELLO_BOLD "| CAUTION! The file contains sensitive private key in plain text!\n");
             printf("| We *strongly* recommend you to delete this file after using it!\n");
-            printf("| You can use the gcloud to manage your storage bucket and files." RESET_DISPLAY "\n");
+            printf("| Please use the gcloud client and authenticate with the key file\n");
+            printf("| to manage your cloud storage.\n");
         }
     }
     printf(WARN_YELLO_BOLD "+---------------- CLUSTER USERS AND *PASSWORDS* -----------------+" RESET_DISPLAY "\n");
@@ -1695,6 +1699,10 @@ int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, c
             strcpy(bucket_sk,tail);
             i++;
         }
+        else if(strcmp(header,"BUCKET_LINK:")==0){
+            strcpy(bucket_ak,tail);
+            i++;
+        }
         else{
             continue;
         }
@@ -1702,15 +1710,29 @@ int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, c
     fclose(file_p);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    if(i!=4){
-        strcpy(bucket_address,"");
-        strcpy(region_id,"");
-        strcpy(bucket_ak,"");
-        strcpy(bucket_sk,"");
-        return 1;
+    if(contain_or_not(bucket_address,"gs://")==0){
+        if(i!=3){
+            strcpy(bucket_address,"");
+            strcpy(region_id,"");
+            strcpy(bucket_ak,"");
+            strcpy(bucket_sk,"");
+            return 1;
+        }
+        else{
+            return 0;
+        }
     }
     else{
-        return 0;
+        if(i!=4){
+            strcpy(bucket_address,"");
+            strcpy(region_id,"");
+            strcpy(bucket_ak,"");
+            strcpy(bucket_sk,"");
+            return 1;
+        }
+        else{
+            return 0;
+        }
     }
 }
 
