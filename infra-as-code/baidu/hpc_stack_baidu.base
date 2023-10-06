@@ -438,7 +438,7 @@ resource "baiducloud_iam_user" "hpc_user" {
   force_destroy = true
 }
 
-resource "baiducloud_iam_access_key" "example" {
+resource "baiducloud_iam_access_key" "hpc_user_key" {
   username = baiducloud_iam_user.hpc_user.name
   secret_file = "access-key.txt"
 }

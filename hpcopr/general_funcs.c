@@ -50,7 +50,8 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--accept", // accept license terms
     "--echo", //echo_flag
     "--od",
-    "--month"
+    "--month",
+    "--gcp"
 };
 
 char command_keywords[CMD_KWDS_NUM][16]={
@@ -579,8 +580,8 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
     if(file_p==NULL){
         return -1;
     }
-    char single_line[LINE_LENGTH]="";
-    char get_string_buffer[LINE_LENGTH_SHORT]="";
+    char single_line[LINE_LENGTH_EXT]="";
+    char get_string_buffer[LINE_LENGTH]="";
     int flag_primary1=0,flag_primary2=0,flag_primary3=0;
     int flag_primary=1;
     int flag1=0,flag2=0,flag3=0;
@@ -1246,5 +1247,38 @@ int password_hash(char* password, char* md5_hash){
     }
     else{
         return 1;
+    }
+}
+
+// Used the system utilities. Actually we should write a real base64 decode function.
+int base64decode(char* encoded_string, char* export_path){
+    if(file_creation_test(export_path)!=0){
+        return 1;
+    }
+    char cmdline[CMDLINE_LENGTH_EXT]=""; // Stack Overflow will occur if the encoded string exceeds 4096
+    int run_flag;
+#ifdef _WIN32
+    char filename_temp[FILENAME_LENGTH]="";
+    FILE* file_p=NULL;
+    sprintf(filename_temp,"%s%sbase64_convert.tmp",DESTROYED_DIR,PATH_SLASH);
+    file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        return 3;
+    }
+    fprintf(file_p,"%s",encoded_string);
+    fclose(file_p);
+    sprintf(cmdline,"certutil -decode %s %s %s",filename_temp,export_path,SYSTEM_CMD_REDIRECT_NULL);
+    run_flag=system(cmdline);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+#else
+    sprintf(cmdline,"echo \"%s\" | base64 -d > %s 2>/dev/null",encoded_string,export_path);
+    run_flag=system(cmdline);
+#endif
+    if(run_flag!=0){
+        return 5;
+    }
+    else{
+        return 0;
     }
 }

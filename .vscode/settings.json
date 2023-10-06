@@ -24,7 +24,8 @@
         "cmath": "c",
         "types.h": "c",
         "socket.h": "c",
-        "in.h": "c"
+        "in.h": "c",
+        "typeinfo": "c"
     },
     "C_Cpp.dimInactiveRegions": true
 }

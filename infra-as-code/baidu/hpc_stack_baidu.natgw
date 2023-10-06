@@ -37,6 +37,8 @@ resource "baiducloud_instance" "natgw" {
 #!/bin/bash
 echo "test2022!" | passwd root --stdin >> /dev/null 2>&1
 yum -y install iptables-services
+systemctl start firewalld
+systemctl enable firewalld
 private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
 cat /etc/sysctl.conf | grep net.ipv4.ip_forward
 if [ $? -ne 0 ]; then

@@ -53,6 +53,7 @@ char bd_tf_plugin_version_var[16]="";
 char azrm_tf_plugin_version_var[16]="";
 char azad_tf_plugin_version_var[16]="";
 char az_environment[16]="";
+char gcp_tf_plugin_version_var[16]="";
 
 char md5_tf_exec_var[64]="";
 char md5_tf_zip_var[64]="";
@@ -71,6 +72,8 @@ char md5_azrm_tf_var[64]="";
 char md5_azrm_tf_zip_var[64]="";
 char md5_azad_tf_var[64]="";
 char md5_azad_tf_zip_var[64]="";
+char md5_gcp_tf_var[64]="";
+char md5_gcp_tf_zip_var[64]="";
 
 /*
  * GEN: GENERAL COMMANDS
@@ -100,7 +103,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "showloc,gen,NULL",
     "resetloc,gen,NULL",
     "showmd5,gen,NULL",
-    "new-keypair,opr,CNAME",
+    "rotate-key,opr,CNAME",
     "get-conf,opr,CNAME",
     "edit-conf,opr,CNAME",
     "rm-conf,opr,CNAME",
@@ -245,8 +248,8 @@ int main(int argc, char* argv[]){
     char workdir[DIR_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX]="";
     char new_cluster_name[128]="";
-    char cloud_ak[128]="";
-    char cloud_sk[128]="";
+    char cloud_ak[AKSK_LENGTH]="";
+    char cloud_sk[AKSK_LENGTH]="";
     char stream_name[128]="";
     char log_type[128]="";
     char user_name[128]="";
@@ -554,11 +557,16 @@ int main(int argc, char* argv[]){
         cmd_keyword_check(argc,argv,"--sk",cloud_sk);
         cmd_keyword_check(argc,argv,"--az-sid",string_temp);
         cmd_keyword_check(argc,argv,"--az-tid",string_temp2);
-        if(cmd_flag_check(argc,argv,"--echo")==0){
-            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"echo");
+        if(cmd_flag_check(argc,argv,"--gcp")==0){
+            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,"",cloud_sk,"","","","gcp");
         }
         else{
-            run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"");
+            if(cmd_flag_check(argc,argv,"--echo")==0){
+                run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"echo","");
+            }
+            else{
+                run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,"","");
+            }
         }
         if(run_flag==-1){
             write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
@@ -571,7 +579,7 @@ int main(int argc, char* argv[]){
             return 21;
         }
         else if(run_flag==3){
-            write_operation_log("NULL",operation_log,argc,argv,"USER_DENIED",3);
+            write_operation_log("NULL",operation_log,argc,argv,"INVALID_GCP_KEY_FILE",3);
             check_and_cleanup(workdir);
             return 3;
         }
@@ -970,7 +978,7 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    if(strcmp(argv[1],"new-keypair")==0){
+    if(strcmp(argv[1],"rotate-key")==0){
         if(confirm_to_operate_cluster(cluster_name)!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);
@@ -1297,6 +1305,9 @@ int main(int argc, char* argv[]){
         else if(strcmp(cloud_flag,"CLOUD_F")==0){
             run_flag=azure_cluster_init(cluster_name,workdir,crypto_keyfile);
         }
+        else if(strcmp(cloud_flag,"CLOUD_G")==0){
+            run_flag=gcp_cluster_init(cluster_name,workdir,crypto_keyfile);
+        }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now." RESET_DISPLAY "\n");
             check_and_cleanup(workdir);
@@ -1385,6 +1396,12 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"rebuild")==0){
+        if(cluster_state_flag==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please wake up the cluster first." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
+            check_and_cleanup(workdir);
+            return 43;
+        }
         if(cmd_flag_check(argc,argv,"--mc")==0){
             run_flag=rebuild_nodes(workdir,crypto_keyfile,"mc");
         }
@@ -1412,8 +1429,8 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"nfsup")==0){
-        if(strcmp(cloud_flag,"CLOUD_D")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] This command is only applicable to CLOUD_D, i.e. huaweicloud." RESET_DISPLAY "\n");
+        if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] This command is only applicable to CLOUD_D, CLOUD_F, and CLOUD_G." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FLAG_NOT_APPLICABLE",8);
             check_and_cleanup(workdir);
             return 8;

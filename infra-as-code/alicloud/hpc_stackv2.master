@@ -25,18 +25,21 @@ resource "alicloud_instance" "master" {
   user_data = <<EOF
 #!/bin/bash
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+hostnamectl set-hostname master
 rm -rf /root/.ssh/id_rsa.pub
 rm -rf /root/.ssh/id_rsa
 rm -rf /root/.ssh/authorized_keys
 rm -rf /root/.ssh/known_hosts
 ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa -q
 cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
-echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
+echo -e "\nPUBLIC_KEY" >> /root/.ssh/authorized_keys
 systemctl restart sshd
+echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
+yum -y install at
 systemctl start atd && systemctl enable atd
+mkdir -p /usr/hpc-now/
 mkdir /hpc_apps && mkdir /hpc_data
 yum -y install nfs-utils
-hostnamectl set-hostname master
 mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${alicloud_nas_mount_target.hpc_apps_mount.mount_target_domain}:/ /hpc_apps
 mount -t nfs -o vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${alicloud_nas_mount_target.hpc_data_mount.mount_target_domain}:/ /hpc_data
 echo -e "${alicloud_nas_mount_target.hpc_apps_mount.mount_target_domain}:/ /hpc_apps nfs vers=4,minorversion=0,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab

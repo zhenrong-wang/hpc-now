@@ -1,0 +1,311 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+
+provider "google" {
+  credentials = "BLANK_CREDENTIAL_PATH"
+  project = "BLANK_PROJECT"
+  region  = "DEFAULT_REGION_ID"
+  zone    = "DEFAULT_ZONE_ID"
+  user_project_override = true
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "NODE_NUM" {
+  type = number
+  default = DEFAULT_NODE_NUM
+}
+
+variable "HPC_USER_NUM" {
+  type = number
+  default = DEFAULT_USER_NUM
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+
+variable "cluster_init_scripts" {
+  type = string
+  default = "BLANK_URL_SHELL_SCRIPTScluster_initv7.sh"
+}
+
+variable "db_init_scripts" {
+  type = string
+  default = "BLANK_URL_SHELL_SCRIPTScluster_db_init.sh"
+}
+
+variable "master_init_parameters" {
+  type = string
+  default = "DEFAULT_MASTERINI"
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "compute_init_parameters" {
+  type = string
+  default = "skip skip"
+}  
+
+variable "master_passwd" {
+  type = string
+  default = "DEFAULT_MASTER_PASSWD"
+}
+
+variable "compute_passwd" {
+  type = string
+  default = "DEFAULT_COMPUTE_PASSWD"
+}
+
+variable "database_root_passwd" {
+  type = string
+  default = "DEFAULT_DB_ROOT_PASSWD"
+}
+
+variable "database_acct_passwd" {
+  type = string
+  default = "DEFAULT_DB_ACCT_PASSWD"
+}
+
+data "google_compute_image" "centoss9" {
+  family  = "centos-stream-9"
+  project = "centos-cloud"
+}
+
+data "google_compute_image" "centos7" {
+  family  = "centos-7"
+  project = "centos-cloud"
+}
+
+variable "i176c352g" {
+  type = string
+  default = "c3-highcpu-176"
+}
+
+variable "i88c176g" {
+  type = string
+  default = "c3-highcpu-88"
+}
+
+variable "i44c88g" {
+  type = string
+  default = "c3-highcpu-44"
+}
+
+variable "i22c44g" {
+  type = string
+  default = "c3-highcpu-22"
+}
+
+variable "i8c16g" {
+  type = string
+  default = "c3-highcpu-8"
+}
+
+variable "i4c8g" {
+  type = string
+  default = "c3-highcpu-4"
+}
+
+variable "a360c720g" {
+  type = string
+  default = "c3d-highcpu-360"
+}
+
+variable "a180c360g" {
+  type = string
+  default = "c3d-highcpu-180"
+}
+
+variable "a90c180g" {
+  type = string
+  default = "c3d-highcpu-90"
+}
+
+variable "a60c120g" {
+  type = string
+  default = "c3d-highcpu-60"
+}
+
+variable "a30c60g" {
+  type = string
+  default = "c3d-highcpu-30"
+}
+
+variable "a16c32g" {
+  type = string
+  default = "c3d-highcpu-16"
+}
+
+variable "a8c16g" {
+  type = string
+  default = "c3d-highcpu-8"
+}
+
+variable "a4c8g" {
+  type = string
+  default = "c3d-highcpu-4"
+}
+
+variable "e2c2g" {
+  type = string
+  default = "e2-highcpu-2"
+}
+
+variable "e4c4g" {
+  type = string
+  default = "e2-highcpu-4"
+}
+
+variable "e8c8g" {
+  type = string
+  default = "e2-highcpu-8"
+}
+
+variable "e16c16g" {
+  type = string
+  default = "e2-highcpu-16"
+}
+
+variable "e32c32g" {
+  type = string
+  default = "e2-highcpu-32"
+}
+
+resource "google_compute_network" "hpc_stack" {
+  name = "vpc-RANDOM_STRING"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "hpc_stack_subnet" {
+  name = "subnet-RANDOM_STRING"
+  ip_cidr_range = "10.0.0.0/18"
+  network = google_compute_network.hpc_stack.id
+}
+
+resource "google_compute_subnetwork" "hpc_stack_pub_subnet" {
+  name = "pubnet-RANDOM_STRING"
+  ip_cidr_range = "10.0.255.240/28"
+  network = google_compute_network.hpc_stack.id
+}
+
+resource "google_compute_firewall" "allow_public_ingress" {
+  name = "public-in-RANDOM_STRING"
+  network = google_compute_network.hpc_stack.name
+  direction = "INGRESS"
+  allow {
+    protocol = "all"
+  }
+  source_ranges = ["0.0.0.0/0"]
+  target_tags = ["natgw"]
+}
+
+resource "google_compute_firewall" "allow_egress" {
+  name = "out-RANDOM_STRING"
+  network = google_compute_network.hpc_stack.name
+  direction = "EGRESS"
+  allow {
+    protocol = "all"
+  }
+}
+
+resource "google_compute_firewall" "allow_ping" {
+  name = "ping-RANDOM_STRING"
+  network = google_compute_network.hpc_stack.name
+  direction = "INGRESS"
+  allow {
+    protocol = "icmp"
+  }
+  source_ranges = ["0.0.0.0/0"]
+}
+
+resource "google_compute_firewall" "allow_intra_ingress" {
+  name = "intra-in-RANDOM_STRING"
+  network = google_compute_network.hpc_stack.name
+  direction = "INGRESS"
+  allow {
+    protocol = "all"
+  }
+  source_ranges = ["10.0.0.0/16"]
+  target_tags = ["master","database","compute"]
+}
+
+resource "google_compute_firewall" "allow_public_ssh_rdp" {
+  name = "ssh-rdp-RANDOM_STRING"
+  network = google_compute_network.hpc_stack.name
+  direction = "INGRESS"
+  allow {
+    protocol = "tcp"
+    ports = ["22","3389"]
+  }
+  source_ranges = ["0.0.0.0/0"]
+  target_tags = ["master"]
+}
+
+resource "google_compute_firewall" "allow_intra_slurm" {
+  name = "slurm-RANDOM_STRING"
+  network = google_compute_network.hpc_stack.name
+  direction = "INGRESS"
+  allow {
+    protocol = "tcp"
+    ports = ["6817-6819"]
+  }
+  source_ranges = ["10.0.0.0/16"]
+  destination_ranges = ["10.0.0.0/16"]
+  target_tags = ["master","compute"]
+}
+
+resource "google_compute_firewall" "allow_intra_mysql" {
+  name = "mysql-RANDOM_STRING"
+  network = google_compute_network.hpc_stack.name
+  direction = "INGRESS"
+  allow {
+    protocol = "tcp"
+    ports = ["3306"]
+  }
+  source_ranges = ["10.0.0.0/16"]
+  target_tags = ["database"]
+}
+
+variable "shared_storage" {
+  type = number
+  default = DEFAULT_STORAGE_VOLUME #-#-#
+}
+
+resource "google_storage_bucket" "hpc_storage" {
+  name = "RANDOM_STRING"
+  location = "DEFAULT_REGION_ID"
+  force_destroy = true
+  labels = {
+    resource_label = "RESOURCE_LABEL"
+  }
+}
+
+resource "google_service_account" "hpc_storage_account" {
+  account_id = "RANDOM_STRING"
+  display_name = "hpc-now-RANDOM_STRING"
+}
+
+resource "google_project_iam_binding" "hpc_storage_binding" {
+  project = "BLANK_PROJECT"
+  role = "roles/storage.admin"
+  members = ["serviceAccount:${google_service_account.hpc_storage_account.email}"]
+  condition {
+    title = "only-bucket-RANDOM_STRING"
+    description = "only-bucket-RANDOM_STRING"
+    expression  = "resource.name.startsWith(\"projects/_/buckets/RANDOM_STRING\")"
+  }
+}
+
+resource "google_service_account_key" "hpc_storage_key" {
+  service_account_id = google_service_account.hpc_storage_account.name
+}
+
+resource "google_compute_disk" "shared_volume" {
+  name = "shared-RANDOM_STRING"
+  type = "pd-ssd"
+  size = "${var.shared_storage}"
+  labels = {
+    cluster_ucid = "RANDOM_STRING"
+  }
+}
