@@ -1216,7 +1216,7 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __linux__
                 sprintf(cmdline,"curl %stf-linux/terraform-provider-google_%s_linux_amd64.zip -o '%s'",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
 #elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-google_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,gc p_plugin_version,filename_temp_zip);
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-google_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
 #endif
             }
             flag=system(cmdline);
