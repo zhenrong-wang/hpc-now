@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0154"
+#define CORE_VERSION_CODE "0.2.0.0155"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -193,6 +193,7 @@
 
 /* Usually you don't need to modify the macros in this section.*/
 #define CMDLINE_LENGTH 2048
+#define CMDLINE_LENGTH_EXT 8192
 #define CLUSTER_ID_LENGTH_MAX 24
 #define CLUSTER_ID_LENGTH_MIN 8
 #define USERNAME_LENGTH_MAX 16
@@ -206,16 +207,17 @@
 #define FILENAME_LENGTH_EXT 576
 #define LOCATION_LENGTH 384
 #define LOCATION_LENGTH_EXTENDED 512
+#define LINE_LENGTH_EXT 8192
 #define LINE_LENGTH 5120
 #define LINE_LENGTH_MID 2048
 #define LINE_LENGTH_SHORT 256
-#define AKSK_LENGTH 128
+#define AKSK_LENGTH 256
 #define CONF_STRING_LENTH 64
 #define COMMAND_NUM 48
 #define DATAMAN_COMMAND_NUM 17
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 11
-#define CMD_FLAG_NUM 25
+#define CMD_FLAG_NUM 26
 #define CMD_KWDS_NUM 42
 
 /* Usually you don't need to modify the macros in this section.*/

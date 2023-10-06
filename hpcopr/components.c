@@ -30,6 +30,7 @@ extern char hw_tf_plugin_version_var[16];
 extern char bd_tf_plugin_version_var[16];
 extern char azrm_tf_plugin_version_var[16];
 extern char azad_tf_plugin_version_var[16];
+extern char gcp_tf_plugin_version_var[16];
 
 extern char md5_tf_exec_var[64];
 extern char md5_tf_zip_var[64];
@@ -48,6 +49,8 @@ extern char md5_azrm_tf_var[64];
 extern char md5_azrm_tf_zip_var[64];
 extern char md5_azad_tf_var[64];
 extern char md5_azad_tf_zip_var[64];
+extern char md5_gcp_tf_var[64];
+extern char md5_gcp_tf_zip_var[64];
 
 int valid_md5_or_not(char* md5_input){
     if(strlen(md5_input)!=32){
@@ -128,7 +131,8 @@ int get_vers_md5_vars(void){
     get_seq_string(vers_md5_line,'\t',6,bd_tf_plugin_version_var);
     get_seq_string(vers_md5_line,'\t',7,azrm_tf_plugin_version_var);
     get_seq_string(vers_md5_line,'\t',8,azad_tf_plugin_version_var);
-    if(valid_ver_or_not(terraform_version_var)!=0||valid_ver_or_not(ali_tf_plugin_version_var)!=0||valid_ver_or_not(qcloud_tf_plugin_version_var)!=0||valid_ver_or_not(aws_tf_plugin_version_var)!=0||valid_ver_or_not(hw_tf_plugin_version_var)!=0||valid_ver_or_not(bd_tf_plugin_version_var)!=0||valid_ver_or_not(azrm_tf_plugin_version_var)!=0||valid_ver_or_not(azad_tf_plugin_version_var)!=0){
+    get_seq_string(vers_md5_line,'\t',9,gcp_tf_plugin_version_var);
+    if(valid_ver_or_not(terraform_version_var)!=0||valid_ver_or_not(ali_tf_plugin_version_var)!=0||valid_ver_or_not(qcloud_tf_plugin_version_var)!=0||valid_ver_or_not(aws_tf_plugin_version_var)!=0||valid_ver_or_not(hw_tf_plugin_version_var)!=0||valid_ver_or_not(bd_tf_plugin_version_var)!=0||valid_ver_or_not(azrm_tf_plugin_version_var)!=0||valid_ver_or_not(azad_tf_plugin_version_var)!=0||valid_ver_or_not(gcp_tf_plugin_version_var)!=0){
         return 1;
     }
     while(!feof(file_p)){
@@ -236,6 +240,18 @@ int get_vers_md5_vars(void){
                 return 1;
             }
             strcpy(md5_azad_tf_zip_var,tail);
+        }
+        else if(strcmp(header,"GCP_TF:")==0){
+            if(valid_md5_or_not(tail)!=0){
+                return 1;
+            }
+            strcpy(md5_gcp_tf_var,tail);
+        }
+        else if(strcmp(header,"GCP_TF_ZIP:")==0){
+            if(valid_md5_or_not(tail)!=0){
+                return 1;
+            }
+            strcpy(md5_gcp_tf_zip_var,tail);
         }
         else{
             continue;

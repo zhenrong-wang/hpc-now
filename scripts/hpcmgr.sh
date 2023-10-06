@@ -542,6 +542,7 @@ elif [ $1 = 'applist' ]; then
     echo -e "1. Applications:"
     echo -e "\tof7       - OpenFOAM-v7"
     echo -e "\tof9       - OpenFOAM-v9"
+    echo -e "\tof1912    - OpenFOAM-v1912"
     echo -e "\tof2112    - OpenFOAM-v2112"
     echo -e "\tlammps    - LAMMPS dev latest"
     echo -e "\tgromacs   - GROMACS"

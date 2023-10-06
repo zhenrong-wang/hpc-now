@@ -5,70 +5,43 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
-resource "azurerm_network_interface" "master_nic" {
-  name = "master_nic_RANDOM_STRING"
-  location = azurerm_resource_group.hpc_resources.location
-  resource_group_name = azurerm_resource_group.hpc_resources.name
-
-  ip_configuration {
-    name = "master_ip_RANDOM_STRING"
-    subnet_id = azurerm_subnet.hpc_stack_pub_subnet.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id = azurerm_public_ip.master_public_ip.id
-  }
+resource "google_compute_attached_disk" "master_disk_attach" {
+  disk = google_compute_disk.shared_volume.id
+  instance = google_compute_instance.master.id
 }
 
-resource "azurerm_public_ip" "master_public_ip" {
-  name = "master_public_ip_RANDOM_STRING"
-  resource_group_name = azurerm_resource_group.hpc_resources.name
-  location = azurerm_resource_group.hpc_resources.location
-  allocation_method = "Dynamic"
-}
-
-resource "azurerm_network_interface_security_group_association" "master_sg_attach" {
-  network_interface_id = azurerm_network_interface.master_nic.id
-  network_security_group_id = azurerm_network_security_group.group.id
-}
-
-resource "azurerm_virtual_machine_data_disk_attachment" "master_disk_attach" {
-  managed_disk_id = azurerm_managed_disk.shared_volume.id
-  virtual_machine_id = azurerm_linux_virtual_machine.master.id
-  lun = "10"
-  caching = "ReadWrite"
-}
-
-resource "azurerm_linux_virtual_machine" "master" {
-  name = "master_RANDOM_STRING"
-  computer_name = "master"
-  resource_group_name = azurerm_resource_group.hpc_resources.name
-  location = azurerm_resource_group.hpc_resources.location
-  size = "${var.MASTER_INST}"
-  admin_username = "adminuser"
-  admin_password = "Null2023~"
-  disable_password_authentication = false
-
-  network_interface_ids = [
-    azurerm_network_interface.master_nic.id,
-  ]
-
-  os_disk {
-    caching = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-    disk_size_gb = 30
+resource "google_compute_instance" "master" {
+  name = "master-RANDOM_STRING"
+  machine_type = "${var.MASTER_INST}"
+  allow_stopping_for_update = true
+  desired_status = "RUNNING"
+  tags = ["master"]
+  labels = {
+    resource_label = "RESOURCE_LABEL"
   }
 
-  source_image_reference {
-    publisher = "oracle"
-    offer = "oracle-linux"
-    sku = "ol92-lvm"
-    version = "latest"
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.OS_IMAGE.self_link
+      size = 30
+    }
   }
 
-  custom_data = base64encode(<<EOF
+  network_interface {
+    subnetwork = google_compute_subnetwork.hpc_stack_pub_subnet.self_link
+    access_config {
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [attached_disk]
+  }
+
+  metadata_startup_script = <<EOF
 #!/bin/bash
-userdel -f adminuser
 systemctl stop firewalld
 systemctl disable firewalld
+hostnamectl set-hostname master
 echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
@@ -83,9 +56,9 @@ cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 echo -e "\nPUBLIC_KEY" >> /root/.ssh/authorized_keys
 systemctl restart sshd
 echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
-mkfs -t ext4 /dev/sdc
+mkfs -t ext4 /dev/sdb
 mkdir -p /mnt/sdb
-block_id=`blkid /dev/sdc | awk -F"\"" '{print $2}'`
+block_id=`blkid /dev/sdb | awk -F"\"" '{print $2}'`
 echo -e "UUID=$block_id /mnt/sdb                ext4    defaults        0 2" >> /etc/fstab
 mkdir -p /usr/hpc-now/
 mount -a
@@ -108,12 +81,11 @@ if [ ! -f /root/hostfile ]; then
   echo -e "$master_private_ip\tmaster" > /root/hostfile
 fi
 echo -e "export HPC_USER_NUM=${var.HPC_USER_NUM}" >> /etc/profile
-echo -e "${azurerm_linux_virtual_machine.database.private_ip_address}\tmariadb" > /root/mariadb_private_ip.txt
+echo -e "${google_compute_instance.database.network_interface.0.network_ip}\tmariadb" > /root/mariadb_private_ip.txt
 echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
 echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
 echo -e "${var.master_passwd}" > /root/master_passwd.txt && echo -e "${var.compute_passwd}" > /root/compute_passwd.txt
 yum -y install sshpass readhat-lsb
 curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.master_init_parameters} > /var/log/cluster_init_master_raw.log 2>&1
 EOF
-)
 }

@@ -30,6 +30,7 @@ extern char hw_tf_plugin_version_var[16];
 extern char bd_tf_plugin_version_var[16];
 extern char azrm_tf_plugin_version_var[16];
 extern char azad_tf_plugin_version_var[16];
+extern char gcp_tf_plugin_version_var[16];
 
 extern char md5_tf_exec_var[64];
 extern char md5_tf_zip_var[64];
@@ -48,6 +49,8 @@ extern char md5_azrm_tf_var[64];
 extern char md5_azrm_tf_zip_var[64];
 extern char md5_azad_tf_var[64];
 extern char md5_azad_tf_zip_var[64];
+extern char md5_gcp_tf_var[64];
+extern char md5_gcp_tf_zip_var[64];
 
 extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
 
@@ -469,6 +472,7 @@ int check_and_install_prerequisitions(int repair_flag){
     char* bd_plugin_version=bd_tf_plugin_version_var;
     char* azrm_plugin_version=azrm_tf_plugin_version_var;
     char* azad_plugin_version=azad_tf_plugin_version_var;
+    char* gcp_plugin_version=gcp_tf_plugin_version_var;
 
     char* usage_logfile=USAGE_LOG_FILE;
     char* operation_logfile=OPERATION_LOG_FILE;
@@ -772,7 +776,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_ali_tf_var);
     if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/6) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/7) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_ali_tf_zip_var);
         if(file_check_flag==1){
@@ -833,7 +837,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_qcloud_tf_var);
     if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (2/6) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (2/7) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_qcloud_tf_zip_var);
         if(file_check_flag==1){
@@ -893,7 +897,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_aws_tf_var);
     if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (3/6) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (3/7) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_aws_tf_zip_var);
         if(file_check_flag==1){
@@ -953,7 +957,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_hw_tf_var);
     if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (4/6) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (4/7) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_hw_tf_zip_var);
         if(file_check_flag==1){
@@ -1013,7 +1017,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_bd_tf_var);
     if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (5/6) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (5/7) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_bd_tf_zip_var);
         if(file_check_flag==1){
@@ -1073,7 +1077,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_azad_tf_var);
     if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (6a/6) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (6a/7) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_azad_tf_zip_var);
         if(file_check_flag==1){
@@ -1114,7 +1118,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
 
-    #ifdef _WIN32
+#ifdef _WIN32
     sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\hashicorp\\azurerm\\%s\\windows_amd64\\",appdata_dir,azrm_plugin_version);
     sprintf(filename_temp,"%s\\terraform-provider-azurerm_v%s_x5.exe",dirname_temp,azrm_plugin_version);
     sprintf(filename_temp_zip,"%s\\terraform-provider-azurerm_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,azrm_plugin_version);
@@ -1133,7 +1137,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_azrm_tf_var);
     if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (6b/6) ...\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (6b/7) ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_azrm_tf_zip_var);
         if(file_check_flag==1){
@@ -1153,6 +1157,66 @@ int check_and_install_prerequisitions(int repair_flag){
                 sprintf(cmdline,"curl %stf-linux/terraform-provider-azurerm_%s_linux_amd64.zip -o '%s'",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
 #elif __APPLE__
                 sprintf(cmdline,"curl %stf-darwin/terraform-provider-azurerm_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
+#endif
+            }
+            flag=system(cmdline);
+            if(flag!=0){
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
+                return 3;
+            }
+        }
+#ifdef _WIN32
+        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+#else
+        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+#endif
+        flag=system(cmdline);
+        if(flag!=0){
+            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
+            return 3;
+        }
+    }
+
+#ifdef _WIN32
+    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\hashicorp\\google\\%s\\windows_amd64\\",appdata_dir,gcp_plugin_version);
+    sprintf(filename_temp,"%s\\terraform-provider-google_v%s_x5.exe",dirname_temp,gcp_plugin_version);
+    sprintf(filename_temp_zip,"%s\\terraform-provider-google_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,gcp_plugin_version);
+#elif __linux__
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/google/%s/linux_amd64/",TF_LOCAL_PLUGINS,gcp_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-google_v%s_x5",dirname_temp,gcp_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-google_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,gcp_plugin_version);
+#elif __APPLE__
+    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/google/%s/darwin_amd64/",TF_LOCAL_PLUGINS,gcp_plugin_version);
+    sprintf(filename_temp,"%s/terraform-provider-google_v%s_x5",dirname_temp,gcp_plugin_version);
+    sprintf(filename_temp_zip,"%s/terraform-provider-google_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,gcp_plugin_version);
+#endif
+    if(folder_exist_or_not(dirname_temp)!=0){
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_gcp_tf_var);
+    if(file_check_flag==1){
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (7/7) ...\n");
+        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_gcp_tf_zip_var);
+        if(file_check_flag==1){
+            if(tf_loc_flag_var==1){
+#ifdef _WIN32
+                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-google_%s_windows_amd64.zip %s",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
+#elif __linux__
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-google_%s_linux_amd64.zip '%s'",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
+#elif __APPLE__
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-google_%s_darwin_amd64.zip '%s'",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
+#endif
+            }
+            else{
+#ifdef _WIN32
+                sprintf(cmdline,"curl %stf-win/terraform-provider-google_%s_windows_amd64.zip -o %s",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
+#elif __linux__
+                sprintf(cmdline,"curl %stf-linux/terraform-provider-google_%s_linux_amd64.zip -o '%s'",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
+#elif __APPLE__
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-google_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,gc p_plugin_version,filename_temp_zip);
 #endif
             }
             flag=system(cmdline);
