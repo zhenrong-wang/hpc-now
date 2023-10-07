@@ -3600,7 +3600,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf("|          NFS Volume:            %d\n" RESET_DISPLAY,nfs_volume);
 //    printf("---%s %s %s %s---\n",stackdir,vaultdir,logdir,confdir);
     generate_sshkey(sshkey_folder,pubkey);
-    gcp_credential_convert(workdir,"decrypt");
+    gcp_credential_convert(workdir,"decrypt",0);
     get_cloud_flag(workdir,cloud_flag);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(keyfile_path,"%s%s.key.json",vaultdir,PATH_SLASH);
@@ -3709,7 +3709,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
 
     sprintf(filename_temp,"%s%sbucket_key.txt",vaultdir,PATH_SLASH);
     base64decode(bucket_private_key,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.key","root","put","",0);
+    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_key.json","root","put","",0);
 
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(randstr,region_id,bucket_selflink,"","","",filename_temp,cloud_flag);
@@ -3775,6 +3775,6 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     print_cluster_init_done();
     delete_decrypted_files(workdir,crypto_keyfile);
-    gcp_credential_convert(workdir,"delete");
+    gcp_credential_convert(workdir,"delete",0);
     return 0;
 }

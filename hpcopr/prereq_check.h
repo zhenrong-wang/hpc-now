@@ -9,6 +9,8 @@
 #define PREREQ_CHECK_H
 
 int check_internet(void);
+int check_internet_google(void);
+int get_google_connectivity(void);
 int file_validity_check(char* filename, int repair_flag, char* target_md5);
 int check_current_user(void);
 int install_bucket_clis(int silent_flag);
