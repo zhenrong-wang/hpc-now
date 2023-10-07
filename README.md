@@ -19,19 +19,13 @@
 
 目前，HPC-NOW 服务支持的云平台列表如下：
 
-阿里云，Alibaba，Cloud，内部代号 CLOUD_A
-
-腾讯云，Tencent Cloud，内部代号 CLOUD_B
-
-亚马逊，Amazon Web Services，内部代号 CLOUD_C
-
-华为云，Huawei Cloud，内部代号 CLOUD_D
-
-百度云，Baidu BCE，内部代号 CLOUD_E
-
-微软云，Azure，内部代号 CLOUD_F
-
-谷歌云，Google Cloud Platform，内部代号 CLOUD_G
+- 阿里云，Alibaba，Cloud，内部代号 CLOUD_A
+- 腾讯云，Tencent Cloud，内部代号 CLOUD_B
+- 亚马逊，Amazon Web Services，内部代号 CLOUD_C
+- 华为云，Huawei Cloud，内部代号 CLOUD_D
+- 百度云，Baidu BCE，内部代号 CLOUD_E
+- 微软云，Azure，内部代号 CLOUD_F
+- 谷歌云，Google Cloud Platform，内部代号 CLOUD_G
 
 希望与您共同携手打造开源、开放的 Cloud HPC 生态！
 
