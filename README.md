@@ -17,6 +17,17 @@
 - 现在即可开始，无需等待
 - No Operation Workload，无需繁重的运行维护工作，即可在云上轻松管理您的超算集群和超算服务
 
+目前，HPC-NOW 服务支持的云平台列表如下：
+____________________________________________
+阿里云	    | Alibaba Cloud	        | CLOUD_A
+腾讯云	    | Tencent Cloud	        | CLOUD_B
+亚马逊	    | Amazon Web Services   | CLOUD_C
+华为云	    | Huawei Cloud	        | CLOUD_D
+百度云      | Baidu BCE	            | CLOUD_E
+微软云	    | Azure	CLOUD_F         | CLOUD_F
+谷歌云      | Google Cloud Platform	| CLOUD_G
+____________________________________________
+
 希望与您共同携手打造开源、开放的 Cloud HPC 生态！
 
 本项目基于 MIT 协议开源，协议条款详见 COPYING 。
