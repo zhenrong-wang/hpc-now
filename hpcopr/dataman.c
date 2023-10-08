@@ -675,7 +675,7 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
         }
     }
     else{
-        remote_exec_general(workdir,sshkey_dir,hpc_user,"gcloud auth activate-service-account /hpc_data/cluster_data/.bucket_key.json >> /dev/null 2>&1","-n",0,1,"","");
+        remote_exec_general(workdir,sshkey_dir,hpc_user,"gcloud auth activate-service-account --key-file=/hpc_data/cluster_data/.bucket_key.json >> /dev/null 2>&1","-n",0,1,"","");
         if(strcmp(cmd_type,"rget")==0){
             sprintf(remote_commands,"gcloud storage cp %s%s %s %s",bucket_address,real_source_path,real_dest_path,real_rflag);
         }
