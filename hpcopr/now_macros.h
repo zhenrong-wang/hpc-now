@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0155"
+#define CORE_VERSION_CODE "0.2.0.0156"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -61,6 +61,7 @@
 #define URL_OBSUTIL "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_windows_amd64.zip"
 #define URL_BCECMD "https://doc.bce.baidu.com/bce-documentation/BOS/windows-bcecmd-0.4.1.zip"
 #define URL_AZCOPY "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_windows_amd64_10.20.1.zip"
+#define URL_GCLOUD "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-449.0.0-windows-x86_64-bundled-python.zip"
 
 #define S3CLI_EXEC "\"c:\\program files\\amazon\\awscliv2\\aws.exe\""
 #define COSCLI_EXEC "c:\\hpc-now\\utils\\coscli.exe"
@@ -68,6 +69,7 @@
 #define OBSUTIL_EXEC "c:\\hpc-now\\utils\\obsutil.exe"
 #define BCECMD_EXEC "c:\\hpc-now\\utils\\bcecmd.exe"
 #define AZCOPY_EXEC "c:\\hpc-now\\utils\\azcopy.exe"
+#define GCLOUD_CLI "c:\\hpc-now\\utils\\google-cloud-sdk\\bin\\gcloud"
 
 #elif __linux__
 #define PATH_SLASH "/"
@@ -120,6 +122,7 @@
 #define URL_OBSUTIL "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz"
 #define URL_BCECMD "https://doc.bce.baidu.com/bce-documentation/BOS/linux-bcecmd-0.4.1.zip"
 #define URL_AZCOPY "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_linux_amd64_10.20.1.tar.gz"
+#define URL_GCLOUD "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-449.0.0-linux-x86_64.tar.gz"
 
 #define S3CLI_EXEC "/home/hpc-now/.bin/utils/aws"
 #define COSCLI_EXEC "/home/hpc-now/.bin/utils/coscli.exe"
@@ -127,6 +130,7 @@
 #define OBSUTIL_EXEC "/home/hpc-now/.bin/utils/obsutil.exe"
 #define BCECMD_EXEC "/home/hpc-now/.bin/utils/bcecmd.exe"
 #define AZCOPY_EXEC "/home/hpc-now/.bin/utils/azcopy.exe"
+#define GCLOUD_CLI "/home/hpc-now/.bin/utils/google-cloud-sdk/bin/gcloud"
 
 #elif __APPLE__
 #define PATH_SLASH "/"
@@ -179,6 +183,7 @@
 #define URL_OBSUTIL "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_darwin_amd64.tar.gz"
 #define URL_BCECMD "https://doc.bce.baidu.com/bce-documentation/BOS/mac-bcecmd-0.4.1.zip"
 #define URL_AZCOPY "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_darwin_amd64_10.20.1.zip"
+#define URL_GCLOUD "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-449.0.0-darwin-x86_64.tar.gz"
 
 #define S3CLI_EXEC "/Users/hpc-now/.bin/utils/aws"
 #define COSCLI_EXEC "/Users/hpc-now/.bin/utils/coscli.exe"
@@ -186,6 +191,7 @@
 #define OBSUTIL_EXEC "/Users/hpc-now/.bin/utils/obsutil.exe"
 #define BCECMD_EXEC "/Users/hpc-now/.bin/utils/bcecmd.exe"
 #define AZCOPY_EXEC "/Users/hpc-now/.bin/utils/azcopy.exe"
+#define GCLOUD_CLI "/Users/hpc-now/.bin/utils/google-cloud-sdk/bin/gcloud"
 
 #endif
 

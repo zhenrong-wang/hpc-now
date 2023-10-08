@@ -70,6 +70,51 @@ int check_internet(void){
     return 0;
 }
 
+/* 
+ * Check whether the current device can connect to google 
+ * This function is critical for GCP
+ */
+int check_internet_google(void){
+    char cmdline[CMDLINE_LENGTH]="";
+    char google_connectivity_flag[FILENAME_LENGTH];
+    sprintf(google_connectivity_flag,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
+    FILE* file_p=fopen(google_connectivity_flag,"w+");
+    if(file_p==NULL){
+        return -1;
+    }
+#ifdef _WIN32
+    sprintf(cmdline,"ping -n 1 api.google.com %s",SYSTEM_CMD_REDIRECT);
+#else
+    sprintf(cmdline,"ping -c 1 api.google.com %s",SYSTEM_CMD_REDIRECT);
+#endif
+    if(system(cmdline)!=0){
+        fprintf(file_p,"api.google.com_connectivity_check: FAILED\n");
+        fclose(file_p);
+        return 1;
+    }
+    fprintf(file_p,"api.google.com_connectivity_check: SUCCEEDED\n");
+    fclose(file_p);
+    return 0;
+}
+
+int get_google_connectivity(void){
+    char google_connectivity_flag[FILENAME_LENGTH]="";
+    char line_buffer[256]="";
+    char connectivity_status[16]="";
+    sprintf(google_connectivity_flag,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
+    FILE* file_p=fopen(google_connectivity_flag,"r");
+    if(file_p==NULL){
+        return -1;
+    }
+    fgetline(file_p,line_buffer);
+    fclose(file_p);
+    get_seq_string(line_buffer,' ',2,connectivity_status);
+    if(strcmp(connectivity_status,"SUCCEEDED")==0){
+        return 0;
+    }
+    return 1;
+}
+
 int file_validity_check(char* filename, int repair_flag, char* target_md5){
     char md5sum[64]="";
     if(file_exist_or_not(filename)!=0){
@@ -78,7 +123,6 @@ int file_validity_check(char* filename, int repair_flag, char* target_md5){
     else{
         if(repair_flag==1){
             get_crypto_key(filename,md5sum);
-//            printf("-------%s\n\n------%s\n\n-----%s\n\n",md5sum,target_md5,filename);
             if(strcmp(md5sum,target_md5)!=0){
                 return 1;
             }
@@ -133,7 +177,7 @@ int install_bucket_clis(int silent_flag){
     char filename_temp_zip[FILENAME_LENGTH]="";
     int inst_flag=0;
     if(silent_flag!=0){
-        printf(RESET_DISPLAY GENERAL_BOLD "|        . Checking & installing the dataman components: 1/6 ..." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "|        . Checking & installing the dataman components: 1/7 ..." RESET_DISPLAY "\n");
     }
     sprintf(filename_temp,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
     sprintf(filename_temp_zip,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
@@ -147,7 +191,7 @@ int install_bucket_clis(int silent_flag){
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 1/6." RESET_DISPLAY "\n");
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 1/7." RESET_DISPLAY "\n");
                 }
                 inst_flag=1;
                 goto coscli;
@@ -177,12 +221,12 @@ int install_bucket_clis(int silent_flag){
         system(cmdline);  
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 1/6 .\n");
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 1/7 .\n");
     }
 
 coscli:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 2/6 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 2/7 ..." RESET_DISPLAY "\n");
     }
     sprintf(filename_temp,"%s%scoscli.exe",NOW_BINARY_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
@@ -190,7 +234,7 @@ coscli:
         sprintf(cmdline,"curl %s -o %s",URL_COSCLI,filename_temp);
         if(system(cmdline)!=0){
             if(silent_flag!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/6." RESET_DISPLAY "\n");
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/7." RESET_DISPLAY "\n");
             }
             inst_flag=2;
             goto awscli;
@@ -201,12 +245,12 @@ coscli:
 #endif
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 2/6 .\n");
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 2/7 .\n");
     }
 
 awscli: 
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 3/6 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 3/7 ..." RESET_DISPLAY "\n");
     }
     sprintf(filename_temp,"%s%saws",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef __linux__
@@ -219,7 +263,7 @@ awscli:
             sprintf(cmdline,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/6." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/7." RESET_DISPLAY "\n");
                 }
                 inst_flag=3;
                 goto obsutil;
@@ -239,7 +283,7 @@ awscli:
             sprintf(cmdline,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/6." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/7." RESET_DISPLAY "\n");
                 }
                 inst_flag=3;
                 goto obsutil;
@@ -295,12 +339,12 @@ awscli:
     }
 #endif
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 3/6 .\n");
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 3/7 .\n");
     }
 
 obsutil:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 4/6 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 4/7 ..." RESET_DISPLAY "\n");
     }
     sprintf(filename_temp,"%s%sobsutil.exe",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef _WIN32
@@ -318,7 +362,7 @@ obsutil:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 4/6." RESET_DISPLAY "\n");
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 4/7." RESET_DISPLAY "\n");
                 }
                 inst_flag=4;
                 goto bcecmd;
@@ -344,11 +388,11 @@ obsutil:
         system(cmdline);
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 4/6 .\n");
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 4/7 .\n");
     }
 bcecmd:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 5/6 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 5/7 ..." RESET_DISPLAY "\n");
     }
     sprintf(filename_temp,"%s%sbcecmd.exe",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef _WIN32
@@ -368,7 +412,7 @@ bcecmd:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 5/6." RESET_DISPLAY "\n");
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 5/7." RESET_DISPLAY "\n");
                 }
                 inst_flag=5;
                 goto azcopy;
@@ -396,11 +440,11 @@ bcecmd:
 #endif
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 5/6 .\n");
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 5/7 .\n");
     }
 azcopy:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 6/6 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 6/7 ..." RESET_DISPLAY "\n");
     }
     sprintf(filename_temp,"%s%sazcopy.exe",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef _WIN32
@@ -420,10 +464,10 @@ azcopy:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 6/6." RESET_DISPLAY "\n");
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 6/7." RESET_DISPLAY "\n");
                 }
                 inst_flag=6;
-                goto end_return;
+                goto gcloud_cli;
             }
         }
 #ifdef _WIN32
@@ -448,7 +492,52 @@ azcopy:
 #endif
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 6/6 .\n");
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 6/7 .\n");
+    }
+gcloud_cli:
+    if(silent_flag!=0){
+        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 7/7 ..." RESET_DISPLAY "\n");
+    }
+    if(get_google_connectivity()!=0){
+        if(silent_flag!=0){
+            printf(RESET_DISPLAY "|        x Failed to connect to api.google.com. Skip installing the gcp component.\n");
+        }
+        goto end_return;
+    }
+    sprintf(filename_temp,"%s%sgoogle-cloud-sdk%sbin%sgcloud",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,PATH_SLASH);
+#ifdef _WIN32
+    sprintf(filename_temp_zip,"%s%sgoogle-cloud-sdk-449.0.0-windows-x86_64-bundled-python.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+#elif __linux__
+    sprintf(filename_temp_zip,"%s%sgoogle-cloud-cli-449.0.0-linux-x86_64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
+#elif __APPLE__
+    sprintf(filename_temp_zip,"%s%sgoogle-cloud-cli-449.0.0-darwin-x86_64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
+#endif
+    if(file_exist_or_not(filename_temp)!=0){
+        printf("|          Dataman component 7 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        if(file_exist_or_not(filename_temp_zip)!=0){
+#ifdef _WIN32
+            sprintf(cmdline,"curl %s -o %s",URL_GCLOUD,filename_temp_zip);
+#else
+            sprintf(cmdline,"curl %s -o '%s'",URL_GCLOUD,filename_temp_zip);
+#endif
+            if(system(cmdline)!=0){
+                if(silent_flag!=0){
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 7/7." RESET_DISPLAY "\n");
+                }
+                inst_flag=7;
+                goto end_return;
+            }
+        }
+#ifdef _WIN32
+        sprintf(cmdline,"tar xf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+        system(cmdline);
+#else
+        sprintf(cmdline,"tar zxf '%s' -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+#endif
+    }
+    if(silent_flag!=0){
+        printf(RESET_DISPLAY "|        v Installed the dataman components: 7/7 .\n");
     }
 end_return:
     return inst_flag;
@@ -516,6 +605,20 @@ int check_and_install_prerequisitions(int repair_flag){
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the environment for HPC-NOW services ...\n");
     }
+
+    sprintf(filename_temp,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)||repair_flag==1){
+        printf("[ -INFO- ] Checking whether Google Cloud Platform (GCP) is accessible ...\n");
+        check_internet_google();
+    }
+    flag=get_google_connectivity();
+    if(flag==1){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to connect to GCP's API. You may not be able to use GCP." RESET_DISPLAY "\n");
+    }
+    else if(flag==-1){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Internal error (GCP connectivity status is absent)." RESET_DISPLAY "\n");
+    }
+
     if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " No registry file found. Creating a blank cluster registry now ...\n");
         file_p=fopen(ALL_CLUSTER_REGISTRY,"w+");

@@ -1281,7 +1281,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
     if(strcmp(cloud_flag,"CLOUD_G")==0){
-        gcp_credential_convert(workdir,"decrypt");
+        gcp_credential_convert(workdir,"decrypt",0);
     }
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_realtime_log_archive,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
@@ -1304,12 +1304,12 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,tf_error_log);
         if(strcmp(cloud_flag,"CLOUD_G")==0){
-            gcp_credential_convert(workdir,"delete");
+            gcp_credential_convert(workdir,"delete",0);
         }
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_G")==0){
-        gcp_credential_convert(workdir,"delete");
+        gcp_credential_convert(workdir,"delete",0);
     }
     return 0;
 }
@@ -2736,7 +2736,7 @@ int decrypt_bcecredentials(char* workdir){
     return decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
 }
 
-int gcp_credential_convert(char* workdir, const char* operation){
+int gcp_credential_convert(char* workdir, const char* operation, int key_flag){
     char md5sum[64]="";
     char vaultdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -2744,8 +2744,14 @@ int gcp_credential_convert(char* workdir, const char* operation){
     char keyfile_decrypted[FILENAME_LENGTH]="";
     get_crypto_key(CRYPTO_KEY_FILE,md5sum);
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(keyfile_encrypted,"%s%s.secrets.key",vaultdir,PATH_SLASH);
-    sprintf(keyfile_decrypted,"%s%s.key.json",vaultdir,PATH_SLASH);
+    if(key_flag==0){
+        sprintf(keyfile_encrypted,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+        sprintf(keyfile_decrypted,"%s%s.key.json",vaultdir,PATH_SLASH);
+    }
+    else{
+        sprintf(keyfile_encrypted,"%s%sbucket_key.txt.tmp",vaultdir,PATH_SLASH);
+        sprintf(keyfile_decrypted,"%s%s.bucket_key.json",vaultdir,PATH_SLASH);
+    }
     if(strcmp(operation,"decrypt")==0){
         if(file_exist_or_not(keyfile_decrypted)!=0){
             return decrypt_single_file_general(NOW_CRYPTO_EXEC,keyfile_encrypted,keyfile_decrypted,md5sum);
