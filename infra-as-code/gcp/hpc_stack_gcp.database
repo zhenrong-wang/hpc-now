@@ -27,7 +27,7 @@ resource "google_compute_instance" "database" {
     subnetwork = google_compute_subnetwork.hpc_stack_subnet.self_link
   }
 
-  metadata_startup_script = <<EOF
+  metadata_startup_script = replace(<<EOF
 #!/bin/bash
 systemctl stop firewalld
 systemctl disable firewalld
@@ -41,4 +41,5 @@ do
 done
 curl ${var.db_init_scripts} | bash
 EOF
+,"\r\n","\n")
 }

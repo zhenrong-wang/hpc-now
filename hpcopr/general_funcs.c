@@ -1057,15 +1057,20 @@ int file_cr_clean(char* filename){
         fclose(file_p);
         return -1;
     }
-    while(!feof(file_p)){
+    do{
         ch=fgetc(file_p);
-        if(ch!='\r'){
-            fputc(ch,file_p_tmp);
+        if(ch==EOF){
+            break;
         }
         else{
-            fputc('\0',file_p_tmp);
+            if(ch!='\r'){
+                fputc(ch,file_p_tmp);
+            }
+            else{
+                fputc('\0',file_p_tmp);
+            }
         }
-    }
+    }while(!feof(file_p));
     fclose(file_p);
     fclose(file_p_tmp);
     sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);

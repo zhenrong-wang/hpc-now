@@ -29,7 +29,7 @@ resource "google_compute_instance" "natgw" {
     }
   }
 
-  metadata_startup_script = <<EOF
+  metadata_startup_script = replace(<<EOF
 #!/bin/bash
 hostnamectl set-hostname natgw
 yum -y install iptables-services
@@ -49,6 +49,7 @@ service iptables save
 systemctl restart iptables
 systemctl enable iptables
 EOF
+,"\r\n","\n")
 }
 
 resource "google_compute_route" "route_to_natgw" {
