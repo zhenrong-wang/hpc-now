@@ -46,5 +46,6 @@ int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string);
 
 int include_string_or_not(int cmd_c, char** cmds, char* string);
 int base64decode(char* encoded_string, char* exported_path);
+int windows_path_to_string(char* input_string, char* new_string);
 
 #endif

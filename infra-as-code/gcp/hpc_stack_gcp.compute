@@ -27,7 +27,7 @@ resource "google_compute_instance" "COMPUTE_NODE_N" {
     subnetwork = google_compute_subnetwork.hpc_stack_subnet.self_link
   }
 
-  metadata_startup_script = <<EOF
+  metadata_startup_script = replace(<<EOF
 #!/bin/bash
 systemctl stop firewalld
 systemctl disable firewalld
@@ -56,4 +56,5 @@ rm -rf /root/.ssh
 echo -e "${google_compute_instance.master.network_interface.0.network_ip}" > /root/master_ip.txt
 nohup curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.compute_init_parameters} > /var/log/cluster_COMPUTE_NODE_N_init_raw.log 2>&1 &
 EOF
+,"\r\n","\n")
 }

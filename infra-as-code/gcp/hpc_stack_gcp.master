@@ -37,7 +37,7 @@ resource "google_compute_instance" "master" {
     ignore_changes = [attached_disk]
   }
 
-  metadata_startup_script = <<EOF
+  metadata_startup_script = replace(<<EOF
 #!/bin/bash
 systemctl stop firewalld
 systemctl disable firewalld
@@ -88,4 +88,5 @@ echo -e "${var.master_passwd}" > /root/master_passwd.txt && echo -e "${var.compu
 yum -y install sshpass readhat-lsb
 curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.master_init_parameters} > /var/log/cluster_init_master_raw.log 2>&1
 EOF
+,"\r\n","\n")
 }
