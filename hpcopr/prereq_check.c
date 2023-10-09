@@ -500,7 +500,7 @@ gcloud_cli:
     }
     if(get_google_connectivity()!=0){
         if(silent_flag!=0){
-            printf(RESET_DISPLAY "|        x Failed to connect to api.google.com. Skip installing the gcp component.\n");
+            printf(WARN_YELLO_BOLD "|        x Failed to connect to api.google.com. Skip installing the gcp component." RESET_DISPLAY "\n");
         }
         goto end_return;
     }
