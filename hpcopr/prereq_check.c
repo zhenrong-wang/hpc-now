@@ -608,17 +608,29 @@ int check_and_install_prerequisitions(int repair_flag){
 
     sprintf(filename_temp,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)||repair_flag==1){
-        printf("[ -INFO- ] Checking whether Google Cloud Platform (GCP) is accessible ...\n");
+        printf("|        . Checking whether Google Cloud Platform (GCP) is accessible ...\n");
         check_internet_google();
     }
     flag=get_google_connectivity();
     if(flag==1){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to connect to GCP's API. You may not be able to use GCP." RESET_DISPLAY "\n");
+        if(repair_flag==1){
+            printf(WARN_YELLO_BOLD "|        x Failed to connect to GCP's API. You may not be able to use GCP." RESET_DISPLAY "\n");
+        }
+        else{
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to connect to GCP's API. You may not be able to use GCP." RESET_DISPLAY "\n");
+        }
     }
     else if(flag==-1){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Internal error (GCP connectivity status is absent)." RESET_DISPLAY "\n");
+        if(repair_flag==1){
+            printf(WARN_YELLO_BOLD "|        x Internal error (GCP connectivity status is absent)." RESET_DISPLAY "\n");
+        }
+        else{
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Internal error (GCP connectivity status is absent)." RESET_DISPLAY "\n");
+        }
     }
-
+    if(repair_flag==1){
+        printf("|        . Checking and repairing the registry now ...\n");
+    }
     if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " No registry file found. Creating a blank cluster registry now ...\n");
         file_p=fopen(ALL_CLUSTER_REGISTRY,"w+");
