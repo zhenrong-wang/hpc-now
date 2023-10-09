@@ -529,7 +529,7 @@ gcloud_cli:
             }
         }
 #ifdef _WIN32
-        sprintf(cmdline,"tar xf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+        sprintf(cmdline,"tar xf %s -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
 #else
         sprintf(cmdline,"tar zxf '%s' -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
