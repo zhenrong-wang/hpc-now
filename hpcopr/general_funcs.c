@@ -1064,6 +1064,7 @@ int file_cr_clean(char* filename){
         }
     }
     fclose(file_p);
+    fprintf(file_p_tmp,"\n");
     fclose(file_p_tmp);
     sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
