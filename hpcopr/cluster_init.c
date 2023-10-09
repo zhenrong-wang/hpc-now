@@ -3652,6 +3652,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
+    file_cr_clean(filename_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
@@ -3661,14 +3662,17 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"OS_IMAGE",os_image);
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
+    file_cr_clean(filename_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
     global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
+    file_cr_clean(filename_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
     global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
+    file_cr_clean(filename_temp);
 
     for(i=0;i<node_num;i++){
         sprintf(cmdline,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
@@ -3678,6 +3682,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
         insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        file_cr_clean(filename_temp);
     }
     generate_tf_files(stackdir);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,0)!=0){
