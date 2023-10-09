@@ -3362,6 +3362,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char unique_cluster_id[96]="";
     char string_temp[128]="";
     char keyfile_path[FILENAME_LENGTH]="";
+    char keyfile_path_ext[FILENAME_LENGTH_EXT]="";
     char gcp_project_id[128]="";
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
@@ -3603,8 +3604,10 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     gcp_credential_convert(workdir,"decrypt",0);
     get_cloud_flag(workdir,cloud_flag);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
+
     sprintf(keyfile_path,"%s%s.key.json",vaultdir,PATH_SLASH);
-    global_replace(filename_temp,"BLANK_CREDENTIAL_PATH",keyfile_path);
+    windows_path_to_string(keyfile_path,keyfile_path_ext);
+    global_replace(filename_temp,"BLANK_CREDENTIAL_PATH",keyfile_path_ext);
     find_and_get(keyfile_path,"\"project_id\":","","",1,"\"project_id\":","","",'\"',4,gcp_project_id);
     global_replace(filename_temp,"BLANK_PROJECT",gcp_project_id);
     global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);

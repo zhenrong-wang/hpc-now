@@ -1051,18 +1051,26 @@ int file_cr_clean(char* filename){
     char filename_temp[FILENAME_LENGTH]="";
     char ch;
     char cmdline[CMDLINE_LENGTH]="";
-    sprintf(filename_temp,"%s.tmp",filename);
+    sprintf(filename_temp,"%s.cr.tmp",filename);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
         return -1;
     }
-    while(!feof(file_p)){
+    do{
         ch=fgetc(file_p);
-        if(ch!='\r'){
-            fputc(ch,file_p_tmp);
+        if(ch==EOF){
+            break;
         }
-    }
+        else{
+            if(ch!='\r'){
+                fputc(ch,file_p_tmp);
+            }
+            else{
+                fputc('\0',file_p_tmp);
+            }
+        }
+    }while(!feof(file_p));
     fclose(file_p);
     fclose(file_p_tmp);
     sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
@@ -1281,4 +1289,46 @@ int base64decode(char* encoded_string, char* export_path){
     else{
         return 0;
     }
+}
+
+int windows_path_to_string(char* input_string, char* new_string){
+#ifndef _WIN32
+    strcpy(new_string,input_string);
+    return 0;
+#else
+    int i,j=0;
+    char string_buffer[FILENAME_LENGTH_EXT]=""; //Caution! Stack Overflow may occur.
+    char ch_curr,ch_prev,ch_next;
+    int length=strlen(input_string);
+    for(i=0;i<length;i++){
+        ch_curr=*(input_string+i);
+        if(i!=0){
+            ch_prev=*(input_string+i-1);
+        }
+        else{
+            ch_prev='\0';
+        }
+        if(i!=length-1){
+            ch_next=*(input_string+i+1);
+        }
+        else{
+            ch_next='\0';
+        }
+        if(j>FILENAME_LENGTH_EXT||j==FILENAME_LENGTH_EXT){
+            strcpy(new_string,"");
+            return -1;
+        }
+        if(ch_curr=='\\'&&ch_prev!='\\'&&ch_next!='\\'){
+            string_buffer[j]='\\';
+            string_buffer[j+1]='\\';
+            j=j+2;
+        }
+        else{
+            string_buffer[j]=ch_curr;
+            j++;
+        }
+    }
+    strcpy(new_string,string_buffer);
+    return 0;
+#endif
 }
