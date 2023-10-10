@@ -7,6 +7,15 @@ In order to make it super easy to start and manage HPC workloads on the cloud, w
 - Start HPC journey on the cloud immediately, in minutes.
 - (almost) No Operation Workload.
 
+Currently, the HPC-NOW platform supports the cloud services as below:
+
+- [Alibaba Cloud](https://www.alibabacloud.com/en), HPC-NOW Internal Code: CLOUD_A
+- [Tencent Cloud](https://www.tencentcloud.com/), HPC-NOW Internal Code: CLOUD_B
+- [Amazon Web Services](https://aws.amazon.com/), HPC-NOW Internal Code: CLOUD_C
+- [Huawei Cloud](https://www.huaweicloud.com/), HPC-NOW Internal Code: CLOUD_D
+- [Baidu BCE](https://cloud.baidu.com/), HPC-NOW Internal Code: CLOUD_E
+- [Microsoft Azure](https://azure.microsoft.com/en-us/), HPC-NOW Internal Code: CLOUD_F
+- [Google Cloud Platform](https://cloud.google.com/), HPC-NOW Internal Code: CLOUD_G
 
 ### 2. Core Components
 
@@ -24,9 +33,11 @@ In this project, we developed components as below:
 
 ### 3. How-To: Build, Run, and Use
 
-Please refer to Docs/UserManual-EN.pdf
+The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Windows, GNU/Linux, or macOS. Note: Currently only x86_64 platform is supported.
+
+For more information, please refer to Docs/UserManual-EN.pdf
 
 ### 4. Bug Reports
 
-Please report issues to GitHub, Gitee, or 
-mail to: zhenrongwang@live.com | wangzhenrong@hpc-now | info@hpc-now.com
+Please submit issues to GitHub, Gitee, or 
+mailto: zhenrongwang@live.com | wangzhenrong@hpc-now | info@hpc-now.com
