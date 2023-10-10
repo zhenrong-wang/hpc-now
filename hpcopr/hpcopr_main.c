@@ -449,7 +449,12 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"envcheck")==0){
-        run_flag=check_and_install_prerequisitions(0);
+        if(cmd_flag_check(argc,argv,"--gcp")==0){
+            run_flag=check_and_install_prerequisitions(2); // Check GCP Connectivity.
+        }
+        else{
+            run_flag=check_and_install_prerequisitions(0);
+        }
         if(run_flag!=0){
             write_operation_log("NULL",operation_log,argc,argv,"ENVCHECK_FAILED",run_flag);
             check_and_cleanup("");
