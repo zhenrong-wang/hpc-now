@@ -10,7 +10,7 @@ In order to make it super easy to start and manage HPC workloads on the cloud, w
 
 ### 2. Core Components
 
-Thanks to the Terraform[Terraform](http://www.terraform.io), a great cloud Infrastructure-as-Code platform, which makes it possible to orchestrate cloud resources in a unified and simple way.
+Thanks to the [Terraform](http://www.terraform.io), a great cloud Infrastructure-as-Code platform, which makes it possible to orchestrate cloud resources in a unified and simple way.
 
 In this project, we developed components as below:
 
