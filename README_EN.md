@@ -26,6 +26,7 @@ In this project, we developed components as below:
 
 Please refer to Docs/UserManual-EN.pdf
 
-### 4. Bug Reports:
+### 4. Bug Reports
 
-Please report issues to GitHub, Gitee, or mail to info@hpc-now.com
+Please report issues to GitHub, Gitee, or 
+mail to: zhenrongwang@live.com | wangzhenrong@hpc-now | info@hpc-now.com
