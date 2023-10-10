@@ -549,6 +549,7 @@ int check_and_install_prerequisitions(int repair_flag){
     char filename_temp_zip[FILENAME_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
     int flag=0;
+    int gcp_flag=0;
     int file_check_flag=0;
     int force_repair_flag;
 
@@ -592,7 +593,12 @@ int check_and_install_prerequisitions(int repair_flag){
         force_repair_flag=1;
     }
     else{
-        force_repair_flag=repair_flag;
+        if(repair_flag==1){
+            force_repair_flag=repair_flag;
+        }
+        else{
+            force_repair_flag=0;
+        }
     }
 
     sprintf(cmdline,"%s %s%sworkdir %s",MKDIR_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
@@ -607,12 +613,12 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 
     sprintf(filename_temp,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)||repair_flag==1){
+    if(file_exist_or_not(filename_temp)||repair_flag==1||repair_flag==2){
         printf("|        . Checking whether Google Cloud Platform (GCP) is accessible ...\n");
         check_internet_google();
     }
-    flag=get_google_connectivity();
-    if(flag==1){
+    gcp_flag=get_google_connectivity();
+    if(gcp_flag==1){
         if(repair_flag==1){
             printf(WARN_YELLO_BOLD "|        x Failed to connect to GCP's API. You may not be able to use GCP." RESET_DISPLAY "\n");
         }
@@ -620,7 +626,7 @@ int check_and_install_prerequisitions(int repair_flag){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to connect to GCP's API. You may not be able to use GCP." RESET_DISPLAY "\n");
         }
     }
-    else if(flag==-1){
+    else if(gcp_flag==-1){
         if(repair_flag==1){
             printf(WARN_YELLO_BOLD "|        x Internal error (GCP connectivity status is absent)." RESET_DISPLAY "\n");
         }
@@ -1411,10 +1417,20 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v Environment variables have been repaired.\n");
         printf("|        v SSH files have been repaired. \n");
-        printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked and repaired." RESET_DISPLAY "\n");
+        if(gcp_flag==0){
+            printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked and repaired." RESET_DISPLAY "\n");
+        }
+        else{
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Running environment checked and repaired with a warning.\n");
+        }
     }
     else{
-        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked." RESET_DISPLAY "\n");
+        if(gcp_flag==0){
+            printf(RESET_DISPLAY HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked." RESET_DISPLAY "\n");
+        }
+        else{
+            printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Running environment checked with a warning.\n");
+        }
     }
     return 0;
 }

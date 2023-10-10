@@ -21,7 +21,7 @@
 
 void print_empty_cluster_info(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " It seems the cluster is empty. You can either:\n");
-    printf("|          a) Run 'hpcopr init' to create a *default* cluster directly.\n");
+    printf("|          a) Run 'hpcopr init' to create a *default* cluster directly .\n");
     printf("|          b) Run 'hpcopr init' with init options. i.e. --rg region_id .\n");
     printf("|          c) Run 'hpcopr edit-conf' -> 'hpcopr init' (not recommended).\n");
 }
@@ -42,6 +42,7 @@ void print_help(char* cmd_name){
     }
     if(strcmp(cmd_name,"envcheck")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "envcheck" RESET_DISPLAY "    :~ Quickly check the running environment.\n");
+        printf("|   --gcp         ~ Check the connectivity to Google Cloud Platform.\n");
     }
     if(strcmp(cmd_name,"all")==0){
         printf(GENERAL_BOLD "\n+ I    . Multi-Cluster Management:" RESET_DISPLAY "\n");

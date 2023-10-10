@@ -23,6 +23,7 @@
 #include "cluster_general_funcs.h"
 #include "general_print_info.h"
 #include "cluster_operations.h"
+#include "prereq_check.h"
 
 extern char url_code_root_var[LOCATION_LENGTH];
 extern int code_loc_flag_var;
@@ -356,6 +357,13 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return -1;
     }
     fclose(file_p);
+    if(strcmp(gcp_flag,"gcp")==0){
+        if(get_google_connectivity()!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to " WARN_YELLO_BOLD "api.google.com" FATAL_RED_BOLD " during last check. Please run\n");
+            printf("|          the command " WARN_YELLO_BOLD "hpcopr envcheck --gcp" FATAL_RED_BOLD " to re-check and retry." RESET_DISPLAY "\n");
+            return 3;
+        }
+    }
     if(strlen(cluster_name)==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the cluster name (A-Z a-z 0-9 -, %d<=length<=%d):\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
