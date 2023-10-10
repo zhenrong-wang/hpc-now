@@ -33,7 +33,9 @@ In this project, we developed components as below:
 
 ### 3. How-To: Build, Run, and Use
 
-Please refer to Docs/UserManual-EN.pdf
+The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Windows, GNU/Linux, or macOS. Note: Currently only x86_64 platform is supported.
+
+For more information, please refer to Docs/UserManual-EN.pdf
 
 ### 4. Bug Reports
 
