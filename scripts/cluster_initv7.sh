@@ -409,7 +409,7 @@ if [ -f /root/hostfile ]; then
       ln -s /usr/lib64/libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6
       systemctl disable firewalld
       systemctl stop firewalld
-      echo -e "#! /bin/bash\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true" > /etc/g_ini.sh
+      echo -e "#! /bin/bash\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.wm.preferences button-layout \":minimize,maximize,close\"\n" > /etc/g_ini.sh
       chmod +x /etc/g_ini.sh
       sed -i '/gini/d' /etc/profile
       echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
@@ -518,7 +518,7 @@ if [ -f /root/hostfile ]; then
   if [ -z $centos_vers ] || [ $centos_vers != 7 ]; then
     sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm/custom.conf
     yum -y install gnome-tweaks gnome-extensions-app.x86_64
-    echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options zoom\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/day.jpg" > /etc/g_ini.sh
+    echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options zoom\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/day.jpg\ngsettings set org.gnome.desktop.wm.preferences button-layout \":minimize,maximize,close\"\n" > /etc/g_ini.sh
     chmod +x /etc/g_ini.sh
     echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
   fi
