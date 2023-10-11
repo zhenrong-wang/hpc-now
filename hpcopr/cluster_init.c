@@ -2743,6 +2743,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
 
     file_p=fopen(filename_temp,"a");
     sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
@@ -2761,7 +2762,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     global_replace(filename_temp,"MASTER_INST",master_inst);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
+//    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
     global_replace(filename_temp,"OS_IMAGE",os_image);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
@@ -2787,7 +2788,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
+//    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"NATGW_INST",natgw_inst);
 
