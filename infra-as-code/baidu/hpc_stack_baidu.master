@@ -6,13 +6,6 @@
  */
  
 #create master and compute nodes
-resource "baiducloud_eip" "master_eip" {
-  name = "master_eip-RESOURCETAG"
-  bandwidth_in_mbps = MASTER_BANDWIDTH
-  payment_timing = "Postpaid"
-  billing_method = "ByTraffic"
-}
-
 resource "baiducloud_eip_association" "master_eip_attach" {
   eip = "${baiducloud_eip.master_eip.eip}"
   instance_type = "BCC"

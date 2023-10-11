@@ -6,13 +6,6 @@
  */
  
 #CREATE_NATGW_NODE
-resource "baiducloud_eip" "natgw_eip" {
-  name = "natgw_eip-RESOURCETAG"
-  bandwidth_in_mbps = MASTER_BANDWIDTH
-  payment_timing = "Postpaid"
-  billing_method = "ByTraffic"
-}
-
 resource "baiducloud_eip_association" "natgw_eip_attach" {
   eip = baiducloud_eip.natgw_eip.eip
   instance_type = "BCC"

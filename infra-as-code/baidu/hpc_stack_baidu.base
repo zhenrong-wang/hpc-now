@@ -471,3 +471,17 @@ resource "baiducloud_iam_user_policy_attachment" "bucket_access_attach" {
   user = "${baiducloud_iam_user.hpc_user.name}"
   policy = "${baiducloud_iam_policy.hpc_bucket_access_policy.name}"
 }
+
+resource "baiducloud_eip" "master_eip" {
+  name = "master_eip-RESOURCETAG"
+  bandwidth_in_mbps = MASTER_BANDWIDTH
+  payment_timing = "Postpaid"
+  billing_method = "ByTraffic"
+}
+
+resource "baiducloud_eip" "natgw_eip" {
+  name = "natgw_eip-RESOURCETAG"
+  bandwidth_in_mbps = MASTER_BANDWIDTH
+  payment_timing = "Postpaid"
+  billing_method = "ByTraffic"
+}
