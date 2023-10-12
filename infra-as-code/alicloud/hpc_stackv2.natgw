@@ -24,6 +24,9 @@ resource "alicloud_instance" "natgw" {
   user_data = <<EOF
 #!/bin/bash
 yum -y install iptables-services
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl mask firewalld
 private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
 cat /etc/sysctl.conf | grep net.ipv4.ip_forward
 if [ $? -ne 0 ]; then

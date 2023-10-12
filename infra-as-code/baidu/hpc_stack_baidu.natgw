@@ -16,7 +16,7 @@ resource "baiducloud_instance" "natgw" {
   name = "natgw-RESOURCETAG"
   hostname = "natgw"
   availability_zone = "DEFAULT_ZONE_ID"
-  image_id = data.baiducloud_images.centoss9.images[0].id
+  image_id = data.baiducloud_images.centos7.images[0].id
   instance_spec = data.baiducloud_specs.NATGW_INST.specs[0].spec
   action = "start"
   subnet_id = baiducloud_subnet.hpc_stack_pub_subnet.id
@@ -28,10 +28,10 @@ resource "baiducloud_instance" "natgw" {
   auto_renew_time_length = 1
   user_data = base64encode(<<EOF
 #!/bin/bash
-echo "test2022!" | passwd root --stdin >> /dev/null 2>&1
 yum -y install iptables-services
-systemctl start firewalld
-systemctl enable firewalld
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl mask firewalld
 private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
 cat /etc/sysctl.conf | grep net.ipv4.ip_forward
 if [ $? -ne 0 ]; then
