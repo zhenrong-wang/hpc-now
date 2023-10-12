@@ -61,8 +61,9 @@ resource "azurerm_linux_virtual_machine" "natgw" {
 #!/bin/bash
 userdel -f adminuser
 yum -y install iptables-services
-systemctl restart firewalld
-systemctl enable firewalld
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl mask firewalld
 private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
 cat /etc/sysctl.conf | grep net.ipv4.ip_forward
 if [ $? -ne 0 ]; then
