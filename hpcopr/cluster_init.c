@@ -2354,7 +2354,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     }
     else{
         sprintf(string_temp,"\"%s\"",os_image);
-        global_replace(filename_temp,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);]
+        global_replace(filename_temp,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
