@@ -242,9 +242,9 @@ int get_tf_prep_conf(char* conf_file, char* reconf_list, char* cluster_id, char*
     FILE* file_p=fopen(conf_file,"r");
     char conf_line_buffer[256]="";
     char header[64]="";
-    char tail[32]="";
-    char tail_ext[32]="";
-    char node_inst_ext[64]="";
+    char tail[128]="";
+    char tail_ext[144]="";
+    char node_inst_ext[144]="";
     int read_conf_lines=0;
     int sum_temp=0;
     int i;
