@@ -2333,7 +2333,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     }
     else{
         sprintf(string_temp,"\"%s\"",os_image);
-        global_replace(filename_temp,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);]
+        global_replace(filename_temp,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);
     }
     
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
