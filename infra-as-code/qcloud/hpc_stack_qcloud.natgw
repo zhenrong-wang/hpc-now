@@ -7,20 +7,20 @@
  
 #CREATE_NATGW_NODE
 resource "tencentcloud_instance" "natgw" {
-  instance_name     = "natgw-RESOURCETAG"
+  instance_name = "natgw-RESOURCETAG"
   availability_zone = "DEFAULT_ZONE_ID"
-  orderly_security_groups   = tencentcloud_security_group.natgw_transparent.*.id
-  image_id          = data.tencentcloud_images.centos7.images.0.image_id
-  instance_type     = data.tencentcloud_instance_types.a2c4g.instance_types.0.instance_type
-  system_disk_type  = "CLOUD_SSD"
-  system_disk_size  = 60
-  hostname          = "natgw"
-  project_id        = 0
-  vpc_id            = tencentcloud_vpc.hpc_stack.id
-  subnet_id         = tencentcloud_subnet.hpc_stack_pub_subnet.id
-  running_flag      = "true"
+  orderly_security_groups = tencentcloud_security_group.natgw_transparent.*.id
+  image_id = data.tencentcloud_images.centos7.images.0.image_id
+  instance_type = data.tencentcloud_instance_types.a2c4g.instance_types.0.instance_type
+  system_disk_type = "CLOUD_SSD"
+  system_disk_size = 60
+  hostname = "natgw"
+  project_id = 0
+  vpc_id = tencentcloud_vpc.hpc_stack.id
+  subnet_id = tencentcloud_subnet.hpc_stack_pub_subnet.id
+  running_flag = "true"
   internet_charge_type = "TRAFFIC_POSTPAID_BY_HOUR"
-  allocate_public_ip         = true
+  allocate_public_ip = true
   internet_max_bandwidth_out = MASTER_BANDWIDTH
   stopped_mode = "STOP_CHARGING"
   user_data_raw = <<EOF
