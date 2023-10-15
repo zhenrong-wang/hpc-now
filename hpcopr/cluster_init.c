@@ -242,9 +242,9 @@ int get_tf_prep_conf(char* conf_file, char* reconf_list, char* cluster_id, char*
     FILE* file_p=fopen(conf_file,"r");
     char conf_line_buffer[256]="";
     char header[64]="";
-    char tail[32]="";
-    char tail_ext[32]="";
-    char node_inst_ext[64]="";
+    char tail[128]="";
+    char tail_ext[144]="";
+    char node_inst_ext[144]="";
     int read_conf_lines=0;
     int sum_temp=0;
     int i;
@@ -497,7 +497,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char compute_passwd[CONF_STRING_LENTH]="";
     char master_inst[CONF_STRING_LENTH]="";
     char compute_inst[CONF_STRING_LENTH]="";
-    char os_image_raw[32]="";
+    char os_image_raw[64]="";
     char htflag[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
@@ -678,19 +678,34 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     if(strcmp(region_id,"cn-northwest-1")==0){
         strcpy(region_flag,"cn_regions");
-        sprintf(os_image,"ami = \"${var.%scn.0}\"",os_image_raw);
+        if(strcmp(os_image_raw,"centos7")==0||strcmp(os_image_raw,"centoss9")==0){
+            sprintf(os_image,"ami = \"${var.%scn.0}\"",os_image_raw);
+        }
+        else{
+            sprintf(os_image,"ami = \"%s\"",os_image_raw);
+        }
         strcpy(db_os_image,"ami = \"${var.centos7cn.0}\"");
         strcpy(nat_os_image,"ami = \"${var.centos7cn.0}\"");
     }
     else if(strcmp(region_id,"cn-north-1")==0){
         strcpy(region_flag,"cn_regions");
-        sprintf(os_image,"ami = \"${var.%scn.1}\"",os_image_raw);
+        if(strcmp(os_image_raw,"centos7")==0||strcmp(os_image_raw,"centoss9")==0){
+            sprintf(os_image,"ami = \"${var.%scn.1}\"",os_image_raw);
+        }
+        else{
+            sprintf(os_image,"ami = \"%s\"",os_image_raw);
+        }
         strcpy(db_os_image,"ami = \"${var.centos7cn.1}\"");
         strcpy(nat_os_image,"ami = \"${var.centos7cn.1}\"");
     }
     else{
         strcpy(region_flag,"global_regions");
-        sprintf(os_image,"ami = data.aws_ami.%s_x86_glb.image_id",os_image_raw);
+        if(strcmp(os_image_raw,"centos7")==0||strcmp(os_image_raw,"centoss9")==0){
+            sprintf(os_image,"ami = data.aws_ami.%s_x86_glb.image_id",os_image_raw);
+        }
+        else{
+            sprintf(os_image,"ami = \"%s\"",os_image_raw);
+        }
         strcpy(db_os_image,"ami = data.aws_ami.centos7_x86_glb.image_id");
         strcpy(nat_os_image,"ami = data.aws_ami.centos7_x86_glb.image_id");
     }
@@ -755,6 +770,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     printf("|          Master Node Instance:  %s\n",master_inst);
     printf("|          Compute Node Instance: %s\n",compute_inst);
     printf("|          OS Image:              %s\n" RESET_DISPLAY,os_image_raw);
+    
     generate_sshkey(sshkey_folder,pubkey);
 
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
@@ -992,7 +1008,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     char string_temp[128]="";
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
-    char os_image[32]="";
+    char os_image[64]="";
     char zone_id[CONF_STRING_LENTH]="";
     int node_num=0;
     int hpc_user_num=0;
@@ -1304,7 +1320,13 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",os_image);
+    }
+    else{
+        sprintf(string_temp,"\"%s\"",os_image);
+        global_replace(filename_temp,"data.tencentcloud_images.OS_IMAGE.images.0.image_id",string_temp);
+    }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
@@ -1318,7 +1340,13 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"COMPUTE_INST",compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",os_image);
+    }
+    else{
+        sprintf(string_temp,"\"%s\"",os_image);
+        global_replace(filename_temp,"data.tencentcloud_images.OS_IMAGE.images.0.image_id",string_temp);
+    }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
 
@@ -1328,7 +1356,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
+    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
 
     for(i=0;i<node_num;i++){
@@ -1472,7 +1500,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     char string_temp[128]="";
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
-    char os_image[32]="";
+    char os_image[64]="";
     char zone_id[CONF_STRING_LENTH]="";
     int node_num=0;
     int hpc_user_num=0;
@@ -1777,7 +1805,12 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"MASTER_INST",master_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",os_image);
+    }
+    else{
+        global_replace(filename_temp,"${data.alicloud_images.OS_IMAGE.images.0.id}",os_image);
+    }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
@@ -1791,7 +1824,12 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"RG_DISPLAY_NAME",unique_cluster_id);
     global_replace(filename_temp,"COMPUTE_INST",compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",os_image);
+    }
+    else{
+        global_replace(filename_temp,"${data.alicloud_images.OS_IMAGE.images.0.id}",os_image);
+    }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
 
@@ -1801,7 +1839,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
+    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
     global_replace(filename_temp,"RG_DISPLAY_NAME",unique_cluster_id);
     reset_string(filename_temp);
     reset_string(string_temp);
@@ -1976,7 +2014,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     char string_temp[128]="";
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
-    char os_image[32]="";
+    char os_image[64]="";
     char zone_id[CONF_STRING_LENTH]="";
     int node_num=0;
     int hpc_user_num=0;
@@ -2290,7 +2328,14 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(os_image,"rocky9")==0||strcmp(os_image,"euleros")==0||strcmp(os_image,"centos7")==0){
+        global_replace(filename_temp,"OS_IMAGE",os_image);
+    }
+    else{
+        sprintf(string_temp,"\"%s\"",os_image);
+        global_replace(filename_temp,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);
+    }
+    
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
@@ -2304,7 +2349,13 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     global_replace(filename_temp,"COMPUTE_INST",compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(os_image,"rocky9")==0||strcmp(os_image,"euleros")==0||strcmp(os_image,"centos7")==0){
+        global_replace(filename_temp,"OS_IMAGE",os_image);
+    }
+    else{
+        sprintf(string_temp,"\"%s\"",os_image);
+        global_replace(filename_temp,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);
+    }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
 
@@ -2315,7 +2366,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
+    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
 
     for(i=0;i<node_num;i++){
@@ -2456,7 +2507,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     char string_temp[128]="";
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
-    char os_image[32]="";
+    char os_image[64]="";
     char zone_id[CONF_STRING_LENTH]="";
     int node_num=0;
     int hpc_user_num=0;
@@ -2762,8 +2813,13 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     global_replace(filename_temp,"MASTER_INST",master_inst);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-//    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",os_image);
+    }
+    else{
+        sprintf(string_temp,"\"%s\"",os_image);
+        global_replace(filename_temp,"data.baiducloud_images.OS_IMAGE.images[0].id",string_temp);
+    }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
@@ -2777,7 +2833,13 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     global_replace(filename_temp,"COMPUTE_INST",compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",os_image);
+    }
+    else{
+        sprintf(string_temp,"\"%s\"",os_image);
+        global_replace(filename_temp,"data.baiducloud_images.OS_IMAGE.images[0].id",string_temp);
+    }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
 
@@ -2788,7 +2850,6 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
     global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-//    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"NATGW_INST",natgw_inst);
 
@@ -2936,7 +2997,7 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     char conf_param_buffer1[32]="";
     char conf_param_buffer2[32]="";
     char conf_param_buffer3[32]="";
-    char os_image[32]="";
+    char os_image[64]="";
     char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
@@ -3367,7 +3428,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     char gcp_project_id[128]="";
     char cluster_id[CONF_STRING_LENTH]="";
     char region_id[CONF_STRING_LENTH]="";
-    char os_image[32]="";
+    char os_image[120]="";
     char zone_id[CONF_STRING_LENTH]="";
     int node_num=0;
     int hpc_user_num=0;
@@ -3645,7 +3706,13 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"MASTER_INST",master_inst);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
     global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",os_image);
+    }
+    else{
+        sprintf(string_temp,"\"%s\"",os_image);
+        global_replace(filename_temp,"data.google_compute_image.OS_IMAGE.self_link",string_temp);
+    }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
@@ -3659,7 +3726,13 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"COMPUTE_INST",compute_inst);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
     global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
-    global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",os_image);
+    }
+    else{
+        sprintf(string_temp,"\"%s\"",os_image);
+        global_replace(filename_temp,"data.google_compute_image.OS_IMAGE.self_link",string_temp);
+    }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
 
