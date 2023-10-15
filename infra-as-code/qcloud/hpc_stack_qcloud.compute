@@ -7,20 +7,20 @@
  
 resource "tencentcloud_instance" "COMPUTE_NODE_N" {
   #cn-hangzhou
-  instance_name     = "COMPUTE_NODE_N-RESOURCETAG"
+  instance_name = "COMPUTE_NODE_N-RESOURCETAG"
   availability_zone = "DEFAULT_ZONE_ID"
-  orderly_security_groups   = tencentcloud_security_group.group_intra.*.id
-  image_id          = data.tencentcloud_images.OS_IMAGE.images.0.image_id
-  instance_type     = data.tencentcloud_instance_types.COMPUTE_INST.instance_types.0.instance_type
-  system_disk_type  = "CLOUD_SSD"
-  system_disk_size  = 60
-  hostname          = "COMPUTE_NODE_N"
-  project_id        = 0
-  vpc_id            = tencentcloud_vpc.hpc_stack.id
-  subnet_id         = tencentcloud_subnet.hpc_stack_subnet.id
-  running_flag      = "RUNNING_FLAG"
+  orderly_security_groups = tencentcloud_security_group.group_intra.*.id
+  image_id = data.tencentcloud_images.OS_IMAGE.images.0.image_id
+  instance_type = data.tencentcloud_instance_types.COMPUTE_INST.instance_types.0.instance_type
+  system_disk_type = "CLOUD_SSD"
+  system_disk_size = 60
+  hostname = "COMPUTE_NODE_N"
+  project_id = 0
+  vpc_id = tencentcloud_vpc.hpc_stack.id
+  subnet_id = tencentcloud_subnet.hpc_stack_subnet.id
+  running_flag = "RUNNING_FLAG"
 #  internet_charge_type = "TRAFFIC_POSTPAID_BY_HOUR"
-#  allocate_public_ip         = "true"
+#  allocate_public_ip = "true"
 #  internet_max_bandwidth_out = COMPUTE_BANDWIDTH
   stopped_mode = "STOP_CHARGING"
   password = "${var.compute_passwd}"
