@@ -174,6 +174,7 @@ void print_help(char* cmd_name){
     if(strcmp(cmd_name,"init")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "init" RESET_DISPLAY "        :~ Initialize a new cluster. If the configuration file is absent,\n");
         printf("|              :~ the command will generate a default configuration file.\n");
+        printf("|   --force           ~ Remove the existed conf file(comes from a previously-failed init process)\n");
         printf("|   --rg REGION_ID    ~ Cloud Region ID\n");
         printf("|   --az AZ_ID        ~ Cloud Availability Zone ID\n");
         printf("|   --nn NODE_NUM     ~ Initial compute number\n");
@@ -181,8 +182,17 @@ void print_help(char* cmd_name){
         printf("|   --mi MASTER_INST  ~ Master node instance type\n");
         printf("|   --ci COMPUTE_INST ~ Compute node instance type\n");
         printf("|   --ht ON | OFF     ~ Hyperthreading option for AWS\n");
-        printf("|   --vol             ~ Shared Volume in GB (for Huaweicloud, Azure and GCP)\n");
-        printf("|   --force           ~ Remove existed conf file\n");
+        printf("|   --os OS_NAME      ~ Valid names (see " HIGH_CYAN_BOLD "[c]" RESET_DISPLAY " below): centos7(CentOS 7.9), centoss9(CentOS Stream 9); OR\n");
+        printf("|        OS_ID        ~ The cloud image ID string, e.g. ami-xxxxxxxxx, id-xxxxxxxx; OR\n");
+        printf("|        OS_SELFLINK  ~ Only for Google Cloud Platform, e.g: projects/xxxx/xxxx\n");
+        printf("|                     ~ " HIGH_CYAN_BOLD "[a] This option is *NOT* valid for Microsoft Azure Cloud." RESET_DISPLAY "\n");
+        printf("|                     ~ " HIGH_CYAN_BOLD "[b] If this option is absent, the HPC-NOW will use a default os image." RESET_DISPLAY "\n");
+        printf("|                     ~ " HIGH_CYAN_BOLD "[c] For Huaweicloud, the valid names are: rocky9(Rocky Linux 9), euleros(EulerOS)." RESET_DISPLAY "\n");
+        printf("|                     ~ " HIGH_CYAN_BOLD "[d] We *STRONGLY* recommend you to use the default option, unless that your image" RESET_DISPLAY "\n");
+        printf("|                     ~ " HIGH_CYAN_BOLD "    has been tested and validated." RESET_DISPLAY "\n");
+        printf("|   --vol             ~ Shared Volume in GB (Only for Huaweicloud, Microsoft Azure and GCP)\n");
+        printf("|                     ~ This volume cannot be reduced! You can increase it by the 'hpcopr nfsup' command.\n");
+        printf("|                     ~ Therefore, please specify a reasonable volume.\n");
     }
     if(strcmp(cmd_name,"rebuild")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "rebuild" RESET_DISPLAY "     :~ Rebuild the nodes *without* destroying the cluster's storage.\n");
