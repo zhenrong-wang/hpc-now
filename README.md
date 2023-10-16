@@ -50,7 +50,7 @@
 
 ### 4. Bug与技术沟通
 
-欢迎随时联系 info@hpc-now.com
+欢迎向该仓库提交 issues，或者邮箱联系 zhenrongwang@live.com | wangzhenrong@hpc-now.com | info@hpc-now.com
 
 ### 5. 开发路线图
 
