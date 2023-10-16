@@ -125,6 +125,27 @@ data "aws_ami" "centoss9_x86_glb" {
     values = ["CentOS-Stream-ec2-9-2*"]
   }
 }
+
+data "aws_ami" "openEuler_x86_glb" {
+  most_recent = true
+  owners = ["aws-marketplace"]
+  filter {
+    name = "architecture"
+    values = ["x86_64"]
+  }
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+  filter {
+    name = "name"
+    values = ["openEuler-22.03-LTS-SP2*"]
+  }
+}
 DELETE_FOR_CN_REGIONS*/
 
 data "aws_ami" "al2_x86_glb" {
