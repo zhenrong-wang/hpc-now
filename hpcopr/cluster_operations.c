@@ -281,8 +281,8 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
         }
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster is empty. This operation will remove all the related files\n");
-        printf("|          from your system and registry. Would you like to continue?\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster is empty. This operation will remove all the\n");
+        printf("|          related files from your system. Would you like to continue?\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: ");
         fflush(stdin);
         scanf("%s",doubleconfirm);

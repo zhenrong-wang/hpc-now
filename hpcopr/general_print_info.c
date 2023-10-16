@@ -182,7 +182,7 @@ void print_help(char* cmd_name){
         printf("|   --mi MASTER_INST  ~ Master node instance type\n");
         printf("|   --ci COMPUTE_INST ~ Compute node instance type\n");
         printf("|   --ht ON | OFF     ~ Hyperthreading option for AWS\n");
-        printf("|   --vol             ~ Shared Volume in GB (" HIGH_CYAN_BOLD "Only for Huaweicloud, Microsoft Azure and GCP" RESET_DISPLAY ")\n");
+        printf("|   --vol VOLUME_GB   ~ Shared Volume in GB (" HIGH_CYAN_BOLD "Only for Huaweicloud, Microsoft Azure and GCP" RESET_DISPLAY ")\n");
         printf("|                     ~ This volume cannot be reduced! You can increase it by the 'hpcopr nfsup' command.\n");
         printf("|                     ~ Therefore, please specify a reasonable volume.\n");
         printf("|   --os OS_NAME      ~ Valid names (see " HIGH_CYAN_BOLD "[c]" RESET_DISPLAY " below): centos7(CentOS 7.9), centoss9(CentOS Stream 9); OR\n");
