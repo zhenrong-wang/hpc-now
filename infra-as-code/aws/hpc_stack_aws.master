@@ -25,7 +25,14 @@ resource "aws_instance" "master" {
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 hostnamectl set-hostname master
 echo -e "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
-userdel -f ec2-user
+id ec2-user >> /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  userdel -f ec2-user
+fi
+id openeuler >> /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  userdel -f openeuler
+fi
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config
 echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
