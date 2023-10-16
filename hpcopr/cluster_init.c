@@ -700,7 +700,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     else{
         strcpy(region_flag,"global_regions");
-        if(strcmp(os_image_raw,"centos7")==0||strcmp(os_image_raw,"centoss9")==0){
+        if(strcmp(os_image_raw,"centos7")==0||strcmp(os_image_raw,"centoss9")==0||strcmp(os_image_raw,"openEuler")==0){
             sprintf(os_image,"ami = data.aws_ami.%s_x86_glb.image_id",os_image_raw);
         }
         else{

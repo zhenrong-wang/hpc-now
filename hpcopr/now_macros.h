@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.0.0160"
+#define CORE_VERSION_CODE "0.2.0.0161"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
