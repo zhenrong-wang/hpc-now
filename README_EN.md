@@ -39,5 +39,5 @@ For more information, please refer to Docs/UserManual-EN.pdf
 
 ### 4. Bug Reports
 
-Please submit issues to GitHub, Gitee, or 
+Please submit issues to this repo. Or
 mailto: zhenrongwang@live.com | wangzhenrong@hpc-now | info@hpc-now.com
