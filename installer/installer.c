@@ -825,7 +825,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         sleep(1);
         if(i==120){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
-            break;
+            goto update_done;
         }
     }
     printf("\n");
