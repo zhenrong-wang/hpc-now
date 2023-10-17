@@ -471,6 +471,10 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
     }
+    if(system("which xclip >> /dev/null 2>&1")==0){
+        sprintf(cmdline1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
+        system(cmdline1);
+    }
 linux_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
@@ -522,7 +526,7 @@ linux_install_done:
     sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the Microsoft RDP Client now ...\n");
-    if(file_exist_or_not("/Applications/Microsoft Remote Desktop Beta.app")==0){
+    if(file_exist_or_not("/Applications/msrdp.app")==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Microsoft RDP has been installed to your OS.\n");
         goto mac_install_done;
     }
@@ -537,7 +541,7 @@ linux_install_done:
             goto mac_install_done;
         }
     }
-    if(system("unzip -q /Users/Shared/rdp_for_mac.zip -d /Applications/")!=0){
+    if(system("unzip -q /Users/Shared/rdp_for_mac.zip -d /Applications/ && mv '/Applications/Microsoft Remote Desktop Beta.app' /Applications/msrdp.app")!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to unzip the package, RDP won't work properly." RESET_DISPLAY "\n");
     }
     else{
@@ -876,6 +880,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
     }
+    if(system("which xclip >> /dev/null 2>&1")==0){
+        sprintf(cmdline1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
+        system(cmdline1);
+    }
 #elif __APPLE__
     system("mkdir -p /Users/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
     if(file_exist_or_not("/Users/hpc-now/hpc-now.licenses/MIT.LICENSE")!=0){
@@ -897,7 +905,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the Microsoft RDP Client now ...\n");
-    if(file_exist_or_not("/Applications/Microsoft Remote Desktop Beta.app")==0){
+    if(file_exist_or_not("/Applications/msrdp.app")==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Microsoft RDP has been installed to your OS.\n");
         goto update_done;
     }
@@ -912,7 +920,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
             goto update_done;
         }
     }
-    if(system("unzip -q /Users/Shared/rdp_for_mac.zip -d /Applications/")!=0){
+    if(system("unzip -q /Users/Shared/rdp_for_mac.zip -d /Applications/ && mv '/Applications/Microsoft Remote Desktop Beta.app' /Applications/msrdp.app")!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to unzip the package, RDP won't work properly." RESET_DISPLAY "\n");
     }
     else{

@@ -135,6 +135,10 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "ssh" RESET_DISPLAY "         :~ SSH to the master node of a cluster.\n");
         printf("|   -u       USER_NAME    ~ SSH to the cluster as a valid user.\n");
     }
+    if(strcmp(cmd_name,"rdp")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "rdp" RESET_DISPLAY "         :~ Connect to the desktop of the cluster with RDP.\n");
+        printf("|   -u       USER_NAME    ~ Connect as a valid user.\n");
+    }
     if(strcmp(cmd_name,"all")==0){
         printf("+  Advanced - For developers:\n");
     }

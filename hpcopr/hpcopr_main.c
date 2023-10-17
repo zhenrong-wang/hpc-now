@@ -99,6 +99,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "history,gen,NULL",
     "syserr,gen,NULL",
     "ssh,gen,UNAME",
+    "rdp,gen,UNAME",
     "configloc,gen,NULL",
     "showloc,gen,NULL",
     "resetloc,gen,NULL",
@@ -208,6 +209,7 @@ char jobman_commands[3][COMMAND_STRING_LENGTH_MAX]={
 45 GRAPH_FAILED
 46 JOBMAN_FAILED
 47 GRAPH_NOT_UPDATED
+48 RDP_CONNECTION_FAILED
 49 CLUSTER_EMPTY
 51 CLUSTER_NOT_EMPTY
 53 PROCESS_LOCKED
@@ -902,6 +904,42 @@ int main(int argc, char* argv[]){
         write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",run_flag);
         check_and_cleanup(workdir);
         return run_flag;
+    }
+
+    if(strcmp(argv[1],"rdp")==0){
+        if(cluster_state_flag==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] You need to wake up the cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " first.\n" RESET_DISPLAY,cluster_name);
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
+            check_and_cleanup(workdir);
+            return 43;
+        }
+        run_flag=cluster_rdp(workdir,user_name,cluster_role);
+        if(run_flag==0||run_flag==9){
+            if(run_flag==9){
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " RDP client exited (either normally or unexpectedly).\n");
+            }
+            write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",run_flag);
+            check_and_cleanup(workdir);
+            return 0;
+        }
+        else if(run_flag==-3){
+            printf(FATAL_RED_BOLD "[ FATAL: ] You do not have the privilege to connect as root." RESET_DISPLAY "\n");
+        }
+        else if(run_flag==1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get and copy the password of %s ." RESET_DISPLAY "\n",user_name);
+        }
+        else if(run_flag==3){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cluster name." RESET_DISPLAY "\n");
+        }
+        else if(run_flag==5){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the latest IP address of the cluster." RESET_DISPLAY "\n");
+        }
+        else{
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to generate an RDP connection file." RESET_DISPLAY "\n");
+        }
+        write_operation_log(cluster_name,operation_log,argc,argv,"RDP_FAILED",48);
+        check_and_cleanup(workdir);
+        return 48;
     }
 
     if(strcmp(argv[1],"graph")==0){
