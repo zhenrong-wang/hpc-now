@@ -6,8 +6,7 @@
  */
 
 /*
- * This is a *psedo* and very *simple* crypto program! Not a real one. If you'd like to use a real
- * crypto program, try AES, or at least DES. Maybe we will switch to it in th future.
+ * This is a text-file encryption & decryption program.
  */
 
 #include <stdio.h>

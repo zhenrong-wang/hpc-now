@@ -469,6 +469,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     system("chown -R hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
     sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
+    if(system("cat /etc/profile | grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\"")!=0){
+        system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
+    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          Please follow the steps below:\n");
@@ -617,6 +620,9 @@ int uninstall_services(void){
     printf("|          There might still be remaining files for the specific user 'hpc-now'.\n");
     printf("|          Please mannually delete the folder C:\\Users\\hpc-now* after reboot.\n");
 #elif __linux__
+    if(system("cat /etc/profile | grep -w \"# Added by HPC-NOW\" >> /dev/null 2>&1")==0){
+        system("sed -i '/# Added by HPC-NOW/d' /etc/profile");
+    }
     printf("|          There are still remaining files for reinstall. You can run the command: \n");
     printf("|          " HIGH_GREEN_BOLD "sudo rm -rf /usr/share/terraform" RESET_DISPLAY " to erase them.\n");
 #elif __APPLE__
@@ -813,6 +819,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
+    if(system("cat /etc/profile | grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\"")!=0){
+        system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
+    }
 #elif __APPLE__
     system("mkdir -p /Users/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
     if(file_exist_or_not("/Users/hpc-now/hpc-now.licenses/MIT.LICENSE")!=0){
