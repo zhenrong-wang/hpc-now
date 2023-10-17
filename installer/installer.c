@@ -93,7 +93,9 @@ void print_help_installer(void){
     printf("|                         : Provide your own location of now-crypto.exe, similar to\n");
     printf("|                           the --hloc parameter above.\n");
     printf("|        --hver VER   * Only valid when hpcoprloc is absent.\n");
-    printf("|                         : Specify the version code of hpcopr, i.e. 0.2.0.0128\n");
+    printf("|                         : Specify the version code of hpcopr, i.e. 0.2.0.0161\n");
+    printf("|        --rdp            : Install the RDP client.\n");
+    printf("|                           GNU/Linux: Remmina | macOS: Microsoft RDP\n");
     printf(GENERAL_BOLD "|        * You can specify any or all of the advanced options above." RESET_DISPLAY "\n");
 }
 
@@ -166,10 +168,13 @@ int license_confirmation(void){
 // 3. Create the crypto key file for further encryption and decryption
 // 4. Manage the folder permissions
 
-int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int crypto_loc_flag, char* now_crypto_loc){
+int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int crypto_loc_flag, char* now_crypto_loc, int rdp_flag){
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
+#ifdef __linux__
+    char linux_packman[8]="";
+#endif
     FILE* file_p=NULL;
     int run_flag1,run_flag2;
 #ifdef _WIN32
@@ -232,53 +237,32 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     system("icacls c:\\hpc-now /grant hpc-now:(OI)(CI)F /t > nul 2>&1");
     system("icacls c:\\hpc-now /deny hpc-now:(DE) /t > nul 2>&1");
 #elif __linux__
+    if(system("which yum >> /dev/null 2>&1")==0){
+        strcpy(linux_packman,"yum");
+    }
+    else if(system("which dnf >> /dev/null 2>&1")==0){
+        strcpy(linux_packman,"dnf");
+    }
+    else if(system("which apt >> /dev/null 2>&1")==0){
+        strcpy(linux_packman,"apt");
+    }
+    else{
+        printf(FATAL_RED_BOLD "[ FATAL: ] YUM|DNF|APT not found. Please install the 'unzip' manually. Exit now." RESET_DISPLAY "\n");
+        return -1;
+    }
     if(system("which unzip >> /dev/null 2>&1")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Unzip not found. Install the utility 'unzip' by yum|dnf|apt ...\n");
-        if(system("which yum >> /dev/null 2>&1")==0){
-            if(system("yum install unzip -y >> /dev/null 2>&1")!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install unzip. Please install it first. Exit now." RESET_DISPLAY "\n");
-                return -1;
-            }
-        }
-        else if(system("which dnf >> /dev/null 2>&1")==0){
-            if(system("dnf install unzip -y >> /dev/null 2>&1")!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install unzip. Please install it first. Exit now." RESET_DISPLAY "\n");
-                return -1;
-            }
-        }
-        else if(system("which apt >> /dev/null 2>&1")==0){
-            if(system("apt install unzip -y >> /dev/null 2>&1")!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install unzip. Please install it first. Exit now." RESET_DISPLAY "\n");
-                return -1;
-            }
-        }
-        else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] YUM|DNF|APT not found. Please install the 'unzip' manually. Exit now." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Unzip not found. Install the utility 'unzip' with %s ...\n",linux_packman);
+        sprintf(cmdline1,"%s install unzip -y >> /dev/null 2>&1",linux_packman);
+        if(system(cmdline1)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install unzip. Please install it first. Exit now." RESET_DISPLAY "\n");
             return -1;
         }
     }
     if(system("which curl >> /dev/null 2>&1")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Curl not found. Install the utility 'curl' by yum|dnf|apt ...\n");
-        if(system("which yum >> /dev/null 2>&1")==0){
-            if(system("yum install curl -y >> /dev/null 2>&1")!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install curl. Please install it first. Exit now." RESET_DISPLAY "\n");
-                return -1;
-            }
-        }
-        else if(system("which dnf >> /dev/null 2>&1")==0){
-            if(system("dnf install curl -y >> /dev/null 2>&1")!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install curl. Please install it first. Exit now." RESET_DISPLAY "\n");
-                return -1;
-            }
-        }
-        else if(system("which apt >> /dev/null 2>&1")==0){
-            if(system("apt install curl -y >> /dev/null 2>&1")!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install curl. Please install it first. Exit now." RESET_DISPLAY "\n");
-                return -1;
-            }
-        }
-        else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] YUM|DNF|APT not found. Please install the 'curl' manually. Exit now." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Curl not found. Install the utility 'curl' with %s ...\n",linux_packman);
+        sprintf(cmdline1,"%s install curl -y >> /dev/null 2>&1",linux_packman);
+        if(system(cmdline1)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install curl. Please install it first. Exit now." RESET_DISPLAY "\n");
             return -1;
         }
     }
@@ -472,6 +456,22 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     if(system("cat /etc/profile | grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\"")!=0){
         system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
     }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking Remmina (the RDP client for GNU/Linux) now ...\n");
+    if(system("remmina --version >> /dev/null 2>&1")==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina has been installed to your OS.\n");
+        goto linux_install_done;
+    }
+    if(rdp_flag==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Installing Remmina - the RDP client for GNU/Linux now ...\n");
+        sprintf(cmdline1,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
+        if(system(cmdline1)!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install Remmina, RDP won't work properly." RESET_DISPLAY "\n");
+        }
+    }
+    else{
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
+    }
+linux_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          Please follow the steps below:\n");
@@ -521,6 +521,29 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     system("chown -R hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
     sprintf(cmdline1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the Microsoft RDP Client now ...\n");
+    if(file_exist_or_not("/Applications/Microsoft Remote Desktop Beta.app")==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Microsoft RDP has been installed to your OS.\n");
+        goto mac_install_done;
+    }
+    if(rdp_flag!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The Microsoft RDP Client is absent. Please update with --rdp to install.\n");
+        goto mac_install_done;
+    }
+    if(file_exist_or_not("/Applications/rdp_for_mac.zip")!=0){
+        sprintf(cmdline1,"curl %s -o /Applications/rdp_for_mac.zip",URL_MSRDP_FOR_MAC);
+        if(system(cmdline1)!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download the package, RDP won't work properly." RESET_DISPLAY "\n");
+            goto mac_install_done;
+        }
+    }
+    if(system("unzip /Applications/rdp_for_mac.zip -q -d /Applications/")!=0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to unzip the package, RDP won't work properly." RESET_DISPLAY "\n");
+    }
+    else{
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The Microsoft RDP Client has been installed.\n");
+    }
+mac_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          Please follow the steps below:\n");
@@ -632,10 +655,13 @@ int uninstall_services(void){
     return 0;
 }
 
-int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int crypto_loc_flag, char* now_crypto_loc){
+int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int crypto_loc_flag, char* now_crypto_loc, int rdp_flag){
     char doubleconfirm[128]="";
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
+#ifdef __linux__
+    char linux_packman[8]="";
+#endif
     int run_flag1,run_flag2;
 #ifdef _WIN32
     if(system("net user hpc-now > nul 2>&1")!=0){
@@ -822,6 +848,34 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     if(system("cat /etc/profile | grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\"")!=0){
         system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
     }
+    if(system("which yum >> /dev/null 2>&1")==0){
+        strcpy(linux_packman,"yum");
+    }
+    else if(system("which dnf >> /dev/null 2>&1")==0){
+        strcpy(linux_packman,"dnf");
+    }
+    else if(system("which apt >> /dev/null 2>&1")==0){
+        strcpy(linux_packman,"apt");
+    }
+    else{
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to detect the package manager." RESET_DISPLAY "\n");
+        goto update_done;
+    }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking Remmina (the RDP client for GNU/Linux) now ...\n");
+    if(system("remmina --version >> /dev/null 2>&1")==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina has been installed to your OS.\n");
+        goto update_done;
+    }
+    if(rdp_flag==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Installing Remmina - the RDP client for GNU/Linux now ...\n");
+        sprintf(cmdline1,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
+        if(system(cmdline1)!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install Remmina, RDP won't work properly." RESET_DISPLAY "\n");
+        }
+    }
+    else{
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
+    }
 #elif __APPLE__
     system("mkdir -p /Users/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
     if(file_exist_or_not("/Users/hpc-now/hpc-now.licenses/MIT.LICENSE")!=0){
@@ -842,7 +896,30 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("mkdir -p '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chmod -R 755 '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chown -R hpc-now:hpc-now '/Library/Application Support/io.terraform' >> /dev/null 2>&1");
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the Microsoft RDP Client now ...\n");
+    if(file_exist_or_not("/Applications/Microsoft Remote Desktop Beta.app")==0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Microsoft RDP has been installed to your OS.\n");
+        goto update_done;
+    }
+    if(rdp_flag!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The Microsoft RDP Client is absent. Please update with --rdp to install.\n");
+        goto update_done;
+    }
+    if(file_exist_or_not("/Applications/rdp_for_mac.zip")!=0){
+        sprintf(cmdline1,"curl %s -o /Applications/rdp_for_mac.zip",URL_MSRDP_FOR_MAC);
+        if(system(cmdline1)!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download the package, RDP won't work properly." RESET_DISPLAY "\n");
+            goto update_done;
+        }
+    }
+    if(system("unzip /Applications/rdp_for_mac.zip -q -d /Applications/")!=0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to unzip the package, RDP won't work properly." RESET_DISPLAY "\n");
+    }
+    else{
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The Microsoft RDP Client has been installed.\n");
+    }
 #endif
+update_done:
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been updated to your device and OS.\n");
     return 0;
 }
@@ -895,6 +972,7 @@ int main(int argc, char* argv[]){
     char hpcopr_loc[LOCATION_LENGTH]="";
     char now_crypto_loc[LOCATION_LENGTH]="";
     char hpcopr_ver[256]="";
+    int rdp_flag=cmd_flag_check(argc,argv,"--rdp");
     print_header_installer();
     if(check_current_user_root()!=0){
         return -1;
@@ -939,6 +1017,7 @@ int main(int argc, char* argv[]){
         print_tail_installer();
         return run_flag;
     }
+
     if(strcmp(argv[1],"update")!=0&&strcmp(argv[1],"install")!=0){
         print_help_installer();
         printf(FATAL_RED_BOLD "\n[ FATAL: ] The specified option " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is invalid. Exit now.\n" RESET_DISPLAY, argv[1]);
@@ -978,12 +1057,12 @@ int main(int argc, char* argv[]){
         }
     }
     if(strcmp(argv[1],"update")==0){
-        run_flag=update_services(hpcopr_loc_flag,hpcopr_loc,hpcopr_ver,crypto_loc_flag,now_crypto_loc);
+        run_flag=update_services(hpcopr_loc_flag,hpcopr_loc,hpcopr_ver,crypto_loc_flag,now_crypto_loc,rdp_flag);
         print_tail_installer();
         return run_flag;
     }
     if(strcmp(argv[1],"install")==0){
-        run_flag=install_services(hpcopr_loc_flag,hpcopr_loc,hpcopr_ver,crypto_loc_flag,now_crypto_loc);
+        run_flag=install_services(hpcopr_loc_flag,hpcopr_loc,hpcopr_ver,crypto_loc_flag,now_crypto_loc,rdp_flag);
         print_tail_installer();
         return run_flag;
     }

@@ -223,7 +223,7 @@
 #define DATAMAN_COMMAND_NUM 17
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 11
-#define CMD_FLAG_NUM 26
+#define CMD_FLAG_NUM 27
 #define CMD_KWDS_NUM 42
 
 /* Usually you don't need to modify the macros in this section.*/
