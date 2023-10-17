@@ -453,11 +453,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     system("chown -R hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
     sprintf(cmdline1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
-    if(system("cat /etc/profile | grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\"")!=0){
+    if(system("grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
         system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking Remmina (the RDP client for GNU/Linux) now ...\n");
-    if(system("remmina --version >> /dev/null 2>&1")==0){
+    if(system("which remmina >> /dev/null 2>&1")==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina has been installed to your OS.\n");
         goto linux_install_done;
     }
@@ -845,7 +845,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
     sprintf(cmdline1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
-    if(system("cat /etc/profile | grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\"")!=0){
+    if(system("grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
         system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
     }
     if(system("which yum >> /dev/null 2>&1")==0){
@@ -862,7 +862,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         goto update_done;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking Remmina (the RDP client for GNU/Linux) now ...\n");
-    if(system("remmina --version >> /dev/null 2>&1")==0){
+    if(system("which remmina >> /dev/null 2>&1")==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina has been installed to your OS.\n");
         goto update_done;
     }
@@ -1020,7 +1020,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"update")!=0&&strcmp(argv[1],"install")!=0){
         print_help_installer();
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] The specified option " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is invalid. Exit now.\n" RESET_DISPLAY, argv[1]);
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The specified option " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n", argv[1]);
         print_tail_installer();
         return 1;
     }
