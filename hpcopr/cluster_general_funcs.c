@@ -2843,6 +2843,8 @@ int generate_rdp_file(char* cluster_name, char* master_address, char* username){
     char filename_rdp[FILENAME_LENGTH]="";
 #ifdef __linux__
     sprintf(filename_rdp,"%s%s.tmp%s%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+#elif __APPLE__
+    sprintf(filename_rdp,"/Users/Shared/hpc-now-%s-%s.rdp",cluster_name,username);
 #else
     sprintf(filename_rdp,"%s%s.tmp%s%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
 #endif
@@ -2894,6 +2896,8 @@ int start_rdp_connection(char* cluster_workdir, char* username){
     }
 #ifdef __linux__
     sprintf(filename_rdp,"%s%s.tmp%s%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+#elif __APPLE__
+    sprintf(filename_rdp,"/Users/Shared/hpc-now-%s-%s.rdp",cluster_name,username);
 #else
     sprintf(filename_rdp,"%s%s.tmp%s%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
 #endif
