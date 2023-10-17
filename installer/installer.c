@@ -94,7 +94,7 @@ void print_help_installer(void){
     printf("|                           the --hloc parameter above.\n");
     printf("|        --hver VER   * Only valid when hpcoprloc is absent.\n");
     printf("|                         : Specify the version code of hpcopr, i.e. 0.2.0.0161\n");
-    printf("|        --rdp            : Install the RDP client.\n");
+    printf("|        --rdp            : Install the RDP client for GNU/Linux or macOS.\n");
     printf("|                           GNU/Linux: Remmina | macOS: Microsoft RDP\n");
     printf(GENERAL_BOLD "|        * You can specify any or all of the advanced options above." RESET_DISPLAY "\n");
 }
@@ -530,14 +530,14 @@ linux_install_done:
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The Microsoft RDP Client is absent. Please update with --rdp to install.\n");
         goto mac_install_done;
     }
-    if(file_exist_or_not("/Applications/rdp_for_mac.zip")!=0){
-        sprintf(cmdline1,"curl %s -o /Applications/rdp_for_mac.zip",URL_MSRDP_FOR_MAC);
+    if(file_exist_or_not("/Users/Shared/rdp_for_mac.zip")!=0){
+        sprintf(cmdline1,"mkdir -p /Users/Shared/ && curl %s -o /Users/Shared/rdp_for_mac.zip",URL_MSRDP_FOR_MAC);
         if(system(cmdline1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download the package, RDP won't work properly." RESET_DISPLAY "\n");
             goto mac_install_done;
         }
     }
-    if(system("unzip /Applications/rdp_for_mac.zip -q -d /Applications/")!=0){
+    if(system("unzip /Users/Shared/rdp_for_mac.zip -q -d /Applications/")!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to unzip the package, RDP won't work properly." RESET_DISPLAY "\n");
     }
     else{
@@ -905,14 +905,14 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The Microsoft RDP Client is absent. Please update with --rdp to install.\n");
         goto update_done;
     }
-    if(file_exist_or_not("/Applications/rdp_for_mac.zip")!=0){
-        sprintf(cmdline1,"curl %s -o /Applications/rdp_for_mac.zip",URL_MSRDP_FOR_MAC);
+    if(file_exist_or_not("/Users/Shared/rdp_for_mac.zip")!=0){
+        sprintf(cmdline1,"mkdir -p /Users/Shared/ && curl %s -o /Users/Shared/rdp_for_mac.zip",URL_MSRDP_FOR_MAC);
         if(system(cmdline1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download the package, RDP won't work properly." RESET_DISPLAY "\n");
-            goto update_done;
+            goto mac_install_done;
         }
     }
-    if(system("unzip /Applications/rdp_for_mac.zip -q -d /Applications/")!=0){
+    if(system("unzip /Users/Shared/rdp_for_mac.zip -q -d /Applications/")!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to unzip the package, RDP won't work properly." RESET_DISPLAY "\n");
     }
     else{
