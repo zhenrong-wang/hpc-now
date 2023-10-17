@@ -1975,6 +1975,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     else{
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The cluster is in the state of " HIGH_CYAN_BOLD "minimal" RESET_DISPLAY " running.\n");
     }
+    remote_exec_general(workdir,sshkeydir,"root","systemctl restart xrdp","-n",0,0,"","");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }

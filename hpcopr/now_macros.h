@@ -41,6 +41,9 @@
 #define MKDIR_CMD "mkdir"
 #define EDITOR_CMD "notepad"
 #define CLEAR_SCREEN_CMD "cls"
+#define RDP_EDIT_CMD "mstsc /e"
+#define CLIPBOARD_CMD "clip"
+#define PIPE_TO_CLIPBOARD_CMD "| clip"
 
 #define NOW_BINARY_DIR "c:\\hpc-now\\utils\\"
 #define GENERAL_CONF_DIR "c:\\programdata\\hpc-now\\etc\\"
@@ -102,6 +105,9 @@
 #define MKDIR_CMD "mkdir -p"
 #define EDITOR_CMD "vi"
 #define CLEAR_SCREEN_CMD "clear"
+#define RDP_EDIT_CMD "remmina --edit"
+#define CLIPBOARD_CMD "xclip"
+#define PIPE_TO_CLIPBOARD_CMD "| xclip -i -selection clipboard"
 
 #define NOW_BINARY_DIR "/home/hpc-now/.bin/utils/"
 #define GENERAL_CONF_DIR "/usr/.hpc-now/.etc/"
@@ -163,6 +169,9 @@
 #define MKDIR_CMD "mkdir -p"
 #define EDITOR_CMD "vi"
 #define CLEAR_SCREEN_CMD "clear"
+#define RDP_EDIT_CMD "open /Applications/msrdp.app"
+#define CLIPBOARD_CMD "pbcopy"
+#define PIPE_TO_CLIPBOARD_CMD "| pbcopy"
 
 #define NOW_BINARY_DIR "/Users/hpc-now/.bin/utils/"
 #define GENERAL_CONF_DIR "/Applications/.hpc-now/.etc/"
@@ -219,11 +228,11 @@
 #define LINE_LENGTH_SHORT 256
 #define AKSK_LENGTH 256
 #define CONF_STRING_LENTH 64
-#define COMMAND_NUM 48
+#define COMMAND_NUM 49
 #define DATAMAN_COMMAND_NUM 17
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 11
-#define CMD_FLAG_NUM 26
+#define CMD_FLAG_NUM 27
 #define CMD_KWDS_NUM 42
 
 /* Usually you don't need to modify the macros in this section.*/

@@ -2790,3 +2790,124 @@ int get_max_cluster_name_length(void){
     }
     return max_length;
 }
+
+int password_to_clipboard(char* cluster_workdir, char* username){
+    char cmdline[CMDLINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char vaultdir[DIR_LENGTH]="";
+    char password_string[64]="";
+    char username_ext[64]="";
+    char md5sum[64]="";
+    int run_flag;
+    FILE* file_p=NULL;
+    create_and_get_vaultdir(cluster_workdir,vaultdir);
+    if(strcmp(username,"root")==0){
+        get_crypto_key(CRYPTO_KEY_FILE,md5sum);
+        sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
+        decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+        sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
+        find_and_get(filename_temp,"Master Node Root Password:","","",1,"Master Node Root Password:","","",' ',5,password_string);
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_ERR_REDIRECT_NULL);
+        system(cmdline);
+    }
+    else{
+        decrypt_user_passwords(cluster_workdir,CRYPTO_KEY_FILE);
+        sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+        sprintf(username_ext,"username: %s ",username);
+        find_and_get(filename_temp,username_ext,"","",1,username_ext,"","",' ',3,password_string);
+        delete_decrypted_user_passwords(cluster_workdir);
+    }
+    if(strlen(password_string)==0){
+        return -1;
+    }
+    sprintf(filename_temp,"%s%s.tmp%spassword_for_rdp.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
+    file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        return 1;
+    }
+    fprintf(file_p,"%s",password_string);
+    fclose(file_p);
+    sprintf(cmdline,"%s %s %s %s",CAT_FILE_CMD,filename_temp,PIPE_TO_CLIPBOARD_CMD,SYSTEM_CMD_REDIRECT_NULL);
+    run_flag=system(cmdline);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    if(run_flag!=0){
+        return 3;
+    }
+    else{
+        return 0;
+    }
+}
+
+int generate_rdp_file(char* cluster_name, char* master_address, char* username){
+    char filename_rdp[FILENAME_LENGTH]="";
+#ifdef __linux__
+    sprintf(filename_rdp,"%s%s.tmp%s%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+#else
+    sprintf(filename_rdp,"%s%s.tmp%s%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+#endif
+    FILE* file_p=fopen(filename_rdp,"w+");
+    if(file_p==NULL){
+        return -1;
+    }
+#ifdef __linux__
+    fprintf(file_p,"[remmina]\n");
+    fprintf(file_p,"name=%s-%s\n",master_address,username);
+    fprintf(file_p,"server=%s\n",master_address);
+    fprintf(file_p,"colordepth=32\n");
+    fprintf(file_p,"username=%s\n",username);
+    fprintf(file_p,"protocal=RDP\n");
+    fprintf(file_p,"disableclipboard=0\n");
+    fclose(file_p);
+    return 0;
+#else
+    fprintf(file_p,"full address:s:%s\n",master_address);
+    fprintf(file_p,"redirectclipboard:i:1\n");
+    fprintf(file_p,"autoreconnection enabled:i:1\n");
+    fprintf(file_p,"authentication level:i:2\n");
+    fprintf(file_p,"prompt for credentials on client:i:1\n");
+    fprintf(file_p,"username:s:%s\n",username);
+    fclose(file_p);
+    return 0;
+#endif
+}
+
+int start_rdp_connection(char* cluster_workdir, char* username){
+    if(password_to_clipboard(cluster_workdir,username)!=0){
+        return 1;
+    }
+    char master_address[32]="";
+    char filename_rdp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    int run_flag;
+    printf(WARN_YELLO_BOLD "|\n[ -WARN- ] VERY RISKY! The user's password has been copied to the clipboard!\n");
+    printf("|          Please empty your clipboard after pasting the password!\n|" RESET_DISPLAY "\n");
+    if(get_cluster_name(cluster_name,cluster_workdir)!=0){
+        return 3;
+    }
+    if(get_state_value(cluster_workdir,"master_public_ip:",master_address)!=0){
+        return 5;
+    }
+    if(generate_rdp_file(cluster_name,master_address,username)!=0){
+        return 7;
+    }
+#ifdef __linux__
+    sprintf(filename_rdp,"%s%s.tmp%s%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+#else
+    sprintf(filename_rdp,"%s%s.tmp%s%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+#endif
+    sprintf(cmdline,"%s %s %s",RDP_EDIT_CMD,filename_rdp,SYSTEM_CMD_REDIRECT);
+    run_flag=system(cmdline);
+    if(run_flag!=0){
+        return 9;
+    }
+    return 0;
+}
+
+int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role){
+    if(strcmp(cluster_role,"opr")!=0&&strcmp(cluster_role,"admin")!=0&&strcmp(username,"root")==0){
+        return -3;
+    }
+    return start_rdp_connection(cluster_workdir,username);
+}

@@ -135,6 +135,10 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "ssh" RESET_DISPLAY "         :~ SSH to the master node of a cluster.\n");
         printf("|   -u       USER_NAME    ~ SSH to the cluster as a valid user.\n");
     }
+    if(strcmp(cmd_name,"rdp")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "rdp" RESET_DISPLAY "         :~ Connect to the desktop of the cluster with RDP.\n");
+        printf("|   -u       USER_NAME    ~ Connect as a valid user.\n");
+    }
     if(strcmp(cmd_name,"all")==0){
         printf("+  Advanced - For developers:\n");
     }
@@ -276,7 +280,7 @@ void print_help(char* cmd_name){
         printf("|   --all          ~ Turn on the management and compute nodes of the cluster.\n");
     }
     if(strcmp(cmd_name,"nfsup")==0||strcmp(cmd_name,"all")==0){
-        printf("|  " HIGH_GREEN_BOLD "nfsup" RESET_DISPLAY "      :~ Increase the NFS volume. " HIGH_CYAN_BOLD "Only for CLOUD_D/HuaweiCloud and CLOUD_F/Azure." RESET_DISPLAY "\n");
+        printf("|  " HIGH_GREEN_BOLD "nfsup" RESET_DISPLAY "      :~ Increase the NFS volume. " HIGH_CYAN_BOLD "Only for Huaweicloud, Microsoft Azure and GCP." RESET_DISPLAY "\n");
         printf("|   --vol NEW_VOLUME  ~ Specify a positive number as the new volume.\n");
     }
     if(strcmp(cmd_name,"destroy")==0||strcmp(cmd_name,"all")==0){

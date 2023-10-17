@@ -51,7 +51,8 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--echo", //echo_flag
     "--od",
     "--month",
-    "--gcp"
+    "--gcp",
+    "--rdp"
 };
 
 char command_keywords[CMD_KWDS_NUM][16]={
