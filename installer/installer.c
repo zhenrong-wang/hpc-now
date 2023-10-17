@@ -909,7 +909,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         sprintf(cmdline1,"mkdir -p /Users/Shared/ && curl %s -o /Users/Shared/rdp_for_mac.zip",URL_MSRDP_FOR_MAC);
         if(system(cmdline1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download the package, RDP won't work properly." RESET_DISPLAY "\n");
-            goto mac_install_done;
+            goto update_done;
         }
     }
     if(system("unzip /Users/Shared/rdp_for_mac.zip -q -d /Applications/")!=0){
