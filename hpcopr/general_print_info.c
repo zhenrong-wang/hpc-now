@@ -138,6 +138,10 @@ void print_help(char* cmd_name){
     if(strcmp(cmd_name,"rdp")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "rdp" RESET_DISPLAY "         :~ Connect to the desktop of the cluster with RDP.\n");
         printf("|   -u       USER_NAME    ~ Connect as a valid user.\n");
+        printf("|   --copypass            ~ Copy the user's password to the system clipboard. " WARN_YELLO_BOLD "HIGH RISK!" RESET_DISPLAY "\n");
+        printf("|                         ~ " WARN_YELLO_BOLD "VERY RISKY! Please DO empty your system clipboard after pasting it" RESET_DISPLAY "\n");
+        printf("|                         ~ " WARN_YELLO_BOLD "to the RDP Client! Otherwise the password will probably be leaked!" RESET_DISPLAY "\n");
+        printf("|                         ~ " WARN_YELLO_BOLD "You need to copy other contents to overwrite the system clipboard." RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"all")==0){
         printf("+  Advanced - For developers:\n");
