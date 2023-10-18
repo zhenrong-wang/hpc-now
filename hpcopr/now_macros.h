@@ -41,7 +41,7 @@
 #define MKDIR_CMD "mkdir"
 #define EDITOR_CMD "notepad"
 #define CLEAR_SCREEN_CMD "cls"
-#define RDP_EDIT_CMD "mstsc /e"
+#define RDP_EDIT_CMD "mstsc /edit"
 #define CLIPBOARD_CMD "clip"
 #define PIPE_TO_CLIPBOARD_CMD "| clip"
 
