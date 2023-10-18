@@ -2919,7 +2919,7 @@ int password_to_clipboard(char* cluster_workdir, char* username){
     fclose(file_p);
     sprintf(cmdline,"%s %s %s %s",CAT_FILE_CMD,filename_temp,PIPE_TO_CLIPBOARD_CMD,SYSTEM_CMD_REDIRECT_NULL);
     run_flag=system(cmdline);
-    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     if(run_flag!=0){
         return 3;
@@ -2998,7 +2998,7 @@ int start_rdp_connection(char* cluster_workdir, char* username, int password_fla
 #else
     sprintf(filename_rdp,"%s%s.tmp%s%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
 #endif
-    sprintf(cmdline,"%s %s %s",RDP_EDIT_CMD,filename_rdp,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s %s",RDP_EDIT_CMD,filename_rdp,SYSTEM_CMD_REDIRECT_NULL);
     run_flag=system(cmdline);
     if(run_flag!=0){
         return 9;
