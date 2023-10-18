@@ -2807,7 +2807,7 @@ int password_to_clipboard(char* cluster_workdir, char* username){
         decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
         sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
         find_and_get(filename_temp,"Master Node Root Password:","","",1,"Master Node Root Password:","","",' ',5,password_string);
-        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_ERR_REDIRECT_NULL);
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
     }
     else{
@@ -2843,6 +2843,8 @@ int generate_rdp_file(char* cluster_name, char* master_address, char* username){
     char filename_rdp[FILENAME_LENGTH]="";
 #ifdef __linux__
     sprintf(filename_rdp,"%s%s.tmp%s%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+#elif __APPLE__
+    sprintf(filename_rdp,"/Users/Shared/.hpc-now_%s_%s.rdp",cluster_name,username);
 #else
     sprintf(filename_rdp,"%s%s.tmp%s%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
 #endif
@@ -2867,22 +2869,29 @@ int generate_rdp_file(char* cluster_name, char* master_address, char* username){
     fprintf(file_p,"authentication level:i:2\n");
     fprintf(file_p,"prompt for credentials on client:i:1\n");
     fprintf(file_p,"username:s:%s\n",username);
+    fprintf(file_p,"negotiate security layer:i:1\n");
     fclose(file_p);
     return 0;
 #endif
 }
 
-int start_rdp_connection(char* cluster_workdir, char* username){
-    if(password_to_clipboard(cluster_workdir,username)!=0){
-        return 1;
+int start_rdp_connection(char* cluster_workdir, char* username, int password_flag){
+    if(password_flag==0){
+        if(password_to_clipboard(cluster_workdir,username)!=0){
+            return 1;
+        }
+        else{
+            printf(WARN_YELLO_BOLD "|\n[ -WARN- ] VERY RISKY! The user's password has been copied to the clipboard!\n");
+            printf("|          Please empty your clipboard after pasting the password!\n|" RESET_DISPLAY "\n");
+        }
     }
+
     char master_address[32]="";
     char filename_rdp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     int run_flag;
-    printf(WARN_YELLO_BOLD "|\n[ -WARN- ] VERY RISKY! The user's password has been copied to the clipboard!\n");
-    printf("|          Please empty your clipboard after pasting the password!\n|" RESET_DISPLAY "\n");
+    
     if(get_cluster_name(cluster_name,cluster_workdir)!=0){
         return 3;
     }
@@ -2894,6 +2903,8 @@ int start_rdp_connection(char* cluster_workdir, char* username){
     }
 #ifdef __linux__
     sprintf(filename_rdp,"%s%s.tmp%s%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+#elif __APPLE__
+    sprintf(filename_rdp,"/Users/Shared/.hpc-now_%s_%s.rdp",cluster_name,username);
 #else
     sprintf(filename_rdp,"%s%s.tmp%s%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
 #endif
@@ -2905,9 +2916,9 @@ int start_rdp_connection(char* cluster_workdir, char* username){
     return 0;
 }
 
-int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role){
+int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role, int password_flag){
     if(strcmp(cluster_role,"opr")!=0&&strcmp(cluster_role,"admin")!=0&&strcmp(username,"root")==0){
         return -3;
     }
-    return start_rdp_connection(cluster_workdir,username);
+    return start_rdp_connection(cluster_workdir,username,password_flag);
 }

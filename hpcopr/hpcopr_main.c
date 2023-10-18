@@ -913,12 +913,12 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 43;
         }
-        run_flag=cluster_rdp(workdir,user_name,cluster_role);
+        run_flag=cluster_rdp(workdir,user_name,cluster_role,cmd_flag_check(argc,argv,"--copypass"));
         if(run_flag==0||run_flag==9){
             if(run_flag==9){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " RDP client exited (either normally or unexpectedly).\n");
             }
-            write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",run_flag);
+            write_operation_log(cluster_name,operation_log,argc,argv,"RDP_EXITED",run_flag);
             check_and_cleanup(workdir);
             return 0;
         }
