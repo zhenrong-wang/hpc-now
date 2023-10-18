@@ -162,6 +162,9 @@ void print_help(char* cmd_name){
     if(strcmp(cmd_name,"all")==0){
         printf(GENERAL_BOLD "\n+ III  . Cluster Initialization: " RESET_DISPLAY "\n");
     }
+    if(strcmp(cmd_name,"cloud-info")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "cloud-info" RESET_DISPLAY " :~ Display the cloud information of a specified cluster\n");
+    }
     if(strcmp(cmd_name,"rotate-key")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "rotate-key" RESET_DISPLAY " :~ *Rotate* a new keypair for an existing cluster. The new keypair\n");
         printf("|              :~  should be valid and comes from the same cloud vendor.\n");

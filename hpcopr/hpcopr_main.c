@@ -86,6 +86,7 @@ char md5_gcp_tf_zip_var[64]="";
 char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "envcheck,gen,NULL",
     "new-cluster,gen,NULL",
+    "cloud-info,opr,CNAME",
     "ls-clusters,gen,NULL",
     "switch,gen,NULL",
     "glance,gen,NULL",
@@ -173,6 +174,7 @@ char jobman_commands[3][COMMAND_STRING_LENGTH_MAX]={
 /*
 1 NOT_A_VALID_COMMAND
 3 USER_DENIED
+4 FAILED_TO_GET_CLOUD_INFO
 5 LACK_PARAMS
 6 CLOUD_FUNCTION_UNSUPPORTED
 7 MISSING_CLOUD_FLAG_FILE
@@ -1015,6 +1017,18 @@ int main(int argc, char* argv[]){
             write_operation_log(cluster_name,operation_log,argc,argv,"FILE_I/O_ERROR",127);
             check_and_cleanup(workdir);
             return 127;
+        }
+        write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
+        check_and_cleanup(workdir);
+        return 0;
+    }
+
+    if(strcmp(argv[1],"cloud-info")==0){
+        run_flag=display_cloud_info(workdir);
+        if(run_flag!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"FAILED_TO_GET_CLOUD_INFO",4);
+            check_and_cleanup(workdir);
+            return 4;
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
         check_and_cleanup(workdir);

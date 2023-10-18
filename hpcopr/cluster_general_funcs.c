@@ -402,25 +402,115 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     if(file_exist_or_not(crypto_key_file)!=0){
         return 1;
     }
-    char md5[33]="";
+    char md5[64]="";
     char cmdline[CMDLINE_LENGTH]="";
-    char decrypted_file_name[FILENAME_LENGTH]="";
-    FILE* decrypted_file=NULL;
+    char filename_temp[FILENAME_LENGTH]="";
+    char get_ak[128]="";
+    char get_sk[128]="";
+    char get_cloud_flag[32]="";
+    FILE* file_p=NULL;
     if(get_crypto_key(crypto_key_file,md5)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
-    sprintf(cmdline,"%s decrypt %s %s.dat %s %s", now_crypto_exec, secret_file, secret_file, md5,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s decrypt %s %s.dat %s %s",now_crypto_exec,secret_file,secret_file,md5,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(decrypted_file_name,"%s.dat",secret_file);
-    decrypted_file=fopen(decrypted_file_name,"r");
-    if(decrypted_file==NULL){
+    sprintf(filename_temp,"%s.dat",secret_file);
+    file_p=fopen(filename_temp,"r");
+    if(file_p==NULL){
         return -1;
     }
-    fscanf(decrypted_file,"%s\n%s\n%s",ak,sk,cloud_flag);
-    fclose(decrypted_file);
-    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,decrypted_file_name,SYSTEM_CMD_REDIRECT);
+    fgetline(file_p,get_ak);
+    fgetline(file_p,get_sk);
+    fgetline(file_p,get_cloud_flag);
+    fclose(file_p);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    if(strlen(get_ak)==0||strlen(get_sk)==0||strlen(get_cloud_flag)==0){
+        strcpy(ak,"");
+        strcpy(sk,"");
+        strcpy(cloud_flag,"");
+        return 1;
+    }
+    else{
+        strcpy(ak,get_ak);
+        strcpy(sk,get_sk);
+        strcpy(cloud_flag,get_cloud_flag);
+        return 0;
+    }
+}
+
+int display_cloud_info(char* workdir){
+    char cloud_flag[32]="";
+    char vaultdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char cloud_ak[128]="";
+    char cloud_sk_buffer[128]="";
+    char cloud_flag_buffer[32]="";
+    char az_subscription_id[128]="";
+    char az_tenant_id[128]="";
+    char gcp_project_id[128]="";
+    char gcp_client_email[128]="";
+    char gcp_client_id[128]="";
+    
+    if(get_cloud_flag(workdir,cloud_flag)!=0){
+        return -1;
+    }
+    if(create_and_get_vaultdir(workdir,vaultdir)!=0){
+        return -3;
+    }
+    if(strcmp(cloud_flag,"CLOUD_G")!=0){
+        sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+        get_ak_sk(filename_temp,CRYPTO_KEY_FILE,cloud_ak,cloud_sk_buffer,cloud_flag_buffer);
+        if(strcmp(cloud_flag,"CLOUD_F")==0){  
+            get_azure_info(workdir,az_subscription_id,az_tenant_id);
+        }
+    }
+    else{
+        gcp_credential_convert(workdir,"decrypt",0);
+        sprintf(filename_temp,"%s%s.key.json",vaultdir,PATH_SLASH);
+        find_and_get(filename_temp,"\"project_id\":","","",1,"\"project_id\":","","",'\"',4,gcp_project_id);
+        find_and_get(filename_temp,"\"client_email\":","","",1,"\"client_email\":","","",'\"',4,gcp_client_email);
+        find_and_get(filename_temp,"\"client_id\":","","",1,"\"client_id\":","","",'\"',4,gcp_client_id);
+        find_and_get(filename_temp,"\"private_key_id\":","","",1,"\"private_key_id\":","","",'\"',4,cloud_ak);
+        gcp_credential_convert(workdir,"encrypt",0);
+    }
+    printf("\nCloud Vendor    : %s ",cloud_flag);
+    if(strcmp(cloud_flag,"CLOUD_A")==0){
+        printf("| Alibaba Cloud | https://www.alibabacloud.com\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_B")==0){
+        printf("| Tencent Cloud | https://www.tencentcloud.com\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_C")==0){
+        printf("| Amazon Web Services | https://aws.amazon.com\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
+        printf("| Huawei Cloud | https://www.huaweicloud.com\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
+        printf("| Baidu BCE Cloud | https://cloud.baidu.com\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        printf("| Microsoft Azure Cloud | https://azure.microsoft.com\n");
+    }
+    else{
+        printf("| Google Cloud Platform | https://cloud.google.com\n");
+    }
+    if(strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
+        printf("Access Key ID   : %s\n",cloud_ak);
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        printf("Subscription ID : %s\n",az_subscription_id);
+        printf("Tenant ID       : %s\n",az_tenant_id);
+        printf("Access Key ID   : %s\n",cloud_ak);
+    }
+    else{
+        printf("Project ID      : %s\n",gcp_project_id);
+        printf("Client Email    : %s\n",gcp_client_email);
+        printf("Client ID       : %s\n",gcp_client_id);
+        printf("Private Key ID  : %s\n",cloud_ak);
+    }
     return 0;
 }
 
