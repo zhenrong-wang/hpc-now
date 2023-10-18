@@ -2882,7 +2882,7 @@ int start_rdp_connection(char* cluster_workdir, char* username, int password_fla
         }
         else{
             printf(WARN_YELLO_BOLD "|\n[ -WARN- ] VERY RISKY! The user's password has been copied to the clipboard!\n");
-            printf("|          Please empty your clipboard after pasting the password!\n|" RESET_DISPLAY "\n");
+            printf("|          Please empty your clipboard after pasting the password!" RESET_DISPLAY "\n");
         }
     }
 
