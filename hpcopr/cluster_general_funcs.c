@@ -2875,17 +2875,23 @@ int generate_rdp_file(char* cluster_name, char* master_address, char* username){
 #endif
 }
 
-int start_rdp_connection(char* cluster_workdir, char* username){
-    if(password_to_clipboard(cluster_workdir,username)!=0){
-        return 1;
+int start_rdp_connection(char* cluster_workdir, char* username, int password_flag){
+    if(password_flag==0){
+        if(password_to_clipboard(cluster_workdir,username)!=0){
+            return 1;
+        }
+        else{
+            printf(WARN_YELLO_BOLD "|\n[ -WARN- ] VERY RISKY! The user's password has been copied to the clipboard!\n");
+            printf("|          Please empty your clipboard after pasting the password!\n|" RESET_DISPLAY "\n");
+        }
     }
+
     char master_address[32]="";
     char filename_rdp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     int run_flag;
-    printf(WARN_YELLO_BOLD "|\n[ -WARN- ] VERY RISKY! The user's password has been copied to the clipboard!\n");
-    printf("|          Please empty your clipboard after pasting the password!\n|" RESET_DISPLAY "\n");
+    
     if(get_cluster_name(cluster_name,cluster_workdir)!=0){
         return 3;
     }
@@ -2910,9 +2916,9 @@ int start_rdp_connection(char* cluster_workdir, char* username){
     return 0;
 }
 
-int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role){
+int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role, int password_flag){
     if(strcmp(cluster_role,"opr")!=0&&strcmp(cluster_role,"admin")!=0&&strcmp(username,"root")==0){
         return -3;
     }
-    return start_rdp_connection(cluster_workdir,username);
+    return start_rdp_connection(cluster_workdir,username,password_flag);
 }

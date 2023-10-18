@@ -98,7 +98,7 @@ int get_max_cluster_name_length(void);
 
 int password_to_clipboard(char* cluster_workdir, char* username);
 int generate_rdp_file(char* cluster_name, char* master_address, char* username);
-int start_rdp_connection(char* cluster_workdir, char* username);
-int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role);
+int start_rdp_connection(char* cluster_workdir, char* username, int password_flag);
+int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role, int password_flag);
 
 #endif

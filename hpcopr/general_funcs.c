@@ -52,7 +52,8 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--od",
     "--month",
     "--gcp",
-    "--rdp"
+    "--rdp",
+    "--copypass"
 };
 
 char command_keywords[CMD_KWDS_NUM][16]={
