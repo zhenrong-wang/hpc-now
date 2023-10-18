@@ -57,9 +57,9 @@ extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
 int check_internet(void){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    sprintf(cmdline,"ping -n 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"ping -n 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #else
-    sprintf(cmdline,"ping -c 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"ping -c 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #endif
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please either check your DNS\n");
@@ -83,9 +83,9 @@ int check_internet_google(void){
         return -1;
     }
 #ifdef _WIN32
-    sprintf(cmdline,"ping -n 1 api.google.com %s",SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"ping -n 1 api.google.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #else
-    sprintf(cmdline,"ping -c 1 api.google.com %s",SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"ping -c 1 api.google.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #endif
     if(system(cmdline)!=0){
         fprintf(file_p,"api.google.com_connectivity_check: FAILED\n");
