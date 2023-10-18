@@ -414,17 +414,17 @@ if [ -f /root/hostfile ]; then
       sed -i '/gini/d' /etc/profile
       echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
     else
-      if [ $cloud_flag != "CLOUD_G" ]; then
-        yum -y groupinstall "Server with GUI"
-      else
+#      if [ $cloud_flag != "CLOUD_G" ]; then
+#        yum -y groupinstall "Server with GUI"
+#      else
         # For some reasons, Google Compute Instance fails to restart after installing "Server with GUI". 
         # Therefore, we have to avoid installing "Server with GUI"
-        yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks 
-        yum -y install gnome-shell-*
-        yum -y install firefox
-        yum -y install nautilus
-        yum -y install ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
-      fi
+      yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks 
+      yum -y install gnome-shell-*
+      yum -y install firefox
+      yum -y install nautilus
+      yum -y install ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
+#      fi
       systemctl enable gdm --now
       systemctl disable firewalld
       systemctl stop firewalld
@@ -456,8 +456,6 @@ if [ -f /root/hostfile ]; then
   sed -i '/\[neutrinordp-any\]/,+8d' /etc/xrdp/xrdp.ini
   sed -i 's/; (1 = ExtendedDesktopSize)/ (1 = ExtendedDesktopSize)/g' /etc/xrdp/xrdp.ini
   sed -i 's/#xserverbpp=24/xserverbpp=24/g' /etc/xrdp/xrdp.ini
-  systemctl start xrdp
-  systemctl enable xrdp
 
   yum -y install rpcbind flex GConf2 cmake cmake3 tcsh
   yum -y install ibus libXScrnSaver
@@ -488,6 +486,8 @@ if [ -f /root/hostfile ]; then
   fi
   time_current=`date "+%Y-%m-%d %H:%M:%S"`
   echo -e "# $time_current Desktop Environment and RDP has been installed." >> ${logfile}
+  systemctl restart xrdp
+  systemctl enable xrdp
 fi
 
 # Download scripts & Desktop shortcuts 
@@ -564,6 +564,8 @@ fi
 yum -y update
 yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix bash-completion
 systemctl mask firewalld
+systemctl restart xrdp
+systemctl enable xrdp
 
 if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete
