@@ -2807,7 +2807,7 @@ int password_to_clipboard(char* cluster_workdir, char* username){
         decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
         sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
         find_and_get(filename_temp,"Master Node Root Password:","","",1,"Master Node Root Password:","","",' ',5,password_string);
-        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_ERR_REDIRECT_NULL);
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
     }
     else{
