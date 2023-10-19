@@ -95,19 +95,19 @@ Several extra packages (around 400 MB) will be download and installed. This proc
 
 #### 3.3 Basic Workflow
 
-In order to use and manage HPC on the cloud with HPC-NOW. Please follow the workflow:
+In order to use and manage HPC on the cloud with HPC-NOW, please follow the workflow:
 
-- Import a cloud credential - a keypair or key file (`hpcopr new-cluster ...`) --> 
-- Initialize a new cluster (`hpcopr init ...`) --> 
-- Deploy an application (`hpcopr appman ...`) -->
-- Upload your data (`hpcopr dataman ...`) -->
-- Connect to your cluster (`hpcopr ssh ...` OR `hpcopr rdp ...`) -->
-- Start your HPC work (`hpcopr jobman ...`) -->
-- Waiting for the job to be done - may be minutes, hours, or days
-- Export your HPC data to local or other places (`hpcopr dataman ...`) -->
-- Hibernate the cluster (*optional*, `hpcopr sleep ...`) -->
-- Destroy the cloud cluster (`hpcopr destroy ...`) -->
-- Remove the cloud credentials (optional, `hpcopr remove ...`)
+- Import a cloud credential - a keypair or key file (**`hpcopr new-cluster ...`**) --> 
+- Initialize a new cluster (**`hpcopr init ...`**) --> 
+- Deploy an application (**`hpcopr appman ...`**) -->
+- Upload your data (**`hpcopr dataman ...`**) -->
+- Connect to your cluster (**`hpcopr ssh ...`** OR **`hpcopr rdp ...`**) -->
+- Start your HPC work (**`hpcopr jobman ...`**) -->
+- Waiting for the job to be done - **may be minutes, hours, or days ...**
+- Export your HPC data to local or other places (**`hpcopr dataman ...`**) -->
+- Hibernate the cluster (*optional*, **`hpcopr sleep ...`**) -->
+- Destroy the cloud cluster (**`hpcopr destroy ...`**) -->
+- Remove the cloud credentials (optional, **`hpcopr remove ...`**)
 
 #### 3.4 Commands
 
