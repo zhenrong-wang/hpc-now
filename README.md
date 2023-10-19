@@ -86,7 +86,7 @@ If everything goes well, the binaries will be built to the 'build' folder.
 
     `sudo ./installer-dwn-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-dwn-HPCOPR_VERSION_CODE.exe --cloc now-crypto-dwn.exe`
 
-Please replace the `INSTALLER_VERSION_CODE` and `HPCOPR_VERSION_CODE` to the real codes.
+Please replace the `INSTALLER_VERSION_CODE` and `HPCOPR_VERSION_CODE` to the actual codes of your build.
 
 Please keep the window open for the next step.
 
@@ -134,8 +134,9 @@ The **`hpcopr.exe`** is the main interface for you to operate.
 
 USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 
-    `CMD_FLAG`: such as --force，--all
-    `CMD_KEYWORD`: key-value pair, such as -c myFirstCluster
+    CMD_NAME: see all the command names below
+    CMD_FLAG: such as --force，--all
+    CMD_KEYWORD: key-value pair, such as -c myFirstCluster
 
 ##### **Get-Started**
 
