@@ -1,73 +1,286 @@
-### 1. 项目背景
+### 1. Project Background
 
-云上的高性能计算（ Cloud High-Performance Computing, Cloud HPC ），与本地集群相比，有多方面的区别。其中最为显著的区别，就是云资源的弹性、动态与灵活性。理论上讲，您可以轻松使用多个云计算机房的计算、存储、网络资源，您的超算集群规模可以扩展到数百、数千核心，也可能根据实际情况减小到 0 个计算核心。这种动态特点就意味着，您在一定程度上需要关心底层资源 —— 例如集群的规模、集群的数量等。
+Cloud High-Performance Computing, Cloud HPC differs from on-premise HPC significantly. Cloud service brings high scalability and flexibility to High-Performance Computing. However, most HPC users are not familiar with building and maintaining HPC services on the cloud. 
 
-然而，资源管理对于广大的 Cloud HPC 用户来说，是比较陌生的；尤其是云资源的管理，更是无从下手。云提供海量的底层资源，但是 Cloud HPC 用户首先需要让这些资源组成具备超级计算能力的集群。这也就意味着需要一个  **构建和运行** 的过程。这个过程，对于大多数用户来说，难度非常高，原因在于它涉及到多方面的 IT 应用知识和云计算技能，包括但不限于：
+In order to make it super easy to start and manage HPC workloads on the cloud, we have been developing this project and named it as HPC-NOW. NOW stands for:
 
-- 什么是网络、虚拟私有网络、子网、网段、ACL、公有和私有 IP ……
-- 什么是云主机、主机镜像、安全组、公钥私钥 ……
-- 什么是云硬盘、文件存储、对象存储、挂载不同类型的存储 ……
-- 什么是任务调度器、调度器如何配置和运行、超算用户如何使用和提交任务 ……
-- ……
+- Start HPC journey on the cloud immediately, in minutes.
+- (almost) No Operation Workload.
 
-以上种种，都成为了制约 Cloud HPC 走向更广阔应用的一道门槛。目前，这些工作要么是由云厂商以自研的方式、面向 HPC 用户推出自有的 Cloud HPC 服务，要么是由第三方服务商进行集成开发之后以类 SaaS 平台的方式提供给客户。无论是哪一种方案，都旨在将客户留在各自的平台上；尽管在商业方面是完全合理而且完全值得尊重的，但是无形之中会限制最终用户对于超算的掌控权以及选择 Cloud HPC 服务的自由度。
+Currently, the HPC-NOW platform supports the cloud services as below:
 
-为了打造全面开放且超级简单的 Cloud HPC 平台，让用户能够以极低的门槛开启 Cloud HPC，加速科研创新，我们打造了开源的云超算平台 HPC-NOW。这里，NOW 有两层含义：
+- [Alibaba Cloud](https://www.alibabacloud.com/en), HPC-NOW Internal Code: CLOUD_A
+- [Tencent Cloud](https://www.tencentcloud.com/), HPC-NOW Internal Code: CLOUD_B
+- [Amazon Web Services](https://aws.amazon.com/), HPC-NOW Internal Code: CLOUD_C
+- [Huawei Cloud](https://www.huaweicloud.com/), HPC-NOW Internal Code: CLOUD_D
+- [Baidu BCE](https://cloud.baidu.com/), HPC-NOW Internal Code: CLOUD_E
+- [Microsoft Azure](https://azure.microsoft.com/en-us/), HPC-NOW Internal Code: CLOUD_F
+- [Google Cloud Platform](https://cloud.google.com/), HPC-NOW Internal Code: CLOUD_G
 
-- 现在即可开始，无需等待
-- No Operation Workload，无需繁重的运行维护工作，即可在云上轻松管理您的超算集群和超算服务
+### 2. Core Components
 
-目前，HPC-NOW 服务支持的云平台列表如下：
+Thanks to the [Terraform](http://www.terraform.io), a great cloud Infrastructure-as-Code platform, which makes it possible to orchestrate cloud resources in a unified and simple way.
 
-- 阿里云，Alibaba，Cloud，内部代号 CLOUD_A
-- 腾讯云，Tencent Cloud，内部代号 CLOUD_B
-- 亚马逊，Amazon Web Services，内部代号 CLOUD_C
-- 华为云，Huawei Cloud，内部代号 CLOUD_D
-- 百度云，Baidu BCE，内部代号 CLOUD_E
-- 微软云，Azure，内部代号 CLOUD_F
-- 谷歌云，Google Cloud Platform，内部代号 CLOUD_G
+In this project, we developed components as below:
 
-希望与您共同携手打造开源、开放的 Cloud HPC 生态！
+-  **installer**  : HPC-NOW service installer, which requires administrator or root privilege to run.
+-  **hpcopr**     : HPC Operator. The main component that manages the HPC clusters, users, jobs, data, monitoring, usage, etc.
+-  **now-crypto** : A cryptography module that encrypts and decrypts the files containing sensitive information.
+-  **hpcmgr**    : A utility running in every cluster to communicate with the operator.
+-  **infra-as-code** : Infrastructure codes in HCL format
+-  **scripts**    : Shell scripts to initialize the clusters, install applications, etc.
 
-本项目基于 MIT 协议开源，协议条款详见 COPYING 。
 
-### 2. 核心组件
+### 3. How-To: Build, Run, and Use
 
-首先，在此鸣谢卓越、开源、面向多云的 IaC（ 基础设施即代码 ）平台 [Terraform](http://www.terraform.io)。正是 Terraform 强大的功能和良好的生态为 HPC-NOW 提供了坚实的基础，我们可以不必重复造轮子。本项目的核心工作，在于如何驱动 Terraform 来构建和管理一个或多个 Cloud HPC 集群。
+The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Windows, GNU/Linux, or macOS. Note: Currently only x86_64 platform is supported.
 
-本项目的核心组件如下：
+#### 3.1 Build
 
--  **installer**  ：HPC-NOW 服务的安装器。主要负责服务的安装、卸载、更新三项工作。该安装器被设计为必须由管理员权限执行。
--  **hpcopr**     ：意即 HPC Operator，是 HPC-NOW 的核心程序，也是用户需要执行的主程序。为了确保安全性和隔离性，该程序被设计为必须由专属 OS 用户 "hpc-now" 执行，其他用户，即使是管理员用户或者根用户也无法执行。由 hpcopr 管理基础设施代码，并调用 Terraform 对云资源进行全生命周期管理。
--  **now-crypto** ：核心程序，主要作用是文本文件加密和解密，以确保敏感信息不以明文形式存放。请注意，该程序通过偏移字符的方式对文本信息进行随机修改，您的密文文件仍需要妥善保管。
--  **hpcmgr**    ：强大的集群内管理工具，包括集群的连接、SLURM 服务的启动、以及 HPC 软件包的自动化编译安装等。
--  **infra-as-code** ：模板文件是 IaC（基础设施及代码）的核心要素，我们已经针对阿里云、腾讯云、AWS、华为云、百度云、Azure（国际区）、Google Cloud Platform 七家公有云厂商制作了专用的资源模板。
--  **scripts**    ：启动脚本包含了集群各个节点启动过程的编排，包括各类必要组件的自动化安装。
+**Prerequisites:** `git`, `gcc` (for GNU/Linux) | `clang` (for macOS) | `mingw` (for Microsoft Windows)
 
-### 3. 如何部署、使用、卸载、构建与开发
+**Step 1. Clone this repository:** 
 
-请查阅 Docs/UserManual-CN.pdf 。
+    git clone https://github.com/zhenrong-wang/hpc-now OR
+    git clone https://github.com/zhenrong-wang/hpc-now
 
-### 4. Bug与技术沟通
+**Step 2. Change the directory :** `cd hpc-now`
 
-欢迎向该仓库提交 issues，或者邮箱联系 zhenrongwang@live.com | wangzhenrong@hpc-now.com | info@hpc-now.com
+**Step 3. Run the build script :** 
 
-### 5. 开发路线图
+    For Microsoft Windows users: .\make_windows.bat build
+    For GNU/Linux Distro users : ./make_linux.sh build
+    For macOS users            : ./make_darwin.sh build
 
-HPC-NOW 的开发将遵循以下总体路线（其中的优先级为暂定）：
+If everything goes well, the binaries will be built to the 'build' folder.
 
-软件仓库优化：
+#### 3.2 Run
 
-- HPCMGR 操作逻辑优化（最高优先级）
-- 提供PreBuild 仓库与源代码仓库（高优先级）
-- 本地软件仓库功能（低优先级）
+**Step 1. Run the installer:**
 
-UI/UE：（高优先级）
+- For Microsoft Windows users: open a cmd window as Administrator, and change the direcroty to the 'build' folder. Then run: 
 
-- hpcopr、installer 的GUI客户端（一般优先级）
-- 基于 Web 的在线平台（高优先级）
+    **`.\installer-win-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-win-HPCOPR_VERSION_CODE.exe --cloc now-crypto-win.exe`**
 
-平台核心层：（以下皆为最高优先级）
+- For GNU/Linux Distro users: 
 
-- 日志清理功能（清理 error archive、logtrash、tf_prep.log.archive）
-- 默认 Disable root ssh 和远程桌面连接
+    **`sudo ./installer-lin-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-lin-HPCOPR_VERSION_CODE.exe --cloc now-crypto-lin.exe`** 
+
+- For macOS users:
+
+    **`sudo ./installer-dwn-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-dwn-HPCOPR_VERSION_CODE.exe --cloc now-crypto-dwn.exe`**
+
+Please replace the **`INSTALLER_VERSION_CODE`** and **`HPCOPR_VERSION_CODE`** to the real codes.
+
+Please keep the window open for the next step.
+
+**Step 2. Run the hpcopr.exe:**
+
+- For Microsoft Windows users:
+
+    - Set a password for the user 'hpc-now' : `net user hpc-now YOUR_COMPLEX_PASSWORD`
+    - Run a new cmd window as 'hpc-now'     : `runas /savecred /user:mymachine\hpc-now cmd`
+    - Run the main program 'hpcopr.exe'     : `hpcopr envcheck`
+
+- For GNU/Linux Distros users:
+
+    - Set a password for the user 'hpc-now' : `sudo passwd hpc-now`
+    - Switch to the user 'hpc-now'          : `su hpc-now`
+    - Run the main program 'hpcopr.exe'     : `hpcopr envcheck`
+
+- For macOS users:
+
+    - Set a password for the user 'hpc-now' : `sudo dscl . -passwd /Users/hpc-now YOUR_COMPLEX_PASSWORD`
+    - Switch to the user 'hpc-now'          : `su hpc-now`
+    - Run the main program 'hpcopr.exe'     : `hpcopr envcheck`
+
+Several extra packages (around 400 MB) will be download and installed. This process may needs minutes (depending on your local network connectivity).
+
+#### 3.3 Basic Workflow
+
+In order to use and manage HPC on the cloud with HPC-NOW, please follow the workflow:
+
+- Import a cloud credential - a keypair or key file (**`hpcopr new-cluster ...`**) --> 
+- Initialize a new cluster (**`hpcopr init ...`**) --> 
+- Deploy an application (**`hpcopr appman ...`**) -->
+- Upload your data (**`hpcopr dataman ...`**) -->
+- Connect to your cluster (**`hpcopr ssh ...`** OR **`hpcopr rdp ...`**) -->
+- Start your HPC work (**`hpcopr jobman ...`**) -->
+- Waiting for the job to be done - **may be minutes, hours, or days ...**
+- Export your HPC data to local or other places (**`hpcopr dataman ...`**) -->
+- Hibernate the cluster (*optional*, **`hpcopr sleep ...`**) -->
+- Destroy the cloud cluster (**`hpcopr destroy ...`**) -->
+- Remove the cloud credentials (optional, **`hpcopr remove ...`**)
+
+#### 3.4 Commands
+
+The **`hpcopr.exe`** is the main interface for you to operate.
+
+USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
+
+    `CMD_FLAG`: such as --force，--all
+    `CMD_KEYWORD`: key-value pair, such as -c myFirstCluster
+
+**Get-Started**
+
+- `envcheck`     Quickly check the running environment.
+
+**Multi-Cluster Management**
+
+- `new-cluster`  Create a new cluster to initialize.
+- `ls-clusters`  List all the current clusters.
+- `switch`       Switch to a cluster in the registry to operate.
+- `glance`       View all the clusters or a target cluster.
+- `refresh`      Refresh a cluster without changing the resources.
+- `export`       Export a cluster to another hpcopr client. Optional params:
+- `import`       Import a cluster to the current hpcopr client.
+- `remove`       Completely remove a cluster from the OS and registry.
+- `exit-current` Exit the current cluster.
+
+**Global Management**
+
+- `help`         Show this page and the information here.
+- `usage`        View and/or export the usage history.
+- `monman`       Get, filter, and extract cluster monitoring data.
+- `history`      View and/or export the operation log.
+- `syserr`       View and/or export the system cmd errors.
+- `ssh`          SSH to the master node of a cluster.
+- `rdp`          Connect to the cluster's desktop environment.
+
+*Advanced - For developers:*
+
+- `configloc`    Configure the locations for the terraform binaries, providers, IaC templates and shell scripts.
+- `showloc`      Show the current configured locations.
+- `showmd5`      Show the md5sum values of core components.
+- `resetloc`     Reset to the default locations.
+
+**Cluster Initialization**
+
+- `rotate-key`  *Rotate* a new keypair for an existing cluster. The new keypair should be valid and comes from the same cloud vendor.
+- `get-conf`    Get the default configuration file to edit and build a customized HPC cluster later (using the 'init' command).
+- `edit-conf`   Edit and save the default configuration file *before* init.
+- `rm-conf`     Remove the configuration file *before* init.
+- `init`        Initialize a new cluster. If the configuration file is absent, the command will generate a default configuration file.
+- `rebuild`     Rebuild the nodes *without* destroying the cluster's storage.
+
+**Cluster Management**
+
+- `vault`        Check the sensitive information of the current cluster.
+- `graph`        Display the cluster map including all the nodes and status.
+- `viewlog`      View the operation log of the current cluster.
+
+**Cluster Operation**
+
+- `delc`         Delete specified compute nodes:
+- `addc`         Add compute nodes to current cluster. You must specify how many to be added.
+- `shutdownc`    Shutdown specified compute nodes. Similar to 'delc', you can specify to shut down all or part of the compute nodes by the param 'all' or 'NUM'.
+- `turnonc`      Turn on specified compute nodes. Similar to 'delc', you can specify to turn on all or part of the compute nodes by the parameter 'all' or 'NUM'.
+- `reconfc`      Reconfigure all the compute nodes.
+- `reconfm`      Reconfigure the master node.
+- `sleep`        Turn off all the nodes (management and compute) of the cluster.
+- `wakeup`       Wake up the cluster nodes.
+- `nfsup`        Increase the cluster’s NFS shared volume (in GB).
+- `destroy`      *DESTROY* the whole cluster - including all the resources & data.
+- `payment`      Switch the payment method between on-demand and monthly.
+
+**Cluster User Management**
+
+Usage `hpcopr userman --ucmd USER_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
+
+The cluster must be in running state (minimal or all). 
+
+    --ucmd list      List all the current cluster users.
+    --ucmd add       Add a user to the cluster. By default, added users are enabled.
+    --ucmd delete    Delete a user from the cluster.
+    --ucmd enable    Enable a *disabled* user. Enabled users can run HPC workloads.
+    --ucmd disable   Disable a user. Disabled users still can access the cluster.
+    --ucmd passwd    Change user's password.
+
+**Cluster Data Management**
+
+Usage `hpcopr dataman CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...`
+
+General Flags     -r, -rf, --recursive, --force, -f.
+
+    -s SOURCE_PATH    Source path of the binary operations. i.e. cp
+    -d DEST_PATH      Destination path of binary operations. i.e. cp
+    -t TARGET_PATH    Target path of unary operations. i.e. ls
+
+**Bucket Operations:** Transfer and manage data with the bucket.
+
+    --dcmd put         Upload a local file or folder to the bucket path.
+    --dcmd get         Download a bucket object(file or folder) to the local path.
+    --dcmd copy        Copy a bucket object to another folder/path.
+    --dcmd list        Show the object list of a specified folder/path.
+    --dcmd delete      Delete an object (file or folder) of the bucket.
+    --dcmd move        Move an existed object (file or folder) in the bucket.
+
+Example: `hpcopr dataman --dcmd put -s ./foo -d /foo -u user1`
+
+**Direct Operations:** Transfer and manage data in the cluster storage.
+
+The cluster must be in running state (minimal or all).
+
+    --dcmd cp          Remote copy between local and the cluster storage.
+    --dcmd mv          Move the remote files/folders in the cluster storage.
+    --dcmd ls          List the files/folders in the cluster storage.
+    --dcmd rm          Remove the files/folders in the cluster storage.
+    --dcmd mkdir       Make a directory in the cluster storage.
+    --dcmd cat         Print out a remote plain text file.
+    --dcmd more        Read a remote file.
+    --dcmd less        Read a remote file.
+    --dcmd tail        Streaming out a remote file dynamically.
+    --dcmd rput        Upload a *remote* file or folder to the bucket path.
+    --dcmd rget        Download a bucket object(file or folder) to the *remote* path.
+
+        @h/ to specify the $HOME prefix of the cluster.
+        @d/ to specify the /hpc_data/user_data prefix.
+        @a/ to specify the /hpc_apps/ prefix, only for root or user1.
+        @p/ to specify the public folder prefix ( INSECURE !).
+        @R/ to specify the / prefix, only for root or user1.
+        @t/ to specify the /tmp prefix.
+
+Example: `hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1`
+
+**Cluster App Management**
+
+Usage `hpcopr appman --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...`
+
+The cluster must be in running state (minimal or all). *
+
+`-u USERNAME`    A valid user name. Use 'root' for all users. Admin or Operator role is required for root.
+
+    --acmd store     List out the apps in store.
+    --acmd avail     List out all the installed apps.
+    --acmd check     Check whether an app is available.
+    --acmd install   Install an app to all users or a specified user.
+    --acmd build     Compile and build an app to all users or a specified user.
+    --acmd remove    Remove an app from the cluster.
+
+**Cluster Job Management**
+
+Usage `hpcopr jobman --jcmd APP_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
+
+The cluster must be in running state (minimal or all).
+
+`-u USERNAME`      A valid user name. The root user CANNOT submit jobs.
+
+    --jcmd submit    Submit a job to the cluster.
+    --jcmd list      List out all the jobs.
+    --jcmd cancel    Cancel a job with specified ID
+
+**Others**
+
+- `about`        About this software and HPC-NOW project.
+- `version`      Display the version info.
+- `license`      Read the terms of the MIT License
+- `repair`       Try to repair the hpcopr core components.
+
+For more information, please refer to Docs/UserManual-EN.pdf.
+
+The most detailed help info can be found by the command `hpcopr help` .
+
+### 4. Bug Reports
+
+Please submit issues to this repo. Or
+mailto: zhenrongwang@live.com | wangzhenrong@hpc-now | info@hpc-now.com
