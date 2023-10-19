@@ -37,16 +37,20 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 #### 3.1 Build
 
-**Prerequisites:** `git`, `gcc` (for GNU/Linux) | `clang` (for macOS) | `mingw` (for Microsoft Windows)
+##### **Prerequisites:** 
 
-**Step 1. Clone this repository:** 
+`git`, `gcc` (for GNU/Linux) | `clang` (for macOS) | `mingw` (for Microsoft Windows)
+
+##### **Step 1. Clone this repository:** 
 
     git clone https://github.com/zhenrong-wang/hpc-now OR
     git clone https://github.com/zhenrong-wang/hpc-now
 
-**Step 2. Change the directory :** `cd hpc-now`
+##### **Step 2. Change the directory :** 
 
-**Step 3. Run the build script :** 
+`cd hpc-now`
+
+##### **Step 3. Run the build script :** 
 
     For Microsoft Windows users: .\make_windows.bat build
     For GNU/Linux Distro users : ./make_linux.sh build
@@ -56,21 +60,33 @@ If everything goes well, the binaries will be built to the 'build' folder.
 
 #### 3.2 Run
 
-**Step 1. Run the installer:**
+##### **Step 1. Run the installer (Administrator or root privilege is required):**
 
-- For Microsoft Windows users: open a cmd window as Administrator, and change the direcroty to the 'build' folder. Then run: 
+- For **Microsoft Windows** users: 
+    
+    Open a cmd prompt as Administrator: 
 
-    **`.\installer-win-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-win-HPCOPR_VERSION_CODE.exe --cloc now-crypto-win.exe`**
+        Type 'cmd' in the search box
+        Right click on the icon of Command Prompt
+        Select 'Run as Administrator'
+    
+    Change the direcroty to the 'build' folder: 
+    
+    `cd YOUR_PATH_TO_THE_BUILD_FOLDER`
 
-- For GNU/Linux Distro users: 
+    Run the command below:
 
-    **`sudo ./installer-lin-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-lin-HPCOPR_VERSION_CODE.exe --cloc now-crypto-lin.exe`** 
+    `.\installer-win-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-win-HPCOPR_VERSION_CODE.exe --cloc now-crypto-win.exe`
 
-- For macOS users:
+- For **GNU/Linux Distro** users: 
 
-    **`sudo ./installer-dwn-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-dwn-HPCOPR_VERSION_CODE.exe --cloc now-crypto-dwn.exe`**
+    `sudo ./installer-lin-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-lin-HPCOPR_VERSION_CODE.exe --cloc now-crypto-lin.exe`
 
-Please replace the **`INSTALLER_VERSION_CODE`** and **`HPCOPR_VERSION_CODE`** to the real codes.
+- For **macOS** users:
+
+    `sudo ./installer-dwn-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-dwn-HPCOPR_VERSION_CODE.exe --cloc now-crypto-dwn.exe`
+
+Please replace the `INSTALLER_VERSION_CODE` and `HPCOPR_VERSION_CODE` to the real codes.
 
 Please keep the window open for the next step.
 
