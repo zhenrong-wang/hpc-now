@@ -565,8 +565,8 @@ fi
 yum -y update
 yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix bash-completion
 systemctl mask firewalld
-systemctl restart xrdp
-systemctl enable xrdp
+#systemctl restart xrdp
+#systemctl enable xrdp
 
 if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete
