@@ -93,7 +93,30 @@ Please keep the window open for the next step.
 
 Several extra packages (around 400 MB) will be download and installed. This process may needs minutes (depending on your local network connectivity).
 
-#### 3.3 Use
+#### 3.3 Basic Workflow
+
+In order to use and manage HPC on the cloud with HPC-NOW. Please follow the workflow:
+
+- Import a cloud credential - a keypair or key file (`hpcopr new-cluster ...`) --> 
+- Initialize a new cluster (`hpcopr init ...`) --> 
+- Deploy an application (`hpcopr appman ...`) -->
+- Upload your data (`hpcopr dataman ...`) -->
+- Connect to your cluster (`hpcopr ssh ...` OR `hpcopr rdp ...`) -->
+- Start your HPC work (`hpcopr jobman ...`) -->
+- Waiting for the job to be done - may be minutes, hours, or days
+- Export your HPC data to local or other places (`hpcopr dataman ...`) -->
+- Hibernate the cluster (*optional*, `hpcopr sleep ...`) -->
+- Destroy the cloud cluster (`hpcopr destroy ...`) -->
+- Remove the cloud credentials (optional, `hpcopr remove ...`)
+
+#### 3.4 Commands
+
+The **`hpcopr.exe`** is the main interface for you to operate.
+
+USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
+
+    `CMD_FLAG`: such as --force，--all
+    `CMD_KEYWORD`: key-value pair, such as -c myFirstCluster
 
 **Get-Started**
 
@@ -163,55 +186,56 @@ Usage `hpcopr userman --ucmd USER_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
 The cluster must be in running state (minimal or all). 
 
-    - `--ucmd list`      List all the current cluster users.
-    - `--ucmd add`       Add a user to the cluster. By default, added users are enabled.
-    - `--ucmd delete`    Delete a user from the cluster.
-    - `--ucmd enable`    Enable a *disabled* user. Enabled users can run HPC workloads.
-    - `--ucmd disable`   Disable a user. Disabled users still can access the cluster.
-    - `--ucmd passwd`    Change user's password.
+    --ucmd list      List all the current cluster users.
+    --ucmd add       Add a user to the cluster. By default, added users are enabled.
+    --ucmd delete    Delete a user from the cluster.
+    --ucmd enable    Enable a *disabled* user. Enabled users can run HPC workloads.
+    --ucmd disable   Disable a user. Disabled users still can access the cluster.
+    --ucmd passwd    Change user's password.
 
 **Cluster Data Management**
 
 Usage `hpcopr dataman CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...`
 
 General Flags     -r, -rf, --recursive, --force, -f.
-    - `-s SOURCE_PATH`    Source path of the binary operations. i.e. cp
-    - `-d DEST_PATH`      Destination path of binary operations. i.e. cp
-    - `-t TARGET_PATH`    Target path of unary operations. i.e. ls
+
+    -s SOURCE_PATH    Source path of the binary operations. i.e. cp
+    -d DEST_PATH      Destination path of binary operations. i.e. cp
+    -t TARGET_PATH    Target path of unary operations. i.e. ls
 
 **Bucket Operations:** Transfer and manage data with the bucket.
 
-    - `--dcmd put`         Upload a local file or folder to the bucket path.
-    - `--dcmd get`         Download a bucket object(file or folder) to the local path.
-    - `--dcmd copy`        Copy a bucket object to another folder/path.
-    - `--dcmd list`        Show the object list of a specified folder/path.
-    - `--dcmd delete`      Delete an object (file or folder) of the bucket.
-    - `--dcmd move`        Move an existed object (file or folder) in the bucket.
+    --dcmd put         Upload a local file or folder to the bucket path.
+    --dcmd get         Download a bucket object(file or folder) to the local path.
+    --dcmd copy        Copy a bucket object to another folder/path.
+    --dcmd list        Show the object list of a specified folder/path.
+    --dcmd delete      Delete an object (file or folder) of the bucket.
+    --dcmd move        Move an existed object (file or folder) in the bucket.
 
 Example: `hpcopr dataman --dcmd put -s ./foo -d /foo -u user1`
 
 **Direct Operations:** Transfer and manage data in the cluster storage.
 
-The cluster must be in running state (minimal or all). *
+The cluster must be in running state (minimal or all).
 
-    - `--dcmd cp`          Remote copy between local and the cluster storage.
-    - `--dcmd mv`          Move the remote files/folders in the cluster storage.
-    - `--dcmd ls`          List the files/folders in the cluster storage.
-    - `--dcmd rm`          Remove the files/folders in the cluster storage.
-    - `--dcmd mkdir`       Make a directory in the cluster storage.
-    - `--dcmd cat`         Print out a remote plain text file.
-    - `--dcmd more`        Read a remote file.
-    - `--dcmd less`        Read a remote file.
-    - `--dcmd tail`        Streaming out a remote file dynamically.
-    - `--dcmd rput`        Upload a *remote* file or folder to the bucket path.
-    - `--dcmd rget`        Download a bucket object(file or folder) to the *remote* path.
+    --dcmd cp          Remote copy between local and the cluster storage.
+    --dcmd mv          Move the remote files/folders in the cluster storage.
+    --dcmd ls          List the files/folders in the cluster storage.
+    --dcmd rm          Remove the files/folders in the cluster storage.
+    --dcmd mkdir       Make a directory in the cluster storage.
+    --dcmd cat         Print out a remote plain text file.
+    --dcmd more        Read a remote file.
+    --dcmd less        Read a remote file.
+    --dcmd tail        Streaming out a remote file dynamically.
+    --dcmd rput        Upload a *remote* file or folder to the bucket path.
+    --dcmd rget        Download a bucket object(file or folder) to the *remote* path.
 
-        - `@h/` to specify the $HOME prefix of the cluster.
-        - `@d/` to specify the /hpc_data/user_data prefix.
-        - `@a/` to specify the /hpc_apps/ prefix, only for root or user1.
-        - `@p/` to specify the public folder prefix ( INSECURE !).
-        - `@R/` to specify the / prefix, only for root or user1.
-        - `@t/` to specify the /tmp prefix.
+        @h/ to specify the $HOME prefix of the cluster.
+        @d/ to specify the /hpc_data/user_data prefix.
+        @a/ to specify the /hpc_apps/ prefix, only for root or user1.
+        @p/ to specify the public folder prefix ( INSECURE !).
+        @R/ to specify the / prefix, only for root or user1.
+        @t/ to specify the /tmp prefix.
 
 Example: `hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1`
 
@@ -221,14 +245,14 @@ Usage `hpcopr appman --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...`
 
 The cluster must be in running state (minimal or all). *
 
-- `-u USERNAME`      A valid user name. Use 'root' for all users. Admin or Operator role is required for root.
+`-u USERNAME`    A valid user name. Use 'root' for all users. Admin or Operator role is required for root.
 
-    - `--acmd store`     List out the apps in store.
-    - `--acmd avail`     List out all the installed apps.
-    - `--acmd check`     Check whether an app is available.
-    - `--acmd install`   Install an app to all users or a specified user.
-    - `--acmd build`     Compile and build an app to all users or a specified user.
-    - `--acmd remove`    Remove an app from the cluster.
+    --acmd store     List out the apps in store.
+    --acmd avail     List out all the installed apps.
+    --acmd check     Check whether an app is available.
+    --acmd install   Install an app to all users or a specified user.
+    --acmd build     Compile and build an app to all users or a specified user.
+    --acmd remove    Remove an app from the cluster.
 
 **Cluster Job Management**
 
@@ -236,11 +260,11 @@ Usage `hpcopr jobman --jcmd APP_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
 The cluster must be in running state (minimal or all).
 
-- `-u USERNAME`      A valid user name. The root user CANNOT submit jobs.
+`-u USERNAME`      A valid user name. The root user CANNOT submit jobs.
 
-    - `--jcmd submit`    Submit a job to the cluster.
-    - `--jcmd list`      List out all the jobs.
-    - `--jcmd cancel`    Cancel a job with specified ID
+    --jcmd submit    Submit a job to the cluster.
+    --jcmd list      List out all the jobs.
+    --jcmd cancel    Cancel a job with specified ID
 
 **Others**
 
@@ -249,7 +273,9 @@ The cluster must be in running state (minimal or all).
 - `license`      Read the terms of the MIT License
 - `repair`       Try to repair the hpcopr core components.
 
-For more information, please refer to Docs/UserManual-EN.pdf, the most detailed help info can be found by the command `hpcopr help` .
+For more information, please refer to Docs/UserManual-EN.pdf.
+
+The most detailed help info can be found by the command `hpcopr help` .
 
 ### 4. Bug Reports
 
