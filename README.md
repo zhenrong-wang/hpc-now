@@ -1,4 +1,4 @@
-### 1. Project Background
+# 1. Project Background
 
 Cloud High-Performance Computing, Cloud HPC differs from on-premise HPC significantly. Cloud service brings high scalability and flexibility to High-Performance Computing. However, most HPC users are not familiar with building and maintaining HPC services on the cloud. 
 
@@ -17,7 +17,7 @@ Currently, the HPC-NOW platform supports the cloud services as below:
 - [Microsoft Azure](https://azure.microsoft.com/en-us/), HPC-NOW Internal Code: CLOUD_F
 - [Google Cloud Platform](https://cloud.google.com/), HPC-NOW Internal Code: CLOUD_G
 
-### 2. Core Components
+# 2. Core Components
 
 Thanks to the [Terraform](http://www.terraform.io), a great cloud Infrastructure-as-Code platform, which makes it possible to orchestrate cloud resources in a unified and simple way.
 
@@ -31,26 +31,26 @@ In this project, we developed components as below:
 -  **scripts**    : Shell scripts to initialize the clusters, install applications, etc.
 
 
-### 3. How-To: Build, Run, and Use
+# 3. How-To: Build, Run, and Use
 
 The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Windows, GNU/Linux, or macOS. Note: Currently only x86_64 platform is supported.
 
-#### 3.1 Build
+## 3.1 Build
 
-##### **Prerequisites:** 
+### **Prerequisites:** 
 
 `git`, `gcc` (for GNU/Linux) | `clang` (for macOS) | `mingw` (for Microsoft Windows)
 
-##### **Step 1. Clone this repository:** 
+### **Step 1. Clone this repository:** 
 
     git clone https://github.com/zhenrong-wang/hpc-now OR
     git clone https://gitee.com/zhenrong-wang/hpc-now
 
-##### **Step 2. Change the directory :** 
+### **Step 2. Change the directory :** 
 
 `cd hpc-now`
 
-##### **Step 3. Run the build script :** 
+### **Step 3. Run the build script :** 
 
     For Microsoft Windows users: .\make_windows.bat build
     For GNU/Linux Distro users : ./make_linux.sh build
@@ -58,9 +58,9 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 If everything goes well, the binaries will be built to the 'build' folder.
 
-#### 3.2 Run
+## 3.2 Run
 
-##### **Step 1. Run the installer (Administrator or root privilege is required):**
+### **Step 1. Run the installer (Administrator or root privilege is required):**
 
 - For **Microsoft Windows** users: 
     
@@ -90,7 +90,7 @@ Please replace the `INSTALLER_VERSION_CODE` and `HPCOPR_VERSION_CODE` to the act
 
 Please keep the window open for the next step.
 
-##### **Step 2. Run the hpcopr.exe:**
+### **Step 2. Run the hpcopr.exe:**
 
 - For Microsoft Windows users:
 
@@ -112,7 +112,7 @@ Please keep the window open for the next step.
 
 Several extra packages (around 400 MB) will be download and installed. This process may needs minutes (depending on your local network connectivity).
 
-#### 3.3 Basic Workflow
+## 3.3 Basic Workflow
 
 In order to use and manage HPC on the cloud with HPC-NOW, please follow the workflow:
 
@@ -128,7 +128,7 @@ In order to use and manage HPC on the cloud with HPC-NOW, please follow the work
 - Destroy the cloud cluster (**`hpcopr destroy ...`**) -->
 - Remove the cloud credentials (optional, **`hpcopr remove ...`**)
 
-#### 3.4 Commands
+## 3.4 Commands
 
 The **`hpcopr.exe`** is the main interface for you to operate.
 
@@ -138,11 +138,11 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
     CMD_FLAG: such as --force，--all
     CMD_KEYWORD: key-value pair, such as -c myFirstCluster
 
-##### **Get-Started**
+### **Get-Started**
 
 - `envcheck`     Quickly check the running environment.
 
-##### **Multi-Cluster Management**
+### **Multi-Cluster Management**
 
 - `new-cluster`  Create a new cluster to initialize.
 - `ls-clusters`  List all the current clusters.
@@ -154,7 +154,7 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 - `remove`       Completely remove a cluster from the OS and registry.
 - `exit-current` Exit the current cluster.
 
-##### **Global Management**
+### **Global Management**
 
 - `help`         Show this page and the information here.
 - `usage`        View and/or export the usage history.
@@ -171,7 +171,7 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 - `showmd5`      Show the md5sum values of core components.
 - `resetloc`     Reset to the default locations.
 
-##### **Cluster Initialization**
+### **Cluster Initialization**
 
 - `rotate-key`  *Rotate* a new keypair for an existing cluster. The new keypair should be valid and comes from the same cloud vendor.
 - `get-conf`    Get the default configuration file to edit and build a customized HPC cluster later (using the 'init' command).
@@ -180,13 +180,13 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 - `init`        Initialize a new cluster. If the configuration file is absent, the command will generate a default configuration file.
 - `rebuild`     Rebuild the nodes *without* destroying the cluster's storage.
 
-##### **Cluster Management**
+### **Cluster Management**
 
 - `vault`        Check the sensitive information of the current cluster.
 - `graph`        Display the cluster map including all the nodes and status.
 - `viewlog`      View the operation log of the current cluster.
 
-##### **Cluster Operation**
+### **Cluster Operation**
 
 - `delc`         Delete specified compute nodes:
 - `addc`         Add compute nodes to current cluster. You must specify how many to be added.
@@ -200,7 +200,7 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 - `destroy`      *DESTROY* the whole cluster - including all the resources & data.
 - `payment`      Switch the payment method between on-demand and monthly.
 
-##### **Cluster User Management**
+### **Cluster User Management**
 
 Usage `hpcopr userman --ucmd USER_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -213,7 +213,7 @@ The cluster must be in running state (minimal or all).
     --ucmd disable   Disable a user. Disabled users still can access the cluster.
     --ucmd passwd    Change user's password.
 
-##### **Cluster Data Management**
+### **Cluster Data Management**
 
 Usage `hpcopr dataman CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -223,7 +223,7 @@ General Flags     -r, -rf, --recursive, --force, -f.
     -d DEST_PATH      Destination path of binary operations. i.e. cp
     -t TARGET_PATH    Target path of unary operations. i.e. ls
 
-###### **Bucket Operations:** Transfer and manage data with the bucket.
+#### **Bucket Operations:** Transfer and manage data with the bucket.
 
     --dcmd put         Upload a local file or folder to the bucket path.
     --dcmd get         Download a bucket object(file or folder) to the local path.
@@ -234,7 +234,7 @@ General Flags     -r, -rf, --recursive, --force, -f.
 
 Example: `hpcopr dataman --dcmd put -s ./foo -d /foo -u user1`
 
-###### **Direct Operations:** Transfer and manage data in the cluster storage.
+#### **Direct Operations:** Transfer and manage data in the cluster storage.
 
 The cluster must be in running state (minimal or all).
 
@@ -259,7 +259,7 @@ The cluster must be in running state (minimal or all).
 
 Example: `hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1`
 
-##### **Cluster App Management**
+### **Cluster App Management**
 
 Usage `hpcopr appman --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -274,7 +274,7 @@ The cluster must be in running state (minimal or all). *
     --acmd build     Compile and build an app to all users or a specified user.
     --acmd remove    Remove an app from the cluster.
 
-##### **Cluster Job Management**
+### **Cluster Job Management**
 
 Usage `hpcopr jobman --jcmd APP_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -286,7 +286,7 @@ The cluster must be in running state (minimal or all).
     --jcmd list      List out all the jobs.
     --jcmd cancel    Cancel a job with specified ID
 
-##### **Others**
+### **Others**
 
 - `about`        About this software and HPC-NOW project.
 - `version`      Display the version info.
@@ -297,7 +297,7 @@ For more information, please refer to Docs/UserManual-EN.pdf.
 
 The most detailed help info can be found by the command `hpcopr help` .
 
-### 4. Bug Reports
+# 4. Bug Reports
 
 Please submit issues to this repo. Or
 mailto: zhenrongwang@live.com | wangzhenrong@hpc-now | info@hpc-now.com
