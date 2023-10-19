@@ -309,6 +309,8 @@ next_user:
         }
         sprintf(cmdline,"%s %s%sroot.key %s%s %s",COPY_FILE_CMD,current_sshdir,PATH_SLASH,tmp_sshdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
+        sprintf(filename_temp,"%s%sroot.key",tmp_sshdir,PATH_SLASH);
+        encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum_trans);
     }
     else{
         printf(WARN_YELLO_BOLD "[ -WARN- ] Not exporting Root/Admin privilege." RESET_DISPLAY "\n");
