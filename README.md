@@ -44,7 +44,7 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 ##### **Step 1. Clone this repository:** 
 
     git clone https://github.com/zhenrong-wang/hpc-now OR
-    git clone https://github.com/zhenrong-wang/hpc-now
+    git clone https://gitee.com/zhenrong-wang/hpc-now
 
 ##### **Step 2. Change the directory :** 
 
@@ -67,7 +67,7 @@ If everything goes well, the binaries will be built to the 'build' folder.
     Open a cmd prompt as Administrator: 
 
         Type 'cmd' in the search box
-        Right click on the icon of Command Prompt
+        Right click on the icon of the Command Prompt
         Select 'Run as Administrator'
     
     Change the direcroty to the 'build' folder: 
