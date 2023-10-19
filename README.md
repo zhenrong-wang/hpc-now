@@ -90,7 +90,7 @@ Please replace the `INSTALLER_VERSION_CODE` and `HPCOPR_VERSION_CODE` to the rea
 
 Please keep the window open for the next step.
 
-**Step 2. Run the hpcopr.exe:**
+##### **Step 2. Run the hpcopr.exe:**
 
 - For Microsoft Windows users:
 
@@ -137,11 +137,11 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
     `CMD_FLAG`: such as --force，--all
     `CMD_KEYWORD`: key-value pair, such as -c myFirstCluster
 
-**Get-Started**
+##### **Get-Started**
 
 - `envcheck`     Quickly check the running environment.
 
-**Multi-Cluster Management**
+##### **Multi-Cluster Management**
 
 - `new-cluster`  Create a new cluster to initialize.
 - `ls-clusters`  List all the current clusters.
@@ -153,7 +153,7 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 - `remove`       Completely remove a cluster from the OS and registry.
 - `exit-current` Exit the current cluster.
 
-**Global Management**
+##### **Global Management**
 
 - `help`         Show this page and the information here.
 - `usage`        View and/or export the usage history.
@@ -170,7 +170,7 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 - `showmd5`      Show the md5sum values of core components.
 - `resetloc`     Reset to the default locations.
 
-**Cluster Initialization**
+##### **Cluster Initialization**
 
 - `rotate-key`  *Rotate* a new keypair for an existing cluster. The new keypair should be valid and comes from the same cloud vendor.
 - `get-conf`    Get the default configuration file to edit and build a customized HPC cluster later (using the 'init' command).
@@ -179,13 +179,13 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 - `init`        Initialize a new cluster. If the configuration file is absent, the command will generate a default configuration file.
 - `rebuild`     Rebuild the nodes *without* destroying the cluster's storage.
 
-**Cluster Management**
+##### **Cluster Management**
 
 - `vault`        Check the sensitive information of the current cluster.
 - `graph`        Display the cluster map including all the nodes and status.
 - `viewlog`      View the operation log of the current cluster.
 
-**Cluster Operation**
+##### **Cluster Operation**
 
 - `delc`         Delete specified compute nodes:
 - `addc`         Add compute nodes to current cluster. You must specify how many to be added.
@@ -199,7 +199,7 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 - `destroy`      *DESTROY* the whole cluster - including all the resources & data.
 - `payment`      Switch the payment method between on-demand and monthly.
 
-**Cluster User Management**
+##### **Cluster User Management**
 
 Usage `hpcopr userman --ucmd USER_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -212,7 +212,7 @@ The cluster must be in running state (minimal or all).
     --ucmd disable   Disable a user. Disabled users still can access the cluster.
     --ucmd passwd    Change user's password.
 
-**Cluster Data Management**
+##### **Cluster Data Management**
 
 Usage `hpcopr dataman CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -222,7 +222,7 @@ General Flags     -r, -rf, --recursive, --force, -f.
     -d DEST_PATH      Destination path of binary operations. i.e. cp
     -t TARGET_PATH    Target path of unary operations. i.e. ls
 
-**Bucket Operations:** Transfer and manage data with the bucket.
+###### **Bucket Operations:** Transfer and manage data with the bucket.
 
     --dcmd put         Upload a local file or folder to the bucket path.
     --dcmd get         Download a bucket object(file or folder) to the local path.
@@ -233,7 +233,7 @@ General Flags     -r, -rf, --recursive, --force, -f.
 
 Example: `hpcopr dataman --dcmd put -s ./foo -d /foo -u user1`
 
-**Direct Operations:** Transfer and manage data in the cluster storage.
+###### **Direct Operations:** Transfer and manage data in the cluster storage.
 
 The cluster must be in running state (minimal or all).
 
@@ -258,7 +258,7 @@ The cluster must be in running state (minimal or all).
 
 Example: `hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1`
 
-**Cluster App Management**
+##### **Cluster App Management**
 
 Usage `hpcopr appman --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -273,7 +273,7 @@ The cluster must be in running state (minimal or all). *
     --acmd build     Compile and build an app to all users or a specified user.
     --acmd remove    Remove an app from the cluster.
 
-**Cluster Job Management**
+##### **Cluster Job Management**
 
 Usage `hpcopr jobman --jcmd APP_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -285,7 +285,7 @@ The cluster must be in running state (minimal or all).
     --jcmd list      List out all the jobs.
     --jcmd cancel    Cancel a job with specified ID
 
-**Others**
+##### **Others**
 
 - `about`        About this software and HPC-NOW project.
 - `version`      Display the version info.
