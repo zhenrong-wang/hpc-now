@@ -75,21 +75,21 @@ Please keep the window open for the next step.
 
 - For Microsoft Windows users:
 
-    - Set a password for the user 'hpc-now' : net user hpc-now **YOUR_COMPLEX_PASSWORD**
-    - Run a new cmd window as 'hpc-now'     : runas /savecred /user:mymachine\hpc-now cmd
-    - Run the main program 'hpcopr.exe'     : hpcopr envcheck
+    - Set a password for the user 'hpc-now' : `net user hpc-now YOUR_COMPLEX_PASSWORD`
+    - Run a new cmd window as 'hpc-now'     : `runas /savecred /user:mymachine\hpc-now cmd`
+    - Run the main program 'hpcopr.exe'     : `hpcopr envcheck`
 
 - For GNU/Linux Distros users:
 
-    - Set a password for the user 'hpc-now' : sudo passwd hpc-now
-    - Switch to the user 'hpc-now'          : su hpc-now
-    - Run the main program 'hpcopr.exe'     : hpcopr envcheck
+    - Set a password for the user 'hpc-now' : `sudo passwd hpc-now`
+    - Switch to the user 'hpc-now'          : `su hpc-now`
+    - Run the main program 'hpcopr.exe'     : `hpcopr envcheck`
 
 - For macOS users:
 
-    - Set a password for the user 'hpc-now' : sudo dscl . -passwd /Users/hpc-now **YOUR_COMPLEX_PASSWORD**
-    - Switch to the user 'hpc-now'          : su hpc-now
-    - Run the main program 'hpcopr.exe'     : hpcopr envcheck
+    - Set a password for the user 'hpc-now' : `sudo dscl . -passwd /Users/hpc-now YOUR_COMPLEX_PASSWORD`
+    - Switch to the user 'hpc-now'          : `su hpc-now`
+    - Run the main program 'hpcopr.exe'     : `hpcopr envcheck`
 
 Several extra packages (around 400 MB) will be download and installed. This process may needs minutes (depending on your local network connectivity).
 
@@ -97,156 +97,157 @@ Several extra packages (around 400 MB) will be download and installed. This proc
 
 **Get-Started**
 
-- envcheck    :~ Quickly check the running environment.
+- `envcheck`     Quickly check the running environment.
 
 **Multi-Cluster Management**
 
-- new-cluster :~ Create a new cluster to initialize.
-- ls-clusters :~ List all the current clusters.
-- switch      :~ Switch to a cluster in the registry to operate.
-- glance      :~ View all the clusters or a target cluster.
-- refresh     :~ Refresh a cluster without changing the resources.
-- export      :~ Export a cluster to another hpcopr client. Optional params:
-- import      :~ Import a cluster to the current hpcopr client.
-- remove      :~ Completely remove a cluster from the OS and registry.
-- exit-current:~ Exit the current cluster.
+- `new-cluster`  Create a new cluster to initialize.
+- `ls-clusters`  List all the current clusters.
+- `switch`       Switch to a cluster in the registry to operate.
+- `glance`       View all the clusters or a target cluster.
+- `refresh`      Refresh a cluster without changing the resources.
+- `export`       Export a cluster to another hpcopr client. Optional params:
+- `import`       Import a cluster to the current hpcopr client.
+- `remove`       Completely remove a cluster from the OS and registry.
+- `exit-current` Exit the current cluster.
 
 **Global Management**
 
-- help        :~ Show this page and the information here.
-- usage       :~ View and/or export the usage history.
-- monman      :~ Get, filter, and extract cluster monitoring data.
-- history     :~ View and/or export the operation log.
-- syserr      :~ View and/or export the system cmd errors.
-- ssh         :~ SSH to the master node of a cluster.
-- rdp         :~ Connect to the cluster's desktop environment.
+- `help`         Show this page and the information here.
+- `usage`        View and/or export the usage history.
+- `monman`       Get, filter, and extract cluster monitoring data.
+- `history`      View and/or export the operation log.
+- `syserr`       View and/or export the system cmd errors.
+- `ssh`          SSH to the master node of a cluster.
+- `rdp`          Connect to the cluster's desktop environment.
 
 *Advanced - For developers:*
 
-- configloc   :~ Configure the locations for the terraform binaries, providers, IaC templates and shell scripts.
-- showloc     :~ Show the current configured locations.
-- showmd5     :~ Show the md5sum values of core components.
-- resetloc    :~ Reset to the default locations.
+- `configloc`    Configure the locations for the terraform binaries, providers, IaC templates and shell scripts.
+- `showloc`      Show the current configured locations.
+- `showmd5`      Show the md5sum values of core components.
+- `resetloc`     Reset to the default locations.
 
 **Cluster Initialization**
 
-- rotate-key :~ *Rotate* a new keypair for an existing cluster. The new keypair should be valid and comes from the same cloud vendor.
-- get-conf   :~ Get the default configuration file to edit and build a customized HPC cluster later (using the 'init' command).
-- edit-conf  :~ Edit and save the default configuration file *before* init.
-- rm-conf    :~ Remove the configuration file *before* init.
-- init       :~ Initialize a new cluster. If the configuration file is absent, the command will generate a default configuration file.
-- rebuild    :~ Rebuild the nodes *without* destroying the cluster's storage.
+- `rotate-key`  *Rotate* a new keypair for an existing cluster. The new keypair should be valid and comes from the same cloud vendor.
+- `get-conf`    Get the default configuration file to edit and build a customized HPC cluster later (using the 'init' command).
+- `edit-conf`   Edit and save the default configuration file *before* init.
+- `rm-conf`     Remove the configuration file *before* init.
+- `init`        Initialize a new cluster. If the configuration file is absent, the command will generate a default configuration file.
+- `rebuild`     Rebuild the nodes *without* destroying the cluster's storage.
 
 **Cluster Management**
 
-- vault       :~ Check the sensitive information of the current cluster.
-- graph       :~ Display the cluster map including all the nodes and status.
-- viewlog     :~ View the operation log of the current cluster.
+- `vault`        Check the sensitive information of the current cluster.
+- `graph`        Display the cluster map including all the nodes and status.
+- `viewlog`      View the operation log of the current cluster.
 
 **Cluster Operation**
 
-- delc        :~ Delete specified compute nodes:
-- addc        :~ Add compute nodes to current cluster. You must specify how many to be added.
-- shutdownc   :~ Shutdown specified compute nodes. Similar to 'delc', you can specify to shut down all or part of the compute nodes by the param 'all' or 'NUM'.
-- turnonc     :~ Turn on specified compute nodes. Similar to 'delc', you can specify to turn on all or part of the compute nodes by the parameter 'all' or 'NUM'.
-- reconfc     :~ Reconfigure all the compute nodes.
-- reconfm     :~ Reconfigure the master node.
-- sleep       :~ Turn off all the nodes (management and compute) of the cluster.
-- wakeup      :~ Wake up the cluster nodes.
-- nfsup       :~ Increase the cluster’s NFS shared volume (in GB).
-- destroy     :~ *DESTROY* the whole cluster - including all the resources & data.
-- payment     :~ Switch the payment method between on-demand and monthly.
+- `delc`         Delete specified compute nodes:
+- `addc`         Add compute nodes to current cluster. You must specify how many to be added.
+- `shutdownc`    Shutdown specified compute nodes. Similar to 'delc', you can specify to shut down all or part of the compute nodes by the param 'all' or 'NUM'.
+- `turnonc`      Turn on specified compute nodes. Similar to 'delc', you can specify to turn on all or part of the compute nodes by the parameter 'all' or 'NUM'.
+- `reconfc`      Reconfigure all the compute nodes.
+- `reconfm`      Reconfigure the master node.
+- `sleep`        Turn off all the nodes (management and compute) of the cluster.
+- `wakeup`       Wake up the cluster nodes.
+- `nfsup`        Increase the cluster’s NFS shared volume (in GB).
+- `destroy`      *DESTROY* the whole cluster - including all the resources & data.
+- `payment`      Switch the payment method between on-demand and monthly.
 
 **Cluster User Management**
 
-Usage:~ hpcopr userman --ucmd USER_CMD [ KEY_WORD1 KEY_STRING1 ] ...
+Usage `hpcopr userman --ucmd USER_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
-* The cluster must be in running state (minimal or all). *
+The cluster must be in running state (minimal or all). 
 
--  --ucmd list    ~ List all the current cluster users.
--  --ucmd add     ~ Add a user to the cluster. By default, added users are enabled.
--  --ucmd delete  ~ Delete a user from the cluster.
--  --ucmd enable  ~ Enable a *disabled* user. Enabled users can run HPC workloads.
--  --ucmd disable ~ Disable a user. Disabled users still can access the cluster.
--  --ucmd passwd  ~ Change user's password.
+    - `--ucmd list`      List all the current cluster users.
+    - `--ucmd add`       Add a user to the cluster. By default, added users are enabled.
+    - `--ucmd delete`    Delete a user from the cluster.
+    - `--ucmd enable`    Enable a *disabled* user. Enabled users can run HPC workloads.
+    - `--ucmd disable`   Disable a user. Disabled users still can access the cluster.
+    - `--ucmd passwd`    Change user's password.
 
 **Cluster Data Management**
 
-Usage:~ hpcopr dataman CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...
+Usage `hpcopr dataman CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...`
 
-General Flags    :~ -r, -rf, --recursive, --force, -f.
-    - -s SOURCE_PATH  ~ Source path of the binary operations. i.e. cp
-    - -d DEST_PATH    ~ Destination path of binary operations. i.e. cp
-    - -t TARGET_PATH  ~ Target path of unary operations. i.e. ls
+General Flags     -r, -rf, --recursive, --force, -f.
+    - `-s SOURCE_PATH`    Source path of the binary operations. i.e. cp
+    - `-d DEST_PATH`      Destination path of binary operations. i.e. cp
+    - `-t TARGET_PATH`    Target path of unary operations. i.e. ls
 
-**Bucket Operations:**~ Transfer and manage data with the bucket.
+**Bucket Operations:** Transfer and manage data with the bucket.
 
--  --dcmd put       ~ Upload a local file or folder to the bucket path.
--  --dcmd get       ~ Download a bucket object(file or folder) to the local path.
--  --dcmd copy      ~ Copy a bucket object to another folder/path.
--  --dcmd list      ~ Show the object list of a specified folder/path.
--  --dcmd delete    ~ Delete an object (file or folder) of the bucket.
--  --dcmd move      ~ Move an existed object (file or folder) in the bucket.
+    - `--dcmd put`         Upload a local file or folder to the bucket path.
+    - `--dcmd get`         Download a bucket object(file or folder) to the local path.
+    - `--dcmd copy`        Copy a bucket object to another folder/path.
+    - `--dcmd list`        Show the object list of a specified folder/path.
+    - `--dcmd delete`      Delete an object (file or folder) of the bucket.
+    - `--dcmd move`        Move an existed object (file or folder) in the bucket.
 
-Example: hpcopr dataman --dcmd put -s ./foo -d /foo -u user1
+Example: `hpcopr dataman --dcmd put -s ./foo -d /foo -u user1`
 
-**Direct Operations:**~ Transfer and manage data in the cluster storage.
+**Direct Operations:** Transfer and manage data in the cluster storage.
 
-* The cluster must be in running state (minimal or all). *
+The cluster must be in running state (minimal or all). *
 
--  --dcmd cp        ~ Remote copy between local and the cluster storage.
--  --dcmd mv        ~ Move the remote files/folders in the cluster storage.
--  --dcmd ls        ~ List the files/folders in the cluster storage.
--  --dcmd rm        ~ Remove the files/folders in the cluster storage.
--  --dcmd mkdir     ~ Make a directory in the cluster storage.
--  --dcmd cat       ~ Print out a remote plain text file.
--  --dcmd more      ~ Read a remote file.
--  --dcmd less      ~ Read a remote file.
--  --dcmd tail      ~ Streaming out a remote file dynamically.
--  --dcmd rput      ~ Upload a *remote* file or folder to the bucket path.
--  --dcmd rget      ~ Download a bucket object(file or folder) to the *remote* path.
+    - `--dcmd cp`          Remote copy between local and the cluster storage.
+    - `--dcmd mv`          Move the remote files/folders in the cluster storage.
+    - `--dcmd ls`          List the files/folders in the cluster storage.
+    - `--dcmd rm`          Remove the files/folders in the cluster storage.
+    - `--dcmd mkdir`       Make a directory in the cluster storage.
+    - `--dcmd cat`         Print out a remote plain text file.
+    - `--dcmd more`        Read a remote file.
+    - `--dcmd less`        Read a remote file.
+    - `--dcmd tail`        Streaming out a remote file dynamically.
+    - `--dcmd rput`        Upload a *remote* file or folder to the bucket path.
+    - `--dcmd rget`        Download a bucket object(file or folder) to the *remote* path.
 
-   - @h/ to specify the $HOME prefix of the cluster.
-   - @d/ to specify the /hpc_data/user_data prefix.
-   - @a/ to specify the /hpc_apps/ prefix, only for root or user1.
-   - @p/ to specify the public folder prefix ( INSECURE !).
-   - @R/ to specify the / prefix, only for root or user1.
-   - @t/ to specify the /tmp prefix.
+        - `@h/` to specify the $HOME prefix of the cluster.
+        - `@d/` to specify the /hpc_data/user_data prefix.
+        - `@a/` to specify the /hpc_apps/ prefix, only for root or user1.
+        - `@p/` to specify the public folder prefix ( INSECURE !).
+        - `@R/` to specify the / prefix, only for root or user1.
+        - `@t/` to specify the /tmp prefix.
 
-Example: hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1
+Example: `hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1`
 
 **Cluster App Management**
 
-Usage:~ hpcopr appman --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...
+Usage `hpcopr appman --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...`
 
-* The cluster must be in running state (minimal or all). *
+The cluster must be in running state (minimal or all). *
 
-- -u USERNAME    ~ A valid user name. Use 'root' for all users. Admin or Operator role is required for root.
+- `-u USERNAME`      A valid user name. Use 'root' for all users. Admin or Operator role is required for root.
 
--  --acmd store   ~ List out the apps in store.
--  --acmd avail   ~ List out all the installed apps.
--  --acmd check   ~ Check whether an app is available.
--  --acmd install ~ Install an app to all users or a specified user.
--  --acmd build   ~ Compile and build an app to all users or a specified user.
--  --acmd remove  ~ Remove an app from the cluster.
+    - `--acmd store`     List out the apps in store.
+    - `--acmd avail`     List out all the installed apps.
+    - `--acmd check`     Check whether an app is available.
+    - `--acmd install`   Install an app to all users or a specified user.
+    - `--acmd build`     Compile and build an app to all users or a specified user.
+    - `--acmd remove`    Remove an app from the cluster.
 
 **Cluster Job Management**
 
-Usage:~ hpcopr jobman --jcmd APP_CMD [ KEY_WORD1 KEY_STRING1 ] ...
+Usage `hpcopr jobman --jcmd APP_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
-* The cluster must be in running state (minimal or all). *
+The cluster must be in running state (minimal or all).
 
-- -u USERNAME    ~ A valid user name. The root user CANNOT submit jobs.
--  --jcmd submit  ~ Submit a job to the cluster.
--  --jcmd list    ~ List out all the jobs.
--  --jcmd cancel  ~ Cancel a job with specified ID
+- `-u USERNAME`      A valid user name. The root user CANNOT submit jobs.
+
+    - `--jcmd submit`    Submit a job to the cluster.
+    - `--jcmd list`      List out all the jobs.
+    - `--jcmd cancel`    Cancel a job with specified ID
 
 **Others**
 
-- about       :~ About this software and HPC-NOW project.
-- version     :~ Display the version info.
-- license     :~ Read the terms of the GNU Public License-v2.0
-- repair      :~ Try to repair the hpcopr core components.
+- `about`        About this software and HPC-NOW project.
+- `version`      Display the version info.
+- `license`      Read the terms of the MIT License
+- `repair`       Try to repair the hpcopr core components.
 
 For more information, please refer to Docs/UserManual-EN.pdf, the most detailed help info can be found by the command `hpcopr help` .
 
