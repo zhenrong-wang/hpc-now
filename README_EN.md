@@ -2,7 +2,7 @@
 
 Cloud High-Performance Computing, Cloud HPC differs from on-premise HPC significantly. Cloud service brings high scalability and flexibility to High-Performance Computing. However, most HPC users are not familiar with building and maintaining HPC services on the cloud. 
 
-In order to make it super easy to start and manage HPC workloads on the cloud, we have been developing this project and named it as HPC-NOW. NOW represents:
+In order to make it super easy to start and manage HPC workloads on the cloud, we have been developing this project and named it as HPC-NOW. NOW stands for:
 
 - Start HPC journey on the cloud immediately, in minutes.
 - (almost) No Operation Workload.
@@ -34,6 +34,47 @@ In this project, we developed components as below:
 ### 3. How-To: Build, Run, and Use
 
 The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Windows, GNU/Linux, or macOS. Note: Currently only x86_64 platform is supported.
+
+#### 3.1 Build
+
+Prerequisites: git, gcc (for GNU/Linux) | clang (for macOS) | mingw (for Microsoft Windows)
+
+Step 1. Clone this repository: git clone https://github.com/zhenrong-wang/hpc-now
+
+Step 2. Change the directory : cd hpc-now
+
+Step 3. Run the build script : 
+
+    - For Microsoft Windows users: .\make_windows.bat build
+    - For GNU/Linux Distro users : ./make_linux.sh build
+    - For macOS users            : ./make_darwin.sh build
+
+If everything goes well, the binaries will be built to the 'build' folder.
+
+#### 3.2 Run
+
+Step 1. Run the installer:
+
+- For Microsoft Windows users: open a cmd windows as Administrator, and change the direcroty to the 'build' folder. Then run: 
+
+    .\installer-win-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-win-HPCOPR_VERSION_CODE.exe --cloc now-crypto-win.exe 
+
+    Please replace the INSTALLER_VERSION_CODE and HPCOPR_VERSION_CODE to the real codes.
+
+- For GNU/Linux Distro users: 
+
+    sudo ./installer-lin-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-lin-HPCOPR_VERSION_CODE.exe --cloc now-crypto-lin.exe 
+
+- For macOS users:
+
+    sudo ./installer-dwn-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-dwn-HPCOPR_VERSION_CODE.exe --cloc now-crypto-dwn.exe 
+
+Step 2. Run the hpcopr.exe
+
+- For Microsoft Windows users: 
+
+- For GNU/Linux Distros and macOS users:
+
 
 For more information, please refer to Docs/UserManual-EN.pdf
 
