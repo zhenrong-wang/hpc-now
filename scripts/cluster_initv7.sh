@@ -514,7 +514,7 @@ if [ -f /root/hostfile ]; then
   rm -rf /usr/share/backgrounds/*.png
   rm -rf /usr/share/backgrounds/*.jpg
   /bin/cp -r ${utils_path}pics/wallpapers.zip /usr/share/backgrounds/
-  cd /usr/share/backgrounds && unzip wallpapers.zip
+  cd /usr/share/backgrounds && unzip -o wallpapers.zip
   chmod 644 *.jpg
   if [ -z $centos_vers ] || [ $centos_vers != 7 ]; then
     sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm/custom.conf
