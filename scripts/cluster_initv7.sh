@@ -565,7 +565,12 @@ if [ -f /root/hostfile ]; then
   fi
 fi
 yum -y update
-yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix bash-completion
+yum -y install gcc-c++ gcc-gfortran 
+yum -y install htop 
+yum -y install python3 python3-devel 
+yum -y install hostname dos2unix bash-completion
+yum -y install evince # The PDF viewer
+yum -y install eog # The image viewer
 systemctl mask firewalld
 #systemctl restart xrdp
 #systemctl enable xrdp
