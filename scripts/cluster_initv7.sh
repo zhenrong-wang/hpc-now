@@ -399,6 +399,7 @@ if [ -f /root/hostfile ]; then
     yum -y install firefox
     yum -y install nautilus
     yum -y install ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
+    yum -y install gedit
     systemctl enable gdm.service --now
   else
     echo -e "# $time_current CENTOS VERSION $centos_vers. Installing GUI now." >> ${logfile}
@@ -424,12 +425,13 @@ if [ -f /root/hostfile ]; then
       yum -y install firefox
       yum -y install nautilus
       yum -y install ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
+      yum -y install gedit
 #      fi
-      systemctl enable gdm --now
-      systemctl disable firewalld
-      systemctl stop firewalld
+      systemctl enable gdm.service --now
     fi
   fi
+  systemctl disable firewalld
+  systemctl stop firewalld
   systemctl set-default graphical.target
   yum -y install tigervnc tigervnc-server
   grep "< desktop >" $public_app_registry
@@ -519,7 +521,7 @@ if [ -f /root/hostfile ]; then
   if [ -z $centos_vers ] || [ $centos_vers != 7 ]; then
     sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm/custom.conf
     yum -y install gnome-tweaks gnome-extensions-app.x86_64
-    echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options zoom\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/day.jpg\ngsettings set org.gnome.desktop.wm.preferences button-layout \":minimize,maximize,close\"\n" > /etc/g_ini.sh
+    echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options zoom\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/hpc-now-default.jpg\ngsettings set org.gnome.desktop.wm.preferences button-layout \":minimize,maximize,close\"\n" > /etc/g_ini.sh
     chmod +x /etc/g_ini.sh
     echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
   fi
