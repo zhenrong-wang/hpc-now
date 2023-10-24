@@ -1828,7 +1828,7 @@ int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, c
 
 int tail_f_for_windows(char* filename){
     FILE* file_p=fopen(filename,"r");
-    char ch='\0';
+    int ch='\0';
     time_t start_time;
     time_t current_time;
     time(&start_time);

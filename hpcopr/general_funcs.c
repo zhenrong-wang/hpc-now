@@ -1052,7 +1052,7 @@ int file_cr_clean(char* filename){
     }
     FILE* file_p=fopen(filename,"r");
     char filename_temp[FILENAME_LENGTH]="";
-    char ch;
+    int ch;
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(filename_temp,"%s.cr.tmp",filename);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
