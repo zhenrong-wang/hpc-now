@@ -161,7 +161,8 @@ void reset_string(char* orig_string){
  * SEGMENT FAULT MAY OCCUR IF YOU DO NOT USE THIS FUNCTION PROPERLY!
  */
 int fgetline(FILE* file_p, char* line_string){
-    char ch;
+//    char ch;
+    int ch='\0';
     int i=0;
     if(file_p==NULL){
         return -1;
