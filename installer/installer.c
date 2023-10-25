@@ -1028,7 +1028,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"update")!=0&&strcmp(argv[1],"install")!=0){
         print_help_installer();
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] The specified option " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n", argv[1]);
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The specified general option " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n", argv[1]);
         print_tail_installer();
         return 1;
     }
