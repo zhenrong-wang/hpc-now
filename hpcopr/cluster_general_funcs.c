@@ -1383,7 +1383,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
         sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s -upgrade -lock=false > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
     }
     else{
-        sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s -lock=false > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
+        sprintf(cmdline,"cd %s%s && %s TF_LOG=DEBUG&&%s TF_LOG_PATH=%s%slog%sterraform.log && echo yes | %s %s %s -lock=false -parallelism=1000 > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
     }
     system(cmdline);
     if(silent_flag!=0){
