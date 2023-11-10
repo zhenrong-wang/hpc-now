@@ -196,9 +196,9 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 - `reconfm`      Reconfigure the master node.
 - `sleep`        Turn off all the nodes (management and compute) of the cluster.
 - `wakeup`       Wake up the cluster nodes.
-- `nfsup`        Increase the cluster’s NFS shared volume (in GB).
+- `nfsup`        Increase the cluster’s NFS shared volume (in GB, only for Huaweicloud, Google Cloud Platform, and Microsoft Azure).
 - `destroy`      *DESTROY* the whole cluster - including all the resources & data.
-- `payment`      Switch the payment method between on-demand and monthly.
+- `payment`      Switch the payment method between on-demand and monthly (not applicable for AWS, Google Cloud Platform, or Microsoft Azure).
 
 ### **Cluster User Management**
 
