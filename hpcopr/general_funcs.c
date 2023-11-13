@@ -56,7 +56,7 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--copypass"
 };
 
-char command_keywords[CMD_KWDS_NUM][16]={
+char command_keywords[CMD_KWDS_NUM][32]={
     "-c", //cluster
     "-u", //user
     "-p", // password
@@ -94,6 +94,8 @@ char command_keywords[CMD_KWDS_NUM][16]={
     "--ci",
     "--os",
     "--ht",
+    "--apps-inst",
+    "--apps-pkgs",
     "--conf",
     "--hloc",
     "--cloc",

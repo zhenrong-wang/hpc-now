@@ -9,22 +9,22 @@
 
 function help_info() {
   echo -e "[ -INFO- ] Valid options/commands:"
-  echo -e "           quick   - quick config"
-  echo -e "           master  - refresh only master node"
-  echo -e "           connect - check cluster connectivity"
-  echo -e "           all     - refresh the whole cluster"
-  echo -e "           clear   - clear the hostfile_dead_nodes list"
-  echo -e "           applist - List out the apps in the store"
-  echo -e "           build   - build software from source"
-  echo -e "           install - install software"
-  echo -e "           remove  - remove software"
-  echo -e "           submit  - submit a job"
+  echo -e "|          quick   - quick config"
+  echo -e "|          master  - refresh only master node"
+  echo -e "|          connect - check cluster connectivity"
+  echo -e "|          all     - refresh the whole cluster"
+  echo -e "|          clear   - clear the hostfile_dead_nodes list"
+  echo -e "|          applist - List out the apps in the store"
+  echo -e "|          build   - build software from source"
+  echo -e "|          install - install software"
+  echo -e "|          remove  - remove software"
+  echo -e "|          submit  - submit a job"
 }
 
 function node_invalid_info() {
   echo -e "[ FATAL: ] It seems you are *NOT* working on the master node of a NOW Cluster."
-  echo -e "           In this case, *ONLY* 'hpcmgr install' command is valid."
-  echo -e "           Exit now."
+  echo -e "|          In this case, *ONLY* 'hpcmgr install' command is valid."
+  echo -e "|          Exit now."
 }
 
 function add_a_user() {
@@ -69,9 +69,9 @@ fi
 current_user=`whoami`
 public_app_registry="/hpc_apps/.public_apps.reg"
 app_tmp_log_root="/tmp/app_tmp_logs/"
-#if [ $current_user != 'root' ]; then
 private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
-#fi
+appstore_env="/usr/hpc-now/appstore_env.sh"
+applist_cache="/usr/hpc-now/.applist_cache.txt"
 
 main_menu=('quick' 'master' 'connect' 'all' 'clear' 'applist' 'build' 'install' 'remove' 'submit' 'users')
 command_flag='false'
@@ -91,15 +91,37 @@ fi
 
 if [ $current_user != 'root' ] && [ $1 != 'applist' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 != 'submit' ]; then
   echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr $1'. "
-  echo -e "           Please make sure you use either user1 with 'sudo' privilege, OR"
-  echo -e "           use root (NOT recommend!) to run 'hpcmgr'. Exit now."
+  echo -e "|          Please make sure you use either user1 with 'sudo' privilege, OR"
+  echo -e "|          use root (NOT recommend!) to run 'hpcmgr'. Exit now."
   exit 1
 fi
-#CRITICAL: Environment Variable $NODE_NUM and $NODE_CORES MUST be written to /etc/profile IN ADVANCE!
-source /etc/profile
-if [ ! -z $APPS_INSTALL_SCRIPTS_URL ]; then
-  url_instscripts_root=$APPS_INSTALL_SCRIPTS_URL
+
+if [ $1 = 'build' ] || [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'applist' ]; then
+  source ${appstore_env} >> /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo -e "[ -WARN- ] Failed to load the appstore environment file ${appstore_env}."
+    url_instscripts_root=${3}
+    url_instpkgs_root=${4}
+  else
+    if [ ! -z $APPS_INST_SCRIPTS_URL ]; then
+      url_instscripts_root=$APPS_INST_SCRIPTS_URL
+    else
+      url_instscripts_root=${3}
+    fi
+    if [ ! -z $APPS_INST_PKGS_URL ]; then
+      url_instpkgs_root=$APPS_INST_PKGS_URL
+    else
+      url_instpkgs_root=${4}
+    fi
+  fi
+  if [ -z $url_instscripts_root ] || [ -z $url_instpkgs_root ]; then
+    echo -e "[ FATAL: ] Failed to get the locations for app scripts and/or app packages."
+    echo -e "|          You need to set them by command params or by the ${appstore_env} file."
+    echo -e "[ FATAL: ] Exit now."
+    exit 34
+  fi
 fi
+
 rm -rf ~/.ssh/known_hosts
 user_registry=/root/.cluster_secrets/user_secrets.txt
 if [ $current_user = 'root' ]; then
@@ -534,52 +556,11 @@ elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
   sinfo -N
   exit 0
 elif [ $1 = 'applist' ]; then
-  if [ -z $url_instscripts_root ]; then
-    echo -e "[ FATAL: ] Failed to connect to a valid appstore repo. Exit now."
-    exit 34
-  fi
-  if [ -z $2 ]; then
-    echo -e "1. Applications:"
-    echo -e "\tof7       - OpenFOAM-v7"
-    echo -e "\tof9       - OpenFOAM-v9"
-    echo -e "\tof1912    - OpenFOAM-v1912"
-    echo -e "\tof2112    - OpenFOAM-v2112"
-    echo -e "\tlammps    - LAMMPS dev latest"
-    echo -e "\tgromacs   - GROMACS"
-    echo -e "\twrf       - WRF & WPS -4.4"
-    echo -e "\tvasp5     - VASP-5.4.4 (BRING YOUR OWN SOURCE AND LICENSE)"
-    echo -e "\tvasp6.1   - VASP-6.1.0 (BRING YOUR OWN SOURCE AND LICENSE)"
-    echo -e "\tvasp6.3   - VASP-6.1.0 (BRING YOUR OWN SOURCE AND LICENSE)"
-    echo -e "\tR         - R & RStudio (in development)"
-    echo -e "\tparaview  - ParaView-5"
-    echo -e "\thdf5      - HDF5-1.10.9"
-    echo -e "\tnetcdf4   - netCDF-C-4.9.0 & netCDF-fortran-4.5.3"
-    echo -e "\tabinit    - ABINIT-9.6.2"
-    echo -e "2. MPI Toolkits:"
-    echo -e "\tmpich3    - MPICH-3.2.1"
-    echo -e "\tmpich4    - MPICH-4.0.2"
-    echo -e "\tompi3     - OpenMPI-3.1.6"
-    echo -e "\tompi4     - OpenMPI-4.1.2"
-    echo -e "3. Compilers:"
-    echo -e "\tgcc4      - GNU Compiler Collections - 4.9.2"
-    echo -e "\tgcc8      - GNU Compiler Collections - 8.2.0"
-    echo -e "\tgcc9      - GNU Compiler Collections - 9.5.0."
-    echo -e "\tgcc12     - GNU Compiler Collections - 12.1.0"
-    echo -e "\tintel     - Intel(R) HPC Toolkit Latest"
-    echo -e "4. Important Libraries:"
-    echo -e "\tfftw3     - FFTW 3"
-    echo -e "\tlapack311 - LAPACK-3.11.0"
-    echo -e "\tzlib      - zlib-1.2.13"
-    echo -e "\tslpack2   - ScaLAPACK-2.1.0"
-    echo -e "\topenblas  - OpenBLAS 0.3.15 *SINGLE THREAD*"
-    echo -e "5. Other Tools:"
-    echo -e "\tdesktop   - Desktop Environment" 
-    echo -e "\tbaidu     - Baidu Netdisk"
-    echo -e "\tcos       - COSBrowser (RECOMMENDED)" 
-    echo -e "\trar       - RAR for Linux (RECOMMENDED)" 
-    echo -e "\tkswps     - WPS Office Suite for Linux (RECOMMENDED)" 
-    echo -e "\tenvmod    - Environment Modules" 
-    echo -e "\tvscode    - Visual Studio Code"
+  if [ -n $2 ]; then
+    if [ ! -f ${applist_cache} ]; then
+      curl -s ${url_instscripts_root}_app_list.txt -o ${applist_cache}
+    fi
+    cat ${applist_cache}
     exit 0
   elif [ $2 = 'avail' ]; then
     echo -e "|       +- Available(Installed) Apps ~ Public:"

@@ -21,10 +21,13 @@
 #include "general_funcs.h"
 #include "general_print_info.h"
 #include "cluster_init.h"
+#include "components.h"
 
 extern char url_code_root_var[LOCATION_LENGTH];
 extern char url_shell_scripts_var[LOCATION_LENGTH];
 extern char url_initutils_root_var[LOCATION_LENGTH];
+extern char url_app_pkgs_root_var[LOCATION_LENGTH];
+extern char url_app_inst_root_var[LOCATION_LENGTH];
 extern char az_environment[16];
 extern int code_loc_flag_var;
 
@@ -79,6 +82,8 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     char* default_ht_flag="ON";
     char real_ht_flag[128]="";
     char real_nfs_volume[128]="";
+    char app_inst_script_url_specified[LOCATION_LENGTH]="";
+    char app_inst_pkgs_url_specified[LOCATION_LENGTH]="";
     int sum_temp;
 
     cmd_keyword_check(argc,argv,"--rg",real_region);
@@ -90,6 +95,8 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     cmd_keyword_check(argc,argv,"--os",real_os_image);
     cmd_keyword_check(argc,argv,"--ht",real_ht_flag);
     cmd_keyword_check(argc,argv,"--vol",real_nfs_volume);
+    cmd_keyword_check(argc,argv,"--apps-inst",app_inst_script_url_specified);
+    cmd_keyword_check(argc,argv,"--apps-pkgs",app_inst_pkgs_url_specified);
 
     if(strlen(real_node_num_string)!=0){
         sum_temp=string_to_positive_num(real_node_num_string);
@@ -197,6 +204,13 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     if(strlen(real_ht_flag)==0){
         strcpy(real_ht_flag,default_ht_flag);
     }
+    if(strlen(app_inst_script_url_specified)>0&&valid_loc_format_or_not(app_inst_script_url_specified)==0){
+        strncpy(url_app_inst_root_var,app_inst_script_url_specified,LOCATION_LENGTH);
+    }
+    if(strlen(app_inst_pkgs_url_specified)>0&&valid_loc_format_or_not(app_inst_pkgs_url_specified)==0){
+        strncpy(url_app_pkgs_root_var,app_inst_pkgs_url_specified,LOCATION_LENGTH);
+    }
+
     if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0){
         sum_temp=string_to_positive_num(real_nfs_volume);
         if(sum_temp==0||sum_temp<0){
@@ -834,7 +848,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
+    sprintf(line_temp,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -867,8 +883,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         sprintf(string_temp,"comp%d",i+1);
         global_replace(filename_temp,"NUMBER",string_temp);
-        sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
+        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);*/
     }
     generate_tf_files(stackdir);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,0)!=0){
@@ -1332,7 +1348,9 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
+    sprintf(line_temp,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -1366,9 +1384,9 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         global_replace(filename_temp,"RUNNING_FLAG","true");
-        sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
+        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
         insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        /*for(j=0;j<hpc_user_num;j++){
+        for(j=0;j<hpc_user_num;j++){
             sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
             insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
         }*/
@@ -1816,7 +1834,9 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
+    sprintf(line_temp,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -1850,9 +1870,9 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
-        sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
+        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
         insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        /*for(j=0;j<hpc_user_num;j++){
+        for(j=0;j<hpc_user_num;j++){
             sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
             insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
         }*/
@@ -2341,7 +2361,9 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
+    sprintf(line_temp,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -2376,8 +2398,8 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-        sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
+        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);*/
     }
 
     generate_tf_files(stackdir);
@@ -2825,7 +2847,9 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
+    sprintf(line_temp,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -2860,8 +2884,8 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-        sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
+        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);*/
     }
     generate_tf_files(stackdir);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,0)!=0){
@@ -3279,7 +3303,9 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
+    sprintf(line_temp,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -3301,8 +3327,8 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
-        sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
+        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);*/
     }
     generate_tf_files(stackdir);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,0)!=0){
@@ -3718,7 +3744,9 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
-    sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\\nexport APPS_INSTALL_SCRIPTS_URL=%sapps-install/\\nexport INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_shell_scripts_var,url_shell_scripts_var,url_initutils_root_var);
+    sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_lines(filename_temp,"master_private_ip",line_temp);
+    sprintf(line_temp,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
@@ -3750,8 +3778,8 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
-        sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
+        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
+        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);*/
     }
     generate_tf_files(stackdir);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,0)!=0){

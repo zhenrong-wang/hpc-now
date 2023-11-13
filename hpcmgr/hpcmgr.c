@@ -16,11 +16,12 @@
 #include <string.h>
 #include <time.h>
 
-#define HPCMGR_VERSION "0.2.0.0016"
+#define HPCMGR_VERSION "0.2.0.0017"
 
 int appstore_env_check(void){
-  int appstore_flag=system("cat /etc/profile | grep APPS_INSTALL_SCRIPTS_URL= >> /dev/null 2>&1");
-  if(appstore_flag!=0){
+  int apps_inst_scripts_flag=system("cat /usr/hpc-now/appstore_env.sh | grep APPS_INST_SCRIPTS_URL= >> /dev/null 2>&1");
+  int apps_inst_pkgs_flag=system("cat /usr/hpc-now/appstore_env.sh | grep APPS_INST_PKGS_URL= >> /dev/null 2>&1");
+  if(apps_inst_scripts_flag!=0||apps_inst_pkgs_flag!=0){
     return 1;
   }
   else{
@@ -58,7 +59,7 @@ int main(int argc,char *argv[]){
   char final_cmd_cp[256]="";
   char final_cmd_chmod[128]="";
   char cmd_run[128]="";
-  char final_cmd_run[512]="";
+  char final_cmd_run[1024]="";
   char final_cmd_dele[64];
   char confirm[64];
   int real_argc;
@@ -106,31 +107,31 @@ int main(int argc,char *argv[]){
     }
     else{
       printf("[ -INFO- ]You denied the operation. Nothing changed.\n");
-//      print_tail_hpcmgr();
+      //print_tail_hpcmgr();
       return 1;
     }
   }
   system_run_flag=system(final_cmd_cp);
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 1.\n");
-//    print_tail_hpcmgr();
+    //print_tail_hpcmgr();
     return 1;
   }
   system_run_flag=system(final_cmd_chmod);  
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 2.\n");
     system(final_cmd_dele);
-//    print_tail_hpcmgr();
+    //print_tail_hpcmgr();
     return 1;
   }
   system_run_flag=system(final_cmd_run);
   if(system_run_flag!=0){
     printf("[ FATAL: ] ERROR CODE 3.\n");
     system(final_cmd_dele);
-//    print_tail_hpcmgr();
+    //print_tail_hpcmgr();
     return 1;
   } 
   system(final_cmd_dele);
-//  print_tail_hpcmgr();
+  //print_tail_hpcmgr();
   return 0;
 }

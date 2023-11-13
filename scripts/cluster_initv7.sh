@@ -33,10 +33,6 @@ if [ -z $INITUTILS_REPO_ROOT ]; then
   echo -e "# $time_current [ FATAL: ] The critical environment var INITUTILS_REPO_ROOT is not set. Init abort." >> ${logfile}
   exit 1
 fi
-if [ -z $SCRIPTS_URL_ROOT ]; then
-  echo -e "# $time_current [ FATAL: ] The critical environment var SCRIPTS_URL_ROOT is not set. Init abort." >> ${logfile}
-  exit 1
-fi
 url_utils=${INITUTILS_REPO_ROOT}
 
 #CLOUD_A: Alicloud
