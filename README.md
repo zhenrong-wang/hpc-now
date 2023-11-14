@@ -1,6 +1,6 @@
 # 1. Project Background
 
-Cloud High-Performance Computing, Cloud HPC differs from on-premise HPC significantly. Cloud service brings high scalability and flexibility to High-Performance Computing. However, most HPC users are not familiar with building and maintaining HPC services on the cloud. 
+Cloud High-Performance Computing - Cloud HPC, differs from on-premise HPC significantly. Cloud service brings high scalability and flexibility to High-Performance Computing. However, most HPC users are not familiar with building and maintaining HPC services on the cloud. 
 
 In order to make it super easy to start and manage HPC workloads on the cloud, we have been developing this project and named it as HPC-NOW. NOW stands for:
 
@@ -43,7 +43,10 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 ### **Step 1. Clone this repository:** 
 
-    git clone https://github.com/zhenrong-wang/hpc-now OR
+    git clone https://github.com/zhenrong-wang/hpc-now 
+
+    Or, if github connection is not stable, please try:
+
     git clone https://gitee.com/zhenrong-wang/hpc-now
 
 ### **Step 2. Change the directory :** 
@@ -300,4 +303,9 @@ The most detailed help info can be found by the command `hpcopr help` .
 # 4. Bug Reports
 
 Please submit issues to this repo. Or
-mailto: zhenrongwang@live.com | wangzhenrong@hpc-now | info@hpc-now.com
+
+mailto: 
+
+- zhenrongwang@live.com
+- wangzhenrong@hpc-now
+- info@hpc-now.com
