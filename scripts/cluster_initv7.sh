@@ -33,10 +33,6 @@ if [ -z $INITUTILS_REPO_ROOT ]; then
   echo -e "# $time_current [ FATAL: ] The critical environment var INITUTILS_REPO_ROOT is not set. Init abort." >> ${logfile}
   exit 1
 fi
-if [ -z $SCRIPTS_URL_ROOT ]; then
-  echo -e "# $time_current [ FATAL: ] The critical environment var SCRIPTS_URL_ROOT is not set. Init abort." >> ${logfile}
-  exit 1
-fi
 url_utils=${INITUTILS_REPO_ROOT}
 
 #CLOUD_A: Alicloud
@@ -399,6 +395,7 @@ if [ -f /root/hostfile ]; then
     yum -y install firefox
     yum -y install nautilus
     yum -y install ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
+    yum -y install gedit
     systemctl enable gdm.service --now
   else
     echo -e "# $time_current CENTOS VERSION $centos_vers. Installing GUI now." >> ${logfile}
@@ -424,12 +421,13 @@ if [ -f /root/hostfile ]; then
       yum -y install firefox
       yum -y install nautilus
       yum -y install ibus-table-chinese texlive-collection-langchinese google-noto-sans-cjk-sc-fonts
+      yum -y install gedit
 #      fi
-      systemctl enable gdm --now
-      systemctl disable firewalld
-      systemctl stop firewalld
+      systemctl enable gdm.service --now
     fi
   fi
+  systemctl disable firewalld
+  systemctl stop firewalld
   systemctl set-default graphical.target
   yum -y install tigervnc tigervnc-server
   grep "< desktop >" $public_app_registry
@@ -514,12 +512,12 @@ if [ -f /root/hostfile ]; then
   rm -rf /usr/share/backgrounds/*.png
   rm -rf /usr/share/backgrounds/*.jpg
   /bin/cp -r ${utils_path}pics/wallpapers.zip /usr/share/backgrounds/
-  cd /usr/share/backgrounds && unzip wallpapers.zip
+  cd /usr/share/backgrounds && unzip -o wallpapers.zip
   chmod 644 *.jpg
   if [ -z $centos_vers ] || [ $centos_vers != 7 ]; then
     sed -i 's/#WaylandEnable=false/WaylandEnable=false/g' /etc/gdm/custom.conf
     yum -y install gnome-tweaks gnome-extensions-app.x86_64
-    echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options zoom\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/day.jpg\ngsettings set org.gnome.desktop.wm.preferences button-layout \":minimize,maximize,close\"\n" > /etc/g_ini.sh
+    echo -e "#! /bin/bash\ngnome-extensions enable background-logo@fedorahosted.org\ngnome-extensions enable window-list@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable apps-menu@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable desktop-icons@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable launch-new-instance@gnome-shell-extensions.gcampax.github.com\ngnome-extensions enable places-menu@gnome-shell-extensions.gcampax.github.com\ngsettings set org.gnome.desktop.lockdown disable-lock-screen true\ngsettings set org.gnome.desktop.background picture-options zoom\ngsettings set org.gnome.desktop.background picture-uri /usr/share/backgrounds/hpc-now-default.jpg\ngsettings set org.gnome.desktop.wm.preferences button-layout \":minimize,maximize,close\"\n" > /etc/g_ini.sh
     chmod +x /etc/g_ini.sh
     echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
   fi
@@ -563,7 +561,12 @@ if [ -f /root/hostfile ]; then
   fi
 fi
 yum -y update
-yum -y install gcc-c++ gcc-gfortran htop python3 python3-devel hostname dos2unix bash-completion
+yum -y install gcc-c++ gcc-gfortran 
+yum -y install htop 
+yum -y install python3 python3-devel 
+yum -y install hostname dos2unix bash-completion
+yum -y install evince # The PDF viewer
+yum -y install eog # The image viewer
 systemctl mask firewalld
 #systemctl restart xrdp
 #systemctl enable xrdp

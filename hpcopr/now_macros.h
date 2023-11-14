@@ -8,7 +8,11 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
+<<<<<<< HEAD
 #define CORE_VERSION_CODE "0.2.1"
+=======
+#define CORE_VERSION_CODE "0.2.1.0004"
+>>>>>>> development
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -233,7 +237,7 @@
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 11
 #define CMD_FLAG_NUM 28
-#define CMD_KWDS_NUM 42
+#define CMD_KWDS_NUM 44
 
 /* Usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/COPYING"
@@ -266,13 +270,13 @@
 #define DEFAULT_URL_TF_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-root/"
 #define DEFAULT_URL_CODE_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/infra-as-code/"
 #define DEFAULT_URL_SHELL_SCRIPTS "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/scripts/"
+#define DEFAULT_URL_APPS_INST_SCRIPTS "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/scripts/apps-install/"
 #define DEFAULT_URL_NOW_CRYPTO "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-crypto/"
 #define DEFAULT_INITUTILS_REPO_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/"
+#define DEFAULT_APPS_PKGS_REPO_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/packages/"
+#define DEFAULT_LOCATIONS_COUNT 7
 
 #define TRANSFER_HEADER "EXPORTED AND TO BE IMPORTED BY HPC-NOW SERVICES"
-
-#define LOCATION_CONF_TOTAL_LINES 6
-#define LOCATION_LINES 5
 
 #define FATAL_RED_BOLD "\033[1;31m"
 #define WARN_YELLO_BOLD "\033[1;33m"

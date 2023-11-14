@@ -40,6 +40,9 @@ char url_tf_root_var[LOCATION_LENGTH]="";
 char url_shell_scripts_var[LOCATION_LENGTH]="";
 char url_now_crypto_var[LOCATION_LENGTH]="";
 char url_initutils_root_var[LOCATION_LENGTH]="";
+char url_app_pkgs_root_var[LOCATION_LENGTH]="";
+char url_app_inst_root_var[LOCATION_LENGTH]="";
+
 int tf_loc_flag_var=0;
 int code_loc_flag_var=0;
 int now_crypto_loc_flag_var=0;

@@ -56,7 +56,7 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--copypass"
 };
 
-char command_keywords[CMD_KWDS_NUM][16]={
+char command_keywords[CMD_KWDS_NUM][32]={
     "-c", //cluster
     "-u", //user
     "-p", // password
@@ -94,6 +94,8 @@ char command_keywords[CMD_KWDS_NUM][16]={
     "--ci",
     "--os",
     "--ht",
+    "--apps-inst",
+    "--apps-pkgs",
     "--conf",
     "--hloc",
     "--cloc",
@@ -161,7 +163,8 @@ void reset_string(char* orig_string){
  * SEGMENT FAULT MAY OCCUR IF YOU DO NOT USE THIS FUNCTION PROPERLY!
  */
 int fgetline(FILE* file_p, char* line_string){
-    char ch;
+//    char ch;
+    int ch='\0';
     int i=0;
     if(file_p==NULL){
         return -1;
@@ -1051,7 +1054,7 @@ int file_cr_clean(char* filename){
     }
     FILE* file_p=fopen(filename,"r");
     char filename_temp[FILENAME_LENGTH]="";
-    char ch;
+    int ch;
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(filename_temp,"%s.cr.tmp",filename);
     FILE* file_p_tmp=fopen(filename_temp,"w+");

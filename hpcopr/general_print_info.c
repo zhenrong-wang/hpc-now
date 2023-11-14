@@ -333,7 +333,7 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "version" RESET_DISPLAY "     :~ Display the version info.\n");
     }
     if(strcmp(cmd_name,"license")==0||strcmp(cmd_name,"all")==0){
-        printf("|  " HIGH_GREEN_BOLD "license" RESET_DISPLAY "     :~ Read the terms of the GNU Public License-v2.0\n");
+        printf("|  " HIGH_GREEN_BOLD "license" RESET_DISPLAY "     :~ Read the terms of the MIT License.\n");
         printf("|   --print           ~ Print out the license terms.\n");
         printf("|   --read            ~ Read the license terms.\n");
     }

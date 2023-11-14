@@ -1,45 +1,45 @@
 1. Applications:
-< of7 >
-< of9 >
-< of1912 >
-< of2112 >
-< lammps >
-< gromacs >
-< wrf >
-< R >
-< paraview >
-< hdf5 >
-< netcdf4 >
-< abinit >
-< vasp5 >
-< vasp6.1 >
-< vasp6.3 >
+< of7 >         OpenFOAM-v7
+< of9 >         OpenFOAM-v9
+< of1912 >      OpenFOAM-v1912
+< of2112 >      OpenFOAM-v2112
+< lammps >      LAMMPS dev latest
+< gromacs >     GROMACS
+< wrf >         WRF & WPS -4.4
+< R >           R & RStudio (in development)
+< paraview >    ParaView-5.10.1
+< hdf5 >        HDF5-1.10.9
+< netcdf4 >     netCDF-C-4.9.0 & netCDF-fortran-4.5.3
+< abinit >      ABINIT-9.6.2
+< vasp5 >       VASP-5.4.4 (BRING YOUR OWN SOURCE AND LICENSE)
+< vasp6.1 >     VASP-6.1.0 (BRING YOUR OWN SOURCE AND LICENSE)
+< vasp6.3 >     VASP-6.1.0 (BRING YOUR OWN SOURCE AND LICENSE)
 
 2. MPI Toolkits:
-< mpich3 >
-< mpich4 >
-< ompi3 >
-< ompi4 >
+< mpich3 >      MPICH-3.2.1
+< mpich4 >      MPICH-4.0.2
+< ompi3 >       OpenMPI-3.1.6
+< ompi4 >       OpenMPI-4.1.2
 
 3. Compilers:
-< gcc4 >
-< gcc8 >
-< gcc9 >
-< gcc12 >
-< intel >
+< gcc4 >        GNU Compiler Collections - 4.9.2
+< gcc8 >        GNU Compiler Collections - 8.2.0
+< gcc9 >        GNU Compiler Collections - 9.5.0
+< gcc12 >       GNU Compiler Collections - 12.1.0
+< intel >       Intel(R) HPC Toolkit Latest
 
 4. Important Libraries:
-< fftw3 >
-< lapack311 >
-< zlib >
-< slpack2 >
-< openblas >
+< fftw3 >       FFTW 3
+< lapack311 >   LAPACK-3.11.0
+< zlib >        zlib-1.2.13
+< slpack2 >     ScaLAPACK-2.1.0
+< openblas >    OpenBLAS 0.3.15 *SINGLE THREAD*
 
 5. Other Tools:
-< desktop >
-< baidu >
-< cos >
-< rar >
-< kswps >
-< envmod >
-< vscode >
+< desktop >     Desktop Environment
+< baidu >       Baidu Netdisk
+< cos >         COSBrowser (RECOMMENDED)
+< rar >         RAR for Linux (RECOMMENDED)
+< kswps >       WPS Office Suite for Linux (RECOMMENDED)
+< envmod >      Environment Modules
+< vscode >      Visual Studio Code

@@ -18,6 +18,9 @@ extern char url_tf_root_var[LOCATION_LENGTH];
 extern char url_shell_scripts_var[LOCATION_LENGTH];
 extern char url_now_crypto_var[LOCATION_LENGTH];
 extern char url_initutils_root_var[LOCATION_LENGTH];
+extern char url_app_pkgs_root_var[LOCATION_LENGTH];
+extern char url_app_inst_root_var[LOCATION_LENGTH];
+
 extern int tf_loc_flag_var;
 extern int code_loc_flag_var;
 extern int now_crypto_loc_flag_var;
@@ -427,6 +430,8 @@ int reset_locations(void){
     fprintf(file_p,"ONLINE_SHELL_SCRIPTS_LOC_ROOT %s\n",DEFAULT_URL_SHELL_SCRIPTS);
     fprintf(file_p,"NOW_CRYPTO_BINARY_LOC %s\n",DEFAULT_URL_NOW_CRYPTO);
     fprintf(file_p,"ONLINE_URL_INITUTILS_ROOT %s\n",DEFAULT_INITUTILS_REPO_ROOT);
+    fprintf(file_p,"ONLINE_APPS_PKGS_LOC_ROOT %s\n",DEFAULT_APPS_PKGS_REPO_ROOT);
+    fprintf(file_p,"ONLINE_APPS_INST_LOC_ROOT %s\n",DEFAULT_URL_APPS_INST_SCRIPTS);
     fclose(file_p);
     return 0;
 }
@@ -436,6 +441,7 @@ int get_locations(void){
     char header_string[64]="";
     char loc_string[LOCATION_LENGTH]="";
     char title_string[256]="";
+    int i=0;
     if(file_exist_or_not(LOCATION_CONF_FILE)!=0){
         return -1;
     }
@@ -455,6 +461,7 @@ int get_locations(void){
                 tf_loc_flag_var=1;
             }
 #endif
+            i++;
         }
         else if(strcmp(header_string,"CLOUD_IAC_TEMPLATES_LOC_ROOT")==0){
             strcpy(url_code_root_var,loc_string);
@@ -467,9 +474,19 @@ int get_locations(void){
                 code_loc_flag_var=1;
             }
 #endif
+            i++;
         }
         else if(strcmp(header_string,"ONLINE_SHELL_SCRIPTS_LOC_ROOT")==0){
             strcpy(url_shell_scripts_var,loc_string);
+            i++;
+        }
+        else if(strcmp(header_string,"ONLINE_APPS_PKGS_LOC_ROOT")==0){
+            strcpy(url_app_pkgs_root_var,loc_string);
+            i++;
+        }
+        else if(strcmp(header_string,"ONLINE_APPS_INST_LOC_ROOT")==0){
+            strcpy(url_app_inst_root_var,loc_string);
+            i++;
         }
         else if(strcmp(header_string,"NOW_CRYPTO_BINARY_LOC")==0){
             strcpy(url_now_crypto_var,loc_string);
@@ -482,15 +499,22 @@ int get_locations(void){
                 now_crypto_loc_flag_var=1;
             }
 #endif
+            i++;
         }
         else if(strcmp(header_string,"ONLINE_URL_INITUTILS_ROOT")==0){
             strcpy(url_initutils_root_var,loc_string);
+            i++;
         }
         else{
             continue;
         }
     }
-    return 0;       
+    if(i==DEFAULT_LOCATIONS_COUNT){
+        return 0;
+    }
+    else{
+        return 1;
+    }    
 }
 
 int show_locations(void){
@@ -506,7 +530,7 @@ int show_locations(void){
     }
     fgetline(file_p,loc_string);
     printf("\n");
-    for(i=0;i<LOCATION_LINES;i++){
+    for(i=0;i<DEFAULT_LOCATIONS_COUNT;i++){
         fscanf(file_p,"%s%s",header,loc_string);
         printf("%s -> %s\n",header,loc_string);
     }
@@ -550,7 +574,7 @@ int configure_locations(void){
         printf("|          Nothing changed.\n");
         return 1;
     }
-    printf("[ LOC1/5 ] Please specify the root location of the terraform binary and providers. \n");
+    printf("[ LOC1/7 ] Please specify the root location of the terraform binary and providers. \n");
     printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_TF_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
@@ -566,7 +590,7 @@ int configure_locations(void){
             strcpy(url_tf_root_var,loc_string);
         }
     }
-    printf("[ LOC2/5 ] Please specify the root location of the terraform templates. \n");
+    printf("[ LOC2/7 ] Please specify the root location of the terraform templates. \n");
     printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_CODE_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
@@ -582,7 +606,7 @@ int configure_locations(void){
             strcpy(url_code_root_var,loc_string);
         }
     }
-    printf("[ LOC3/5 ] Please specify the root location of the *online* shell scripts.\n");
+    printf("[ LOC3/7 ] Please specify the root location of the *online* shell scripts.\n");
     printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
@@ -601,7 +625,7 @@ int configure_locations(void){
             strcpy(url_shell_scripts_var,loc_string);
         }
     }
-    printf("[ LOC4/5 ] Please input the root location of the now-crypto binary.\n");
+    printf("[ LOC4/7 ] Please input the root location of the now-crypto binary.\n");
     printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_URL_NOW_CRYPTO);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
@@ -617,7 +641,7 @@ int configure_locations(void){
             strcpy(url_now_crypto_var,loc_string);
         }
     }
-    printf("[ LOC5/5 ] Please specify the location of the *online* repo for utils and apps.\n");
+    printf("[ LOC5/7 ] Please specify the location of the *online* repo for utils and apps.\n");
     printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
@@ -634,6 +658,46 @@ int configure_locations(void){
         }
         else{
             strcpy(url_initutils_root_var,loc_string);
+        }
+    }
+
+    printf("[ LOC6/7 ] Please specify the location of the *online* repo for application install scripts.\n");
+    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
+    printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
+    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+    fflush(stdin);
+    scanf("%s",loc_string);
+    getchar();
+    if(strcmp(loc_string,"default")!=0){
+        format_flag=valid_loc_format_or_not(loc_string);
+        if(format_flag==-1){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location." RESET_DISPLAY "\n");
+        }
+        else if(format_flag==1){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify." RESET_DISPLAY "\n");
+        }
+        else{
+            strcpy(url_app_inst_root_var,loc_string);
+        }
+    }
+
+    printf("[ LOC7/7 ] Please specify the location of the *online* repo for application packages.\n");
+    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
+    printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
+    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+    fflush(stdin);
+    scanf("%s",loc_string);
+    getchar();
+    if(strcmp(loc_string,"default")!=0){
+        format_flag=valid_loc_format_or_not(loc_string);
+        if(format_flag==-1){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location." RESET_DISPLAY "\n");
+        }
+        else if(format_flag==1){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify." RESET_DISPLAY "\n");
+        }
+        else{
+            strcpy(url_app_pkgs_root_var,loc_string);
         }
     }
 
@@ -673,6 +737,18 @@ int configure_locations(void){
     }
     else{
         fprintf(file_p,"ONLINE_URL_INITUTILS_ROOT %s\n",url_initutils_root_var);
+    }
+    if(strlen(url_app_pkgs_root_var)==0){
+        fprintf(file_p,"ONLINE_APPS_PKGS_LOC_ROOT %s\n",DEFAULT_APPS_PKGS_REPO_ROOT);
+    }
+    else{
+        fprintf(file_p,"ONLINE_APPS_PKGS_LOC_ROOT %s\n",url_app_pkgs_root_var);
+    }
+    if(strlen(url_app_inst_root_var)==0){
+        fprintf(file_p,"ONLINE_APPS_INST_LOC_ROOT %s\n",DEFAULT_URL_APPS_INST_SCRIPTS);
+    }
+    else{
+        fprintf(file_p,"ONLINE_APPS_INST_LOC_ROOT %s\n",url_app_inst_root_var);
     }
     fclose(file_p);
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Locations are modified and saved. The latest locations:\n");
