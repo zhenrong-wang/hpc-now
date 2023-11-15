@@ -35,7 +35,7 @@ In this project, we are developing several components:
 -  **scripts**    : Shell scripts to initialize the clusters, install applications, etc.
 
 
-# 3. How-To: Build, Run, and Use
+# 3. How-To: Build, Install, Run, and Use
 
 The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Windows, GNU/Linux, or macOS. Note: Currently only x86_64 platform is supported.
 
@@ -66,7 +66,7 @@ If your connectivity to github is not stable, you can also try to clone from git
 
 If everything goes well, the binaries will be built to the `build` folder.
 
-## 3.2 Run
+## 3.2 Install
 
 ### **Step 1. Run the installer (Administrator or root privilege is required):**
 
@@ -106,7 +106,7 @@ If everything goes well, the binaries will be built to the `build` folder.
 
 **IMPORTANT**: Please keep the window open for the next step.
 
-### **Step 2. Run the hpcopr.exe:**
+### **Step 2. Initialize the hpcopr.exe:**
 
 The `hpcopr.exe` is designed to be executed by the dedicated system os user named `hpc-now`, which has been created by the installer in the last step.
 
@@ -137,6 +137,12 @@ Several extra packages (around 500 MB) will be download and installed. This proc
 `sudo -u hpc-now hpcopr envcheck`
 
 **NOTE:** This method is only valid for **sudoers**.
+
+## 3.4 Run
+
+The `hpcopr` is the main CLI for you to run. Please see the description above.
+
+If you'd like to update/uninstall the HPC-NOW services, you will need to run the `installer` with `sudo`(for UNIX-like OS) or **as administrator**(for Windows).
 
 ## 3.3 Basic Workflow
 
