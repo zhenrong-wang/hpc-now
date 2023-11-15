@@ -1,13 +1,13 @@
 # 1. Project Background
 
-Cloud High-Performance Computing - Cloud HPC, differs from on-premise HPC significantly. Cloud service brings high scalability and flexibility to High-Performance Computing. However, most HPC users are not familiar with building and maintaining HPC services on the cloud. 
+Cloud High-Performance Computing - Cloud HPC, differs from on-premise HPC significantly. Cloud service brings high scalability and flexibility to High-Performance Computing. However, most HPC users are not familiar with building and maintaining HPC services in the cloud. The technical barrier of cloud computing is very high to researchers, engineers, and developers in different scientific and engineering domains, e.g. energy, chemistry, physics, materials, bioscience. 
 
-In order to make it super easy to start and manage HPC workloads on the cloud, we have been developing this project and named it as HPC-NOW. NOW stands for:
+In order to make it super easy to start and manage HPC workloads in the cloud, we have been developing this project: HPC-NOW. 'NOW' stands for:
 
-- Start HPC journey on the cloud immediately, in minutes.
-- (almost) No Operation Workload.
+- Start HPC workloads in the cloud **NOW**, immediately, in minutes.
+- Manage HPC workloads with (almost) **N**o **O**peration **W**orkload.
 
-Currently, the HPC-NOW platform supports the cloud services as below:
+Currently, the HPC-NOW platform supports 7 popular cloud platforms, shown as below:
 
 - [Alibaba Cloud](https://www.alibabacloud.com/en), HPC-NOW Internal Code: CLOUD_A
 - [Tencent Cloud](https://www.tencentcloud.com/), HPC-NOW Internal Code: CLOUD_B
@@ -19,15 +19,15 @@ Currently, the HPC-NOW platform supports the cloud services as below:
 
 # 2. Core Components
 
-Thanks to the [Terraform](http://www.terraform.io), a great cloud Infrastructure-as-Code platform, which makes it possible to orchestrate cloud resources in a unified and simple way.
+Thanks to the [Terraform](http://www.terraform.io), a great cloud Infrastructure-as-Code platform making it possible to orchestrate cloud resources in a unified and simple way.
 
-In this project, we developed components as below:
+In this project, we are developing several components:
 
--  **installer**  : HPC-NOW service installer, which requires administrator or root privilege to run.
+-  **installer**  : HPC-NOW service installer. It requires administrator or root privilege to run.
 -  **hpcopr**     : HPC Operator. The main component that manages the HPC clusters, users, jobs, data, monitoring, usage, etc.
--  **now-crypto** : A cryptography module that encrypts and decrypts the files containing sensitive information.
--  **hpcmgr**    : A utility running in every cluster to communicate with the operator.
--  **infra-as-code** : Infrastructure codes in HCL format
+-  **now-crypto** : An independent cryptography module that encrypts and decrypts the files containing sensitive information.
+-  **hpcmgr**    : A utility running in every cluster's master node to communicate with the operator.
+-  **infra-as-code** : Infrastructure codes in HCL format.
 -  **scripts**    : Shell scripts to initialize the clusters, install applications, etc.
 
 
@@ -39,15 +39,13 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 ### **Prerequisites:** 
 
-`git`, `gcc` (for GNU/Linux) | `clang` (for macOS) | `mingw` (for Microsoft Windows)
+- `git` for code management
+- A standard C compiler. We recommend `gcc` (for GNU/Linux) | `clang` (for macOS) | `mingw` (for Microsoft Windows)
 
 ### **Step 1. Clone this repository:** 
 
-    git clone https://github.com/zhenrong-wang/hpc-now 
-
-    Or, if github connection is not stable, please try:
-
-    git clone https://gitee.com/zhenrong-wang/hpc-now
+`git clone https://github.com/zhenrong-wang/hpc-now`
+`git clone https://gitee.com/zhenrong-wang/hpc-now`
 
 ### **Step 2. Change the directory :** 
 
@@ -55,69 +53,81 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 ### **Step 3. Run the build script :** 
 
-    For Microsoft Windows users: .\make_windows.bat build
-    For GNU/Linux Distro users : ./make_linux.sh build
-    For macOS users            : ./make_darwin.sh build
+- For **Microsoft Windows**: `.\make_windows.bat build`
+- For **GNU/Linux Distro** : `./make_linux.sh build`
+- For **macOS (Darwin)**   : `./make_darwin.sh build`
 
-If everything goes well, the binaries will be built to the 'build' folder.
+If everything goes well, the binaries will be built to the `build` folder.
 
 ## 3.2 Run
 
 ### **Step 1. Run the installer (Administrator or root privilege is required):**
 
-- For **Microsoft Windows** users: 
+- For **Microsoft Windows** : 
     
-    Open a cmd prompt as Administrator: 
+    Step 1. Open a Command Prompt **as Administrator**: 
 
-        Type 'cmd' in the search box
-        Right click on the icon of the Command Prompt
-        Select 'Run as Administrator'
+        - Type 'cmd' in the search box
+        - Right click on the icon of the Command Prompt
+        - Select 'Run as Administrator'
+
+    Step 2. Change direcroty to the `build` folder: 
     
-    Change the direcroty to the 'build' folder: 
+    Suppose your local repo path is `c:\users\public\hpc-now`, then the command should be:
     
-    `cd YOUR_PATH_TO_THE_BUILD_FOLDER`
+    `cd c:\users\public\hpc-now\build`
 
-    Run the command below:
+    Step 3. Run the command below:
 
-    `.\installer-win-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-win-HPCOPR_VERSION_CODE.exe --cloc now-crypto-win.exe`
+    Suppose your installer version code is 0.2.1, hpcopr version code is 0.2.1, then the command should be:
 
-- For **GNU/Linux Distro** users: 
+    `.\installer-win-0.2.1.exe install --hloc hpcopr-win-0.2.1.exe --cloc now-crypto-win.exe`
 
-    `sudo ./installer-lin-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-lin-HPCOPR_VERSION_CODE.exe --cloc now-crypto-lin.exe`
+- For **GNU/Linux Distros** : 
 
-- For **macOS** users:
+    Suppose your installer version code is 0.2.1, hpcopr version code is 0.2.1, then the command should be:
 
-    `sudo ./installer-dwn-INSTALLER_VERSION_CODE.exe install --hloc hpcopr-dwn-HPCOPR_VERSION_CODE.exe --cloc now-crypto-dwn.exe`
+    `sudo ./installer-lin-0.2.1.exe install --hloc hpcopr-lin-0.2.1.exe --cloc now-crypto-lin.exe`
 
-Please replace the `INSTALLER_VERSION_CODE` and `HPCOPR_VERSION_CODE` to the actual codes of your build.
+- For **macOS(Darwin)**:
 
-Please keep the window open for the next step.
+    Suppose your installer version code is 0.2.1, hpcopr version code is 0.2.1, then the command should be:
+
+    `sudo ./installer-dwn-0.2.1.exe install --hloc hpcopr-dwn-0.2.1.exe --cloc now-crypto-dwn.exe`
+
+**IMPORTANT**: Please replace the sample version code `0.2.1` with the real code of your own build.
+
+**IMPORTANT**: Please keep the window open for the next step.
 
 ### **Step 2. Run the hpcopr.exe:**
 
-- For Microsoft Windows users:
+The `hpcopr.exe` is designed to be executed by the dedicated system os user named `hpc-now`, which has been created by the installer in the last step.
+
+In order to run the `hpcopr.exe`, you'll need to set a password and switch to that user. See the stpes below:
+
+- For **Microsoft Windows**:
 
     - Set a password for the user 'hpc-now' : `net user hpc-now YOUR_COMPLEX_PASSWORD`
     - Run a new cmd window as 'hpc-now'     : `runas /savecred /user:mymachine\hpc-now cmd`
     - Run the main program 'hpcopr.exe'     : `hpcopr envcheck`
 
-- For GNU/Linux Distros users:
+- For **GNU/Linux Distros**:
 
     - Set a password for the user 'hpc-now' : `sudo passwd hpc-now`
     - Switch to the user 'hpc-now'          : `su hpc-now`
     - Run the main program 'hpcopr.exe'     : `hpcopr envcheck`
 
-- For macOS users:
+- For **macOS(Darwin)**:
 
     - Set a password for the user 'hpc-now' : `sudo dscl . -passwd /Users/hpc-now YOUR_COMPLEX_PASSWORD`
     - Switch to the user 'hpc-now'          : `su hpc-now`
     - Run the main program 'hpcopr.exe'     : `hpcopr envcheck`
 
-Several extra packages (around 400 MB) will be download and installed. This process may needs minutes (depending on your local network connectivity).
+Several extra packages (around 500 MB) will be download and installed. This process may needs minutes (depending on your local network connectivity).
 
 ## 3.3 Basic Workflow
 
-In order to use and manage HPC on the cloud with HPC-NOW, please follow the workflow:
+In order to use and manage HPC in the cloud with HPC-NOW, please follow the workflow:
 
 - Import a cloud credential - a keypair or key file (**`hpcopr new-cluster ...`**) --> 
 - Initialize a new cluster (**`hpcopr init ...`**) --> 
@@ -133,13 +143,15 @@ In order to use and manage HPC on the cloud with HPC-NOW, please follow the work
 
 ## 3.4 Commands
 
-The **`hpcopr.exe`** is the main interface for you to operate.
+The **`hpcopr.exe`** is a very powerful Command Line Interface (CLI) for you to use.
 
-USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
+**USAGE**: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 
     CMD_NAME: see all the command names below
-    CMD_FLAG: such as --force，--all
+    CMD_FLAG: single value, such as --force，--all
     CMD_KEYWORD: key-value pair, such as -c myFirstCluster
+
+**CMD_NAME LIST**:
 
 ### **Get-Started**
 
@@ -205,9 +217,9 @@ USAGE: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
 
 ### **Cluster User Management**
 
-Usage `hpcopr userman --ucmd USER_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
+**Usage:** `hpcopr userman --ucmd USER_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
-The cluster must be in running state (minimal or all). 
+*The cluster must be in running state (minimal or all).* 
 
     --ucmd list      List all the current cluster users.
     --ucmd add       Add a user to the cluster. By default, added users are enabled.
@@ -218,9 +230,9 @@ The cluster must be in running state (minimal or all).
 
 ### **Cluster Data Management**
 
-Usage `hpcopr dataman CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...`
+**Usage:** `hpcopr dataman CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...`
 
-General Flags     -r, -rf, --recursive, --force, -f.
+**General Flags:**     -r, -rf, --recursive, --force, -f.
 
     -s SOURCE_PATH    Source path of the binary operations. i.e. cp
     -d DEST_PATH      Destination path of binary operations. i.e. cp
@@ -235,11 +247,11 @@ General Flags     -r, -rf, --recursive, --force, -f.
     --dcmd delete      Delete an object (file or folder) of the bucket.
     --dcmd move        Move an existed object (file or folder) in the bucket.
 
-Example: `hpcopr dataman --dcmd put -s ./foo -d /foo -u user1`
+**Example:** `hpcopr dataman --dcmd put -s ./foo -d /foo -u user1`
 
 #### **Direct Operations:** Transfer and manage data in the cluster storage.
 
-The cluster must be in running state (minimal or all).
+*The cluster must be in running state (minimal or all).*
 
     --dcmd cp          Remote copy between local and the cluster storage.
     --dcmd mv          Move the remote files/folders in the cluster storage.
@@ -260,13 +272,13 @@ The cluster must be in running state (minimal or all).
         @R/ to specify the / prefix, only for root or user1.
         @t/ to specify the /tmp prefix.
 
-Example: `hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1`
+**Example:** `hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1`
 
 ### **Cluster App Management**
 
-Usage `hpcopr appman --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...`
+**Usage:** `hpcopr appman --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...`
 
-The cluster must be in running state (minimal or all). *
+*The cluster must be in running state (minimal or all).*
 
 `-u USERNAME`    A valid user name. Use 'root' for all users. Admin or Operator role is required for root.
 
@@ -279,9 +291,9 @@ The cluster must be in running state (minimal or all). *
 
 ### **Cluster Job Management**
 
-Usage `hpcopr jobman --jcmd APP_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
+**Usage:** `hpcopr jobman --jcmd APP_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
-The cluster must be in running state (minimal or all).
+*The cluster must be in running state (minimal or all).*
 
 `-u USERNAME`      A valid user name. The root user CANNOT submit jobs.
 
@@ -298,7 +310,7 @@ The cluster must be in running state (minimal or all).
 
 For more information, please refer to Docs/UserManual-EN.pdf.
 
-The most detailed help info can be found by the command `hpcopr help` .
+The most detailed help info can be found by the command `hpcopr help`. We are also considering writing a standard mannual for `hpcopr`. If you are interested, please let us know.
 
 # 4. Bug Reports
 
@@ -306,6 +318,5 @@ Please submit issues to this repo. Or
 
 mailto: 
 
-- zhenrongwang@live.com
-- wangzhenrong@hpc-now
-- info@hpc-now.com
+- [zhenrongwang@live.com](mailto:zhenrongwang@live.com)
+- [wangzhenrong@hpc-now](mailto:wangzhenrong@hpc-now)

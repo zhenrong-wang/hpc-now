@@ -114,11 +114,21 @@ if [ $1 = 'build' ] || [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'applis
       url_instpkgs_root=${4}
     fi
   fi
-  if [ -z $url_instscripts_root ] || [ -z $url_instpkgs_root ]; then
-    echo -e "[ FATAL: ] Failed to get the locations for app scripts and/or app packages."
+  if [ -z $url_instscripts_root ]; then
+    echo -e "[ FATAL: ] Failed to get the locations for app scripts."
     echo -e "|          You need to set them by command params or by the ${appstore_env} file."
     echo -e "[ FATAL: ] Exit now."
     exit 34
+  fi
+  if [ -z $url_instpkgs_root ]; then
+    if [ $1 = 'build' ] || [ $1 = 'install' ]; then
+      echo -e "[ FATAL: ] Failed to get the locations for app packages."
+      echo -e "|          You need to set them by command params or by the ${appstore_env} file."
+      echo -e "[ FATAL: ] Exit now."
+      exit 34
+    else
+      echo -e "[ -WARN- ] Failed to get the locations for app packages. Please check the ${appstore_env}."
+    fi
   fi
 fi
 
