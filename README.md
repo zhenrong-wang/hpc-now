@@ -138,13 +138,13 @@ Several extra packages (around 500 MB) will be download and installed. This proc
 
 **NOTE:** This method is only valid for **sudoers**.
 
-## 3.4 Run
+## 3.3 Run
 
 The `hpcopr` is the main CLI for you to run. Please see the description above.
 
 If you'd like to update/uninstall the HPC-NOW services, you will need to run the `installer` with `sudo`(for UNIX-like OS) or **as administrator**(for Windows).
 
-## 3.3 Basic Workflow
+## 3.4 Basic Workflow
 
 In order to use and manage HPC in the cloud with HPC-NOW, please follow the workflow:
 
@@ -160,7 +160,7 @@ In order to use and manage HPC in the cloud with HPC-NOW, please follow the work
 - Destroy the cloud cluster (**`hpcopr destroy ...`**) -->
 - Remove the cloud credentials (optional, **`hpcopr remove ...`**)
 
-## 3.4 Commands
+## 3.5 Commands
 
 The **`hpcopr.exe`** is a very powerful Command Line Interface (CLI) for you to use.
 
@@ -331,7 +331,7 @@ For more information, please refer to Docs/UserManual-EN.pdf.
 
 The most detailed help info can be found by the command `hpcopr help`. We are also considering writing a standard mannual for `hpcopr`. If you are interested, please let us know.
 
-# 4. Bug Reports
+# 4. Bugs and Communications
 
 Please submit issues to this repo. Or
 
