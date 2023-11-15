@@ -1,3 +1,7 @@
+# HPC-NOW, start your HPC journey in the cloud **now**, with **n**o **o**peration **w**orkload!
+
+*A full-stack HPC solution in the cloud, for the HPC community.*
+
 # 1. Project Background
 
 Cloud High-Performance Computing - Cloud HPC, differs from on-premise HPC significantly. Cloud service brings high scalability and flexibility to High-Performance Computing. However, most HPC users are not familiar with building and maintaining HPC services in the cloud. The technical barrier of cloud computing is very high to researchers, engineers, and developers in different scientific and engineering domains, e.g. energy, chemistry, physics, materials, bioscience. 
@@ -45,6 +49,9 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 ### **Step 1. Clone this repository:** 
 
 `git clone https://github.com/zhenrong-wang/hpc-now`
+
+If your connectivity to github is not stable, you can also try to clone from gitee:
+
 `git clone https://gitee.com/zhenrong-wang/hpc-now`
 
 ### **Step 2. Change the directory :** 
