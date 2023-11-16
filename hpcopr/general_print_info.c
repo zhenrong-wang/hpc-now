@@ -213,6 +213,10 @@ void print_help(char* cmd_name){
         printf("|                     ~ " HIGH_CYAN_BOLD "[c] For Huaweicloud, the valid names are: rocky9(Rocky Linux 9), euleros(EulerOS)." RESET_DISPLAY "\n");
         printf("|                     ~ " HIGH_CYAN_BOLD "[d] We *STRONGLY* recommend you to use the default images, unless that your image" RESET_DISPLAY "\n");
         printf("|                     ~ " HIGH_CYAN_BOLD "    has been tested and validated." RESET_DISPLAY "\n");
+        printf("|   --inst URL        ~ You can specify an URL for the scripts of app management.\n");
+        printf("|   --repo URL        ~ You can specify an URL for the HPC package repository.\n");
+        printf("|                     ~ If not specified, the default URLs will be used automatically.\n");
+        printf("|                     ~ You can run 'hpcopr showloc' to check them.\n");
     }
     if(strcmp(cmd_name,"rebuild")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "rebuild" RESET_DISPLAY "     :~ Rebuild the nodes *without* destroying the cluster's storage.\n");
@@ -480,6 +484,8 @@ void print_appmgr_info(void){
     printf("| * The cluster must be in running state (minimal or all). *\n");
     printf("| * -u USERNAME    ~ A valid user name. Use 'root' for all users.\n");
     printf("| *                ~ " WARN_YELLO_BOLD "Admin or Operator role is required for root." RESET_DISPLAY "\n");
+    printf("| * Optional: --inst LOCATION   ~ A location for the scripts of app management.\n");
+    printf("| * Optional: --repo LOCATION   ~ A location for the HPC package repository.\n");
     printf("|   --acmd store   ~ List out the apps in store.\n");
     printf("|   --acmd avail   ~ List out all the installed apps.\n");
     printf("|   --acmd check   ~ Check whether an app is available.\n");
@@ -490,6 +496,9 @@ void print_appmgr_info(void){
     printf("|     --app  APP_NAME   ~ The app name to be compiled and built.\n");
     printf("|   --acmd remove  ~ Remove an app from the cluster.\n");
     printf("|     --app  APP_NAME   ~ The app name to be removed.\n");
+    printf("|   --acmd conf-update  ~ Update the locations of app scripts and package repository.\n");
+    printf("|                       ~ You need to specify new location(s).\n");
+    printf("|   --acmd conf-show    ~ Display the locations of app scripts and package repository.\n");
 }
 
 void print_jobmgr_info(void){

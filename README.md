@@ -1,6 +1,36 @@
-# HPC-NOW, start your HPC journey in the cloud **now**, with **n**o **o**peration **w**orkload!
+HPC-NOW, start your HPC journey in the cloud **now**, with **n**o **o**peration **w**orkload!
 
 *A full-stack HPC solution in the cloud, for the HPC community.*
+
+- [1. Project Background](#1-project-background)
+- [2. Core Components](#2-core-components)
+- [3. How-To: Build, Install, Run, and Use](#3-how-to-build-install-run-and-use)
+  - [3.1 Build](#31-build)
+    - [**Prerequisites:**](#prerequisites)
+    - [**Step 1. Clone this repository:**](#step-1-clone-this-repository)
+    - [**Step 2. Change the directory :**](#step-2-change-the-directory-)
+    - [**Step 3. Run the build script :**](#step-3-run-the-build-script-)
+  - [3.2 Install](#32-install)
+    - [**Step 1. Run the installer (Administrator or root privilege is required):**](#step-1-run-the-installer-administrator-or-root-privilege-is-required)
+    - [**Step 2. Initialize the hpcopr.exe:**](#step-2-initialize-the-hpcoprexe)
+  - [3.3 Run](#33-run)
+  - [3.4 Basic Workflow](#34-basic-workflow)
+  - [3.5 Commands](#35-commands)
+    - [**Get-Started**](#get-started)
+    - [**Multi-Cluster Management**](#multi-cluster-management)
+    - [**Global Management**](#global-management)
+    - [**Cluster Initialization**](#cluster-initialization)
+    - [**Cluster Management**](#cluster-management)
+    - [**Cluster Operation**](#cluster-operation)
+    - [**Cluster User Management**](#cluster-user-management)
+    - [**Cluster Data Management**](#cluster-data-management)
+      - [**Bucket Operations:** Transfer and manage data with the bucket.](#bucket-operations-transfer-and-manage-data-with-the-bucket)
+      - [**Direct Operations:** Transfer and manage data in the cluster storage.](#direct-operations-transfer-and-manage-data-in-the-cluster-storage)
+    - [**Cluster App Management**](#cluster-app-management)
+    - [**Cluster Job Management**](#cluster-job-management)
+    - [**Others**](#others)
+- [4. Bugs and Communications](#4-bugs-and-communications)
+
 
 # 1. Project Background
 

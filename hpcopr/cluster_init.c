@@ -95,8 +95,8 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     cmd_keyword_check(argc,argv,"--os",real_os_image);
     cmd_keyword_check(argc,argv,"--ht",real_ht_flag);
     cmd_keyword_check(argc,argv,"--vol",real_nfs_volume);
-    cmd_keyword_check(argc,argv,"--apps-inst",app_inst_script_url_specified);
-    cmd_keyword_check(argc,argv,"--apps-pkgs",app_inst_pkgs_url_specified);
+    cmd_keyword_check(argc,argv,"--inst",app_inst_script_url_specified);
+    cmd_keyword_check(argc,argv,"--repo",app_inst_pkgs_url_specified);
 
     if(strlen(real_node_num_string)!=0){
         sum_temp=string_to_positive_num(real_node_num_string);

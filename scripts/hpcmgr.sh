@@ -566,13 +566,7 @@ elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
   sinfo -N
   exit 0
 elif [ $1 = 'applist' ]; then
-  if [ -n $2 ]; then
-    if [ ! -f ${applist_cache} ]; then
-      curl -s ${url_instscripts_root}_app_list.txt -o ${applist_cache}
-    fi
-    cat ${applist_cache}
-    exit 0
-  elif [ $2 = 'avail' ]; then
+  if [ ! -z $2 ] && [ $2 = 'avail' ]; then
     echo -e "|       +- Available(Installed) Apps ~ Public:"
     while read public_reg_row
     do
@@ -595,7 +589,7 @@ elif [ $1 = 'applist' ]; then
       done < /hpc_apps/${current_user}_apps/.private_apps.reg
     fi
     exit 0
-  elif [ $2 = 'check' ]; then
+  elif [ ! -z $2 ] && [ $2 = 'check' ]; then
     if [ -z $3 ]; then
       echo -e "[ FATAL: ] Please provide an app name to check."
       exit 35
@@ -629,8 +623,11 @@ elif [ $1 = 'applist' ]; then
       fi
     fi
   else
-    echo -e "[ FATAL: ] Invalid applist sub-commands. Valid commands: avail, check."
-    exit 36
+    if [ ! -f ${applist_cache} ]; then
+      curl -s ${url_instscripts_root}_app_list.txt -o ${applist_cache}
+    fi
+    cat ${applist_cache}
+    exit 0
   fi
 elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
   if [ -z "$2" ]; then
