@@ -98,7 +98,9 @@ if [ $current_user != 'root' ] && [ $1 != 'applist' ] && [ $1 != 'build' ] && [ 
   exit 1
 fi
 
+source /etc/profile
 source ${appstore_env} >> /dev/null 2>&1
+
 for i in $(seq 1 $#)
 do
 	eval argi=\$$i
