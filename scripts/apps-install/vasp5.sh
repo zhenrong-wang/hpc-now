@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
-
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_extract_cache="/root/.app_extract_cache/"
@@ -54,9 +50,27 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=${4}
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
+
 if [ ! -f ${app_root}vasp.5.4.4.zip ]; then
-  echo -e "[ FATAL: ] Source code ${app_root}vasp.5.4.4.zip not found. Exit now."
-  exit 3
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}vasp.5.4.4.zip ${app_root}vasp.5.4.4.zip >> ${2}
+  else
+    wget ${url_pkgs}vasp.5.4.4.zip -O ${app_root}vasp.5.4.4.zip -o ${2}
+  fi
 fi
 echo -e "[ -INFO- ] Detecting GNU Compiler Collection ..."
 gcc_vers=('gcc12' 'gcc9' 'gcc8' 'gcc4')
@@ -127,7 +141,7 @@ do
 done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  hpcmgr install ompi4 >> ${2}
+  hpcmgr install --app=ompi4 --repo=$4 --inst=$6 >> ${2}
   if [ $current_user = 'root' ]; then
     module load ompi-4.1.2
     mpi_env=ompi-4.1.2
@@ -140,7 +154,7 @@ fi
 echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: LAPACK-3.11.0 ..."
-hpcmgr install lapack311 >> ${2} 2>&1
+hpcmgr install --app=lapack311 --repo=$4 --inst=$6 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build lapack-3.11.0. Exit now."
   exit 5
@@ -156,7 +170,7 @@ else
   lapack_env="${current_user}_env/lapack-3.11"
 fi
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: ScaLAPACK ..."
-hpcmgr install slpack2 >> ${2} 2>&1
+hpcmgr install --app=slpack2 --repo=$4 --inst=$6 >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build ScaLAPACK. Exit now."
   exit 7
@@ -172,7 +186,7 @@ else
   scalapack_env="${current_user}_env/scalapack"
 fi
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: FFTW-3.3.10 ..."
-hpcmgr install fftw3 >> ${2} 2>&1
+hpcmgr install --app=fftw3 --repo=$4 --inst=$6 >> ${2} 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build fftw3. Exit now."
   exit 7
@@ -190,6 +204,10 @@ fi
 echo -e "[ -INFO- ] Prerequisition Checked. Will start building VASP-5.4.4."
 echo -e "[ START: ] Extracting the source code at ${app_root}vasp.5.4.4.zip..."
 unzip -o ${app_root}vasp.5.4.4.zip -d ${app_extract_cache} >> ${2}
+if [ $? -ne 0 ]; then
+  echo -e "[ FATAL: ] Failed to unzip ${app_root}vasp.5.4.4.zip. Exit now."
+  exit 3
+fi
 echo -e "[ -INFO- ] Building binaries from the source code, this step usually take minutes..."
 cd ${app_extract_cache}vasp.5.4.4
 /bin/cp arch/makefile.include.linux_gnu makefile.include

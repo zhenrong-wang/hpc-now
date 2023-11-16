@@ -12,9 +12,7 @@
 # Therefore, CentOS Stream or Fedora would be a good choice to aviod as many dependency problems as possible.
 
 current_user=`whoami`
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
+
 if [ $current_user != 'root' ]; then
   echo -e "[ FATAL: ] ONLY root user or user1 with sudo can $1 this app."
   echo -e "           Please contact the administrator. Exit now."
@@ -61,6 +59,21 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=${4}
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
+
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
@@ -77,7 +90,11 @@ echo -e "[ STEP 1 ] Installing OpenSSL-1.1.1 ... "
 yum -y install perl-devel perl-App-cpanminus 
 cpanm FindBin
 if [ ! -f ${app_cache}openssl-1.1.1q.tar.gz ]; then
-  wget ${url_pkgs}openssl-1.1.1q.tar.gz -O ${app_cache}openssl-1.1.1q.tar.gz
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}openssl-1.1.1q.tar.gz ${app_cache}openssl-1.1.1q.tar.gz
+  else
+    wget ${url_pkgs}openssl-1.1.1q.tar.gz -O ${app_cache}openssl-1.1.1q.tar.gz
+  fi
 fi
 grep "< openssl-1.1.1q >" $public_app_registry >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
@@ -110,7 +127,11 @@ source /etc/profile
 grep "< r_env >" $public_app_registry >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   if [ ! -f ${app_cache}R-4.2.1.tar.gz ]; then
-    wget ${url_pkgs}R-4.2.1.tar.gz -O ${app_cache}R-4.2.1.tar.gz 
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}R-4.2.1.tar.gz ${app_cache}R-4.2.1.tar.gz
+    else
+      wget ${url_pkgs}R-4.2.1.tar.gz -O ${app_cache}R-4.2.1.tar.gz
+    fi 
   fi
   tar zvxf ${app_cache}R-4.2.1.tar.gz -C ${app_extract_cache} >> ${2}
   cd ${app_extract_cache}R-4.2.1
@@ -130,7 +151,11 @@ echo -e "[ STEP 3 ] Installing RStudio ... "
 # Install RStudio
 yum -y install postgresql-devel postgresql sqlite >> ${2}
 if [ ! -f ${app_cache}rstudio-2022.07.1-554-x86_64-centos9.rpm ]; then
-  wget ${url_pkgs}rstudio-2022.07.1-554-x86_64-centos9.rpm -O ${app_cache}rstudio-2022.07.1-554-x86_64-centos9.rpm
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}rstudio-2022.07.1-554-x86_64-centos9.rpm ${app_cache}rstudio-2022.07.1-554-x86_64-centos9.rpm
+  else
+    wget ${url_pkgs}rstudio-2022.07.1-554-x86_64-centos9.rpm -O ${app_cache}rstudio-2022.07.1-554-x86_64-centos9.rpm
+  fi
 fi
 rpm -ivh ${app_cache}rstudio-2022.07.1-554-x86_64-centos9.rpm >> ${2}
 # RStudio & R should work well. The problems are in installing other packages.
@@ -144,7 +169,11 @@ echo -e "[ STEP 4 ] Installing gdal ... This step usually takes tens of minutes.
 # To build gdal really costs time. To be optimized later.
 yum -y install proj-devel geos-devel
 if [ ! -f ${app_cache}gdal-3.5.2.tar.gz ]; then
-  wget -q ${url_pkgs}gdal-3.5.2.tar.gz -O ${app_cache}gdal-3.5.2.tar.gz
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}gdal-3.5.2.tar.gz ${app_cache}gdal-3.5.2.tar.gz
+  else
+    wget -q ${url_pkgs}gdal-3.5.2.tar.gz -O ${app_cache}gdal-3.5.2.tar.gz
+  fi
 fi
 tar zvxf ${app_cache}gdal-3.5.2.tar.gz -C ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}gdal-3.5.2

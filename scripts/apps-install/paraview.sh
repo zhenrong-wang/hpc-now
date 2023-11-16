@@ -8,8 +8,6 @@
 # This script is used by 'hpcmgr' command to build *Paraview 5* to HPC-NOW cluster.
 
 current_user=`whoami`
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
 public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
@@ -50,19 +48,41 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=${4}
+
 mkdir -p $app_cache
 centos_v=`cat /etc/redhat-release | awk '{print $4}' | awk -F"." '{print $1}'`
 if [ -z $centos_v ] || [ $centos_v -ne 7 ]; then
   echo -e "[ -INFO- ] Downloading and extracting files ..."
   if [ ! -f ${app_cache}ParaView5.tar.gz ]; then
-    wget ${url_pkgs}ParaView-5.10.1-MPI-Linux-Python3.9-x86_64.tar.gz -O ${app_cache}ParaView5.tar.gz -o ${2}
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}ParaView-5.10.1-MPI-Linux-Python3.9-x86_64.tar.gz ${app_cache}ParaView5.tar.gz >> ${2}
+    else
+      wget ${url_pkgs}ParaView-5.10.1-MPI-Linux-Python3.9-x86_64.tar.gz -O ${app_cache}ParaView5.tar.gz -o ${2}
+    fi
   fi
   tar zvxf ${app_cache}ParaView5.tar.gz -C ${app_root} >> ${2}
   mv ${app_root}ParaView-5.10.1-MPI-Linux-Python3.9-x86_64 ${app_root}ParaView
 else
   echo -e "[ -INFO- ] Downloading and extracting files ..."
   if [ ! -f ${app_cache}ParaView4.tar.gz ]; then
-    wget ${url_pkgs}ParaView-4.0.1-Linux-64bit-glibc-2.3.6.tar.gz -O ${app_cache}ParaView4.tar.gz -o ${2}
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}ParaView-4.0.1-Linux-64bit-glibc-2.3.6.tar.gz ${app_cache}ParaView4.tar.gz >> ${2}
+    else
+      wget ${url_pkgs}ParaView-4.0.1-Linux-64bit-glibc-2.3.6.tar.gz -O ${app_cache}ParaView4.tar.gz -o ${2}
+    fi
   fi
   tar zvxf ${app_cache}ParaView4.tar.gz -C ${app_root} >> ${2}
   mv ${app_root}ParaView-4.0.1-Linux-64bit ${app_root}ParaView

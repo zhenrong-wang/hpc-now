@@ -17,8 +17,21 @@ if [ $current_user != 'root' ]; then
   echo -e "           Please contact the administrator. Exit now."
   exit 1
 fi
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/desktop/
+
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+
+url_pkgs=${4}desktop/
 public_app_registry="/hpc_apps/.public_apps.reg"
 
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
@@ -55,7 +68,11 @@ if [ ! -z $CENTOS_VERSION ] && [ $CENTOS_VERSION = '7' ]; then
   sed -i '/gini/d' /etc/profile
   echo -e "alias gini='/etc/g_ini.sh'" >> /etc/profile
   echo -e "[ -DONE- ] *IMPORTANT*: Please set password for the users in order to log into the desktop by using RDP."
-  wget ${url_pkgs}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26 -q
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6.0.26
+  else
+    wget ${url_pkgs}libstdc++.so.6.0.26 -O /usr/lib64/libstdc++.so.6.0.26 -q
+  fi
   rm -rf /usr/lib64/libstdc++.so.6
   ln -s /usr/lib64/libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6
   grep "source /etc/profile" /root/.bashrc >> /dev/null 2>&1
@@ -99,7 +116,11 @@ else
   if [ ! -f /usr/share/backgrounds/wallpapers.zip ]; then
     rm -rf /usr/share/backgrounds/*.png
     rm -rf /usr/share/backgrounds/*.jpg
-    wget -q ${url_pkgs}wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}wallpapers.zip /usr/share/backgrounds/wallpapers.zip
+    else
+      wget -q ${url_pkgs}wallpapers.zip -O /usr/share/backgrounds/wallpapers.zip
+    fi
     cd /usr/share/backgrounds && unzip -o -q wallpapers.zip
   fi
 # Make sure the desktop is user-friendly

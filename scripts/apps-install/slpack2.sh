@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
-
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
@@ -47,6 +43,21 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] ScaLAPACK-Latest has been removed successfully."
   exit 0
 fi
+
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=${4}
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
 gcc_vers=('gcc12' 'gcc9' 'gcc8' 'gcc4')
 gcc_code=('gcc-12.1.0' 'gcc-9.5.0' 'gcc-8.2.0' 'gcc-4.9.2')
@@ -97,13 +108,13 @@ if [ $? -eq 0 ]; then
   lapack_lib="/hpc_apps/lapack-3.11"
 else
   if [ $current_user = 'root' ]; then
-    hpcmgr install lapack311 >> ${2}
+    hpcmgr install --app=lapack311 --repo=$4 --inst=$6 >> ${2}
     module load lapack-3.11
     lapack_lib="/hpc_apps/lapack-3.11"
   else
     grep "< lapack311 > < $current_user >" $private_app_registry >> /dev/null 2>&1
     if [ $? -ne 0 ]; then
-      hpcmgr install lapack-3.11 >> ${2}
+      hpcmgr install --app=lapack311 --repo=$4 --inst=$6 >> ${2}
     fi
     module load ${current_user}_env/lapack-3.11
     lapack_lib="${app_root}lapack-3.11"
@@ -135,7 +146,7 @@ done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] Building MPI Libraries now ..."
-  hpcmgr install ompi4 >> ${2}
+  hpcmgr install --app=ompi4 --repo=$4 --inst=$6 >> ${2}
   if [ $current_user = 'root' ]; then
     module load ompi-4.1.2
     mpi_env="ompi-4.1.2"
@@ -152,7 +163,11 @@ echo -e "[ START: ] $time_current Started building ScaLAPACK-Latest."
 echo -e "[ START: ] Downloading and Extracting source code ..."
 
 if [ ! -f ${app_cache}scalapack-master.zip ]; then
-  wget ${url_pkgs}scalapack-master.zip -O ${app_cache}scalapack-master.zip -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}scalapack-master.zip ${app_cache}scalapack-master.zip >> ${2}
+  else
+    wget ${url_pkgs}scalapack-master.zip -O ${app_cache}scalapack-master.zip -o ${2}
+  fi
 fi
 unzip -o ${app_cache}scalapack-master.zip -d ${app_extract_cache} >> ${2}
 rm -rf ${app_root}scalapack

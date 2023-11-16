@@ -7,8 +7,6 @@
 
 # This script is used by 'hpcmgr' command to build *Baidu Netdisk* to HPC-NOW cluster.
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/baidu/
 current_user=`whoami`
 if [ $current_user != 'root' ]; then
   echo -e "[ FATAL: ] ONLY root user or user1 with sudo can $1 this app."
@@ -34,12 +32,26 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=${4}baidu/
+
 mkdir -p $app_cache
 # Check whether the desktop environment is ready
 yum list installed -q | grep gnome-desktop >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
-  hpcmgr install desktop >> $2.desktop
+  hpcmgr install --app=desktop --repo=$4 --inst=$6 >> $2.desktop
   if [ $? -ne 0 ]; then
     echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
     exit 5
@@ -50,7 +62,11 @@ if [ ! -z $CENTOS_VERSION ] && [ $CENTOS_VERSION = '7' ]; then
   echo -e "[ -INFO- ] Downloading and installing Baidu Netdisk now ..."
   yum -y install libXScrnSaver >> ${2}
   if [ ! -f ${app_cache}baidunetdisk-4.3.0.x86_64.rpm ]; then
-    wget ${url_pkgs}baidunetdisk-4.3.0.x86_64.rpm -O ${app_cache}baidunetdisk-4.3.0.x86_64.rpm -o ${2}
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}baidunetdisk-4.3.0.x86_64.rpm ${app_cache} >> ${2}
+    else
+      wget ${url_pkgs}baidunetdisk-4.3.0.x86_64.rpm -O ${app_cache}baidunetdisk-4.3.0.x86_64.rpm -o ${2}
+    fi
   fi
   rpm -ivh ${app_cache}baidunetdisk-4.3.0.x86_64.rpm
   grep "alias baidu='/opt/baidunetdisk/baidunetdisk --no-sandbox'" /etc/profile >> /dev/null 2>&1
@@ -63,15 +79,27 @@ else
   yum -y install libXScrnSaver libcloudproviders >> ${2}
   echo -e "[ -INFO- ] Downloading and installing Baidu Netdisk now ..."
   if [ ! -f ${app_cache}baidunetdisk-4.15.5.x86_64.rpm ]; then
-    wget ${url_pkgs}baidunetdisk-4.15.5.x86_64.rpm -O ${app_cache}baidunetdisk-4.15.5.x86_64.rpm -o ${2}
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}baidunetdisk-4.15.5.x86_64.rpm ${app_cache} >> ${2}
+    else
+      wget ${url_pkgs}baidunetdisk-4.15.5.x86_64.rpm -O ${app_cache}baidunetdisk-4.15.5.x86_64.rpm -o ${2}
+    fi
   fi
   if [ ! -f ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm ]; then
-    wget ${url_pkgs}baidunetdisk-patch-1.0.1-1.x86_64.rpm -O ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm -o ${2}
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}baidunetdisk-patch-1.0.1-1.x86_64.rpm ${app_cache} >> ${2}
+    else
+      wget ${url_pkgs}baidunetdisk-patch-1.0.1-1.x86_64.rpm -O ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm -o ${2}
+    fi
   fi
   rpm -ivh ${app_cache}baidunetdisk-4.15.5.x86_64.rpm 
   rpm -ivh ${app_cache}baidunetdisk-patch-1.0.1-1.x86_64.rpm
   if [ ! -f ${app_cache}libgdkpatch.so ]; then
-    wget ${url_pkgs}libgdkpatch.so -O ${app_cache}libgdkpatch.so -o ${2}
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}libgdkpatch.so ${app_cache} >> ${2}
+    else
+      wget ${url_pkgs}libgdkpatch.so -O ${app_cache}libgdkpatch.so -o ${2}
+    fi
   fi
   /bin/cp ${app_cache}libgdkpatch.so /opt/baidunetdisk/
   grep "alias baidu='LD_PRELOAD=/opt/baidunetdisk/libgdkpatch.so /opt/baidunetdisk/baidunetdisk --no-sandbox'" /etc/profile >> /dev/null 2>&1

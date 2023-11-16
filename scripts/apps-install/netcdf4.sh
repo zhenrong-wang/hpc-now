@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
-
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
@@ -47,6 +43,21 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] NetCDF has been removed successfully."
   exit 0
 fi
+
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=$4
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ -INFO- ] $time_current SOFTWARE: netCDF-c-4.9.0, netcdf-fortran-4.5.3"
@@ -103,11 +114,11 @@ else
     if [ $? -eq 0 ]; then
       hdf5_root="${app_root}hdf5-1.10.9/"
     else
-      hpcmgr install hdf5 >> ${2}
+      hpcmgr install --app=hdf5 --repo=$4 --inst=$6 >> ${2}
       hdf5_root="${app_root}hdf5-1.10.9/"
     fi
   else
-    hpcmgr install hdf5 >> ${2}
+    hpcmgr install --app=hdf5 --repo=$4 --inst=$6 >> ${2}
     hdf5_root="${app_root}hdf5-1.10.9/"
   fi
 fi
@@ -121,10 +132,18 @@ ldflags="-L${hdf5_root}lib -L${zlib_path}lib"
 echo -e "[ -INFO- ] netCDF-C and netCDF-Fortran will be built with GNU Compiler Collections."
 echo -e "[ START: ] Downloading and Extracting source code ..."
 if [ ! -f ${app_cache}netcdf-c-4.9.0.zip ]; then
-  wget ${url_pkgs}netcdf-c-4.9.0.zip -O ${app_cache}netcdf-c-4.9.0.zip -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}netcdf-c-4.9.0.zip ${app_cache}netcdf-c-4.9.0.zip >> ${2}
+  else
+    wget ${url_pkgs}netcdf-c-4.9.0.zip -O ${app_cache}netcdf-c-4.9.0.zip -o ${2}
+  fi
 fi
 if [ ! -f ${app_cache}netcdf-fortran-4.5.3.tar.gz ]; then
-  wget ${url_pkgs}netcdf-fortran-4.5.3.tar.gz -O ${app_cache}netcdf-fortran-4.5.3.tar.gz -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}netcdf-fortran-4.5.3.tar.gz ${app_cache}netcdf-fortran-4.5.3.tar.gz >> ${2}
+  else
+    wget ${url_pkgs}netcdf-fortran-4.5.3.tar.gz -O ${app_cache}netcdf-fortran-4.5.3.tar.gz -o ${2}
+  fi
 fi
 unzip -o ${app_cache}netcdf-c-4.9.0.zip -d ${app_extract_cache} >> ${2}
 tar zvxf ${app_cache}netcdf-fortran-4.5.3.tar.gz -C ${app_extract_cache} >> ${2}

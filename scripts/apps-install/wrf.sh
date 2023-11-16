@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
-
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
@@ -50,6 +46,21 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] WRF & WPS has been removed successfully."
   exit 0
 fi
+
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=${4}
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ -INFO- ] ${time_current} Software: WRF & WPS - Version 4.4."
@@ -124,7 +135,7 @@ done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] Building MPI Libraries now ..."
-  hpcmgr install ompi4 >> ${2}
+  hpcmgr install --app=ompi4 --repo=$4 --inst=$6 >> ${2}
   if [ $current_user = 'root' ]; then
     module load ompi-4.1.2
     mpi_env="ompi-4.1.2"
@@ -136,7 +147,7 @@ if [ $? -ne 0 ]; then
 fi
 echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 echo -e "[ -INFO- ] Checking and installing prerequisitions: netCDF"
-hpcmgr install netcdf4 >> ${2}
+hpcmgr install --app=netcdf4 --repo=$4 --inst=$6 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build/install netcdf4. Exit now."
   exit 3
@@ -164,7 +175,11 @@ fi
 
 echo -e "[ -INFO- ] Checking and installing prerequisitions: jasper ..."
 if [ ! -f ${app_cache}jasper-1.900.1.tar.gz ]; then
-  wget ${url_pkgs}jasper-1.900.1.tar.gz -O ${app_cache}jasper-1.900.1.tar.gz -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}jasper-1.900.1.tar.gz ${app_cache}jasper-1.900.1.tar.gz >> ${2}
+  else
+    wget ${url_pkgs}jasper-1.900.1.tar.gz -O ${app_cache}jasper-1.900.1.tar.gz -o ${2}
+  fi
 fi
 tar zvxf ${app_cache}jasper-1.900.1.tar.gz -C ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}jasper-1.900.1
@@ -174,7 +189,11 @@ make install >> ${2} 2>&1
 
 echo -e "[ STEP 1 ] Downloading WRF source code packages ... "
 if [ ! -f ${app_cache}wrf-latest.tar.gz ]; then
-  wget ${url_pkgs}wrf-latest.tar.gz -O ${app_cache}wrf-latest.tar.gz -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}wrf-latest.tar.gz ${app_cache}wrf-latest.tar.gz >> ${2}
+  else
+    wget ${url_pkgs}wrf-latest.tar.gz -O ${app_cache}wrf-latest.tar.gz -o ${2}
+  fi
 fi
 echo -e "[ STEP 2 ] Extracting WRF source code tarball ..."
 tar zvxf ${app_cache}wrf-latest.tar.gz -C ${app_extract_cache} >> ${2}
@@ -218,7 +237,11 @@ echo -e "module load ${netcdf4_env}\nmodule load ${hdf5_env}" >> ${wrf_root}wrfe
 echo -e "export LD_LIBRARY_PATH=${wrf_root}jasper/lib:\$LD_LIBRARY_PATH" >> ${wrf_root}wrfenv.sh
 echo -e "[ STEP 4 ] Building WPS now ..."
 if [ ! -f ${app_cache}wps-latest.tar.gz ]; then
-  wget ${url_pkgs}wps-latest.tar.gz -O ${app_cache}wps-latest.tar.gz -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}wps-latest.tar.gz ${app_cache}wps-latest.tar.gz >> ${2}
+  else
+    wget ${url_pkgs}wps-latest.tar.gz -O ${app_cache}wps-latest.tar.gz -o ${2}
+  fi
 fi
 tar zvxf ${app_cache}wps-latest.tar.gz -C ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}WPS

@@ -9,16 +9,18 @@
 
 function help_info() {
   echo -e "[ -INFO- ] Valid options/commands:"
-  echo -e "|          quick   - quick config"
-  echo -e "|          master  - refresh only master node"
-  echo -e "|          connect - check cluster connectivity"
-  echo -e "|          all     - refresh the whole cluster"
-  echo -e "|          clear   - clear the hostfile_dead_nodes list"
-  echo -e "|          applist - List out the apps in the store"
-  echo -e "|          build   - build software from source"
-  echo -e "|          install - install software"
-  echo -e "|          remove  - remove software"
-  echo -e "|          submit  - submit a job"
+  echo -e "|          quick      - quick config"
+  echo -e "|          master     - refresh only master node"
+  echo -e "|          connect    - check cluster connectivity"
+  echo -e "|          all        - refresh the whole cluster"
+  echo -e "|          clear      - clear the hostfile_dead_nodes list"
+  echo -e "|          applist    - List out the apps in the store"
+  echo -e "|          build      - build software from source"
+  echo -e "|          install    - install software"
+  echo -e "|          remove     - remove software"
+  echo -e "|          submit     - submit a job"
+  echo -e "|  appman-conf-update - Update the locations for app manager"
+  echo -e "|  appman-conf-show   - Show the locations for app manager"
 }
 
 function node_invalid_info() {
@@ -73,9 +75,9 @@ private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 appstore_env="/usr/hpc-now/appstore_env.sh"
 applist_cache="/usr/hpc-now/.applist_cache.txt"
 
-main_menu=('quick' 'master' 'connect' 'all' 'clear' 'applist' 'build' 'install' 'remove' 'submit' 'users')
+main_menu=('quick' 'master' 'connect' 'all' 'clear' 'applist' 'build' 'install' 'remove' 'submit' 'users' 'appman-conf-update' 'appman-conf-show')
 command_flag='false'
-for i in $(seq 0 10)
+for i in $(seq 0 13)
 do
   if [ $1 = ${main_menu[i]} ]; then
     command_flag='true'
@@ -89,46 +91,115 @@ if [ $command_flag = 'false' ]; then
   exit 51
 fi
 
-if [ $current_user != 'root' ] && [ $1 != 'applist' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 != 'submit' ]; then
+if [ $current_user != 'root' ] && [ $1 != 'applist' ] && [ $1 != 'build' ] && [ $1 != 'install' ] && [ $1 != 'remove' ] && [ $1 != 'submit' ] && [ $1 != 'appman-conf-update' ]; then
   echo -e "[ FATAL: ] *ONLY* root user can run the command 'hpcmgr $1'. "
   echo -e "|          Please make sure you use either user1 with 'sudo' privilege, OR"
   echo -e "|          use root (NOT recommend!) to run 'hpcmgr'. Exit now."
   exit 1
 fi
 
-if [ $1 = 'build' ] || [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'applist' ]; then
-  source ${appstore_env} >> /dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "[ -WARN- ] Failed to load the appstore environment file ${appstore_env}."
-    url_instscripts_root=${3}
-    url_instpkgs_root=${4}
+source ${appstore_env} >> /dev/null 2>&1
+for i in $(seq 1 $#)
+do
+	eval argi=\$$i
+  arg_header=`echo $argi | awk -F'=' '{print $1}'`
+  if [ ! -z $arg_header ] && [ $arg_header = '--inst' ]; then
+    inst_loc=`echo $argi | awk -F'=' '{for(i=2;i<NF;i++) printf $i "="; print $NF}'`
+  elif [ ! -z $arg_header ] && [ $arg_header = '--repo' ]; then
+    repo_loc=`echo $argi | awk -F'=' '{for(i=2;i<NF;i++) printf $i "="; print $NF}'`
+  elif [ ! -z $arg_header ] && [ $arg_header = '--app' ]; then
+    app_name=`echo $argi | awk -F'=' '{for(i=2;i<NF;i++) printf $i "="; print $NF}'`
   else
-    if [ ! -z $APPS_INST_SCRIPTS_URL ]; then
-      url_instscripts_root=$APPS_INST_SCRIPTS_URL
+    continue;
+  fi
+done
+if [ ! -z ${inst_loc} ]; then
+  loc_char_first=${inst_loc:0:1}
+  loc_header1=${inst_loc:0:7}
+  loc_header2=${inst_loc:0:8}
+  loc_header3=${inst_loc:0:6}
+  if [ $loc_char_first = '/' ] || [ $loc_header1 = 'http://' ] || [ $loc_header2 = 'https://' ] || [ $loc_header3 = 'ftp://' ]; then
+    loc_char_last=${inst_loc:NF-1:1}
+    if [ ${loc_char_last} != '/' ]; then
+      inst_loc_final=${inst_loc}/
     else
-      url_instscripts_root=${3}
+      inst_loc_final=${inst_loc}
     fi
-    if [ ! -z $APPS_INST_PKGS_URL ]; then
-      url_instpkgs_root=$APPS_INST_PKGS_URL
+  else
+    loc_char_last=${APPS_INST_SCRIPTS_URL:NF-1:1}
+    if [ ${loc_char_last} != '/' ]; then
+      inst_loc_final=${APPS_INST_SCRIPTS_URL}/
     else
-      url_instpkgs_root=${4}
+      inst_loc_final=${APPS_INST_SCRIPTS_URL}
     fi
   fi
-  if [ -z $url_instscripts_root ]; then
-    echo -e "[ FATAL: ] Failed to get the locations for app scripts."
-    echo -e "|          You need to set them by command params or by the ${appstore_env} file."
-    echo -e "[ FATAL: ] Exit now."
-    exit 34
+else
+  loc_char_last=${APPS_INST_SCRIPTS_URL:NF-1:1}
+  if [ ${loc_char_last} != '/' ]; then
+    inst_loc_final=${APPS_INST_SCRIPTS_URL}/
+  else
+    inst_loc_final=${APPS_INST_SCRIPTS_URL}
   fi
-  if [ -z $url_instpkgs_root ]; then
-    if [ $1 = 'build' ] || [ $1 = 'install' ]; then
-      echo -e "[ FATAL: ] Failed to get the locations for app packages."
-      echo -e "|          You need to set them by command params or by the ${appstore_env} file."
-      echo -e "[ FATAL: ] Exit now."
-      exit 34
+fi
+
+if [ -z ${inst_loc_final} ]; then
+  inst_loc_flag="invalid"
+else
+  loc_char_first=${inst_loc_final:0:1}
+  loc_header1=${inst_loc_final:0:7}
+  loc_header2=${inst_loc_final:0:8}
+  loc_header3=${inst_loc_final:0:6}
+  if [ $loc_char_first = '/' ]; then
+    inst_loc_flag="local"
+  elif [ $loc_header1 = 'http://' ] || [ $loc_header2 = 'https://' ] || [ $loc_header3 = 'ftp://' ]; then
+    inst_loc_flag="web"
+  else
+    inst_loc_flag="invalid"
+  fi
+fi
+
+if [ ! -z ${repo_loc} ]; then
+  loc_char_first=${repo_loc:0:1}
+  loc_header1=${repo_loc:0:7}
+  loc_header2=${repo_loc:0:8}
+  loc_header3=${repo_loc:0:6}
+  if [ $loc_char_first = '/' ] || [ $loc_header1 = 'http://' ] || [ $loc_header2 = 'https://' ] || [ $loc_header3 = 'ftp://' ]; then
+    loc_char_last=${repo_loc:NF-1:1}
+    if [ ${loc_char_last} != '/' ]; then
+      repo_loc_final=${repo_loc}/
     else
-      echo -e "[ -WARN- ] Failed to get the locations for app packages. Please check the ${appstore_env}."
+      repo_loc_final=${repo_loc}
     fi
+  else
+    loc_char_last=${APPS_INST_PKGS_URL:NF-1:1}
+    if [ ${loc_char_last} != '/' ]; then
+      repo_loc_final=${APPS_INST_PKGS_URL}/
+    else
+      repo_loc_final=${APPS_INST_PKGS_URL}
+    fi
+  fi
+else
+  loc_char_last=${APPS_INST_PKGS_URL:NF-1:1}
+  if [ ${loc_char_last} != '/' ]; then
+    repo_loc_final=${APPS_INST_PKGS_URL}/
+  else
+    repo_loc_final=${APPS_INST_PKGS_URL}
+  fi
+fi
+
+if [ -z ${repo_loc_final} ]; then
+  repo_loc_flag="invalid"
+else
+  loc_char_first=${repo_loc_final:0:1}
+  loc_header1=${repo_loc_final:0:7}
+  loc_header2=${repo_loc_final:0:8}
+  loc_header3=${repo_loc_final:0:6}
+  if [ $loc_char_first = '/' ]; then
+    repo_loc_flag="local"
+  elif [ $loc_header1 = 'http://' ] || [ $loc_header2 = 'https://' ] || [ $loc_header3 = 'ftp://' ]; then
+    repo_loc_flag="web"
+  else
+    repo_loc_flag="invalid"
   fi
 fi
 
@@ -590,62 +661,74 @@ elif [ $1 = 'applist' ]; then
     fi
     exit 0
   elif [ ! -z $2 ] && [ $2 = 'check' ]; then
-    if [ -z $3 ]; then
+    if [ -z ${app_name} ]; then
       echo -e "[ FATAL: ] Please provide an app name to check."
       exit 35
     else
-      grep "< $3 >" $public_app_registry >> /dev/null 2>&1
+      grep "< ${app_name} >" $public_app_registry >> /dev/null 2>&1
       if [ $? -eq 0 ]; then
-        echo -e "[ -INFO- ] The app $3 is available for all users."
+        echo -e "[ -INFO- ] The app ${app_name} is available for all users."
         exit 0
       else
         if [ $current_user = 'root' ]; then
           while read user_row
           do
             user_name_tmp=`echo $user_row | awk '{print $2}'`
-            grep "< $3 >" /hpc_apps/${user_name_tmp}_apps/.private_apps.reg
+            grep "< ${app_name} >" /hpc_apps/${user_name_tmp}_apps/.private_apps.reg
             if [ $? -eq 0 ]; then
-              echo -e "[ -INFO- ] The app $3 is available for ${user_name_tmp}."
+              echo -e "[ -INFO- ] The app ${app_name} is available for ${user_name_tmp}."
               exit 0
             fi
           done < /root/.cluster_secrets/user_secrets.txt
-          echo -e "[ -INFO- ] The app $3 is not available for any users."
+          echo -e "[ -INFO- ] The app ${app_name} is not available for any users."
           exit 0
         else
-          grep "< $3 >" ${private_app_registry}
+          grep "< ${app_name} >" ${private_app_registry}
           if [ $? -eq 0 ]; then
-            echo -e "[ -INFO- ] The app $3 is available for the current user ${current_user}."
+            echo -e "[ -INFO- ] The app ${app_name} is available for the current user ${current_user}."
           else
-            echo -e "[ -INFO- ] The app $3 is not available for the current user ${current_user}"
+            echo -e "[ -INFO- ] The app ${app_name} is not available for the current user ${current_user}"
           fi
           exit 0
         fi
       fi
     fi
   else
-    if [ ! -f ${applist_cache} ]; then
-      curl -s ${url_instscripts_root}_app_list.txt -o ${applist_cache}
+    if [ ${inst_loc_flag} = 'invalid' ]; then
+      echo -e "[ FATAL: ] Failed to get the app inst scripts location. Exit now."
+      exit 36
+    elif [ ${inst_loc_flag} = 'local' ]; then
+      cat ${inst_loc_final}_app_list.txt
+    else
+      curl -s ${inst_loc_final}_app_list.txt | cat
     fi
-    cat ${applist_cache}
     exit 0
   fi
 elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
-  if [ -z "$2" ]; then
+  if [ -z ${app_name} ]; then
     echo -e "[ -INFO- ] Please specify an app to $1 ."
     exit 37
   fi
+  if [ ${inst_loc_flag} = 'invalid' ]; then
+    echo -e "[ FATAL: ] Failed to get the app inst scripts location. Exit now."
+    exit 36
+  fi
   if [ $1 = 'install' ] || [ $1 = 'build' ]; then
-    curl -s ${url_instscripts_root}_app_list.txt | grep "< ${2} >" >> /dev/null 2>&1
+    if [ ${inst_loc_flag} = 'local' ]; then
+      cat ${inst_loc_final}_app_list.txt | grep "< ${app_name} >" >> /dev/null 2>&1
+    else
+      curl -s ${inst_loc_final}_app_list.txt | grep "< ${app_name} >" >> /dev/null 2>&1
+    fi
     if [ $? -ne 0 ]; then
-      echo -e "[ FATAL: ] The software ${2} is not in the store. Exit now."
+      echo -e "[ FATAL: ] The software ${app_name} is not in the store. Exit now."
       exit 39
     fi
-    grep "< $2 >" $public_app_registry >> /dev/null 2>&1
+    grep "< ${app_name} >" $public_app_registry >> /dev/null 2>&1
     if [ $? -eq 0 ]; then
       echo -e "[ -INFO- ] This app has been installed to all users. Please run it directly."
       exit 0
     else
-      grep "< $2 > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
+      grep "< ${app_name} > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
       if [ $? -eq 0 ]; then
         echo -e "[ -INFO- ] This app has been installed to the current user. Please run it directly."
         exit 0
@@ -653,22 +736,37 @@ elif [ $1 = 'install' ] || [ $1 = 'remove' ] || [ $1 = 'build' ]; then
     fi
   else
     if [ $current_user = 'root' ]; then
-      grep "< $2 >" $public_app_registry >> /dev/null 2>&1
+      grep "< ${app_name} >" $public_app_registry >> /dev/null 2>&1
       if [ $? -ne 0 ]; then
         echo -e "[ -INFO- ] This app has not been installed to all users."
         exit 4
       fi
     else
-      grep "< $2 > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
+      grep "< ${app_name} > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
       if [ $? -ne 0 ]; then
         echo -e "[ -INFO- ] This app has not been installed to the current user."
         exit 4
       fi
     fi
   fi
-  app_tmp_log="${app_tmp_log_root}${current_user}_${1}_${2}.log"
+  app_tmp_log="${app_tmp_log_root}${current_user}_${1}_${app_name}.log"
   touch ${app_tmp_log} && chmod 644 ${app_tmp_log}
-  curl -s ${url_instscripts_root}${2}.sh | bash -s $1 ${app_tmp_log}
+  if [ $1 = 'install' ] || [ $1 = 'build' ]; then
+    if [ ${repo_loc_flag} = 'invalid' ]; then
+      echo -e "[ -WARN- ] Failed to get the app packages repository location."
+    fi
+    if [ ${inst_loc_flag} = 'local' ]; then
+      bash ${inst_loc_final}${app_name}.sh $1 ${app_tmp_log} ${repo_loc_flag} ${repo_loc_final} ${inst_loc_flag} ${inst_loc_final} 
+    else
+      curl -s ${inst_loc_final}${app_name}.sh | bash -s $1 ${app_tmp_log} ${repo_loc_flag} ${repo_loc_final} ${inst_loc_flag} ${inst_loc_final}
+    fi
+  else
+    if [ ${inst_loc_flag} = 'local' ]; then
+      bash ${inst_loc_final}${app_name}.sh remove ${app_tmp_log} 
+    else
+      curl -s ${inst_loc_final}${app_name}.sh | bash -s remove ${app_tmp_log}
+    fi
+  fi
   exit 0
 elif [ $1 = 'submit' ]; then
   if [ -z $2 ]; then
@@ -718,6 +816,30 @@ elif [ $1 = 'submit' ]; then
   else
     echo -e "[ -INFO- ] Failed to submit the job."
     exit 55
+  fi
+elif [ $1 = 'appman-conf-update' ]; then
+  /bin/cp -r ${appstore_env} ${appstore_env}.bak
+  if [ ${inst_loc_flag} != 'invalid' ]; then
+    sed -i '/APPS_INST_SCRIPTS_URL/d' ${appstore_env}
+    echo "export APPS_INST_SCRIPTS_URL=${inst_loc_final}" >> ${appstore_env}
+    echo -e "[ -INFO- ] Updated the app inst scripts location to ${inst_loc_final} ."
+  else
+    echo -e "[ -WARN- ] The specified location ${inst_loc_final} is invalid."
+  fi
+  if [ ${repo_loc_flag} != 'invalid' ]; then
+    sed -i '/APPS_INST_PKGS_URL/d' ${appstore_env}
+    echo "export APPS_INST_PKGS_URL=${repo_loc_final}" >> ${appstore_env}
+    echo -e "[ -INFO- ] Updated the app package repository location to ${repo_loc_final} ."
+  else
+    echo -e "[ -WARN- ] The specified location ${repo_loc_final} is invalid."
+  fi
+  exit 0 
+elif [ $1 = 'appman-conf-show' ]; then
+  cat ${appstore_env}
+  if [ $? -ne 0 ]; then
+    exit 59
+  else
+    exit 0
   fi
 else
   echo -e "[ FATAL ] The command $1 is invalid."

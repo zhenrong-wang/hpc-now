@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
-
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
@@ -51,6 +47,21 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] OpenFOAM9 has been removed successfully."
   exit 0
 fi
+
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=$4
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
 echo -e "[ -INFO- ] Cleaning up processes..."
 ps -aux | grep OpenFOAM-9/wmake | cut -c 9-15 | xargs kill -9 >> /dev/null 2>&1
@@ -123,7 +134,7 @@ done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] Building MPI Libraries now ..."
-  hpcmgr install mpich4 >> ${2}
+  hpcmgr install --app=mpich4 --repo=$4 --inst=$6 >> ${2}
   if [ $current_user = 'root' ]; then
     module load mpich-4.0.2
     mpi_env="mpich-4.0.2"
@@ -138,7 +149,11 @@ echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 if [ $1 = 'install' ]; then
   echo -e "[ -INFO- ] Downloading the prebuilt package ..."
   if [ ! -f ${of_cache}of9.tar.gz ]; then
-    wget ${url_pkgs}prebuilds-9/of9.tar.gz -O ${of_cache}of9.tar.gz -o ${2}
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}prebuilds-9/of9.tar.gz ${of_cache}of9.tar.gz >> ${2}
+    else
+      wget ${url_pkgs}prebuilds-9/of9.tar.gz -O ${of_cache}of9.tar.gz -o ${2}
+    fi
   fi
   echo -e "[ -INFO- ] Extracting the binaries and libraries ..."
   tar zvxf ${of_cache}of9.tar.gz -C ${of_cache} >> ${2}
@@ -191,10 +206,18 @@ rm -rf ${of_root}OpenFOAM-9
 rm -rf ${of_root}ThirdParty-9
 echo -e "[ -INFO- ] $time_current Downloading & extracting source packages ..."
 if [ ! -f ${app_cache}OpenFOAM-9.zip ]; then
-  wget ${url_pkgs}OpenFOAM-9.zip -O ${app_cache}OpenFOAM-9.zip -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}OpenFOAM-9.zip ${app_cache}OpenFOAM-9.zip >> ${2}
+  else
+    wget ${url_pkgs}OpenFOAM-9.zip -O ${app_cache}OpenFOAM-9.zip -o ${2}
+  fi
 fi  
 if [ ! -f ${app_cache}ThirdParty-9.zip ]; then
-  wget ${url_pkgs}ThirdParty-9.zip -O ${app_cache}ThirdParty-9.zip -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}ThirdParty-9.zip ${app_cache}ThirdParty-9.zip >> ${2}
+  else
+    wget ${url_pkgs}ThirdParty-9.zip -O ${app_cache}ThirdParty-9.zip -o ${2}
+  fi
 fi
 cd ${app_cache}
 unzip -o OpenFOAM-9.zip -d ${of_cache} >> ${2}

@@ -159,13 +159,15 @@ char dataman_commands[DATAMAN_COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "tail"
 };
 
-char appman_commands[6][COMMAND_STRING_LENGTH_MAX]={
+char appman_commands[8][COMMAND_STRING_LENGTH_MAX]={
     "store",
     "avail",
     "build",
     "install",
     "check",
-    "remove"
+    "remove",
+    "update-conf",
+    "check-conf"
 };
 
 char jobman_commands[3][COMMAND_STRING_LENGTH_MAX]={
@@ -277,6 +279,8 @@ int main(int argc, char* argv[]){
     char user_cmd[128]="";
     char app_cmd[128]="";
     char app_name[128]="";
+    char inst_loc[384]="";
+    char repo_loc[384]="";
     char job_cmd[128]="";
     char job_id[32]="";
     char* usage_log=USAGE_LOG_FILE;
@@ -1745,7 +1749,8 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"appman")==0){
         if(cmd_keyword_check(argc,argv,"--acmd",app_cmd)!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid command: store, avail, build, install, remove.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid command:\n");
+            printf(GENERAL_BOLD "|         " RESET_DISPLAY " store, avail, build, install, check, remove, update-conf, check-conf\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
             scanf("%s",app_cmd);
@@ -1754,22 +1759,30 @@ int main(int argc, char* argv[]){
         int i=0;
         while(strcmp(app_cmd,appman_commands[i])!=0){
             i++;
-            if(i==6){
+            if(i==8){
                 break;
             }
         }
-        if(i==6){
+        if(i==8){
             printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is incorrect. Valid commands:" RESET_DISPLAY "\n",app_cmd);
-            printf(GENERAL_BOLD "|         " RESET_DISPLAY " store, avail, build, install, remove\n");
+            printf(GENERAL_BOLD "|         " RESET_DISPLAY " store, avail, build, install, check, remove, update-conf, check-conf\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
         }
+        cmd_keyword_check(argc,argv,"--inst",inst_loc);
+        cmd_keyword_check(argc,argv,"--repo",repo_loc);
         if(strcmp(app_cmd,"store")==0){
-            run_flag=app_list(workdir,"all",user_name,"",SSHKEY_DIR,"");
+            run_flag=app_list(workdir,"all",user_name,"",SSHKEY_DIR,"",inst_loc);
         }
         else if(strcmp(app_cmd,"avail")==0){
-            run_flag=app_list(workdir,"installed",user_name,"",SSHKEY_DIR,"");
+            run_flag=app_list(workdir,"installed",user_name,"",SSHKEY_DIR,"","");
+        }
+        else if(strcmp(app_cmd,"check-conf")==0){
+            run_flag=appman_check_conf(workdir,user_name,SSHKEY_DIR);
+        }
+        else if(strcmp(app_cmd,"update-conf")==0){
+            run_flag=appman_update_conf(workdir,inst_loc,repo_loc,SSHKEY_DIR,"");
         }
         else{
             if(cmd_keyword_check(argc,argv,"--app",app_name)!=0){
@@ -1779,10 +1792,10 @@ int main(int argc, char* argv[]){
                 return 9;
             }
             if(strcmp(app_cmd,"check")==0){
-                run_flag=app_list(workdir,"check",user_name,app_name,SSHKEY_DIR,"");
+                run_flag=app_list(workdir,"check",user_name,app_name,SSHKEY_DIR,"","");
             }
             else{
-                run_flag=app_operation(workdir,user_name,app_cmd,app_name,SSHKEY_DIR);
+                run_flag=app_operation(workdir,user_name,app_cmd,app_name,SSHKEY_DIR,inst_loc,repo_loc);
             }
         }
         if(run_flag!=0){

@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
-
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
@@ -48,6 +44,21 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=$4
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
+
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ -INFO- ] $time_current SOFTWARE: HDF5-1.10.9"
 echo -e "[ -INFO- ] HDF5 requires zlib-1.2.13. Installing now ... "
@@ -56,11 +67,11 @@ if [ $? -eq 0 ]; then
   zlib_path="/hpc_apps/zlib-1.2.13/"
 else
   if [ $current_user = 'root' ]; then
-    hpcmgr install zlib >> ${2}
+    hpcmgr install --app=zlib --repo=$4 --inst=$6 >> ${2}
   else
     grep "< zlib > < ${current_user} >" $private_app_registry >> /dev/null 2>&1
     if [ $? -ne 0 ]; then
-      hpcmgr install zlib >> ${2}
+      hpcmgr install --app=zlib --repo=$4 --inst=$6 >> ${2}
     fi
   fi
   zlib_path="${app_root}zlib-1.2.13/"
@@ -137,7 +148,7 @@ done
 
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  hpcmgr install ompi4 >> ${2}
+  hpcmgr install --app=ompi4 --repo=$4 --inst=$6 >> ${2}
   if [ $current_user = 'root' ]; then
     module load ompi-4.1.2
   else
@@ -152,7 +163,11 @@ fi
 echo -e "[ -INFO- ] HDF5-1.10.9 will be built with GNU Compiler Collections."
 echo -e "[ START: ] Downloading and Extracting source code ..."
 if [ ! -f ${app_cache}hdf5-1.10.9.tar.gz ]; then
-  wget ${url_pkgs}hdf5-1.10.9.tar.gz -O ${app_cache}hdf5-1.10.9.tar.gz -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}hdf5-1.10.9.tar.gz ${app_cache}hdf5-1.10.9.tar.gz >> ${2}
+  else
+    wget ${url_pkgs}hdf5-1.10.9.tar.gz -O ${app_cache}hdf5-1.10.9.tar.gz -o ${2}
+  fi
 fi
 tar zvxf ${app_cache}hdf5-1.10.9.tar.gz -C ${app_extract_cache} >> ${2}
 echo -e "[ STEP 1 ] Building HDF5-1.10.9 ... This step usually takes seconds."

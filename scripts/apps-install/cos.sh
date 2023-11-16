@@ -55,7 +55,7 @@ if [ $? -ne 0 ]; then
     exit 5
   fi
   echo -e "[ -INFO- ] This app needs desktop environment. Installing now ..."
-  hpcmgr install desktop >> ${2}.desktop
+  hpcmgr install --app=desktop >> ${2}.desktop
   if [ $? -ne 0 ]; then
     echo -e "[ FATAL: ] Desktop environment installation failed. Please check the log file for details. Exit now."
     exit 7

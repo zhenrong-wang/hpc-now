@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
-
 if [ ! -z $CENTOS_VERSION ] && [ $CENTOS_VERSION -eq 7 ]; then
   echo -e "[ FATAL: ] GROMACS on CentOS 7.x is not natively supported by App Store. But you can manually build and run it."
   exit 3
@@ -52,6 +48,21 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] ABINIT has been removed successfully."
   exit 0
 fi
+
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=$4
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ -INFO- ] $time_current INSTALLING GROMACS-version 2022-2 now."
@@ -126,7 +137,7 @@ done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] Building MPI Libraries now ..."
-  hpcmgr install mpich4 >> ${2}
+  hpcmgr install --app=mpich4 --repo=$4 --inst=$6 >> ${2}
   if [ $current_user = 'root' ]; then
     module load mpich-4.0.2
     mpi_env="mpich-4.0.2"
@@ -139,7 +150,7 @@ fi
 echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 
 echo -e "[ -INFO- ] Checking and Installing the fftw3 libraries ... "
-hpcmgr install fftw3 >> ${2}
+hpcmgr install --app=fftw3 --repo=$4 --inst=$6 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build fftw3. Exit now."
   exit 5
@@ -157,7 +168,11 @@ fi
 
 echo -e "[ -INFO- ] Downloading and extracting source files ..."
 if [ ! -f ${app_cache}gromacs-2022.2.tar.gz ]; then
-  wget ${url_pkgs}gromacs-2022.2.tar.gz -O ${app_cache}gromacs-2022.2.tar.gz -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}gromacs-2022.2.tar.gz ${app_cache}gromacs-2022.2.tar.gz >> ${2}
+  else
+    wget ${url_pkgs}gromacs-2022.2.tar.gz -O ${app_cache}gromacs-2022.2.tar.gz -o ${2}
+  fi
 fi
 tar zvxf ${app_cache}gromacs-2022.2.tar.gz -C ${app_extract_cache} >> ${2}
 echo -e "[ -INFO- ] Building GROMACS-2022 now...This step may take minutes."

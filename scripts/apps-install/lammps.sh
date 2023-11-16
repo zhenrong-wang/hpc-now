@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
-
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
@@ -47,6 +43,21 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] LAMMPS has been removed successfully."
   exit 0
 fi
+
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=$4
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
 mkdir -p ${app_root}lammps
 rm -rf ${app_root}lammps/*
@@ -125,7 +136,7 @@ done
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo -e "[ -INFO- ] Building MPI Libraries now ..."
-  hpcmgr install mpich4 >> ${2}
+  hpcmgr install --app=mpich4 --repo=$4 --inst=$6 >> ${2}
   if [ $current_user = 'root' ]; then
     module load mpich-4.0.2
     mpi_env="mpich-4.0.2"
@@ -138,7 +149,7 @@ fi
 echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 
 echo -e "[ -INFO- ] Checking and Installing the fftw3 libraries ... "
-hpcmgr install fftw3 >> ${2}
+hpcmgr install --app=fftw3 --repo=$4 --inst=$6 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build fftw3. Exit now."
   exit 5
@@ -157,7 +168,11 @@ fi
 # Install adios2 now
 echo -e "[ -INFO- ] Checking and Installing ADIOS2 now ... "
 if [ ! -f ${app_cache}ADIOS2-master.zip ]; then
-  wget ${url_pkgs}ADIOS2-master.zip -O ${app_cache}ADIOS2-master.zip -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}ADIOS2-master.zip ${app_cache}ADIOS2-master.zip >> ${2}
+  else
+    wget ${url_pkgs}ADIOS2-master.zip -O ${app_cache}ADIOS2-master.zip -o ${2}
+  fi
 fi
 unzip -o ${app_cache}ADIOS2-master.zip -d ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}
@@ -172,7 +187,11 @@ export C_INCLUDE_PATH=${app_root}lammps/ADIOS2/include:$C_INCLUDE_PATH
 
 echo -e "[ -INFO- ] Downloading and extracting source files ..."
 if [ ! -f ${app_cache}lammps.zip ]; then
-  wget ${url_pkgs}lammps-develop.zip -O ${app_cache}lammps.zip -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}lammps-develop.zip ${app_cache}lammps.zip >> ${2}
+  else
+    wget ${url_pkgs}lammps-develop.zip -O ${app_cache}lammps.zip -o ${2}
+  fi
 fi
 unzip -o -q ${app_cache}lammps.zip -d ${app_extract_cache} >> ${2}
 if [ ! -f ${app_extract_cache}lammps-develop/src/MAKE/OPTIONS/Makefile.g++_mpich.orig ]; then 

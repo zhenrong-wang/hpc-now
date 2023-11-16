@@ -496,9 +496,9 @@ void print_appmgr_info(void){
     printf("|     --app  APP_NAME   ~ The app name to be compiled and built.\n");
     printf("|   --acmd remove  ~ Remove an app from the cluster.\n");
     printf("|     --app  APP_NAME   ~ The app name to be removed.\n");
-    printf("|   --acmd conf-update  ~ Update the locations of app scripts and package repository.\n");
+    printf("|   --acmd update-conf  ~ Update the locations of app scripts and package repository.\n");
     printf("|                       ~ You need to specify new location(s).\n");
-    printf("|   --acmd conf-show    ~ Display the locations of app scripts and package repository.\n");
+    printf("|   --acmd check-conf   ~ Display the locations of app scripts and package repository.\n");
 }
 
 void print_jobmgr_info(void){

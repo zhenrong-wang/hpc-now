@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
-
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
@@ -48,10 +44,29 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=${4}
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
+
 if [ $1 = 'install' ]; then
   echo -e "[ -INFO- ] Downloading the prebuilt package ..."
   if [ ! -f ${app_cache}ompi3.tar.gz ]; then
-    wget ${url_pkgs}prebuilds-9/ompi3.tar.gz -O ${app_cache}ompi3.tar.gz -o ${2}
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}prebuilds-9/ompi3.tar.gz ${app_cache}ompi3.tar.gz >> ${2}
+    else
+      wget ${url_pkgs}prebuilds-9/ompi3.tar.gz -O ${app_cache}ompi3.tar.gz -o ${2}
+    fi
   fi
   echo -e "[ -INFO- ] Extracting the binaries and libraries ..."
   tar zvxf ${app_cache}ompi3.tar.gz -C ${app_root} >> ${2}
@@ -116,7 +131,11 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Started building OpenMPI-3.1.6."
 echo -e "[ STEP 1 ] $time_current Downloading and extracting source packages ..."
 if [ ! -f ${app_cache}openmpi-3.1.6.zip ]; then
-  wget ${url_pkgs}openmpi-3.1.6.zip -O ${app_cache}openmpi-3.1.6.zip -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}openmpi-3.1.6.zip ${app_cache}openmpi-3.1.6.zip >> ${2}
+  else
+    wget ${url_pkgs}openmpi-3.1.6.zip -O ${app_cache}openmpi-3.1.6.zip -o ${2}
+  fi
 fi
 cd ${app_cache} && unzip -o openmpi-3.1.6.zip -d ${app_extract_cache} >> ${2}
 time_current=`date "+%Y-%m-%d %H:%M:%S"`

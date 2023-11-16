@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
-
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
@@ -42,10 +38,29 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=${4}
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
+
 mkdir -p $app_cache
 echo -e "[ START: ] Downloading and Extracting source code ..."
 if [ ! -f ${app_cache}zlib-1.2.13.tar.gz ]; then
-  wget ${url_pkgs}zlib-1.2.13.tar.gz -O ${app_cache}zlib-1.2.13.tar.gz -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}zlib-1.2.13.tar.gz ${app_cache}zlib-1.2.13.tar.gz >> ${2}
+  else
+    wget ${url_pkgs}zlib-1.2.13.tar.gz -O ${app_cache}zlib-1.2.13.tar.gz -o ${2}
+  fi
 fi
 tar zxf ${app_cache}zlib-1.2.13.tar.gz -C ${app_cache} >> /dev/null 2>&1
 

@@ -17,8 +17,21 @@ if [ $current_user != 'root' ]; then
   echo -e "           Please contact the administrator. Exit now."
   exit 1
 fi
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs_envmod=${url_root}packages/envmod/
+
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+
+url_pkgs=${4}packages/envmod/
 public_app_registry="/hpc_apps/.public_apps.reg"
 app_cache="/hpc_apps/.cache/"
 mkdir -p $app_cache
@@ -27,7 +40,11 @@ yum install tcl-devel -y >> ${2}
 
 echo -e "[ -INFO- ] Downloading and Extracting files ..."
 if [ ! -f ${app_cache}modules-5.1.0.tar.gz ]; then
-  wget ${url_pkgs_envmod}modules-5.1.0.tar.gz -O ${app_cache}modules-5.1.0.tar.gz -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}modules-5.1.0.tar.gz ${app_cache}modules-5.1.0.tar.gz >> ${2}
+  else
+    wget ${url_pkgs}modules-5.1.0.tar.gz -O ${app_cache}modules-5.1.0.tar.gz -o ${2}
+  fi
 fi
 tar zvxf ${app_cache}modules-5.1.0.tar.gz -C ${app_cache} >> ${2}
 cd ${app_cache}modules-5.1.0

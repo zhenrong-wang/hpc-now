@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
-
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
@@ -47,6 +43,21 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] LAPACK-3.11.0 has been removed successfully."
   exit 0
 fi
+
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=$4
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
 gcc_vers=('gcc12' 'gcc9' 'gcc8' 'gcc4')
 gcc_code=('gcc-12.1.0' 'gcc-9.5.0' 'gcc-8.2.0' 'gcc-4.9.2')
@@ -98,7 +109,11 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Started building LAPACK-3.11.0."
 echo -e "[ START: ] Downloading and Extracting source code ..."
 if [ ! -f ${app_cache}lapack-3.11.tar.gz ]; then
-  wget ${url_pkgs}lapack-3.11.tar.gz -O ${app_cache}lapack-3.11.tar.gz -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}lapack-3.11.tar.gz ${app_cache}lapack-3.11.tar.gz >> ${2}
+  else
+    wget ${url_pkgs}lapack-3.11.tar.gz -O ${app_cache}lapack-3.11.tar.gz -o ${2}
+  fi
 fi
 tar zvxf ${app_cache}lapack-3.11.tar.gz -C ${app_extract_cache} >> ${2}
 echo -e "[ STEP 1 ] Building LAPACK, BLAS, CBLAS, LAPACKE ... This step usually takes minutes."

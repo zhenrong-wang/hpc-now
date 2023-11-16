@@ -12,9 +12,6 @@ public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
 
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
@@ -46,6 +43,21 @@ if [ $1 = 'remove' ]; then
   echo -e "[ -INFO- ] ABINIT has been removed successfully."
   exit 0
 fi
+
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=$4
+num_processors=`cat /proc/cpuinfo| grep "processor"| wc -l`
 
 time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ -INFO- ] $time_current Software: ABINIT-9.6.2"
@@ -119,7 +131,7 @@ done
 
 mpirun --version >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  hpcmgr install ompi4 >> ${2}
+  hpcmgr install --app=ompi4 --repo=$4 --inst=$6 >> ${2}
   if [ $current_user = 'root' ]; then
     module load ompi-4.1.2
     mpi_env=ompi-4.1.2
@@ -132,7 +144,7 @@ fi
 echo -e "[ -INFO- ] Using MPI Libraries - ${mpi_env}."
 
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: OpenBLAS Libraries ..."
-hpcmgr install openblas >> ${2}
+hpcmgr install --app=openblas --repo=$4 --inst=$6 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build OpenBLAS. Exit now."
   exit 11
@@ -151,7 +163,11 @@ mkdir -p $abinit_root
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: libXC libraries ..."
 if [ ! -f ${abinit_root}libxc-4.3.4/lib/libxcf90.la ]; then
   if [ ! -f ${app_cache}libxc-4.3.0.tar.gz ]; then
-    wget ${url_pkgs}libxc-4.3.4.tar.gz -O ${app_cache}libxc-4.3.4.tar.gz -o ${2}
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}libxc-4.3.4.tar.gz ${app_cache} >> ${2}
+    else
+      wget ${url_pkgs}libxc-4.3.4.tar.gz -O ${app_cache}libxc-4.3.4.tar.gz -o ${2}
+    fi
   fi
   tar zvxf ${app_cache}libxc-4.3.4.tar.gz -C ${app_extract_cache} >> ${2}
   cd ${app_extract_cache}libxc-4.3.4
@@ -163,7 +179,11 @@ fi
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: FFTW-3.3.8 Libraries ..."
 if [[ ! -f ${abinit_root}fftw-3.3.8/lib/libfftw3.a || ! -f ${abinit_root}fftw-3.3.8/lib/libfftw3_mpi.la ]]; then
   if [ ! -f ${app_cache}fftw-3.3.8.tar.gz ]; then
-    wget ${url_pkgs}fftw-3.3.8.tar.gz -O ${app_cache}fftw-3.3.8.tar.gz -o ${2}
+    if [ $3 = 'local' ]; then
+      /bin/cp -r ${url_pkgs}fftw-3.3.8.tar.gz ${app_cache} >> ${2}
+    else
+      wget ${url_pkgs}fftw-3.3.8.tar.gz -O ${app_cache}fftw-3.3.8.tar.gz -o ${2}
+    fi
   fi
   tar zvxf ${app_cache}fftw-3.3.8.tar.gz -C ${app_extract_cache} >> ${2}
   cd ${app_extract_cache}fftw-3.3.8
@@ -177,7 +197,7 @@ if [[ ! -f ${abinit_root}fftw-3.3.8/lib/libfftw3.a || ! -f ${abinit_root}fftw-3.
   make install >> ${2}
 fi
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: HDF5 ..."
-hpcmgr install hdf5 >> ${2}
+hpcmgr install --app=hdf5 $3 $4 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build HDF5. Exit now."
   exit 13
@@ -192,7 +212,7 @@ else
 fi
 
 echo -e "[ -INFO- ] Checking and Installing Prerequisitions: netCDF4 ..."
-hpcmgr install netcdf4 >> ${2}
+hpcmgr install --app=netcdf4 $3 $4 >> ${2}
 if [ $? -ne 0 ]; then
   echo -e "[ FATAL: ] Failed to build netcdf4. Exit now."
   exit 15
@@ -210,7 +230,11 @@ pip install configurator >> ${2}
 echo -e "[ -INFO- ] Now, finally, we can start building ABINIT-9.6.2 ..."
 echo -e "[ STEP 1 ] Downloading and extracing source code ..."
 if [ ! -f ${app_cache}abinit-9.6.2.tar.gz ]; then
-  wget ${url_pkgs}abinit-9.6.2.tar.gz -O ${app_cache}abinit-9.6.2.tar.gz -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}abinit-9.6.2.tar.gz ${app_cache} >> ${2}
+  else
+    wget ${url_pkgs}abinit-9.6.2.tar.gz -O ${app_cache}abinit-9.6.2.tar.gz -o ${2}
+  fi
 fi
 echo -e "[ STEP 2 ] Configuring and Compiling in progress, this step usually takes minutes ..."
 tar zvxf ${app_cache}abinit-9.6.2.tar.gz -C ${app_extract_cache} >> ${2}

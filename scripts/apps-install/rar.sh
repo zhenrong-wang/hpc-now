@@ -8,8 +8,6 @@
 # This script is used by 'hpcmgr' command to build *rarlinux* to HPC-NOW cluster.
 
 current_user=`whoami`
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/rar/
 public_app_registry="/hpc_apps/.public_apps.reg"
 if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
@@ -42,11 +40,29 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=${4}rar/
+
 mkdir -p $app_cache
 echo -e "[ -INFO- ] Software: RAR for Linux "
 if [ ! -f ${app_cache}rarlinux-x64-612.tar.gz ]; then
   echo -e "[ -INFO- ] Downloading package(s) ..."
-  wget ${url_pkgs}rarlinux-x64-612.tar.gz -O ${app_cache}rarlinux-x64-612.tar.gz >> ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}rarlinux-x64-612.tar.gz ${app_cache}rarlinux-x64-612.tar.gz >> ${2}
+  else
+    wget ${url_pkgs}rarlinux-x64-612.tar.gz -O ${app_cache}rarlinux-x64-612.tar.gz -o ${2}
+  fi
 fi
 echo -e "[ -INFO- ] Extracting packages ..."
 tar zvxf ${app_cache}rarlinux-x64-612.tar.gz -C ${app_root} >> ${2}

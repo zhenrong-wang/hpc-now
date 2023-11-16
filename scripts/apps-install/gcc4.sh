@@ -13,10 +13,6 @@ if [ $current_user != 'root' ]; then
   private_app_registry="/hpc_apps/${current_user}_apps/.private_apps.reg"
 fi
 
-url_root=https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/
-url_pkgs=${url_root}packages/
-num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
-
 if [ $current_user = 'root' ]; then
   app_root="/hpc_apps/"
   app_cache="/hpc_apps/.cache/"
@@ -48,6 +44,21 @@ if [ $1 = 'remove' ]; then
   exit 0
 fi
 
+if [ -z $3 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ $3 != 'local' ] && [ $3 != 'web' ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+if [ -z $4 ]; then
+  echo -e "[ FATAL: ] Failed to get the location for packages repository. Exit now."
+  exit 1
+fi
+url_pkgs=$4
+num_processors=`cat /proc/cpuinfo | grep "processor" | wc -l`
+
 unset LIBRARY_PATH #Only for gcc, we have to do this
 unset LD_LIBRARY_PATH
 unset CPATH
@@ -61,7 +72,11 @@ time_current=`date "+%Y-%m-%d %H:%M:%S"`
 echo -e "[ START: ] $time_current Building GNU Compiler Collections - Version 4.9.2  now ... "
 echo -e "[ STEP 1 ] $time_current Downloading and extracting source packages, this step usually takes minutes ... "
 if [ ! -f ${app_cache}gcc-4.9.2-full.tar.gz ]; then
-  wget ${url_pkgs}gcc-4.9.2-full.tar.gz -O ${app_cache}gcc-4.9.2-full.tar.gz -o ${2}
+  if [ $3 = 'local' ]; then
+    /bin/cp -r ${url_pkgs}gcc-4.9.2-full.tar.gz ${app_cache}gcc-4.9.2-full.tar.gz >> ${2}
+  else
+    wget ${url_pkgs}gcc-4.9.2-full.tar.gz -O ${app_cache}gcc-4.9.2-full.tar.gz -o ${2}
+  fi
 fi
 tar zvxf ${app_cache}gcc-4.9.2-full.tar.gz -C ${app_extract_cache} >> ${2}
 cd ${app_extract_cache}gcc-4.9.2
