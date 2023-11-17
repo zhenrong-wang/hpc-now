@@ -1236,6 +1236,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         return 1;
     }
     cluster_role_detect(workdir,cluster_role,cluster_role_ext);
+    //printf("HERE!\n");
     get_key_value(statefile,"master_public_ip:",' ',master_address);
     get_key_value(statefile,"master_status:",' ',master_status);
     get_key_value(statefile,"database_status:",' ',db_status);
@@ -1245,6 +1246,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     get_key_value(statefile,"total_compute_nodes:",' ',node_num_string);
     get_key_value(statefile,"payment_method:",' ',payment_method);
     get_key_value(statefile,"shared_volume_gb:",' ',shared_volume);
+    //printf("HERE!\n");
     node_num=string_to_positive_num(node_num_string);
     get_key_value(statefile,"running_compute_nodes:",' ',running_node_num_string);
     running_node_num=string_to_positive_num(running_node_num_string);

@@ -34,8 +34,9 @@ void print_cluster_init_done(void){
 }
 
 void print_help(char* cmd_name){
-    printf(GENERAL_BOLD "[ -INFO- ] Usage: hpcopr" HIGH_GREEN_BOLD " Command " GENERAL_BOLD "CMD_FLAG ..." RESET_DISPLAY " [ " HIGH_CYAN_BOLD "KEY_WORD1" RESET_DISPLAY " KEY_STRING1 ] ...\n");
-    printf("|          Global key word & string pair: " GENERAL_BOLD "-c CLUSTER_NAME\n" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "[ -INFO- ] Usage: hpcopr " RESET_DISPLAY GREY_LIGHT "-i" RESET_DISPLAY HIGH_GREEN_BOLD " Command " RESET_DISPLAY GENERAL_BOLD "CMD_FLAG ..." RESET_DISPLAY " [ " HIGH_CYAN_BOLD "KEY_WORD1" RESET_DISPLAY " KEY_STRING1 ] ...\n");
+    printf("|          A Global and special CMD_FLAG : " GENERAL_BOLD "-i" RESET_DISPLAY " Enter interactive mode\n");
+    printf("|          Global KEY_WORD and KEY_STRING: " GENERAL_BOLD "-c CLUSTER_NAME\n" RESET_DISPLAY "\n");
     if(strcmp(cmd_name,"all")==0){
         printf(GENERAL_BOLD "| Command Instructions\n" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "+ 0    . Get-Started:" RESET_DISPLAY "\n");

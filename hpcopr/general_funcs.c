@@ -137,8 +137,10 @@ int get_key_value(char* filename, char* key, char ch, char* value){
     }
     while(!feof(file_p)){
         fgetline(file_p,line_buffer);
+        reset_string(tail);
         get_seq_string(line_buffer,ch,1,head);
         get_seq_string(line_buffer,ch,2,tail);
+//        printf("%s\t%s\t%s\n",line_buffer,head,tail);
         if(strcmp(key,head)==0){
             fclose(file_p);
             strcpy(value,tail);
