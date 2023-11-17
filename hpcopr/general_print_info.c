@@ -519,3 +519,32 @@ void print_jobmgr_info(void){
     printf("|   --jcmd cancel  ~ Cancel a job with specified ID\n");
     printf("|     --jid   JOB_ID           ~ A valid job ID.\n");
 }
+
+void list_all_commands(void){
+    printf(GENERAL_BOLD " 0.  GET-STARTED:" RESET_DISPLAY HIGH_GREEN_BOLD " envcheck" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD " 1.  Multi-Cluster Management: " RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD "        new-cluster  ls-clusters \n");
+    printf("        switch  glance  refresh \n");
+    printf("        export  import  remove  exit-current " RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD " 2.  Global Management: " RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD "        help  usage  monman  history  syserr \n");
+    printf("        ssh  rdp \n");
+    printf("        configloc  showloc  showmd5  resetloc " RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD " 3.  Cluster Initialization: " RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD "        cloud-info  rotate-key  get-conf  edit-conf \n");
+    printf("        rm-conf  init  rebuild " RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD " 4.  Cluster Management: " RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD "        vault  graph  viewlog " RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD " 5.  Cluster Operation: " RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD "        delc     addc     shutdownc  turnonc \n");
+    printf("        reconfc  reconfm  nfsup \n");
+    printf("        sleep    wakeup   destroy\n");
+    printf("        payment" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD " 6.  User Mgmt: " RESET_DISPLAY HIGH_GREEN_BOLD "userman" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD " 7.  Data Mgmt: " RESET_DISPLAY HIGH_GREEN_BOLD "dataman" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD " 8.  App Mgmt : " RESET_DISPLAY HIGH_GREEN_BOLD "appman" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD " 9.  Job Mgmt : " RESET_DISPLAY HIGH_GREEN_BOLD"jobman" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD " 10. Others: " RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD"        about  version  license  repair " RESET_DISPLAY "\n");
+    printf("\n");
+}

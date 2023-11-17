@@ -537,8 +537,8 @@ int show_locations(void){
     return 0;
 }
 
-int configure_locations(void){
-    char doubleconfirm[32]="";
+int configure_locations(int auto_confirm_flag_local){
+    char doubleconfirm[128]="";
     char loc_string[LOCATION_LENGTH]="";
     int format_flag=0;
     FILE* file_p=NULL;
@@ -564,15 +564,20 @@ int configure_locations(void){
     printf("|*   THE DEFAULT LOCATIONS IF YOUR LOCATIONS FAIL TO WORK PROPERLY!                \n");
     printf("|*                                                                                 \n");
     printf("|*                                C A U T I O N !                                  \n");
-    printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n" RESET_DISPLAY "\n");
-    fflush(stdin);
-    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    scanf("%s",doubleconfirm);
-    getchar();
-    if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
-        printf("|          Nothing changed.\n");
-        return 1;
+    if(auto_confirm_flag_local==0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed by --confirm ." RESET_DISPLAY "\n");
+    }
+    else{
+        printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n" RESET_DISPLAY "\n");
+        fflush(stdin);
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+        scanf("%s",doubleconfirm);
+        getchar();
+        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
+            printf("|          Nothing changed.\n");
+            return 1;
+        }
     }
     printf("[ LOC1/7 ] Please specify the root location of the terraform binary and providers. \n");
     printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");

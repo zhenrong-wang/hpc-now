@@ -13,6 +13,7 @@
 
 #include "now_macros.h"
 #include "general_funcs.h"
+#include "general_print_info.h"
 #include "components.h"
 #include "cluster_general_funcs.h"
 #include "prereq_check.h"
@@ -51,6 +52,10 @@ extern char md5_azad_tf_var[64];
 extern char md5_azad_tf_zip_var[64];
 extern char md5_gcp_tf_var[64];
 extern char md5_gcp_tf_zip_var[64];
+
+extern int interactive_flag;
+extern int auto_confirm_flag;
+extern char final_command[512];
 
 extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
 
@@ -688,7 +693,7 @@ int check_and_install_prerequisitions(int repair_flag){
                 return 1;
             }
             else{
-                if(configure_locations()!=0){
+                if(configure_locations(auto_confirm_flag)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure the locations. Exit now." RESET_DISPLAY "\n");
                     return 5;
                 }
@@ -1493,14 +1498,35 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
     char temp_workdir[DIR_LENGTH]="";
     char string_temp[128]="";
     char cluster_name_source[16]="";
+
     if(argc<2){
         return -1;
     }
+    if(strcmp(argv[1],"-i")==0){
+        interactive_flag=0;
+        if(argc==2){
+            list_all_commands();
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Choose a " HIGH_GREEN_BOLD "command" RESET_DISPLAY ": " HIGH_GREEN_BOLD);
+            fflush(stdin);
+            scanf("%s",final_command);
+            getchar();
+            printf(RESET_DISPLAY);
+        }
+        else{
+            strncpy(final_command,argv[2],512);
+        }
+    }
+    else{
+        interactive_flag=cmd_flag_check(argc,argv,"-i");
+        strncpy(final_command,argv[1],512);
+    }
+
     char role_flag[16]="";
     char cluster_role_ext[32]="";
     char cu_flag[16]="";
-    int interactive_flag=cmd_flag_check(argc,argv,"-i");
-    command_flag=command_name_check(argv[1],command_name_prompt,role_flag,cu_flag);
+
+    auto_confirm_flag=cmd_flag_check(argc,argv,"--confirm");
+    command_flag=command_name_check(final_command,command_name_prompt,role_flag,cu_flag);
     if(command_flag!=0){
         return command_flag;
     }
@@ -1581,7 +1607,7 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
                 }
             }
             else{
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify a valid user name by " HIGH_CYAN_BOLD "-u" RESET_DISPLAY " or run hpcopr with " HIGH_CYAN_BOLD "-i" RESET_DISPLAY ".\n");
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster user not specified. Use " HIGH_CYAN_BOLD "-u USER_NAME" RESET_DISPLAY " or " HIGH_CYAN_BOLD "-i" RESET_DISPLAY " (interactive).\n");
                 hpc_user_list(workdir,CRYPTO_KEY_FILE,0);
                 return -5;
             }

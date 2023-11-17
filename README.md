@@ -24,8 +24,8 @@
     - [**Cluster Operation**](#cluster-operation)
     - [**Cluster User Management**](#cluster-user-management)
     - [**Cluster Data Management**](#cluster-data-management)
-      - [**Bucket Operations:** Transfer and manage data with the bucket.](#bucket-operations-transfer-and-manage-data-with-the-bucket)
-      - [**Direct Operations:** Transfer and manage data in the cluster storage.](#direct-operations-transfer-and-manage-data-in-the-cluster-storage)
+      - [**Bucket Operations:**](#bucket-operations)
+      - [**Direct Operations:**](#direct-operations)
     - [**Cluster App Management**](#cluster-app-management)
     - [**Cluster Job Management**](#cluster-job-management)
     - [**Others**](#others)
@@ -287,7 +287,9 @@ The **`hpcopr.exe`** is a very powerful Command Line Interface (CLI) for you to 
     -d DEST_PATH      Destination path of binary operations. i.e. cp
     -t TARGET_PATH    Target path of unary operations. i.e. ls
 
-#### **Bucket Operations:** Transfer and manage data with the bucket.
+#### **Bucket Operations:** 
+
+*Transfer and manage data with the bucket.*
 
     --dcmd put         Upload a local file or folder to the bucket path.
     --dcmd get         Download a bucket object(file or folder) to the local path.
@@ -298,7 +300,9 @@ The **`hpcopr.exe`** is a very powerful Command Line Interface (CLI) for you to 
 
 **Example:** `hpcopr dataman --dcmd put -s ./foo -d /foo -u user1`
 
-#### **Direct Operations:** Transfer and manage data in the cluster storage.
+#### **Direct Operations:** 
+
+*Transfer and manage data in the cluster storage.*
 
 *The cluster must be in running state (minimal or all).*
 

@@ -20,7 +20,7 @@ typedef struct
     char echo_flag[8];
 } jobinfo;
 
-int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* sshkey_dir, char* crypto_keyfile, jobinfo* job_info);
+int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* sshkey_dir, char* crypto_keyfile, jobinfo* job_info, int interactive_flag_local);
 int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_info);
 int job_cancel(char* workdir, char* user_name, char* sshkey_dir, char* job_id);
 int job_list(char* workdir, char* user_name, char* sshkey_dir);

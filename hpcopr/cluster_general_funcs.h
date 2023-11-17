@@ -46,7 +46,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
 int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bucket_flag, char* root_flag);
 int check_pslock(char* workdir);
-int confirm_to_operate_cluster(char* current_cluster_name);
+int confirm_to_operate_cluster(char* current_cluster_name,int auto_confirm_flag_local);
 int check_down_nodes(char* workdir);
 int cluster_ssh(char* workdir, char* username, char* cluster_role);
 int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
@@ -64,11 +64,11 @@ int sync_statefile(char* workdir, char* sshkey_dir);
 int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag);
 int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir);
 int username_check(char* user_registry, char* username_input);
-int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* username, char* password);
+int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* username, char* password, int interactive_flag_local);
 int delete_user_from_registry(char* user_registry_file, char* username);
-int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char* username);
-int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, char* crypto_keyfile, char* option);
-int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, char* username, char* password);
+int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char* username, int interactive_flag_local);
+int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, char* crypto_keyfile, char* option, int interactive_flag_local);
+int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, char* username, char* password, int interactive_flag_local);
 int usrmgr_prereq_check(char* workdir, char* ucmd);
 void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_flag);
 

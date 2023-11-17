@@ -1655,7 +1655,11 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     return 0;
 }
 
-int confirm_to_operate_cluster(char* current_cluster_name){
+int confirm_to_operate_cluster(char* current_cluster_name, int auto_confirm_flag_local){
+    if(auto_confirm_flag_local==0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed by --confirm ." RESET_DISPLAY "\n");
+        return 0;
+    }
     char doubleconfirm[64]="";
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster" HIGH_CYAN_BOLD " %s" RESET_DISPLAY " now, which may affect\n",current_cluster_name);
     printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to continue.\n");
@@ -2011,7 +2015,7 @@ int username_check(char* user_registry, char* username_input){
     return 0;
 }
 
-int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* username, char* password){
+int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* username, char* password, int interactive_flag_local){
     if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
         return -1;
     }
@@ -2033,6 +2037,10 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
         return -1;
     }
     if(strlen(username)==0){
+        if(interactive_flag_local!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Username not specified. Use -i (interactive) or -u USER_NAME ." RESET_DISPLAY "\n");
+            return 17;
+        }
         printf(GENERAL_BOLD"[ INPUT: ]" RESET_DISPLAY " Please input a *UNIQUE* username (A-Z | a-z | 0-9 | - , Length %d-%d)\n",USERNAME_LENGTH_MIN,USERNAME_LENGTH_MAX);
         printf(GENERAL_BOLD"[ INPUT: ]" RESET_DISPLAY " Do *NOT* begin with '-' : ");
         fflush(stdin);
@@ -2069,9 +2077,20 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
     printf(HIGH_GREEN_BOLD "|          Username: %s" RESET_DISPLAY "\n",username_input);
     sprintf(password_prompt,"[ INPUT: ] Password (MaxLength %d): ",USER_PASSWORD_LENGTH_MAX);
     if(strlen(password)==0){
+        if(interactive_flag_local!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Password not specified. Use -i (interactive) or -p PASSWORD ." RESET_DISPLAY "\n");
+            return 17;
+        }
         password_temp=GETPASS_FUNC(password_prompt);
         if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The password is too long." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The password " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is too long." RESET_DISPLAY "\n",password_temp);
+            delete_decrypted_user_passwords(workdir);
+            return -5;
+        }
+        if(password_complexity_check(password_temp)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The password " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",password_temp);
+            printf("|          Must include at least 3 of 4 different types: \n");
+            printf("|          " HIGH_GREEN_BOLD "A-Z" RESET_DISPLAY " | " HIGH_GREEN_BOLD "a-z" RESET_DISPLAY " | " HIGH_GREEN_BOLD "0-9" RESET_DISPLAY " | " HIGH_GREEN_BOLD "~@&(){}[]=" RESET_DISPLAY "\n");
             delete_decrypted_user_passwords(workdir);
             return -5;
         }
@@ -2160,7 +2179,7 @@ int delete_user_from_registry(char* user_registry_file, char* username){
     return 0;
 }
 
-int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char* username){
+int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char* username, int interactive_flag_local){
     if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
         return -1;
     }
@@ -2172,6 +2191,10 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(strlen(username)==0){
+        if(interactive_flag_local!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Username not specified. Use -i (interactive) or -u USER_NAME ." RESET_DISPLAY "\n");
+            return 17;
+        }
         hpc_user_list(workdir,crypto_keyfile,1);
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify the username: ");
         fflush(stdin);
@@ -2216,7 +2239,7 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
     }
 }
 
-int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, char* crypto_keyfile, char* option){
+int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, char* crypto_keyfile, char* option, int interactive_flag_local){
     if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
         return -1;
     }
@@ -2241,6 +2264,10 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(strlen(username)==0){
+        if(interactive_flag_local!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Password not specified. Use -i (interactive) or -p PASSWORD ." RESET_DISPLAY "\n");
+            return 17;
+        }
         hpc_user_list(workdir,crypto_keyfile,1);
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify the username: ");
         fflush(stdin);
@@ -2286,7 +2313,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
     }
 }
 
-int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, char* username, char* password){
+int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, char* username, char* password, int interactive_flag_local){
     if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
         return -1;
     }
@@ -2305,6 +2332,10 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(strlen(username)==0){
+        if(interactive_flag_local!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Username not specified. Use -i (interactive) or -u USERNAME ." RESET_DISPLAY "\n");
+            return 17;
+        }
         hpc_user_list(workdir,crypto_keyfile,1);
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify the username: ");
         fflush(stdin);
@@ -2328,9 +2359,20 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
     printf(HIGH_GREEN_BOLD "|          Username: %s" RESET_DISPLAY " \n",username_input);
     sprintf(password_prompt,"[ INPUT: ] Password (MaxLength %d): ",USER_PASSWORD_LENGTH_MAX);
     if(strlen(password)==0){
+        if(interactive_flag_local!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Password not specified. Use -i (interactive) or -p PASSWORD ." RESET_DISPLAY "\n");
+            return 17;
+        }
         password_temp=GETPASS_FUNC(password_prompt);
         if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The password is too long." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The password " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is too long." RESET_DISPLAY "\n", password_temp);
+            delete_decrypted_user_passwords(workdir);
+            return -5;
+        }
+        if(password_complexity_check(password_temp)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The password " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",password_temp);
+            printf("|          Must include at least 3 of 4 different types: \n");
+            printf("|          " HIGH_GREEN_BOLD "A-Z" RESET_DISPLAY " | " HIGH_GREEN_BOLD "a-z" RESET_DISPLAY " | " HIGH_GREEN_BOLD "0-9" RESET_DISPLAY " | " HIGH_GREEN_BOLD "~@&(){}[]=" RESET_DISPLAY "\n");
             delete_decrypted_user_passwords(workdir);
             return -5;
         }

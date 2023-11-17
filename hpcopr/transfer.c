@@ -107,7 +107,7 @@ int user_list_check(char* cluster_name, char* user_list_read, char* user_list_fi
     return valid_user_num;
 }
 
-int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* crypto_keyfile, char* password, char* export_target_file){
+int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* crypto_keyfile, char* password, char* export_target_file, int interactive_flag_local){
     char workdir[DIR_LENGTH]="";
     char current_stackdir[DIR_LENGTH]="";
     char current_vaultdir[DIR_LENGTH]="";
@@ -155,12 +155,18 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
 
     get_workdir(workdir,cluster_name);
     if(strlen(user_list)==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the username(s) to be exported. i.e. " HIGH_CYAN_BOLD "user1:user2." RESET_DISPLAY "\n");
-        hpc_user_list(workdir,crypto_keyfile,0);
-        printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-        fflush(stdin);
-        scanf("%s",user_list_buffer);
-        getchar();
+        if(interactive_flag_local!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] User list specified. Use -i (interactive) or --ul USER_LIST." RESET_DISPLAY "\n");
+            return 17;
+        }
+        else{
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the username(s) to be exported. i.e. " HIGH_CYAN_BOLD "user1:user2." RESET_DISPLAY "\n");
+            hpc_user_list(workdir,crypto_keyfile,0);
+            printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
+            fflush(stdin);
+            scanf("%s",user_list_buffer);
+            getchar();
+        }
     }
     else{
         strcpy(user_list_buffer,user_list);
@@ -187,6 +193,10 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         printf(GENERAL_BOLD "|          %s\n" RESET_DISPLAY,real_user_list);
     }
     if(strlen(password)==0){
+        if(interactive_flag_local!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Password not specified. Use -i (interactive) or -p PASSWORD ." RESET_DISPLAY "\n");
+            return 17;
+        }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a *complex* password to encrypt and export.\n");
         password_temp=GETPASS_FUNC("[ INPUT: ] *without echo* ");
         strcpy(real_password,password_temp);
@@ -197,6 +207,10 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     password_hash(real_password,md5sum_trans);
     local_path_parser(export_target_file,filename_temp);
     if(strlen(filename_temp)==0){
+        if(interactive_flag_local!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Export path not specified. Use -i (interactive) or -d EXPORT_DEST." RESET_DISPLAY "\n");
+            return 17;
+        }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a path (folder or file) to export. i.e. " HIGH_CYAN_BOLD "/home/hpc-now/" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
@@ -391,7 +405,7 @@ next_user:
     }
 }
 
-int import_cluster(char* zip_file, char* password, char* crypto_keyfile){
+int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int interactive_flag_local, int auto_confirm_flag_local){
     char real_zipfile[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp_2[FILENAME_LENGTH]="";
@@ -416,6 +430,10 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile){
 
     local_path_parser(zip_file,filename_temp);
     if(strlen(filename_temp)==0||file_empty_or_not(filename_temp)<1){
+        if(interactive_flag_local!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Import file not specified or invalid. Use -i (interactive) or -s SOURCE_PATH ." RESET_DISPLAY "\n");
+            return 17;
+        }
         printf("[ -INFO- ] Please input the path of the now-cluster file. i.e. ~/import.now, d:\\import.now\n");
         printf("[ INPUT: ] ");
         fflush(stdin);
@@ -435,6 +453,10 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile){
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the specified now-cluster file: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",real_zipfile);
     if(strlen(password)==0){
+        if(interactive_flag_local!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Password not specified. Use -i (interactive) or -p PASSWORD ." RESET_DISPLAY "\n");
+            return 17;
+        }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the password to decrypt and import.\n");
         password_temp=GETPASS_FUNC("[ INPUT: ] *without echo* ");
         strcpy(real_password,password_temp);
@@ -468,19 +490,25 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile){
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " has already been imported to this environment.\n",cluster_name_buffer);
             printf("|          Would you like to replace it? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continue.\n");
-            printf("[ INPUT: ] ");
-            fflush(stdin);
-            scanf("%s",doubleconfirm);
-            getchar();
-            if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
-                printf("|          Nothing changed.\n");
-                sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
-                system(cmdline);
-                return -9;
+            if(auto_confirm_flag_local==0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed by --confirm ." RESET_DISPLAY "\n");
+                update_flag=1;
             }
             else{
-                update_flag=1;
+                printf("[ INPUT: ] ");
+                fflush(stdin);
+                scanf("%s",doubleconfirm);
+                getchar();
+                if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
+                    printf("|          Nothing changed.\n");
+                    sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
+                    system(cmdline);
+                    return -9;
+                }
+                else{
+                    update_flag=1;
+                }
             }
         }
     }

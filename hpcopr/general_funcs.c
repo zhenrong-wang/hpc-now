@@ -53,7 +53,8 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--month",
     "--gcp",
     "--rdp",
-    "--copypass"
+    "--copypass",
+    "--confirm"
 };
 
 char command_keywords[CMD_KWDS_NUM][32]={
@@ -701,6 +702,9 @@ int password_complexity_check(char* password){
     int lowercase_flag=0;
     int number_flag=0;
     int special_ch_flag=0;
+    char special_ch[10]="~@&(){}[]=";
+    int j;
+
     for(i=0;i<length;i++){
         if(*(password+i)=='A'||*(password+i)=='Z'){
             uppercase_flag=1;
@@ -721,10 +725,14 @@ int password_complexity_check(char* password){
             number_flag=1;
         }
         else{
+            for(j=0;j<10;j++){
+                if(*(password+i)!=*(special_ch+j)){
+                    return 1;
+                }
+            }
             special_ch_flag=1;
         }
     }
-//    printf(" ------%d   %d    %d    %d    %d\n\n",length,uppercase_flag,lowercase_flag,number_flag,special_ch_flag);
     if((uppercase_flag+lowercase_flag+number_flag+special_ch_flag)<3){
         return 1;
     }
