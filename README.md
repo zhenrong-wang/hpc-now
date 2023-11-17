@@ -194,13 +194,19 @@ In order to use and manage HPC in the cloud with HPC-NOW, please follow the work
 
 ## **3.5 Commands**
 
-The **`hpcopr.exe`** is a very powerful Command Line Interface (CLI) for you to use.
+The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 
-**USAGE**: `hpcopr CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
+**USAGE**: `hpcopr [-i] CMD_NAME CMD_FLAG ... [CMD_KEYWORD1 CMD_KEY_STRING1] ...`
+    **`-i`** : An optional flag to enter interactive mode
+    **`CMD_NAME`**: see all the command names below
+    **`CMD_FLAG`**: single value, such as `--force`，`--all`
+    **`CMD_KEYWORD`**: key-value pair, such as `-c myFirstCluster`
 
-    CMD_NAME: see all the command names below
-    CMD_FLAG: single value, such as --force，--all
-    CMD_KEYWORD: key-value pair, such as -c myFirstCluster
+**Examples:** 
+
+- `hpcopr -i new-cluster`
+- `hpcopr ssh -u user1 -c my_first_cluster`
+- `hpcopr rdp -u user2 --copypass`
 
 **CMD_NAME LIST**:
 
