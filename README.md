@@ -1,21 +1,21 @@
-HPC-NOW, start your HPC journey in the cloud **now**, with **n**o **o**peration **w**orkload!
+**HPC-NOW, start your HPC journey in the cloud <u>now</u>, with <u>n</u>o <u>o</u>peration <u>w</u>orkload!**
 
-*A full-stack HPC solution in the cloud, for the HPC community.*
+*<u>A full-stack HPC solution in the cloud, for the HPC community.</u>*
 
-- [1. Project Background](#1-project-background)
-- [2. Core Components](#2-core-components)
-- [3. How-To: Build, Install, Run, and Use](#3-how-to-build-install-run-and-use)
-  - [3.1 Build](#31-build)
+- [**1. Project Background**](#1-project-background)
+- [**2. Core Components**](#2-core-components)
+- [**3. How-To: Build, Install, Run, and Use**](#3-how-to-build-install-run-and-use)
+  - [**3.1 Build**](#31-build)
     - [**Prerequisites:**](#prerequisites)
     - [**Step 1. Clone this repository:**](#step-1-clone-this-repository)
     - [**Step 2. Change the directory :**](#step-2-change-the-directory-)
     - [**Step 3. Run the build script :**](#step-3-run-the-build-script-)
-  - [3.2 Install](#32-install)
+  - [**3.2 Install**](#32-install)
     - [**Step 1. Run the installer (Administrator or root privilege is required):**](#step-1-run-the-installer-administrator-or-root-privilege-is-required)
     - [**Step 2. Initialize the hpcopr.exe:**](#step-2-initialize-the-hpcoprexe)
-  - [3.3 Run](#33-run)
-  - [3.4 Basic Workflow](#34-basic-workflow)
-  - [3.5 Commands](#35-commands)
+  - [**3.3 Run**](#33-run)
+  - [**3.4 Basic Workflow**](#34-basic-workflow)
+  - [**3.5 Commands**](#35-commands)
     - [**Get-Started**](#get-started)
     - [**Multi-Cluster Management**](#multi-cluster-management)
     - [**Global Management**](#global-management)
@@ -29,10 +29,10 @@ HPC-NOW, start your HPC journey in the cloud **now**, with **n**o **o**peration 
     - [**Cluster App Management**](#cluster-app-management)
     - [**Cluster Job Management**](#cluster-job-management)
     - [**Others**](#others)
-- [4. Bugs and Communications](#4-bugs-and-communications)
+- [**4. Bugs and Communications**](#4-bugs-and-communications)
 
 
-# 1. Project Background
+# **1. Project Background**
 
 Cloud High-Performance Computing - Cloud HPC, differs from on-premise HPC significantly. Cloud service brings high scalability and flexibility to High-Performance Computing. However, most HPC users are not familiar with building and maintaining HPC services in the cloud. The technical barrier of cloud computing is very high to researchers, engineers, and developers in different scientific and engineering domains, e.g. energy, chemistry, physics, materials, bioscience. 
 
@@ -51,7 +51,7 @@ Currently, the HPC-NOW platform supports 7 popular cloud platforms, shown as bel
 - [Microsoft Azure](https://azure.microsoft.com/en-us/), HPC-NOW Internal Code: CLOUD_F
 - [Google Cloud Platform](https://cloud.google.com/), HPC-NOW Internal Code: CLOUD_G
 
-# 2. Core Components
+# **2. Core Components**
 
 Thanks to the [Terraform](http://www.terraform.io), a great cloud Infrastructure-as-Code platform making it possible to orchestrate cloud resources in a unified and simple way.
 
@@ -65,11 +65,11 @@ In this project, we are developing several components:
 -  **scripts**    : Shell scripts to initialize the clusters, install applications, etc.
 
 
-# 3. How-To: Build, Install, Run, and Use
+# **3. How-To: Build, Install, Run, and Use**
 
 The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Windows, GNU/Linux, or macOS. Note: Currently only x86_64 platform is supported.
 
-## 3.1 Build
+## **3.1 Build**
 
 ### **Prerequisites:** 
 
@@ -96,7 +96,7 @@ If your connectivity to github is not stable, you can also try to clone from git
 
 If everything goes well, the binaries will be built to the `build` folder.
 
-## 3.2 Install
+## **3.2 Install**
 
 ### **Step 1. Run the installer (Administrator or root privilege is required):**
 
@@ -168,13 +168,13 @@ Several extra packages (around 500 MB) will be download and installed. This proc
 
 **NOTE:** This method is only valid for **sudoers**.
 
-## 3.3 Run
+## **3.3 Run**
 
 The `hpcopr` is the main CLI for you to run. Please see the description above.
 
 If you'd like to update/uninstall the HPC-NOW services, you will need to run the `installer` with `sudo`(for UNIX-like OS) or **as administrator**(for Windows).
 
-## 3.4 Basic Workflow
+## **3.4 Basic Workflow**
 
 In order to use and manage HPC in the cloud with HPC-NOW, please follow the workflow:
 
@@ -190,7 +190,7 @@ In order to use and manage HPC in the cloud with HPC-NOW, please follow the work
 - Destroy the cloud cluster (**`hpcopr destroy ...`**) -->
 - Remove the cloud credentials (optional, **`hpcopr remove ...`**)
 
-## 3.5 Commands
+## **3.5 Commands**
 
 The **`hpcopr.exe`** is a very powerful Command Line Interface (CLI) for you to use.
 
@@ -331,12 +331,14 @@ The **`hpcopr.exe`** is a very powerful Command Line Interface (CLI) for you to 
 
 `-u USERNAME`    A valid user name. Use 'root' for all users. Admin or Operator role is required for root.
 
-    --acmd store     List out the apps in store.
-    --acmd avail     List out all the installed apps.
-    --acmd check     Check whether an app is available.
-    --acmd install   Install an app to all users or a specified user.
-    --acmd build     Compile and build an app to all users or a specified user.
-    --acmd remove    Remove an app from the cluster.
+    --acmd store         List out the apps in store.
+    --acmd avail         List out all the installed apps.
+    --acmd check         Check whether an app is available.
+    --acmd install       Install an app to all users or a specified user.
+    --acmd build         Compile and build an app to all users or a specified user.
+    --acmd remove        Remove an app from the cluster.
+    --acmd update-config Update the locations for scripts and pacakge repository
+    --acmd show-config   Display the locations for scripts and pacakge repository
 
 ### **Cluster Job Management**
 
@@ -361,7 +363,7 @@ For more information, please refer to Docs/UserManual-EN.pdf.
 
 The most detailed help info can be found by the command `hpcopr help`. We are also considering writing a standard mannual for `hpcopr`. If you are interested, please let us know.
 
-# 4. Bugs and Communications
+# **4. Bugs and Communications**
 
 Please submit issues to this repo. Or
 
