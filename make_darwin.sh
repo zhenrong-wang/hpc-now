@@ -29,7 +29,7 @@ elif [ "$1" = "build" ]; then
 #    clang ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto-dwn.exe
     clang ./now-crypto/now-crypto-v2.c -Wall -lm -o ./build/now-crypto-dwn.exe
     chmod +x ./build/*
-    mv ./installer/libgfuncs.a ./build/
+    rm -rf ./installer/libgfuncs.a
 elif [ "$1" = "delete" ]; then
     echo "[ START: ] Deleting the binaries now ..."
     rm -rf ./build/*

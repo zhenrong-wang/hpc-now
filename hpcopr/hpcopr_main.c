@@ -1627,11 +1627,9 @@ int main(int argc, char* argv[]){
         }
         if(cmd_flag_check(argc,argv,"--all")!=0){
             run_flag=cluster_wakeup(workdir,crypto_keyfile,"minimal");
-            sprintf(string_temp,"%s default",final_command);
         }
         else{
             run_flag=cluster_wakeup(workdir,crypto_keyfile,"all");
-            sprintf(string_temp,"%s all",final_command);
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);

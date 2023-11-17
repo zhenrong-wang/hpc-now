@@ -30,7 +30,7 @@ elif [ "$1" = "build" ]; then
     gcc ./hpcmgr/hpcmgr.c -Wall -lm -o ./build/hpcmgr.exe
     gcc ./now-server/now-server.c -Wall -o ./build/now-server.exe
     chmod +x ./build/*
-    mv ./installer/libgfuncs.a ./build/
+    rm -rf ./installer/libgfuncs.a
 elif [ "$1" = "delete" ]; then
     echo -e "[ START: ] Deleting the binaries now ..."
     rm -rf ./build/*
