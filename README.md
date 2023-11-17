@@ -6,13 +6,13 @@
 - [**2. Core Components**](#2-core-components)
 - [**3. How-To: Build, Install, Run, and Use**](#3-how-to-build-install-run-and-use)
   - [**3.1 Build**](#31-build)
-    - [**Prerequisites:**](#prerequisites)
-    - [**Step 1. Clone this repository:**](#step-1-clone-this-repository)
-    - [**Step 2. Change the directory :**](#step-2-change-the-directory-)
-    - [**Step 3. Run the build script :**](#step-3-run-the-build-script-)
+    - [**Prerequisites**](#prerequisites)
+    - [**Step 1. Clone this repository**](#step-1-clone-this-repository)
+    - [**Step 2. Change the directory**](#step-2-change-the-directory)
+    - [**Step 3. Run the build script**](#step-3-run-the-build-script)
   - [**3.2 Install**](#32-install)
-    - [**Step 1. Run the installer (Administrator or root privilege is required):**](#step-1-run-the-installer-administrator-or-root-privilege-is-required)
-    - [**Step 2. Initialize the hpcopr.exe:**](#step-2-initialize-the-hpcoprexe)
+    - [**Step 1. Run the installer**](#step-1-run-the-installer)
+    - [**Step 2. Initialize the hpcopr.exe**](#step-2-initialize-the-hpcoprexe)
   - [**3.3 Run**](#33-run)
   - [**3.4 Basic Workflow**](#34-basic-workflow)
   - [**3.5 Commands**](#35-commands)
@@ -24,8 +24,8 @@
     - [**Cluster Operation**](#cluster-operation)
     - [**Cluster User Management**](#cluster-user-management)
     - [**Cluster Data Management**](#cluster-data-management)
-      - [**Bucket Operations:**](#bucket-operations)
-      - [**Direct Operations:**](#direct-operations)
+      - [**Bucket Operations**](#bucket-operations)
+      - [**Direct Operations**](#direct-operations)
     - [**Cluster App Management**](#cluster-app-management)
     - [**Cluster Job Management**](#cluster-job-management)
     - [**Others**](#others)
@@ -71,12 +71,12 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 ## **3.1 Build**
 
-### **Prerequisites:** 
+### **Prerequisites** 
 
 - `git` for code management
 - A standard C compiler. We recommend `gcc` (for GNU/Linux) | `clang` (for macOS) | `mingw` (for Microsoft Windows)
 
-### **Step 1. Clone this repository:** 
+### **Step 1. Clone this repository** 
 
 `git clone https://github.com/zhenrong-wang/hpc-now`
 
@@ -84,11 +84,11 @@ If your connectivity to github is not stable, you can also try to clone from git
 
 `git clone https://gitee.com/zhenrong-wang/hpc-now`
 
-### **Step 2. Change the directory :** 
+### **Step 2. Change the directory** 
 
 `cd hpc-now`
 
-### **Step 3. Run the build script :** 
+### **Step 3. Run the build script** 
 
 - For **Microsoft Windows**: `.\make_windows.bat build`
 - For **GNU/Linux Distro** : `./make_linux.sh build`
@@ -98,7 +98,9 @@ If everything goes well, the binaries will be built to the `build` folder.
 
 ## **3.2 Install**
 
-### **Step 1. Run the installer (Administrator or root privilege is required):**
+### **Step 1. Run the installer**
+
+*Administrator or root privilege is required.*
 
 - For **Microsoft Windows** : 
     
@@ -136,7 +138,7 @@ If everything goes well, the binaries will be built to the `build` folder.
 
 **IMPORTANT**: Please keep the window open for the next step.
 
-### **Step 2. Initialize the hpcopr.exe:**
+### **Step 2. Initialize the hpcopr.exe**
 
 The `hpcopr.exe` is designed to be executed by the dedicated system os user named `hpc-now`, which has been created by the installer in the last step.
 
@@ -287,7 +289,7 @@ The **`hpcopr.exe`** is a very powerful Command Line Interface (CLI) for you to 
     -d DEST_PATH      Destination path of binary operations. i.e. cp
     -t TARGET_PATH    Target path of unary operations. i.e. ls
 
-#### **Bucket Operations:** 
+#### **Bucket Operations** 
 
 *Transfer and manage data with the bucket.*
 
@@ -300,7 +302,7 @@ The **`hpcopr.exe`** is a very powerful Command Line Interface (CLI) for you to 
 
 **Example:** `hpcopr dataman --dcmd put -s ./foo -d /foo -u user1`
 
-#### **Direct Operations:** 
+#### **Direct Operations** 
 
 *Transfer and manage data in the cluster storage.*
 
