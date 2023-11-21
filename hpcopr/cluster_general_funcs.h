@@ -46,7 +46,14 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
 int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bucket_flag, char* root_flag);
 int check_pslock(char* workdir);
-int confirm_to_operate_cluster(char* current_cluster_name,int auto_confirm_flag_local);
+
+int confirm_to_operate_cluster(char* current_cluster_name, int batch_flag_local);
+int prompt_to_confirm(const char* prompt_string, const char* confirm_string, int batch_flag_local);
+int prompt_to_confirm_args(const char* prompt_string, const char* confirm_string, int batch_flag_local, int argc, char** argv, char* cmd_flag);
+int prompt_to_input(const char* prompt_string, char* reply_string, int batch_flag_local);
+int prompt_to_input_required_args(const char* prompt_string, char* reply_string, int batch_flag_local,int argc, char** argv, char* cmd_keyword);
+int prompt_to_input_optional_args(const char* prompt_confirm, const char* confirm_string, const char* prompt_string, char* reply_string, int batch_flag_local,int argc, char** argv, char* cmd_keyword);
+
 int check_down_nodes(char* workdir);
 int cluster_ssh(char* workdir, char* username, char* cluster_role);
 int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
@@ -61,15 +68,22 @@ void delete_decrypted_user_passwords(char* workdir);
 void encrypt_and_delete_user_passwords(char* workdir, char* crypto_keyfile);
 int sync_user_passwords(char* workdir, char* sshkey_dir);
 int sync_statefile(char* workdir, char* sshkey_dir);
+
+int user_password_complexity_check(char* password, const char* special_chars);
+int input_user_passwd(char* password_string, int batch_flag_local);
 int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag);
 int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir);
 int username_check(char* user_registry, char* username_input);
-int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* username, char* password, int interactive_flag_local);
+int username_check_add(char* user_registry, char* username_input);
+int username_check_select(char* user_registry, char* username_input);
+
+int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* username, char* password);
 int delete_user_from_registry(char* user_registry_file, char* username);
-int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char* username, int interactive_flag_local);
-int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, char* crypto_keyfile, char* option, int interactive_flag_local);
-int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, char* username, char* password, int interactive_flag_local);
-int usrmgr_prereq_check(char* workdir, char* ucmd);
+int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char* username);
+int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, char* crypto_keyfile, char* option);
+int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, char* username, char* password);
+
+int usrmgr_prereq_check(char* workdir, char* ucmd, int batch_mode_flag);
 void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_flag);
 
 void get_workdir(char* cluster_workdir, char* cluster_name);

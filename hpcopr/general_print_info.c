@@ -22,7 +22,7 @@
 void print_empty_cluster_info(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " It seems the cluster is empty. You can either:\n");
     printf("|          a) Run 'hpcopr init' to create a *default* cluster directly .\n");
-    printf("|          b) Run 'hpcopr init' with init options. i.e. --rg region_id .\n");
+    printf("|          b) Run 'hpcopr init' with init options. e.g. --rg region_id .\n");
     printf("|          c) Run 'hpcopr edit-conf' -> 'hpcopr init' (not recommended).\n");
 }
 
@@ -34,8 +34,8 @@ void print_cluster_init_done(void){
 }
 
 void print_help(char* cmd_name){
-    printf(GENERAL_BOLD "[ -INFO- ] Usage: hpcopr " RESET_DISPLAY GREY_LIGHT "-i" RESET_DISPLAY HIGH_GREEN_BOLD " Command " RESET_DISPLAY GENERAL_BOLD "CMD_FLAG ..." RESET_DISPLAY " [ " HIGH_CYAN_BOLD "KEY_WORD1" RESET_DISPLAY " KEY_STRING1 ] ...\n");
-    printf("|          A Global and special CMD_FLAG : " GENERAL_BOLD "-i" RESET_DISPLAY " Enter interactive mode\n");
+    printf(GENERAL_BOLD "[ -INFO- ] Usage: hpcopr " RESET_DISPLAY GREY_LIGHT "-b" RESET_DISPLAY HIGH_GREEN_BOLD " Command " RESET_DISPLAY GENERAL_BOLD "CMD_FLAG ..." RESET_DISPLAY " [ " HIGH_CYAN_BOLD "KEY_WORD1" RESET_DISPLAY " KEY_STRING1 ] ...\n");
+    printf("|          A Global and special CMD_FLAG : " GENERAL_BOLD "-b" RESET_DISPLAY " Enter the batch execution mode\n");
     printf("|          Global KEY_WORD and KEY_STRING: " GENERAL_BOLD "-c CLUSTER_NAME\n" RESET_DISPLAY "\n");
     if(strcmp(cmd_name,"all")==0){
         printf(GENERAL_BOLD "| Command Instructions\n" RESET_DISPLAY "\n");
@@ -113,10 +113,10 @@ void print_help(char* cmd_name){
     }
     if(strcmp(cmd_name,"monman")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "monman" RESET_DISPLAY "      :~ Get, filter, and extract cluster monitoring data.\n");
-        printf("|    -n     NODE_LIST        ~ Specify node names connected by :, i.e. " HIGH_CYAN_BOLD "compute1:compute2:master" RESET_DISPLAY "\n");
-        printf("|    -s     START_TIMESTAMP  ~ Specify a " HIGH_CYAN_BOLD "strictly-formatted" RESET_DISPLAY " start timestamp. i.e. " HIGH_CYAN_BOLD "2023-1-1@12:10" RESET_DISPLAY " \n");
+        printf("|    -n     NODE_LIST        ~ Specify node names connected by :, e.g. " HIGH_CYAN_BOLD "compute1:compute2:master" RESET_DISPLAY "\n");
+        printf("|    -s     START_TIMESTAMP  ~ Specify a " HIGH_CYAN_BOLD "strictly-formatted" RESET_DISPLAY " start timestamp. e.g. " HIGH_CYAN_BOLD "2023-1-1@12:10" RESET_DISPLAY " \n");
         printf("|                            ~ " WARN_YELLO_BOLD "*MUST* use a "HIGH_CYAN_BOLD "@" RESET_DISPLAY " to split the date and time!" RESET_DISPLAY "\n");
-        printf("|    -e     END_TIMESTAMP    ~ Specify a " HIGH_CYAN_BOLD "strictly-formatted" RESET_DISPLAY " end timestamp. i.e. " HIGH_CYAN_BOLD "2023-1-1@12:10" RESET_DISPLAY "\n");
+        printf("|    -e     END_TIMESTAMP    ~ Specify a " HIGH_CYAN_BOLD "strictly-formatted" RESET_DISPLAY " end timestamp. e.g. " HIGH_CYAN_BOLD "2023-1-1@12:10" RESET_DISPLAY "\n");
         printf("|   --level INTERVAL_MINUTES ~ Time interval by minutes.\n");
         printf("|    -d     DEST_PATH        ~ Export the data to a destination folder or file.\n");
     }
@@ -447,9 +447,9 @@ void print_usrmgr_info(void){
 void print_datamgr_info(void){
     printf("| Usage:~ hpcopr " HIGH_GREEN_BOLD "dataman" RESET_DISPLAY " CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...\n");
     printf("| General Flags    :~ -r, -rf, --recursive, --force, -f.\n");
-    printf("|    -s SOURCE_PATH  ~ Source path of the binary operations. i.e. cp\n");
-    printf("|    -d DEST_PATH    ~ Destination path of binary operations. i.e. cp\n");
-    printf("|    -t TARGET_PATH  ~ Target path of unary operations. i.e. ls\n");
+    printf("|    -s SOURCE_PATH  ~ Source path of the binary operations. e.g. cp\n");
+    printf("|    -d DEST_PATH    ~ Destination path of binary operations. e.g. cp\n");
+    printf("|    -t TARGET_PATH  ~ Target path of unary operations. e.g. ls\n");
     printf("| Bucket Operations:~ Transfer and manage data with the bucket.\n");
     printf("|   --dcmd put       ~ Upload a local file or folder to the bucket path.\n");
     printf("|   --dcmd get       ~ Download a bucket object(file or folder) to the local path.\n");
@@ -524,28 +524,27 @@ void print_jobmgr_info(void){
 void list_all_commands(void){
     printf(GENERAL_BOLD " 0.  GET-STARTED:" RESET_DISPLAY HIGH_GREEN_BOLD " envcheck" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 1.  Multi-Cluster Management: " RESET_DISPLAY "\n");
-    printf(HIGH_GREEN_BOLD "        new-cluster  ls-clusters \n");
-    printf("        switch  glance  refresh \n");
-    printf("        export  import  remove  exit-current " RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD "     new-cluster  ls-clusters \n");
+    printf("     switch  glance  refresh \n");
+    printf("     export  import  remove  exit-current " RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 2.  Global Management: " RESET_DISPLAY "\n");
-    printf(HIGH_GREEN_BOLD "        help  usage  monman  history  syserr \n");
-    printf("        ssh  rdp \n");
-    printf("        configloc  showloc  showmd5  resetloc " RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD "     help  usage  monman  history  syserr \n");
+    printf("     ssh  rdp \n");
+    printf("     configloc  showloc  showmd5  resetloc " RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 3.  Cluster Initialization: " RESET_DISPLAY "\n");
-    printf(HIGH_GREEN_BOLD "        cloud-info  rotate-key  get-conf  edit-conf \n");
-    printf("        rm-conf  init  rebuild " RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD "     cloud-info  rotate-key  get-conf  edit-conf \n");
+    printf("     rm-conf  init  rebuild " RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 4.  Cluster Management: " RESET_DISPLAY "\n");
-    printf(HIGH_GREEN_BOLD "        vault  graph  viewlog " RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD "     vault  graph  viewlog " RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 5.  Cluster Operation: " RESET_DISPLAY "\n");
-    printf(HIGH_GREEN_BOLD "        delc     addc     shutdownc  turnonc \n");
-    printf("        reconfc  reconfm  nfsup \n");
-    printf("        sleep    wakeup   destroy\n");
-    printf("        payment" RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD "     delc     addc     shutdownc  turnonc \n");
+    printf("     reconfc  reconfm  nfsup \n");
+    printf("     sleep    wakeup   destroy\n");
+    printf("     payment" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 6.  User Mgmt: " RESET_DISPLAY HIGH_GREEN_BOLD "userman" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 7.  Data Mgmt: " RESET_DISPLAY HIGH_GREEN_BOLD "dataman" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 8.  App Mgmt : " RESET_DISPLAY HIGH_GREEN_BOLD "appman" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 9.  Job Mgmt : " RESET_DISPLAY HIGH_GREEN_BOLD"jobman" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 10. Others: " RESET_DISPLAY "\n");
-    printf(HIGH_GREEN_BOLD"        about  version  license  repair " RESET_DISPLAY "\n");
-    printf("\n");
+    printf(HIGH_GREEN_BOLD"     about  version  license  repair " RESET_DISPLAY "\n");
 }

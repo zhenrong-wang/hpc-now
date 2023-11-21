@@ -195,7 +195,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
         printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster %s is not running. The data is not updated.\n" RESET_DISPLAY,cluster_name);
     }
     else if(run_flag==1||run_flag==-5){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the monitor data of cluster " WARN_YELLO_BOLD "%s" RESET_DISPLAY "\n", cluster_name);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the monitor data of cluster " WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD" ." RESET_DISPLAY "\n", cluster_name);
         return -5;
     }
     sprintf(mon_data_file_temp,"%s%smon_data%smon_data_temp.csv",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
@@ -259,7 +259,6 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
     }
     datetime_to_num(end_date,end_time,&time_tm2);
     time2=mktime(&time_tm2);
-//    printf("%ld ======  %ld\n",time1,time2);
 
     if(strlen(node_name_list)==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] No node specified. Will extract the data of master and all the compute nodes." RESET_DISPLAY "\n");

@@ -53,8 +53,8 @@ extern char md5_azad_tf_zip_var[64];
 extern char md5_gcp_tf_var[64];
 extern char md5_gcp_tf_zip_var[64];
 
-extern int interactive_flag;
-extern int auto_confirm_flag;
+extern int batch_flag;
+
 extern char final_command[512];
 
 extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
@@ -572,7 +572,6 @@ int check_and_install_prerequisitions(int repair_flag){
     char* usage_logfile=USAGE_LOG_FILE;
     char* operation_logfile=OPERATION_LOG_FILE;
     char* sshkey_dir=SSHKEY_DIR;
-    char doubleconfirm[64]="";
     char* tf_exec=TERRAFORM_EXEC;
     char* crypto_exec=NOW_CRYPTO_EXEC;
 
@@ -618,7 +617,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 
     sprintf(filename_temp,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)||repair_flag==1||repair_flag==2){
+    if(file_exist_or_not(filename_temp)!=0||repair_flag==1||repair_flag==2){
         printf("|        . Checking whether Google Cloud Platform (GCP) is accessible ...\n");
         check_internet_google();
     }
@@ -668,38 +667,28 @@ int check_and_install_prerequisitions(int repair_flag){
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Location configuration format incorrect.\n");
         }
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to use the default settings? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted\n");
-        printf("|          to confirm. \n");
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-        fflush(stdin);
-        scanf("%s",doubleconfirm);
-        getchar();
-        if(strcmp(doubleconfirm,CONFIRM_STRING)==0){
-            if(reset_locations()!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now." RESET_DISPLAY "\n");
-                return -3;
-            }
-            get_locations();
-        }
-        else{
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will not use the default settings. Would you like to configure now?\n");
-            printf("|          Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm.\n");
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-            fflush(stdin);
-            scanf("%s",doubleconfirm);
-            getchar();
-            if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
+        if(batch_flag!=0&&prompt_to_confirm("Use the default locations?",CONFIRM_STRING,batch_flag)==1){
+            if(prompt_to_confirm("Configure the locations now?",CONFIRM_STRING,1)==1){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Prerequisites check abort." RESET_DISPLAY "\n");
                 return 1;
             }
-            else{
-                if(configure_locations(auto_confirm_flag)!=0){
-                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure the locations. Exit now." RESET_DISPLAY "\n");
-                    return 5;
-                }
+            if(configure_locations(0)!=0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure the locations. Exit now." RESET_DISPLAY "\n");
+                return 5;
             }
         }
+        else{
+            if(reset_locations()!=0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Fatal error (FILE I/O). Please submit issues to the source repository." RESET_DISPLAY "\n");
+                return 5;
+            }
+        }
+        if(get_locations()!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Fatal error. Please submit issues to the source repository." RESET_DISPLAY "\n");
+            return 5;
+        }
     }
+
     if(repair_flag==1){
         printf( RESET_DISPLAY "|        v Location configuration has been repaired.\n");
         printf("|        . Checking and repairing the versions and md5sums ...\n");
@@ -1500,32 +1489,39 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
     char cluster_name_source[16]="";
 
     if(argc<2){
-        return -1;
+        list_all_commands();
+        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a " HIGH_GREEN_BOLD "command" RESET_DISPLAY " : " HIGH_GREEN_BOLD);
+        fflush(stdin);
+        scanf("%s",final_command);
+        getchar();
+        printf(RESET_DISPLAY);
     }
-    if(strcmp(argv[1],"-i")==0){
-        interactive_flag=0;
-        if(argc==2){
-            list_all_commands();
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Choose a " HIGH_GREEN_BOLD "command" RESET_DISPLAY ": " HIGH_GREEN_BOLD);
-            fflush(stdin);
-            scanf("%s",final_command);
-            getchar();
-            printf(RESET_DISPLAY);
+    else if(argc==2){
+        if(strcmp(argv[1],"-b")==0){
+            strcpy(final_command,"");
+            return -1;
         }
         else{
-            strncpy(final_command,argv[2],512);
+            strncpy(final_command,argv[1],512);
         }
     }
     else{
-        interactive_flag=cmd_flag_check(argc,argv,"-i");
-        strncpy(final_command,argv[1],512);
+        if(strcmp(argv[1],"-b")==0){
+            batch_flag=0;
+            strncpy(final_command,argv[2],512);
+        }
+        else{
+            if(cmd_flag_check(argc,argv,"-b")==0){
+                batch_flag=0;
+            }
+            strncpy(final_command,argv[1],512);
+        }
     }
 
     char role_flag[16]="";
     char cluster_role_ext[32]="";
     char cu_flag[16]="";
 
-    auto_confirm_flag=cmd_flag_check(argc,argv,"--confirm");
     command_flag=command_name_check(final_command,command_name_prompt,role_flag,cu_flag);
     if(command_flag!=0){
         return command_flag;
@@ -1544,9 +1540,9 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
             }
         }
         if(cluster_name_check(temp_cluster_name)!=-127){
-            if(interactive_flag==0){
+            if(batch_flag!=0){
                 if(strlen(temp_cluster_name)==0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " No specified or switched cluster. Please choose one from the list:\n");
+                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " No specified or switched cluster. Please select one from the list:\n");
                 }
                 else{
                     printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " The specified cluster name " WARN_YELLO_BOLD "%s" RESET_DISPLAY " is invalid. Please choose one from the list:\n",temp_cluster_name);
@@ -1563,13 +1559,13 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
                 strcpy(cluster_name_source,"input");
             }
             else{
+                list_all_cluster_names(1);
                 if(strlen(temp_cluster_name)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,temp_cluster_name);
                 }
                 else{
-                    printf(FATAL_RED_BOLD "[ FATAL: ] No cluster specified or switched. Please use " WARN_YELLO_BOLD "-c" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "switch" FATAL_RED_BOLD " to one." RESET_DISPLAY "\n");
+                    printf(FATAL_RED_BOLD "[ FATAL: ] No cluster specified or switched. Use " WARN_YELLO_BOLD "-c" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "switch" FATAL_RED_BOLD " to one." RESET_DISPLAY "\n");
                 }
-                list_all_cluster_names(1);
                 return -3;
             }
         }
@@ -1594,7 +1590,7 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
             return -7;
         }
         if(cmd_keyword_check(argc,argv,"-u",string_temp)!=0){
-            if(interactive_flag==0){
+            if(batch_flag!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid user name from the list below. \n");
                 hpc_user_list(workdir,CRYPTO_KEY_FILE,0);
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);

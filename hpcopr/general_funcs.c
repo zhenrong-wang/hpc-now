@@ -26,7 +26,7 @@
 #include "general_funcs.h"
 
 char command_flags[CMD_FLAG_NUM][16]={
-    "-i", // interactive
+    "-b", // batch mode, skip every confirmation
     "-r", // recursive
     "-rf", // recursive + force
     "-f", // force
@@ -53,8 +53,7 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--month",
     "--gcp",
     "--rdp",
-    "--copypass",
-    "--confirm"
+    "--copypass"
 };
 
 char command_keywords[CMD_KWDS_NUM][32]={
@@ -698,14 +697,13 @@ int folder_exist_or_not(char* foldername){
     }
 }
 
-int password_complexity_check(char* password){
+int password_complexity_check(char* password, const char* special_chars){
     int i,length=strlen(password);
     int uppercase_flag=0;
     int lowercase_flag=0;
     int number_flag=0;
     int special_ch_flag=0;
-    char special_ch[10]="~@&(){}[]=";
-    int j;
+    char ch_temp[2]="";
 
     for(i=0;i<length;i++){
         if(*(password+i)=='A'||*(password+i)=='Z'){
@@ -727,12 +725,14 @@ int password_complexity_check(char* password){
             number_flag=1;
         }
         else{
-            for(j=0;j<10;j++){
-                if(*(password+i)!=*(special_ch+j)){
-                    return 1;
-                }
+            *(ch_temp)=*(password+i);
+            *(ch_temp+1)='\0';
+            if(contain_or_not(special_chars,ch_temp)==0){
+                special_ch_flag=1;
             }
-            special_ch_flag=1;
+            else{
+                return 1;
+            }
         }
     }
     if((uppercase_flag+lowercase_flag+number_flag+special_ch_flag)<3){
@@ -759,7 +759,7 @@ int generate_random_passwd(char* password){
             usleep(5000);
         }
 //        printf(":::   %s \n",password_temp);
-        if(password_complexity_check(password_temp)==0){
+        if(password_complexity_check(password_temp,"~@&(){}[]=")==0){
 //            printf(":::   %s \n",password_temp);
             strcpy(password,password_temp);
             return 0;

@@ -25,7 +25,7 @@ int file_exist_or_not(char* filename);
 int file_empty_or_not(char* filename);
 int folder_exist_or_not(char* foldername);
 int generate_random_passwd(char* password);
-int password_complexity_check(char* password);
+int password_complexity_check(char* password, const char* special_chars);
 int generate_random_db_passwd(char* password);
 int generate_random_string(char* random_string);
 char* getpass_win(char* prompt);

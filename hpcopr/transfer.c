@@ -107,7 +107,7 @@ int user_list_check(char* cluster_name, char* user_list_read, char* user_list_fi
     return valid_user_num;
 }
 
-int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* crypto_keyfile, char* password, char* export_target_file, int interactive_flag_local){
+int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* crypto_keyfile, char* password, char* export_target_file, int batch_flag_local){
     char workdir[DIR_LENGTH]="";
     char current_stackdir[DIR_LENGTH]="";
     char current_vaultdir[DIR_LENGTH]="";
@@ -155,8 +155,8 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
 
     get_workdir(workdir,cluster_name);
     if(strlen(user_list)==0){
-        if(interactive_flag_local!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] User list specified. Use -i (interactive) or --ul USER_LIST." RESET_DISPLAY "\n");
+        if(batch_flag_local==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] User list specified. Use --ul USER_LIST." RESET_DISPLAY "\n");
             return 17;
         }
         else{
@@ -193,8 +193,8 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         printf(GENERAL_BOLD "|          %s\n" RESET_DISPLAY,real_user_list);
     }
     if(strlen(password)==0){
-        if(interactive_flag_local!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Password not specified. Use -i (interactive) or -p PASSWORD ." RESET_DISPLAY "\n");
+        if(batch_flag_local==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Password not specified. Use -p PASSWORD ." RESET_DISPLAY "\n");
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a *complex* password to encrypt and export.\n");
@@ -207,8 +207,8 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     password_hash(real_password,md5sum_trans);
     local_path_parser(export_target_file,filename_temp);
     if(strlen(filename_temp)==0){
-        if(interactive_flag_local!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Export path not specified. Use -i (interactive) or -d EXPORT_DEST." RESET_DISPLAY "\n");
+        if(batch_flag_local==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Export path not specified. Use -d EXPORT_DEST." RESET_DISPLAY "\n");
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a path (folder or file) to export. i.e. " HIGH_CYAN_BOLD "/home/hpc-now/" RESET_DISPLAY "\n");
@@ -405,7 +405,7 @@ next_user:
     }
 }
 
-int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int interactive_flag_local, int auto_confirm_flag_local){
+int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int batch_flag_local){
     char real_zipfile[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp_2[FILENAME_LENGTH]="";
@@ -430,8 +430,8 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int int
 
     local_path_parser(zip_file,filename_temp);
     if(strlen(filename_temp)==0||file_empty_or_not(filename_temp)<1){
-        if(interactive_flag_local!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Import file not specified or invalid. Use -i (interactive) or -s SOURCE_PATH ." RESET_DISPLAY "\n");
+        if(batch_flag_local==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Import file not specified or invalid. Use -s SOURCE_PATH ." RESET_DISPLAY "\n");
             return 17;
         }
         printf("[ -INFO- ] Please input the path of the now-cluster file. i.e. ~/import.now, d:\\import.now\n");
@@ -453,8 +453,8 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int int
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the specified now-cluster file: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",real_zipfile);
     if(strlen(password)==0){
-        if(interactive_flag_local!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Password not specified. Use -i (interactive) or -p PASSWORD ." RESET_DISPLAY "\n");
+        if(batch_flag_local==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Password not specified. Use -p PASSWORD ." RESET_DISPLAY "\n");
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the password to decrypt and import.\n");
@@ -490,8 +490,8 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int int
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " has already been imported to this environment.\n",cluster_name_buffer);
             printf("|          Would you like to replace it? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continue.\n");
-            if(auto_confirm_flag_local==0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed by --confirm ." RESET_DISPLAY "\n");
+            if(batch_flag_local==0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed." RESET_DISPLAY "\n");
                 update_flag=1;
             }
             else{

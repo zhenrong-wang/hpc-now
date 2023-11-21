@@ -179,7 +179,7 @@ fi
 /bin/cp -r ${scripts_path}* /usr/hpc-now/
 chmod +x /usr/hpc-now/*.sh
 if [ -f /root/hostfile ]; then
-  mv /usr/hpc-now/hpcmgr.sh /usr/hpc-now/.hpcmgr_main.sh
+  wget ${url_utils}hpcmgr.sh -O /usr/hpc-now/.hpcmgr_main.sh
 fi
 
 yum -y install gcc bc openssl openssl-devel unzip curl make perl sshpass gtk2 gtk2-devel

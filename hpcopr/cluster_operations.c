@@ -27,7 +27,6 @@
 
 extern char url_code_root_var[LOCATION_LENGTH];
 extern int code_loc_flag_var;
-extern int auto_confirm_flag;
 
 int switch_to_cluster(char* target_cluster_name){
     char* current_cluster=CURRENT_CLUSTER_INDICATOR;
@@ -296,7 +295,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
     }
 
 destroy_cluster:
-    if(cluster_destroy(cluster_workdir,crypto_keyfile,"force")!=0){
+    if(cluster_destroy(cluster_workdir,crypto_keyfile,"force",0)!=0){
         delete_decrypted_files(cluster_workdir,crypto_keyfile);
         return 7;
     }
@@ -329,7 +328,7 @@ remove_files:
     return 0;
 }
 
-int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* az_subscription, char* az_tenant, char* echo_flag, char* gcp_flag, int interactive_flag_local){
+int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* az_subscription, char* az_tenant, char* echo_flag, char* gcp_flag, int batch_flag_local){
     char cmdline[CMDLINE_LENGTH]="";
     char input_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -349,6 +348,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     char* now_crypto_exec=NOW_CRYPTO_EXEC;
     int ak_length,sk_length;
     char* cluster_registry=ALL_CLUSTER_REGISTRY;
+    int run_flag;
+
     if(file_exist_or_not(crypto_keyfile)!=0){
         return -1;
     }
@@ -366,8 +367,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         }
     }
     if(strlen(cluster_name)==0){
-        if(interactive_flag_local!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster name not specified. Use -i (interactive) or --cname CLUSTER_NAME ." RESET_DISPLAY "\n");
+        if(batch_flag_local==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster name not specified. Use --cname CLUSTER_NAME ." RESET_DISPLAY "\n");
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the cluster name (A-Z a-z 0-9 -, %d<=length<=%d):\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
@@ -403,8 +404,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     
     if(strcmp(gcp_flag,"gcp")==0){
         if(strlen(cloud_sk)==0){
-            if(interactive_flag_local!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Key file not specified. Use -i (interactive) or --sk KEY_FILE_PATH ." RESET_DISPLAY "\n");
+            if(batch_flag_local==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Key file not specified. Use --sk KEY_FILE_PATH ." RESET_DISPLAY "\n");
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " The JSON-format key file *ABSOLUTE* path: ");
@@ -432,13 +433,27 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         create_and_get_vaultdir(new_workdir,new_vaultdir);
         get_crypto_key(crypto_keyfile,md5sum);
         sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,secret_key,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. Abort." RESET_DISPLAY "\n");
+            sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,secret_key,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            return 5;
+        }
         sprintf(filename_temp,"%s%scloud_flag.flg",new_vaultdir,PATH_SLASH);
         file_p=fopen(filename_temp,"w+");
         if(file_p!=NULL){
             fprintf(file_p,"CLOUD_G\n");
             fclose(file_p);
         }
+        if(strcmp(echo_flag,"echo")==0){
+            printf(GREY_LIGHT);
+            sprintf(cmdline,"%s %s",CAT_FILE_CMD,secret_key);
+            system(cmdline);
+            printf(RESET_DISPLAY);
+        }
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,secret_key,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
         add_to_cluster_registry(input_cluster_name,"");
         switch_to_cluster(input_cluster_name);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The key file has been encrypted and stored locally. We recommend you\n");
@@ -466,8 +481,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return -1;
     }
     if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
-        if(interactive_flag_local!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] AK and/or SK not specified. Use -i (interactive) or --ak AK --sk SK" RESET_DISPLAY "\n");
+        if(batch_flag_local==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] AK and/or SK not specified. Use --ak AK --sk SK" RESET_DISPLAY "\n");
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your secrets key pair:\n");
@@ -522,8 +537,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             return -1;
         }
         if(strlen(az_subscription)!=36){
-            if(interactive_flag_local!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Subscription ID no specified. Use -i (interactive) or --az-sid ID ." RESET_DISPLAY "\n");
+            if(batch_flag_local==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Subscription ID no specified. Use --az-sid ID ." RESET_DISPLAY "\n");
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Subscription id: ");
@@ -535,11 +550,11 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             strcpy(az_subscription_id,az_subscription);
         }
         if(strlen(az_tenant)!=36){
-            if(interactive_flag_local!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Tenant ID no specified. Use -i (interactive) or --az-tid ID ." RESET_DISPLAY "\n");
+            if(batch_flag_local==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Tenant ID no specified. Use --az-tid ID ." RESET_DISPLAY "\n");
                 return 17;
             }
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Tenant id      : ");
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Azure Tenant id: ");
             fflush(stdin);
             scanf("%s",az_tenant_id);
             getchar();
@@ -589,7 +604,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     return 0;
 }
 
-int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile, char* echo_flag, int interactive_flag_local, int auto_confirm_flag_local){
+int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile, char* echo_flag, int batch_flag_local){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
@@ -601,7 +616,6 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[32]="";
-    char doubleconfirm[32]="";
     char access_key_prev[AKSK_LENGTH]="";
     char secret_key_prev[AKSK_LENGTH]="";
     char az_subscription_id[AKSK_LENGTH]="";
@@ -611,42 +625,27 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     FILE* file_p=NULL;
     int run_flag;
     
-    printf(GENERAL_BOLD "\n");
-    printf("|*                                C A U T I O N !                                  \n");
-    printf("|*                                                                                 \n");
-    printf("|*   YOU ARE ROTATING THE CLOUD KEYPAIR, WHICH MAY DAMAGE THIS CLUSTER.            \n");
-    printf("|*   BEFORE PROCEEDING, PLEASE MAKE SURE:                                          \n");
-    printf("|*                                                                                 \n");
-    printf("|*   1. If the current cluster is NOT empty, your new key pair *MUST* comes from   \n");
-    printf("|*      the *SAME* cloud vendor AND account. This is *EXTREMELY IMPORTANT* !!!     \n");
-    printf("|*   2. If the current cluster is empty, your new key pair can come from another   \n");
-    printf("|*      account of the *SAME* vendor.                                              \n");
-    printf("|*   3. Your new key pair is valid and able to manage cloud resources.             \n");
-    printf("|*      This is * !!! VERY IMPORTANT !!! *                                         \n");
-    printf("|*                                                                                 \n");
-    printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
-    printf("|*                                                                                 \n");
-    printf("|*                                C A U T I O N !                                  \n");
-    if(auto_confirm_flag_local==0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed by --confirm ." RESET_DISPLAY "\n");
-    }
-    else{
-        printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:" RESET_DISPLAY "\n");
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-        scanf("%s",doubleconfirm);
-        getchar();
-        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
-            printf("|          Nothing changed.\n");
-            return 1;
-        }
+    printf(GENERAL_BOLD "                              C A U T I O N !\n\n");
+    printf("|* YOU ARE ROTATING THE CLOUD KEYPAIR, WHICH MAY DAMAGE THIS CLUSTER.\n");
+    printf("|* BEFORE PROCEEDING, PLEASE MAKE SURE:\n");
+    printf("|* 1. If the current cluster is NOT empty, your new key pair *MUST* comes from\n");
+    printf("|*    the *SAME* cloud vendor AND account. This is *EXTREMELY IMPORTANT* !!!\n");
+    printf("|* 2. If the current cluster is empty, your new key pair can come from another\n");
+    printf("|*    account of the *SAME* vendor.\n");
+    printf("|* 3. Your new key pair is valid and able to manage cloud resources.\n");
+    printf("|*    This is * !!! VERY IMPORTANT !!! *\n\n");
+    printf("|*                     THIS OPERATION IS UNRECOVERABLE!\n\n");
+    printf("                              C A U T I O N !\n");
+    
+    if(prompt_to_confirm("ARE YOU SURE ?",CONFIRM_STRING,batch_flag_local)==1){
+        return 1;
     }
     get_cloud_flag(workdir,cloud_flag_prev);
     create_and_get_vaultdir(workdir,vaultdir);
     if(strcmp(cloud_flag_prev,"CLOUD_G")==0){
         if(strlen(cloud_sk)==0){
-            if(interactive_flag_local!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Key file not specified. Use -i (interactive) or --sk KEY_FILE_PATH ." RESET_DISPLAY "\n");
+            if(batch_flag_local==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Key file not specified. Use --sk KEY_FILE_PATH ." RESET_DISPLAY "\n");
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " The JSON-format key file *ABSOLUTE* path: ");
@@ -673,8 +672,18 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         run_flag=system(cmdline);
         if(run_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. The key keeps unchanged." RESET_DISPLAY "\n");
+            printf(cmdline,"%s %s %s",DELETE_FILE_CMD,secret_key,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
             return 5;
         }
+        if(strcmp(echo_flag,"echo")==0){
+            printf(GREY_LIGHT);
+            sprintf(cmdline,"%s %s",CAT_FILE_CMD,secret_key);
+            system(cmdline);
+            printf(RESET_DISPLAY);
+        }
+        printf(cmdline,"%s %s %s",DELETE_FILE_CMD,secret_key,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally.\n");
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Exit now.\n");
         return 0;
@@ -703,8 +712,8 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     }
     get_ak_sk(filename_temp2,crypto_keyfile,access_key_prev,secret_key_prev,cloud_flag_prev);
     if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
-        if(interactive_flag_local!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] AK and/or SK not specified. Use -i (interactive) or --ak AK --sk SK" RESET_DISPLAY "\n");
+        if(batch_flag_local==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] AK and/or SK not specified. Use --ak AK --sk SK" RESET_DISPLAY "\n");
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your new secrets key pair:\n");
@@ -837,8 +846,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     return 0;
 }
 
-int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
-    char doubleconfirm[32]="";
+int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int batch_flag_local){
     char cmdline[LINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char string_temp[LINE_LENGTH_SHORT];
@@ -855,24 +863,15 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
         return -3;
     }
-    printf(GENERAL_BOLD "|*                                C A U T I O N !                                  \n");
-    printf("|*                                                                                 \n");
-    printf("|*   YOU ARE DELETING THE WHOLE CLUSTER - INCLUDING ALL THE NODES AND *DATA*!      \n");
-    printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
-    printf("|*                                                                                 \n");
-    printf("|*                                C A U T I O N !                                  \n");
+    printf(GENERAL_BOLD "                              C A U T I O N !\n\n");
+    printf("|*   YOU ARE DELETING THE WHOLE CLUSTER - INCLUDING ALL THE NODES AND *DATA*!\n");
+    printf("|*                       THIS OPERATION IS UNRECOVERABLE!\n\n");
+    printf("                              C A U T I O N !\n");
     if(strcmp(force_flag,"force")==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Destroying the current cluster *WITHOUT* confirmation." RESET_DISPLAY "\n");
     }
     else{
-        printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to double confirm this operation:" RESET_DISPLAY "\n");
-        fflush(stdin);
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-        scanf("%s",doubleconfirm);
-        getchar();
-        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
-            printf("|          Nothing changed.\n");
+        if(prompt_to_confirm("ARE YOU SURE ?",CONFIRM_STRING,batch_flag_local)==1){
             return 1;
         }
     }
@@ -980,7 +979,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int au
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified a number larger than the quantity of compute nodes.\n");
             printf("           Do you mean deleting *ALL* the compute nodes?\n");
             if(auto_confirm_flag_local==0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed by --confirm ." RESET_DISPLAY "\n");
+                printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed." RESET_DISPLAY "\n");
             }
             else{
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:  ");
@@ -1191,7 +1190,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified a number larger than the quantity of compute nodes.\n");
             printf("           Do you mean shutting down *ALL* the compute nodes?\n");
             if(auto_confirm_flag_local==0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed by --confirm ." RESET_DISPLAY "\n");
+                printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed." RESET_DISPLAY "\n");
             }
             else{
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:  ");
@@ -1331,7 +1330,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified a number larger than the number of currently down nodes.\n");
             printf("           Do you mean turning on *ALL* the compute nodes?\n");
             if(auto_confirm_flag_local==0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed by --confirm ." RESET_DISPLAY "\n");
+                printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed." RESET_DISPLAY "\n");
             }
             else{
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:  ");
@@ -2222,7 +2221,7 @@ int remove_conf(char* cluster_name){
     }
 }
 
-int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int auto_confirm_flag_local){
+int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_flag_local){
     if(strcmp(option,"mc")!=0&&strcmp(option,"mcdb")!=0&&strcmp(option,"all")!=0){
         return -5;
     }
@@ -2239,7 +2238,6 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int auto_co
     char* sshkey_folder=SSHKEY_DIR;
     char cloud_flag[16]="";
     char node_name[16]="";
-    char doubleconfirm[64]="";
     char cluster_name[64]="";
     char username_temp[64]="";
     char user_status_temp[32]="";
@@ -2248,29 +2246,17 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int auto_co
     int i;
     int compute_node_num=0;
     printf(GENERAL_BOLD "\n");
-    printf("|*                                C A U T I O N !                            \n");
-    printf("|*                                                                           \n");
-    printf("|*   YOU ARE REBUILDING THE CLUSTER NODES! YOUR CRITICAL NODES WILL BE       \n");
-    printf("|*   REMOVED AND RECREATED ! THIS OPERATION MAY FAIL DUE TO VARIOUS REASONS. \n");
-    printf("|*   IF ANYTHING GOES WRONG, YOU WILL HAVE TO DESTROY THE WHOLE CLUSTER      \n");
-    printf("|*   AND RE-INIT ! Usually we do not recommend users to do this operation.   \n");
-    printf("|*                                                                           \n");
-    printf("|*                                C A U T I O N !                            \n");
+    printf("                              C A U T I O N !\n\n");
+    printf("|* YOU ARE REBUILDING THE CLUSTER NODES! YOUR CRITICAL NODES WILL BE\n");
+    printf("|* REMOVED AND RECREATED ! THIS OPERATION MAY FAIL DUE TO VARIOUS REASONS.\n");
+    printf("|* IF ANYTHING GOES WRONG, YOU WILL HAVE TO DESTROY THE WHOLE CLUSTER\n");
+    printf("|* AND RE-INIT ! Usually we do not recommend users to do this operation.\n\n");
+    printf("                              C A U T I O N !\n");
 
-    if(auto_confirm_flag_local==0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed by --confirm ." RESET_DISPLAY "\n");
+    if(prompt_to_confirm("ARE YOU SURE ?",CONFIRM_STRING,batch_flag_local)==1){
+        return 1;
     }
-    else{
-        printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n" RESET_DISPLAY "\n");
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-        scanf("%s",doubleconfirm);
-        getchar();
-        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
-            printf("|          Nothing changed.\n");
-            return 1;
-        }
-    }
+
     if(strcmp(option,"mc")==0){
         printf("|          * Will rebuild the " WARN_YELLO_BOLD "master" RESET_DISPLAY " and " WARN_YELLO_BOLD "compute" RESET_DISPLAY " nodes.\n");
     }

@@ -24,7 +24,7 @@
 #include "appman.h"
 #include "jobman.h"
 
-int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* sshkey_dir, char* crypto_keyfile, jobinfo* job_info, int interactive_flag_local){
+int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* sshkey_dir, char* crypto_keyfile, jobinfo* job_info, int batch_flag_local){
     char string_temp[128]="";
     char node_num_string[128]="";
     char node_cores_string[128]="";
@@ -60,7 +60,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         return -3;
     }
     if(cmd_keyword_check(argc,argv,"--app",app_name)!=0){
-        if(interactive_flag_local!=0){
+        if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] App name not specified. Use -i (interactive) or --app APP_NAME ." RESET_DISPLAY "\n");
             return 17;
         }
@@ -79,7 +79,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         return -5;
     }
     if(cmd_keyword_check(argc,argv,"--nn",node_num_string)!=0){
-        if(interactive_flag_local!=0){
+        if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Node num not specified. Use -i (interactive) or --nn NODE_NUM ." RESET_DISPLAY "\n");
             return 17;
         }
@@ -95,7 +95,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
 
     if(cmd_keyword_check(argc,argv,"--tn",node_cores_string)!=0){
-        if(interactive_flag_local!=0){
+        if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Threads-per-node not specified. Use -i (interactive) or --tn THREADS_PER_NODE ." RESET_DISPLAY "\n");
             return 17;
         }
@@ -111,7 +111,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
 
     if(cmd_keyword_check(argc,argv,"--jname",job_name)!=0){
-        if(interactive_flag_local!=0){
+        if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Job name not specified. Use -i (interactive) or --jname JOB_NAME ." RESET_DISPLAY "\n");
             return 17;
         }
@@ -130,7 +130,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
 
     if(cmd_keyword_check(argc,argv,"--jtime",duration_hours_string)!=0){
-        if(interactive_flag_local!=0){
+        if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Duration hours not specified. Use -i (interactive) or --jtime JOB_TIME ." RESET_DISPLAY "\n");
             return 17;
         }
@@ -171,7 +171,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
     
     if(cmd_keyword_check(argc,argv,"--jexec",exec_name)!=0){
-        if(interactive_flag_local!=0){
+        if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Job execution not specified. Use -i (interactive) or --jexec JOB_EXEC ." RESET_DISPLAY "\n");
             return 17;
         }
@@ -182,7 +182,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
 
     if(cmd_keyword_check(argc,argv,"--jdata",job_data)!=0){
-        if(interactive_flag_local!=0){
+        if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Job data directory not specified. Use -i (interactive) or --jdata JOB_DIR." RESET_DISPLAY "\n");
             return 17;
         }

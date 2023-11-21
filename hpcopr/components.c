@@ -12,6 +12,7 @@
 #include "now_macros.h"
 #include "general_funcs.h"
 #include "components.h"
+#include "cluster_general_funcs.h"
 
 extern char url_code_root_var[LOCATION_LENGTH];
 extern char url_tf_root_var[LOCATION_LENGTH];
@@ -537,47 +538,31 @@ int show_locations(void){
     return 0;
 }
 
-int configure_locations(int auto_confirm_flag_local){
-    char doubleconfirm[128]="";
+int configure_locations(int batch_flag_local){
     char loc_string[LOCATION_LENGTH]="";
     int format_flag=0;
     FILE* file_p=NULL;
-    printf(GENERAL_BOLD "\n");
-    printf("|*                                C A U T I O N !                                  \n");
-    printf("|*                                                                                 \n");
-    printf("|*   YOU ARE MODIFYING THE LOCATIONS OF COMPONENTS FOR THE HPC-NOW SERVICES!       \n");
-    printf("|*   YOUR NEED TO MAKE SURE:                                                       \n");
-    printf("|*   1. The locations - either URLs or local filesystem paths are valid.           \n");
-    printf("|*        URLs       : *MUST* start with 'http://' or 'https://' , root locations  \n");
-    printf("|*                     *MUST* end with '/'                                         \n");
-    printf("|*        Local Paths: *MUST* be absolute paths. For GNU/Linux and macOS, the      \n");
-    printf("|                       locations must start with '/'; for Microsoft Windows, the  \n");
-    printf("|                       locations must start with DRIVE_LETTER:\\                   \n");              
-    printf("|*   2. The structures of the location are valid. Please refer to the docs and     \n");
-    printf("|*      confirm your structure in advance.                                         \n");
-    printf("|*                                                                                 \n");
-    printf("|*                                C A U T I O N !                                  \n");
-    printf("|*                                                                                 \n");
-    printf("|*   THE HPCOPR WILL ONLY CHECK THE FORMAT OF YOUR INPUTS, WILL *NOT* CHECK        \n");
-    printf("|*   WHETHER LOCATIONS ARE VALID OR NOT. IT'S YOUR JOB TO GUARANTEE THE VALIDITY!  \n");
-    printf("|*   INVALID LOCATIONS MAY DAMAGE THE HPC-NOW SERVICES! YOU MAY NEED TO RESET TO   \n");
-    printf("|*   THE DEFAULT LOCATIONS IF YOUR LOCATIONS FAIL TO WORK PROPERLY!                \n");
-    printf("|*                                                                                 \n");
-    printf("|*                                C A U T I O N !                                  \n");
-    if(auto_confirm_flag_local==0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed by --confirm ." RESET_DISPLAY "\n");
-    }
-    else{
-        printf("| ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY GENERAL_BOLD " is accepted to double confirm this operation:\n" RESET_DISPLAY "\n");
-        fflush(stdin);
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-        scanf("%s",doubleconfirm);
-        getchar();
-        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
-            printf("|          Nothing changed.\n");
-            return 1;
-        }
+
+    printf(GENERAL_BOLD "                              C A U T I O N !\n\n");
+    printf("|* YOU ARE MODIFYING THE LOCATIONS OF COMPONENTS FOR THE HPC-NOW SERVICES!\n");
+    printf("|* YOUR NEED TO MAKE SURE:\n");
+    printf("|* 1. The locations - either URLs or local filesystem paths are valid.\n");
+    printf("|*      URLs       : *MUST* start with 'http://' or 'https://' , root locations\n");
+    printf("|*                   *MUST* end with '/'\n");
+    printf("|*      Local Paths: *MUST* be absolute paths. For GNU/Linux and macOS, the\n");
+    printf("|                     locations must start with '/'; for Microsoft Windows, the\n");
+    printf("|                     locations must start with DRIVE_LETTER:\\\n");              
+    printf("|* 2. The structures of the location are valid. Please refer to the docs and\n");
+    printf("|*    confirm your structure in advance.\n\n");
+    printf("                              C A U T I O N !\n\n");
+    printf("|* THE HPCOPR WILL ONLY CHECK THE FORMAT OF YOUR INPUTS, WILL *NOT* CHECK\n");
+    printf("|* WHETHER LOCATIONS ARE VALID OR NOT. IT'S YOUR JOB TO GUARANTEE THE VALIDITY!\n");
+    printf("|* INVALID LOCATIONS MAY DAMAGE THE HPC-NOW SERVICES! YOU MAY NEED TO RESET TO\n");
+    printf("|* THE DEFAULT LOCATIONS IF YOUR LOCATIONS FAIL TO WORK PROPERLY!\n\n");
+    printf("                              C A U T I O N !\n\n");
+    
+    if(prompt_to_confirm("ARE YOU SURE ?",CONFIRM_STRING,batch_flag_local)==1){
+        return 1;
     }
     printf("[ LOC1/7 ] Please specify the root location of the terraform binary and providers. \n");
     printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");

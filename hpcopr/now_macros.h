@@ -205,6 +205,7 @@
 #endif
 
 #define CONFIRM_STRING "y-e-s"
+#define CONFIRM_STRING_QUICK "y"
 
 /* Usually you don't need to modify the macros in this section.*/
 #define CMDLINE_LENGTH 2048
@@ -213,6 +214,7 @@
 #define CLUSTER_ID_LENGTH_MIN 8
 #define USERNAME_LENGTH_MAX 16
 #define USERNAME_LENGTH_MIN 4
+#define USER_PASSWORD_LENGTH_MIN 6
 #define USER_PASSWORD_LENGTH_MAX 21
 #define CLUSTER_ID_LENGTH_MAX_PLUS 25
 #define DIR_LENGTH_SHORT 256
@@ -232,8 +234,10 @@
 #define DATAMAN_COMMAND_NUM 17
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 11
-#define CMD_FLAG_NUM 29
+#define CMD_FLAG_NUM 28
 #define CMD_KWDS_NUM 44
+
+#define SPECIAL_PASSWORD_CHARS "~@&(){}[]=,.!#$"
 
 /* Usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/COPYING"

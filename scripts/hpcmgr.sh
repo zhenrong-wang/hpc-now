@@ -256,7 +256,7 @@ elif [ $1 = 'users' ]; then
         else
           echo -e "User $3 already exists in this OS but not in this cluster. Adding to the cluster now.\n"
           echo "y" | sacctmgr add user $3 account=hpc_users
-          sed -i "/$3/,+0 s/DISABLED/ENABLED/g" ${user_registry}
+          sed -i "/$3/,+0 s/STATUS:DISABLED/STATUS:ENABLED/g" ${user_registry}
           mv /root/.sshkey_deleted/id_rsa.$3 /home/$3/.ssh/id_rsa >> ${logfile} 2>&1
           exit 0
         fi
@@ -264,7 +264,7 @@ elif [ $1 = 'users' ]; then
         useradd $3 -m
         if [ -n "$4" ]; then
           echo "$4" | passwd $3 --stdin > /dev/null 2>&1
-          echo -e "username: $3 $4 ENABLED" >> ${user_registry}
+          echo -e "username: $3 $4 STATUS:ENABLED" >> ${user_registry}
         else
           echo -e "Generate random string for password." 
           if [ ! -z $CENTOS_VERSION ] && [ $CENTOS_VERSION -eq 7 ]; then
@@ -275,7 +275,7 @@ elif [ $1 = 'users' ]; then
           cat /root/.cluster_secrets/secret_$3.txt | passwd $3 --stdin > /dev/null 2>&1
           echo -n "username: $3 " >> ${user_registry}
           new_passwd=`cat /root/.cluster_secrets/secret_$3.txt`
-          echo -e "$new_passwd ENABLED" >> ${user_registry}
+          echo -e "$new_passwd STATUS:ENABLED" >> ${user_registry}
           rm -rf /root/.cluster_secrets/secret_$3.txt
         fi
         add_a_user $3
@@ -309,7 +309,7 @@ elif [ $1 = 'users' ]; then
     fi
     if [[ -z "$4" || $4 != "os" ]]; then
       echo -e "User $3 has been deleted from the cluster, but still in the OS."
-      sed -i "/$3/,+0 s/ENABLED/DISABLED/g" ${user_registry}
+      sed -i "/$3/,+0 s/STATUS:ENABLED/STATUS:DISABLED/g" ${user_registry}
       mv /home/$3/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$3 >> ${logfile} 2>&1
       exit 0
     else
@@ -340,7 +340,7 @@ elif [ $1 = 'users' ]; then
     do
       user_name=`echo $user_row | awk '{print $2}'`
       user_passwd=`echo $user_row | awk '{print $3}'`
-      user_status=`echo $user_row | awk '{print $4}'`
+      user_status=`echo $user_row | awk '{print $4}' | awk -F":" '{print $2}'`
       echo $user_name $user_passwd $user_status
       id $user_name >> /dev/null 2>&1
       if [ $? -ne 0 ]; then
@@ -621,7 +621,7 @@ elif [ $1 = 'master' ] || [ $1 = 'all' ]; then
   while read hpc_user_row
   do
     user_name=`echo -e $hpc_user_row | awk '{print $2}'`
-    user_status=`echo -e $hpc_user_row | awk '{print $4}'`
+    user_status=`echo -e $hpc_user_row | awk '{print $4}' | awk -F":" '{print $2}'`
     if [ ! -z $user_status ] && [ $user_status = "DISABLED" ]; then
       echo "y" | sacctmgr delete user $user_name >> ${logfile} 2>&1
       mv /home/$user_name/.ssh/id_rsa /root/.sshkey_deleted/id_rsa.$user_name >> ${logfile} 2>&1

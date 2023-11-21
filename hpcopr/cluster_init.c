@@ -832,7 +832,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
-        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
     fclose(file_p);
     fclose(file_p_2);
@@ -845,7 +845,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
@@ -1325,7 +1325,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
-        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
     fclose(file_p);
     fclose(file_p_2);
@@ -1345,7 +1345,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
@@ -1384,12 +1384,6 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         global_replace(filename_temp,"RUNNING_FLAG","true");
-        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        for(j=0;j<hpc_user_num;j++){
-            sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
-            insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        }*/
     }
     generate_tf_files(stackdir);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,0)!=0){
@@ -1812,7 +1806,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
-        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
     fclose(file_p);
     fclose(file_p_2);
@@ -1831,7 +1825,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
@@ -1870,12 +1864,6 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
-        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        for(j=0;j<hpc_user_num;j++){
-            sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",j+1,j+1);
-            insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);
-        }*/
     }
     generate_tf_files(stackdir);
     if(terraform_execution(tf_exec,"init",workdir,crypto_keyfile,0)!=0){
@@ -2336,7 +2324,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
-        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
     fclose(file_p);
     fclose(file_p_2);
@@ -2358,7 +2346,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
@@ -2825,7 +2813,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
-        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
     fclose(file_p);
     fclose(file_p_2);
@@ -2844,7 +2832,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
@@ -3289,7 +3277,7 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
-        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
     fclose(file_p);
     fclose(file_p_2);
@@ -3300,7 +3288,7 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
@@ -3722,7 +3710,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
-        fprintf(file_p_2,"username: user%d %s ENABLED\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
     fclose(file_p);
     fclose(file_p_2);
@@ -3741,7 +3729,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
     for(i=0;i<hpc_user_num;i++){
-        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
+        sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);

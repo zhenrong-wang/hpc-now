@@ -12,7 +12,7 @@ int valid_loc_format_or_not(char* loc_string);
 int get_locations(void);
 int reset_locations(void);
 int show_locations(void);
-int configure_locations(int auto_confirm_flag_local);
+int configure_locations(int batch_flag_local);
 
 int valid_ver_or_not(char* version_code);
 int valid_md5_or_not(char* md5_input);
