@@ -205,9 +205,9 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 
 **Examples:** 
 
-- `hpcopr -i new-cluster`
+- `hpcopr new-cluster`
 - `hpcopr ssh -u user1 -c my_first_cluster`
-- `hpcopr rdp -u user2 --copypass`
+- `hpcopr -b rdp -u user2`
 
 **CMD_NAME LIST**:
 
