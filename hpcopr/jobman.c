@@ -61,7 +61,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
     if(cmd_keyword_check(argc,argv,"--app",app_name)!=0){
         if(batch_flag_local==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] App name not specified. Use -i (interactive) or --app APP_NAME ." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] App name not specified. Use --app APP_NAME ." RESET_DISPLAY "\n");
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify an app for this job.\n");
@@ -80,7 +80,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
     if(cmd_keyword_check(argc,argv,"--nn",node_num_string)!=0){
         if(batch_flag_local==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Node num not specified. Use -i (interactive) or --nn NODE_NUM ." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Node num not specified. Use --nn NODE_NUM ." RESET_DISPLAY "\n");
             return 17;
         }
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify compute node num (<=%d) for this job: ",cluster_node_num);
@@ -96,7 +96,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
 
     if(cmd_keyword_check(argc,argv,"--tn",node_cores_string)!=0){
         if(batch_flag_local==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Threads-per-node not specified. Use -i (interactive) or --tn THREADS_PER_NODE ." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Threads-per-node not specified. Use --tn THREADS_PER_NODE ." RESET_DISPLAY "\n");
             return 17;
         }
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify threads per node (<=%d) for this job: ",cluster_node_cores);
@@ -112,7 +112,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
 
     if(cmd_keyword_check(argc,argv,"--jname",job_name)!=0){
         if(batch_flag_local==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Job name not specified. Use -i (interactive) or --jname JOB_NAME ." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Job name not specified. Use --jname JOB_NAME ." RESET_DISPLAY "\n");
             return 17;
         }
         printf(WARN_YELLO_BOLD "[ -WARN- ] No job name specified. Input y or yes to use the default (%s-job)." RESET_DISPLAY "\n",user_name);
@@ -131,7 +131,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
 
     if(cmd_keyword_check(argc,argv,"--jtime",duration_hours_string)!=0){
         if(batch_flag_local==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Duration hours not specified. Use -i (interactive) or --jtime JOB_TIME ." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Duration hours not specified. Use --jtime JOB_TIME ." RESET_DISPLAY "\n");
             return 17;
         }
         printf(WARN_YELLO_BOLD "[ -WARN- ] No duration hours specified. Input y or yes to use the default (INFINITE)." RESET_DISPLAY "\n");
@@ -172,7 +172,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     
     if(cmd_keyword_check(argc,argv,"--jexec",exec_name)!=0){
         if(batch_flag_local==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Job execution not specified. Use -i (interactive) or --jexec JOB_EXEC ." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Job execution not specified. Use --jexec JOB_EXEC ." RESET_DISPLAY "\n");
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify an executable: ");
@@ -183,7 +183,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
 
     if(cmd_keyword_check(argc,argv,"--jdata",job_data)!=0){
         if(batch_flag_local==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Job data directory not specified. Use -i (interactive) or --jdata JOB_DIR." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Job data directory not specified. Use --jdata JOB_DIR." RESET_DISPLAY "\n");
             return 17;
         }
         printf(WARN_YELLO_BOLD "[ -WARN- ] No data directory specified. Please specify a remote path." RESET_DISPLAY "\n");
@@ -317,8 +317,20 @@ int job_list(char* workdir, char* user_name, char* sshkey_dir){
     return 0;
 }
 
-int job_cancel(char* workdir, char* user_name, char* sshkey_dir, char* job_id){
+int job_cancel(char* workdir, char* user_name, char* sshkey_dir, char* job_id, int batch_flag_local){
     char remote_commands[CMDLINE_LENGTH]="";
-    sprintf(remote_commands,"scancel --verbose %s",job_id);
+    char string_temp[256]="";
+    if(strlen(job_id)==0){
+        if(batch_flag_local==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Job ID not specified. Use --jid JOB_ID ." RESET_DISPLAY "\n");
+            return 17;
+        }
+        job_list(workdir,user_name,SSHKEY_DIR);
+        prompt_to_input("Please input a jobID from the list above.",string_temp,batch_flag_local);
+        sprintf(remote_commands,"scancel --verbose %s",job_id);
+    }
+    else{
+        sprintf(remote_commands,"scancel --verbose %s",job_id);
+    }
     return remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,3,"","");
 }

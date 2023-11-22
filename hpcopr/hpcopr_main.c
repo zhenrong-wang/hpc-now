@@ -985,7 +985,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"graph")==0){
-        prompt_to_input_optional_args("Specify a graph level? (Default: print out the cluster topology in graph)",CONFIRM_STRING_QUICK,"Select a level: csv   txt   graph(default)]",string_temp,batch_flag,argc,argv,"--level");
+        prompt_to_input_optional_args("Specify a graph level? (Default: detailed graph)",CONFIRM_STRING_QUICK,"Select a level: csv   txt   graph(default)]",string_temp,batch_flag,argc,argv,"--level");
         if(strcmp(string_temp,"csv")==0){
             level_flag=2;
         }
@@ -997,10 +997,10 @@ int main(int argc, char* argv[]){
         }
         if(check_pslock(workdir)!=0){
             if(cluster_empty_or_not(workdir)!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * Graph NOT updated !\n\n" RESET_DISPLAY,cluster_name);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * Graph NOT updated !\n" RESET_DISPLAY "\n",cluster_name);
             }
             else{
-                printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * Graph NOT updated !\n" RESET_DISPLAY,cluster_name);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * Graph NOT updated !" RESET_DISPLAY "\n",cluster_name);
             }
             run_flag=graph(workdir,crypto_keyfile,level_flag);
             if(run_flag==1){
@@ -1346,7 +1346,14 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=get_default_conf(cluster_name,crypto_keyfile,1);
+        run_flag=prompt_to_confirm_args("Edit the conf file after downloading? (Default: don't edit)",CONFIRM_STRING_QUICK,batch_flag,argc,argv,"--edit");
+        if(run_flag==2||run_flag==0){
+            strcpy(string_temp,"edit");
+        }
+        else{
+            strcpy(string_temp,"");
+        }
+        run_flag=get_default_conf(cluster_name,crypto_keyfile,string_temp);
         if(run_flag==1||run_flag==127){
             printf(FATAL_RED_BOLD "[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"INTERNAL_ERROR",125);
@@ -1361,6 +1368,7 @@ int main(int argc, char* argv[]){
             return 0;
         }
     }
+
     if(strcmp(final_command,"edit-conf")==0||strcmp(final_command,"rm-conf")==0){
         if(cluster_empty_or_not(workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
@@ -1375,7 +1383,7 @@ int main(int argc, char* argv[]){
             return 3;
         }
         if(strcmp(final_command,"edit-conf")==0){
-            run_flag=edit_configuration_file(cluster_name,crypto_keyfile);
+            run_flag=edit_configuration_file(cluster_name,crypto_keyfile,batch_flag);
         }
         else{
             run_flag=remove_conf(cluster_name);
@@ -1514,22 +1522,32 @@ int main(int argc, char* argv[]){
 
     if(strcmp(final_command,"payment")==0){
         if(cmd_flag_check(argc,argv,"--od")!=0&&cmd_flag_check(argc,argv,"--month")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify the new payment method with " WARN_YELLO_BOLD "--od" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "--month" RESET_DISPLAY " .\n");
-            write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
-            check_and_cleanup(workdir);
-            return 9;
+            if(batch_flag==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Please specify the new payment method with " WARN_YELLO_BOLD "--od" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "--month" RESET_DISPLAY " .\n");
+                write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
+                check_and_cleanup(workdir);
+                return 9;
+            }
+            prompt_to_input("Select an option by number: [1] Switch to OD    [2] Switch to Monthly",string_temp,batch_flag);
+            if(strcmp(string_temp,"1")!=0&&strcmp(string_temp,"2")!=0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] The specified option " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid.\n",string_temp);
+                write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
+                check_and_cleanup(workdir);
+                return 9;
+            }
+            else if(strcmp(string_temp,"1")==0){
+                strcpy(string_temp2,"od");
+            }
+            else{
+                strcpy(string_temp2,"month");
+            }
         }
         if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);
             return 3;
         }
-        if(cmd_flag_check(argc,argv,"--od")==0){
-            run_flag=switch_cluster_payment(cluster_name,"od",crypto_keyfile);
-        }
-        else if(cmd_flag_check(argc,argv,"--month")==0){
-            run_flag=switch_cluster_payment(cluster_name,"month",crypto_keyfile);
-        }
+        run_flag=switch_cluster_payment(cluster_name,string_temp2,crypto_keyfile);
         if(run_flag==0){
             write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
             check_and_cleanup(workdir);
@@ -1550,21 +1568,39 @@ int main(int argc, char* argv[]){
             return 43;
         }
         if(cmd_flag_check(argc,argv,"--mc")==0){
-            run_flag=rebuild_nodes(workdir,crypto_keyfile,"mc",batch_flag);
+            strcpy(string_temp,"mc");
         }
         else if(cmd_flag_check(argc,argv,"--mcdb")==0){
-            run_flag=rebuild_nodes(workdir,crypto_keyfile,"mcdb",batch_flag);
+            strcpy(string_temp,"mcdb");
         }
         else if(cmd_flag_check(argc,argv,"--all")==0){
-            run_flag=rebuild_nodes(workdir,crypto_keyfile,"all",batch_flag);
+            strcpy(string_temp,"all");
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify '--mc', '--mcdb', or '--all' as the second param.\n");
-            printf("|          Run 'hpcopr help --cmd rebuild' for more details. Exit now." RESET_DISPLAY "\n");
-            write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
-            check_and_cleanup(workdir);
-            return 9;
+            if(batch_flag==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Please specify '--mc', '--mcdb', or '--all' as the second param.\n");
+                write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
+                check_and_cleanup(workdir);
+                return 9;
+            }
+            prompt_to_input("Select an option by number: [1] mc  [2] mddb  [3] all",string_temp2,batch_flag);
+            if(strcmp(string_temp2,"1")!=0&&strcmp(string_temp2,"2")!=0&&strcmp(string_temp2,"3")!=0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] The specified option " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid.\n",string_temp2);
+                write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
+                check_and_cleanup(workdir);
+                return 9;
+            }
+            else if(strcmp(string_temp2,"1")==0){
+                strcpy(string_temp,"mc");
+            }
+            else if(strcmp(string_temp2,"2")==0){
+                strcpy(string_temp,"mcdb");
+            }
+            else{
+                strcpy(string_temp,"all");
+            }
         }
+        run_flag=rebuild_nodes(workdir,crypto_keyfile,string_temp,batch_flag);
         if(run_flag!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"REBUILD_FAILED",34);
             check_and_cleanup(workdir);
@@ -1594,21 +1630,22 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 43;
         }
-        if(cmd_keyword_check(argc,argv,"--vol",string_temp)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a positive number as the new volume." RESET_DISPLAY "\n");
+        run_flag=prompt_to_input_required_args("Please specify a positive number as the new volume",string_temp,batch_flag,argc,argv,"--vol");
+        if(run_flag==1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] New volume not specified. Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
             check_and_cleanup(workdir);
             return 5;
         }
         if(string_to_positive_num(string_temp)<1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a positive number as the new volume." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The new volume %s is invalid." RESET_DISPLAY "\n",string_temp);
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
         }
         get_state_value(workdir,"shared_volume_gb:",string_temp2);
         if(string_to_positive_num(string_temp)<string_to_positive_num(string_temp2)){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a new volume larger than the previous volume %s." RESET_DISPLAY "\n",string_temp2);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The new volume %s is not larger than the previous %s." RESET_DISPLAY "\n",string_temp,string_temp2);
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
@@ -1633,13 +1670,13 @@ int main(int argc, char* argv[]){
 
     if(strcmp(final_command,"sleep")==0){
         if(strcmp(cloud_flag,"CLOUD_F")==0){
-            printf(WARN_YELLO_BOLD "[ -INFO- ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FUNCTION_UNSUPPORTED",6);
             check_and_cleanup("");
             return 6;
         }
         if(cluster_state_flag==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is " RESET_DISPLAY HIGH_CYAN_BOLD "not running" RESET_DISPLAY FATAL_RED_BOLD ". No need to hibernate." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is not running. No need to hibernate." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
             check_and_cleanup("");
             return 43;
@@ -1656,7 +1693,7 @@ int main(int argc, char* argv[]){
     }
     if(strcmp(final_command,"wakeup")==0){
         if(strcmp(cloud_flag,"CLOUD_F")==0){
-            printf(WARN_YELLO_BOLD "[ -INFO- ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FUNCTION_UNSUPPORTED",6);
             check_and_cleanup("");
             return 6;
@@ -1681,11 +1718,12 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        if(cmd_flag_check(argc,argv,"--all")!=0){
-            run_flag=cluster_wakeup(workdir,crypto_keyfile,"minimal");
+        run_flag=prompt_to_confirm_args("Wakeup all the nodes? (Default: minimal)",CONFIRM_STRING,batch_flag,argc,argv,"--all");
+        if(run_flag==2||run_flag==0){
+            run_flag=cluster_wakeup(workdir,crypto_keyfile,"all");
         }
         else{
-            run_flag=cluster_wakeup(workdir,crypto_keyfile,"all");
+            run_flag=cluster_wakeup(workdir,crypto_keyfile,"minimal");
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
@@ -1693,7 +1731,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"reconfc")==0||strcmp(final_command,"reconfm")==0){
-        if(cmd_keyword_check(argc,argv,"--conf",string_temp)!=0||cmd_flag_check(argc,argv,"--list")==0){
+        if(cmd_flag_check(argc,argv,"--list")==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Available configuration list:\n|\n");
             if(check_reconfigure_list(workdir)!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the list. Have you inited this cluster?" RESET_DISPLAY "\n");
@@ -1813,7 +1851,8 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"destroy")==0){
-        if(cmd_flag_check(argc,argv,"--force")==0){
+        run_flag=prompt_to_confirm_args("Do force destroy? (RISKY!)",CONFIRM_STRING,batch_flag,argc,argv,"--force");
+        if(run_flag==2||run_flag==0){
             run_flag=cluster_destroy(workdir,crypto_keyfile,"force",batch_flag);
         }
         else{
@@ -1832,10 +1871,10 @@ int main(int argc, char* argv[]){
             printf(FATAL_RED_BOLD "[ FATAL: ] The switched cluster is not running. Please wake up first.\n");
         }
         if(strcmp(final_command,"addc")==0){
-            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now." RESET_DISPLAY "\n");
+            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --all" RESET_DISPLAY "\n");
         }
         else{
-            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --min | --all" RESET_DISPLAY FATAL_RED_BOLD ". Exit now." RESET_DISPLAY "\n");
+            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --min | --all" RESET_DISPLAY "\n");
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_IS_ASLEEP",43);
         check_and_cleanup(workdir);
@@ -1871,9 +1910,9 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 9;
         }
-        cmd_keyword_check(argc,argv,"--inst",inst_loc);
         cmd_keyword_check(argc,argv,"--repo",repo_loc);
         if(strcmp(app_cmd,"store")==0){
+            prompt_to_input_optional_args("Specify installation shell scripts location?",CONFIRM_STRING,"Input either an URL or a local path.",inst_loc,batch_flag,argc,argv,"--inst");
             run_flag=app_list(workdir,"all",user_name,"",SSHKEY_DIR,"",inst_loc);
         }
         else if(strcmp(app_cmd,"avail")==0){
@@ -1883,6 +1922,8 @@ int main(int argc, char* argv[]){
             run_flag=appman_check_conf(workdir,user_name,SSHKEY_DIR);
         }
         else if(strcmp(app_cmd,"update-conf")==0){
+            prompt_to_input_required_args("Input either an URL or a local path for installation scripts.",inst_loc,batch_flag,argc,argv,"--inst");
+            prompt_to_input_required_args("Input either an URL or a local path for application sources and packages.",repo_loc,batch_flag,argc,argv,"--repo");
             run_flag=appman_update_conf(workdir,inst_loc,repo_loc,SSHKEY_DIR,"");
         }
         else{
@@ -1903,6 +1944,8 @@ int main(int argc, char* argv[]){
                 run_flag=app_list(workdir,"check",user_name,app_name,SSHKEY_DIR,"","");
             }
             else{
+                prompt_to_input_optional_args("Specify installation shell scripts location?",CONFIRM_STRING,"Input either an URL or a local path.",inst_loc,batch_flag,argc,argv,"--inst");
+                prompt_to_input_optional_args("Specify application sources and packages location?",CONFIRM_STRING,"Input either an URL or a local path.",inst_loc,batch_flag,argc,argv,"--repo");
                 run_flag=app_operation(workdir,user_name,app_cmd,app_name,SSHKEY_DIR,inst_loc,repo_loc);
             }
         }
@@ -1975,7 +2018,7 @@ int main(int argc, char* argv[]){
                 scanf("%s",job_id);
                 getchar();
             }
-            run_flag=job_cancel(workdir,user_name,SSHKEY_DIR,job_id);
+            run_flag=job_cancel(workdir,user_name,SSHKEY_DIR,job_id,batch_flag);
         }
         if(run_flag!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"JOBMAN_FAILED",46);
@@ -1995,38 +2038,40 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        if(cmd_flag_check(argc,argv,"--all")==0){
-            run_flag=delete_compute_node(workdir,crypto_keyfile,"all",batch_flag);
-        }
-        else if(cmd_keyword_check(argc,argv,"--nn",node_num_string)==0){
-            run_flag=delete_compute_node(workdir,crypto_keyfile,node_num_string,batch_flag);
+        run_flag=prompt_to_confirm_args("Delete ALL the compute nodes?",CONFIRM_STRING,batch_flag,argc,argv,"--all");
+        if(run_flag==2||run_flag==0){
+            strcpy(string_temp,"all");
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or '--nn NODE_NUM'. Exit now." RESET_DISPLAY "\n");
-            run_flag=9;
+            if(prompt_to_input_required_args("Specify how many nodes to be deleted.",string_temp,batch_flag,argc,argv,"--nn")==1){
+                printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a numbner." RESET_DISPLAY "\n");
+                check_and_cleanup(workdir);
+                return 1;
+            }
         }
+        run_flag=delete_compute_node(workdir,crypto_keyfile,string_temp,batch_flag);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;
     }
+
     if(strcmp(final_command,"addc")==0){
         if(check_down_nodes(workdir)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] You need to turn all compute node(s) on before adding new nodes.\n");
-            printf("|          Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] You need to turn all compute node(s) on before adding new nodes." RESET_DISPLAY "\n");
             check_and_cleanup(workdir);
             return 1;
-        }
-        if(cmd_keyword_check(argc,argv,"--nn",node_num_string)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a number (range: 1-%d) as the second parameter.\n",MAXIMUM_ADD_NODE_NUMBER);
-            printf("|          Exit now." RESET_DISPLAY "\n");
-            write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
-            check_and_cleanup(workdir);
-            return 5;
         }
         if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);
             return 3;
+        }
+        run_flag=prompt_to_input_required_args("Specify how many nodes to be added.",string_temp,batch_flag,argc,argv,"--nn");
+        if(run_flag==1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a number (range: 1-%d) as the second parameter.\n",MAXIMUM_ADD_NODE_NUMBER);
+            write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
+            check_and_cleanup(workdir);
+            return 5;
         }
         run_flag=add_compute_node(workdir,crypto_keyfile,node_num_string);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
@@ -2035,7 +2080,7 @@ int main(int argc, char* argv[]){
     }
     if(strcmp(final_command,"shutdownc")==0){
         if(strcmp(cloud_flag,"CLOUD_F")==0){
-            printf(WARN_YELLO_BOLD "[ -INFO- ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FUNCTION_UNSUPPORTED",6);
             check_and_cleanup("");
             return 6;
@@ -2045,23 +2090,26 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        if(cmd_flag_check(argc,argv,"--all")==0){
-            run_flag=shutdown_compute_nodes(workdir,crypto_keyfile,"all",batch_flag);
-        }
-        else if(cmd_keyword_check(argc,argv,"--nn",node_num_string)==0){
-            run_flag=shutdown_compute_nodes(workdir,crypto_keyfile,node_num_string,batch_flag);
+        run_flag=prompt_to_confirm_args("Shutdown all the compute nodes?",CONFIRM_STRING,batch_flag,argc,argv,"--all");
+        if(run_flag==2||run_flag==0){
+            strcpy(string_temp,"all");
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or '--nn NODE_NUM'. Exit now." RESET_DISPLAY "\n");
-            run_flag=9;
+            if(prompt_to_input_required_args("Specify how many nodes to be shutdown.",string_temp,batch_flag,argc,argv,"--nn")==1){
+                printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a numbner." RESET_DISPLAY "\n");
+                check_and_cleanup(workdir);
+                return 1;
+            }
         }
+        run_flag=shutdown_compute_nodes(workdir,crypto_keyfile,string_temp,batch_flag);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;
     }
+    
     if(strcmp(final_command,"turnonc")==0){
         if(strcmp(cloud_flag,"CLOUD_F")==0){
-            printf(WARN_YELLO_BOLD "[ -INFO- ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FUNCTION_UNSUPPORTED",6);
             check_and_cleanup("");
             return 6;
@@ -2071,49 +2119,54 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        if(cmd_flag_check(argc,argv,"--all")==0){
-            run_flag=turn_on_compute_nodes(workdir,crypto_keyfile,"all",batch_flag);
-        }
-        else if(cmd_keyword_check(argc,argv,"--nn",node_num_string)==0){
-            run_flag=turn_on_compute_nodes(workdir,crypto_keyfile,node_num_string,batch_flag);
+        run_flag=prompt_to_confirm_args("Turn on all the compute nodes?",CONFIRM_STRING,batch_flag,argc,argv,"--all");
+        if(run_flag==2||run_flag==0){
+            strcpy(string_temp,"all");
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or '--nn NODE_NUM'. Exit now." RESET_DISPLAY "\n");
-            run_flag=9;
+            if(prompt_to_input_required_args("Specify how many nodes to be turned on.",string_temp,batch_flag,argc,argv,"--nn")==1){
+                printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a numbner." RESET_DISPLAY "\n");
+                check_and_cleanup(workdir);
+                return 1;
+            }
         }
+        run_flag=turn_on_compute_nodes(workdir,crypto_keyfile,string_temp,batch_flag);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;
     }
-    if(strcmp(final_command,"reconfc")==0){
-        if(strcmp(cloud_flag,"CLOUD_B")==0){
+    if(strcmp(final_command,"reconfc")==0||strcmp(final_command,"reconfm")==0){
+        if(check_reconfigure_list(workdir)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the list. Have you initiated this cluster?" RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"FATAL_INTERNAL_ERROR",125);
+            check_and_cleanup(workdir);
+            return 125;
+        }
+        if(strcmp(final_command,"reconfc")==0&&strcmp(cloud_flag,"CLOUD_B")==0){
             if(check_down_nodes(workdir)!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] You need to turn all compute node(s) on before reconfiguring them.\n");
-                printf("|          Exit now." RESET_DISPLAY "\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] You need to turn all compute node(s) on before reconfiguring them." RESET_DISPLAY "\n");
                 check_and_cleanup(workdir);
                 return 1;
+            }
+        }
+        run_flag=prompt_to_input_required_args("Select a configuration from the list above.",string_temp,batch_flag,argc,argv,"--conf");
+        if(strcmp(final_command,"reconfc")==0&&strcmp(cloud_flag,"CLOUD_C")==0){
+            run_flag=prompt_to_confirm_args("Turn off hyperthreading? (Default: on)",CONFIRM_STRING,batch_flag,argc,argv,"--htoff");
+            if(run_flag==2||run_flag==0){
+                strcpy(string_temp2,"off");
             }
         }
         if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);
             return 3;
+        }   
+        if(strcmp(final_command,"reconfc")==0){
+            run_flag=reconfigure_compute_node(workdir,crypto_keyfile,string_temp,string_temp2);
         }
-        cmd_keyword_check(argc,argv,"--conf",string_temp);
-        cmd_keyword_check(argc,argv,"--ht",string_temp2);
-        run_flag=reconfigure_compute_node(workdir,crypto_keyfile,string_temp,string_temp2);
-        write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
-        check_and_cleanup(workdir);
-        return run_flag;
-    }
-    if(strcmp(final_command,"reconfm")==0){
-        if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
-            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
-            check_and_cleanup(workdir);
-            return 3;
+        else{
+            run_flag=reconfigure_master_node(workdir,crypto_keyfile,string_temp);
         }
-        cmd_keyword_check(argc,argv,"--conf",string_temp);
-        run_flag=reconfigure_master_node(workdir,crypto_keyfile,string_temp);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;

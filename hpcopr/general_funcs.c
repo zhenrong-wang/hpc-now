@@ -38,6 +38,7 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--installed",
     "--verbose",
     "--read", // read contents
+    "--edit",
     "--std", // standard info
     "--err", // error info
     "--this", // this
@@ -53,7 +54,8 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--month",
     "--gcp",
     "--rdp",
-    "--copypass"
+    "--copypass",
+    "--htoff"
 };
 
 char command_keywords[CMD_KWDS_NUM][32]={

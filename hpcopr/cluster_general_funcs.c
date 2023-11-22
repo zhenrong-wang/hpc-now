@@ -393,7 +393,7 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char
         }
     }
     run=system(cmdline);
-    printf("\n\n%s\n\n%d\n",cmdline,run);
+//    printf("\n\n%s\n\n%d\n",cmdline,run);
     return run;
 }
 

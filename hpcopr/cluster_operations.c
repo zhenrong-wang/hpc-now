@@ -939,7 +939,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     return 0;
 }
 
-int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int auto_confirm_flag_local){
+int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local){
     char string_temp[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
@@ -947,7 +947,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int au
     char cmdline[CMDLINE_LENGTH]="";
     char* tf_exec=TERRAFORM_EXEC;
     char* sshkey_dir=SSHKEY_DIR;
-    int i;
+    int i,run_flag;
     int del_num=0;
     char filename_temp[FILENAME_LENGTH]="";
     int compute_node_num=0;
@@ -976,20 +976,9 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int au
             return 1;
         }
         if(del_num>compute_node_num){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified a number larger than the quantity of compute nodes.\n");
-            printf("           Do you mean deleting *ALL* the compute nodes?\n");
-            if(auto_confirm_flag_local==0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed." RESET_DISPLAY "\n");
-            }
-            else{
-                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:  ");
-                fflush(stdin);
-                scanf("%s",string_temp);
-                getchar();
-                if(strcmp(string_temp,CONFIRM_STRING)!=0){
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
-                    return 1;
-                }
+            run_flag=prompt_to_confirm("Did you mean deleting all the comput nodes?",CONFIRM_STRING,batch_flag_local);
+            if(run_flag==1){
+                return 1;
             }
         }
         else{
@@ -1146,7 +1135,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     return 0;
 }
 
-int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int auto_confirm_flag_local){
+int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local){
     char string_temp[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
@@ -1189,7 +1178,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
         if(down_num>compute_node_num){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified a number larger than the quantity of compute nodes.\n");
             printf("           Do you mean shutting down *ALL* the compute nodes?\n");
-            if(auto_confirm_flag_local==0){
+            if(batch_flag_local==0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed." RESET_DISPLAY "\n");
             }
             else{
@@ -1276,7 +1265,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     return 0;
 }
 
-int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int auto_confirm_flag_local){
+int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local){
     char string_temp[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
@@ -1319,7 +1308,6 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
         printf("|          No compute node needs to be turned on. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
-
     if(strcmp(param,"all")!=0){
         on_num=string_to_positive_num(param);
         if(on_num<0||on_num==0){
@@ -1329,7 +1317,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
         if(on_num+compute_node_num_on>compute_node_num){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified a number larger than the number of currently down nodes.\n");
             printf("           Do you mean turning on *ALL* the compute nodes?\n");
-            if(auto_confirm_flag_local==0){
+            if(batch_flag_local==0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed." RESET_DISPLAY "\n");
             }
             else{
@@ -2028,14 +2016,13 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     return 0;
 }
 
-int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag){
+int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     char workdir[DIR_LENGTH]="";
     get_workdir(workdir,cluster_name);
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
     }
     char cloud_flag[32]="";
-    char doubleconfirm[64]="";
     char filename_temp[FILENAME_LENGTH]="";
     char url_aws_root[LOCATION_LENGTH_EXTENDED]="";
     char url_alicloud_root[LOCATION_LENGTH_EXTENDED]="";
@@ -2159,42 +2146,30 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, int edit_flag){
     sprintf(filename_temp,"%s%stf_prep.conf",confdir,PATH_SLASH);
     find_and_replace(filename_temp,"CLUSTER_ID","","","","","hpcnow",cluster_name);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Default configuration file has been downloaded.\n");
-    if(edit_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Would you like to edit it now? Input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to confirm:\n");
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-        fflush(stdin);
-        scanf("%s",doubleconfirm);
-        getchar();
-        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
-            return 3;
-        }
+    if(strcmp(edit_flag,"edit")!=0){
+        return 0;
     }
     sprintf(cmdline,"%s %s%stf_prep.conf",EDITOR_CMD,confdir,PATH_SLASH);
     system(cmdline);
     return 0;
 }
 
-int edit_configuration_file(char* cluster_name, char* crypto_keyfile){
+int edit_configuration_file(char* cluster_name, char* crypto_keyfile, int batch_flag_local){
     char workdir[DIR_LENGTH]="";
+    int run_flag;
     get_workdir(workdir,cluster_name);
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
     }
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    char doubleconfirm[64]="";
     sprintf(filename_temp,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster configuration file not found. Would you like to get one?\n");
-        printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm: ");
-        fflush(stdin);
-        scanf("%s",doubleconfirm);
-        getchar();
-        if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
+        run_flag=prompt_to_confirm("Cluster configuration file not found. Would you like to get one?",CONFIRM_STRING_QUICK,batch_flag_local);
+        if(run_flag!=0){
             return 1;
         }
-        get_default_conf(cluster_name,crypto_keyfile,0);
+        get_default_conf(cluster_name,crypto_keyfile,"edit");
         return 0;
     }
     sprintf(cmdline,"%s %s",EDITOR_CMD,filename_temp);
