@@ -12,7 +12,7 @@
     - [**Step 3. Run the build script**](#step-3-run-the-build-script)
   - [**3.2 Install**](#32-install)
     - [**Step 1. Run the installer**](#step-1-run-the-installer)
-    - [**Step 2. Initialize the hpcopr.exe**](#step-2-initialize-the-hpcoprexe)
+    - [**Step 2. Initialize the hpcopr**](#step-2-initialize-the-hpcopr)
   - [**3.3 Run**](#33-run)
   - [**3.4 Basic Workflow**](#34-basic-workflow)
   - [**3.5 Commands**](#35-commands)
@@ -67,7 +67,9 @@ In this project, we are developing several components:
 
 # **3. How-To: Build, Install, Run, and Use**
 
-The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Windows, GNU/Linux, or macOS. Note: Currently only x86_64 platform is supported.
+The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Microsoft Windows, GNU/Linux, and macOS (Darwin). 
+
+**Note: Currently only x86_64 platform is supported. If you are using other cpu platforms, please let us know.**
 
 ## **3.1 Build**
 
@@ -138,9 +140,9 @@ If everything goes well, the binaries will be built to the `build` folder.
 
 **IMPORTANT**: Please keep the window open for the next step.
 
-### **Step 2. Initialize the hpcopr.exe**
+### **Step 2. Initialize the hpcopr**
 
-The `hpcopr.exe` is designed to be executed by the dedicated system os user named `hpc-now`, which has been created by the installer in the last step.
+The `hpcopr.exe` is designed to be executed by the dedicated system OS user named `hpc-now`, which has been created by the installer in the last step.
 
 In order to run the `hpcopr.exe`, you'll need to set a password and switch to that user. See the stpes below:
 
