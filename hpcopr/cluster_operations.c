@@ -179,12 +179,10 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
     get_workdir(target_cluster_workdir,target_cluster_name);
     if(strcmp(force_flag,"force")==0){
         printf(GENERAL_BOLD "\n");
-        printf("|*                                C A U T I O N !                                  \n");
-        printf("|*                                                                                 \n");
-        printf("|*   YOU ARE REFRESHING THE CLUSTER *WITHOUT* CHECKING OPERATION LOCK STATUS !     \n");
-        printf("|*   PLEASE MAKE SURE CURRENTLY THE CLUSTER IS *NOT* IN A OPERATION PROGRESS !     \n");
-        printf("|*                                                                                 \n");
-        printf("|*                                C A U T I O N !                                  \n\n");
+        printf("|*                              C A U T I O N !\n\n");
+        printf("|* YOU ARE REFRESHING THE CLUSTER *WITHOUT* CHECKING OPERATION LOCK STATUS !\n");
+        printf("|* PLEASE MAKE SURE CURRENTLY THE CLUSTER IS *NOT* IN A OPERATION PROGRESS !\n");
+        printf("|*                              C A U T I O N !\n\n");
     }
     else{
         if(cluster_empty_or_not(target_cluster_workdir)==0){
