@@ -73,7 +73,7 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 **Note 2: Instead of compiling/building from the source code, you can download pre-built executables/binaries from the release of this repository. In this case, no dev/build tools (`git`, `gcc`, `clang`, or `mingw`) are needed.**
 
-**Note 3: The HPC-NOW relies on some very fundamental system utilities. In most cases, these utilities have been included in the OS distros. See the list below:**
+**Note 3: The HPC-NOW relies on some very fundamental system utilities. In most cases, these utilities have been included in the OS distros. See the list below.** If you are not sure whether the utilities are installed or not, please run the commands in a terminal/command prompt window.
 
 - **Microsoft Windows**: 1. `curl`   2. `certutil`
 - **GNU/Linux Distros**: 1. `curl`   2. `base64`   3. `md5sum`
