@@ -69,11 +69,11 @@ In this project, we are developing several components:
 
 The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Microsoft Windows, GNU/Linux (with APT, DNF or YUM), and macOS (Darwin). 
 
-**Note 1: Currently only x86_64 platform is supported. If you are using other cpu platforms, please let us know.**
+**Note 1**: Currently only **x86_64** platform is supported. If you are using other cpu platforms, please let us know.
 
-**Note 2: Instead of compiling/building from the source code, you can download pre-built executables/binaries from the release of this repository. In this case, no dev/build tools (`git`, `gcc`, `clang`, or `mingw`) are needed.**
+**Note 2**: Instead of compiling/building from the source code, you can download pre-built executables/binaries from the release of this repository. In this case, no dev/build tools (`git`, `gcc`, `clang`, or `mingw`) are needed.
 
-**Note 3: The HPC-NOW relies on some very fundamental system utilities. In most cases, these utilities have been included in the OS distros. See the list below.** If you are not sure whether the utilities are installed or not, please run the commands in a terminal/command prompt window.
+**Note 3**: The HPC-NOW relies on some fundamental system utilities. In most cases, these utilities have been included in the OS distros. See the list below. If you are not sure whether the utilities are installed or not, please run the commands in a terminal/command prompt window.
 
 - **Microsoft Windows**: 1. `curl`   2. `certutil`
 - **GNU/Linux Distros**: 1. `curl`   2. `base64`   3. `md5sum`
@@ -83,8 +83,8 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 ### **Prerequisites** 
 
-- `git` for code management [git](https://git-scm.com/) .
-- A standard C compiler. We recommend `gcc` for GNU/Linux [gcc](https://gcc.gnu.org/) , `clang` for macOS [clang](https://clang.llvm.org/) , and `mingw` for Microsoft Windows [mingw](https://sourceforge.net/projects/mingw/) .
+- [git](https://git-scm.com/) for code management.
+- A standard C compiler. We recommend [gcc](https://gcc.gnu.org/) for GNU/Linux distros, [clang](https://clang.llvm.org/) for macOS (Darwin), and [mingw](https://sourceforge.net/projects/mingw/) for Microsoft Windows.
 
 ### **Step 1. Clone this repository** 
 
