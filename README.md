@@ -67,9 +67,17 @@ In this project, we are developing several components:
 
 # **3. How-To: Build, Install, Run, and Use**
 
-The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Microsoft Windows, GNU/Linux, and macOS (Darwin). 
+The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Microsoft Windows, GNU/Linux (with APT, DNF or YUM), and macOS (Darwin). 
 
-**Note: Currently only x86_64 platform is supported. If you are using other cpu platforms, please let us know.**
+**Note #1: Currently only x86_64 platform is supported. If you are using other cpu platforms, please let us know.**
+
+**Note #2: Instead of compiling/building from the source code, you can download pre-built executables/binaries from the release of this repository. In this case, no dev/build tools (`git`, `gcc`, `clang`, or `mingw`) are needed.**
+
+**Note #3: The HPC-NOW relies on some very fundamental system utilities. In most cases, these utilities have been included in the OS distros. See the list below:**
+
+- Microsoft Windows: 1. curl   2. certutil
+- GNU/Linux Distros: 1. curl   2. base64   3. md5sum
+- macOS (Darwin)   : 1. curl   2. base64   3. md5
 
 ## **3.1 Build**
 
