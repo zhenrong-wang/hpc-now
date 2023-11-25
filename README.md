@@ -83,8 +83,8 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 ### **Prerequisites** 
 
-- `git` for code management [Link](https://git-scm.com/)
-- A standard C compiler. We recommend `gcc` for GNU/Linux [Link](https://gcc.gnu.org/) | `clang` for macOS [Link](https://clang.llvm.org/) | `mingw` for Microsoft Windows [Link](https://sourceforge.net/projects/mingw/).
+- `git` for code management [git](https://git-scm.com/) .
+- A standard C compiler. We recommend `gcc` for GNU/Linux [gcc](https://gcc.gnu.org/) , `clang` for macOS [clang](https://clang.llvm.org/) , and `mingw` for Microsoft Windows [mingw](https://sourceforge.net/projects/mingw/) .
 
 ### **Step 1. Clone this repository** 
 
