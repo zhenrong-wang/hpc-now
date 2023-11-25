@@ -75,9 +75,9 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 **Note 3**: The HPC-NOW relies on some fundamental system utilities. In most cases, these utilities have been included in the OS distros. See the list below. If you are not sure whether the utilities are installed or not, please run the commands in a terminal/command prompt window.
 
-- **Microsoft Windows**: 1. `curl`   2. `certutil`
-- **GNU/Linux Distros**: 1. `curl`   2. `base64`   3. `md5sum`
-- **macOS (Darwin)**   : 1. `curl`   2. `base64`   3. `md5`
+- **Microsoft Windows**: `curl`  `certutil`
+- **GNU/Linux Distros**: `curl`  `base64`  `md5sum`
+- **macOS (Darwin)**   : `curl`  `base64`  `md5`
 
 ## **3.1 Build**
 
