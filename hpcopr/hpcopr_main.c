@@ -586,13 +586,13 @@ int main(int argc, char* argv[]){
         cmd_keyword_check(argc,argv,"--az-sid",string_temp);
         cmd_keyword_check(argc,argv,"--az-tid",string_temp2);
 
-        run_flag=prompt_to_confirm_args("Use Google Cloud Platform?",CONFIRM_STRING_QUICK,batch_flag,argc,argv,"--gcp");
-        if(run_flag==2||run_flag==0){
-            strcpy(gcp_flag,"gcp");
-        }
-        run_flag=prompt_to_confirm_args("Echo the credentials to this window (RISKY)?",CONFIRM_STRING,batch_flag,argc,argv,"--echo");
+        run_flag=prompt_to_confirm_args("Echo the input/imported credentials to this window (RISKY)?",CONFIRM_STRING,batch_flag,argc,argv,"--echo");
         if(run_flag==2||run_flag==0){
             strcpy(key_echo_flag,"echo");
+        }
+        run_flag=prompt_to_confirm_args("Use Google Cloud Platform? (Default: other cloud platforms)",CONFIRM_STRING_QUICK,batch_flag,argc,argv,"--gcp");
+        if(run_flag==2||run_flag==0){
+            strcpy(gcp_flag,"gcp");
         }
         run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,key_echo_flag,gcp_flag,batch_flag);
         if(run_flag==-1){
