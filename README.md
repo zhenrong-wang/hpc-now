@@ -69,22 +69,22 @@ In this project, we are developing several components:
 
 The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Microsoft Windows, GNU/Linux (with APT, DNF or YUM), and macOS (Darwin). 
 
-**Note #1: Currently only x86_64 platform is supported. If you are using other cpu platforms, please let us know.**
+**Note 1: Currently only x86_64 platform is supported. If you are using other cpu platforms, please let us know.**
 
-**Note #2: Instead of compiling/building from the source code, you can download pre-built executables/binaries from the release of this repository. In this case, no dev/build tools (`git`, `gcc`, `clang`, or `mingw`) are needed.**
+**Note 2: Instead of compiling/building from the source code, you can download pre-built executables/binaries from the release of this repository. In this case, no dev/build tools (`git`, `gcc`, `clang`, or `mingw`) are needed.**
 
-**Note #3: The HPC-NOW relies on some very fundamental system utilities. In most cases, these utilities have been included in the OS distros. See the list below:**
+**Note 3: The HPC-NOW relies on some very fundamental system utilities. In most cases, these utilities have been included in the OS distros. See the list below:**
 
-- Microsoft Windows: 1. curl   2. certutil
-- GNU/Linux Distros: 1. curl   2. base64   3. md5sum
-- macOS (Darwin)   : 1. curl   2. base64   3. md5
+- **Microsoft Windows**: 1. `curl`   2. `certutil`
+- **GNU/Linux Distros**: 1. `curl`   2. `base64`   3. `md5sum`
+- **macOS (Darwin)**   : 1. `curl`   2. `base64`   3. `md5`
 
 ## **3.1 Build**
 
 ### **Prerequisites** 
 
-- `git` for code management
-- A standard C compiler. We recommend `gcc` (for GNU/Linux) | `clang` (for macOS) | `mingw` (for Microsoft Windows)
+- `git` for code management [Link](https://git-scm.com/)
+- A standard C compiler. We recommend `gcc` for GNU/Linux [Link](https://gcc.gnu.org/) | `clang` for macOS [Link](https://clang.llvm.org/) | `mingw` for Microsoft Windows [Link](https://sourceforge.net/projects/mingw/).
 
 ### **Step 1. Clone this repository** 
 
