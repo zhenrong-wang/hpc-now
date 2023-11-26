@@ -22,6 +22,7 @@
 #include "cluster_general_funcs.h"
 #include "general_print_info.h"
 #include "appman.h"
+#include "userman.h"
 #include "jobman.h"
 
 int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* sshkey_dir, char* crypto_keyfile, jobinfo* job_info, int batch_flag_local){

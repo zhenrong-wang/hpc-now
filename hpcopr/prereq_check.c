@@ -16,6 +16,7 @@
 #include "general_print_info.h"
 #include "components.h"
 #include "cluster_general_funcs.h"
+#include "userman.h"
 #include "prereq_check.h"
 
 extern char url_tf_root_var[LOCATION_LENGTH];

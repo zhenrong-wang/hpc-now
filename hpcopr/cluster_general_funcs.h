@@ -71,20 +71,11 @@ int sync_statefile(char* workdir, char* sshkey_dir);
 
 int user_password_complexity_check(char* password, const char* special_chars);
 int input_user_passwd(char* password_string, int batch_flag_local);
-int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag);
 int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir);
 int username_check(char* user_registry, char* username_input);
 int username_check_add(char* user_registry, char* username_input);
 int username_check_select(char* user_registry, char* username_input);
-
-int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* username, char* password);
 int delete_user_from_registry(char* user_registry_file, char* username);
-int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char* username);
-int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, char* crypto_keyfile, char* option);
-int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, char* username, char* password);
-
-int usrmgr_prereq_check(char* workdir, char* ucmd, int batch_mode_flag);
-void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_flag);
 
 void get_workdir(char* cluster_workdir, char* cluster_name);
 int get_cluster_name(char* cluster_name, char* cluster_workdir);

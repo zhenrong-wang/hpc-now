@@ -15,6 +15,7 @@
 #include "general_funcs.h"
 #include "cluster_general_funcs.h"
 #include "cluster_operations.h"
+#include "userman.h"
 #include "transfer.h"
 
 int get_cluster_name_import(char* cluster_name_output, char* tmp_top_output, char* tmp_import_root, char* md5sum){

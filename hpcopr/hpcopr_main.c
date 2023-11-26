@@ -34,6 +34,7 @@
 #include "monman.h"
 #include "appman.h"
 #include "jobman.h"
+#include "userman.h"
 
 char url_code_root_var[LOCATION_LENGTH]="";
 char url_tf_root_var[LOCATION_LENGTH]="";
