@@ -2,6 +2,8 @@
 
 *<u>A full-stack HPC solution in the cloud, for the HPC community.</u>*
 
+**VERY IMPORTANT: [Terraform](http://www.terraform.io) has changed its license from MPL to BSL, which is not friendly to the open-source developers and community. We are switching to [openTofu](https://github.com/opentofu/opentofu/) now.**
+
 - [**1. Project Background**](#1-project-background)
 - [**2. Core Components**](#2-core-components)
 - [**3. How-To: Build, Install, Run, and Use**](#3-how-to-build-install-run-and-use)

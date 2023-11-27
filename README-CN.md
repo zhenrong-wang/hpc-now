@@ -2,6 +2,8 @@
 
 *全栈的云 HPC 平台*
 
+**重要：[Terraform](http://www.terraform.io) 已经将许可证从 MPL 更换成 BSL。新的许可证对开源项目不友好，我们正在切换成 [openTofu](https://github.com/opentofu/opentofu/)。**
+
 - [1. 项目背景](#1-项目背景)
 - [2. 核心组件](#2-核心组件)
 - [3. 如何部署、使用、卸载、构建与开发](#3-如何部署使用卸载构建与开发)
