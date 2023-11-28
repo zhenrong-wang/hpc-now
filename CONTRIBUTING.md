@@ -57,7 +57,7 @@ Therefore, please submit issues to this repository. In order to debug and commun
 Other than bugs and problems, you can also submit feature requests or other relavent ideas. Please follow the guidelines below:
 
 - **Description**: Please describe your ideas/feature requests in detail. Pictures, architectures, or drawings are welcomed.
-- **References**: If there are good practices, please also provide then.
+- **References**: If there are good practices, please also provide them.
 
 # 4. Discussions
 
