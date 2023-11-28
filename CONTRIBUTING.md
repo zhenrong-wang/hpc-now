@@ -8,7 +8,7 @@
 
 The first and easiest way to contribute to an open-source project, is to let more people know it. 
 
-Therefore, we humbly request a **github star**, **watch**, and **fork** from you. 
+Therefore, we kindly request a **github star**, **watch**, and **fork** from you. 
 
 With your contribution, this project will become more and more valuable to you, and the whole open-source community.
 
@@ -62,3 +62,9 @@ Other than bugs and problems, you can also submit feature requests or other rela
 # 4. Discussions
 
 We believe that **discussions generate great ideas**. Therefore, please feel free to interact with others in the discussion pages published in this repo.
+
+# 5. Dos and Don'ts
+
+- **Focus**: When contributing to this project, please focus on HPC-NOW itself. Unreleated issues or topics are not supposed to appear here.
+- **Inclusive**: Let's work together to keep offensive interactions or attitudes out of this community.
+- **Respect**: Value our own efforts, and respect others' participation.
