@@ -4,6 +4,13 @@
 
 **Your contributions bring great value to this project.**
 
+- [1. Preface](#1-preface)
+- [2. Roadmap](#2-roadmap)
+- [3. Issues](#3-issues)
+- [4. Discussions](#4-discussions)
+- [5. Pull Rquests](#5-pull-rquests)
+- [6. Dos and Don'ts](#6-dos-and-donts)
+
 # 1. Preface
 
 The first and easiest way to contribute to an open-source project, is to let more people know it. 
@@ -39,8 +46,9 @@ There are several key work to be done. Please check the list below:
 - **Graphical User Interface (GUI)**: GUI is always much more user-friendly compare to CLIs. We need a cross-platform GUI for this project.
 - **Web-based UI (WUI)**: in order to make the **HPC Cloud** real and accessible for everyone, a web-based UI is essential.
 - **APPlication MANager (known as 'appman')**: a package manager for building/installing/removing HPC/AI applications.
+- **ARM64 Compatibility**: make HPC-NOW work on mainstream ARM devices.
 
-This list is not detailed or finished, but it shows how this project will evolve: from a CLI (C/S architecture) to a cloud platform (B/S architecture).
+This list is not detailed or completed, but it shows how this project will evolve: from a CLI (C/S architecture) to a cloud platform (B/S architecture).
 
 Please feel free to propose your ideas.
 
@@ -63,8 +71,32 @@ Other than bugs and problems, you can also submit feature requests or other rela
 
 We believe that **discussions generate great ideas**. Therefore, please feel free to interact with others in the discussion pages published in this repo.
 
-# 5. Dos and Don'ts
+# 5. Pull Rquests
 
-- **Focus**: When contributing to this project, please focus on HPC-NOW itself. Unreleated issues or topics are not supposed to appear here.
-- **Inclusive**: Let's work together to keep offensive interactions or attitudes out of this community.
+Code contributions to HPC-NOW are highly welcomed and encouraged!
+
+HPC-NOW can be developed locally on your devices with **Microsoft Windows**, **GNU/Linux**, or **macOS(Darwin)**.
+
+Please follow the general workflow to develop:
+
+- Clone the source code directly from the HPC-NOW repository, or fork this repo to your github account and then clone to your local device
+- Develop your code and test your build
+- Once done, you can submit a Pull Request (PR) to the HPC-NOW repository.
+
+Please provide the key information in your PR:
+
+- **Description of the Change**: [ Detailed, descriptive, well-structured, and well-organized contents. ]
+- **Benefits**: [ What are the effects/benefits will be realized by the changed code? ]
+- **Potential Risks**: [ Will there be potential side-effects? If yes, please describe them. ]
+- **Verification**: [ Steps to verify the that your change will realize the benefits claimed. ]
+- **Related-Issues**: [ Provide the issue number. If your change closes an open issue, use *Closes Issue #xxxxx* ]
+
+Looking forward to your contributions!
+
+Once the PR gets reviewed, the code change will be merged by the workflow.
+
+# 6. Dos and Don'ts
+
+- **Focus**: Please focus on HPC-NOW itself. Unreleated issues or topics are not supposed to be here.
+- **Inclusive**: Keep offensive interactions or attitudes out of this community.
 - **Respect**: Value our own efforts, and respect others' participation.
