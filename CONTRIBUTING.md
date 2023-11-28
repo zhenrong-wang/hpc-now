@@ -40,7 +40,7 @@ There are several key work to be done. Please check the list below:
 - **Web-based UI (WUI)**: in order to make the **HPC Cloud** real and accessible for everyone, a web-based UI is essential.
 - **APPlication MANager (known as 'appman')**: an package manager for building/installing/removing HPC/AI applications.
 
-This list is not detailed enough, but it shows how this project will evolve: finally we will evolve from a CLI (C/S architecture) to a cloud platform (B/S architecture).
+This list is not detailed or finished, but it shows how this project will evolve: from a CLI (C/S architecture) to a cloud platform (B/S architecture).
 
 Please feel free to propose your ideas.
 
