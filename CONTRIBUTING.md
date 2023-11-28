@@ -34,7 +34,7 @@ We aim to building an open and free(libre) cloud platform to the HPC/AI communit
 There are several key work to be done. Please check the list below:
 
 - **Continuous Enhancement**: make the **hpcopr** CLI more functional and robust.
-- **Migration from [Terraform](https://github.com/hashicorp/terraform) to [openTofu](https://github.com/opentofu/opentofu)**: we need to work with the openTofu team closely to test their releases
+- **Migration from [Terraform](https://github.com/hashicorp/terraform) to [openTofu](https://github.com/opentofu/opentofu)**: we need to work with the openTofu team closely to test their releases. 
 - **GPU for AI**: the HPC-NOW started from High-Performance Computing, therefore, GPU cluster with SLURM was not included. We aims to managing GPU clusters for AI workloads in the near future
 - **Graphical User Interface (GUI)**: GUI is always much more user-friendly compare to CLIs. We need a cross-platform GUI for this project.
 - **Web-based UI (WUI)**: in order to make the **HPC Cloud** real and accessible for everyone, a web-based UI is essential.
@@ -57,7 +57,7 @@ Therefore, please submit issues to this repository. In order to debug and commun
 Other than bugs and problems, you can also submit feature requests or other relavent ideas. Please follow the guidelines below:
 
 - **Description**: Please describe your ideas/feature requests in detail. Pictures, architectures, or drawings are welcomed.
-- **Reference**: If there are good practices, please also provide then.
+- **References**: If there are good practices, please also provide then.
 
 # 4. Discussions
 
