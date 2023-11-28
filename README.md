@@ -393,9 +393,9 @@ The most detailed help info can be found by the command `hpcopr help`. We are al
 
 # **4. Bugs and Communications**
 
-Please submit issues to this repo. Or
+Please see the [contributing guide](./CONTRIBUTING.md) .
 
-mailto: 
+Or, mailto: 
 
 - [zhenrongwang@live.com](mailto:zhenrongwang@live.com)
 - [wangzhenrong@hpc-now](mailto:wangzhenrong@hpc-now)

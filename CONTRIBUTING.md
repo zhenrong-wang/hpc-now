@@ -38,7 +38,7 @@ There are several key work to be done. Please check the list below:
 - **GPU for AI**: the HPC-NOW started from High-Performance Computing, therefore, GPU cluster with SLURM was not included. We aims to managing GPU clusters for AI workloads in the near future
 - **Graphical User Interface (GUI)**: GUI is always much more user-friendly compare to CLIs. We need a cross-platform GUI for this project.
 - **Web-based UI (WUI)**: in order to make the **HPC Cloud** real and accessible for everyone, a web-based UI is essential.
-- **APPlication MANager (known as 'appman')**: an package manager for building/installing/removing HPC/AI applications.
+- **APPlication MANager (known as 'appman')**: a package manager for building/installing/removing HPC/AI applications.
 
 This list is not detailed or finished, but it shows how this project will evolve: from a CLI (C/S architecture) to a cloud platform (B/S architecture).
 
