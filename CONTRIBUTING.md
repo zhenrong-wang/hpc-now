@@ -24,7 +24,7 @@ This project covers several different technologies, including:
 - **GNU/Linux, Shell scripts, and automation**: we automate not only the cloud resources, but also everything else
 - **The C programming**: this project uses C to develop Command Line Interface (CLI), and other core components
 - **HPC/AI cluster management**: including data transfer and management, multi-user management, HPC application management, and HPC/AI job management
-- **HPC/AI software management**: 
+- **HPC/AI software management**: automatically manage the software (sources, prebuilt packages, etc.)
 - ...
 
 We aim to building an open and free(libre) cloud platform to the HPC/AI community. This is why your contributions are very important.
