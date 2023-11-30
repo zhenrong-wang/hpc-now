@@ -214,6 +214,8 @@ In order to use and manage HPC in the cloud with HPC-NOW, please follow the work
 - Destroy the cloud cluster (**`hpcopr destroy ...`**) -->
 - Remove the cloud credentials (optional, **`hpcopr remove ...`**)
 
+![example](./img/run_paraview.png)
+
 ## **3.5 Commands**
 
 The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
