@@ -2,7 +2,9 @@
 
 *<u>A full-stack HPC solution in the cloud, for the HPC community.</u>*
 
-**VERY IMPORTANT: [Terraform](http://www.terraform.io) has changed its license from MPL to BSL, which is not friendly to the open-source developers and community. We are switching to [openTofu](https://github.com/opentofu/opentofu/) now. Anyone interested in it, please checkout the branch dev-0.2.2-opentofu for developement and testing.**
+**IMPORTANT: [Terraform](http://www.terraform.io) has changed its license from MPL to BSL, which is not friendly to the open-source developers and community. We are switching to [openTofu](https://github.com/opentofu/opentofu/) now. Anyone interested in it, please checkout the branch dev-0.2.2-opentofu for developement and testing.**
+
+**IMPORTANT: Contributions are highly welcomed and respected. Please see [CONTRIBUTING](./CONTRIBUTING.md).**
 
 - [**1. Project Background**](#1-project-background)
 - [**2. Core Components**](#2-core-components)
@@ -31,7 +33,7 @@
     - [**Cluster App Management**](#cluster-app-management)
     - [**Cluster Job Management**](#cluster-job-management)
     - [**Others**](#others)
-- [**4. Bugs and Communications**](#4-bugs-and-communications)
+- [**4. Contributing**](#4-contributing)
 
 
 # **1. Project Background**
@@ -391,11 +393,11 @@ For more information, please refer to Docs/UserManual-EN.pdf.
 
 The most detailed help info can be found by the command `hpcopr help`. We are also considering writing a standard mannual for `hpcopr`. If you are interested, please let us know.
 
-# **4. Bugs and Communications**
+# **4. Contributing**
 
 Please see the [contributing guide](./CONTRIBUTING.md) .
 
-Or, mailto: 
+Also, please feel free to mailto: 
 
 - [zhenrongwang@live.com](mailto:zhenrongwang@live.com)
 - [wangzhenrong@hpc-now](mailto:wangzhenrong@hpc-now)
