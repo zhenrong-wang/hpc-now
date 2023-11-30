@@ -2,7 +2,7 @@
 
 *<u>A full-stack HPC solution in the cloud, for the HPC community.</u>*
 
-[main_page](./img/main_page.png)
+![main_page](./img/main_page.png)
 
 **IMPORTANT: [Terraform](http://www.terraform.io) has changed its license from MPL to BSL, which is not friendly to the open-source developers and community. We are switching to [openTofu](https://github.com/opentofu/opentofu/) now. Anyone interested in it, please checkout the branch dev-0.2.2-opentofu for developement and testing.**
 
@@ -70,6 +70,9 @@ In this project, we are developing several components:
 -  **infra-as-code** : Infrastructure codes in HCL format.
 -  **scripts**    : Shell scripts to initialize the clusters, install applications, etc.
 
+The high-level architecture of this project is:
+
+![architecture](./img/arch.png)
 
 # **3. How-To: Build, Install, Run, and Use**
 
