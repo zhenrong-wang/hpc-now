@@ -33,7 +33,7 @@
 #define CMDLINE_LENGTH 2048
 #define SERVER_VERSION_CODE "0.2.0.0001"
 
-int main(int argc, char* argv[]){
+int main(int argc, char** argv){
     int socket_fd,connect_fd;
     int socket_opt_val=1;
     int port_num=0;
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]){
         }
         memset(ingress_buffer,0,sizeof(char)*BUFFER_SIZE);
         recv(connect_fd,ingress_buffer,BUFFER_SIZE,0);
-        sprintf(cmdline,"echo y-e-s | hpcopr %s",ingress_buffer);
+        sprintf(cmdline,"hpcopr -b %s",ingress_buffer);
         system(cmdline);
         system("tail -n 1 /usr/.hpc-now/.now-cluster-operation.log > /tmp/now-server-output.tmp 2>&1");
         file_p=fopen("/tmp/now-server-output.tmp","r");
@@ -139,4 +139,5 @@ int main(int argc, char* argv[]){
         close(connect_fd);
     }
     close(socket_fd);
+    return 0;
 }
