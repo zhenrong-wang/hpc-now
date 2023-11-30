@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.1.0008"
+#define CORE_VERSION_CODE "0.2.1.0009"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -234,8 +234,8 @@
 #define DATAMAN_COMMAND_NUM 17
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 11
-#define CMD_FLAG_NUM 30
-#define CMD_KWDS_NUM 44
+#define CMD_FLAG_NUM 31
+#define CMD_KWDS_NUM 47
 
 #define SPECIAL_PASSWORD_CHARS "~@&(){}[]=,.!#$"
 
@@ -259,6 +259,7 @@
 #define MINIMUM_ADD_USER_NUNMBER 2
 /* This macro guarantees the maximum waiting time for terraform running */
 #define MAXIMUM_WAIT_TIME 600
+#define MAXIMUM_WAIT_TIME_EXT 1200
 
 /* 
  * Usually you don't need to modify the macros in this section

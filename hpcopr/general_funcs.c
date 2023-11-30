@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -41,6 +40,7 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--edit",
     "--std", // standard info
     "--err", // error info
+    "--dbg", // tf dbg info
     "--this", // this
     "--hist", // historical
     "--mc", // rebuild mc
@@ -79,6 +79,7 @@ char command_keywords[CMD_KWDS_NUM][32]={
     "--jexec",
     "--jdata",
     "--level",
+    "--log",
     "--vol",
     "--cname", //cluster_name
     "--ak",
@@ -101,7 +102,9 @@ char command_keywords[CMD_KWDS_NUM][32]={
     "--conf",
     "--hloc",
     "--cloc",
-    "--hver"
+    "--hver",
+    "--dbg-level",
+    "--max-time"
 };
 
 int string_to_positive_num(char* string){
@@ -116,7 +119,7 @@ int string_to_positive_num(char* string){
         }
     }
     for(i=0;i<length;i++){
-        sum+=(*(string+i)-'0')*pow(10,length-i-1);
+        sum=sum*10+(*(string+i)-'0');
     }
     return sum;
 }

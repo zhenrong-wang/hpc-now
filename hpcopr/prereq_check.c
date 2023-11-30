@@ -55,8 +55,9 @@ extern char md5_gcp_tf_var[64];
 extern char md5_gcp_tf_zip_var[64];
 
 extern int batch_flag;
-
 extern char final_command[512];
+extern char dbg_level_flag[256];
+extern int max_time_flag;
 
 extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
 
@@ -1481,12 +1482,13 @@ int command_name_check(char* command_name_input, char* command_prompt, char* rol
 
 int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name, char* user_name, char* cluster_role){
     int command_flag=0;
+    int max_time_temp=0;
     char temp_cluster_name_specified[128]="";
     int flag1,flag2;
     char temp_cluster_name_switched[128]="";
     char temp_cluster_name[128]="";
     char temp_workdir[DIR_LENGTH]="";
-    char string_temp[128]="";
+    char string_temp[256]="";
     char cluster_name_source[16]="";
 
     if(argc<2){
@@ -1617,5 +1619,20 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the user name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",string_temp);
         strcpy(user_name,string_temp);
     }
+    cmd_keyword_check(argc,argv,"--dbg-level",string_temp); //Get the global option: debug level
+    if(strcmp(string_temp,"trace")!=0&&strcmp(string_temp,"debug")!=0&&strcmp(string_temp,"info")!=0&&strcmp(string_temp,"warn")!=0&&strcmp(string_temp,"error")!=0&&strcmp(string_temp,"off")!=0&&strcmp(string_temp,"TRACE")!=0&&strcmp(string_temp,"DEBUG")!=0&&strcmp(string_temp,"INFO")!=0&&strcmp(string_temp,"WARN")!=0&&strcmp(string_temp,"ERROR")!=0&&strcmp(string_temp,"OFF")!=0){
+        strcpy(dbg_level_flag,"warn");
+    }
+    else{
+        strcpy(dbg_level_flag,string_temp);
+    }
+    cmd_keyword_check(argc,argv,"--max-time",string_temp); //Get the global option: tf maximum execution time.
+    max_time_temp=string_to_positive_num(string_temp);
+    if(max_time_temp<MAXIMUM_WAIT_TIME||max_time_temp>MAXIMUM_WAIT_TIME_EXT){
+        max_time_flag=MAXIMUM_WAIT_TIME;
+    }
+    else{
+        max_time_flag=max_time_temp;
+    } 
     return 0;
 }

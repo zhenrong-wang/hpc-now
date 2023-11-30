@@ -37,6 +37,8 @@ void print_help(char* cmd_name){
     printf(GENERAL_BOLD "[ -INFO- ] Usage: hpcopr " RESET_DISPLAY GREY_LIGHT "-b" RESET_DISPLAY HIGH_GREEN_BOLD " Command " RESET_DISPLAY GENERAL_BOLD "CMD_FLAG ..." RESET_DISPLAY " [ " HIGH_CYAN_BOLD "KEY_WORD1" RESET_DISPLAY " KEY_STRING1 ] ...\n");
     printf("|          A Global and special CMD_FLAG : " GENERAL_BOLD "-b" RESET_DISPLAY " Enter the batch execution mode\n");
     printf("|          Global KEY_WORD and KEY_STRING: " GENERAL_BOLD "-c CLUSTER_NAME\n" RESET_DISPLAY "\n");
+    printf("|        * Advanced KEY_WORD & KEY_STRING: " GENERAL_BOLD "--dbg-level TF_DEBUG_LEVEL (Default: info)\n" RESET_DISPLAY "\n");
+    printf("|                                          " GENERAL_BOLD "--max-time  TF_MAXIMUM_WAIT_TIME (600~1200)\n" RESET_DISPLAY "\n");
     if(strcmp(cmd_name,"all")==0){
         printf(GENERAL_BOLD "| Command Instructions\n" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "+ 0    . Get-Started:" RESET_DISPLAY "\n");
@@ -240,7 +242,7 @@ void print_help(char* cmd_name){
     }
     if(strcmp(cmd_name,"viewlog")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "viewlog" RESET_DISPLAY "     :~ View the operation log of the current cluster.\n");
-        printf("|   --std  | --err     ~ Choose Standard output or Standart err stream.\n");
+        printf("|   --log STREAM_TYPE  ~ Choose standard output (std), standart error (err), or TF debug stream (dbg).\n");
         printf("|   --this | --hist    ~ Choose the log of this run or historical runs.\n");
         printf("|   --print            ~ Print out (not stream out) the contents.\n");
         printf("|    -d   EXPORT_DEST  ~ Export the log to a specified folder or file.\n");

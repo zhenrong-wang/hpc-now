@@ -1143,7 +1143,7 @@ void update_compute_template(char* stackdir, char* cloud_flag){
     single_file_to_running(filename_temp,cloud_flag);
 }
 
-int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, char* errlog_archive, int silent_flag){
+int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* errorlog, char* errlog_archive, int silent_flag){
 //    char cmdline[CMDLINE_LENGTH]="";
     int i=0;
     int total_minutes=0;
@@ -1167,7 +1167,7 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, char*
         printf(FATAL_RED_BOLD "[ FATAL: ] TF_OPTION_NOT_SUPPORTED." RESET_DISPLAY "\n");
         return -127;
     }
-    while(find_multi_keys(tf_realtime_log,findkey,"","","","")<1&&i<MAXIMUM_WAIT_TIME){
+    while(find_multi_keys(tf_realtime_log,findkey,"","","","")<1&&i<max_time){
         if(silent_flag!=0){
             fflush(stdin);
             printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " This may need %d min(s). %d sec(s) passed ... (%c)\r",total_minutes,i,*(annimation+i%4));
@@ -1187,7 +1187,7 @@ int wait_for_complete(char* tf_realtime_log, char* option, char* errorlog, char*
             }
         }
     }
-    if(i==MAXIMUM_WAIT_TIME){
+    if(i==max_time){
         if(silent_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_TIMEOUT." RESET_DISPLAY "\n");
         }
@@ -1364,13 +1364,15 @@ int cluster_full_running_or_not(char* workdir){
     return get_compute_node_num(filename_temp,"down");
 }
 
-int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char* crypto_keyfile, int silent_flag){
+int tf_execution(char* tf_exec, char* execution_name, char* tf_log_level, int max_time, char* workdir, char* crypto_keyfile, int silent_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
-    char tf_realtime_log[FILENAME_LENGTH];
-    char tf_realtime_log_archive[FILENAME_LENGTH];
-    char tf_error_log[FILENAME_LENGTH];
-    char tf_error_log_archive[FILENAME_LENGTH];
+    char tf_realtime_log[FILENAME_LENGTH]="";
+    char tf_realtime_log_archive[FILENAME_LENGTH]="";
+    char tf_error_log[FILENAME_LENGTH]="";
+    char tf_error_log_archive[FILENAME_LENGTH]="";
+    char tf_dbg_log[FILENAME_LENGTH]="";
+    char tf_dbg_log_archive[FILENAME_LENGTH]="";
     char cloud_flag[16]="";
 
     create_and_get_stackdir(workdir,stackdir);
@@ -1378,26 +1380,31 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     if(strcmp(cloud_flag,"CLOUD_G")==0){
         gcp_credential_convert(workdir,"decrypt",0);
     }
+
     sprintf(tf_realtime_log,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_realtime_log_archive,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_error_log,"%s%slog%stf_prep.err.log",workdir,PATH_SLASH,PATH_SLASH);
     sprintf(tf_error_log_archive,"%s%slog%stf_prep.err.log.archive",workdir,PATH_SLASH,PATH_SLASH);
+    sprintf(tf_dbg_log,"%s%slog%stf_dbg.log",workdir,PATH_SLASH,PATH_SLASH);
+    sprintf(tf_dbg_log_archive,"%s%slog%stf_dbg.log.archive",workdir,PATH_SLASH,PATH_SLASH);
     archive_log(tf_realtime_log_archive,tf_realtime_log);
     archive_log(tf_error_log_archive,tf_error_log);
+    archive_log(tf_dbg_log_archive,tf_dbg_log);
     if(strcmp(execution_name,"init")==0){
-        sprintf(cmdline,"cd %s%s && %s TF_LOG=trace&&%s TF_LOG_PATH=%s%slog%sterraform-trace.log && echo yes | %s %s %s -upgrade -lock=false > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
+        sprintf(cmdline,"cd %s%s && %s TF_LOG=%s&&%s TF_LOG_PATH=%s%slog%stf_dbg.log && echo yes | %s %s %s -upgrade -lock=false > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,tf_log_level,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
     }
     else{
-        sprintf(cmdline,"cd %s%s && %s TF_LOG=trace&&%s TF_LOG_PATH=%s%slog%sterraform-trace.log && echo yes | %s %s %s -lock=false -parallelism=1000 > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
+        sprintf(cmdline,"cd %s%s && %s TF_LOG=%s&&%s TF_LOG_PATH=%s%slog%stf_dbg.log && echo yes | %s %s %s -lock=false -parallelism=1000 > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,tf_log_level,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
     }
     system(cmdline);
     if(silent_flag!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",MAXIMUM_WAIT_TIME);
-        printf("|          Command: %s. View log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr viewlog --std\n" RESET_DISPLAY,execution_name);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",max_time);
+        printf("|          Command: %s. Debug Level: %s. View Log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr -b viewlog\n" RESET_DISPLAY,execution_name,tf_log_level);
     }
-    if(wait_for_complete(tf_realtime_log,execution_name,tf_error_log,tf_error_log_archive,1)!=0){
+    if(wait_for_complete(tf_realtime_log,execution_name,max_time,tf_error_log,tf_error_log_archive,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,tf_error_log);
+        archive_log(tf_dbg_log_archive,tf_dbg_log);
         if(strcmp(cloud_flag,"CLOUD_G")==0){
             gcp_credential_convert(workdir,"delete",0);
         }
@@ -1406,6 +1413,7 @@ int terraform_execution(char* tf_exec, char* execution_name, char* workdir, char
     if(strcmp(cloud_flag,"CLOUD_G")==0){
         gcp_credential_convert(workdir,"delete",0);
     }
+    archive_log(tf_dbg_log_archive,tf_dbg_log);
     return 0;
 }
 

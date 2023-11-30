@@ -78,8 +78,11 @@ char md5_azad_tf_var[64]="";
 char md5_azad_tf_zip_var[64]="";
 char md5_gcp_tf_var[64]="";
 char md5_gcp_tf_zip_var[64]="";
+
 int batch_flag=1; // If batch_flag=0: Batch Mode. If batch_flag!=0: interactive mode. use the -b flag
 char final_command[512]="";
+char dbg_level_flag[256]=""; //TF debug level. Only valid by specifying --dbd-level DBG_LEVEL. Default: info
+int max_time_flag=0; //TF max_time, only valid by specifying --max-time MAX_TIME. Default: MAXIMUM_WAIT_TIME, should be 600~1200
 
 /*
  * GEN: GENERAL COMMANDS
@@ -887,13 +890,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(final_command,"viewlog")==0){
         prompt_to_input_optional_args("Export to a local path?",CONFIRM_STRING_QUICK,"Specify a local path (directory or file).",string_temp,batch_flag,argc,argv,"-d");
-        run_flag=prompt_to_confirm_args("View errpr log? (Default: std output)",CONFIRM_STRING_QUICK,batch_flag,argc,argv,"--err");
-        if(run_flag==2||run_flag==0){
-            strcpy(stream_name,"err");
-        }
-        else{
-            strcpy(stream_name,"std");
-        }
+        prompt_to_input_optional_args("Specify a log stream? (Default: std output stream)",CONFIRM_STRING_QUICK,"Select a log stream: std(default)   err   dbg",stream_name,batch_flag,argc,argv,"--log");
         run_flag=prompt_to_confirm_args("View historical run log? (Default: realtime run log)",CONFIRM_STRING_QUICK,batch_flag,argc,argv,"--hist");
         if(run_flag==2||run_flag==0){
             strcpy(log_type,"archive");
@@ -986,7 +983,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"graph")==0){
-        prompt_to_input_optional_args("Specify a graph level? (Default: detailed graph)",CONFIRM_STRING_QUICK,"Select a level: csv   txt   graph(default)]",string_temp,batch_flag,argc,argv,"--level");
+        prompt_to_input_optional_args("Specify a graph level? (Default: detailed graph)",CONFIRM_STRING_QUICK,"Select a level: csv   txt   graph(default)",string_temp,batch_flag,argc,argv,"--level");
         if(strcmp(string_temp,"csv")==0){
             level_flag=2;
         }
