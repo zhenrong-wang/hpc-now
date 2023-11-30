@@ -403,7 +403,7 @@ int main(int argc, char* argv[]){
                 print_help("all");
                 return 0;
             }
-            confirm_flag=prompt_to_confirm("Select a command? (will display the whole doc if no command selected)",CONFIRM_STRING,batch_flag);
+            confirm_flag=prompt_to_confirm("Select a command? (will display the whole doc if no command selected)",CONFIRM_STRING_QUICK,batch_flag);
             if(confirm_flag==1||confirm_flag==-1){
                 print_help("all");
                 return 0;
