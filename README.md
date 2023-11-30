@@ -4,7 +4,7 @@
 
 **IMPORTANT: [Terraform](http://www.terraform.io) has changed its license from MPL to BSL, which is not friendly to the open-source developers and community. We are switching to [openTofu](https://github.com/opentofu/opentofu/) now. Anyone interested in it, please checkout the branch dev-0.2.2-opentofu for developement and testing.**
 
-**IMPORTANT: Contributions are highly welcomed and respected. Please see [CONTRIBUTING](./CONTRIBUTING.md).**
+**Contributions are highly welcomed and respected. Please see [CONTRIBUTING](./CONTRIBUTING.md).**
 
 - [**1. Project Background**](#1-project-background)
 - [**2. Core Components**](#2-core-components)
