@@ -1361,7 +1361,7 @@ int cluster_empty_or_not(char* workdir){
 
 int cluster_asleep_or_not(char* workdir){
     char master_state[32]="";
-    char running_compute_nodes[4]="";
+    char running_compute_nodes[8]="";
     get_state_value(workdir,"master_status:",master_state);
     if(strcmp(master_state,"running")!=0&&strcmp(master_state,"Running")!=0&&strcmp(master_state,"RUNNING")!=0){
         return 0;
@@ -1378,11 +1378,15 @@ int cluster_asleep_or_not(char* workdir){
 }
 
 int cluster_full_running_or_not(char* workdir){
-    char stackdir[DIR_LENGTH]="";
-    create_and_get_stackdir(workdir,stackdir);
-    char filename_temp[FILENAME_LENGTH]="";
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
-    return get_compute_node_num(filename_temp,"down");
+    if(cluster_asleep_or_not(workdir)==0){
+        return 1;
+    }
+    char down_compute_nodes[8]="";
+    get_state_value(workdir,"down_compute_nodes:",down_compute_nodes);
+    if(strcmp(down_compute_nodes,"0")==0){
+        return 0;
+    }
+    return 1;
 }
 
 int tf_execution(char* tf_exec, char* execution_name, char* tf_log_level, int max_time, char* workdir, char* crypto_keyfile, int silent_flag){
