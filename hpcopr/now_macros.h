@@ -253,7 +253,7 @@
 #define GENERAL_SLEEP_TIME 30
 
 /* You can modify the MAXIMUM_ADD_NODE_NUMBER to allow adding more than 16 nodes in one command */
-#define MAXIMUM_ADD_NODE_NUMBER 32
+#define MAXIMUM_ADD_NODE_NUMBER 64
 #define MINIMUM_ADD_NODE_NUMBER 1
 #define MAXIMUM_ADD_USER_NUMBER 32
 #define MINIMUM_ADD_USER_NUNMBER 2

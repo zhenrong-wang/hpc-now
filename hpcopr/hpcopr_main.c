@@ -1079,17 +1079,17 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"rotate-key")==0){
-        if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
-            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
-            check_and_cleanup(workdir);
-            return 3;
-        }
         get_cloud_flag(workdir,cloud_flag);
         cmd_keyword_check(argc,argv,"--ak",cloud_ak);
         cmd_keyword_check(argc,argv,"--sk",cloud_sk);
         run_flag=prompt_to_confirm_args("Echo the credentials to this window (RISKY)?",CONFIRM_STRING,batch_flag,argc,argv,"--echo");
         if(run_flag==2||run_flag==0){
             strcpy(key_echo_flag,"echo");
+        }
+        if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
+            check_and_cleanup(workdir);
+            return 3;
         }
         run_flag=rotate_new_keypair(workdir,cloud_ak,cloud_sk,crypto_keyfile,key_echo_flag,batch_flag);
         if(run_flag==-1){
@@ -1339,17 +1339,17 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 51;
         }
-        if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
-            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
-            check_and_cleanup(workdir);
-            return 3;
-        }
         run_flag=prompt_to_confirm_args("Edit the conf file after downloading? (Default: don't edit)",CONFIRM_STRING_QUICK,batch_flag,argc,argv,"--edit");
         if(run_flag==2||run_flag==0){
             strcpy(string_temp,"edit");
         }
         else{
             strcpy(string_temp,"");
+        }
+        if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
+            check_and_cleanup(workdir);
+            return 3;
         }
         run_flag=get_default_conf(cluster_name,crypto_keyfile,string_temp);
         if(run_flag==1||run_flag==127){
@@ -1711,12 +1711,12 @@ int main(int argc, char* argv[]){
                 return 38;
             }
         }
+        run_flag=prompt_to_confirm_args("Wakeup all the nodes? (Default: minimal)",CONFIRM_STRING,batch_flag,argc,argv,"--all");
         if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=prompt_to_confirm_args("Wakeup all the nodes? (Default: minimal)",CONFIRM_STRING,batch_flag,argc,argv,"--all");
         if(run_flag==2||run_flag==0){
             run_flag=cluster_wakeup(workdir,crypto_keyfile,"all");
         }
@@ -2031,21 +2031,15 @@ int main(int argc, char* argv[]){
     }
     
     if(strcmp(final_command,"delc")==0){
+        if(prompt_to_input_required_args("Specify how many nodes to be deleted.",string_temp,batch_flag,argc,argv,"--nn")==1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a numbner." RESET_DISPLAY "\n");
+            check_and_cleanup(workdir);
+            return 1;
+        }
         if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);
             return 3;
-        }
-        run_flag=prompt_to_confirm_args("Delete ALL the compute nodes?",CONFIRM_STRING,batch_flag,argc,argv,"--all");
-        if(run_flag==2||run_flag==0){
-            strcpy(string_temp,"all");
-        }
-        else{
-            if(prompt_to_input_required_args("Specify how many nodes to be deleted.",string_temp,batch_flag,argc,argv,"--nn")==1){
-                printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a numbner." RESET_DISPLAY "\n");
-                check_and_cleanup(workdir);
-                return 1;
-            }
         }
         run_flag=delete_compute_node(workdir,crypto_keyfile,string_temp,batch_flag);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
@@ -2059,11 +2053,6 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 1;
         }
-        if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
-            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
-            check_and_cleanup(workdir);
-            return 3;
-        }
         run_flag=prompt_to_input_required_args("Specify how many nodes to be added.",node_num_string,batch_flag,argc,argv,"--nn");
         if(run_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a number (range: 1-%d) as the second parameter.\n",MAXIMUM_ADD_NODE_NUMBER);
@@ -2071,11 +2060,17 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 5;
         }
+        if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
+            check_and_cleanup(workdir);
+            return 3;
+        }
         run_flag=add_compute_node(workdir,crypto_keyfile,node_num_string);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;
     }
+
     if(strcmp(final_command,"shutdownc")==0){
         if(strcmp(cloud_flag,"CLOUD_F")==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Currently Azure (HPC-NOW Code: CLOUD_F) doesn't support this operation." RESET_DISPLAY "\n");
@@ -2083,21 +2078,15 @@ int main(int argc, char* argv[]){
             check_and_cleanup("");
             return 6;
         }
+        if(prompt_to_input_required_args("Specify how many nodes to be shutdown.",string_temp,batch_flag,argc,argv,"--nn")==1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a number or 'all'." RESET_DISPLAY "\n");
+            check_and_cleanup(workdir);
+            return 1;
+        }
         if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);
             return 3;
-        }
-        run_flag=prompt_to_confirm_args("Shutdown all the compute nodes?",CONFIRM_STRING,batch_flag,argc,argv,"--all");
-        if(run_flag==2||run_flag==0){
-            strcpy(string_temp,"all");
-        }
-        else{
-            if(prompt_to_input_required_args("Specify how many nodes to be shutdown.",string_temp,batch_flag,argc,argv,"--nn")==1){
-                printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a numbner." RESET_DISPLAY "\n");
-                check_and_cleanup(workdir);
-                return 1;
-            }
         }
         run_flag=shutdown_compute_nodes(workdir,crypto_keyfile,string_temp,batch_flag);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
@@ -2112,21 +2101,15 @@ int main(int argc, char* argv[]){
             check_and_cleanup("");
             return 6;
         }
+        if(prompt_to_input_required_args("Specify how many nodes to be turned on.",string_temp,batch_flag,argc,argv,"--nn")==1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a numbner or 'all'." RESET_DISPLAY "\n");
+            check_and_cleanup(workdir);
+            return 1;
+        }
         if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
             write_operation_log(workdir,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);
             return 3;
-        }
-        run_flag=prompt_to_confirm_args("Turn on all the compute nodes?",CONFIRM_STRING,batch_flag,argc,argv,"--all");
-        if(run_flag==2||run_flag==0){
-            strcpy(string_temp,"all");
-        }
-        else{
-            if(prompt_to_input_required_args("Specify how many nodes to be turned on.",string_temp,batch_flag,argc,argv,"--nn")==1){
-                printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a numbner." RESET_DISPLAY "\n");
-                check_and_cleanup(workdir);
-                return 1;
-            }
         }
         run_flag=turn_on_compute_nodes(workdir,crypto_keyfile,string_temp,batch_flag);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);

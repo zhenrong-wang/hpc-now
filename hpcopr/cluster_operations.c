@@ -969,7 +969,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
     if(strcmp(param,"all")!=0){
         del_num=string_to_positive_num(param);
         if(del_num==0||del_num<0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or a positive number. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'all' or a positive number. Exit now." RESET_DISPLAY "\n");
             return 1;
         }
         if(del_num>compute_node_num){
@@ -1169,7 +1169,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     if(strcmp(param,"all")!=0){
         down_num=string_to_positive_num(param);
         if(down_num<0||down_num==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or a positive number. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'all' or a positive number. Exit now." RESET_DISPLAY "\n");
             return 1;
         }
         if(down_num>compute_node_num){
@@ -1308,7 +1308,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     if(strcmp(param,"all")!=0){
         on_num=string_to_positive_num(param);
         if(on_num<0||on_num==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either '--all' or a positive number. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'all' or a positive number. Exit now." RESET_DISPLAY "\n");
             return 1;
         }
         if(on_num+compute_node_num_on>compute_node_num){

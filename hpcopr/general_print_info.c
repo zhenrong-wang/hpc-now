@@ -251,11 +251,9 @@ void print_help(char* cmd_name){
         printf(GENERAL_BOLD "\n+ V  . Cluster Operation:" RESET_DISPLAY "\n");
     }
     if(strcmp(cmd_name,"delc")==0||strcmp(cmd_name,"all")==0){
-        printf("|  " HIGH_GREEN_BOLD "delc" RESET_DISPLAY "        :~ Delete specified compute nodes:\n");
-        printf("|   --all         ~ Delete *ALL* the compute nodes, you can run 'hpcopr addc' to\n");
-        printf("|                 ~ add compute nodes later.\n");
-        printf("|   --nn NODE_NUM ~ Delete the last NUM of the compute nodes. NUM should be less\n");
-        printf("|                 ~ than the current quantity of compute nodes.\n");
+        printf("|  " HIGH_GREEN_BOLD "delc" RESET_DISPLAY "        :~ Delete specified compute nodes.\n");
+        printf("|   --nn NODE_NUM ~ Delete the last NUM of the compute nodes. '--nn all'\n");
+        printf("|                 ~ means all nodes.\n");
     }
     if(strcmp(cmd_name,"addc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "addc" RESET_DISPLAY "        :~ Add compute nodes to current cluster. You must specify how many\n");
@@ -265,14 +263,14 @@ void print_help(char* cmd_name){
     if(strcmp(cmd_name,"shutdownc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "shutdownc" RESET_DISPLAY "   :~ Shutdown specified compute nodes. Similar to 'delc',\n");
         printf("|              :~ you can specify to shut down all or part of the compute nodes by\n");
-        printf("|              :~ the param 'all' or 'NUM'.\n");
-        printf("|   --all | --nn NODE_NUM .\n");
+        printf("|              :~ the param --nn NODE_NUM.\n");
+        printf("|   --nn NODE_NUM ~ Nodes to be shutdown, '--nn all' means all nodes.\n");
     }
     if(strcmp(cmd_name,"turnonc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "turnonc" RESET_DISPLAY "     :~ Turn on specified compute nodes. Similar to 'delc',\n");
         printf("|              :~ you can specify to turn on all or part of the compute nodes by\n");
-        printf("|              :~ the parameter 'all' or 'NUM'.\n");
-        printf("|   --all | --nn NODE_NUM .\n");
+        printf("|              :~ the param --nn NODE_NUM.\n");
+        printf("|   --nn NODE_NUM ~ Nodes to be turned on, '--nn all' means all nodes.\n");
     }
     if(strcmp(cmd_name,"reconfc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "reconfc" RESET_DISPLAY "     :~ Reconfigure all the compute nodes.\n");
