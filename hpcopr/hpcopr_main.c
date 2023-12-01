@@ -2156,7 +2156,7 @@ int main(int argc, char* argv[]){
             return 1;
         }
         if(strcmp(final_command,"reconfc")==0&&strcmp(cloud_flag,"CLOUD_C")==0){
-            run_flag=prompt_to_confirm_args("Turn off hyperthreading? (Default: ON)",CONFIRM_STRING,batch_flag,argc,argv,"--htoff");
+            run_flag=prompt_to_confirm_args("Turn off hyperthreading or change HT option? (Default: HT-ON/Unchanged)",CONFIRM_STRING,batch_flag,argc,argv,"--htoff");
             if(run_flag==2||run_flag==0){
                 strcpy(string_temp2,"htoff");
             }
