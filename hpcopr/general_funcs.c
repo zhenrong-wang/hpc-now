@@ -667,6 +667,8 @@ int file_exist_or_not(char* filename){
     }
 }
 
+// return <1, empty
+// return >1, with contents
 int file_empty_or_not(char* filename){
     FILE* file_p=fopen(filename,"r");
     char temp_line[LINE_LENGTH]="";

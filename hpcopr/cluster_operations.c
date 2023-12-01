@@ -1482,128 +1482,64 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     else{
         find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
     }
-    if(strcmp(prev_config,new_config)==0){
-        if(strcmp(cloud_flag,"CLOUD_C")!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
-            printf("|          Nothing changed. Exit now.\n");
-            delete_decrypted_files(workdir,crypto_keyfile);
-            return 1;
+    if(strcmp(prev_config,new_config)==0&&strcmp(cloud_flag,"CLOUD_C")!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
+        printf("|          Nothing changed. Exit now.\n");
+        delete_decrypted_files(workdir,crypto_keyfile);
+        return 1;
+    }
+    if(strcmp(cloud_flag,"CLOUD_C")==0){
+        if(strcmp(htflag,"hton")==0&&find_multi_keys(filename_temp,"cpu_threads_per_core = 1","","","","")>0){
+            for(i=1;i<compute_node_num+1;i++){
+                sprintf(filename_temp2,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
+                sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
+                system(cmdline);
+                global_replace(filename_temp2,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
+                if(strcmp(prev_config,new_config)!=0){
+                    cpu_core_num=get_cpu_num(new_config)/2;
+                    find_and_get(filename_temp2,"cpu_core_count =","","",1,"cpu_core_count =","","",' ',3,string_temp);
+                    sprintf(string_temp3,"cpu_core_count = %s",string_temp);
+                    sprintf(string_temp2,"cpu_core_count = %d",cpu_core_num);
+                    global_replace(filename_temp2,string_temp3,string_temp2);
+                }
+                global_replace(filename_temp2,"  cpu_threads_per_core","#DELETE_HEADER_FOR_HT_OFF  cpu_threads_per_core"); //Delete the header of the 2 lines in the iac template
+                global_replace(filename_temp2,"  cpu_core_count","#DELETE_HEADER_FOR_HT_OFF  cpu_core_count"); //Delete the header of the 2 lines in the iac template
+            }
+            reinit_flag=1;
         }
-        else{
-            if(strlen(htflag)==0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
-                printf("|          Nothing changed. Exit now.\n");
-                delete_decrypted_files(workdir,crypto_keyfile);
-                return 1;
-            }
-            else if(strcmp(htflag,"hton")!=0&&strcmp(htflag,"htoff")!=0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
-                printf("|          Nothing changed. Exit now.\n");
-                delete_decrypted_files(workdir,crypto_keyfile);
-                return 1;
-            }
-            else if(strcmp(htflag,"hton")==0&&find_multi_keys(filename_temp,"cpu_threads_per_core = 2","","","","")>0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
-                printf("|          Nothing changed. Exit now.\n");
-                delete_decrypted_files(workdir,crypto_keyfile);
-                return 1;
-            }
-            else if(strcmp(htflag,"htoff")==0&&find_multi_keys(filename_temp,"cpu_threads_per_core = 1","","","","")>0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
-                printf("|          Nothing changed. Exit now.\n");
-                delete_decrypted_files(workdir,crypto_keyfile);
-                return 1;
-            }
-            if(find_multi_keys(filename_temp,"cpu_threads_per_core = 2","","","","")>0){
+        else if(strcmp(htflag,"htoff")==0){
+            if(find_multi_keys(filename_temp,"cpu_threads_per_core = 2","","","","")>0||find_multi_keys(filename_temp,"#DELETE_HEADER_FOR_HT_OFF  ","","","","")>0){
                 for(i=1;i<compute_node_num+1;i++){
                     sprintf(filename_temp2,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
                     sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
                     system(cmdline);
                     global_replace(filename_temp2,"cpu_threads_per_core = 2","cpu_threads_per_core = 1");
+                    if(strcmp(prev_config,new_config)!=0){
+                        cpu_core_num=get_cpu_num(new_config)/2;
+                        find_and_get(filename_temp2,"cpu_core_count =","","",1,"cpu_core_count =","","",' ',3,string_temp);
+                        sprintf(string_temp3,"cpu_core_count = %s",string_temp);
+                        sprintf(string_temp2,"cpu_core_count = %d",cpu_core_num);
+                        global_replace(filename_temp2,string_temp3,string_temp2);
+                    }
+                    global_replace(filename_temp2,"#DELETE_HEADER_FOR_HT_OFF  ","  ");
                 }
                 reinit_flag=1;
             }
-            if(find_multi_keys(filename_temp,"cpu_threads_per_core = 1","","","","")>0){
-                for(i=1;i<compute_node_num+1;i++){
-                    sprintf(filename_temp2,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
-                    sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
-                    system(cmdline);
-                    global_replace(filename_temp2,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
-                }
-                reinit_flag=1;
-            }
-            if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
-                for(i=1;i<compute_node_num+1;i++){
-                    sprintf(cmdline,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
-                    system(cmdline);
-                }
-                if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
-                    delete_decrypted_files(workdir,crypto_keyfile);
-                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-                    return -127;
-                }
+        }
+        else{
+            if(strcmp(prev_config,new_config)==0){
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
+                printf("|          Nothing changed. Exit now.\n");
                 delete_decrypted_files(workdir,crypto_keyfile);
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
-                return 3;
+                return 1;
             }
-            for(i=1;i<compute_node_num+1;i++){
-                sprintf(node_name_temp,"compute%d",i);
-                update_usage_summary(workdir,crypto_keyfile,node_name_temp,"stop");
-            }
-            update_compute_template(stackdir,cloud_flag);
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
-            getstate(workdir,crypto_keyfile);
-            graph(workdir,crypto_keyfile,0);
-            printf("|\n");
-            sync_statefile(workdir,sshkey_dir);
-            get_latest_hosts(stackdir,filename_temp);
-            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
-            remote_exec(workdir,sshkey_dir,"connect",1);
-            remote_exec(workdir,sshkey_dir,"all",2);
-            for(i=1;i<compute_node_num+1;i++){
-                sprintf(node_name_temp,"compute%d",i);
-                update_usage_summary(workdir,crypto_keyfile,node_name_temp,"start");
-            }
-            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The compute nodes have been reconfigured.\n");
-            delete_decrypted_files(workdir,crypto_keyfile);
-            return 0;
         }
     }
-    if(strcmp(cloud_flag,"CLOUD_C")!=0){
-        for(i=1;i<compute_node_num+1;i++){
-            sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
-            sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            global_replace(filename_temp,prev_config,new_config);
-        }
-    }
-    else{
-        for(i=1;i<compute_node_num+1;i++){
-            sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
-            sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            global_replace(filename_temp,prev_config,new_config);
-            cpu_core_num=get_cpu_num(new_config)/2;
-            find_and_get(filename_temp,"cpu_core_count =","","",1,"cpu_core_count =","","",' ',3,string_temp);
-            sprintf(string_temp3,"cpu_core_count = %s",string_temp);
-            sprintf(string_temp2,"cpu_core_count = %d",cpu_core_num);
-            global_replace(filename_temp,string_temp3,string_temp2);
-        }
-        if(strcmp(htflag,"hton")==0&&find_multi_keys(filename_temp,"cpu_threads_per_core = 1","","","","")>0){
-            for(i=1;i<compute_node_num+1;i++){
-                printf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
-                global_replace(filename_temp,"cpu_threads_per_core = 1","cpu_threads_per_core = 2");
-            }
-            reinit_flag=1;
-        }
-        if(strcmp(htflag,"htoff")==0&&find_multi_keys(filename_temp,"cpu_threads_per_core = 2","","","","")>0){
-            for(i=1;i<compute_node_num+1;i++){
-                sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
-                global_replace(filename_temp,"cpu_threads_per_core = 2","cpu_threads_per_core = 1");
-            }
-            reinit_flag=2;
-        }
+    for(i=1;i<compute_node_num+1;i++){
+        sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
+        sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        global_replace(filename_temp,prev_config,new_config);
     }
     if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");

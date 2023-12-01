@@ -46,6 +46,7 @@ int tf_execution(char* tf_exec, char* execution_name, char* tf_log_level, int ma
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
 int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bucket_flag, char* root_flag);
 int check_pslock(char* workdir);
+int valid_vm_config_or_not(char* workdir, char* vm_config);
 
 int confirm_to_operate_cluster(char* current_cluster_name, int batch_flag_local);
 int prompt_to_confirm(const char* prompt_string, const char* confirm_string, int batch_flag_local);

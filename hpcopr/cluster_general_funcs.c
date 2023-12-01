@@ -575,6 +575,27 @@ int check_pslock(char* workdir){
     }
 }
 
+//return 0, valid
+//return non-0, invalid
+int valid_vm_config_or_not(char* workdir, char* vm_config){
+    char stackdir[DIR_LENGTH]="";
+    char config_list_file[FILENAME_LENGTH]="";
+    char vm_config_ext[64]="";
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(config_list_file,"%s%sreconf.list",stackdir,PATH_SLASH);
+    if(file_empty_or_not(config_list_file)<1){
+        return -1;
+    }
+    if(strlen(vm_config)==0||strlen(vm_config)>16){
+        return 1;
+    }
+    sprintf(vm_config_ext," %s ",vm_config);
+    if(find_multi_keys(config_list_file,vm_config_ext,"","","","")<1){
+        return 1;
+    }
+    return 0;
+}
+
 int get_compute_node_num(char* statefile, char* option){
     char get_num[4]="";
     if(strcmp(option,"all")==0){

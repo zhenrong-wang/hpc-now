@@ -2133,6 +2133,7 @@ int main(int argc, char* argv[]){
         check_and_cleanup(workdir);
         return run_flag;
     }
+
     if(strcmp(final_command,"reconfc")==0||strcmp(final_command,"reconfm")==0){
         if(check_reconfigure_list(workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the list. Have you initiated this cluster?" RESET_DISPLAY "\n");
@@ -2148,10 +2149,16 @@ int main(int argc, char* argv[]){
             }
         }
         run_flag=prompt_to_input_required_args("Select a configuration from the list above.",string_temp,batch_flag,argc,argv,"--conf");
+        if(valid_vm_config_or_not(workdir,string_temp)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The specified configuration " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is not in the list." RESET_DISPLAY "\n",string_temp);
+            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
+            check_and_cleanup(workdir);
+            return 1;
+        }
         if(strcmp(final_command,"reconfc")==0&&strcmp(cloud_flag,"CLOUD_C")==0){
-            run_flag=prompt_to_confirm_args("Turn off hyperthreading? (Default: on)",CONFIRM_STRING,batch_flag,argc,argv,"--htoff");
+            run_flag=prompt_to_confirm_args("Turn off hyperthreading? (Default: ON)",CONFIRM_STRING,batch_flag,argc,argv,"--htoff");
             if(run_flag==2||run_flag==0){
-                strcpy(string_temp2,"off");
+                strcpy(string_temp2,"htoff");
             }
         }
         if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){

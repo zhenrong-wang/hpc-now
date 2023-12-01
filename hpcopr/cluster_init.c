@@ -861,6 +861,9 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     insert_lines(filename_temp,"#INSERT_AMI_HERE",os_image);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
+    if(threads==1){ //Hyperthreading off
+        global_replace(filename_temp,"#DELETE_HEADER_FOR_HT_OFF  ","  "); //Delete the header of the 2 lines in the iac template
+    }
     sprintf(string_temp,"%d",cpu_core_num);
     global_replace(filename_temp,"CPU_CORE_NUM",string_temp);
     sprintf(string_temp,"%d",threads);
