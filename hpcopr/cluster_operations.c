@@ -1524,16 +1524,19 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             if(ht_diff_flag!=0){
                 delete_lines_by_kwd(filename_temp2,"cpu_core_count =",1);
                 delete_lines_by_kwd(filename_temp2,"cpu_threads_per_core =",1);
+                sprintf(string_temp2,"cpu_core_count = %d",cpu_core_num);
+                insert_lines(filename_temp2,"#INSERT_HT_HERE",string_temp2);
                 if(strcmp(prev_htflag,"ON")==0){
                     insert_lines(filename_temp2,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
-                    sprintf(string_temp2,"cpu_core_count = %d",cpu_core_num);
-                    insert_lines(filename_temp2,"#INSERT_HT_HERE",string_temp2);
+                }
+                else{
+                    insert_lines(filename_temp2,"#INSERT_HT_HERE","cpu_threads_per_core = 2");
                 }
             }
             else{
+                delete_lines_by_kwd(filename_temp2,"cpu_core_count =",1);
+                delete_lines_by_kwd(filename_temp2,"cpu_threads_per_core =",1);
                 if(strcmp(prev_htflag,"OFF")==0){
-                    delete_lines_by_kwd(filename_temp2,"cpu_core_count =",1);
-                    delete_lines_by_kwd(filename_temp2,"cpu_threads_per_core =",1);
                     insert_lines(filename_temp2,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
                     sprintf(string_temp2,"cpu_core_count = %d",cpu_core_num);
                     insert_lines(filename_temp2,"#INSERT_HT_HERE",string_temp2);

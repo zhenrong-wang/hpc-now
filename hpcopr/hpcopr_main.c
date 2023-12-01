@@ -2118,7 +2118,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"reconfc")==0||strcmp(final_command,"reconfm")==0){
-        if(check_reconfigure_list(workdir,0)!=0){
+        if(check_reconfigure_list(workdir,1)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the list. Have you initiated this cluster?" RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"FATAL_INTERNAL_ERROR",125);
             check_and_cleanup(workdir);
