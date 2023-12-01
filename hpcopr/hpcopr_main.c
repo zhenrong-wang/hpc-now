@@ -1731,7 +1731,7 @@ int main(int argc, char* argv[]){
     if(strcmp(final_command,"reconfc")==0||strcmp(final_command,"reconfm")==0){
         if(cmd_flag_check(argc,argv,"--list")==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Available configuration list:\n|\n");
-            if(check_reconfigure_list(workdir)!=0){
+            if(check_reconfigure_list(workdir,1)!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the list. Have you inited this cluster?" RESET_DISPLAY "\n");
                 write_operation_log(cluster_name,operation_log,argc,argv,"FATAL_INTERNAL_ERROR",125);
                 check_and_cleanup(workdir);
@@ -2064,7 +2064,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=prompt_to_input_required_args("Specify how many nodes to be added.",string_temp,batch_flag,argc,argv,"--nn");
+        run_flag=prompt_to_input_required_args("Specify how many nodes to be added.",node_num_string,batch_flag,argc,argv,"--nn");
         if(run_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to specify a number (range: 1-%d) as the second parameter.\n",MAXIMUM_ADD_NODE_NUMBER);
             write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -2135,7 +2135,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"reconfc")==0||strcmp(final_command,"reconfm")==0){
-        if(check_reconfigure_list(workdir)!=0){
+        if(check_reconfigure_list(workdir,0)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the list. Have you initiated this cluster?" RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"FATAL_INTERNAL_ERROR",125);
             check_and_cleanup(workdir);
@@ -2156,10 +2156,7 @@ int main(int argc, char* argv[]){
             return 1;
         }
         if(strcmp(final_command,"reconfc")==0&&strcmp(cloud_flag,"CLOUD_C")==0){
-            run_flag=prompt_to_confirm_args("Turn off hyperthreading or change HT option? (Default: HT-ON/Unchanged)",CONFIRM_STRING,batch_flag,argc,argv,"--htoff");
-            if(run_flag==2||run_flag==0){
-                strcpy(string_temp2,"htoff");
-            }
+            prompt_to_input_required_args("Specify the HT option (Case-Sensitive!): ON OFF skip(Default)",string_temp2,batch_flag,argc,argv,"--ht");
         }
         if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);

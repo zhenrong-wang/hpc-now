@@ -54,8 +54,7 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--month",
     "--gcp",
     "--rdp",
-    "--copypass",
-    "--htoff"
+    "--copypass"
 };
 
 char command_keywords[CMD_KWDS_NUM][32]={
@@ -1169,6 +1168,8 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
     return 0;
 }
 
+//overwrite flag =0, not replace
+//overwrite flag !=0, replace.
 int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     if(file_exist_or_not(filename)!=0){
         return -1;

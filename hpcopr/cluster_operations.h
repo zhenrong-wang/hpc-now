@@ -19,7 +19,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
 int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_string);
 int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local);
 int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local);
-int check_reconfigure_list(char* workdir);
+int check_reconfigure_list(char* workdir, int print_flag);
 int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_config, char* htflag);
 int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_config);
 int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume);

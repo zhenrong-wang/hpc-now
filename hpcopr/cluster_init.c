@@ -616,10 +616,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         return 2;
     }
     if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_aws.compute %s%shpc_stack.compute %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s %s%shpc_stack_aws.compute.v2 %s%shpc_stack.compute %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     }
     else{
-        sprintf(cmdline,"curl %shpc_stack_aws.compute -o %s%shpc_stack.compute -s",url_aws_root,stackdir,PATH_SLASH);
+        sprintf(cmdline,"curl %shpc_stack_aws.compute.v2 -o %s%shpc_stack.compute -s",url_aws_root,stackdir,PATH_SLASH);
     }
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
@@ -862,12 +862,10 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     insert_lines(filename_temp,"#INSERT_AMI_HERE",os_image);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     if(threads==1){ //Hyperthreading off
-        global_replace(filename_temp,"#DELETE_HEADER_FOR_HT_OFF  ","  "); //Delete the header of the 2 lines in the iac template
+        sprintf(string_temp,"cpu_core_count = %d",cpu_core_num);
+        insert_lines(filename_temp,"#INSERT_HT_HERE",string_temp);
+        insert_lines(filename_temp,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
     }
-    sprintf(string_temp,"%d",cpu_core_num);
-    global_replace(filename_temp,"CPU_CORE_NUM",string_temp);
-    sprintf(string_temp,"%d",threads);
-    global_replace(filename_temp,"THREADS_PER_CORE",string_temp);
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
 

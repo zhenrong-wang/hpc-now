@@ -833,10 +833,10 @@ int getstate(char* workdir, char* crypto_filename){
         find_and_get(compute_template,"instance_type","","",1,"instance_type","","",'.',3,compute_config);
     }
     if(find_multi_keys(compute_template,"cpu_threads_per_core = 1","","","","")!=0){
-        strcpy(ht_flag,"htoff");
+        strcpy(ht_flag,"OFF");
     }
     else{
-        strcpy(ht_flag,"hton");
+        strcpy(ht_flag,"ON");
     }
     if(find_multi_keys(compute_template,"instance_charge_type = \"PrePaid\"","","","","")>0||find_multi_keys(compute_template,"instance_charge_type = \"PREPAID\"","","","","")>0||find_multi_keys(compute_template,"charging_mode = \"prePaid\"","","","","")>0||find_multi_keys(compute_template,"payment_timing = \"Prepaid\"","","","","")>0){
         strcpy(pay_method,"month");

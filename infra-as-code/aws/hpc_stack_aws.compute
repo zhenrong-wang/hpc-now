@@ -11,8 +11,8 @@ resource "aws_instance" "COMPUTE_NODE_N" {
   instance_type = data.aws_ec2_instance_types.COMPUTE_INST.instance_types.0
   subnet_id = aws_subnet.hpc_stack_subnet.id
   vpc_security_group_ids = [aws_security_group.group_intra.id]
-#DELETE_HEADER_FOR_HT_OFF  cpu_core_count = CPU_CORE_NUM
-#DELETE_HEADER_FOR_HT_OFF  cpu_threads_per_core = THREADS_PER_CORE
+  cpu_core_count = CPU_CORE_NUM
+  cpu_threads_per_core = THREADS_PER_CORE
   root_block_device {
     volume_size = 30
   }
