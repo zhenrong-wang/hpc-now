@@ -1245,8 +1245,9 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char stackdir[DIR_LENGTH]="";
     char cluster_name_column[LINE_LENGTH_SHORT]="";
     char ht_status[16]="";
+    char ht_status_ext[32]="";
     int node_num=0;
-    char node_num_string[4]="";
+    char node_num_string[8]="";
     int running_node_num=0;
     char running_node_num_string[4]="";
     int max_cluster_name_length=get_max_cluster_name_length();
@@ -1270,6 +1271,9 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     get_key_value(statefile,"total_compute_nodes:",' ',node_num_string);
     get_key_value(statefile,"payment_method:",' ',payment_method);
     get_key_value(statefile,"shared_volume_gb:",' ',shared_volume);
+    if(strlen(ht_status)!=0){
+        sprintf(ht_status_ext,"HT-%s",ht_status);
+    }
     //printf("HERE!\n");
     node_num=string_to_positive_num(node_num_string);
     get_key_value(statefile,"running_compute_nodes:",' ',running_node_num_string);
@@ -1290,8 +1294,8 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             get_key_value(statefile,string_temp,' ',compute_address);
             sprintf(string_temp,"compute%d_status:",i+1);
             get_key_value(statefile,string_temp,' ',compute_status);
-            if(strlen(ht_status)!=0){
-                printf("|            +-+-compute%d(%s,%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config,ht_status);
+            if(strlen(ht_status_ext)!=0){
+                printf("|            +-+-compute%d(%s,%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config,ht_status_ext);
             }
             else{
                 printf("|            +-+-compute%d(%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config);
@@ -1303,18 +1307,18 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     }
     else if(graph_level==1){
         if(strlen(shared_volume)!=0){
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,shared_volume,payment_method);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method);
         }
         else{
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s \n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s \n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method);
         }
     }
     else if(graph_level==2){
         if(strlen(shared_volume)!=0){
-            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,shared_volume,payment_method);
+            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method);
         }
         else{
-            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
+            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method);
         }
     }
     else{
@@ -1331,10 +1335,10 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             strcpy(cluster_name_column,cluster_name);
         }
         if(strlen(shared_volume)!=0){
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,shared_volume,payment_method);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method);
         }
         else{
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s \n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status,payment_method);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s \n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method);
         }
     }
     printf(RESET_DISPLAY);
