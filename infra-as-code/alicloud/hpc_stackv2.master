@@ -16,7 +16,7 @@ resource "alicloud_instance" "master" {
   image_id = "${data.alicloud_images.OS_IMAGE.images.0.id}"
   stopped_mode = "StopCharging"
   instance_name = "master-RG_DISPLAY_NAME"
-  vswitch_id = alicloud_vswitch.public_vsw.id
+  vswitch_id = alicloud_vswitch.vsw.id
   internet_charge_type = "PayByTraffic"
   internet_max_bandwidth_out = MASTER_BANDWIDTH
   resource_group_id = "${alicloud_resource_manager_resource_group.resource_group.id}"
