@@ -1905,7 +1905,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
             sleep(1);
         }
         printf("\n");
-        if(tf_execution(tf_run,"run",workdir,crypto_keyfile,0)!=0){
+        if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,0)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             return -1;
         }
