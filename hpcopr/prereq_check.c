@@ -24,18 +24,25 @@ extern char url_now_crypto_var[LOCATION_LENGTH];
 extern int tf_loc_flag_var;
 extern int now_crypto_loc_flag_var;
 
-extern char terraform_version_var[16];
-extern char ali_tf_plugin_version_var[16];
-extern char qcloud_tf_plugin_version_var[16];
-extern char aws_tf_plugin_version_var[16];
-extern char hw_tf_plugin_version_var[16];
-extern char bd_tf_plugin_version_var[16];
-extern char azrm_tf_plugin_version_var[16];
-extern char azad_tf_plugin_version_var[16];
-extern char gcp_tf_plugin_version_var[16];
+extern char terraform_version_var[32];
+extern char tofu_version_var[32];
+
+extern char ali_tf_plugin_version_var[32];
+extern char qcloud_tf_plugin_version_var[32];
+extern char aws_tf_plugin_version_var[32];
+extern char hw_tf_plugin_version_var[32];
+extern char bd_tf_plugin_version_var[32];
+extern char azrm_tf_plugin_version_var[32];
+extern char azad_tf_plugin_version_var[32];
+extern char gcp_tf_plugin_version_var[32];
 
 extern char md5_tf_exec_var[64];
 extern char md5_tf_zip_var[64];
+
+extern char md5_tofu_exec_var[64]; //Added openTofu md5
+extern char md5_tofu_zip_var[64];  //Added openTofu zip md5
+
+
 extern char md5_now_crypto_var[64];
 extern char md5_ali_tf_var[64];
 extern char md5_ali_tf_zip_var[64];
@@ -56,8 +63,7 @@ extern char md5_gcp_tf_zip_var[64];
 
 extern int batch_flag;
 extern char final_command[512];
-extern char dbg_level_flag[256];
-extern int max_time_flag;
+extern tf_exec_config tf_this_run;
 
 extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
 
@@ -550,32 +556,149 @@ end_return:
     return inst_flag;
 }
 
+int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_version, char* md5_exec, char* md5_zip, int force_repair_flag, char* seq_code){
+    if(valid_md5_or_not(md5_exec)!=0||valid_md5_or_not(md5_zip)!=0){
+        return 1;
+    }
+
+    char provider_zip[FILENAME_LENGTH]="";
+    char provider_dir_tf[DIR_LENGTH_EXT]="";
+    char provider_dir_tofu[DIR_LENGTH_EXT]="";
+    char provider_exec_tf[FILENAME_LENGTH]="";
+    char provider_exec_tofu[FILENAME_LENGTH]="";
+    char provider_prefix[32]="";
+    char provider_exec_suffix[8]="";
+    
+    int file_check_flag;
+    int file_check_flag_tf;
+    int file_check_flag_tofu;
+    int run_flag;
+    char cmdline[CMDLINE_LENGTH]="";
+
+    if(strcmp(cloud_name,"alicloud")==0){
+        strcpy(provider_prefix,"aliyun");
+#ifdef _WIN32
+        strcpy(provider_exec_suffix,".exe");
+#endif
+    }
+    else if(strcmp(cloud_name,"tencentcloud")==0){
+        strcpy(provider_prefix,"tencentcloudstack");
+#ifdef _WIN32
+        strcpy(provider_exec_suffix,".exe");
+#endif
+    }
+    else if(strcmp(cloud_name,"aws")==0||strcmp(cloud_name,"azuread")==0||strcmp(cloud_name,"azurerm")==0||strcmp(cloud_name,"google")==0){
+        strcpy(provider_prefix,"hashicorp");
+#ifdef _WIN32
+        strcpy(provider_exec_suffix,"_x5.exe");
+#else
+        strcpy(provider_exec_suffix,"_x5");
+#endif
+    }
+    else if(strcmp(cloud_name,"baiducloud")==0){
+        strcpy(provider_prefix,"baiubce");
+#ifdef _WIN32
+        strcpy(provider_exec_suffix,".exe");
+#endif
+    }
+    else if(strcmp(cloud_name,"huaweicloud")==0){
+        strcpy(provider_prefix,"huaweicloud");
+#ifdef _WIN32
+        strcpy(provider_exec_suffix,".exe");
+#endif
+    }
+    else{
+        return 1;
+    }
+
+    sprintf(provider_zip,"%s%sterraform-provider-%s_%s_%s_amd64.zip",TF_LOCAL_PLUGINS,PATH_SLASH,cloud_name,provider_version,FILENAME_SUFFIX_FULL);
+    sprintf(provider_dir_tf,"%s%sregistry.terraform.io%s%s%s%s%s%s%s%s_amd64%s",plugin_root_path,PATH_SLASH,PATH_SLASH,provider_prefix,PATH_SLASH,cloud_name,PATH_SLASH,provider_version,PATH_SLASH,FILENAME_SUFFIX_FULL,PATH_SLASH);
+    sprintf(provider_dir_tofu,"%s%sregistry.opentofu.org%s%s%s%s%s%s%s%s_amd64%s",plugin_root_path,PATH_SLASH,PATH_SLASH,provider_prefix,PATH_SLASH,cloud_name,PATH_SLASH,provider_version,PATH_SLASH,FILENAME_SUFFIX_FULL,PATH_SLASH);
+    sprintf(provider_exec_tf,"%s%sterraform-provider-%s_v%s%s",provider_dir_tf,PATH_SLASH,cloud_name,provider_version,provider_exec_suffix);
+    sprintf(provider_exec_tofu,"%s%sterraform-provider-%s_v%s%s",provider_dir_tofu,PATH_SLASH,cloud_name,provider_version,provider_exec_suffix);
+
+    if(folder_exist_or_not(provider_dir_tf)!=0){
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,provider_dir_tf,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+    if(folder_exist_or_not(provider_dir_tofu)!=0){
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,provider_dir_tofu,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+    }
+
+    file_check_flag_tf=file_validity_check(provider_exec_tf,force_repair_flag,md5_exec);
+    file_check_flag_tofu=file_validity_check(provider_exec_tofu,force_repair_flag,md5_exec);
+    if(file_check_flag_tf==1||file_check_flag_tofu==1){
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud provider for %s (%s) ...\n",cloud_name,seq_code);
+        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+        file_check_flag=file_validity_check(provider_zip,force_repair_flag,md5_zip);
+        if(file_check_flag==1){
+            if(tf_loc_flag_var==1){
+#ifdef _WIN32
+                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-%s_%s_windows_amd64.zip %s",url_tf_root_var,cloud_name,provider_version,provider_zip);
+#elif __linux__
+                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-%s_%s_linux_amd64.zip '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
+#elif __APPLE__
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-%s_%s_darwin_amd64.zip '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
+#endif
+            }
+            else{
+#ifdef _WIN32
+                sprintf(cmdline,"curl %stf-win/terraform-provider-%s_%s_windows_amd64.zip -o %s",url_tf_root_var,cloud_name,provider_version,provider_zip);
+#elif __linux__
+                sprintf(cmdline,"curl %stf-linux/terraform-provider-%s_%s_linux_amd64.zip -o '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
+#elif __APPLE__
+                sprintf(cmdline,"curl %stf-darwin/terraform-provider-%s_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
+#endif
+            }
+            run_flag=system(cmdline);
+            if(run_flag!=0){
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install the provider." RESET_DISPLAY "\n");
+                return 3;
+            }
+        }
+        if(file_check_flag_tf==1){
+#ifdef _WIN32
+            sprintf(cmdline,"tar zxf %s -C %s %s",provider_zip,provider_dir_tf,SYSTEM_CMD_REDIRECT);
+#else
+            sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",provider_zip,provider_dir_tf,SYSTEM_CMD_REDIRECT);
+#endif
+            run_flag=system(cmdline);
+            if(run_flag!=0){
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
+                return 3;
+            }
+        }
+        if(file_check_flag_tofu==1){
+#ifdef _WIN32
+            sprintf(cmdline,"tar zxf %s -C %s %s",provider_zip,provider_dir_tofu,SYSTEM_CMD_REDIRECT);
+#else
+            sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",provider_zip,provider_dir_tofu,SYSTEM_CMD_REDIRECT);
+#endif
+            run_flag=system(cmdline);
+            if(run_flag!=0){
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
+                return 3;
+            }
+        }
+    }
+    return 0;
+}
+
 int check_and_install_prerequisitions(int repair_flag){
     char cmdline[CMDLINE_LENGTH]="";
+
     char filename_temp[FILENAME_LENGTH]="";
-    char filename_temp_zip[FILENAME_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
+    char filename_temp_zip[FILENAME_LENGTH]="";
+
     int flag=0;
     int gcp_flag=0;
     int file_check_flag=0;
     int force_repair_flag;
 
     FILE* file_p=NULL;
-
-    char* ali_plugin_version=ali_tf_plugin_version_var;
-    char* qcloud_plugin_version=qcloud_tf_plugin_version_var;
-    char* aws_plugin_version=aws_tf_plugin_version_var;
-    char* hw_plugin_version=hw_tf_plugin_version_var;
-    char* bd_plugin_version=bd_tf_plugin_version_var;
-    char* azrm_plugin_version=azrm_tf_plugin_version_var;
-    char* azad_plugin_version=azad_tf_plugin_version_var;
-    char* gcp_plugin_version=gcp_tf_plugin_version_var;
-
-    char* usage_logfile=USAGE_LOG_FILE;
-    char* operation_logfile=OPERATION_LOG_FILE;
-    char* sshkey_dir=SSHKEY_DIR;
-    char* tf_exec=TERRAFORM_EXEC;
-    char* crypto_exec=NOW_CRYPTO_EXEC;
+    char plugin_dir_root[DIR_LENGTH]="";
 
 #ifdef _WIN32
     char appdata_dir[128]="";
@@ -595,7 +718,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 #endif
 
-    if(file_exist_or_not(usage_logfile)!=0){
+    if(file_exist_or_not(USAGE_LOG_FILE)!=0){
         force_repair_flag=1;
     }
     else{
@@ -699,6 +822,10 @@ int check_and_install_prerequisitions(int repair_flag){
             return 7;
         }
         printf( RESET_DISPLAY "|        v Versions and md5sums been repaired.\n");
+        printf("|        . Setting TF running configurations ...\n");
+        if(reset_tf_running()!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to create tf_running_config file." RESET_DISPLAY "\n");
+        }
         printf("|        . Checking and repairing the key directories and files ...\n");
     }
     flag=get_vers_md5_vars();
@@ -745,7 +872,7 @@ int check_and_install_prerequisitions(int repair_flag){
         sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    file_check_flag=file_validity_check(tf_exec,force_repair_flag,md5_tf_exec_var);
+    file_check_flag=file_validity_check(TERRAFORM_EXEC,force_repair_flag,md5_tf_exec_var);
     if(file_check_flag==1){
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_tf_zip_var);
         if(file_check_flag==1){
@@ -792,33 +919,94 @@ int check_and_install_prerequisitions(int repair_flag){
         }        
     }
 #ifndef _WIN32
-        sprintf(cmdline,"chmod +x %s",tf_exec);
+        sprintf(cmdline,"chmod +x %s",TERRAFORM_EXEC);
         system(cmdline);
 #endif
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v The Terraform executable has been repaired.\n");
     }
-//    printf("\n###%s   \n\n",md5_now_crypto_var);
-    file_check_flag=file_validity_check(crypto_exec,repair_flag,md5_now_crypto_var);
+
+#ifdef _WIN32
+    sprintf(filename_temp_zip,"%s\\tofu_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,tofu_version_var);
+#elif __linux__
+    sprintf(filename_temp_zip,"%stofu_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,tofu_version_var);
+#elif __APPLE__
+    sprintf(filename_temp_zip,"%stofu_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,tofu_version_var);
+#endif
+    file_check_flag=file_validity_check(TOFU_EXEC,force_repair_flag,md5_tofu_exec_var);
+    if(file_check_flag==1){
+        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_tofu_zip_var);
+        if(file_check_flag==1){
+            printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the openTofu binary ...\n");
+            printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+            if(tf_loc_flag_var==1){
+#ifdef _WIN32
+                sprintf(cmdline,"copy /y %s\\tf-win\\tofu_%s_windows_amd64.zip %s",url_tf_root_var,tofu_version_var,filename_temp_zip);
+#elif __linux__
+                sprintf(cmdline,"/bin/cp %s/tf-linux/tofu_%s_linux_amd64.zip '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
+#elif __APPLE__
+                sprintf(cmdline,"/bin/cp %s/tf-darwin/tofu_%s_darwin_amd64.zip '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
+#endif
+            }
+            else{
+#ifdef _WIN32
+                sprintf(cmdline,"curl %stf-win/tofu_%s_windows_amd64.zip -o %s",url_tf_root_var,tofu_version_var,filename_temp_zip);
+#elif __linux__
+                sprintf(cmdline,"curl %stf-linux/tofu_%s_linux_amd64.zip -o '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
+#elif __APPLE__
+                sprintf(cmdline,"curl %stf-darwin/tofu_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
+#endif
+            }
+            flag=system(cmdline);
+            if(flag!=0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
+                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
+                return 3;
+            }
+        }
+//        printf("%s,,,,,\"\n",cmdline);
+#ifdef _WIN32
+        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+#elif __linux__
+        sprintf(cmdline,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+#elif __APPLE__
+        sprintf(cmdline,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+#endif
+//        printf("%s,,,,,\"\n",cmdline);
+        flag=system(cmdline);
+        if(flag!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the openTofu binary file. Exit now." RESET_DISPLAY "\n");
+            return 3;
+        }        
+    }
+#ifndef _WIN32
+        sprintf(cmdline,"chmod +x %s",TOFU_EXEC);
+        system(cmdline);
+#endif
+    if(repair_flag==1){
+        printf(RESET_DISPLAY "|        v The openTofu executable has been repaired.\n");
+    }
+
+    file_check_flag=file_validity_check(NOW_CRYPTO_EXEC,repair_flag,md5_now_crypto_var);
     if(file_check_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the now-crypto.exe ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         if(now_crypto_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\now-crypto-win.exe %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"copy /y %s\\now-crypto-win.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __linux__
-            sprintf(cmdline,"/bin/cp %s/now-crypto-lin.exe %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"/bin/cp %s/now-crypto-lin.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __APPLE__
-            sprintf(cmdline,"/bin/cp %s/now-crypto-dwn.exe %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"/bin/cp %s/now-crypto-dwn.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #endif
         }
         else{
 #ifdef _WIN32
-            sprintf(cmdline,"curl %snow-crypto-win.exe -o %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"curl %snow-crypto-win.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __linux__
-            sprintf(cmdline,"curl %snow-crypto-lin.exe -o %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"curl %snow-crypto-lin.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __APPLE__
-            sprintf(cmdline,"curl %snow-crypto-dwn.exe -o %s",url_now_crypto_var,crypto_exec);
+            sprintf(cmdline,"curl %snow-crypto-dwn.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #endif
         }
 //        printf("%s,,,,,\"\n",cmdline);
@@ -830,7 +1018,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
 #ifndef _WIN32
-        sprintf(cmdline,"chmod +x %s",crypto_exec);
+        sprintf(cmdline,"chmod +x %s",NOW_CRYPTO_EXEC);
         system(cmdline);
 #endif
     if(repair_flag==1){
@@ -844,7 +1032,7 @@ int check_and_install_prerequisitions(int repair_flag){
         fprintf(file_p,"privider_installation {\n");
         fprintf(file_p,"  filesystem_mirror {\n");
         fprintf(file_p,"    path    = \"%s\\.terraform.d/plugins\"\n",appdata_dir);
-        fprintf(file_p,"    include = [\"registry.terraform.io/*/*\"]\n");
+        fprintf(file_p,"    include = [\"registry.terraform.io/*/*\",\"registry.opentofu.org/*/*\"]\n");
         fprintf(file_p,"  }\n}\n");
         fclose(file_p);
     }
@@ -854,7 +1042,7 @@ int check_and_install_prerequisitions(int repair_flag){
         fprintf(file_p,"privider_installation {\n");
         fprintf(file_p,"  filesystem_mirror {\n");
         fprintf(file_p,"    path    = \"%splugins\"\n",TF_LOCAL_PLUGINS);
-        fprintf(file_p,"    include = [\"registry.terraform.io/*/*\"]\n");
+        fprintf(file_p,"    include = [\"registry.terraform.io/*/*\",\"registry.opentofu.org/*/*\"]\n");
         fprintf(file_p,"  }\n}\n");
         fclose(file_p);
     }
@@ -864,497 +1052,44 @@ int check_and_install_prerequisitions(int repair_flag){
         fprintf(file_p,"privider_installation {\n");
         fprintf(file_p,"  filesystem_mirror {\n");
         fprintf(file_p,"    path    = \"%splugins\"\n",TF_LOCAL_PLUGINS);
-        fprintf(file_p,"    include = [\"registry.terraform.io/*/*\"]\n");
+        fprintf(file_p,"    include = [\"registry.terraform.io/*/*\",\"registry.opentofu.org/*/*\"]\n");
         fprintf(file_p,"  }\n}\n");
         fclose(file_p);
     }
 #endif
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v The terraformrc file has been repaired.\n");
-        printf("|        . Checking and repairing the Terraform Providers ... \n");
+        printf("|        . Checking and repairing the TF Providers ... \n");
     }
-
 #ifdef _WIN32
-    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\aliyun\\alicloud\\%s\\windows_amd64\\",appdata_dir,ali_plugin_version);
-    sprintf(filename_temp,"%s\\terraform-provider-alicloud_v%s.exe",dirname_temp,ali_plugin_version);
-    sprintf(filename_temp_zip,"%s\\terraform-provider-alicloud_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
-#elif __linux__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/aliyun/alicloud/%s/linux_amd64/",TF_LOCAL_PLUGINS,ali_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-alicloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
-#elif __APPLE__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/aliyun/alicloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,ali_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-alicloud_v%s",dirname_temp,ali_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-alicloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,ali_plugin_version);
-#endif
-    if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_ali_tf_var);
-    if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (1/7) ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_ali_tf_zip_var);
-        if(file_check_flag==1){
-            if(tf_loc_flag_var==1){
-#ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-alicloud_%s_windows_amd64.zip %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-alicloud_%s_linux_amd64.zip '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
-#endif
-            }
-            else{
-#ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform-provider-alicloud_%s_windows_amd64.zip -o %s",url_tf_root_var,ali_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-alicloud_%s_linux_amd64.zip -o '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-alicloud_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,ali_plugin_version,filename_temp_zip);
-#endif
-            }
-//            printf("%s,,,,,\"\n",cmdline);
-            flag=system(cmdline);
-            if(flag!=0){
-                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
-                return 3;
-            }
-        }
-#ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+    sprintf(plugin_dir_root,"%s\\terraform.d\\plugins\\",appdata_dir);
 #else
-        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
+    sprintf(plugin_dir_root,"%s/plugins/",TF_LOCAL_PLUGINS);
 #endif
-        flag=system(cmdline);
-        if(flag!=0){
-            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
-            return 3;
-        }
+    if(repair_provider(plugin_dir_root,"alicloud",ali_tf_plugin_version_var,md5_ali_tf_var,md5_ali_tf_zip_var,force_repair_flag,"1/7")!=0){
+        return 3;
     }
-
-#ifdef _WIN32
-    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\tencentcloudstack\\tencentcloud\\%s\\windows_amd64\\",appdata_dir,qcloud_plugin_version);
-    sprintf(filename_temp,"%s\\terraform-provider-tencentcloud_v%s.exe",dirname_temp,qcloud_plugin_version);
-    sprintf(filename_temp_zip,"%s\\terraform-provider-tencentcloud_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
-#elif __linux__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/linux_amd64/",TF_LOCAL_PLUGINS,qcloud_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-tencentcloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
-#elif __APPLE__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/tencentcloudstack/tencentcloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,qcloud_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-tencentcloud_v%s",dirname_temp,qcloud_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-tencentcloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,qcloud_plugin_version);
-#endif
-    if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    if(repair_provider(plugin_dir_root,"tencentcloud",qcloud_tf_plugin_version_var,md5_qcloud_tf_var,md5_qcloud_tf_zip_var,force_repair_flag,"2/7")!=0){
+        return 3;
     }
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_qcloud_tf_var);
-    if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (2/7) ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_qcloud_tf_zip_var);
-        if(file_check_flag==1){
-            if(tf_loc_flag_var==1){
-#ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-tencentcloud_%s_windows_amd64.zip %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp);
-#endif
-            }
-            else{
-#ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform-provider-tencentcloud_%s_windows_amd64.zip -o %s",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-tencentcloud_%s_linux_amd64.zip -o '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-tencentcloud_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,qcloud_plugin_version,filename_temp_zip);
-#endif
-            }
-            flag=system(cmdline);
-            if(flag!=0){
-                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
-                return 3;
-            }
-        }
-#ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#endif
-        flag=system(cmdline);
-        if(flag!=0){
-            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
-            return 3;
-        }
+    if(repair_provider(plugin_dir_root,"aws",aws_tf_plugin_version_var,md5_aws_tf_var,md5_aws_tf_zip_var,force_repair_flag,"3/7")!=0){
+        return 3;
     }
-
-#ifdef _WIN32
-    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\hashicorp\\aws\\%s\\windows_amd64\\",appdata_dir,aws_plugin_version);
-    sprintf(filename_temp,"%s\\terraform-provider-aws_v%s_x5.exe",dirname_temp,aws_plugin_version);
-    sprintf(filename_temp_zip,"%s\\terraform-provider-aws_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
-#elif __linux__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/aws/%s/linux_amd64/",TF_LOCAL_PLUGINS,aws_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-aws_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
-#elif __APPLE__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/aws/%s/darwin_amd64/",TF_LOCAL_PLUGINS,aws_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-aws_v%s_x5",dirname_temp,aws_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-aws_%s_x5_darwin_amd64.zip",TF_LOCAL_PLUGINS,aws_plugin_version);
-#endif
-    if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    if(repair_provider(plugin_dir_root,"huaweicloud",hw_tf_plugin_version_var,md5_hw_tf_var,md5_hw_tf_zip_var,force_repair_flag,"4/7")!=0){
+        return 3;
     }
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_aws_tf_var);
-    if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (3/7) ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_aws_tf_zip_var);
-        if(file_check_flag==1){
-            if(tf_loc_flag_var==1){
-#ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-aws_%s_windows_amd64.zip %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-aws_%s_linux_amd64.zip '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-aws_%s_darwin_amd64.zip '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
-#endif
-            }
-            else{
-#ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform-provider-aws_%s_windows_amd64.zip -o %s",url_tf_root_var,aws_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-aws_%s_linux_amd64.zip -o '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-aws_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,aws_plugin_version,filename_temp_zip);
-#endif
-            }
-            flag=system(cmdline);
-            if(flag!=0){
-                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
-                return 3;
-            }
-        }
-#ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#endif
-        flag=system(cmdline);
-        if(flag!=0){
-            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
-            return 3;
-        }
+    if(repair_provider(plugin_dir_root,"baiducloud",bd_tf_plugin_version_var,md5_bd_tf_var,md5_bd_tf_zip_var,force_repair_flag,"5/7")!=0){
+        return 3;
     }
-
-#ifdef _WIN32
-    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\huaweicloud\\huaweicloud\\%s\\windows_amd64\\",appdata_dir,hw_plugin_version);
-    sprintf(filename_temp,"%s\\terraform-provider-huaweicloud_v%s.exe",dirname_temp,hw_plugin_version);
-    sprintf(filename_temp_zip,"%s\\terraform-provider-huaweicloud_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,hw_plugin_version);
-#elif __linux__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/huaweicloud/huaweicloud/%s/linux_amd64/",TF_LOCAL_PLUGINS,hw_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-huaweicloud_v%s",dirname_temp,hw_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-huaweicloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,hw_plugin_version);
-#elif __APPLE__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/huaweicloud/huaweicloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,hw_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-huaweicloud_v%s",dirname_temp,hw_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-huaweicloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,hw_plugin_version);
-#endif
-    if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    if(repair_provider(plugin_dir_root,"azuread",azad_tf_plugin_version_var,md5_azad_tf_var,md5_azad_tf_zip_var,force_repair_flag,"6a/7")!=0){
+        return 3;
     }
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_hw_tf_var);
-    if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (4/7) ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_hw_tf_zip_var);
-        if(file_check_flag==1){
-            if(tf_loc_flag_var==1){
-#ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-huaweicloud_%s_windows_amd64.zip %s",url_tf_root_var,hw_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-huaweicloud_%s_linux_amd64.zip '%s'",url_tf_root_var,hw_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-huaweicloud_%s_darwin_amd64.zip '%s'",url_tf_root_var,hw_plugin_version,filename_temp_zip);
-#endif
-            }
-            else{
-#ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform-provider-huaweicloud_%s_windows_amd64.zip -o %s",url_tf_root_var,hw_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-huaweicloud_%s_linux_amd64.zip -o '%s'",url_tf_root_var,hw_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-huaweicloud_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,hw_plugin_version,filename_temp_zip);
-#endif
-            }
-            flag=system(cmdline);
-            if(flag!=0){
-                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
-                return 3;
-            }
-        }
-#ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#endif
-        flag=system(cmdline);
-        if(flag!=0){
-            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
-            return 3;
-        }
+    if(repair_provider(plugin_dir_root,"azurerm",azrm_tf_plugin_version_var,md5_azrm_tf_var,md5_azrm_tf_zip_var,force_repair_flag,"6b/7")!=0){
+        return 3;
     }
-
-#ifdef _WIN32
-    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\baidubce\\baiducloud\\%s\\windows_amd64\\",appdata_dir,bd_plugin_version);
-    sprintf(filename_temp,"%s\\terraform-provider-baiducloud_v%s.exe",dirname_temp,bd_plugin_version);
-    sprintf(filename_temp_zip,"%s\\terraform-provider-baiducloud_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,bd_plugin_version);
-#elif __linux__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/baidubce/baiducloud/%s/linux_amd64/",TF_LOCAL_PLUGINS,bd_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-baiducloud_v%s",dirname_temp,bd_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-baiducloud_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,bd_plugin_version);
-#elif __APPLE__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/baidubce/baiducloud/%s/darwin_amd64/",TF_LOCAL_PLUGINS,bd_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-baiducloud_v%s",dirname_temp,bd_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-baiducloud_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,bd_plugin_version);
-#endif
-    if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    if(repair_provider(plugin_dir_root,"google",gcp_tf_plugin_version_var,md5_gcp_tf_var,md5_gcp_tf_zip_var,force_repair_flag,"7/7")!=0){
+        return 3;
     }
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_bd_tf_var);
-    if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (5/7) ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_bd_tf_zip_var);
-        if(file_check_flag==1){
-            if(tf_loc_flag_var==1){
-#ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-baiducloud_%s_windows_amd64.zip %s",url_tf_root_var,bd_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-baiducloud_%s_linux_amd64.zip '%s'",url_tf_root_var,bd_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-baiducloud_%s_darwin_amd64.zip '%s'",url_tf_root_var,bd_plugin_version,filename_temp_zip);
-#endif
-            }
-            else{
-#ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform-provider-baiducloud_%s_windows_amd64.zip -o %s",url_tf_root_var,bd_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-baiducloud_%s_linux_amd64.zip -o '%s'",url_tf_root_var,bd_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-baiducloud_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,bd_plugin_version,filename_temp_zip);
-#endif
-            }
-            flag=system(cmdline);
-            if(flag!=0){
-                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
-                return 3;
-            }
-        }
-#ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#endif
-        flag=system(cmdline);
-        if(flag!=0){
-            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
-            return 3;
-        }
-    }
-
-#ifdef _WIN32
-    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\hashicorp\\azuread\\%s\\windows_amd64\\",appdata_dir,azad_plugin_version);
-    sprintf(filename_temp,"%s\\terraform-provider-azuread_v%s_x5.exe",dirname_temp,azad_plugin_version);
-    sprintf(filename_temp_zip,"%s\\terraform-provider-azuread_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,azad_plugin_version);
-#elif __linux__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/azuread/%s/linux_amd64/",TF_LOCAL_PLUGINS,azad_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-azuread_v%s_x5",dirname_temp,azad_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-azuread_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,azad_plugin_version);
-#elif __APPLE__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/azuread/%s/darwin_amd64/",TF_LOCAL_PLUGINS,azad_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-azuread_v%s_x5",dirname_temp,azad_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-azuread_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,azad_plugin_version);
-#endif
-    if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_azad_tf_var);
-    if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (6a/7) ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_azad_tf_zip_var);
-        if(file_check_flag==1){
-            if(tf_loc_flag_var==1){
-#ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-azuread_%s_windows_amd64.zip %s",url_tf_root_var,azad_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-azuread_%s_linux_amd64.zip '%s'",url_tf_root_var,azad_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-azuread_%s_darwin_amd64.zip '%s'",url_tf_root_var,azad_plugin_version,filename_temp_zip);
-#endif
-            }
-            else{
-#ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform-provider-azuread_%s_windows_amd64.zip -o %s",url_tf_root_var,azad_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-azuread_%s_linux_amd64.zip -o '%s'",url_tf_root_var,azad_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-azuread_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,azad_plugin_version,filename_temp_zip);
-#endif
-            }
-            flag=system(cmdline);
-            if(flag!=0){
-                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
-                return 3;
-            }
-        }
-#ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#endif
-        flag=system(cmdline);
-        if(flag!=0){
-            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
-            return 3;
-        }
-    }
-
-#ifdef _WIN32
-    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\hashicorp\\azurerm\\%s\\windows_amd64\\",appdata_dir,azrm_plugin_version);
-    sprintf(filename_temp,"%s\\terraform-provider-azurerm_v%s_x5.exe",dirname_temp,azrm_plugin_version);
-    sprintf(filename_temp_zip,"%s\\terraform-provider-azurerm_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,azrm_plugin_version);
-#elif __linux__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/azurerm/%s/linux_amd64/",TF_LOCAL_PLUGINS,azrm_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-azurerm_v%s_x5",dirname_temp,azrm_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-azurerm_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,azrm_plugin_version);
-#elif __APPLE__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/azurerm/%s/darwin_amd64/",TF_LOCAL_PLUGINS,azrm_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-azurerm_v%s_x5",dirname_temp,azrm_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-azurerm_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,azrm_plugin_version);
-#endif
-    if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_azrm_tf_var);
-    if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (6b/7) ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_azrm_tf_zip_var);
-        if(file_check_flag==1){
-            if(tf_loc_flag_var==1){
-#ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-azurerm_%s_windows_amd64.zip %s",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-azurerm_%s_linux_amd64.zip '%s'",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-azurerm_%s_darwin_amd64.zip '%s'",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
-#endif
-            }
-            else{
-#ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform-provider-azurerm_%s_windows_amd64.zip -o %s",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-azurerm_%s_linux_amd64.zip -o '%s'",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-azurerm_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,azrm_plugin_version,filename_temp_zip);
-#endif
-            }
-            flag=system(cmdline);
-            if(flag!=0){
-                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
-                return 3;
-            }
-        }
-#ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#endif
-        flag=system(cmdline);
-        if(flag!=0){
-            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
-            return 3;
-        }
-    }
-
-#ifdef _WIN32
-    sprintf(dirname_temp,"%s\\terraform.d\\plugins\\registry.terraform.io\\hashicorp\\google\\%s\\windows_amd64\\",appdata_dir,gcp_plugin_version);
-    sprintf(filename_temp,"%s\\terraform-provider-google_v%s_x5.exe",dirname_temp,gcp_plugin_version);
-    sprintf(filename_temp_zip,"%s\\terraform-provider-google_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,gcp_plugin_version);
-#elif __linux__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/google/%s/linux_amd64/",TF_LOCAL_PLUGINS,gcp_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-google_v%s_x5",dirname_temp,gcp_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-google_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,gcp_plugin_version);
-#elif __APPLE__
-    sprintf(dirname_temp,"%s/plugins/registry.terraform.io/hashicorp/google/%s/darwin_amd64/",TF_LOCAL_PLUGINS,gcp_plugin_version);
-    sprintf(filename_temp,"%s/terraform-provider-google_v%s_x5",dirname_temp,gcp_plugin_version);
-    sprintf(filename_temp_zip,"%s/terraform-provider-google_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,gcp_plugin_version);
-#endif
-    if(folder_exist_or_not(dirname_temp)!=0){
-        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    file_check_flag=file_validity_check(filename_temp,force_repair_flag,md5_gcp_tf_var);
-    if(file_check_flag==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud Terraform providers (7/7) ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_gcp_tf_zip_var);
-        if(file_check_flag==1){
-            if(tf_loc_flag_var==1){
-#ifdef _WIN32
-                sprintf(cmdline,"copy /y %s\\tf-win\\terraform-provider-google_%s_windows_amd64.zip %s",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"/bin/cp %s/tf-linux/terraform-provider-google_%s_linux_amd64.zip '%s'",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"/bin/cp %s/tf-darwin/terraform-provider-google_%s_darwin_amd64.zip '%s'",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
-#endif
-            }
-            else{
-#ifdef _WIN32
-                sprintf(cmdline,"curl %stf-win/terraform-provider-google_%s_windows_amd64.zip -o %s",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
-#elif __linux__
-                sprintf(cmdline,"curl %stf-linux/terraform-provider-google_%s_linux_amd64.zip -o '%s'",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
-#elif __APPLE__
-                sprintf(cmdline,"curl %stf-darwin/terraform-provider-google_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,gcp_plugin_version,filename_temp_zip);
-#endif
-            }
-            flag=system(cmdline);
-            if(flag!=0){
-                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
-                return 3;
-            }
-        }
-#ifdef _WIN32
-        sprintf(cmdline,"tar zxf %s -C %s %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#else
-        sprintf(cmdline,"unzip -o -q '%s' -d '%s' %s",filename_temp_zip,dirname_temp,SYSTEM_CMD_REDIRECT);
-#endif
-        flag=system(cmdline);
-        if(flag!=0){
-            printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
-            return 3;
-        }
-    }
-
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v The Terraform Providers have been repaired.\n");
     }
@@ -1363,15 +1098,15 @@ int check_and_install_prerequisitions(int repair_flag){
     if(flag!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] IMPORTANT! The dataman component %d may not work properly." RESET_DISPLAY "\n",flag);
     }
-    if(folder_exist_or_not(sshkey_dir)!=0){
-        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,sshkey_dir,SYSTEM_CMD_REDIRECT);
+    if(folder_exist_or_not(SSHKEY_DIR)!=0){
+        sprintf(cmdline,"%s \"%s\" %s",MKDIR_CMD,SSHKEY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    if(file_exist_or_not(usage_logfile)!=0){
-        file_p=fopen(usage_logfile,"w+");
+    if(file_exist_or_not(USAGE_LOG_FILE)!=0){
+        file_p=fopen(USAGE_LOG_FILE,"w+");
         fprintf(file_p,"UCID,CLOUD_VENDOR,NODE_NAME,vCPU,START_DATE,START_TIME,STOP_DATE,STOP_TIME,RUNNING_HOURS,CPUxHOURS,CPU_MODEL,CLOUD_REGION\n");
         fclose(file_p);
-        file_p=fopen(operation_logfile,"w+");
+        file_p=fopen(OPERATION_LOG_FILE,"w+");
         fclose(file_p);
     }
     if(repair_flag==1){
@@ -1383,7 +1118,7 @@ int check_and_install_prerequisitions(int repair_flag){
         sprintf(cmdline,"type nul > %s",filename_temp);
         system(cmdline);
     }
-    sprintf(cmdline,"takeown /f %s /r /d y %s",sshkey_dir,SYSTEM_CMD_REDIRECT_NULL);
+    sprintf(cmdline,"takeown /f %s /r /d y %s",SSHKEY_DIR,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     sprintf(cmdline,"del /f /q %s\\known_hosts* >nul 2>&1",dotssh_dir);
 #elif __linux__
@@ -1619,20 +1354,25 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the user name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",string_temp);
         strcpy(user_name,string_temp);
     }
-    cmd_keyword_check(argc,argv,"--dbg-level",string_temp); //Get the global option: debug level
-    if(strcmp(string_temp,"trace")!=0&&strcmp(string_temp,"debug")!=0&&strcmp(string_temp,"info")!=0&&strcmp(string_temp,"warn")!=0&&strcmp(string_temp,"error")!=0&&strcmp(string_temp,"off")!=0&&strcmp(string_temp,"TRACE")!=0&&strcmp(string_temp,"DEBUG")!=0&&strcmp(string_temp,"INFO")!=0&&strcmp(string_temp,"WARN")!=0&&strcmp(string_temp,"ERROR")!=0&&strcmp(string_temp,"OFF")!=0){
-        strcpy(dbg_level_flag,"warn");
+
+    get_tf_running(&tf_this_run);
+    cmd_keyword_check(argc,argv,"--tf-run",string_temp);
+    if(strcmp(string_temp,"tofu")==0){
+        strcpy(tf_this_run.tf_runner,TOFU_EXEC);
+        strcpy(tf_this_run.tf_runner_type,"tofu");
     }
-    else{
-        strcpy(dbg_level_flag,string_temp);
+    else if(strcmp(string_temp,"terraform")==0){
+        strcpy(tf_this_run.tf_runner,TERRAFORM_EXEC);
+        strcpy(tf_this_run.tf_runner_type,"terraform");
+    }
+    cmd_keyword_check(argc,argv,"--dbg-level",string_temp); //Get the global option: debug level
+    if(strcmp(string_temp,"trace")==0||strcmp(string_temp,"debug")==0||strcmp(string_temp,"info")==0||strcmp(string_temp,"warn")==0||strcmp(string_temp,"error")==0||strcmp(string_temp,"off")==0||strcmp(string_temp,"TRACE")==0||strcmp(string_temp,"DEBUG")==0||strcmp(string_temp,"INFO")==0||strcmp(string_temp,"WARN")==0||strcmp(string_temp,"ERROR")==0||strcmp(string_temp,"OFF")==0){
+        strcpy(tf_this_run.dbg_level,"warn");
     }
     cmd_keyword_check(argc,argv,"--max-time",string_temp); //Get the global option: tf maximum execution time.
     max_time_temp=string_to_positive_num(string_temp);
-    if(max_time_temp<MAXIMUM_WAIT_TIME||max_time_temp>MAXIMUM_WAIT_TIME_EXT){
-        max_time_flag=MAXIMUM_WAIT_TIME;
+    if(max_time_temp>MAXIMUM_WAIT_TIME-1&&max_time_temp<MAXIMUM_WAIT_TIME_EXT+1){
+        tf_this_run.max_wait_time=max_time_temp;
     }
-    else{
-        max_time_flag=max_time_temp;
-    } 
     return 0;
 }

@@ -149,6 +149,12 @@ void print_help(char* cmd_name){
     if(strcmp(cmd_name,"all")==0){
         printf("+  Advanced - For developers:\n");
     }
+    if(strcmp(cmd_name,"set-tf")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "set-tf" RESET_DISPLAY "   :~ Configure the tf execution configurations.\n");
+        printf("|   --tf-run    EXECUTION_NAME  ~ terraform or tofu\n");
+        printf("|   --dbg-level DEBUG_LOG_LEVEL ~ debug log output level, default: warn\n");
+        printf("|   --max-time  MAX_WAIT_TIME   ~ maximum waiting time (600~1200), default 600\n");
+    }
     if(strcmp(cmd_name,"configloc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "configloc" RESET_DISPLAY "   :~ Configure the locations for the terraform binaries, providers\n");
         printf("|              :~ IaC templates and shell scripts.\n");
@@ -530,7 +536,7 @@ void list_all_commands(void){
     printf(GENERAL_BOLD " 2.  Global Management: " RESET_DISPLAY "\n");
     printf(HIGH_GREEN_BOLD "     help  usage  monman  history  syserr \n");
     printf("     ssh  rdp \n");
-    printf("     configloc  showloc  showmd5  resetloc " RESET_DISPLAY "\n");
+    printf("     set-tf configloc  showloc  showmd5  resetloc " RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 3.  Cluster Initialization: " RESET_DISPLAY "\n");
     printf(HIGH_GREEN_BOLD "     cloud-info  rotate-key  get-conf  edit-conf \n");
     printf("     rm-conf  init  rebuild " RESET_DISPLAY "\n");

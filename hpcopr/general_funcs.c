@@ -103,14 +103,15 @@ char command_keywords[CMD_KWDS_NUM][32]={
     "--cloc",
     "--hver",
     "--dbg-level",
-    "--max-time"
+    "--max-time",
+    "--tf-run"
 };
 
 int string_to_positive_num(char* string){
     int i,sum=0;
     int length=strlen(string);
-    if(length==0){
-        return 0;
+    if(length<1){
+        return -1;
     }
     for(i=0;i<length;i++){
         if(*(string+i)<'0'||*(string+i)>'9'){

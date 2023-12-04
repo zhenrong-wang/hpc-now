@@ -27,8 +27,6 @@
 
 extern char url_code_root_var[LOCATION_LENGTH];
 extern int code_loc_flag_var;
-extern char dbg_level_flag[256];
-extern int max_time_flag;
 
 int switch_to_cluster(char* target_cluster_name){
     char* current_cluster=CURRENT_CLUSTER_INDICATOR;
@@ -168,7 +166,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
 }
 
-int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_flag){
+int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_flag, tf_exec_config* tf_run){
     char target_cluster_workdir[DIR_LENGTH]="";
     if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now." RESET_DISPLAY "\n");
@@ -199,7 +197,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Refreshing the target cluster %s now ...\n",target_cluster_name);
     decrypt_files(target_cluster_workdir,crypto_keyfile);
-    if(tf_execution(TERRAFORM_EXEC,"apply",dbg_level_flag,max_time_flag,target_cluster_workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",target_cluster_workdir,crypto_keyfile,1)!=0){
         delete_decrypted_files(target_cluster_workdir,crypto_keyfile);
         return 5;
     }
@@ -212,7 +210,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
     return 0;
 }
 
-int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_flag){
+int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_flag, tf_exec_config* tf_run){
     if(strlen(target_cluster_name)<CLUSTER_ID_LENGTH_MIN||strlen(target_cluster_name)>CLUSTER_ID_LENGTH_MAX){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is invalid.\n" RESET_DISPLAY,target_cluster_name);
         return 1;
@@ -292,7 +290,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
     }
 
 destroy_cluster:
-    if(cluster_destroy(cluster_workdir,crypto_keyfile,"force",0)!=0){
+    if(cluster_destroy(cluster_workdir,crypto_keyfile,"force",0,tf_run)!=0){
         delete_decrypted_files(cluster_workdir,crypto_keyfile);
         return 7;
     }
@@ -843,13 +841,12 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     return 0;
 }
 
-int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int batch_flag_local){
+int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int batch_flag_local, tf_exec_config* tf_run){
     char cmdline[LINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char string_temp[LINE_LENGTH_SHORT];
     char dot_terraform[FILENAME_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    char* tf_exec=TERRAFORM_EXEC;
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char curr_payment_method[16]="";
@@ -878,13 +875,13 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     decrypt_files(workdir,crypto_keyfile);
     sprintf(dot_terraform,"%s%s.terraform",stackdir,PATH_SLASH);
     if(folder_exist_or_not(dot_terraform)==0){
-        if(tf_execution(tf_exec,"destroy",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+        if(tf_execution(tf_run,"destroy",workdir,crypto_keyfile,1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (1/2)..." RESET_DISPLAY "\n");
             sleep(2);
-            if(tf_execution(tf_exec,"destroy",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+            if(tf_execution(tf_run,"destroy",workdir,crypto_keyfile,1)!=0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (2/2)..." RESET_DISPLAY "\n");
                 sleep(2);
-                if(tf_execution(tf_exec,"destroy",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+                if(tf_execution(tf_run,"destroy",workdir,crypto_keyfile,1)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to destroy your cluster. This usually caused by either Terraform or\n");
                     printf("|          the providers developed and maintained by cloud service providers.\n");
                     printf("|          You *MUST* manually destroy the remaining cloud resources of this cluster.\n");
@@ -936,13 +933,12 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     return 0;
 }
 
-int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local){
+int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local, tf_exec_config* tf_run){
     char string_temp[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    char* tf_exec=TERRAFORM_EXEC;
     char* sshkey_dir=SSHKEY_DIR;
     int i,run_flag;
     int del_num=0;
@@ -988,13 +984,13 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
                 sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf* %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,i,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
                 system(cmdline);
             }
-            if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){ 
+            if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){ 
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
                 for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
                     sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,i,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
                     system(cmdline);
                 }
-                if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+                if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
                     return -127;
@@ -1030,13 +1026,13 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
         sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,i,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         for(i=1;i<compute_node_num+1;i++){
             sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,i,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
-        if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+        if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
@@ -1063,12 +1059,11 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
     return 0;
 }
 
-int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_string){
+int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_string, tf_exec_config* tf_run){
     char string_temp[128]="";
     char filename_temp[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    char* tf_exec=TERRAFORM_EXEC;
     int i;
     int add_number=0;
     int current_node_num=0;
@@ -1099,13 +1094,13 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         sprintf(string_temp,"comp%d",i+1+current_node_num);
         global_replace(filename_temp,"comp1",string_temp);
     }
-    if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         for(i=0;i<add_number;i++){
             sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf",DELETE_FILE_CMD,stackdir,PATH_SLASH,i+1+current_node_num);
             system(cmdline);
         }
-        if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+        if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
@@ -1132,13 +1127,12 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     return 0;
 }
 
-int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local){
+int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local, tf_exec_config* tf_run){
     char string_temp[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char cloud_flag[16]="";
-    char* tf_exec=TERRAFORM_EXEC;
     int i;
     int down_num=0;
     char filename_temp[FILENAME_LENGTH]="";
@@ -1197,13 +1191,13 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
                 sprintf(node_name,"compute%d",i);
                 node_file_to_stop(stackdir,node_name,cloud_flag);
             }
-            if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+            if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
                 for(i=compute_node_num-down_num+1;i<compute_node_num+1;i++){
                     sprintf(node_name,"compute%d",i);
                     node_file_to_running(stackdir,node_name,cloud_flag);
                 }
-                if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+                if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
                     return -127;
@@ -1233,13 +1227,13 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
         sprintf(node_name,"compute%d",i);
         node_file_to_stop(stackdir,node_name,cloud_flag);
     }
-    if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         for(i=1;i<compute_node_num+1;i++){
             sprintf(node_name,"compute%d",i);
             node_file_to_running(stackdir,node_name,cloud_flag);
         }
-        if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+        if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
@@ -1262,14 +1256,13 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     return 0;
 }
 
-int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local){
+int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local, tf_exec_config* tf_run){
     char string_temp[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char node_name[16]="";
     char cloud_flag[16]="";
-    char* tf_exec=TERRAFORM_EXEC;
     char* sshkey_dir=SSHKEY_DIR;
     int i;
     int on_num=0;
@@ -1336,13 +1329,13 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
                 sprintf(node_name,"compute%d",i);
                 node_file_to_running(stackdir,node_name,cloud_flag);
             }
-            if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+            if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
                 for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
                     sprintf(node_name,"compute%d",i);
                     node_file_to_stop(stackdir,node_name,cloud_flag);
                 }
-                if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+                if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
                     return -127;
@@ -1373,13 +1366,13 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
         sprintf(node_name,"compute%d",i);
         node_file_to_running(stackdir,node_name,cloud_flag);
     }
-    if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ...\n");
         for(i=compute_node_num_on+1;i<compute_node_num+1;i++){
             sprintf(node_name,"compute%d",i);
             node_file_to_stop(stackdir,node_name,cloud_flag);
         }
-        if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+        if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
@@ -1424,7 +1417,7 @@ int check_reconfigure_list(char* workdir, int print_flag){
     return 0;
 }
 
-int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_config, char* htflag){
+int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_config, char* htflag, tf_exec_config* tf_run){
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -1440,7 +1433,6 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     char* sshkey_dir=SSHKEY_DIR;
     int i;
     char node_name_temp[32]="";
-    char* tf_exec=TERRAFORM_EXEC;
     int cpu_core_num=0;
     int reinit_flag=0;
     char cmdline[CMDLINE_LENGTH]="";
@@ -1546,14 +1538,14 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         }
     }
 
-    if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         for(i=1;i<compute_node_num+1;i++){
             sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
             sprintf(cmdline,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
-        if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+        if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
@@ -1599,7 +1591,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     return 0;
 }
 
-int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_config){
+int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_config, tf_exec_config* tf_run){
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -1609,7 +1601,6 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     char cloud_flag[16]="";
     char* sshkey_dir=SSHKEY_DIR;
     int i;
-    char* tf_exec=TERRAFORM_EXEC;
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
 
@@ -1657,11 +1648,11 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     global_replace(filename_temp,prev_config,new_config);
-    if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         sprintf(cmdline,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+        if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
@@ -1694,7 +1685,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     return 0;
 }
 
-int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume){
+int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec_config* tf_run){
     char stackdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -1703,7 +1694,6 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume){
     int new_volume_num;
     char cloud_flag[16]="";
     char* sshkey_dir=SSHKEY_DIR;
-    char* tf_exec=TERRAFORM_EXEC;
     get_cloud_flag(workdir,cloud_flag);
     if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return 1;
@@ -1730,11 +1720,11 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume){
     sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     find_and_replace(filename_temp,"#-#-#","","","","",prev_volume,new_volume);
-    if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         sprintf(cmdline,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+        if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
@@ -1762,13 +1752,12 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume){
     return 0;
 }
 
-int cluster_sleep(char* workdir, char* crypto_keyfile){
+int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     char string_temp[128]="";
     char unique_cluster_id[64]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char cloud_flag[16]="";
-    char* tf_exec=TERRAFORM_EXEC;
     int i;
     char filename_temp[FILENAME_LENGTH]="";
     char node_name[16]="";
@@ -1803,7 +1792,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
         sprintf(node_name,"compute%d",i);
         node_file_to_stop(stackdir,node_name,cloud_flag);
     }
-    if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ...\n");
         node_file_to_running(stackdir,"master",cloud_flag);
         node_file_to_running(stackdir,"database",cloud_flag);
@@ -1812,7 +1801,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
             sprintf(node_name,"compute%d",i);
             node_file_to_running(stackdir,node_name,cloud_flag);
         }
-        if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+        if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
@@ -1838,7 +1827,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile){
     return 0;
 }
 
-int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
+int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_config* tf_run){
     if(strcmp(option,"all")!=0&&strcmp(option,"minimal")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'minimal' or 'all' as the second parameter.\n");
         printf("|          Exit now." RESET_DISPLAY "\n");
@@ -1849,7 +1838,6 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char cloud_flag[16]="";
-    char* tf_exec=TERRAFORM_EXEC;
     int i;
     char filename_temp[FILENAME_LENGTH]="";
     char* sshkeydir=SSHKEY_DIR;
@@ -1890,7 +1878,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
             node_file_to_running(stackdir,node_name,cloud_flag);
         }
     }
-    if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ...\n");
         node_file_to_stop(stackdir,"master",cloud_flag);
         node_file_to_stop(stackdir,"database",cloud_flag);
@@ -1901,7 +1889,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
                 node_file_to_stop(stackdir,node_name,cloud_flag);
             }
         }
-        if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+        if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -127;
@@ -1917,7 +1905,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option){
             sleep(1);
         }
         printf("\n");
-        if(tf_execution(tf_exec,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,0)!=0){
+        if(tf_execution(tf_run,"run",workdir,crypto_keyfile,0)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             return -1;
         }
@@ -2136,7 +2124,7 @@ int remove_conf(char* cluster_name){
     }
 }
 
-int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_flag_local){
+int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_flag_local, tf_exec_config* tf_run){
     if(strcmp(option,"mc")!=0&&strcmp(option,"mcdb")!=0&&strcmp(option,"all")!=0){
         return -5;
     }
@@ -2199,7 +2187,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     remote_exec_general(workdir,sshkey_folder,"root","/usr/hpc-now/profile_bkup_rstr.sh backup","-n",0,0,"","");
     decrypt_files(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing previous nodes ...\n");
-    if(tf_execution(TERRAFORM_EXEC,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the previous nodes. Rolling back now ..." RESET_DISPLAY "\n");
         sprintf(cmdline,"%s %s%stmp%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,stackdir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
@@ -2232,7 +2220,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     update_tf_passwords(base_tf,master_tf,user_passwords);
 
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully removed previous nodes. Rebuilding new nodes ...\n");
-    if(tf_execution(TERRAFORM_EXEC,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rebuild the nodes. Exit now." RESET_DISPLAY "\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return 5;
@@ -2313,7 +2301,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     return 0;
 }
 
-int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* crypto_keyfile){
+int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* crypto_keyfile, tf_exec_config* tf_run){
     char workdir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char cloud_flag[32]="";
@@ -2352,7 +2340,7 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
     else{
         modify_payment_lines(stackdir,cloud_flag,"del");
     }
-    if(tf_execution(TERRAFORM_EXEC,"apply",dbg_level_flag,max_time_flag,workdir,crypto_keyfile,1)!=0){
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to switch the payment method to " WARN_YELLO_BOLD "%s" RESET_DISPLAY " .\n",new_payment_method);
         if(strcmp(new_payment_method,"month")==0){
             modify_payment_lines(stackdir,cloud_flag,"del");

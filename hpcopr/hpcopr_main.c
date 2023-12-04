@@ -48,19 +48,25 @@ int tf_loc_flag_var=0;
 int code_loc_flag_var=0;
 int now_crypto_loc_flag_var=0;
 
-char terraform_version_var[16]="";
-char ali_tf_plugin_version_var[16]="";
-char qcloud_tf_plugin_version_var[16]="";
-char aws_tf_plugin_version_var[16]="";
-char hw_tf_plugin_version_var[16]="";
-char bd_tf_plugin_version_var[16]="";
-char azrm_tf_plugin_version_var[16]="";
-char azad_tf_plugin_version_var[16]="";
+char terraform_version_var[32]="";
+char tofu_version_var[32]=""; //Added openTofu version
+
+char ali_tf_plugin_version_var[32]="";
+char qcloud_tf_plugin_version_var[32]="";
+char aws_tf_plugin_version_var[32]="";
+char hw_tf_plugin_version_var[32]="";
+char bd_tf_plugin_version_var[32]="";
+char azrm_tf_plugin_version_var[32]="";
+char azad_tf_plugin_version_var[32]="";
 char az_environment[16]="";
-char gcp_tf_plugin_version_var[16]="";
+char gcp_tf_plugin_version_var[32]="";
 
 char md5_tf_exec_var[64]="";
 char md5_tf_zip_var[64]="";
+
+char md5_tofu_exec_var[64]=""; //Added openTofu md5
+char md5_tofu_zip_var[64]="";  //Added openTofu zip md5
+
 char md5_now_crypto_var[64]="";
 char md5_ali_tf_var[64]="";
 char md5_ali_tf_zip_var[64]="";
@@ -81,8 +87,7 @@ char md5_gcp_tf_zip_var[64]="";
 
 int batch_flag=1; // If batch_flag=0: Batch Mode. If batch_flag!=0: interactive mode. use the -b flag
 char final_command[512]="";
-char dbg_level_flag[256]=""; //TF debug level. Only valid by specifying --dbd-level DBG_LEVEL. Default: info
-int max_time_flag=0; //TF max_time, only valid by specifying --max-time MAX_TIME. Default: MAXIMUM_WAIT_TIME, should be 600~1200
+tf_exec_config tf_this_run;
 
 /*
  * GEN: GENERAL COMMANDS
@@ -110,6 +115,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "syserr,gen,NULL",
     "ssh,gen,UNAME",
     "rdp,gen,UNAME",
+    "set-tf,gen,NULL",
     "configloc,gen,NULL",
     "showloc,gen,NULL",
     "resetloc,gen,NULL",
@@ -492,6 +498,35 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
+    if(strcmp(final_command,"set-tf")==0){
+        run_flag=show_tf_running_config();
+        printf("\n");
+        if(run_flag!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get the tf running config file." RESET_DISPLAY "\n");
+            write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
+            check_and_cleanup("");
+            return 127;
+        }
+        run_flag=prompt_to_confirm("Update the tf running configurations listed above?",CONFIRM_STRING,batch_flag);
+        if(run_flag==1){
+            write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
+            check_and_cleanup("");
+            return 127;
+        }
+        prompt_to_input_required_args("Select a new tf execution:  terraform  tofu",string_temp,batch_flag,argc,argv,"--tf-run");
+        prompt_to_input_required_args("Select a new debug log level: trace  debug  info  warn  error  off",string_temp2,batch_flag,argc,argv,"--dbg-level");
+        prompt_to_input_required_args("Specify a new max wait time (600 - 1200) secs",string_temp3,batch_flag,argc,argv,"--max-time");
+        run_flag=update_tf_running(string_temp,string_temp2,string_to_positive_num(string_temp3));
+        if(run_flag==-1){
+            write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
+            check_and_cleanup("");
+            return 127;
+        }
+        write_operation_log("NULL",operation_log,argc,argv,"OPERATION_SUCCEEDED",0);
+        check_and_cleanup("");
+        return 0;
+    }
+
     if(strcmp(final_command,"configloc")==0){
         run_flag=configure_locations(batch_flag);
         if(run_flag==1){
@@ -683,7 +718,7 @@ int main(int argc, char* argv[]){
     if(strcmp(final_command,"refresh")==0){
         run_flag=prompt_to_confirm_args("Do force refresh?",CONFIRM_STRING,batch_flag,argc,argv,"--all");
         if(run_flag==2||run_flag==0){
-            run_flag=refresh_cluster(cluster_name,crypto_keyfile,"force");
+            run_flag=refresh_cluster(cluster_name,crypto_keyfile,"force",&tf_this_run);
         }
         else{
             if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
@@ -691,7 +726,7 @@ int main(int argc, char* argv[]){
                 check_and_cleanup(workdir);
                 return 3;
             }
-            run_flag=refresh_cluster(cluster_name,crypto_keyfile,"");
+            run_flag=refresh_cluster(cluster_name,crypto_keyfile,"",&tf_this_run);
         }
         if(run_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to refresh cluster %s. Exit now.\n" RESET_DISPLAY,cluster_name);
@@ -858,10 +893,10 @@ int main(int argc, char* argv[]){
 
     if(strcmp(final_command,"remove")==0){
         if(cmd_flag_check(argc,argv,"--force")==0||batch_flag==0){
-            run_flag=remove_cluster(cluster_name,crypto_keyfile,"force");
+            run_flag=remove_cluster(cluster_name,crypto_keyfile,"force",&tf_this_run);
         }
         else{
-            run_flag=remove_cluster(cluster_name,crypto_keyfile,"");
+            run_flag=remove_cluster(cluster_name,crypto_keyfile,"",&tf_this_run);
         }
         if(run_flag==1){
             write_operation_log(argv[2],operation_log,argc,argv,"CLUSTER_NAME_CHECK_FAILED",21);
@@ -1441,25 +1476,25 @@ int main(int argc, char* argv[]){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file not found. Using the specified or default params." RESET_DISPLAY "\n");
         }
         if(strcmp(cloud_flag,"CLOUD_A")==0){
-            run_flag=alicloud_cluster_init(cluster_name,workdir,crypto_keyfile);
+            run_flag=alicloud_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            run_flag=qcloud_cluster_init(cluster_name,workdir,crypto_keyfile);
+            run_flag=qcloud_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_C")==0){
-            run_flag=aws_cluster_init(cluster_name,workdir,crypto_keyfile);
+            run_flag=aws_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_D")==0){
-            run_flag=hwcloud_cluster_init(cluster_name,workdir,crypto_keyfile);
+            run_flag=hwcloud_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_E")==0){
-            run_flag=baiducloud_cluster_init(cluster_name,workdir,crypto_keyfile);
+            run_flag=baiducloud_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_F")==0){
-            run_flag=azure_cluster_init(cluster_name,workdir,crypto_keyfile);
+            run_flag=azure_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_G")==0){
-            run_flag=gcp_cluster_init(cluster_name,workdir,crypto_keyfile);
+            run_flag=gcp_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
         }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now." RESET_DISPLAY "\n");
@@ -1545,7 +1580,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=switch_cluster_payment(cluster_name,string_temp2,crypto_keyfile);
+        run_flag=switch_cluster_payment(cluster_name,string_temp2,crypto_keyfile,&tf_this_run);
         if(run_flag==0){
             write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
             check_and_cleanup(workdir);
@@ -1598,7 +1633,7 @@ int main(int argc, char* argv[]){
                 strcpy(string_temp,"all");
             }
         }
-        run_flag=rebuild_nodes(workdir,crypto_keyfile,string_temp,batch_flag);
+        run_flag=rebuild_nodes(workdir,crypto_keyfile,string_temp,batch_flag,&tf_this_run);
         if(run_flag!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"REBUILD_FAILED",34);
             check_and_cleanup(workdir);
@@ -1653,7 +1688,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=nfs_volume_up(workdir,crypto_keyfile,string_temp);
+        run_flag=nfs_volume_up(workdir,crypto_keyfile,string_temp,&tf_this_run);
         if(run_flag!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"NFS_VOLUME_UP_FAILED",10);
             check_and_cleanup(workdir);
@@ -1684,7 +1719,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup("");
             return 3;
         }
-        run_flag=cluster_sleep(workdir,crypto_keyfile);
+        run_flag=cluster_sleep(workdir,crypto_keyfile,&tf_this_run);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;
@@ -1718,10 +1753,10 @@ int main(int argc, char* argv[]){
             return 3;
         }
         if(run_flag==2||run_flag==0){
-            run_flag=cluster_wakeup(workdir,crypto_keyfile,"all");
+            run_flag=cluster_wakeup(workdir,crypto_keyfile,"all",&tf_this_run);
         }
         else{
-            run_flag=cluster_wakeup(workdir,crypto_keyfile,"minimal");
+            run_flag=cluster_wakeup(workdir,crypto_keyfile,"minimal",&tf_this_run);
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
@@ -1851,10 +1886,10 @@ int main(int argc, char* argv[]){
     if(strcmp(final_command,"destroy")==0){
         run_flag=prompt_to_confirm_args("Do force destroy? (RISKY!)",CONFIRM_STRING,batch_flag,argc,argv,"--force");
         if(run_flag==2||run_flag==0){
-            run_flag=cluster_destroy(workdir,crypto_keyfile,"force",batch_flag);
+            run_flag=cluster_destroy(workdir,crypto_keyfile,"force",batch_flag,&tf_this_run);
         }
         else{
-            run_flag=cluster_destroy(workdir,crypto_keyfile,"",batch_flag);
+            run_flag=cluster_destroy(workdir,crypto_keyfile,"",batch_flag,&tf_this_run);
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
@@ -2041,7 +2076,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=delete_compute_node(workdir,crypto_keyfile,string_temp,batch_flag);
+        run_flag=delete_compute_node(workdir,crypto_keyfile,string_temp,batch_flag,&tf_this_run);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;
@@ -2065,7 +2100,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=add_compute_node(workdir,crypto_keyfile,node_num_string);
+        run_flag=add_compute_node(workdir,crypto_keyfile,node_num_string,&tf_this_run);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;
@@ -2088,7 +2123,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=shutdown_compute_nodes(workdir,crypto_keyfile,string_temp,batch_flag);
+        run_flag=shutdown_compute_nodes(workdir,crypto_keyfile,string_temp,batch_flag,&tf_this_run);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;
@@ -2111,7 +2146,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=turn_on_compute_nodes(workdir,crypto_keyfile,string_temp,batch_flag);
+        run_flag=turn_on_compute_nodes(workdir,crypto_keyfile,string_temp,batch_flag,&tf_this_run);
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);
         return run_flag;
@@ -2147,10 +2182,10 @@ int main(int argc, char* argv[]){
             return 3;
         }   
         if(strcmp(final_command,"reconfc")==0){
-            run_flag=reconfigure_compute_node(workdir,crypto_keyfile,string_temp,string_temp2);
+            run_flag=reconfigure_compute_node(workdir,crypto_keyfile,string_temp,string_temp2,&tf_this_run);
         }
         else{
-            run_flag=reconfigure_master_node(workdir,crypto_keyfile,string_temp);
+            run_flag=reconfigure_master_node(workdir,crypto_keyfile,string_temp,&tf_this_run);
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"",run_flag);
         check_and_cleanup(workdir);

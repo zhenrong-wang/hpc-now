@@ -13,9 +13,14 @@ int get_locations(void);
 int reset_locations(void);
 int show_locations(void);
 int configure_locations(int batch_flag_local);
+int reset_tf_running(void);
+int get_tf_running(tf_exec_config* tf_config);
+int show_tf_running_config(void);
+int update_tf_running(char* new_tf_runner, char* new_dbg_level, int new_max_time);
 
 int valid_ver_or_not(char* version_code);
 int valid_md5_or_not(char* md5_input);
+int valid_ver_or_not_tofu(char* version_code);
 int get_vers_md5_vars(void);
 int reset_vers_md5_vars(void);
 int show_vers_md5vars(void);

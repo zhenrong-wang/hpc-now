@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.1.0011"
+#define CORE_VERSION_CODE "0.2.1.0014"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -28,6 +28,7 @@
 
 #define NOW_CRYPTO_EXEC "c:\\hpc-now\\utils\\now-crypto.exe"
 #define TERRAFORM_EXEC "c:\\hpc-now\\utils\\terraform.exe"
+#define TOFU_EXEC "c:\\hpc-now\\utils\\tofu.exe"
 #define HPCOPR_EXEC "C:\\hpc-now\\hpcopr.exe"
 
 #define DELETE_FILE_CMD "del /f /q /s"
@@ -51,6 +52,7 @@
 #define VERS_MD5_CONF_FILE "c:\\programdata\\hpc-now\\etc\\md5values.conf"
 #define ALL_CLUSTER_REGISTRY "c:\\programdata\\hpc-now\\etc\\all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "c:\\programdata\\hpc-now\\etc\\current_cluster.dat"
+#define TF_RUNNING_CONFIG "c:\\programdata\\hpc-now\\etc\\tf_running.conf"
 #define FILENAME_SUFFIX_SHORT "win"
 #define FILENAME_SUFFIX_FULL "windows"
 
@@ -92,6 +94,7 @@
 
 #define NOW_CRYPTO_EXEC "/home/hpc-now/.bin/utils/now-crypto.exe"
 #define TERRAFORM_EXEC "/home/hpc-now/.bin/utils/terraform"
+#define TOFU_EXEC "/home/hpc-now/.bin/utils/tofu"
 #define HPCOPR_EXEC "/home/hpc-now/.bin/hpcopr"
 
 #define DELETE_FILE_CMD "rm -rf"
@@ -115,6 +118,7 @@
 #define VERS_MD5_CONF_FILE "/usr/.hpc-now/.etc/md5values.conf"
 #define ALL_CLUSTER_REGISTRY "/usr/.hpc-now/.etc/.all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "/usr/.hpc-now/.etc/current_cluster.dat"
+#define TF_RUNNING_CONFIG "/usr/.hpc-now/.etc/tf_running.conf"
 #define FILENAME_SUFFIX_SHORT "lin"
 #define FILENAME_SUFFIX_FULL "linux"
 
@@ -156,6 +160,7 @@
 
 #define NOW_CRYPTO_EXEC "/Users/hpc-now/.bin/utils/now-crypto.exe"
 #define TERRAFORM_EXEC "/Users/hpc-now/.bin/utils/terraform"
+#define TOFU_EXEC "/Users/hpc-now/.bin/utils/tofu"
 #define HPCOPR_EXEC "/Users/hpc-now/.bin/hpcopr"
 
 #define DELETE_FILE_CMD "rm -rf"
@@ -179,6 +184,7 @@
 #define VERS_MD5_CONF_FILE "/Applications/.hpc-now/.etc/md5values.conf"
 #define ALL_CLUSTER_REGISTRY "/Applications/.hpc-now/.etc/.all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR "/Applications/.hpc-now/.etc/current_cluster.dat"
+#define TF_RUNNING_CONFIG "/Applications/.hpc-now/.etc/tf_running.conf"
 #define FILENAME_SUFFIX_SHORT "dwn"
 #define FILENAME_SUFFIX_FULL "darwin"
 
@@ -230,12 +236,12 @@
 #define LINE_LENGTH_SHORT 256
 #define AKSK_LENGTH 256
 #define CONF_STRING_LENTH 64
-#define COMMAND_NUM 50
+#define COMMAND_NUM 51
 #define DATAMAN_COMMAND_NUM 17
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 11
 #define CMD_FLAG_NUM 30
-#define CMD_KWDS_NUM 47
+#define CMD_KWDS_NUM 48
 
 #define SPECIAL_PASSWORD_CHARS "~@&(){}[]=,.!#$"
 
@@ -261,6 +267,14 @@
 #define MAXIMUM_WAIT_TIME 600
 #define MAXIMUM_WAIT_TIME_EXT 1200
 
+typedef struct
+{
+    char tf_runner_type[16];
+    char tf_runner[256];
+    char dbg_level[128];
+    int max_wait_time;
+} tf_exec_config;
+
 /* 
  * Usually you don't need to modify the macros in this section
  * Unless you are going to build your own default public repository
@@ -268,7 +282,7 @@
  * Otherwise the repository won't work properly
  */
 
-#define DEFAULT_URL_TF_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/terraform-root/"
+#define DEFAULT_URL_TF_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/tf-root/"
 #define DEFAULT_URL_CODE_ROOT "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/infra-as-code/"
 #define DEFAULT_URL_SHELL_SCRIPTS "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/scripts/"
 #define DEFAULT_URL_APPS_INST_SCRIPTS "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/scripts/apps-install/"
@@ -278,6 +292,7 @@
 #define DEFAULT_LOCATIONS_COUNT 7
 
 #define TRANSFER_HEADER "EXPORTED AND TO BE IMPORTED BY HPC-NOW SERVICES"
+#define VERS_MD5_LINES 11
 
 #define FATAL_RED_BOLD "\033[1;31m"
 #define WARN_YELLO_BOLD "\033[1;33m"

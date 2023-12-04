@@ -31,13 +31,13 @@ int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bu
 void node_user_num_fix(int* node_num, int* hpc_user_num);
 void clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int condition_flag);
 void generate_tf_files(char* stackdir);
-int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
-int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
-int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
+int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
 int hw_intel_amd_generation(const char* region_id, char* intel_generation, char* amd_generation, int* amd_flag);
-int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
-int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
-int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
-int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile);
+int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
 
 #endif

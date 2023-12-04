@@ -1389,7 +1389,24 @@ int cluster_full_running_or_not(char* workdir){
     return 1;
 }
 
-int tf_execution(char* tf_exec, char* execution_name, char* tf_log_level, int max_time, char* workdir, char* crypto_keyfile, int silent_flag){
+int tf_exec_config_validation(tf_exec_config* tf_run){
+    if(strcmp(tf_run->tf_runner,TERRAFORM_EXEC)!=0&&strcmp(tf_run->tf_runner,TOFU_EXEC)!=0){
+        return 1;
+    }
+    if(strcmp(tf_run->dbg_level,"trace")!=0&&strcmp(tf_run->dbg_level,"debug")!=0&&strcmp(tf_run->dbg_level,"info")!=0&&strcmp(tf_run->dbg_level,"warn")!=0&&strcmp(tf_run->dbg_level,"error")!=0&&strcmp(tf_run->dbg_level,"off")!=0&&strcmp(tf_run->dbg_level,"TRACE")!=0&&strcmp(tf_run->dbg_level,"DEBUG")!=0&&strcmp(tf_run->dbg_level,"INFO")!=0&&strcmp(tf_run->dbg_level,"WARN")!=0&&strcmp(tf_run->dbg_level,"ERROR")!=0&&strcmp(tf_run->dbg_level,"OFF")!=0){
+        return 1;
+    }
+    if(tf_run->max_wait_time<MAXIMUM_WAIT_TIME||tf_run->max_wait_time>MAXIMUM_WAIT_TIME_EXT){
+        return 1;
+    }
+    return 0;
+}
+
+int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, char* crypto_keyfile, int silent_flag){
+    if(tf_exec_config_validation(tf_run)!=0){
+        printf("[ FATAL:] The tf execution config is invalid or empty. Please report this bug.\n");
+        return 1;
+    }
     char cmdline[CMDLINE_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char tf_realtime_log[FILENAME_LENGTH]="";
@@ -1415,18 +1432,19 @@ int tf_execution(char* tf_exec, char* execution_name, char* tf_log_level, int ma
     archive_log(tf_realtime_log_archive,tf_realtime_log);
     archive_log(tf_error_log_archive,tf_error_log);
     archive_log(tf_dbg_log_archive,tf_dbg_log);
+
     if(strcmp(execution_name,"init")==0){
-        sprintf(cmdline,"cd %s%s && %s TF_LOG=%s&&%s TF_LOG_PATH=%s%slog%stf_dbg.log && echo yes | %s %s %s -upgrade -lock=false > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,tf_log_level,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
+        sprintf(cmdline,"cd %s%s && %s TF_LOG=%s&&%s TF_LOG_PATH=%s%slog%stf_dbg.log && echo yes | %s %s %s -upgrade -lock=false > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,tf_run->dbg_level,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_run->tf_runner,execution_name,tf_realtime_log,tf_error_log);
     }
     else{
-        sprintf(cmdline,"cd %s%s && %s TF_LOG=%s&&%s TF_LOG_PATH=%s%slog%stf_dbg.log && echo yes | %s %s %s -lock=false -parallelism=1000 > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,tf_log_level,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_exec,execution_name,tf_realtime_log,tf_error_log);
+        sprintf(cmdline,"cd %s%s && %s TF_LOG=%s&&%s TF_LOG_PATH=%s%slog%stf_dbg.log && echo yes | %s %s %s -lock=false -parallelism=1000 > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,tf_run->dbg_level,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_run->tf_runner,execution_name,tf_realtime_log,tf_error_log);
     }
     system(cmdline);
     if(silent_flag!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process manually. Max Exec Time: %d s\n",max_time);
-        printf("|          Command: %s. Debug Level: %s. View Log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr -b viewlog\n" RESET_DISPLAY,execution_name,tf_log_level);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process. TF: %s. Max Exec Time: %d s.\n",tf_run->tf_runner_type,tf_run->max_wait_time);
+        printf("|          Command: %s. Debug Level: %s. Log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr -b viewlog\n" RESET_DISPLAY,execution_name,tf_run->dbg_level);
     }
-    if(wait_for_complete(tf_realtime_log,execution_name,max_time,tf_error_log,tf_error_log_archive,1)!=0){
+    if(wait_for_complete(tf_realtime_log,execution_name,tf_run->max_wait_time,tf_error_log,tf_error_log_archive,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
         archive_log(tf_error_log_archive,tf_error_log);
         archive_log(tf_dbg_log_archive,tf_dbg_log);
