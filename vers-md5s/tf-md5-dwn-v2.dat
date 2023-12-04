@@ -1,5 +1,6 @@
+component_name   version      exec_md5                         zip_md5
 terraform:       1.6.2        d490b06f6b53b7a9350f590a7728b7e3 3af6bb553ad887a7e59989705bdeaa46
-tofu:            1.6.0-alpha5 7f1571f9e53a7190fcf3295c4360a00b c510f5612be2d9df587035573f29a62a
+tofu:            1.6.0-beta1  1d7c4b9e24ab7196b8ff434ccc478bdb 65225a323f71269f18e063ecdb4a75e6
 alicloud_tf:     1.203.0      6091b17f8454fb6eb58c265938f0852f a8994ffac784d05f1d4bb45af65371ba
 tencentcloud_tf: 1.80.5       98e1a2b414fa3d38a9af20950deba844 13c2632876e3cbd02687d777e30a4708
 aws_tf:          4.64.0       aa46b5649535029d96fe6ada7fff1a20 1f01e3b61fa0d4a5e3514a775e27a826
