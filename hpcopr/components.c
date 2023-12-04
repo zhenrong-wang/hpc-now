@@ -575,7 +575,7 @@ int get_tf_running(tf_exec_config* tf_config){
             continue;
         }
     }
-    if(strcmp(tf_config->tf_runner,TERRAFORM_EXEC)!=0||strcmp(tf_config->tf_runner,TOFU_EXEC)!=0){
+    if(strcmp(tf_config->tf_runner,TERRAFORM_EXEC)!=0&&strcmp(tf_config->tf_runner,TOFU_EXEC)!=0){
         strcpy(tf_config->tf_runner,TERRAFORM_EXEC);
         strcpy(tf_config->tf_runner_type,"terraform");
     }
