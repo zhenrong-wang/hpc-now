@@ -152,7 +152,7 @@ int license_confirmation(void){
     printf("|          If you do not accept, this installation will exit immediately.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please input ( case-sensitive ): ");
     fflush(stdin);
-    scanf("%s",confirmation);
+    scanf("%63s",confirmation);
     if(strcmp(confirmation,"accept")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " This installation process is terminated because you didn't accept the\n");
         printf("|          terms and conditions in the license. Exit now.\n");
@@ -586,7 +586,7 @@ int uninstall_services(void){
     printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%s",doubleconfirm);
+    scanf("%127s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");
@@ -691,7 +691,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%s",doubleconfirm);
+    scanf("%127s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
         printf("|          Nothing changed.\n");

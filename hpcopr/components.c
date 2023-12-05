@@ -507,7 +507,7 @@ int show_locations(void){
     fgetline(file_p,loc_string);
     printf("\n");
     for(i=0;i<DEFAULT_LOCATIONS_COUNT;i++){
-        fscanf(file_p,"%64s%384s",header,loc_string);
+        fscanf(file_p,"%63s%383s",header,loc_string);
         printf("%s -> %s\n",header,loc_string);
     }
     return 0;
@@ -706,7 +706,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_URL_TF_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%384s",loc_string);
+    scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -722,7 +722,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_URL_CODE_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%384s",loc_string);
+    scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -738,7 +738,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%384s",loc_string);
+    scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -757,7 +757,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_URL_NOW_CRYPTO);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%384s",loc_string);
+    scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -773,7 +773,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%384s",loc_string);
+    scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -793,7 +793,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%384s",loc_string);
+    scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -813,7 +813,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%384s",loc_string);
+    scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);

@@ -156,7 +156,7 @@ int check_current_user(void){
         return 1;
     }
     FILE* file_p_temp=fopen("c:\\programdata\\current_user.txt.tmp","r");
-    fscanf(file_p_temp,"%128s",current_user_full);
+    fscanf(file_p_temp,"%127s",current_user_full);
     fclose(file_p_temp);
     system("del /f /q c:\\programdata\\current_user.txt.tmp > nul 2>&1");
     for(i=0;i<strlen(current_user_full);i++){
@@ -706,7 +706,7 @@ int check_and_install_prerequisitions(int repair_flag){
     char dotssh_dir[128]="";
     system("echo %APPDATA% > c:\\programdata\\appdata.txt.tmp");
     file_p=fopen("c:\\programdata\\appdata.txt.tmp","r");
-    fscanf(file_p,"%128s",appdata_dir);
+    fscanf(file_p,"%127s",appdata_dir);
     fclose(file_p);
     sprintf(cmdline,"del /f /s /q c:\\programdata\\appdata.txt.tmp %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -1230,7 +1230,7 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
         list_all_commands();
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a " HIGH_GREEN_BOLD "command" RESET_DISPLAY " : " HIGH_GREEN_BOLD);
         fflush(stdin);
-        scanf("%512s",final_command);
+        scanf("%511s",final_command);
         getchar();
         printf(RESET_DISPLAY);
     }
@@ -1290,7 +1290,7 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
                 list_all_cluster_names(1);
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
-                scanf("%128s",temp_cluster_name);
+                scanf("%127s",temp_cluster_name);
                 getchar();
                 if(cluster_name_check(temp_cluster_name)!=-127){
                     printf(FATAL_RED_BOLD "[ FATAL: ] The input cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,temp_cluster_name);
@@ -1338,7 +1338,7 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
                 hpc_user_list(workdir,CRYPTO_KEY_FILE,0);
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
-                scanf("%256s",string_temp);
+                scanf("%255s",string_temp);
                 getchar();
                 if(user_name_quick_check(cluster_name,string_temp,SSHKEY_DIR)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] The input user name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,string_temp);

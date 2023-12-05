@@ -1211,7 +1211,7 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "|       +- Remote:" RESET_DISPLAY " cp, mv, ls, rm, mkdir, cat, more, less, tail, rput, rget \n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
-            scanf("%128s",data_cmd);
+            scanf("%127s",data_cmd);
             getchar();
         }
         int i=0;
@@ -1251,7 +1251,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
-                scanf("%512s",source_path);
+                scanf("%511s",source_path);
                 getchar();
             }
             if(cmd_keyword_check(argc,argv,"-d",destination_path)!=0){
@@ -1267,7 +1267,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
-                scanf("%512s",destination_path);
+                scanf("%511s",destination_path);
                 getchar();
             }
         }
@@ -1285,7 +1285,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
-                scanf("%512s",target_path);
+                scanf("%511s",target_path);
                 getchar();
             }
         }
@@ -1801,7 +1801,7 @@ int main(int argc, char* argv[]){
             printf("|          list | add | delete | enable | disable | passwd \n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
-            scanf("%128s",user_cmd);
+            scanf("%127s",user_cmd);
             getchar();
         }
         if(strcmp(user_cmd,"list")!=0&&strcmp(user_cmd,"add")!=0&&strcmp(user_cmd,"delete")!=0&&strcmp(user_cmd,"enable")!=0&&strcmp(user_cmd,"disable")!=0&&strcmp(user_cmd,"passwd")!=0){
@@ -1931,7 +1931,7 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "|         " RESET_DISPLAY " store, avail, build, install, check, remove, update-conf, check-conf\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
-            scanf("%128s",app_cmd);
+            scanf("%127s",app_cmd);
             getchar();
         }
         int i=0;
@@ -1975,7 +1975,7 @@ int main(int argc, char* argv[]){
                 printf(GENERAL_BOLD "[ -INFO- ] Please specify an app name, e.g. " HIGH_CYAN_BOLD "mpich4" RESET_DISPLAY " :\n");
                 printf(GENERAL_BOLD "[ INPUT: ] ");
                 fflush(stdin);
-                scanf("%128s",app_name);
+                scanf("%127s",app_name);
                 getchar();
             }
             if(strcmp(app_cmd,"check")==0){
@@ -2013,7 +2013,7 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a valid command: submit, list, cancel\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
-            scanf("%128s",job_cmd);
+            scanf("%127s",job_cmd);
             getchar();
         }
         int i=0;
@@ -2053,7 +2053,7 @@ int main(int argc, char* argv[]){
                 }
                 printf("[ INPUT: ] Please specify the job id to be canceled: ");
                 fflush(stdin);
-                scanf("%32s",job_id);
+                scanf("%31s",job_id);
                 getchar();
             }
             run_flag=job_cancel(workdir,user_name,SSHKEY_DIR,job_id,batch_flag);

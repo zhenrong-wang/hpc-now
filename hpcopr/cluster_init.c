@@ -770,7 +770,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%11s",randstr);
+        fscanf(file_p,"%10s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -1267,7 +1267,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%11s",randstr);
+        fscanf(file_p,"%10s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -1754,7 +1754,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%11s",randstr);
+        fscanf(file_p,"%10s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -2249,7 +2249,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%11s",randstr);
+        fscanf(file_p,"%10s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -2742,7 +2742,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%11s",randstr);
+        fscanf(file_p,"%10s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -3232,7 +3232,7 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%11s",randstr);
+        fscanf(file_p,"%10s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -3661,7 +3661,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%11s",randstr);
+        fscanf(file_p,"%10s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
