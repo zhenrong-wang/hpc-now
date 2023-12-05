@@ -19,31 +19,28 @@
     - [**Step 2. Initialize the hpcopr**](#step-2-initialize-the-hpcopr)
   - [**3.3 Run**](#33-run)
   - [**3.4 Basic Workflow**](#34-basic-workflow)
-  - [**3.5 Commands**](#35-commands)
-    - [**3.5.1 installer Commands**](#351-installer-commands)
-      - [**General Options**](#general-options)
-      - [**Advanced\_Options**](#advanced_options)
-    - [**3.5.2 hpcopr Commands**](#352-hpcopr-commands)
-      - [**Get-Started**](#get-started)
-      - [**Multi-Cluster Management**](#multi-cluster-management)
-      - [**Global Management**](#global-management)
-      - [**Cluster Initialization**](#cluster-initialization)
-      - [**Cluster Management**](#cluster-management)
-      - [**Cluster Operation**](#cluster-operation)
-      - [**Cluster User Management**](#cluster-user-management)
-      - [**Cluster Data Management**](#cluster-data-management)
-        - [**Bucket Operations**](#bucket-operations)
-        - [**Direct Operations**](#direct-operations)
-      - [**Cluster App Management**](#cluster-app-management)
-      - [**Cluster Job Management**](#cluster-job-management)
-      - [**Others**](#others)
+  - [**3.5 The Installer Commands**](#35-the-installer-commands)
+    - [**General Options(Required)**](#general-optionsrequired)
+    - [**Advanced Options(Optional)**](#advanced-optionsoptional)
+  - [**3.6 The hpcopr Commands**](#36-the-hpcopr-commands)
+    - [**Get-Started**](#get-started)
+    - [**Multi-Cluster Management**](#multi-cluster-management)
+    - [**Global Management**](#global-management)
+    - [**Cluster Initialization**](#cluster-initialization)
+    - [**Cluster Management**](#cluster-management)
+    - [**Cluster Operation**](#cluster-operation)
+    - [**Cluster User Management**](#cluster-user-management)
+    - [**Cluster Data Management**](#cluster-data-management)
+    - [**Cluster App Management**](#cluster-app-management)
+    - [**Cluster Job Management**](#cluster-job-management)
+    - [**Others**](#others)
 - [**4. Contributing**](#4-contributing)
 
 # **1. Project Background**
 
 Cloud High-Performance Computing - **Cloud HPC**, differs from on-premise HPC significantly. Cloud service brings high scalability and flexibility to High-Performance Computing. However, most HPC users are not familiar with building and maintaining HPC services in the cloud. The technical barrier of cloud computing is very high to researchers, engineers, and developers in different scientific and engineering domains, e.g. energy, chemistry, physics, materials, bioscience. 
 
-In order to make it super easy to start and manage HPC workloads in the cloud, we have been developing this project: HPC-NOW. 'NOW' stands for:
+In order to make it super easy to start and manage HPC workloads in the cloud, we have been developing this project: HPC-NOW. **NOW** stands for:
 
 - Start HPC workloads in the cloud **NOW**, immediately, in minutes.
 - Manage HPC workloads with (almost) **N**o **O**peration **W**orkload.
@@ -60,7 +57,7 @@ Currently, the HPC-NOW platform supports 7 popular cloud platforms, shown as bel
 
 # **2. Core Components**
 
-Thanks to the [Terraform](http://www.terraform.io), a great cloud Infrastructure-as-Code platform making it possible to orchestrate cloud resources in a unified and simple way.
+Thanks to [Terraform](http://www.terraform.io) and [openTofu](https://github.com/opentofu/opentofu) for making it possible to orchestrate cloud resources in a unified and simple way.
 
 In this project, we are developing several components:
 
@@ -215,11 +212,10 @@ In order to use and manage HPC in the cloud with HPC-NOW, please follow the work
 - Destroy the cloud cluster (**`hpcopr destroy ...`**) -->
 - Remove the cloud credentials (optional, **`hpcopr remove ...`**)
 
+*An example of an HPC-NOW cluster running Paraview*
 ![example](./img/run_paraview.png)
 
-## **3.5 Commands**
-
-### **3.5.1 installer Commands**
+## **3.5 The Installer Commands**
 
 The **`installer`** is designed to manage the installation/update/uninstallation of the HPC-NOW services. It needs temporary administrator privilege to:
 
@@ -234,7 +230,7 @@ Please check the [source directory of installer](./installer/).
 - `sudo ./installer GENERAL_OPTION(required) ADVANCED_OPTIONS(optional)` for macOS(Darwin) and GNU/Linux sudoers
 - `.\installer GENERAL_OPTION(required) ADVANCED_OPTIONS(optional)` for Microsoft Windows Administrators
 
-#### **General Options**
+### **General Options(Required)**
 
 - `install`    Install the HPC-NOW services and components.
 - `update`     Update the HPC-NOW services and components.
@@ -243,7 +239,7 @@ Please check the [source directory of installer](./installer/).
 - `version`    Display the version of the `installer`, not the `hpcopr`
 - `verlist`    List out all the available versions provided in the public repository
 
-#### **Advanced_Options**
+### **Advanced Options(Optional)**
 
 - `--accept`    Automatically accept the MIT License terms of this software.
 - `--hloc LOCATION`  The location (an URL or a valid local path) of the `hpcopr` CLI.
@@ -251,7 +247,14 @@ Please check the [source directory of installer](./installer/).
 - `--hver VERSION` Specify a version of the `hpcopr` CLI, default: latest version.
 - `--rdp` **Recommend!** Install the RDP client for GNU/Linux or macOS(Darwin).
 
-### **3.5.2 hpcopr Commands**
+**Examples**
+
+- `sudo ./installer install --rdp`
+- `sudo ./installer install --hloc ./hpcopr.exe --cloc ./now-crypto.exe --accept`
+- `sudo ./installer uninstall`
+- `sudo ./installer update --hloc ./hpcopr.exe --accpet`
+
+## **3.6 The hpcopr Commands**
 
 The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 
@@ -270,11 +273,11 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 
 **CMD_NAME LIST**:
 
-#### **Get-Started**
+### **Get-Started**
 
 - `envcheck`     Quickly check the running environment.
 
-#### **Multi-Cluster Management**
+### **Multi-Cluster Management**
 
 - `new-cluster`  Create a new cluster to initialize.
 - `ls-clusters`  List all the current clusters.
@@ -286,7 +289,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 - `remove`       Completely remove a cluster from the OS and registry.
 - `exit-current` Exit the current cluster.
 
-#### **Global Management**
+### **Global Management**
 
 - `help`         Show this page and the information here.
 - `usage`        View and/or export the usage history.
@@ -304,7 +307,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 - `showmd5`      Show the md5sum values of core components.
 - `resetloc`     Reset to the default locations.
 
-#### **Cluster Initialization**
+### **Cluster Initialization**
 
 - `rotate-key`  *Rotate* a new keypair for an existing cluster. The new keypair should be valid and comes from the same cloud vendor.
 - `get-conf`    Get the default configuration file to edit and build a customized HPC cluster later (using the 'init' command).
@@ -313,13 +316,13 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 - `init`        Initialize a new cluster. If the configuration file is absent, the command will generate a default configuration file.
 - `rebuild`     Rebuild the nodes *without* destroying the cluster's storage.
 
-#### **Cluster Management**
+### **Cluster Management**
 
 - `vault`        Check the sensitive information of the current cluster.
 - `graph`        Display the cluster map including all the nodes and status.
 - `viewlog`      View the operation log of the current cluster.
 
-#### **Cluster Operation**
+### **Cluster Operation**
 
 - `delc`         Delete specified compute nodes:
 - `addc`         Add compute nodes to current cluster. You must specify how many to be added.
@@ -333,7 +336,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 - `destroy`      *DESTROY* the whole cluster - including all the resources & data.
 - `payment`      Switch the payment method between on-demand and monthly (not applicable for AWS, Google Cloud Platform, or Microsoft Azure).
 
-#### **Cluster User Management**
+### **Cluster User Management**
 
 **Usage:** `hpcopr userman --ucmd USER_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -346,7 +349,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
     --ucmd disable   Disable a user. Disabled users still can access the cluster.
     --ucmd passwd    Change user's password.
 
-#### **Cluster Data Management**
+### **Cluster Data Management**
 
 **Usage:** `hpcopr dataman CMD_FLAG... [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -356,7 +359,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
     -d DEST_PATH      Destination path of binary operations. i.e. cp
     -t TARGET_PATH    Target path of unary operations. i.e. ls
 
-##### **Bucket Operations** 
+**Bucket Operations** 
 
 *Transfer and manage data with the bucket.*
 
@@ -369,7 +372,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 
 **Example:** `hpcopr dataman --dcmd put -s ./foo -d /foo -u user1`
 
-##### **Direct Operations** 
+**Direct Operations** 
 
 *Transfer and manage data in the cluster storage.*
 
@@ -396,7 +399,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 
 **Example:** `hpcopr dataman --dcmd cp -s ~/foo/ -d @h/foo -r -u user1`
 
-#### **Cluster App Management**
+### **Cluster App Management**
 
 **Usage:** `hpcopr appman --acmd APP_CMD CMD_FLAG [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -413,7 +416,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
     --acmd update-config Update the locations for scripts and pacakge repository
     --acmd show-config   Display the locations for scripts and pacakge repository
 
-#### **Cluster Job Management**
+### **Cluster Job Management**
 
 **Usage:** `hpcopr jobman --jcmd APP_CMD [ KEY_WORD1 KEY_STRING1 ] ...`
 
@@ -425,7 +428,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
     --jcmd list      List out all the jobs.
     --jcmd cancel    Cancel a job with specified ID
 
-#### **Others**
+### **Others**
 
 - `about`        About this software and HPC-NOW project.
 - `version`      Display the version info.
