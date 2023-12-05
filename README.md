@@ -217,24 +217,24 @@ In order to use and manage HPC in the cloud with HPC-NOW, please follow the work
 
 ## **3.5 The Installer Commands**
 
-The **`installer`** is designed to manage the installation/update/uninstallation of the HPC-NOW services. It needs temporary administrator privilege to:
+The **`installer`** is designed to manage the installation/update/removal of the HPC-NOW services. It needs temporary administrator privilege to:
 
 - Add/delete the dedicated system user 'hpc-now'
 - Change the ownership and/or permissions of the key working directories
-- Use system-level package manager to install packages such as wget, zip/unzip, in case the packages are absent.
+- Use system-level package manager to install packages such as wget, zip/unzip, in case the packages are absent
 
-Please check the [source directory of installer](./installer/).
+**We follow the least privilege principle**. Please check the [source code directory of installer](./installer/).
 
 **USAGE**: 
 
-- `sudo ./installer GENERAL_OPTION(required) ADVANCED_OPTIONS(optional)` for macOS(Darwin) and GNU/Linux sudoers
-- `.\installer GENERAL_OPTION(required) ADVANCED_OPTIONS(optional)` for Microsoft Windows Administrators
+- `sudo ./installer GENERAL_OPTION(required) ADVANCED_OPTIONS(optional)` for **macOS(Darwin)** and **GNU/Linux** sudoers
+- `.\installer GENERAL_OPTION(required) ADVANCED_OPTIONS(optional)` for **Microsoft Windows** Administrators
 
 ### **General Options(Required)**
 
 - `install`    Install the HPC-NOW services and components.
 - `update`     Update the HPC-NOW services and components.
-- `uninstall`  **Risky!** Uninstall the HPC-NOW services completely.
+- `uninstall`  Uninstall the HPC-NOW services completely. **CAUTION! You must destroy/remove all the clusters managed in current device before running this command! Otherwise, out-of-manage cloud resource may occur!**
 - `help`       Read the help doc for `installer`
 - `version`    Display the version of the `installer`, not the `hpcopr`
 - `verlist`    List out all the available versions provided in the public repository
