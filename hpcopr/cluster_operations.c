@@ -1525,6 +1525,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 else{
                     insert_lines(filename_temp2,"#INSERT_HT_HERE","cpu_threads_per_core = 2");
                 }
+                reinit_flag=1;
             }
             else{
                 delete_lines_by_kwd(filename_temp2,"cpu_core_count =",1);
@@ -1533,6 +1534,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                     insert_lines(filename_temp2,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
                     sprintf(string_temp2,"cpu_core_count = %d",cpu_core_num);
                     insert_lines(filename_temp2,"#INSERT_HT_HERE",string_temp2);
+                    reinit_flag=1;
                 }
             }
             //printf("----%d\n",cpu_core_num);
