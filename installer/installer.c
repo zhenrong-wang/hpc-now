@@ -175,7 +175,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
 #ifdef __linux__
     char linux_packman[8]="";
 #endif
-    FILE* file_p=NULL;
+    FILE* file_p;
     int run_flag1,run_flag2;
 #ifdef _WIN32
     if(system("net user hpc-now > nul 2>&1")==0){
@@ -312,6 +312,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
 #elif __APPLE__
     file_p=fopen("/Applications/.hpc-now/.now_crypto_seed.lock","w+");
 #endif
+    if(file_p==NULL){
+        return -1;
+    }
     fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
     fprintf(file_p,"PLEASE DO NOT HANDLE THIS FILE MANNUALLY! OTHERWISE THE SERVICE WILL BE CORRUPTED!\n");
     fprintf(file_p,"SHANGHAI HPC-NOW TECHNOLOGIES CO., LTD | info@hpc-now.com | https://www.hpc-now.com\n\n");

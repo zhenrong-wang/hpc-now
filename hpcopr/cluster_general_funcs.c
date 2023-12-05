@@ -2407,7 +2407,7 @@ int current_cluster_or_not(char* current_indicator, char* cluster_name){
     if(file_p==NULL){
         return 1;
     }
-    fscanf(file_p,"%31s",current_cluster_name);
+    fscanf(file_p,"%24s",current_cluster_name);
     if(strcmp(current_cluster_name,cluster_name)!=0){
         fclose(file_p);
         return -1;
@@ -2470,7 +2470,7 @@ int check_and_cleanup(char* prev_workdir){
     char appdata_dir[DIR_LENGTH]="";
     system("echo %APPDATA% > c:\\programdata\\appdata.txt.tmp");
     file_p=fopen("c:\\programdata\\appdata.txt.tmp","r");
-    fscanf(file_p,"%511s",appdata_dir);
+    fscanf(file_p,"%383s",appdata_dir);
     fclose(file_p);
     system("del /f /s /q c:\\programdata\\appdata.txt.tmp > nul 2>&1");
     system("icacls C:\\programdata\\hpc-now\\workdir /deny Administrators:F /T > nul 2>&1");

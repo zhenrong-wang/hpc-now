@@ -478,6 +478,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
         if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] AK and/or SK not specified. Use --ak AK --sk SK" RESET_DISPLAY "\n");
+            fclose(file_p);
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your secrets key pair:\n");
@@ -534,6 +535,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         if(strlen(az_subscription)!=36){
             if(batch_flag_local==0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Subscription ID no specified. Use --az-sid ID ." RESET_DISPLAY "\n");
+                fclose(file_p_2);
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Subscription id: ");
@@ -547,6 +549,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         if(strlen(az_tenant)!=36){
             if(batch_flag_local==0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Tenant ID no specified. Use --az-tid ID ." RESET_DISPLAY "\n");
+                fclose(file_p_2);
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Azure Tenant id: ");
@@ -709,6 +712,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     if(strlen(cloud_ak)==0||strlen(cloud_sk)==0){
         if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] AK and/or SK not specified. Use --ak AK --sk SK" RESET_DISPLAY "\n");
+            fclose(file_p);
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your new secrets key pair:\n");
@@ -1408,6 +1412,7 @@ int check_reconfigure_list(char* workdir, int print_flag){
         return -1;
     }
     if(print_flag==0){
+        fclose(file_p);
         return 0;
     }
     while(fgetline(file_p,single_line)==0){

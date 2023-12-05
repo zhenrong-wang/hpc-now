@@ -100,7 +100,7 @@ int main(int argc,char *argv[]){
     printf("[ -WARN- ] You are deleting User %s from the cluster and the OS!\n", argv[3]);
     printf("[ INPUT: ] Please input 'y-e-s' to confirm: ");
     fflush(stdin);
-    scanf("%s",confirm);
+    scanf("%63s",confirm);
     getchar();
     if(strcmp(confirm,"y-e-s")==0){
       printf("Operation confirmed.\n");
