@@ -770,7 +770,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%s",randstr);
+        fscanf(file_p,"%11s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -997,6 +997,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
+    create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -1266,7 +1267,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%s",randstr);
+        fscanf(file_p,"%11s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -1484,6 +1485,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
         get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
+    create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -1752,7 +1754,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%s",randstr);
+        fscanf(file_p,"%11s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -1966,6 +1968,7 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
         get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
+    create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -2246,7 +2249,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%s",randstr);
+        fscanf(file_p,"%11s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -2487,6 +2490,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
         get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
+    create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -2738,7 +2742,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%s",randstr);
+        fscanf(file_p,"%11s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -2974,6 +2978,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
         get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
+    create_local_tf_config(tf_run,stackdir);
     generate_bceconfig(vaultdir,region_id,bucket_ak,bucket_sk);
     sprintf(filename_temp,"%s%scredentials",vaultdir,PATH_SLASH);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/credentials","root","put","",0);
@@ -3227,7 +3232,7 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%s",randstr);
+        fscanf(file_p,"%11s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -3409,6 +3414,7 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
         get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
+    create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -3655,7 +3661,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%s",randstr);
+        fscanf(file_p,"%11s",randstr);
         sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
         fclose(file_p);
     }
@@ -3861,6 +3867,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
+    create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
     gcp_credential_convert(workdir,"delete",0);
     return 0;

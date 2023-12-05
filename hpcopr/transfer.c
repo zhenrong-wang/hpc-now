@@ -165,7 +165,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
             hpc_user_list(workdir,crypto_keyfile,0);
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
-            scanf("%s",user_list_buffer);
+            scanf("%1024s",user_list_buffer);
             getchar();
         }
     }
@@ -215,7 +215,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a path (folder or file) to export. i.e. " HIGH_CYAN_BOLD "/home/hpc-now/" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
-        scanf("%s",filename_temp_2);
+        scanf("%512s",filename_temp_2);
         getchar();
         local_path_parser(filename_temp_2,filename_temp);
     }
@@ -438,7 +438,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         printf("[ -INFO- ] Please input the path of the now-cluster file. i.e. ~/import.now, d:\\import.now\n");
         printf("[ INPUT: ] ");
         fflush(stdin);
-        scanf("%s",filename_temp);
+        scanf("%512s",filename_temp);
         getchar();
         local_path_parser(filename_temp,filename_temp_2);
         if(strlen(filename_temp_2)==0||file_empty_or_not(filename_temp_2)<1){
@@ -498,7 +498,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
             else{
                 printf("[ INPUT: ] ");
                 fflush(stdin);
-                scanf("%s",doubleconfirm);
+                scanf("%64s",doubleconfirm);
                 getchar();
                 if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
                     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");

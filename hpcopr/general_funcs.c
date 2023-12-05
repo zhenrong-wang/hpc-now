@@ -656,6 +656,8 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
     return 1;
 }
 
+//return 0: exists
+//return 1: not-exists
 int file_exist_or_not(char* filename){
     FILE* file_p=fopen(filename,"r");
     if(file_p==NULL){

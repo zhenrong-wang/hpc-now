@@ -261,6 +261,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 
 *Advanced - For developers:*
 
+- `set-tf`       Set the running configurations for openTofu or terraform
 - `configloc`    Configure the locations for the terraform binaries, providers, IaC templates and shell scripts.
 - `showloc`      Show the current configured locations.
 - `showmd5`      Show the md5sum values of core components.

@@ -314,22 +314,27 @@ int main(int argc, char* argv[]){
 
 #ifdef _WIN32
     if(check_current_user()!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] You *MUST* run hpcopr as the OS user 'hpc-now'." RESET_DISPLAY "\n");
-        printf("|          Please follow the steps below:\n");
-        printf("|          1. run the command " HIGH_GREEN_BOLD "runas /savecred /user:mymachine\\hpc-now cmd" RESET_DISPLAY "\n");
-        printf("|          2. run the " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands in the *new* CMD window\n");
+        printf(WARN_YELLO_BOLD "|    Only the system user 'hpc-now' can run hpcopr. Steps:" RESET_DISPLAY "\n");
+        printf("|    +- " GENERAL_BOLD "COMMAND MODE" RESET_DISPLAY " (pretty simple and fast):\n");
+        printf("|       1. run command " HIGH_GREEN_BOLD "runas /savecred /user:mymachine\\hpc-now cmd" RESET_DISPLAY "\n");
+        printf("|          The password of 'hpc-now' is needed for the first time.\n");
+        printf("|       2. run " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands in the " GENERAL_BOLD "new" RESET_DISPLAY " CMD Window.\n");
+        printf("|    +- " GENERAL_BOLD "DESKTOP MODE" RESET_DISPLAY " (switch the whole desktop environment):\n");
+        printf("|       1. Press " HIGH_GREEN_BOLD "Ctrl + Alt + Delete" RESET_DISPLAY "\n");
+        printf("|       2. Select the user " HIGH_GREEN_BOLD "hpc-now" RESET_DISPLAY " and log in.\n");
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] You *MUST* run hpcopr as the system user 'hpc-now'." RESET_DISPLAY "\n");
         print_tail();
         return 117;
     }
 #else
     if(check_current_user()!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] You *MUST* run hpcopr as the OS user 'hpc-now'." RESET_DISPLAY "\n");
-        printf("|     <> Please follow the instructions below:\n");
-        printf("|     -> SUDO-MODE (pretty simple and fast for *sudoers*): \n");
-        printf("|          run the hpcopr as " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr ..." RESET_DISPLAY "\n");
-        printf("|     -> USER-MODE (for both *non-sudoers* and *sudoers*): \n");
-        printf("|          1. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY " (The password of 'hpc-now' is needed)\n");
-        printf("|          2. run the " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands, e.g. " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY "\n");
+        printf(WARN_YELLO_BOLD "|    Only the system user 'hpc-now' can run hpcopr. Steps:" RESET_DISPLAY "\n");
+        printf("|    +- " GENERAL_BOLD "SUDO MODE" RESET_DISPLAY " (pretty simple and fast for *sudoers*):\n");
+        printf("|       Run with the " HIGH_GREEN_BOLD "sudo -u" RESET_DISPLAY " prefix, e.g. " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr ..." RESET_DISPLAY "\n");
+        printf("|    +- " GENERAL_BOLD "USER MODE" RESET_DISPLAY " (for both *non-sudoers* and *sudoers*):" RESET_DISPLAY "\n");
+        printf("|       1. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY " (The password of 'hpc-now' is needed)\n");
+        printf("|       2. run the " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands, e.g. " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] You *MUST* run hpcopr as the system user 'hpc-now'." RESET_DISPLAY "\n");
         print_tail();
         return 117;
     }
@@ -1206,7 +1211,7 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "|       +- Remote:" RESET_DISPLAY " cp, mv, ls, rm, mkdir, cat, more, less, tail, rput, rget \n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
-            scanf("%s",data_cmd);
+            scanf("%128s",data_cmd);
             getchar();
         }
         int i=0;
@@ -1246,7 +1251,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
-                scanf("%s",source_path);
+                scanf("%512s",source_path);
                 getchar();
             }
             if(cmd_keyword_check(argc,argv,"-d",destination_path)!=0){
@@ -1262,7 +1267,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
-                scanf("%s",destination_path);
+                scanf("%512s",destination_path);
                 getchar();
             }
         }
@@ -1280,7 +1285,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
-                scanf("%s",target_path);
+                scanf("%512s",target_path);
                 getchar();
             }
         }
@@ -1796,7 +1801,7 @@ int main(int argc, char* argv[]){
             printf("|          list | add | delete | enable | disable | passwd \n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
-            scanf("%s",user_cmd);
+            scanf("%128s",user_cmd);
             getchar();
         }
         if(strcmp(user_cmd,"list")!=0&&strcmp(user_cmd,"add")!=0&&strcmp(user_cmd,"delete")!=0&&strcmp(user_cmd,"enable")!=0&&strcmp(user_cmd,"disable")!=0&&strcmp(user_cmd,"passwd")!=0){
@@ -1926,7 +1931,7 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "|         " RESET_DISPLAY " store, avail, build, install, check, remove, update-conf, check-conf\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
-            scanf("%s",app_cmd);
+            scanf("%128s",app_cmd);
             getchar();
         }
         int i=0;
@@ -1970,7 +1975,7 @@ int main(int argc, char* argv[]){
                 printf(GENERAL_BOLD "[ -INFO- ] Please specify an app name, e.g. " HIGH_CYAN_BOLD "mpich4" RESET_DISPLAY " :\n");
                 printf(GENERAL_BOLD "[ INPUT: ] ");
                 fflush(stdin);
-                scanf("%s",app_name);
+                scanf("%128s",app_name);
                 getchar();
             }
             if(strcmp(app_cmd,"check")==0){
@@ -2008,7 +2013,7 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a valid command: submit, list, cancel\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
-            scanf("%s",job_cmd);
+            scanf("%128s",job_cmd);
             getchar();
         }
         int i=0;
@@ -2048,7 +2053,7 @@ int main(int argc, char* argv[]){
                 }
                 printf("[ INPUT: ] Please specify the job id to be canceled: ");
                 fflush(stdin);
-                scanf("%s",job_id);
+                scanf("%32s",job_id);
                 getchar();
             }
             run_flag=job_cancel(workdir,user_name,SSHKEY_DIR,job_id,batch_flag);

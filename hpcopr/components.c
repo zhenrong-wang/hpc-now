@@ -507,7 +507,7 @@ int show_locations(void){
     fgetline(file_p,loc_string);
     printf("\n");
     for(i=0;i<DEFAULT_LOCATIONS_COUNT;i++){
-        fscanf(file_p,"%s%s",header,loc_string);
+        fscanf(file_p,"%64s%384s",header,loc_string);
         printf("%s -> %s\n",header,loc_string);
     }
     return 0;
@@ -525,18 +525,24 @@ int reset_tf_running(void){
     return 0;
 }
 
-int get_tf_running(tf_exec_config* tf_config){
-    FILE* file_p=fopen(TF_RUNNING_CONFIG,"r");
+//return -1: file_not_exist
+//return 0: file exist and format correct
+//return 1: one config failed
+//return 2: two configs failed
+//return 3: three configs failed
+//Any failed config will be reset to the default one
+int get_tf_running(tf_exec_config* tf_config, char* tf_config_file){
+    FILE* file_p=fopen(tf_config_file,"r");
     char conf_line[1024]="";
     char header[256]="";
     char tail[512]="";
-    int time;
+    int time,get_flag=0;
     if(file_p==NULL){
         strcpy(tf_config->tf_runner_type,"terraform");
         strcpy(tf_config->tf_runner,TERRAFORM_EXEC);
         strcpy(tf_config->dbg_level,"warn");
         tf_config->max_wait_time=MAXIMUM_WAIT_TIME;
-        return 2;
+        return -1;
     }
     while(!feof(file_p)){
         if(fgetline(file_p,conf_line)!=0){
@@ -575,18 +581,21 @@ int get_tf_running(tf_exec_config* tf_config){
             continue;
         }
     }
+    fclose(file_p);
     if(strcmp(tf_config->tf_runner,TERRAFORM_EXEC)!=0&&strcmp(tf_config->tf_runner,TOFU_EXEC)!=0){
         strcpy(tf_config->tf_runner,TERRAFORM_EXEC);
         strcpy(tf_config->tf_runner_type,"terraform");
+        get_flag++;
     }
     if(strcmp(tf_config->dbg_level,"trace")!=0&&strcmp(tf_config->dbg_level,"debug")!=0&&strcmp(tf_config->dbg_level,"info")!=0&&strcmp(tf_config->dbg_level,"warn")!=0&&strcmp(tf_config->dbg_level,"error")!=0&&strcmp(tf_config->dbg_level,"off")!=0&&strcmp(tf_config->dbg_level,"TRACE")!=0&&strcmp(tf_config->dbg_level,"DEBUG")!=0&&strcmp(tf_config->dbg_level,"INFO")!=0&&strcmp(tf_config->dbg_level,"WARN")!=0&&strcmp(tf_config->dbg_level,"ERROR")!=0&&strcmp(tf_config->dbg_level,"OFF")!=0){
         strcpy(tf_config->dbg_level,"warn");
+        get_flag++;
     }
     if(tf_config->max_wait_time<MAXIMUM_WAIT_TIME||tf_config->max_wait_time>MAXIMUM_WAIT_TIME_EXT){
         tf_config->max_wait_time=MAXIMUM_WAIT_TIME;
+        get_flag++;
     }
-    fclose(file_p);
-    return 0;
+    return get_flag;
 }
 
 int show_tf_running_config(void){
@@ -697,7 +706,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_URL_TF_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%s",loc_string);
+    scanf("%384s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -713,7 +722,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_URL_CODE_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%s",loc_string);
+    scanf("%384s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -729,7 +738,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%s",loc_string);
+    scanf("%384s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -748,7 +757,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_URL_NOW_CRYPTO);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%s",loc_string);
+    scanf("%384s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -764,7 +773,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%s",loc_string);
+    scanf("%384s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -784,7 +793,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%s",loc_string);
+    scanf("%384s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);
@@ -804,7 +813,7 @@ int configure_locations(int batch_flag_local){
     printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%s",loc_string);
+    scanf("%384s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
         format_flag=valid_loc_format_or_not(loc_string);

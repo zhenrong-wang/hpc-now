@@ -14,7 +14,7 @@ int reset_locations(void);
 int show_locations(void);
 int configure_locations(int batch_flag_local);
 int reset_tf_running(void);
-int get_tf_running(tf_exec_config* tf_config);
+int get_tf_running(tf_exec_config* tf_config, char* tf_config_file);
 int show_tf_running_config(void);
 int update_tf_running(char* new_tf_runner, char* new_dbg_level, int new_max_time);
 

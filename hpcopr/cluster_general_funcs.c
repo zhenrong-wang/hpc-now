@@ -108,7 +108,7 @@ int get_cloud_flag(char* workdir, char* cloud_flag){
         return -1;
     }
     file_p=fopen(filename_temp,"r");
-    fscanf(file_p,"%s",cloud_flag);
+    fscanf(file_p,"%16s",cloud_flag);
     fclose(file_p);
     return 0;
 }
@@ -568,6 +568,54 @@ int check_pslock(char* workdir){
     create_and_get_stackdir(workdir,stackdir);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+int create_local_tf_config(tf_exec_config* tf_run, char* stackdir){
+    char filename_temp[FILENAME_LENGTH]="";
+    sprintf(filename_temp,"%s%s.tf_running.conf.local",stackdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)==0){
+        return 1; // Normally, this should not happen.
+    }
+    FILE* file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        return 1;
+    }
+    fprintf(file_p,"tf_execution:  %s\n",tf_run->tf_runner);
+    fprintf(file_p,"tf_dbg_level:  %s\n",tf_run->dbg_level);
+    fprintf(file_p,"max_wait_sec:  %d\n",tf_run->max_wait_time);
+    fclose(file_p);
+    return 0;
+}
+
+// return 0: local_tf_config file exists
+// return 1: local_tf_config file doesn't exits
+int check_local_tf_config(char* workdir, char* tf_running_config_local){
+    char stackdir[DIR_LENGTH_EXT]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(filename_temp,"%s%s.tf_running.conf.local",stackdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)==0){
+        strcpy(tf_running_config_local,filename_temp);
+        return 0;
+    }
+    else{
+        strcpy(tf_running_config_local,"");
+        return 1;
+    }
+}
+
+//
+int delete_local_tf_config(char* stackdir){
+    char cmdline[CMDLINE_LENGTH]="";
+    int run_flag;
+    sprintf(cmdline,"%s %s%s.tf_running.conf.local %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    run_flag=system(cmdline);
+    if(run_flag!=0){
         return 1;
     }
     else{
@@ -1728,7 +1776,7 @@ int confirm_to_operate_cluster(char* current_cluster_name, int batch_flag_local)
     printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to confirm.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%s",confirm);
+    scanf("%64s",confirm);
     getchar();
     if(strcmp(confirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. Denied.\n");
@@ -1750,7 +1798,7 @@ int prompt_to_confirm(const char* prompt_string, const char* confirm_string, int
     printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "%s\n",prompt_string);
     printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY "Input " WARN_YELLO_BOLD "%s" RESET_DISPLAY " to confirm: ",confirm_string);
     fflush(stdin);
-    scanf("%s",confirm);
+    scanf("%256s",confirm);
     getchar();
     if(strcmp(confirm,confirm_string)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "%s" RESET_DISPLAY " is accepted to confirm. Denied.\n",confirm_string);
@@ -1789,7 +1837,7 @@ int prompt_to_input(const char* prompt_string, char* reply_string, int batch_fla
     }
     printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY "");
     fflush(stdin);
-    scanf("%s",reply_string);
+    scanf("%512s",reply_string);
     getchar();
     return 0;
 }
@@ -2343,7 +2391,7 @@ int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int 
     }
     else{
         file_p=fopen(CURRENT_CLUSTER_INDICATOR,"r");
-        fscanf(file_p,"%s",current_cluster_name);
+        fscanf(file_p,"%32s",current_cluster_name);
         if(silent_flag==1){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Current cluster:" HIGH_GREEN_BOLD " %s" RESET_DISPLAY ".\n",current_cluster_name);
         }
@@ -2359,7 +2407,7 @@ int current_cluster_or_not(char* current_indicator, char* cluster_name){
     if(file_p==NULL){
         return 1;
     }
-    fscanf(file_p,"%s",current_cluster_name);
+    fscanf(file_p,"%32s",current_cluster_name);
     if(strcmp(current_cluster_name,cluster_name)!=0){
         fclose(file_p);
         return -1;
@@ -2422,7 +2470,7 @@ int check_and_cleanup(char* prev_workdir){
     char appdata_dir[DIR_LENGTH]="";
     system("echo %APPDATA% > c:\\programdata\\appdata.txt.tmp");
     file_p=fopen("c:\\programdata\\appdata.txt.tmp","r");
-    fscanf(file_p,"%s",appdata_dir);
+    fscanf(file_p,"%512s",appdata_dir);
     fclose(file_p);
     system("del /f /s /q c:\\programdata\\appdata.txt.tmp > nul 2>&1");
     system("icacls C:\\programdata\\hpc-now\\workdir /deny Administrators:F /T > nul 2>&1");

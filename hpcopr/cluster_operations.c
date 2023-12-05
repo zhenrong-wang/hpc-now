@@ -257,14 +257,14 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
         printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? This operation is *NOT* recoverable!" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: " );
         fflush(stdin);
-        scanf("%s",doubleconfirm);
+        scanf("%64s",doubleconfirm);
         getchar();
         if(strcmp(doubleconfirm,CONFIRM_STRING)==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
             printf("|          absolutely *NOT* recoverable!" RESET_DISPLAY "\n");
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
             fflush(stdin);
-            scanf("%s",doubleconfirm);
+            scanf("%64s",doubleconfirm);
             getchar();
             if(strcmp(doubleconfirm,target_cluster_name)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
@@ -281,7 +281,7 @@ int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_f
         printf("|          related files from your system. Would you like to continue?\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: ");
         fflush(stdin);
-        scanf("%s",doubleconfirm);
+        scanf("%64s",doubleconfirm);
         getchar();
         if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
@@ -368,7 +368,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the cluster name (A-Z a-z 0-9 -, %d<=length<=%d):\n",CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-        scanf("%s",input_cluster_name);
+        scanf("%25s",input_cluster_name);
         getchar();
     }
     else{
@@ -405,7 +405,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " The JSON-format key file *ABSOLUTE* path: ");
             fflush(stdin);
-            scanf("%s",secret_key);
+            scanf("%256s",secret_key);
             getchar();
         }
         else{
@@ -538,7 +538,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Subscription id: ");
             fflush(stdin);
-            scanf("%s",az_subscription_id);
+            scanf("%256s",az_subscription_id);
             getchar();
         }
         else{
@@ -551,7 +551,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Azure Tenant id: ");
             fflush(stdin);
-            scanf("%s",az_tenant_id);
+            scanf("%256s",az_tenant_id);
             getchar();
         }
         else{
@@ -645,7 +645,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " The JSON-format key file *ABSOLUTE* path: ");
             fflush(stdin);
-            scanf("%s",secret_key);
+            scanf("%256s",secret_key);
             getchar();
         }
         else{
@@ -882,7 +882,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (2/2)..." RESET_DISPLAY "\n");
                 sleep(2);
                 if(tf_execution(tf_run,"destroy",workdir,crypto_keyfile,1)!=0){
-                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to destroy your cluster. This usually caused by either Terraform or\n");
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Failed to destroy your cluster. This usually caused by either TF or\n");
                     printf("|          the providers developed and maintained by cloud service providers.\n");
                     printf("|          You *MUST* manually destroy the remaining cloud resources of this cluster.\n");
                     printf("|          Exit now." RESET_DISPLAY "\n");
@@ -929,6 +929,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     get_cluster_name(cluster_name,workdir);
     sprintf(cmdline,"%s %s%s.%s %s",DELETE_FOLDER_CMD,SSHKEY_DIR,PATH_SLASH,cluster_name,SYSTEM_CMD_REDIRECT);
     system(cmdline);
+    delete_local_tf_config(stackdir);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been destroyed successfully.\n");
     return 0;
 }
@@ -950,7 +951,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
     if(file_p==NULL){
         return -1;
     }
-    fscanf(file_p,"%s",unique_cluster_id);
+    fscanf(file_p,"%64s",unique_cluster_id);
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -1144,7 +1145,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     if(file_p==NULL){
         return -1;
     }
-    fscanf(file_p,"%s",unique_cluster_id);
+    fscanf(file_p,"%64s",unique_cluster_id);
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
@@ -1175,7 +1176,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
             else{
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:  ");
                 fflush(stdin);
-                scanf("%s",string_temp);
+                scanf("%128s",string_temp);
                 getchar();
                 if(strcmp(string_temp,CONFIRM_STRING)!=0){
                     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
@@ -1275,7 +1276,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     if(file_p==NULL){
         return -1;
     }
-    fscanf(file_p,"%s",unique_cluster_id);
+    fscanf(file_p,"%64s",unique_cluster_id);
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
@@ -1313,7 +1314,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
             else{
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:  ");
                 fflush(stdin);
-                scanf("%s",string_temp);
+                scanf("%128s",string_temp);
                 getchar();
                 if(strcmp(string_temp,CONFIRM_STRING)!=0){
                     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
@@ -1768,7 +1769,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     if(file_p==NULL){
         return -1;
     }
-    fscanf(file_p,"%s",unique_cluster_id);
+    fscanf(file_p,"%64s",unique_cluster_id);
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
@@ -1849,7 +1850,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     if(file_p==NULL){
         return -1;
     }
-    fscanf(file_p,"%s",unique_cluster_id);
+    fscanf(file_p,"%64s",unique_cluster_id);
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
     get_cloud_flag(workdir,cloud_flag);
