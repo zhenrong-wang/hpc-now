@@ -175,7 +175,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
 #ifdef __linux__
     char linux_packman[8]="";
 #endif
-    FILE* file_p;
+    FILE* file_p=NULL;
     int run_flag1,run_flag2;
 #ifdef _WIN32
     if(system("net user hpc-now > nul 2>&1")==0){
