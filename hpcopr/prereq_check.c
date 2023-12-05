@@ -749,10 +749,10 @@ int check_and_install_prerequisitions(int repair_flag){
     gcp_flag=get_google_connectivity();
     if(gcp_flag==1){
         if(repair_flag==1){
-            printf(WARN_YELLO_BOLD "|        x Failed to connect to GCP's API. You may not be able to use GCP." RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "|        x Failed to call GCP's API. GCP is unavailable currently." RESET_DISPLAY "\n");
         }
         else{
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to connect to GCP's API. You may not be able to use GCP." RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to call GCP's API. GCP is unavailable currently." RESET_DISPLAY "\n");
         }
     }
     else if(gcp_flag==-1){
