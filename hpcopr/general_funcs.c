@@ -196,6 +196,39 @@ int fgetline(FILE* file_p, char* line_string){
     }
 }
 
+//This is a slightly-secure implementation of fgetline()
+//Aims to replace the fgetline() if validated.
+//Users must make sure that the max_length equals or smaller than the size of the array
+//Otherwise, overflow will definately occur.
+int fngetline(FILE* file_p, char* line_string, unsigned int max_length){
+    int ch='\0';
+    int i=0;
+    if(max_length<1){
+        return 127;
+    }
+    if(file_p==NULL){
+        return -1;
+    }
+    reset_string(line_string);
+    do{
+        ch=fgetc(file_p);
+        if(ch!=EOF&&ch!='\n'){
+            *(line_string+i)=ch;
+            i++;
+        }
+    }while(ch!=EOF&&ch!='\n'&&i!=max_length); // Be careful! This function can only handle lines <= 4096 chars. Extra chars will be ommited
+    if(i==max_length){
+        return -127; // When returns this value, the outcome will be unpredictable.
+    }
+    *(line_string+i)='\0'; // This is very dangerous. You need to guarantee the length of line_string is long enough!
+    if(ch==EOF&&i==0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
 int contain_or_not(const char* line, const char* findkey){
     int length_line=strlen(line);
     int length_findkey=strlen(findkey);

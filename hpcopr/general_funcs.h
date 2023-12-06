@@ -12,6 +12,7 @@ int string_to_positive_num(char* string);
 int get_key_value(char* filename, char* key, char ch, char* value);
 void reset_string(char* orig_string);
 int fgetline(FILE* file_p, char* line_string);
+int fngetline(FILE* file_p, char* line_string, int n);
 int contain_or_not(const char* line, const char* findkey);
 int global_replace(char* filename, char* orig_string, char* new_string);
 int line_replace(char* orig_line, char* new_line, char* orig_string, char* new_string);
