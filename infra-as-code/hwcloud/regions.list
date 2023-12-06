@@ -1,0 +1,86 @@
+[Region:cn-north-4] Beijing
+[cn-north-4] cn-north-4a
+[cn-north-4] cn-north-4b
+[cn-north-4] cn-north-4c
+[cn-north-4] cn-north-4g
+
+[Region:cn-north-1] Beijing
+[cn-north-1] cn-north-1a
+[cn-north-1] cn-north-1b
+[cn-north-1] cn-north-1c
+
+[Region:cn-north-9] Wulanchabu
+[cn-north-9] cn-north-9a
+[cn-north-9] cn-north-9b
+
+[Region:cn-east-5] Qingdao
+[cn-east-5] cn-east-5a
+
+[Region:cn-east-2] Shanghai
+[cn-east-2] cn-east-2a
+[cn-east-2] cn-east-2b
+[cn-east-2] cn-east-2c
+[cn-east-2] cn-east-2d
+
+[Region:cn-east-3] Shanghai
+[cn-east-3] cn-east-3a
+[cn-east-3] cn-east-3b
+[cn-east-3] cn-east-3c
+
+[Region:cn-south-1] Guangzhou
+[cn-south-1] cn-south-1a
+[cn-south-1] cn-south-1b
+[cn-south-1] cn-south-1c
+[cn-south-1] cn-south-1e
+[cn-south-1] cn-south-1f
+
+[Region:cn-south-2] Shenzhen
+[cn-south-2] cn-south-2a
+
+[Region:la-north-2] Mexico
+[la-north-2] la-north-2a
+[la-north-2] la-north-2c
+
+[Region:la-south-2] Mexico
+[la-south-2] la-south-2a
+
+[Region:eu-west-0] Paris
+[eu-west-0] eu-west-0a
+[eu-west-0] eu-west-0b
+[eu-west-0] eu-west-0c
+
+[Region:eu-west-101] Dublin
+[eu-west-101] eu-west-101a
+[eu-west-101] eu-west-101b
+
+[Region:tr-west-1] Turkey
+[tr-west-1] tr-west-1a
+[tr-west-1] tr-west-1b
+[tr-west-1] tr-west-1c
+
+[Region:cn-southwest-2] Guiyang
+[cn-southwest-2] cn-southwest-2a
+[cn-southwest-2] cn-southwest-2b
+[cn-southwest-2] cn-southwest-2c
+[cn-southwest-2] cn-southwest-2d
+[cn-southwest-2] cn-southwest-2e
+[cn-southwest-2] cn-southwest-2f
+
+[Region:ap-southeast-2] Bangkok
+[ap-southeast-2] ap-southeast-2a
+[ap-southeast-2] ap-southeast-2b
+[ap-southeast-2] ap-southeast-2c
+
+[Region:ap-southeast-3] Singapore
+[ap-southeast-3] ap-southeast-3a
+[ap-southeast-3] ap-southeast-3b
+[ap-southeast-3] ap-southeast-3c
+
+[Region:ap-southeast-4] Jakarta
+[ap-southeast-4] ap-southeast-4a
+[ap-southeast-4] ap-southeast-4b
+[ap-southeast-4] ap-southeast-4c
+
+[Region:ap-southeast-1] HongKong
+[ap-southeast-1] ap-southeast-1a
+[ap-southeast-1] ap-southeast-1b

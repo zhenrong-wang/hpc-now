@@ -1,4 +1,4 @@
-[Region:cn-hangzhou]
+[Region:cn-hangzhou] Hangzhou
 [cn-hangzhou] cn-hangzhou-b
 [cn-hangzhou] cn-hangzhou-e
 [cn-hangzhou] cn-hangzhou-f
@@ -8,7 +8,7 @@
 [cn-hangzhou] cn-hangzhou-j
 [cn-hangzhou] cn-hangzhou-k
 
-[Region:cn-beijing]
+[Region:cn-beijing] Beijing
 [cn-beijing] cn-beijing-a
 [cn-beijing] cn-beijing-b
 [cn-beijing] cn-beijing-c
@@ -22,25 +22,25 @@
 [cn-beijing] cn-beijing-k
 [cn-beijing] cn-beijing-l
 
-[Region:cn-qingdao]
+[Region:cn-qingdao] Qingdao
 [cn-qingdao] cn-qingdao-b
 [cn-qingdao] cn-qingdao-c
 
-[Region:cn-zhangjiakou]
+[Region:cn-zhangjiakou] Zhangjiakou
 [cn-zhangjiakou] cn-zhangjiakou-a
 [cn-zhangjiakou] cn-zhangjiakou-b
 [cn-zhangjiakou] cn-zhangjiakou-c
 
-[Region:cn-huhehaote]
+[Region:cn-huhehaote] Huhehaote
 [cn-huhehaote] cn-huhehaote-a
 [cn-huhehaote] cn-huhehaote-b
 
-[Region:cn-wulanchabu]
+[Region:cn-wulanchabu] Wulanchabu
 [cn-wulanchabu] cn-wulanchabu-a
 [cn-wulanchabu] cn-wulanchabu-b
 [cn-wulanchabu] cn-wulanchabu-c
 
-[Region:cn-shanghai]
+[Region:cn-shanghai] Shanghai
 [cn-shanghai] cn-shanghai-a
 [cn-shanghai] cn-shanghai-b
 [cn-shanghai] cn-shanghai-c
@@ -53,7 +53,7 @@
 [cn-shanghai] cn-shanghai-m
 [cn-shanghai] cn-shanghai-n
 
-[Region:cn-shenzhen]
+[Region:cn-shenzhen] Shenzhen
 [cn-shenzhen] cn-shenzhen-a
 [cn-shenzhen] cn-shenzhen-b
 [cn-shenzhen] cn-shenzhen-c
@@ -61,65 +61,65 @@
 [cn-shenzhen] cn-shenzhen-e
 [cn-shenzhen] cn-shenzhen-f
 
-[Region:cn-guangzhou]
+[Region:cn-guangzhou] Guangzhou
 [cn-guangzhou] cn-guangzhou-a
 [cn-guangzhou] cn-guangzhou-b
 
-[Region:cn-chengdu]
+[Region:cn-chengdu] Chengdu
 [cn-chengdu] cn-chengdu-a
 [cn-chengdu] cn-chengdu-b
 
-[Region:cn-hongkong]
+[Region:cn-hongkong] HongKong
 [cn-hongkong] cn-hongkong-b
 [cn-hongkong] cn-hongkong-c
 [cn-hongkong] cn-hongkong-d
 
-[Region:ap-southeast-1]
+[Region:ap-southeast-1] Singapore
 [ap-southeast-1] ap-southeast-1a
 [ap-southeast-1] ap-southeast-1b
 [ap-southeast-1] ap-southeast-1c
 
-[Region:ap-southeast-2]
+[Region:ap-southeast-2] Sydney
 [ap-southeast-2] ap-southeast-2a
 [ap-southeast-2] ap-southeast-2b
 
-[Region:ap-southeast-3]
+[Region:ap-southeast-3] KualaLumpur
 [ap-southeast-3] ap-southeast-3a
 [ap-southeast-3] ap-southeast-3b
 
-[Region:ap-southeast-5]
+[Region:ap-southeast-5] Jakarta
 [ap-southeast-5] ap-southeast-5a
 [ap-southeast-5] ap-southeast-5b
 [ap-southeast-5] ap-southeast-5c
 
-[Region:ap-southeast-6]
+[Region:ap-southeast-6] Manila
 [ap-southeast-6] ap-southeast-6a
 
-[Region:ap-southeast-7]
+[Region:ap-southeast-7] Bangkok
 [ap-southeast-7] ap-southeast-7a
 
-[Region:ap-south-1]
+[Region:ap-south-1] Mumbai
 [ap-south-1] ap-south-1a
 [ap-south-1] ap-south-1b
 
-[Region:ap-northeast-1]
+[Region:ap-northeast-1] Tokyo
 [ap-northeast-1] ap-northeast-1a
 [ap-northeast-1] ap-northeast-1b
 [ap-northeast-1] ap-northeast-1c
 
-[Region:us-west-1]
+[Region:us-west-1] SiliconValley
 [us-west-1] us-west-1a
 [us-west-1] us-west-1b
 
-[Region:us-east-1]
+[Region:us-east-1] Virginia
 [us-east-1] us-east-1a
 [us-east-1] us-east-1b
 
-[Region:eu-central-1]
+[Region:eu-central-1] Frankfurt
 [eu-central-1] eu-central-1a
 [eu-central-1] eu-central-1b
 [eu-central-1] eu-central-1c
 
-[Region:eu-west-1]
+[Region:eu-west-1] London
 [eu-west-1] eu-west-1a
 [eu-west-1] eu-west-1b

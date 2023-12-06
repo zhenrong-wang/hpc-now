@@ -1,0 +1,22 @@
+[Region:bj] Beijing
+[bj] cn-bj-a
+[bj] cn-bj-c
+[bj] cn-bj-d
+[bj] cn-bj-f
+
+[Region:bd] Baoding
+[bd] cn-bd-b
+[bd] cn-bd-c
+[bd] cn-bd-d
+
+[Region:gz] Guangzhou
+[gz] cn-gz-c
+[gz] cn-gz-d
+[gz] cn-gz-f
+
+[Region:su] Suzhou
+[su] cn-su-a
+[su] cn-su-b
+[su] cn-su-d
+[su] cn-su-f
+[su] cn-su-h

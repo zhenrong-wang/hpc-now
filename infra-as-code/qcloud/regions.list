@@ -1,0 +1,75 @@
+[Region:ap-guangzhou] Guangzhou
+[ap-guangzhou] ap-guangzhou-1
+[ap-guangzhou] ap-guangzhou-2
+[ap-guangzhou] ap-guangzhou-3
+[ap-guangzhou] ap-guangzhou-4
+[ap-guangzhou] ap-guangzhou-6
+[ap-guangzhou] ap-guangzhou-7
+
+[Region:ap-chengdu] Chengdu
+[ap-chengdu] ap-chengdu-1
+[ap-chengdu] ap-chengdu-2
+
+[Region:ap-chongqing] Chongqing
+[ap-chongqing] ap-chongqing-1
+
+[Region:ap-shanghai] Shanghai
+[ap-shanghai] ap-shanghai-1
+[ap-shanghai] ap-shanghai-2
+[ap-shanghai] ap-shanghai-3
+[ap-shanghai] ap-shanghai-4
+[ap-shanghai] ap-shanghai-5
+
+[Region:ap-nanjing] Nanjing
+[ap-nanjing] ap-nanjing-1
+[ap-nanjing] ap-nanjing-2
+[ap-nanjing] ap-nanjing-3
+
+[Region:ap-beijing] Beijing
+[ap-beijing] ap-beijing-1
+[ap-beijing] ap-beijing-2
+[ap-beijing] ap-beijing-3
+[ap-beijing] ap-beijing-4
+[ap-beijing] ap-beijing-5
+[ap-beijing] ap-beijing-6
+[ap-beijing] ap-beijing-7
+
+[Region:ap-singapore] Singapore
+[ap-singapore] ap-singapore-1
+[ap-singapore] ap-singapore-2
+[ap-singapore] ap-singapore-3
+[ap-singapore] ap-singapore-4
+
+[Region:ap-bangkok] Bangkok
+[ap-bangkok] ap-bangkok-1
+[ap-bangkok] ap-bangkok-2
+
+[Region:ap-seoul] Seoul
+[ap-seoul] ap-seoul-1
+[ap-seoul] ap-seoul-2
+
+[Region:ap-mumbai] Mumbai
+[ap-mumbai] ap-mumbai-1
+
+[Region:ap-tokyo] Tokyo
+[ap-tokyo] ap-tokyo-1
+[ap-tokyo] ap-tokyo-2
+
+[Region:ap-hongkong] HongKong
+[ap-hongkong] ap-hongkong-1
+[ap-hongkong] ap-hongkong-2
+[ap-hongkong] ap-hongkong-3
+
+[Region:na-siliconvalley] SiliconValley
+[na-siliconvalley] na-siliconvalley-1
+[na-siliconvalley] na-siliconvalley-2
+
+[Region:na-ashburn] Virginia
+[na-ashburn] na-ashburn-1
+[na-ashburn] na-ashburn-2
+
+[Region:eu-frankfurt] Frankfurt
+[eu-frankfurt] eu-frankfurt-1
+
+[Region:na-toronto] Toronto
+[na-toronto] na-toronto-1
