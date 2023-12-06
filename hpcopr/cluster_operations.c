@@ -1594,6 +1594,12 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         update_usage_summary(workdir,crypto_keyfile,node_name_temp,"start");
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The compute nodes have been reconfigured.\n");
+    if(reinit_flag!=0){
+        printf(GENERAL_BOLD "|         " RESET_DISPLAY " Recreating the compute node(s), the process may need 7 minutes.\n");
+    }
+    else{
+        printf(GENERAL_BOLD "|         " RESET_DISPLAY " Changing the compute node(s), the process may need 1 minute.\n");
+    }
     sprintf(cmdline,"%s %s%s*bak %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 0;
