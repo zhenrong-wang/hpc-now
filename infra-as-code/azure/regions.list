@@ -1,8 +1,8 @@
-[Region:China-East] Shanghai
-[Region:China-East-2] Shanghai
-[Region:China-North] Beijing
-[Region:China-North-2] Beijing
-[Region:China-North-3] Hebei
+[Region:China-East] [CN]Shanghai
+[Region:China-East-2] [CN]Shanghai
+[Region:China-North] [CN]Beijing [Default]
+[Region:China-North-2] [CN]Beijing
+[Region:China-North-3] [CN]Hebei
 [Region:East-Asia] HongKong
 [Region:Southeast-Asia] Singapore
 [Region:Australia-Central] Canberra
@@ -12,7 +12,7 @@
 [Region:India-South-Central] Hyderabad
 [Region:South-India] Chennai
 [*Region:Indonesia-Central] Jakarta
-[Region:Japan-East] Tokyo
+[Region:Japan-East] Tokyo [Default]
 [Region:Japan-West] Osaka
 [Region:Korea-Central] Seoul
 [*Region:Malaysia-West] KualaLumpur

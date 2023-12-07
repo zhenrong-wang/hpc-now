@@ -1,10 +1,10 @@
-[Region:ap-guangzhou] Guangzhou
+[Region:ap-guangzhou] Guangzhou [Default]
 [ap-guangzhou] ap-guangzhou-1
 [ap-guangzhou] ap-guangzhou-2
 [ap-guangzhou] ap-guangzhou-3
 [ap-guangzhou] ap-guangzhou-4
 [ap-guangzhou] ap-guangzhou-6
-[ap-guangzhou] ap-guangzhou-7
+[ap-guangzhou] ap-guangzhou-7   [Default]
 
 [Region:ap-chengdu] Chengdu
 [ap-chengdu] ap-chengdu-1

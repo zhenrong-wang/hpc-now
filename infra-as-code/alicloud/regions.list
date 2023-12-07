@@ -1,11 +1,11 @@
-[Region:cn-hangzhou] Hangzhou
+[Region:cn-hangzhou] Hangzhou [Default]
 [cn-hangzhou] cn-hangzhou-b
 [cn-hangzhou] cn-hangzhou-e
 [cn-hangzhou] cn-hangzhou-f
 [cn-hangzhou] cn-hangzhou-g
 [cn-hangzhou] cn-hangzhou-h
 [cn-hangzhou] cn-hangzhou-i
-[cn-hangzhou] cn-hangzhou-j
+[cn-hangzhou] cn-hangzhou-j   [Default]
 [cn-hangzhou] cn-hangzhou-k
 
 [Region:cn-beijing] Beijing

@@ -18,10 +18,10 @@
 [us-west4] us-west4-b
 [us-west4] us-west4-c
 
-[Region:us-central1] Iowa
+[Region:us-central1] Iowa   [Default]
 [us-central1] us-central1-a
 [us-central1] us-central1-b
-[us-central1] us-central1-c
+[us-central1] us-central1-c [Default]
 
 [Region:us-east1] S.Carolina
 [us-east1] us-east1-a

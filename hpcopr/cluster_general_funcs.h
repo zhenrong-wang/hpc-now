@@ -114,4 +114,6 @@ int generate_rdp_file(char* cluster_name, char* master_address, char* username);
 int start_rdp_connection(char* cluster_workdir, char* username, int password_flag);
 int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role, int password_flag);
 
+int list_regions(char* cluster_name);
+
 #endif
