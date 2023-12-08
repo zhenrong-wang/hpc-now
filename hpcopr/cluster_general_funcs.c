@@ -68,6 +68,8 @@ int add_to_cluster_registry(char* new_cluster_name, char* import_flag){
     return 0;
 }
 
+//return non-zero: failed
+//return 0: succeeded
 int create_and_get_stackdir(char* workdir, char* stackdir){
     int base_length=strlen(HPC_NOW_ROOT_DIR)+7;
     if(strlen(workdir)<base_length){
@@ -264,6 +266,8 @@ void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
     system(cmdline);
 }
 
+//return 0: succeeded
+//return non-zero: failed
 int create_and_get_vaultdir(char* workdir, char* vaultdir){
     int base_length=strlen(HPC_NOW_ROOT_DIR)+7;
     if(strlen(workdir)<base_length){
@@ -2311,19 +2315,24 @@ void get_workdir(char* cluster_workdir, char* cluster_name){
     sprintf(cluster_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,PATH_SLASH);
 }
 
+// Please make sure the cluster_name[] with width 25
 int get_cluster_name(char* cluster_name, char* cluster_workdir){
     char* path_seprator_str=PATH_SLASH;
     char path_seprator=path_seprator_str[0];
     int i=0;
     char dir_buffer[128]="";
+    char dir_buffer2[128]="";
     while(i<16){
         i++;
         get_seq_string(cluster_workdir,path_seprator,i,dir_buffer);
         if(strlen(dir_buffer)==0){
-            return 0;
+            if(cluster_name_check(dir_buffer2)==0||cluster_name_check(dir_buffer2)==-127){
+                strcpy(cluster_name,dir_buffer2);
+                return 0;
+            }
         }
         else{
-            strcpy(cluster_name,dir_buffer);
+            strcpy(dir_buffer2,dir_buffer);
         }
     }
     return 1;
@@ -2416,6 +2425,11 @@ int current_cluster_or_not(char* current_indicator, char* cluster_name){
     return 0;
 }
 
+// return -1: start with -, illegal
+// return -3: length not in the range, illegal
+// return -5: illegal char found
+// return -127: OK and found
+// return 0: legal but not found.
 int cluster_name_check(char* cluster_name){
     char cluster_name_ext[64]="";
     int i;
@@ -2442,7 +2456,7 @@ int cluster_name_check(char* cluster_name){
             continue;
         }
     }
-    sprintf(cluster_name_ext,"< cluster name: %s >",cluster_name);
+    snprintf(cluster_name_ext,64,"< cluster name: %s >",cluster_name);
     if(find_multi_keys(ALL_CLUSTER_REGISTRY,cluster_name_ext,"","","","")>0){
         return -127;
     }
@@ -2905,4 +2919,103 @@ int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role, int p
         return -3;
     }
     return start_rdp_connection(cluster_workdir,username,password_flag);
+}
+
+//If the file exists, return 0
+//If not, return -1;
+FILE* check_regions_list_file(char* cluster_name){
+    char workdir[DIR_LENGTH]="";
+    char stackdir[DIR_LENGTH]="";
+    char region_list[FILENAME_LENGTH]="";
+    get_workdir(workdir,cluster_name);
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(region_list,"%s%sregions.list",stackdir,PATH_SLASH);
+    FILE* file_p=fopen(region_list,"r");
+    return file_p;
+}
+
+int list_cloud_regions(char* cluster_name){
+    int i=0;
+    char line_buffer[LINE_LENGTH_TINY]="";
+    FILE* file_p=check_regions_list_file(cluster_name);
+    if(file_p==NULL){
+        return -1;
+    }
+    while(!feof(file_p)){
+        fngetline(file_p,line_buffer,LINE_LENGTH_TINY-1);
+        if(*(line_buffer+0)!='['){
+            continue;
+        }
+        if(contain_or_not(line_buffer,"[Region:")==0){
+            printf("%s\n",line_buffer);
+            i++;
+        }
+    }
+    fclose(file_p);
+    if(i==0){
+        return 1;
+    }
+    return 0;
+}
+
+int list_cloud_zones(char* cluster_name, char* region){
+    int i=0;
+    char line_buffer[LINE_LENGTH_TINY]="";
+    char region_ext[64]="";
+    FILE* file_p=check_regions_list_file(cluster_name);
+    if(file_p==NULL){
+        return -1;
+    }
+    snprintf(region_ext,64,"[%s]",region);
+    while(!feof(file_p)){
+        fngetline(file_p,line_buffer,LINE_LENGTH_TINY-1);
+        if(*(line_buffer+0)!='['){
+            continue;
+        }
+        if(contain_or_not(line_buffer,region_ext)==0){
+            printf("%s\n",line_buffer);
+            i++;
+        }
+    }
+    fclose(file_p);
+    if(i==0){
+        return 1;
+    }
+    return 0;
+}
+
+int valid_region_or_not(char* cluster_name, char* region){
+    char line_buffer[LINE_LENGTH_TINY]="";
+    char region_ext[64]="";
+    FILE* file_p=check_regions_list_file(cluster_name);
+    if(file_p==NULL){
+        return -1;
+    }
+    snprintf(region_ext,64,"[Region:%s]",region);
+    while(!feof(file_p)){
+        fngetline(file_p,line_buffer,LINE_LENGTH_TINY-1);
+        if(contain_or_not(line_buffer,region_ext)==0){
+            fclose(file_p);
+            return 0;
+        }
+    }
+    fclose(file_p);
+    return 1;
+}
+
+int valid_zone_or_not(char* cluster_name, char* zone){
+    char line_buffer[LINE_LENGTH_TINY]="";
+    FILE* file_p=check_regions_list_file(cluster_name);
+    if(file_p==NULL){
+        return -1;
+    }
+    while(!feof(file_p)){
+        fngetline(file_p,line_buffer,LINE_LENGTH_TINY-1);
+        if(contain_or_not(line_buffer,zone)==0){
+            fclose(file_p);
+            return 0;
+        }
+    }
+    fclose(file_p);
+    return 1;
 }

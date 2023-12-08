@@ -372,7 +372,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         getchar();
     }
     else{
-        strcpy(input_cluster_name,cluster_name);
+        strncpy(input_cluster_name,cluster_name,24);
     }
     cluster_name_check_flag=cluster_name_check(input_cluster_name);
     if(cluster_name_check_flag==-1){

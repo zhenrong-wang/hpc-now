@@ -9,35 +9,41 @@
 #define CLUSTER_INIT_H
 
 typedef struct {
-    char cluster_id[128];
-    char region_id[128];
-    char zone_id[128];
+    char cluster_id[32];
+    char region_id[32];
+    char zone_id[64];
     int node_num;
     int hpc_user_num;
     int hpc_nfs_volume;
-    char master_init_param[32];
+    char master_init_param[256];
     char master_passwd[32];
     char compute_passwd[32];
     char master_inst[16];
-    char master_bandwidth[8];
+    int master_bandwidth;
     char compute_inst[16];
-    char os_image_raw[16];
+    char os_image_raw[32];
     char ht_flag[8];
-} initinfo; // For future use if needed.
+} cluster_initinfo; // For future use if needed.
 
+void reset_initinfo(cluster_initinfo* init_info, char* cluster_id);
+void empty_initinfo(cluster_initinfo* init_info);
 int cluster_init_conf(char* cluster_name, int argc, char* argv[]);
-int get_tf_prep_conf(char* conf_file, char* reconf_list, char* cluster_id, char* region_id, char* zone_id, int* node_num, int* hpc_user_num, char* master_init_param, char* master_passwd, char* compute_passwd, char* master_inst, char* master_bandwidth, char* compute_inst, char* os_image_raw, char* ht_flag, int* nfs_volume);
+int create_init_dirs(char* workdir, char* stackdir, char* vaultdir, char* logdir, char* confdir);
+int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_loc_flag, char* url_code_root);
+int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, cluster_initinfo* init_info);
+void print_read_conf_failed(int read_conf_flag);
+void print_conf_summary(cluster_initinfo* init_info);
 int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bucket_sk, char* az_subscription_id, char* az_tenant_id, char* bucket_info_file, char* cloud_flag);
 void node_user_num_fix(int* node_num, int* hpc_user_num);
 void clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int condition_flag);
 void generate_tf_files(char* stackdir);
-int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
-int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
-int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int aws_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int qcloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int alicloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
 int hw_intel_amd_generation(const char* region_id, char* intel_generation, char* amd_generation, int* amd_flag);
-int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
-int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
-int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
-int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int azure_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
+int gcp_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run);
 
 #endif

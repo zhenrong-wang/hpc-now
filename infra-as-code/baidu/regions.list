@@ -20,3 +20,6 @@
 [su] cn-su-d
 [su] cn-su-f
 [su] cn-su-h
+
+[Region:hk] HongKong
+[hk] cn-hk-a

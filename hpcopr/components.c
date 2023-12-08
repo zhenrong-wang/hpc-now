@@ -363,6 +363,9 @@ int valid_loc_format_or_not(char* loc_string){
     if(*(loc_string+0)=='h'&&*(loc_string+1)=='t'&&*(loc_string+2)=='t'&&*(loc_string+3)=='p'&&*(loc_string+4)=='s'&&*(loc_string+5)==':'&&*(loc_string+6)=='/'&&*(loc_string+7)=='/'&&*(loc_string+length-1)=='/'){
         return 0;
     }
+    if(*(loc_string+0)=='f'&&*(loc_string+1)=='t'&&*(loc_string+2)=='p'&&*(loc_string+3)==':'&&*(loc_string+4)=='/'&&*(loc_string)=='/'&&*(loc_string+length-1)=='/'){
+        return 0;
+    }
     if(*(loc_string+0)<'A'||*(loc_string+0)>'z'){
         return -1;
     }
@@ -387,6 +390,9 @@ int valid_loc_format_or_not(char* loc_string){
             return 0;
         }
         if(*(loc_string+0)=='h'&&*(loc_string+1)=='t'&&*(loc_string+2)=='t'&&*(loc_string+3)=='p'&&*(loc_string+4)=='s'&&*(loc_string+5)==':'&&*(loc_string+6)=='/'&&*(loc_string+7)=='/'&&*(loc_string+length-1)=='/'){
+            return 0;
+        }
+        if(*(loc_string+0)=='f'&&*(loc_string+1)=='t'&&*(loc_string+2)=='p'&&*(loc_string+3)==':'&&*(loc_string+4)=='/'&&*(loc_string)=='/'&&*(loc_string+length-1)=='/'){
             return 0;
         }
         return -1;

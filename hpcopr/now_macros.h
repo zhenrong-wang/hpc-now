@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.1.0021"
+#define CORE_VERSION_CODE "0.2.1.0023"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -234,6 +234,7 @@
 #define LINE_LENGTH 5120
 #define LINE_LENGTH_MID 2048
 #define LINE_LENGTH_SHORT 256
+#define LINE_LENGTH_TINY 128
 #define AKSK_LENGTH 256
 #define CONF_STRING_LENTH 64
 #define COMMAND_NUM 51

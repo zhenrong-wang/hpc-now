@@ -35,6 +35,176 @@ extern int code_loc_flag_var;
  * 
  *
  */
+
+void reset_initinfo(cluster_initinfo* init_info, char* cluster_id){
+    strcpy(init_info->cluster_id,cluster_id);
+    strcpy(init_info->region_id,"");
+    strcpy(init_info->zone_id,"");
+    init_info->node_num=0;
+    init_info->hpc_user_num=0;
+    init_info->hpc_nfs_volume=0;
+    strcpy(init_info->master_init_param,"");
+    strcpy(init_info->master_passwd,"");
+    strcpy(init_info->compute_passwd,"");
+    strcpy(init_info->master_inst,"");
+    init_info->master_bandwidth=0;
+    strcpy(init_info->compute_inst,"");
+    strcpy(init_info->os_image_raw,"");
+    strcpy(init_info->ht_flag,"");
+}
+
+void empty_initinfo(cluster_initinfo* init_info){
+    reset_initinfo(init_info,"");
+}
+
+int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_loc_flag, char* url_code_root){
+    char cmdline[CMDLINE_LENGTH]="";
+    char url_code[DIR_LENGTH_EXT]="";
+    char tf_conf[FILENAME_LENGTH]="";
+
+    if(strcmp(cloud_name,"alicloud")!=0&&strcmp(cloud_name,"aws")!=0&&strcmp(cloud_name,"azure")!=0&&strcmp(cloud_name,"baidu")&&strcmp(cloud_name,"gcp")!=0&&strcmp(cloud_name,"hwcloud")!=0&&strcmp(cloud_name,"qcloud")!=0){
+        return 1;
+    }
+    if(valid_loc_format_or_not(url_code_root)!=0){
+        return 1;
+    }
+    if(code_loc_flag==1){
+        sprintf(url_code,"%s%s%s%s",url_code_root,PATH_SLASH,cloud_name,PATH_SLASH);
+    }
+    else{
+        sprintf(url_code,"%s%s/",url_code_root,cloud_name);
+    }
+    sprintf(cmdline,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    sprintf(tf_conf,"%s%stf_prep.conf",confdir,PATH_SLASH);
+    if(file_exist_or_not(tf_conf)==1){
+        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one." RESET_DISPLAY "\n");
+        if(code_loc_flag==1){
+            sprintf(cmdline,"%s %s%stf_prep.conf %s %s", COPY_FILE_CMD,url_code,PATH_SLASH,tf_conf,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_code,tf_conf);
+        }
+        if(system(cmdline)!=0){
+            return 2;
+        }
+    }
+    if(code_loc_flag==1){
+        sprintf(cmdline,"%s %s%shpc_stack_%s.base %s%shpc_stack.base %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_%s.base -o %s%shpc_stack.base -s",url_code,cloud_name,stackdir,PATH_SLASH);
+    }
+    if(system(cmdline)!=0){
+        return 2;
+    }
+    if(code_loc_flag==1){
+        sprintf(cmdline,"%s %s%shpc_stack_%s.master %s%shpc_stack.master %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_%s.master -o %s%shpc_stack.master -s",url_code,cloud_name,stackdir,PATH_SLASH);
+    }
+    if(system(cmdline)!=0){
+        return 2;
+    }
+    if(code_loc_flag==1){
+        if(strcmp(cloud_name,"aws")==0){
+            sprintf(cmdline,"%s %s%shpc_stack_%s.compute.v2 %s%shpc_stack.compute %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"%s %s%shpc_stack_%s.compute %s%shpc_stack.compute %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        }
+    }
+    else{
+        if(strcmp(cloud_name,"aws")==0){
+            sprintf(cmdline,"curl %shpc_stack_%s.compute.v2 -o %s%shpc_stack.compute -s",url_code,cloud_name,stackdir,PATH_SLASH);
+        }
+        else{
+            sprintf(cmdline,"curl %shpc_stack_%s.compute -o %s%shpc_stack.compute -s",url_code,cloud_name,stackdir,PATH_SLASH);
+        }
+    }
+    if(system(cmdline)!=0){
+        return 2;
+    }
+    if(code_loc_flag==1){
+        sprintf(cmdline,"%s %s%shpc_stack_%s.database %s%shpc_stack.database %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_%s.database -o %s%shpc_stack.database -s",url_code,cloud_name,stackdir,PATH_SLASH);
+    }
+    if(system(cmdline)!=0){
+        return 2;
+    }
+    if(code_loc_flag==1){
+        sprintf(cmdline,"%s %s%shpc_stack_%s.natgw %s%shpc_stack.natgw %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    }
+    else{
+        sprintf(cmdline,"curl %shpc_stack_%s.natgw -o %s%shpc_stack.natgw -s",url_code,cloud_name,stackdir,PATH_SLASH);
+    }
+    if(system(cmdline)!=0){
+        return 2;
+    }
+    if(code_loc_flag==1){
+        sprintf(cmdline,"%s %s%sreconf.list %s%sreconf.list %s",COPY_FILE_CMD,url_code,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    }
+    else{
+        sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_code,stackdir,PATH_SLASH);
+    }
+    if(system(cmdline)!=0){
+        return 2;
+    }
+    if(code_loc_flag==1){
+        sprintf(cmdline,"%s %s%sregions.list %s%sregions.list %s",COPY_FILE_CMD,url_code,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    }
+    else{
+        sprintf(cmdline,"curl %sregions.list -o %s%sregions.list -s",url_code,stackdir,PATH_SLASH);
+    }
+    if(system(cmdline)!=0){
+        return 2;
+    }
+    if(strcmp(cloud_name,"alicloud")==0||strcmp(cloud_name,"qcloud")==0){
+        if(code_loc_flag==1){
+            sprintf(cmdline,"%s %s%snas_zons_%s.txt %s%snas_zones.list %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"curl %snas_zons_%s.txt -o %s%snas_zones.list -s",url_code,cloud_name,stackdir,PATH_SLASH);
+        }
+        if(system(cmdline)!=0){
+            return 2;
+        }
+    }
+    return 0;
+}
+
+//You must guarantee the stackdir,vaultdir,logdir,confdir is long enough with DIR_LENGTH!
+int create_init_dirs(char* workdir, char* stackdir, char* vaultdir, char* logdir, char* confdir){
+    char cmdline[CMDLINE_LENGTH]="";
+    if(folder_exist_or_not(workdir)==1){
+        return -1;
+    }
+    if(create_and_get_stackdir(workdir,stackdir)!=0){
+        return -1;
+    }
+    if(create_and_get_vaultdir(workdir,vaultdir)!=0){
+        return -1;
+    }
+    sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
+    sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
+    if(folder_exist_or_not(logdir)!=0){
+        snprintf(cmdline,CMDLINE_LENGTH,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
+        if(system(cmdline)!=0){
+            return -1;
+        }
+    }
+    if(folder_exist_or_not(confdir)!=0){
+        snprintf(cmdline,CMDLINE_LENGTH,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
+        if(system(cmdline)!=0){
+            return -1;
+        }
+    }
+    return 0;
+}
+
 int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
 //    char* region_id, char* zone_id, char* node_num, char* hpc_user_num, char* master_inst, char* compute_inst, char* os_image, char* ht_flag
     char cloud_flag[16]="";
@@ -205,10 +375,10 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
         strcpy(real_ht_flag,default_ht_flag);
     }
     if(strlen(app_inst_script_url_specified)>0&&valid_loc_format_or_not(app_inst_script_url_specified)==0){
-        strncpy(url_app_inst_root_var,app_inst_script_url_specified,LOCATION_LENGTH);
+        strncpy(url_app_inst_root_var,app_inst_script_url_specified,LOCATION_LENGTH-1);
     }
     if(strlen(app_inst_pkgs_url_specified)>0&&valid_loc_format_or_not(app_inst_pkgs_url_specified)==0){
-        strncpy(url_app_pkgs_root_var,app_inst_pkgs_url_specified,LOCATION_LENGTH);
+        strncpy(url_app_pkgs_root_var,app_inst_pkgs_url_specified,LOCATION_LENGTH-1);
     }
 
     if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0){
@@ -222,14 +392,14 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
             }
         }
     }
-    fprintf(file_p,"#IMPORTANT: THERE *MUST* BE 22 CHARACTERs (including spaces) BEFORE THE VALUE OF PARAMETERS.\n");
-    fprintf(file_p,"#FOR EXAMPLE        : PARAMETER_VALUE (*WITHOUT* ANY SPACE OR OTHER CHARACTORS AFTER THE PARAMETER_VALUE!)\n");
-    fprintf(file_p,"#                   : |<---THIS IS THE STANDARD START POINT! YOU NEED TO *ABSOLUTELY* ALIGN WITH THIS LINE.\n");
-    fprintf(file_p,"CLUSTER_ID          : %s\n",cluster_name);
-    fprintf(file_p,"REGION_ID           : %s\n",real_region);
-    fprintf(file_p,"ZONE_ID             : %s\n",real_zone);
-    fprintf(file_p,"NODE_NUM            : %s\n",real_node_num_string);
-    fprintf(file_p,"HPC_USER_NUM        : %s\n",real_user_num_string);
+    fprintf(file_p,"# This file is generated and maintained by the HPC-NOW services. We do not recommend\n");
+    fprintf(file_p,"# to edit it manually. If need to do so, please follow the strict format.\n");
+    fprintf(file_p,"ITEM_NAME           : CONFIGURATION  \n");
+    fprintf(file_p,"cluster_id          : %s [IMMUTABLE]\n",cluster_name);
+    fprintf(file_p,"region_id           : %s\n",real_region);
+    fprintf(file_p,"zone_id             : %s\n",real_zone);
+    fprintf(file_p,"node_num            : %s\n",real_node_num_string);
+    fprintf(file_p,"hpc_user_num        : %s\n",real_user_num_string);
     fprintf(file_p,"master_init_param   : db skip\n");
     fprintf(file_p,"master_passwd       : *AUTOGEN*\n");
     fprintf(file_p,"compute_passwd      : *AUTOGEN*\n");
@@ -249,35 +419,38 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     return 0;
 }
 
-int get_tf_prep_conf(char* conf_file, char* reconf_list, char* cluster_id, char* region_id, char* zone_id, int* node_num, int* hpc_user_num, char* master_init_param, char* master_passwd, char* compute_passwd, char* master_inst, char* master_bandwidth, char* compute_inst, char* os_image_raw, char* ht_flag, int* nfs_volume){
+int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, cluster_initinfo* init_info){
     if(file_exist_or_not(conf_file)!=0){
         return -3; // If the conf file doesn't exist, exit.
     }
     FILE* file_p=fopen(conf_file,"r");
     char conf_line_buffer[256]="";
     char header[64]="";
-    char tail[128]="";
-    char tail_ext[144]="";
-    char node_inst_ext[144]="";
+    char tail[64]="";
+    char tail_ext[64]="";
+    char node_inst_ext[128]="";
     int read_conf_lines=0;
     int sum_temp=0;
     int i;
+
+    reset_initinfo(init_info,cluster_id);
     while(!feof(file_p)){
-        fgetline(file_p,conf_line_buffer);
+        if(fngetline(file_p,conf_line_buffer,255)!=0){
+            continue;
+        }
         get_seq_string(conf_line_buffer,' ',1,header);
         get_seq_string(conf_line_buffer,' ',3,tail);
-        if(strcmp(header,"CLUSTER_ID")==0){
-            strcpy(cluster_id,tail);
-            read_conf_lines++;
+        if(strcmp(header,"cluster_id")==0){
+            continue; // The cluster id is immutable. Skip it.
         }
-        else if(strcmp(header,"REGION_ID")==0){
+        else if(strcmp(header,"region_id")==0){
             if(*(tail+0)=='a'&&*(tail+1)=='z'&&*(tail+2)=='.'){
                 for(i=3;i<strlen(tail);i++){
                     if(*(tail+i)=='-'){
-                        *(region_id+i-3)=' ';
+                        *(init_info->region_id+i-3)=' ';
                     }
                     else{
-                        *(region_id+i-3)=*(tail+i);
+                        *(init_info->region_id+i-3)=*(tail+i);
                     }
                 }
                 if(contain_or_not(tail,"China")==0){
@@ -288,77 +461,79 @@ int get_tf_prep_conf(char* conf_file, char* reconf_list, char* cluster_id, char*
                 }
             }
             else{
-                strcpy(region_id,tail);
+                strncpy(init_info->region_id,tail,31);
             }
             read_conf_lines++;
         }
-        else if(strcmp(header,"ZONE_ID")==0){
-            strcpy(zone_id,tail);
+        else if(strcmp(header,"zone_id")==0){
+            strncpy(init_info->zone_id,tail,63);
             read_conf_lines++;
         }
-        else if(strcmp(header,"NODE_NUM")==0){
+        else if(strcmp(header,"node_num")==0){
             sum_temp=string_to_positive_num(tail);
             if(sum_temp<MINIMUM_ADD_NODE_NUMBER||sum_temp>MAXIMUM_ADD_NODE_NUMBER){
                 fclose(file_p);
                 return 1;
             }
-            *node_num=sum_temp;
+            init_info->node_num=sum_temp;
             read_conf_lines++;
         }
-        else if(strcmp(header,"HPC_USER_NUM")==0){
+        else if(strcmp(header,"hpc_user_num")==0){
             sum_temp=string_to_positive_num(tail);
             if(sum_temp<MINIMUM_ADD_USER_NUNMBER||sum_temp>MAXIMUM_ADD_USER_NUMBER){
                 fclose(file_p);
                 return 1;
             }
-            *hpc_user_num=sum_temp;
+            init_info->hpc_user_num=sum_temp;
             read_conf_lines++;
         }
         else if(strcmp(header,"master_init_param")==0){
             get_seq_string(conf_line_buffer,' ',4,tail_ext);
-            sprintf(master_init_param,"%s %s",tail,tail_ext);
+            snprintf(init_info->master_init_param,255,"%s %s",tail,tail_ext);
             read_conf_lines++;
         }
         else if(strcmp(header,"master_passwd")==0){
-            strcpy(master_passwd,tail);
+            strncpy(init_info->master_passwd,tail,31);
             read_conf_lines++;
         }
         else if(strcmp(header,"compute_passwd")==0){
-            strcpy(compute_passwd,tail);
+            strncpy(init_info->compute_passwd,tail,31);
             read_conf_lines++;
         }
         else if(strcmp(header,"master_inst")==0){
             sprintf(node_inst_ext," %s ",tail);
             if(find_multi_keys(reconf_list,node_inst_ext,"","","","")<1){
+                fclose(file_p);
                 return 2;
             }
-            strcpy(master_inst,tail);
+            strncpy(init_info->master_inst,tail,15);
             read_conf_lines++;
         }
         else if(strcmp(header,"master_bandwidth")==0){
             sum_temp=string_to_positive_num(tail);
             if(sum_temp>50||sum_temp<0){
-                strcpy(master_bandwidth,"50");
+                init_info->master_bandwidth=50;
             }
             else{
-                strcpy(master_bandwidth,tail);
+                init_info->master_bandwidth=sum_temp;
             }
             read_conf_lines++;
         }
         else if(strcmp(header,"compute_inst")==0){
             sprintf(node_inst_ext," %s ",tail);
             if(find_multi_keys(reconf_list,node_inst_ext,"","","","")<1){
+                fclose(file_p);
                 return 2;
             }
-            strcpy(compute_inst,tail);
+            strncpy(init_info->compute_inst,tail,15);
             read_conf_lines++;
         }
         else if(strcmp(header,"os_image")==0){
-            strcpy(os_image_raw,tail);
+            strncpy(init_info->os_image_raw,tail,31);
             read_conf_lines++;
         }
         else if(strcmp(header,"hyperthreading")==0){
-            strcpy(ht_flag,tail);
+            strncpy(init_info->ht_flag,tail,8);
             read_conf_lines++;
         }
         else if(strcmp(header,"nfs_volume")==0){
@@ -367,7 +542,7 @@ int get_tf_prep_conf(char* conf_file, char* reconf_list, char* cluster_id, char*
                 fclose(file_p);
                 return 1;
             }
-            *nfs_volume=sum_temp;
+            init_info->hpc_nfs_volume=sum_temp;
             read_conf_lines++;
         }
         else{
@@ -380,6 +555,38 @@ int get_tf_prep_conf(char* conf_file, char* reconf_list, char* cluster_id, char*
     }
     else{
         return 0;
+    }
+}
+
+void print_read_conf_failed(int read_conf_flag){
+    if(read_conf_flag==-3){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
+    }
+    else if(read_conf_flag==1){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
+    }
+    else if(read_conf_flag==2){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
+    }
+    else if(read_conf_flag==3){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
+    }
+}
+
+void print_conf_summary(cluster_initinfo* init_info){
+    printf("|          Cluster ID:            %s\n",init_info->cluster_id);
+    printf("|          Region:                %s\n",init_info->region_id);
+    printf("|          Availability Zone:     %s\n",init_info->zone_id);
+    printf("|          Number of Nodes:       %d\n",init_info->node_num);
+    printf("|          Number of Users:       %d\n",init_info->hpc_user_num);
+    printf("|          Master Node Instance:  %s\n",init_info->master_inst);
+    printf("|          Compute Node Instance: %s\n",init_info->compute_inst);
+    printf("|          OS Image:              %s\n" RESET_DISPLAY,init_info->os_image_raw);
+    if(strcmp(init_info->ht_flag,"OFF")==0){
+        printf("|          Hyperthreading:        %s\n" RESET_DISPLAY,init_info->ht_flag);
+    }
+    if(init_info->hpc_nfs_volume>0){
+        printf("|          Shared Volume (GB):    %d\n" RESET_DISPLAY,init_info->hpc_nfs_volume);
     }
 }
 
@@ -476,42 +683,30 @@ void generate_tf_files(char* stackdir){
     system(cmdline);
 }
 
-int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int aws_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+    char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+        return -3;
+    }
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
-    char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char user_passwords[FILENAME_LENGTH]="";
-    char url_aws_root[LOCATION_LENGTH_EXTENDED]="";
+    cluster_initinfo init_info;
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char conf_param_buffer[32]="";
-    char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-    char cluster_id[CONF_STRING_LENTH]="";
-    char region_id[CONF_STRING_LENTH]="";
     char region_flag[16]="";
     char os_image[128]="";
     char db_os_image[64]="";
     char nat_os_image[64]="";
-    char zone_id[CONF_STRING_LENTH]="";
-    int node_num=0;
-    int hpc_user_num=0;
-    char master_init_param[CONF_STRING_LENTH]="";
-    char master_passwd[CONF_STRING_LENTH]="";
-    char compute_passwd[CONF_STRING_LENTH]="";
-    char master_inst[CONF_STRING_LENTH]="";
-    char compute_inst[CONF_STRING_LENTH]="";
-    char os_image_raw[64]="";
-    char htflag[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
@@ -537,187 +732,73 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i;
-    int num_temp;
-    if(folder_exist_or_not(workdir)==1){
+    
+    printf("[ START: ] Start initializing the cluster ...\n");
+    if(create_init_dirs(workdir,stackdir,vaultdir,logdir,confdir)!=0){
         return -1;
     }
-    create_and_get_stackdir(workdir,stackdir);
-    create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
-    printf("[ START: ] Start initializing the cluster ...\n");
-    if(folder_exist_or_not(stackdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
     }
-    if(folder_exist_or_not(vaultdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(logdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(confdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(code_loc_flag_var==1){
-        sprintf(url_aws_root,"%s%saws%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-    }
-    else{
-        sprintf(url_aws_root,"%saws/",url_code_root_var);
-    }
-
     printf("[ STEP 1 ] Creating initialization files now ...\n");
-    sprintf(cmdline,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
-    get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
+    if(get_tf_templates(confdir,stackdir,"aws",code_loc_flag_var,url_code_root_var)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
+        clear_if_failed(stackdir,confdir,vaultdir,1);
+        return 2;
+    }    
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    if(file_exist_or_not(conf_file)==1){
-        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one." RESET_DISPLAY "\n");
-        if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s %s", COPY_FILE_CMD,url_aws_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
-        }
-        else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_aws_root,conf_file);
-        }
-        if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-            clear_if_failed(stackdir,confdir,vaultdir,1);
-            return 2;
-        }
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_aws.base %s%shpc_stack.base %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_aws.base -o %s%shpc_stack.base -s",url_aws_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_aws.master %s%shpc_stack.master %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_aws.master -o %s%shpc_stack.master -s",url_aws_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_aws.compute.v2 %s%shpc_stack.compute %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_aws.compute.v2 -o %s%shpc_stack.compute -s",url_aws_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_aws.database %s%shpc_stack.database %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_aws.database -o %s%shpc_stack.database -s",url_aws_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_aws.natgw %s%shpc_stack.natgw %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_aws.natgw -o %s%shpc_stack.natgw -s",url_aws_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%sreconf.list %s%sreconf.list %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_aws_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
     sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
-    read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,conf_param_buffer,compute_inst,os_image_raw,htflag,&num_temp);
+    read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_info);
     if(read_conf_flag!=0){
-        if(read_conf_flag==-3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
-        }
+        print_read_conf_failed(read_conf_flag);
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
-    node_user_num_fix(&node_num,&hpc_user_num);
-    number_of_vcpu=get_cpu_num(compute_inst);
+    node_user_num_fix(&init_info.node_num,&init_info.hpc_user_num);
+    number_of_vcpu=get_cpu_num(init_info.compute_inst);
     cpu_core_num=number_of_vcpu/2;
-    if(strcmp(htflag,"OFF")==0){
+    if(strcmp(init_info.ht_flag,"OFF")==0){
         threads=1;
     }
     else{
         threads=2;
     }
-    if(contain_or_not(zone_id,region_id)!=0){
+    if(contain_or_not(init_info.zone_id,init_info.region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
-    if(strcmp(region_id,"cn-northwest-1")==0){
+    if(strcmp(init_info.region_id,"cn-northwest-1")==0){
         strcpy(region_flag,"cn_regions");
-        if(strcmp(os_image_raw,"centos7")==0||strcmp(os_image_raw,"centoss9")==0){
-            sprintf(os_image,"ami = \"${var.%scn.0}\"",os_image_raw);
+        if(strcmp(init_info.os_image_raw,"centos7")==0||strcmp(init_info.os_image_raw,"centoss9")==0){
+            sprintf(os_image,"ami = \"${var.%scn.0}\"",init_info.os_image_raw);
         }
         else{
-            sprintf(os_image,"ami = \"%s\"",os_image_raw);
+            sprintf(os_image,"ami = \"%s\"",init_info.os_image_raw);
         }
         strcpy(db_os_image,"ami = \"${var.centos7cn.0}\"");
         strcpy(nat_os_image,"ami = \"${var.centos7cn.0}\"");
     }
-    else if(strcmp(region_id,"cn-north-1")==0){
+    else if(strcmp(init_info.region_id,"cn-north-1")==0){
         strcpy(region_flag,"cn_regions");
-        if(strcmp(os_image_raw,"centos7")==0||strcmp(os_image_raw,"centoss9")==0){
-            sprintf(os_image,"ami = \"${var.%scn.1}\"",os_image_raw);
+        if(strcmp(init_info.os_image_raw,"centos7")==0||strcmp(init_info.os_image_raw,"centoss9")==0){
+            sprintf(os_image,"ami = \"${var.%scn.1}\"",init_info.os_image_raw);
         }
         else{
-            sprintf(os_image,"ami = \"%s\"",os_image_raw);
+            sprintf(os_image,"ami = \"%s\"",init_info.os_image_raw);
         }
         strcpy(db_os_image,"ami = \"${var.centos7cn.1}\"");
         strcpy(nat_os_image,"ami = \"${var.centos7cn.1}\"");
     }
     else{
         strcpy(region_flag,"global_regions");
-        if(strcmp(os_image_raw,"centos7")==0||strcmp(os_image_raw,"centoss9")==0||strcmp(os_image_raw,"openEuler")==0){
-            sprintf(os_image,"ami = data.aws_ami.%s_x86_glb.image_id",os_image_raw);
+        if(strcmp(init_info.os_image_raw,"centos7")==0||strcmp(init_info.os_image_raw,"centoss9")==0||strcmp(init_info.os_image_raw,"openEuler")==0){
+            sprintf(os_image,"ami = data.aws_ami.%s_x86_glb.image_id",init_info.os_image_raw);
         }
         else{
-            sprintf(os_image,"ami = \"%s\"",os_image_raw);
+            sprintf(os_image,"ami = \"%s\"",init_info.os_image_raw);
         }
         strcpy(db_os_image,"ami = data.aws_ami.centos7_x86_glb.image_id");
         strcpy(nat_os_image,"ami = data.aws_ami.centos7_x86_glb.image_id");
@@ -727,43 +808,21 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     usleep(10000);
     reset_string(database_acct_passwd);
     generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(master_passwd,"*AUTOGEN*")==0||strlen(master_passwd)<8){
-        reset_string(master_passwd);
-        generate_random_passwd(master_passwd);
+    if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||strlen(init_info.master_passwd)<8){
+        reset_string(init_info.master_passwd);
+        generate_random_passwd(init_info.master_passwd);
     }
-    if(strcmp(compute_passwd,"*AUTOGEN*")==0||strlen(compute_passwd)<8){
-        reset_string(compute_passwd);
-        generate_random_passwd(compute_passwd);
+    if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||strlen(init_info.compute_passwd)<8){
+        reset_string(init_info.compute_passwd);
+        generate_random_passwd(init_info.compute_passwd);
     }
-    if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MAX){
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id_temp+i)=*(cluster_id_input+i);
-        }
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
-        global_replace(conf_file,cluster_id,cluster_id_input);
-        reset_string(cluster_id);
-        for(i=0;i<strlen(cluster_id_input);i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)<CLUSTER_ID_LENGTH_MIN&&strlen(cluster_id_input)>0){
-        sprintf(cluster_id_temp,"%s-hpcnow",cluster_id_input);
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        strcpy(cluster_id,cluster_id_temp);
-    }
+    
     sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
         reset_string(randstr);
         generate_random_string(randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_info.cluster_id,randstr);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
@@ -771,19 +830,12 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     else{
         file_p=fopen(filename_temp,"r");
         fscanf(file_p,"%10s",randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_info.cluster_id,randstr);
         fclose(file_p);
     }
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    printf("|          Cluster ID:            %s\n",cluster_id);
-    printf("|          Region:                %s\n",region_id);
-    printf("|          Availability Zone:     %s\n",zone_id);
-    printf("|          Number of Nodes:       %d\n",node_num);
-    printf("|          Number of Users:       %d\n",hpc_user_num);
-    printf("|          Master Node Instance:  %s\n",master_inst);
-    printf("|          Compute Node Instance: %s\n",compute_inst);
-    printf("|          OS Image:              %s\n" RESET_DISPLAY,os_image_raw);
-    
+    print_conf_summary(&init_info);
+
     generate_sshkey(sshkey_folder,pubkey);
 
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
@@ -808,16 +860,16 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"SECURITY_GROUP_MYSQL",string_temp);
     sprintf(string_temp,"%s-nag",randstr);
     global_replace(filename_temp,"NAS_ACCESS_GROUP",string_temp);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);
+    global_replace(filename_temp,"DEFAULT_REGION_ID",init_info.region_id);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    sprintf(string_temp,"%d",node_num);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
+    sprintf(string_temp,"%d",init_info.node_num);
     global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
-    sprintf(string_temp,"%d",hpc_user_num);
+    sprintf(string_temp,"%d",init_info.hpc_user_num);
     global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
+    global_replace(filename_temp,"DEFAULT_MASTERINI",init_info.master_init_param);
+    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_info.master_passwd);
+    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_info.compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
@@ -827,7 +879,7 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     file_p=fopen(filename_temp,"a");
     sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_info.hpc_user_num;i++){
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
@@ -837,13 +889,13 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     fclose(file_p_2);
 
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"MASTER_INST",master_inst);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_replace(filename_temp,"MASTER_INST",init_info.master_inst);
     insert_lines(filename_temp,"#INSERT_AMI_HERE",os_image);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_info.hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
@@ -853,8 +905,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"COMPUTE_INST",compute_inst);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_replace(filename_temp,"COMPUTE_INST",init_info.compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     insert_lines(filename_temp,"#INSERT_AMI_HERE",os_image);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
@@ -867,15 +919,15 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     insert_lines(filename_temp,"mount",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
     insert_lines(filename_temp,"#INSERT_AMI_HERE",db_os_image);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
     insert_lines(filename_temp,"#INSERT_AMI_HERE",nat_os_image);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
-    for(i=0;i<node_num;i++){
+    for(i=0;i<init_info.node_num;i++){
         sprintf(cmdline,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
@@ -883,8 +935,6 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         sprintf(string_temp,"comp%d",i+1);
         global_replace(filename_temp,"NUMBER",string_temp);
-        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);*/
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
@@ -930,15 +980,15 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,init_info.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: s3:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
+    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: s3:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_info.master_passwd,bucket_id,init_info.region_id,bucket_ak,bucket_sk);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
+    fprintf(file_p,"%s\n%s\n",init_info.master_passwd,init_info.compute_passwd);
 	fclose(file_p); 
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
@@ -954,8 +1004,8 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
     sprintf(current_time,"%d:%d:%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    master_vcpu=get_cpu_num(master_inst);
-    compute_vcpu=get_cpu_num(compute_inst);
+    master_vcpu=get_cpu_num(init_info.master_inst);
+    compute_vcpu=get_cpu_num(init_info.compute_inst);
     sprintf(filename_temp,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
     reset_string(string_temp);
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
@@ -965,13 +1015,13 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
     natgw_vcpu=get_cpu_num(string_temp);
     reset_string(string_temp);
-    if(*(master_inst+0)=='a'){
+    if(*(init_info.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
     else{
         strcpy(master_cpu_vendor,"intel64");
     }
-    if(*(compute_inst+0)=='a'){
+    if(*(init_info.compute_inst+0)=='a'){
         strcpy(compute_cpu_vendor,"amd64");
     }
     else{
@@ -979,22 +1029,22 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     strcpy(usage_logfile,USAGE_LOG_FILE);
     file_p=fopen(usage_logfile,"a+");
-    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,region_id);
-    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,region_id);
-    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,region_id);
-    for(i=0;i<node_num;i++){
-        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,region_id);
+    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_info.cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,init_info.region_id);
+    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_info.cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,init_info.region_id);
+    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_info.cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,init_info.region_id);
+    for(i=0;i<init_info.node_num;i++){
+        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_info.cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,init_info.region_id);
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
     sync_statefile(workdir,sshkey_folder);
-    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_info.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
-    for(i=0;i<hpc_user_num;i++){
+    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder);
+    for(i=0;i<init_info.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -1002,38 +1052,26 @@ int aws_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     return 0;
 }
 
-int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int qcloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+    char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+        return -3;
+    }
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
-    char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    cluster_initinfo init_info;
     char user_passwords[FILENAME_LENGTH]="";
-    char url_qcloud_root[LOCATION_LENGTH_EXTENDED];
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char conf_param_buffer[32]="";
-    char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-    char cluster_id[CONF_STRING_LENTH]="";
-    char region_id[CONF_STRING_LENTH]="";
-    char os_image[64]="";
-    char zone_id[CONF_STRING_LENTH]="";
-    int node_num=0;
-    int hpc_user_num=0;
-    char master_init_param[CONF_STRING_LENTH]="";
-    char master_passwd[CONF_STRING_LENTH]="";
-    char compute_passwd[CONF_STRING_LENTH]="";
-    char master_inst[CONF_STRING_LENTH]="";
-    char compute_inst[CONF_STRING_LENTH]="";
-    char master_bandwidth[CONF_STRING_LENTH];
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
@@ -1057,163 +1095,38 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i;
-    int num_temp;
-    if(folder_exist_or_not(workdir)==1){
+
+    printf("[ START: ] Start initializing the cluster ...\n");
+    if(create_init_dirs(workdir,stackdir,vaultdir,logdir,confdir)!=0){
         return -1;
     }
-    create_and_get_stackdir(workdir,stackdir);
-    create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
-    printf("[ START: ] Start initializing the cluster ...\n");
-    if(folder_exist_or_not(stackdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(vaultdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(logdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(confdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(code_loc_flag_var==1){
-        sprintf(url_qcloud_root,"%s%sqcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-    }
-    else{
-        sprintf(url_qcloud_root,"%sqcloud/",url_code_root_var);
-    }
-    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    if(file_exist_or_not(conf_file)==1){
-        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. " RESET_DISPLAY "\n");
-        if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
-        }
-        else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_qcloud_root,conf_file);
-        }
-            if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-            clear_if_failed(stackdir,confdir,vaultdir,1);
-            return 2;
-        }
+    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
-    sprintf(cmdline,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_qcloud.base %s%shpc_stack.base %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.base -o %s%shpc_stack.base -s",url_qcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
+    if(get_tf_templates(confdir,stackdir,"qcloud",code_loc_flag_var,url_code_root_var)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_qcloud.master %s%shpc_stack.master %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.master -o %s%shpc_stack.master -s",url_qcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_qcloud.compute %s%shpc_stack.compute %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.compute -o %s%shpc_stack.compute -s",url_qcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_qcloud.database %s%shpc_stack.database %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.database -o %s%shpc_stack.database -s",url_qcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_qcloud.natgw %s%shpc_stack.natgw %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_qcloud.natgw -o %s%shpc_stack.natgw -s",url_qcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%sNAS_Zones_QCloud.txt %s%sNAS_Zones_QCloud.txt %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %sNAS_Zones_QCloud.txt -o %s%sNAS_Zones_QCloud.txt -s",url_qcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%sreconf.list %s%sreconf.list %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_qcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
-    get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
+    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
-    read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,master_bandwidth,compute_inst,os_image,conf_param_buffer,&num_temp);
+    read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_info);
     if(read_conf_flag!=0){
-        if(read_conf_flag==-3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
-        }
+        print_read_conf_failed(read_conf_flag);
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
-    node_user_num_fix(&node_num,&hpc_user_num);
-    sprintf(filename_temp,"%s%sNAS_Zones_QCloud.txt",stackdir,PATH_SLASH);
-    if(find_multi_keys(filename_temp,zone_id,"","","","")>0){
-        strcpy(NAS_Zone,zone_id);
+    node_user_num_fix(&init_info.node_num,&init_info.hpc_user_num);
+    sprintf(filename_temp,"%s%snas_zones.list",stackdir,PATH_SLASH);
+    if(find_multi_keys(filename_temp,init_info.zone_id,"","","","")>0){
+        strcpy(NAS_Zone,init_info.zone_id);
     }
     else{
-        find_and_get(filename_temp,region_id,"","",1,region_id,"","",' ',1,NAS_Zone);
+        find_and_get(filename_temp,init_info.region_id,"","",1,init_info.region_id,"","",' ',1,NAS_Zone);
     }
- 
-    if(contain_or_not(zone_id,region_id)!=0){
+    if(contain_or_not(init_info.zone_id,init_info.region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
@@ -1224,43 +1137,20 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     usleep(10000);
     reset_string(database_acct_passwd);
     generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(master_passwd,"*AUTOGEN*")==0||strlen(master_passwd)<8){
-        reset_string(master_passwd);
-        generate_random_passwd(master_passwd);
+    if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||strlen(init_info.master_passwd)<8){
+        reset_string(init_info.master_passwd);
+        generate_random_passwd(init_info.master_passwd);
     }
-    if(strcmp(compute_passwd,"*AUTOGEN*")==0||strlen(compute_passwd)<8){
-        reset_string(compute_passwd);
-        generate_random_passwd(compute_passwd);
-    }
-    if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MAX){
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id_temp+i)=*(cluster_id_input+i);
-        }
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
-        global_replace(conf_file,cluster_id,cluster_id_input);
-        reset_string(cluster_id);
-        for(i=0;i<strlen(cluster_id_input);i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)<CLUSTER_ID_LENGTH_MIN&&strlen(cluster_id_input)>0){
-        sprintf(cluster_id_temp,"%s-hpcnow",cluster_id_input);
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        strcpy(cluster_id,cluster_id_temp);
+    if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||strlen(init_info.compute_passwd)<8){
+        reset_string(init_info.compute_passwd);
+        generate_random_passwd(init_info.compute_passwd);
     }
     sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
         reset_string(randstr);
         generate_random_string(randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_info.cluster_id,randstr);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
@@ -1268,18 +1158,12 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     else{
         file_p=fopen(filename_temp,"r");
         fscanf(file_p,"%10s",randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_info.cluster_id,randstr);
         fclose(file_p);
     }
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    printf("|          Cluster ID:            %s\n",cluster_id);
-    printf("|          Region:                %s\n",region_id);
-    printf("|          Availability Zone:     %s\n",zone_id);
-    printf("|          Number of Nodes:       %d\n",node_num);
-    printf("|          Number of Users:       %d\n",hpc_user_num);
-    printf("|          Master Node Instance:  %s\n",master_inst);
-    printf("|          Compute Node Instance: %s\n",compute_inst);
-    printf("|          OS Image:              %s\n" RESET_DISPLAY,os_image);
+    print_conf_summary(&init_info);
+
     generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
@@ -1304,16 +1188,16 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     global_replace(filename_temp,"SECURITY_GROUP_NATGW",string_temp);
     sprintf(string_temp,"%s-nag",randstr);
     global_replace(filename_temp,"NAS_ACCESS_GROUP",string_temp);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
+    global_replace(filename_temp,"DEFAULT_REGION_ID",init_info.region_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
     global_replace(filename_temp,"DEFAULT_NAS_ZONE",NAS_Zone);
-    sprintf(string_temp,"%d",node_num);
+    sprintf(string_temp,"%d",init_info.node_num);
     global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
-    sprintf(string_temp,"%d",hpc_user_num);
+    sprintf(string_temp,"%d",init_info.hpc_user_num);
     global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
+    global_replace(filename_temp,"DEFAULT_MASTERINI",init_info.master_init_param);
+    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_info.master_passwd);
+    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_info.compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
@@ -1321,7 +1205,7 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     file_p=fopen(filename_temp,"a");
     sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_info.hpc_user_num;i++){
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
@@ -1331,20 +1215,21 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     fclose(file_p_2);
 
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"MASTER_INST",master_inst);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_replace(filename_temp,"MASTER_INST",init_info.master_inst);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
-    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",os_image);
+    sprintf(string_temp,"%d",init_info.master_bandwidth);
+    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
+    if(strcmp(init_info.os_image_raw,"centos7")==0||strcmp(init_info.os_image_raw,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",init_info.os_image_raw);
     }
     else{
-        sprintf(string_temp,"\"%s\"",os_image);
+        sprintf(string_temp,"\"%s\"",init_info.os_image_raw);
         global_replace(filename_temp,"data.tencentcloud_images.OS_IMAGE.images.0.image_id",string_temp);
     }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_info.hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
@@ -1354,30 +1239,31 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"COMPUTE_INST",compute_inst);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_replace(filename_temp,"COMPUTE_INST",init_info.compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(init_info.os_image_raw,"centos7")==0||strcmp(init_info.os_image_raw,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",init_info.os_image_raw);
     }
     else{
-        sprintf(string_temp,"\"%s\"",os_image);
+        sprintf(string_temp,"\"%s\"",init_info.os_image_raw);
         global_replace(filename_temp,"data.tencentcloud_images.OS_IMAGE.images.0.image_id",string_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
+    sprintf(string_temp,"%d",init_info.master_bandwidth);
+    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
 
-    for(i=0;i<node_num;i++){
+    for(i=0;i<init_info.node_num;i++){
         sprintf(cmdline,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
@@ -1418,15 +1304,15 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,init_info.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: cos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
+    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: cos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_info.master_passwd,bucket_id,init_info.region_id,bucket_ak,bucket_sk);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
+    fprintf(file_p,"%s\n%s\n",init_info.master_passwd,init_info.compute_passwd);
 	fclose(file_p);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
@@ -1442,8 +1328,8 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
     sprintf(current_time,"%d:%d:%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    master_vcpu=get_cpu_num(master_inst);
-    compute_vcpu=get_cpu_num(compute_inst);
+    master_vcpu=get_cpu_num(init_info.master_inst);
+    compute_vcpu=get_cpu_num(init_info.compute_inst);
     sprintf(filename_temp,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
     reset_string(string_temp);
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
@@ -1453,13 +1339,13 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
     natgw_vcpu=get_cpu_num(string_temp);
     reset_string(string_temp);
-    if(*(master_inst+0)=='a'){
+    if(*(init_info.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
     else{
         strcpy(master_cpu_vendor,"intel64");
     }
-    if(*(compute_inst+0)=='a'){
+    if(*(init_info.compute_inst+0)=='a'){
         strcpy(compute_cpu_vendor,"amd64");
     }
     else{
@@ -1467,22 +1353,22 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     }
     strcpy(usage_logfile,USAGE_LOG_FILE);
     file_p=fopen(usage_logfile,"a+");
-    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,region_id);
-    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,region_id);
-    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,region_id);
-    for(i=0;i<node_num;i++){
-        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,region_id);
+    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_info.cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,init_info.region_id);
+    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_info.cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,init_info.region_id);
+    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_info.cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,init_info.region_id);
+    for(i=0;i<init_info.node_num;i++){
+        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_info.cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,init_info.region_id);
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
     sync_statefile(workdir,sshkey_folder);
-    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_info.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
-    for(i=0;i<hpc_user_num;i++){
+    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder);
+    for(i=0;i<init_info.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -1490,38 +1376,26 @@ int qcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyf
     return 0;
 }
 
-int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int alicloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+    char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+        return -3;
+    }
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
-    char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    cluster_initinfo init_info;
     char user_passwords[FILENAME_LENGTH]="";
-    char url_alicloud_root[LOCATION_LENGTH_EXTENDED]="";
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
-    char conf_param_buffer[32]="";
     int read_conf_flag=0;
-    char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-    char cluster_id[CONF_STRING_LENTH]="";
-    char region_id[CONF_STRING_LENTH]="";
-    char os_image[64]="";
-    char zone_id[CONF_STRING_LENTH]="";
-    int node_num=0;
-    int hpc_user_num=0;
-    char master_init_param[CONF_STRING_LENTH]="";
-    char master_passwd[CONF_STRING_LENTH]="";
-    char compute_passwd[CONF_STRING_LENTH]="";
-    char master_inst[CONF_STRING_LENTH]="";
-    char compute_inst[CONF_STRING_LENTH]="";
-    char master_bandwidth[CONF_STRING_LENTH]="";
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
@@ -1545,162 +1419,38 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i;
-    int num_temp;
-    if(folder_exist_or_not(workdir)==1){
+    
+    printf("[ START: ] Start initializing the cluster ...\n");
+    if(create_init_dirs(workdir,stackdir,vaultdir,logdir,confdir)!=0){
         return -1;
     }
-    create_and_get_stackdir(workdir,stackdir);
-    create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
-    printf("[ START: ] Start initializing the cluster ...\n");
-    if(folder_exist_or_not(stackdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(vaultdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(logdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(confdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(code_loc_flag_var==1){
-        sprintf(url_alicloud_root,"%s%salicloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-    }
-    else{
-        sprintf(url_alicloud_root,"%salicloud/",url_code_root_var);
-    }
-    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    if(file_exist_or_not(conf_file)==1){
-        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. " RESET_DISPLAY "\n");
-        if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
-        }
-        else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s",url_alicloud_root,conf_file);
-        }
-        if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-            clear_if_failed(stackdir,confdir,vaultdir,1);
-            return 2;
-        }
+    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
-    sprintf(cmdline,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stackv2.base %s%shpc_stack.base %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stackv2.base -o %s%shpc_stack.base -s",url_alicloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
+    if(get_tf_templates(confdir,stackdir,"alicloud",code_loc_flag_var,url_code_root_var)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stackv2.master %s%shpc_stack.master %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stackv2.master -o %s%shpc_stack.master -s",url_alicloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stackv2.compute %s%shpc_stack.compute %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stackv2.compute -o %s%shpc_stack.compute -s",url_alicloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stackv2.database %s%shpc_stack.database %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stackv2.database -o %s%shpc_stack.database -s",url_alicloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stackv2.natgw %s%shpc_stack.natgw %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stackv2.natgw -o %s%shpc_stack.natgw -s",url_alicloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%sNAS_Zones_ALI.txt %s%sNAS_Zones_ALI.txt %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %sNAS_Zones_ALI.txt -o %s%sNAS_Zones_ALI.txt -s",url_alicloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%sreconf.list %s%sreconf.list %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_alicloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
-    get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
+    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
-    read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,master_bandwidth,compute_inst,os_image,conf_param_buffer,&num_temp);
+    read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_info);
     if(read_conf_flag!=0){
-        if(read_conf_flag==-3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
-        }
+        print_read_conf_failed(read_conf_flag);
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
-    node_user_num_fix(&node_num,&hpc_user_num);
-    sprintf(filename_temp,"%s%sNAS_Zones_ALI.txt",stackdir,PATH_SLASH);
-    if(find_multi_keys(filename_temp,zone_id,"","","","")>0){
-        strcpy(NAS_Zone,zone_id);
+    node_user_num_fix(&init_info.node_num,&init_info.hpc_user_num);
+    sprintf(filename_temp,"%s%snas_zones.list",stackdir,PATH_SLASH);
+    if(find_multi_keys(filename_temp,init_info.zone_id,"","","","")>0){
+        strcpy(NAS_Zone,init_info.zone_id);
     }
     else{
-        find_and_get(filename_temp,region_id,"","",1,region_id,"","",' ',1,NAS_Zone);
+        find_and_get(filename_temp,init_info.region_id,"","",1,init_info.region_id,"","",' ',1,NAS_Zone);
     }
-    if(contain_or_not(zone_id,region_id)!=0){
+    if(contain_or_not(init_info.zone_id,init_info.region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
@@ -1711,43 +1461,20 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     usleep(10000);
     reset_string(database_acct_passwd);
     generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(master_passwd,"*AUTOGEN*")==0||strlen(master_passwd)<8){
-        reset_string(master_passwd);
-        generate_random_passwd(master_passwd);
+    if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||strlen(init_info.master_passwd)<8){
+        reset_string(init_info.master_passwd);
+        generate_random_passwd(init_info.master_passwd);
     }
-    if(strcmp(compute_passwd,"*AUTOGEN*")==0||strlen(compute_passwd)<8){
-        reset_string(compute_passwd);
-        generate_random_passwd(compute_passwd);
-    }
-    if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MAX){
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id_temp+i)=*(cluster_id_input+i);
-        }
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
-        global_replace(conf_file,cluster_id,cluster_id_input);
-        reset_string(cluster_id);
-        for(i=0;i<strlen(cluster_id_input);i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)<CLUSTER_ID_LENGTH_MIN&&strlen(cluster_id_input)>0){
-        sprintf(cluster_id_temp,"%s-hpcnow",cluster_id_input);
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        strcpy(cluster_id,cluster_id_temp);
+    if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||strlen(init_info.compute_passwd)<8){
+        reset_string(init_info.compute_passwd);
+        generate_random_passwd(init_info.compute_passwd);
     }
     sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
         reset_string(randstr);
         generate_random_string(randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_info.cluster_id,randstr);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
@@ -1755,18 +1482,12 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     else{
         file_p=fopen(filename_temp,"r");
         fscanf(file_p,"%10s",randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_info.cluster_id,randstr);
         fclose(file_p);
     }
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    printf("|          Cluster ID:            %s\n",cluster_id);
-    printf("|          Region:                %s\n",region_id);
-    printf("|          Availability Zone:     %s\n",zone_id);
-    printf("|          Number of Nodes:       %d\n",node_num);
-    printf("|          Number of Users:       %d\n",hpc_user_num);
-    printf("|          Master Node Instance:  %s\n",master_inst);
-    printf("|          Compute Node Instance: %s\n",compute_inst);
-    printf("|          OS Image:              %s\n" RESET_DISPLAY,os_image);
+    print_conf_summary(&init_info);
+
     generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
@@ -1786,23 +1507,23 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     global_replace(filename_temp,"SECURITY_GROUP_MYSQL",string_temp);
     sprintf(string_temp,"%s-nag",randstr);
     global_replace(filename_temp,"NAS_ACCESS_GROUP",string_temp);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
+    global_replace(filename_temp,"DEFAULT_REGION_ID",init_info.region_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
     global_replace(filename_temp,"DEFAULT_NAS_ZONE",NAS_Zone);
-    sprintf(string_temp,"%d",node_num);
+    sprintf(string_temp,"%d",init_info.node_num);
     global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
-    sprintf(string_temp,"%d",hpc_user_num);
+    sprintf(string_temp,"%d",init_info.hpc_user_num);
     global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
+    global_replace(filename_temp,"DEFAULT_MASTERINI",init_info.master_init_param);
+    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_info.master_passwd);
+    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_info.compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
     file_p=fopen(filename_temp,"a");
     sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_info.hpc_user_num;i++){
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
@@ -1812,19 +1533,20 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     fclose(file_p_2);
 
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
     global_replace(filename_temp,"RG_DISPLAY_NAME",unique_cluster_id);
-    global_replace(filename_temp,"MASTER_INST",master_inst);
+    global_replace(filename_temp,"MASTER_INST",init_info.master_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
-    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",os_image);
+    sprintf(string_temp,"%d",init_info.master_bandwidth);
+    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
+    if(strcmp(init_info.os_image_raw,"centos7")==0||strcmp(init_info.os_image_raw,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",init_info.os_image_raw);
     }
     else{
-        global_replace(filename_temp,"${data.alicloud_images.OS_IMAGE.images.0.id}",os_image);
+        global_replace(filename_temp,"${data.alicloud_images.OS_IMAGE.images.0.id}",init_info.os_image_raw);
     }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_info.hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
@@ -1834,31 +1556,30 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
     global_replace(filename_temp,"RG_DISPLAY_NAME",unique_cluster_id);
-    global_replace(filename_temp,"COMPUTE_INST",compute_inst);
+    global_replace(filename_temp,"COMPUTE_INST",init_info.compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(init_info.os_image_raw,"centos7")==0||strcmp(init_info.os_image_raw,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",init_info.os_image_raw);
     }
     else{
-        global_replace(filename_temp,"${data.alicloud_images.OS_IMAGE.images.0.id}",os_image);
+        global_replace(filename_temp,"${data.alicloud_images.OS_IMAGE.images.0.id}",init_info.os_image_raw);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
     global_replace(filename_temp,"RG_DISPLAY_NAME",unique_cluster_id);
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
+    sprintf(string_temp,"%d",init_info.master_bandwidth);
+    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
     global_replace(filename_temp,"RG_DISPLAY_NAME",unique_cluster_id);
-    reset_string(filename_temp);
-    reset_string(string_temp);
 
-    for(i=0;i<node_num;i++){
+    for(i=0;i<init_info.node_num;i++){
         sprintf(cmdline,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
@@ -1901,15 +1622,15 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     system(cmdline);
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,init_info.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: oss:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
+    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: oss:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_info.master_passwd,bucket_id,init_info.region_id,bucket_ak,bucket_sk);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
+    fprintf(file_p,"%s\n%s\n",init_info.master_passwd,init_info.compute_passwd);
 	fclose(file_p);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
@@ -1925,8 +1646,8 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
     sprintf(current_time,"%d:%d:%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    master_vcpu=get_cpu_num(master_inst);
-    compute_vcpu=get_cpu_num(compute_inst);
+    master_vcpu=get_cpu_num(init_info.master_inst);
+    compute_vcpu=get_cpu_num(init_info.compute_inst);
     sprintf(filename_temp,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
     reset_string(string_temp);
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
@@ -1936,13 +1657,13 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
     natgw_vcpu=get_cpu_num(string_temp);
     reset_string(string_temp);
-    if(*(master_inst+0)=='a'){
+    if(*(init_info.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
     else{
         strcpy(master_cpu_vendor,"intel64");
     }
-    if(*(compute_inst+0)=='a'){
+    if(*(init_info.compute_inst+0)=='a'){
         strcpy(compute_cpu_vendor,"amd64");
     }
     else{
@@ -1950,22 +1671,22 @@ int alicloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_ke
     }
     strcpy(usage_logfile,USAGE_LOG_FILE);
     file_p=fopen(usage_logfile,"a+");
-    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,region_id);
-    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,region_id);
-    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,region_id);
-    for(i=0;i<node_num;i++){
-        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,region_id);
+    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_info.cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,init_info.region_id);
+    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_info.cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,init_info.region_id);
+    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_info.cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,init_info.region_id);
+    for(i=0;i<init_info.node_num;i++){
+        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_info.cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,init_info.region_id);
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
     sync_statefile(workdir,sshkey_folder);
-    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_info.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
-    for(i=0;i<hpc_user_num;i++){
+    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder);
+    for(i=0;i<init_info.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -2000,38 +1721,27 @@ int hw_intel_amd_generation(const char* region_id, char* intel_generation, char*
     }
 }
 
-int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+    char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+        return -3;
+    }
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
-    char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    cluster_initinfo init_conf;
+
     char user_passwords[FILENAME_LENGTH]="";
-    char url_hwcloud_root[LOCATION_LENGTH_EXTENDED];
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char conf_param_buffer[32]="";
-    char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-    char cluster_id[CONF_STRING_LENTH]="";
-    char region_id[CONF_STRING_LENTH]="";
-    char os_image[64]="";
-    char zone_id[CONF_STRING_LENTH]="";
-    int node_num=0;
-    int hpc_user_num=0;
-    char master_init_param[CONF_STRING_LENTH]="";
-    char master_passwd[CONF_STRING_LENTH]="";
-    char compute_passwd[CONF_STRING_LENTH]="";
-    char master_inst[CONF_STRING_LENTH]="";
-    char compute_inst[CONF_STRING_LENTH]="";
-    char master_bandwidth[CONF_STRING_LENTH];
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
@@ -2058,144 +1768,31 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     int intel_flavor_flag=0;
     char usage_logfile[FILENAME_LENGTH]="";
     int i;
-    int nfs_volume;
-    if(folder_exist_or_not(workdir)==1){
+
+    printf("[ START: ] Start initializing the cluster ...\n");
+    if(create_init_dirs(workdir,stackdir,vaultdir,logdir,confdir)!=0){
         return -1;
     }
-    create_and_get_stackdir(workdir,stackdir);
-    create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
-    printf("[ START: ] Start initializing the cluster ...\n");
-    if(folder_exist_or_not(stackdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(vaultdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(logdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(confdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(code_loc_flag_var==1){
-        sprintf(url_hwcloud_root,"%s%shwcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-    }
-    else{
-        sprintf(url_hwcloud_root,"%shwcloud/",url_code_root_var);
-    }
-    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    if(file_exist_or_not(conf_file)==1){
-        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. " RESET_DISPLAY "\n");
-        if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
-        }
-        else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_hwcloud_root,conf_file);
-        }
-            if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-            clear_if_failed(stackdir,confdir,vaultdir,1);
-            return 2;
-        }
+    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
-    sprintf(cmdline,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_hwcloud.base %s%shpc_stack.base %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_hwcloud.base -o %s%shpc_stack.base -s",url_hwcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
+    if(get_tf_templates(confdir,stackdir,"hwcloud",code_loc_flag_var,url_code_root_var)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_hwcloud.master %s%shpc_stack.master %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_hwcloud.master -o %s%shpc_stack.master -s",url_hwcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_hwcloud.compute %s%shpc_stack.compute %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_hwcloud.compute -o %s%shpc_stack.compute -s",url_hwcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_hwcloud.database %s%shpc_stack.database %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_hwcloud.database -o %s%shpc_stack.database -s",url_hwcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_hwcloud.natgw %s%shpc_stack.natgw %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_hwcloud.natgw -o %s%shpc_stack.natgw -s",url_hwcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%sreconf.list %s%sreconf.list %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_hwcloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
-    get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
+    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
-    read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,master_bandwidth,compute_inst,os_image,conf_param_buffer,&nfs_volume);
+    read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_conf);
     if(read_conf_flag!=0){
-        if(read_conf_flag==-3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
-        }
+        print_read_conf_failed(read_conf_flag);
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
-    node_user_num_fix(&node_num,&hpc_user_num);
-    if(contain_or_not(zone_id,region_id)!=0){
+    node_user_num_fix(&init_conf.node_num,&init_conf.hpc_user_num);
+    if(contain_or_not(init_conf.zone_id,init_conf.region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
@@ -2206,43 +1803,20 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     usleep(10000);
     reset_string(database_acct_passwd);
     generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(master_passwd,"*AUTOGEN*")==0||strlen(master_passwd)<8){
-        reset_string(master_passwd);
-        generate_random_passwd(master_passwd);
+    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||strlen(init_conf.master_passwd)<8){
+        reset_string(init_conf.master_passwd);
+        generate_random_passwd(init_conf.master_passwd);
     }
-    if(strcmp(compute_passwd,"*AUTOGEN*")==0||strlen(compute_passwd)<8){
-        reset_string(compute_passwd);
-        generate_random_passwd(compute_passwd);
-    }
-    if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MAX){
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id_temp+i)=*(cluster_id_input+i);
-        }
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
-        global_replace(conf_file,cluster_id,cluster_id_input);
-        reset_string(cluster_id);
-        for(i=0;i<strlen(cluster_id_input);i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)<CLUSTER_ID_LENGTH_MIN&&strlen(cluster_id_input)>0){
-        sprintf(cluster_id_temp,"%s-hpcnow",cluster_id_input);
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        strcpy(cluster_id,cluster_id_temp);
+    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||strlen(init_conf.compute_passwd)<8){
+        reset_string(init_conf.compute_passwd);
+        generate_random_passwd(init_conf.compute_passwd);
     }
     sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
         reset_string(randstr);
         generate_random_string(randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_conf.cluster_id,randstr);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
@@ -2250,21 +1824,13 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     else{
         file_p=fopen(filename_temp,"r");
         fscanf(file_p,"%10s",randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_conf.cluster_id,randstr);
         fclose(file_p);
     }
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    printf("|          Cluster ID:            %s\n",cluster_id);
-    printf("|          Region:                %s\n",region_id);
-    printf("|          Availability Zone:     %s\n",zone_id);
-    printf("|          Number of Nodes:       %d\n",node_num);
-    printf("|          Number of Users:       %d\n",hpc_user_num);
-    printf("|          Master Node Instance:  %s\n",master_inst);
-    printf("|          Compute Node Instance: %s\n",compute_inst);
-    printf("|          OS Image:              %s\n",os_image);
-    printf("|          NFS Volume:            %d\n" RESET_DISPLAY,nfs_volume);
+    print_conf_summary(&init_conf);
 
-    intel_flavor_flag=hw_intel_amd_generation(region_id,intel_generation,amd_generation,&amd_flavor_flag);
+    intel_flavor_flag=hw_intel_amd_generation(init_conf.region_id,intel_generation,amd_generation,&amd_flavor_flag);
     generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
@@ -2285,17 +1851,17 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     global_replace(filename_temp,"SECURITY_GROUP_MYSQL",string_temp);
     sprintf(string_temp,"%s-natgw",randstr);
     global_replace(filename_temp,"SECURITY_GROUP_NATGW",string_temp);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    sprintf(string_temp,"%d",node_num);
+    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    sprintf(string_temp,"%d",init_conf.node_num);
     global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
-    sprintf(string_temp,"%d",hpc_user_num);
+    sprintf(string_temp,"%d",init_conf.hpc_user_num);
     global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    sprintf(string_temp,"%d",nfs_volume);
+    sprintf(string_temp,"%d",init_conf.hpc_nfs_volume);
     global_replace(filename_temp,"DEFAULT_STORAGE_VOLUME",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
+    global_replace(filename_temp,"DEFAULT_MASTERINI",init_conf.master_init_param);
+    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
+    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
@@ -2320,7 +1886,7 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     file_p=fopen(filename_temp,"a");
     sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_conf.hpc_user_num;i++){
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
@@ -2330,22 +1896,23 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     fclose(file_p_2);
 
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"MASTER_INST",master_inst);
+    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_replace(filename_temp,"MASTER_INST",init_conf.master_inst);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
-    if(strcmp(os_image,"rocky9")==0||strcmp(os_image,"euleros")==0||strcmp(os_image,"centos7")==0){
-        global_replace(filename_temp,"OS_IMAGE",os_image);
+    sprintf(string_temp,"%d",init_conf.master_bandwidth);
+    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
+    if(strcmp(init_conf.os_image_raw,"rocky9")==0||strcmp(init_conf.os_image_raw,"euleros")==0||strcmp(init_conf.os_image_raw,"centos7")==0){
+        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
-        sprintf(string_temp,"\"%s\"",os_image);
+        sprintf(string_temp,"\"%s\"",init_conf.os_image_raw);
         global_replace(filename_temp,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);
     }
     
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
@@ -2355,39 +1922,38 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"COMPUTE_INST",compute_inst);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_replace(filename_temp,"COMPUTE_INST",init_conf.compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    if(strcmp(os_image,"rocky9")==0||strcmp(os_image,"euleros")==0||strcmp(os_image,"centos7")==0){
-        global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(init_conf.os_image_raw,"rocky9")==0||strcmp(init_conf.os_image_raw,"euleros")==0||strcmp(init_conf.os_image_raw,"centos7")==0){
+        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
-        sprintf(string_temp,"\"%s\"",os_image);
+        sprintf(string_temp,"\"%s\"",init_conf.os_image_raw);
         global_replace(filename_temp,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
+    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    sprintf(string_temp,"%d",init_conf.master_bandwidth);
+    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
 
-    for(i=0;i<node_num;i++){
+    for(i=0;i<init_conf.node_num;i++){
         sprintf(cmdline,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);*/
     }
 
     generate_tf_files(stackdir);
@@ -2423,15 +1989,15 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: obs: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
+    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: obs: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_conf.master_passwd,bucket_id,init_conf.region_id,bucket_ak,bucket_sk);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
+    fprintf(file_p,"%s\n%s\n",init_conf.master_passwd,init_conf.compute_passwd);
 	fclose(file_p);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
@@ -2447,8 +2013,8 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
     sprintf(current_time,"%d:%d:%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    master_vcpu=get_cpu_num(master_inst);
-    compute_vcpu=get_cpu_num(compute_inst);
+    master_vcpu=get_cpu_num(init_conf.master_inst);
+    compute_vcpu=get_cpu_num(init_conf.compute_inst);
     sprintf(filename_temp,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
     reset_string(string_temp);
     find_and_get(filename_temp,"flavor_id","","",1,"flavor_id","","",'.',3,string_temp);
@@ -2458,13 +2024,13 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     find_and_get(filename_temp,"flavor_id","","",1,"flavor_id","","",'.',3,string_temp);
     natgw_vcpu=get_cpu_num(string_temp);
     reset_string(string_temp);
-    if(*(master_inst+0)=='a'){
+    if(*(init_conf.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
     else{
         strcpy(master_cpu_vendor,"intel64");
     }
-    if(*(compute_inst+0)=='a'){
+    if(*(init_conf.compute_inst+0)=='a'){
         strcpy(compute_cpu_vendor,"amd64");
     }
     else{
@@ -2472,22 +2038,22 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     }
     strcpy(usage_logfile,USAGE_LOG_FILE);
     file_p=fopen(usage_logfile,"a+");
-    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,region_id);
-    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,region_id);
-    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,region_id);
-    for(i=0;i<node_num;i++){
-        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,region_id);
+    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_conf.cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,init_conf.region_id);
+    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_conf.cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,init_conf.region_id);
+    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_conf.cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,init_conf.region_id);
+    for(i=0;i<init_conf.node_num;i++){
+        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_conf.cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,init_conf.region_id);
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
     sync_statefile(workdir,sshkey_folder);
-    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
-    for(i=0;i<hpc_user_num;i++){
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder);
+    for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -2495,38 +2061,26 @@ int hwcloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_key
     return 0;
 }
 
-int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+    char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+        return -3;
+    }
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
-    char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    cluster_initinfo init_conf;
     char user_passwords[FILENAME_LENGTH]="";
-    char url_baiducloud_root[LOCATION_LENGTH_EXTENDED];
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char conf_param_buffer[32]="";
-    char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-    char cluster_id[CONF_STRING_LENTH]="";
-    char region_id[CONF_STRING_LENTH]="";
-    char os_image[64]="";
-    char zone_id[CONF_STRING_LENTH]="";
-    int node_num=0;
-    int hpc_user_num=0;
-    char master_init_param[CONF_STRING_LENTH]="";
-    char master_passwd[CONF_STRING_LENTH]="";
-    char compute_passwd[CONF_STRING_LENTH]="";
-    char master_inst[CONF_STRING_LENTH]="";
-    char compute_inst[CONF_STRING_LENTH]="";
-    char master_bandwidth[CONF_STRING_LENTH];
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
@@ -2551,144 +2105,31 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     char db_inst[16]="";
     char usage_logfile[FILENAME_LENGTH]="";
     int i;
-    int num_temp;
-    if(folder_exist_or_not(workdir)==1){
+
+    printf("[ START: ] Start initializing the cluster ...\n");
+    if(create_init_dirs(workdir,stackdir,vaultdir,logdir,confdir)!=0){
         return -1;
     }
-    create_and_get_stackdir(workdir,stackdir);
-    create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
-    printf("[ START: ] Start initializing the cluster ...\n");
-    if(folder_exist_or_not(stackdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(vaultdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(logdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(confdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(code_loc_flag_var==1){
-        sprintf(url_baiducloud_root,"%s%sbaidu%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-    }
-    else{
-        sprintf(url_baiducloud_root,"%sbaidu/",url_code_root_var);
-    }
-    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    if(file_exist_or_not(conf_file)==1){
-        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. " RESET_DISPLAY "\n");
-        if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s %s",COPY_FILE_CMD,url_baiducloud_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
-        }
-        else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_baiducloud_root,conf_file);
-        }
-            if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-            clear_if_failed(stackdir,confdir,vaultdir,1);
-            return 2;
-        }
+    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
-    sprintf(cmdline,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_baidu.base %s%shpc_stack.base %s",COPY_FILE_CMD,url_baiducloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_baidu.base -o %s%shpc_stack.base -s",url_baiducloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
+    if(get_tf_templates(confdir,stackdir,"baidu",code_loc_flag_var,url_code_root_var)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_baidu.master %s%shpc_stack.master %s",COPY_FILE_CMD,url_baiducloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_baidu.master -o %s%shpc_stack.master -s",url_baiducloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_baidu.compute %s%shpc_stack.compute %s",COPY_FILE_CMD,url_baiducloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_baidu.compute -o %s%shpc_stack.compute -s",url_baiducloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_baidu.database %s%shpc_stack.database %s",COPY_FILE_CMD,url_baiducloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_baidu.database -o %s%shpc_stack.database -s",url_baiducloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_baidu.natgw %s%shpc_stack.natgw %s",COPY_FILE_CMD,url_baiducloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_baidu.natgw -o %s%shpc_stack.natgw -s",url_baiducloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%sreconf.list %s%sreconf.list %s",COPY_FILE_CMD,url_baiducloud_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_baiducloud_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
-    get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
+    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
-    read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,master_bandwidth,compute_inst,os_image,conf_param_buffer,&num_temp);
+    read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_conf);
     if(read_conf_flag!=0){
-        if(read_conf_flag==-3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
-        }
+        print_read_conf_failed(read_conf_flag);
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
-    node_user_num_fix(&node_num,&hpc_user_num);
-    if(contain_or_not(zone_id,region_id)!=0){
+    node_user_num_fix(&init_conf.node_num,&init_conf.hpc_user_num);
+    if(contain_or_not(init_conf.zone_id,init_conf.region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
@@ -2699,43 +2140,20 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     usleep(10000);
     reset_string(database_acct_passwd);
     generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(master_passwd,"*AUTOGEN*")==0||strlen(master_passwd)<8){
-        reset_string(master_passwd);
-        generate_random_passwd(master_passwd);
+    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||strlen(init_conf.master_passwd)<8){
+        reset_string(init_conf.master_passwd);
+        generate_random_passwd(init_conf.master_passwd);
     }
-    if(strcmp(compute_passwd,"*AUTOGEN*")==0||strlen(compute_passwd)<8){
-        reset_string(compute_passwd);
-        generate_random_passwd(compute_passwd);
-    }
-    if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MAX){
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id_temp+i)=*(cluster_id_input+i);
-        }
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
-        global_replace(conf_file,cluster_id,cluster_id_input);
-        reset_string(cluster_id);
-        for(i=0;i<strlen(cluster_id_input);i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)<CLUSTER_ID_LENGTH_MIN&&strlen(cluster_id_input)>0){
-        sprintf(cluster_id_temp,"%s-hpcnow",cluster_id_input);
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        strcpy(cluster_id,cluster_id_temp);
+    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||strlen(init_conf.compute_passwd)<8){
+        reset_string(init_conf.compute_passwd);
+        generate_random_passwd(init_conf.compute_passwd);
     }
     sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
         reset_string(randstr);
         generate_random_string(randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_conf.cluster_id,randstr);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
@@ -2743,10 +2161,10 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     else{
         file_p=fopen(filename_temp,"r");
         fscanf(file_p,"%10s",randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_conf.cluster_id,randstr);
         fclose(file_p);
     }
-    if(strcmp(region_id,"hk")==0){
+    if(strcmp(init_conf.region_id,"hk")==0){
         strcpy(db_inst,"i2c2g-hk");
         strcpy(natgw_inst,"i2c2g-hk");
     }
@@ -2755,14 +2173,7 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
         strcpy(natgw_inst,"i2c2g");
     }
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    printf("|          Cluster ID:            %s\n",cluster_id);
-    printf("|          Region:                %s\n",region_id);
-    printf("|          Availability Zone:     %s\n",zone_id);
-    printf("|          Number of Nodes:       %d\n",node_num);
-    printf("|          Number of Users:       %d\n",hpc_user_num);
-    printf("|          Master Node Instance:  %s\n",master_inst);
-    printf("|          Compute Node Instance: %s\n",compute_inst);
-    printf("|          OS Image:              %s\n" RESET_DISPLAY,os_image);
+    print_conf_summary(&init_conf);
     generate_sshkey(sshkey_folder,pubkey);
 
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
@@ -2784,32 +2195,33 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     global_replace(filename_temp,"SECURITY_GROUP_MYSQL",string_temp);
     sprintf(string_temp,"%s-natgw",randstr);
     global_replace(filename_temp,"SECURITY_GROUP_NATGW",string_temp);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    if(strcmp(region_id,"gz")==0){
+    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    if(strcmp(init_conf.region_id,"gz")==0){
         global_replace(filename_temp,"DEFAULT_NAS_ZONE","zoneC");
     }
     else{
         global_replace(filename_temp,"DEFAULT_NAS_ZONE","zoneA");
     }
     global_replace(filename_temp,"NFSID",randstr);
-    sprintf(string_temp,"%d",node_num);
+    sprintf(string_temp,"%d",init_conf.node_num);
     global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
-    sprintf(string_temp,"%d",hpc_user_num);
+    sprintf(string_temp,"%d",init_conf.hpc_user_num);
     global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
+    global_replace(filename_temp,"DEFAULT_MASTERINI",init_conf.master_init_param);
+    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
+    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",master_bandwidth);
+    sprintf(string_temp,"%d",init_conf.master_bandwidth);
+    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
 
     file_p=fopen(filename_temp,"a");
     sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_conf.hpc_user_num;i++){
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
@@ -2819,19 +2231,19 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     fclose(file_p_2);
 
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"MASTER_INST",master_inst);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_replace(filename_temp,"MASTER_INST",init_conf.master_inst);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(init_conf.os_image_raw,"centos7")==0||strcmp(init_conf.os_image_raw,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
-        sprintf(string_temp,"\"%s\"",os_image);
+        sprintf(string_temp,"\"%s\"",init_conf.os_image_raw);
         global_replace(filename_temp,"data.baiducloud_images.OS_IMAGE.images[0].id",string_temp);
     }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
@@ -2841,39 +2253,37 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     insert_lines(filename_temp,"master_private_ip",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    global_replace(filename_temp,"COMPUTE_INST",compute_inst);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_replace(filename_temp,"COMPUTE_INST",init_conf.compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(init_conf.os_image_raw,"centos7")==0||strcmp(init_conf.os_image_raw,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
-        sprintf(string_temp,"\"%s\"",os_image);
+        sprintf(string_temp,"\"%s\"",init_conf.os_image_raw);
         global_replace(filename_temp,"data.baiducloud_images.OS_IMAGE.images[0].id",string_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
 
     sprintf(filename_temp,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"DB_INST",db_inst);
 
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
     global_replace(filename_temp,"NATGW_INST",natgw_inst);
 
-    for(i=0;i<node_num;i++){
+    for(i=0;i<init_conf.node_num;i++){
         sprintf(cmdline,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
         global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);*/
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
@@ -2911,15 +2321,15 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: bos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
+    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: bos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_conf.master_passwd,bucket_id,init_conf.region_id,bucket_ak,bucket_sk);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
+    fprintf(file_p,"%s\n%s\n",init_conf.master_passwd,init_conf.compute_passwd);
 	fclose(file_p);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
@@ -2935,8 +2345,8 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
     sprintf(current_time,"%d:%d:%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    master_vcpu=get_cpu_num(master_inst);
-    compute_vcpu=get_cpu_num(compute_inst);
+    master_vcpu=get_cpu_num(init_conf.master_inst);
+    compute_vcpu=get_cpu_num(init_conf.compute_inst);
     sprintf(filename_temp,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
     reset_string(string_temp);
     find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,string_temp);
@@ -2946,13 +2356,13 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,string_temp);
     natgw_vcpu=get_cpu_num(string_temp);
     reset_string(string_temp);
-    if(*(master_inst+0)=='a'){
+    if(*(init_conf.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
     else{
         strcpy(master_cpu_vendor,"intel64");
     }
-    if(*(compute_inst+0)=='a'){
+    if(*(init_conf.compute_inst+0)=='a'){
         strcpy(compute_cpu_vendor,"amd64");
     }
     else{
@@ -2960,26 +2370,26 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     }
     strcpy(usage_logfile,USAGE_LOG_FILE);
     file_p=fopen(usage_logfile,"a+");
-    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,region_id);
-    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,region_id);
-    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,region_id);
-    for(i=0;i<node_num;i++){
-        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,region_id);
+    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_conf.cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,init_conf.region_id);
+    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_conf.cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,init_conf.region_id);
+    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_conf.cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,init_conf.region_id);
+    for(i=0;i<init_conf.node_num;i++){
+        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_conf.cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,init_conf.region_id);
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
     sync_statefile(workdir,sshkey_folder);
-    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
-    for(i=0;i<hpc_user_num;i++){
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder);
+    for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
-    generate_bceconfig(vaultdir,region_id,bucket_ak,bucket_sk);
+    generate_bceconfig(vaultdir,init_conf.region_id,bucket_ak,bucket_sk);
     sprintf(filename_temp,"%s%scredentials",vaultdir,PATH_SLASH);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/credentials","root","put","",0);
     sprintf(filename_temp,"%s%sconfig",vaultdir,PATH_SLASH);
@@ -2988,40 +2398,28 @@ int baiducloud_cluster_init(char* cluster_id_input, char* workdir, char* crypto_
     return 0;
 }
 
-int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int azure_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+    char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+        return -3;
+    }
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
-    char secret_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    cluster_initinfo init_conf;
     char user_passwords[FILENAME_LENGTH]="";
-    char url_azure_root[LOCATION_LENGTH_EXTENDED];
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
     char subscription_id[AKSK_LENGTH]="";
     char tenant_id[AKSK_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char conf_param_buffer1[32]="";
-    char conf_param_buffer2[32]="";
-    char conf_param_buffer3[32]="";
-    char os_image[64]="";
-    char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
-    char cluster_id[CONF_STRING_LENTH]="";
-    char region_id[CONF_STRING_LENTH]="";
-    int node_num=0;
-    int hpc_user_num=0;
-    char master_init_param[CONF_STRING_LENTH]="";
-    char master_passwd[CONF_STRING_LENTH]="";
-    char compute_passwd[CONF_STRING_LENTH]="";
-    char master_inst[CONF_STRING_LENTH]="";
-    char compute_inst[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char random_storage_account[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
@@ -3045,187 +2443,52 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i;
-    int nfs_volume;
 
-    if(folder_exist_or_not(workdir)==1){
+    printf("[ START: ] Start initializing the cluster ...\n");
+    if(create_init_dirs(workdir,stackdir,vaultdir,logdir,confdir)!=0){
         return -1;
     }
-    create_and_get_stackdir(workdir,stackdir);
-    create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
-    printf("[ START: ] Start initializing the cluster ...\n");
-    if(folder_exist_or_not(stackdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
     }
-    if(folder_exist_or_not(vaultdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(logdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(confdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(code_loc_flag_var==1){
-        sprintf(url_azure_root,"%s%sazure%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-    }
-    else{
-        sprintf(url_azure_root,"%sazure/",url_code_root_var);
-    }
-    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    if(file_exist_or_not(conf_file)==1){
-        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. " RESET_DISPLAY "\n");
-        if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
-        }
-        else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_azure_root,conf_file);
-        }
-        if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-            clear_if_failed(stackdir,confdir,vaultdir,1);
-            return 2;
-        }
+    if(get_azure_info(workdir,subscription_id,tenant_id)!=0){
+        return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
-    sprintf(cmdline,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_azure.base %s%shpc_stack.base %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_azure.base -o %s%shpc_stack.base -s",url_azure_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
+    if(get_tf_templates(confdir,stackdir,"azure",code_loc_flag_var,url_code_root_var)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_azure.master %s%shpc_stack.master %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_azure.master -o %s%shpc_stack.master -s",url_azure_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_azure.compute %s%shpc_stack.compute %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_azure.compute -o %s%shpc_stack.compute -s",url_azure_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_azure.database %s%shpc_stack.database %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_azure.database -o %s%shpc_stack.database -s",url_azure_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_azure.natgw %s%shpc_stack.natgw %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_azure.natgw -o %s%shpc_stack.natgw -s",url_azure_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%sreconf.list %s%sreconf.list %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_azure_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
-    get_ak_sk(secret_file,crypto_keyfile,access_key,secret_key,cloud_flag);
-    get_azure_info(workdir,subscription_id,tenant_id);
+    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
-    read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,conf_param_buffer1,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,conf_param_buffer2,compute_inst,os_image,conf_param_buffer3,&nfs_volume);
+    read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_conf);
     if(read_conf_flag!=0){
-        if(read_conf_flag==-3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
-        }
+        print_read_conf_failed(read_conf_flag);
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
-    node_user_num_fix(&node_num,&hpc_user_num);
+    node_user_num_fix(&init_conf.node_num,&init_conf.hpc_user_num);
     reset_string(database_root_passwd);
     generate_random_db_passwd(database_root_passwd);
     usleep(10000);
     reset_string(database_acct_passwd);
     generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(master_passwd,"*AUTOGEN*")==0||strlen(master_passwd)<8){
-        reset_string(master_passwd);
-        generate_random_passwd(master_passwd);
+    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||strlen(init_conf.master_passwd)<8){
+        reset_string(init_conf.master_passwd);
+        generate_random_passwd(init_conf.master_passwd);
     }
-    if(strcmp(compute_passwd,"*AUTOGEN*")==0||strlen(compute_passwd)<8){
-        reset_string(compute_passwd);
-        generate_random_passwd(compute_passwd);
-    }
-    if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MAX){
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id_temp+i)=*(cluster_id_input+i);
-        }
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
-        global_replace(conf_file,cluster_id,cluster_id_input);
-        reset_string(cluster_id);
-        for(i=0;i<strlen(cluster_id_input);i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)<CLUSTER_ID_LENGTH_MIN&&strlen(cluster_id_input)>0){
-        sprintf(cluster_id_temp,"%s-hpcnow",cluster_id_input);
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        strcpy(cluster_id,cluster_id_temp);
+    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||strlen(init_conf.compute_passwd)<8){
+        reset_string(init_conf.compute_passwd);
+        generate_random_passwd(init_conf.compute_passwd);
     }
     sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
         reset_string(randstr);
         generate_random_string(randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_conf.cluster_id,randstr);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
@@ -3233,18 +2496,11 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     else{
         file_p=fopen(filename_temp,"r");
         fscanf(file_p,"%10s",randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_conf.cluster_id,randstr);
         fclose(file_p);
     }
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    printf("|          Cluster ID:            %s\n",cluster_id);
-    printf("|          Region:                %s\n",region_id);
-    printf("|          Number of Nodes:       %d\n",node_num);
-    printf("|          Number of Users:       %d\n",hpc_user_num);
-    printf("|          Master Node Instance:  %s\n",master_inst);
-    printf("|          Compute Node Instance: %s\n",compute_inst);
-    printf("|          OS Image:              %s\n",os_image);
-    printf("|          NFS Volume:            %d\n" RESET_DISPLAY,nfs_volume);
+    print_conf_summary(&init_conf);
     generate_sshkey(sshkey_folder,pubkey);
     generate_random_string(random_storage_account);
 
@@ -3256,24 +2512,24 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     global_replace(filename_temp,"ENVIRONMENT_OPTION",az_environment);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
     global_replace(filename_temp,"RANDOM_STORAGE_ACCOUNT",random_storage_account);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);
-    sprintf(string_temp,"%d",node_num);
+    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
+    sprintf(string_temp,"%d",init_conf.node_num);
     global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
-    sprintf(string_temp,"%d",hpc_user_num);
+    sprintf(string_temp,"%d",init_conf.hpc_user_num);
     global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
+    global_replace(filename_temp,"DEFAULT_MASTERINI",init_conf.master_init_param);
+    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
+    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
-    sprintf(string_temp,"%d",nfs_volume);
+    sprintf(string_temp,"%d",init_conf.hpc_nfs_volume);
     global_replace(filename_temp,"DEFAULT_STORAGE_VOLUME",string_temp);
 
     file_p=fopen(filename_temp,"a");
     sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_conf.hpc_user_num;i++){
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
@@ -3284,10 +2540,10 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
 
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
-    global_replace(filename_temp,"MASTER_INST",master_inst);
+    global_replace(filename_temp,"MASTER_INST",init_conf.master_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
@@ -3298,7 +2554,7 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
-    global_replace(filename_temp,"COMPUTE_INST",compute_inst);
+    global_replace(filename_temp,"COMPUTE_INST",init_conf.compute_inst);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_lines(filename_temp,"mount",line_temp);
@@ -3309,14 +2565,12 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     sprintf(filename_temp,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
 
-    for(i=0;i<node_num;i++){
+    for(i=0;i<init_conf.node_num;i++){
         sprintf(cmdline,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
-        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);*/
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
@@ -3353,16 +2607,16 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,region_id,bucket_ak,bucket_sk,subscription_id,tenant_id,filename_temp,cloud_flag);
+    save_bucket_info(bucket_id,init_conf.region_id,bucket_ak,bucket_sk,subscription_id,tenant_id,filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,master_passwd,bucket_id,region_id,bucket_ak,bucket_sk);
+    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_conf.master_passwd,bucket_id,init_conf.region_id,bucket_ak,bucket_sk);
     fprintf(file_p,"Azure Subscription ID: %s\nAzure Tenant ID: %s\n",subscription_id,tenant_id);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
+    fprintf(file_p,"%s\n%s\n",init_conf.master_passwd,init_conf.compute_passwd);
 	fclose(file_p);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
@@ -3378,17 +2632,17 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
     sprintf(current_time,"%d:%d:%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    master_vcpu=get_cpu_num(master_inst);
-    compute_vcpu=get_cpu_num(compute_inst);
+    master_vcpu=get_cpu_num(init_conf.master_inst);
+    compute_vcpu=get_cpu_num(init_conf.compute_inst);
     database_vcpu=1;
     natgw_vcpu=1;
-    if(*(master_inst+0)=='a'){
+    if(*(init_conf.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
     else{
         strcpy(master_cpu_vendor,"intel64");
     }
-    if(*(compute_inst+0)=='a'){
+    if(*(init_conf.compute_inst+0)=='a'){
         strcpy(compute_cpu_vendor,"amd64");
     }
     else{
@@ -3396,22 +2650,22 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     }
     strcpy(usage_logfile,USAGE_LOG_FILE);
     file_p=fopen(usage_logfile,"a+");
-    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,region_id);
-    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,region_id);
-    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,region_id);
-    for(i=0;i<node_num;i++){
-        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,region_id);
+    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_conf.cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,init_conf.region_id);
+    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_conf.cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,init_conf.region_id);
+    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_conf.cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,init_conf.region_id);
+    for(i=0;i<init_conf.node_num;i++){
+        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_conf.cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,init_conf.region_id);
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
     sync_statefile(workdir,sshkey_folder);
-    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
-    for(i=0;i<hpc_user_num;i++){
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder);
+    for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -3419,38 +2673,27 @@ int azure_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfi
     return 0;
 }
 
-int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int gcp_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+    char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+        return -3;
+    }
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char compute_template[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    cluster_initinfo init_conf;
     char user_passwords[FILENAME_LENGTH]="";
-    char url_gcp_root[LOCATION_LENGTH_EXTENDED];
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char conf_param_buffer1[32]="";
-    char conf_param_buffer2[32]="";
-    char cluster_id_temp[24]="";
     char unique_cluster_id[96]="";
     char string_temp[128]="";
     char keyfile_path[FILENAME_LENGTH]="";
     char keyfile_path_ext[FILENAME_LENGTH_EXT]="";
     char gcp_project_id[128]="";
-    char cluster_id[CONF_STRING_LENTH]="";
-    char region_id[CONF_STRING_LENTH]="";
-    char os_image[120]="";
-    char zone_id[CONF_STRING_LENTH]="";
-    int node_num=0;
-    int hpc_user_num=0;
-    char master_init_param[CONF_STRING_LENTH]="";
-    char master_passwd[CONF_STRING_LENTH]="";
-    char compute_passwd[CONF_STRING_LENTH]="";
-    char master_inst[CONF_STRING_LENTH]="";
-    char compute_inst[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[LINE_LENGTH]="";
@@ -3470,147 +2713,38 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     char usage_logfile[FILENAME_LENGTH]="";
     int i;
-    int nfs_volume;
     char bucket_selflink[128]="";
     char bucket_private_key[LINE_LENGTH]="";
-    if(folder_exist_or_not(workdir)==1){
+
+    printf("[ START: ] Start initializing the cluster ...\n");
+    if(create_init_dirs(workdir,stackdir,vaultdir,logdir,confdir)!=0){
         return -1;
     }
-    create_and_get_stackdir(workdir,stackdir);
-    create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(logdir,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(compute_template,"%s%scompute_template",stackdir,PATH_SLASH);
-    printf("[ START: ] Start initializing the cluster ...\n");
-    if(folder_exist_or_not(stackdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,stackdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(vaultdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,vaultdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(logdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(confdir)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(code_loc_flag_var==1){
-        sprintf(url_gcp_root,"%s%sgcp%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-    }
-    else{
-        sprintf(url_gcp_root,"%sgcp/",url_code_root_var);
-    }
-    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    if(file_exist_or_not(conf_file)==1){
-        printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one. " RESET_DISPLAY "\n");
-        if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,conf_file,SYSTEM_CMD_REDIRECT);
-        }
-        else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_gcp_root,conf_file);
-        }
-            if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-            clear_if_failed(stackdir,confdir,vaultdir,1);
-            return 2;
-        }
+    if(gcp_credential_convert(workdir,"decrypt",0)!=0){
+        return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
-    sprintf(cmdline,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_gcp.base %s%shpc_stack.base %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_gcp.base -o %s%shpc_stack.base -s",url_gcp_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
+    if(get_tf_templates(confdir,stackdir,"gcp",code_loc_flag_var,url_code_root_var)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
+        gcp_credential_convert(workdir,"delete",0);
         return 2;
     }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_gcp.master %s%shpc_stack.master %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_gcp.master -o %s%shpc_stack.master -s",url_gcp_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_gcp.compute %s%shpc_stack.compute %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_gcp.compute -o %s%shpc_stack.compute -s",url_gcp_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_gcp.database %s%shpc_stack.database %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_gcp.database -o %s%shpc_stack.database -s",url_gcp_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%shpc_stack_gcp.natgw %s%shpc_stack.natgw %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %shpc_stack_gcp.natgw -o %s%shpc_stack.natgw -s",url_gcp_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
-    if(code_loc_flag_var==1){
-        sprintf(cmdline,"%s %s%sreconf.list %s%sreconf.list %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_gcp_root,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
-        clear_if_failed(stackdir,confdir,vaultdir,1);
-        return 2;
-    }
+    sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
     sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
-    read_conf_flag=get_tf_prep_conf(conf_file,filename_temp,cluster_id,region_id,zone_id,&node_num,&hpc_user_num,master_init_param,master_passwd,compute_passwd,master_inst,conf_param_buffer1,compute_inst,os_image,conf_param_buffer2,&nfs_volume);
+    read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_conf);
     if(read_conf_flag!=0){
-        if(read_conf_flag==-3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
-        }
-        else if(read_conf_flag==3){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
-        }
+        print_read_conf_failed(read_conf_flag);
         clear_if_failed(stackdir,confdir,vaultdir,2);
+        gcp_credential_convert(workdir,"delete",0);
         return 3;
     }
-    node_user_num_fix(&node_num,&hpc_user_num);
-    if(contain_or_not(zone_id,region_id)!=0){
+    node_user_num_fix(&init_conf.node_num,&init_conf.hpc_user_num);
+    if(contain_or_not(init_conf.zone_id,init_conf.region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
+        gcp_credential_convert(workdir,"delete",0);
         return 3;
     }
     reset_string(database_root_passwd);
@@ -3618,43 +2752,20 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     usleep(10000);
     reset_string(database_acct_passwd);
     generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(master_passwd,"*AUTOGEN*")==0||strlen(master_passwd)<8){
-        reset_string(master_passwd);
-        generate_random_passwd(master_passwd);
+    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||strlen(init_conf.master_passwd)<8){
+        reset_string(init_conf.master_passwd);
+        generate_random_passwd(init_conf.master_passwd);
     }
-    if(strcmp(compute_passwd,"*AUTOGEN*")==0||strlen(compute_passwd)<8){
-        reset_string(compute_passwd);
-        generate_random_passwd(compute_passwd);
-    }
-    if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MAX){
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id_temp+i)=*(cluster_id_input+i);
-        }
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        for(i=0;i<CLUSTER_ID_LENGTH_MAX;i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)>CLUSTER_ID_LENGTH_MIN||strlen(cluster_id_input)==CLUSTER_ID_LENGTH_MIN){
-        global_replace(conf_file,cluster_id,cluster_id_input);
-        reset_string(cluster_id);
-        for(i=0;i<strlen(cluster_id_input);i++){
-            *(cluster_id+i)=*(cluster_id_input+i);
-        }
-    }
-    else if(strlen(cluster_id_input)<CLUSTER_ID_LENGTH_MIN&&strlen(cluster_id_input)>0){
-        sprintf(cluster_id_temp,"%s-hpcnow",cluster_id_input);
-        global_replace(conf_file,cluster_id,cluster_id_temp);
-        reset_string(cluster_id);
-        strcpy(cluster_id,cluster_id_temp);
+    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||strlen(init_conf.compute_passwd)<8){
+        reset_string(init_conf.compute_passwd);
+        generate_random_passwd(init_conf.compute_passwd);
     }
     sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
         reset_string(randstr);
         generate_random_string(randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_conf.cluster_id,randstr);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
@@ -3662,43 +2773,33 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     else{
         file_p=fopen(filename_temp,"r");
         fscanf(file_p,"%10s",randstr);
-        sprintf(unique_cluster_id,"%s-%s",cluster_id,randstr);
+        sprintf(unique_cluster_id,"%s-%s",init_conf.cluster_id,randstr);
         fclose(file_p);
     }
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    printf("|          Cluster ID:            %s\n",cluster_id);
-    printf("|          Region:                %s\n",region_id);
-    printf("|          Availability Zone:     %s\n",zone_id);
-    printf("|          Number of Nodes:       %d\n",node_num);
-    printf("|          Number of Users:       %d\n",hpc_user_num);
-    printf("|          Master Node Instance:  %s\n",master_inst);
-    printf("|          Compute Node Instance: %s\n",compute_inst);
-    printf("|          OS Image:              %s\n",os_image);
-    printf("|          NFS Volume:            %d\n" RESET_DISPLAY,nfs_volume);
-//    printf("---%s %s %s %s---\n",stackdir,vaultdir,logdir,confdir);
+    print_conf_summary(&init_conf);
     generate_sshkey(sshkey_folder,pubkey);
-    gcp_credential_convert(workdir,"decrypt",0);
+    
     get_cloud_flag(workdir,cloud_flag);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
-
     sprintf(keyfile_path,"%s%s.key.json",vaultdir,PATH_SLASH);
     windows_path_to_string(keyfile_path,keyfile_path_ext);
     global_replace(filename_temp,"BLANK_CREDENTIAL_PATH",keyfile_path_ext);
     find_and_get(keyfile_path,"\"project_id\":","","",1,"\"project_id\":","","",'\"',4,gcp_project_id);
     global_replace(filename_temp,"BLANK_PROJECT",gcp_project_id);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",zone_id);
-    sprintf(string_temp,"%d",node_num);
+    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    sprintf(string_temp,"%d",init_conf.node_num);
     global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
-    sprintf(string_temp,"%d",hpc_user_num);
+    sprintf(string_temp,"%d",init_conf.hpc_user_num);
     global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",compute_passwd);
+    global_replace(filename_temp,"DEFAULT_MASTERINI",init_conf.master_init_param);
+    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
+    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
-    sprintf(string_temp,"%d",nfs_volume);
+    sprintf(string_temp,"%d",init_conf.hpc_nfs_volume);
     global_replace(filename_temp,"DEFAULT_STORAGE_VOLUME",string_temp);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
     global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
@@ -3706,7 +2807,7 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     file_p=fopen(filename_temp,"a");
     sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_conf.hpc_user_num;i++){
         reset_string(user_passwd_temp);
         generate_random_passwd(user_passwd_temp);
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
@@ -3717,18 +2818,18 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
 
     sprintf(filename_temp,"%s%shpc_stack.master",stackdir,PATH_SLASH);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"MASTER_INST",master_inst);
+    global_replace(filename_temp,"MASTER_INST",init_conf.master_inst);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
     global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
-    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(init_conf.os_image_raw,"centos7")==0||strcmp(init_conf.os_image_raw,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
-        sprintf(string_temp,"\"%s\"",os_image);
+        sprintf(string_temp,"\"%s\"",init_conf.os_image_raw);
         global_replace(filename_temp,"data.google_compute_image.OS_IMAGE.self_link",string_temp);
     }
     global_replace(filename_temp,"PUBLIC_KEY",pubkey);
-    for(i=0;i<hpc_user_num;i++){
+    for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(line_temp,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
         insert_lines(filename_temp,"master_private_ip",line_temp);
     }
@@ -3739,14 +2840,14 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
 
     sprintf(filename_temp,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
     global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"COMPUTE_INST",compute_inst);
+    global_replace(filename_temp,"COMPUTE_INST",init_conf.compute_inst);
     global_replace(filename_temp,"RANDOM_STRING",randstr);
     global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
-    if(strcmp(os_image,"centos7")==0||strcmp(os_image,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",os_image);
+    if(strcmp(init_conf.os_image_raw,"centos7")==0||strcmp(init_conf.os_image_raw,"centoss9")==0){
+        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
-        sprintf(string_temp,"\"%s\"",os_image);
+        sprintf(string_temp,"\"%s\"",init_conf.os_image_raw);
         global_replace(filename_temp,"data.google_compute_image.OS_IMAGE.self_link",string_temp);
     }
     sprintf(line_temp,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
@@ -3760,17 +2861,16 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     global_replace(filename_temp,"RANDOM_STRING",randstr);
     global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
 
-    for(i=0;i<node_num;i++){
+    for(i=0;i<init_conf.node_num;i++){
         sprintf(cmdline,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         sprintf(string_temp,"compute%d",i+1);
         global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
-        /*sprintf(line_temp,"echo -e \"export SCRIPTS_URL_ROOT=%s\" >> /etc/profile",url_shell_scripts_var);
-        insert_lines(filename_temp,"var.cluster_init_scripts",line_temp);*/
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
+        gcp_credential_convert(workdir,"delete",0);
         return 5;
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -3780,10 +2880,12 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
             printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
+            gcp_credential_convert(workdir,"delete",0);
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
         delete_decrypted_files(workdir,crypto_keyfile);
+        gcp_credential_convert(workdir,"delete",0);
         return 9;
     }
     sprintf(cmdline,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);   
@@ -3805,17 +2907,17 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_key.json","root","put","",0);
 
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(randstr,region_id,bucket_selflink,"","","",filename_temp,cloud_flag);
+    save_bucket_info(randstr,init_conf.region_id,bucket_selflink,"","","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     
     get_state_value(workdir,"master_public_ip:",master_address);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: gs: %s\nNetDisk Region: %s\nNetDisk Self Link: %s\nNetDisk Short Link: gs://%s\n",master_address,master_passwd,randstr,region_id,bucket_selflink,randstr);
+    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: gs: %s\nNetDisk Region: %s\nNetDisk Self Link: %s\nNetDisk Short Link: gs://%s\n",master_address,init_conf.master_passwd,randstr,init_conf.region_id,bucket_selflink,randstr);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
     fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
     fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",master_passwd,compute_passwd);
+    fprintf(file_p,"%s\n%s\n",init_conf.master_passwd,init_conf.compute_passwd);
 	fclose(file_p);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
@@ -3831,17 +2933,17 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     time_p=gmtime(&current_time_long);
     sprintf(current_date,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
     sprintf(current_time,"%d:%d:%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    master_vcpu=get_cpu_num(master_inst);
-    compute_vcpu=get_cpu_num(compute_inst);
+    master_vcpu=get_cpu_num(init_conf.master_inst);
+    compute_vcpu=get_cpu_num(init_conf.compute_inst);
     database_vcpu=2;
     natgw_vcpu=2;
-    if(*(master_inst+0)=='a'){
+    if(*(init_conf.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
     else{
         strcpy(master_cpu_vendor,"intel64");
     }
-    if(*(compute_inst+0)=='a'){
+    if(*(init_conf.compute_inst+0)=='a'){
         strcpy(compute_cpu_vendor,"amd64");
     }
     else{
@@ -3849,22 +2951,22 @@ int gcp_cluster_init(char* cluster_id_input, char* workdir, char* crypto_keyfile
     }
     strcpy(usage_logfile,USAGE_LOG_FILE);
     file_p=fopen(usage_logfile,"a+");
-    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,region_id);
-    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,region_id);
-    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,region_id);
-    for(i=0;i<node_num;i++){
-        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,region_id);
+    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_conf.cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,init_conf.region_id);
+    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_conf.cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,init_conf.region_id);
+    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_conf.cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,init_conf.region_id);
+    for(i=0;i<init_conf.node_num;i++){
+        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_conf.cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,init_conf.region_id);
     }
     fclose(file_p);
     get_latest_hosts(stackdir,filename_temp);
     remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
     sync_statefile(workdir,sshkey_folder);
-    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,cluster_id,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(cluster_id,"root","ENABLED",sshkey_folder);
-    for(i=0;i<hpc_user_num;i++){
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder);
+    for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);

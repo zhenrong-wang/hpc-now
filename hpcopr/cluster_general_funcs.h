@@ -114,6 +114,10 @@ int generate_rdp_file(char* cluster_name, char* master_address, char* username);
 int start_rdp_connection(char* cluster_workdir, char* username, int password_flag);
 int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role, int password_flag);
 
-int list_regions(char* cluster_name);
+FILE* check_regions_list_file(char* cluster_name);
+int list_cloud_regions(char* cluster_name);
+int list_cloud_zones(char* cluster_name, char* region);
+int valid_region_or_not(char* cluster_name, char* region);
+int valid_zone_or_not(char* cluster_name, char* zone);
 
 #endif

@@ -229,6 +229,8 @@ int fngetline(FILE* file_p, char* line_string, unsigned int max_length){
     }
 }
 
+//contain: return 0
+//not contain: return 1
 int contain_or_not(const char* line, const char* findkey){
     int length_line=strlen(line);
     int length_findkey=strlen(findkey);

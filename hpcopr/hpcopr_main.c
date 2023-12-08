@@ -1481,25 +1481,25 @@ int main(int argc, char* argv[]){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Configuration file not found. Using the specified or default params." RESET_DISPLAY "\n");
         }
         if(strcmp(cloud_flag,"CLOUD_A")==0){
-            run_flag=alicloud_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
+            run_flag=alicloud_cluster_init(workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_B")==0){
-            run_flag=qcloud_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
+            run_flag=qcloud_cluster_init(workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_C")==0){
-            run_flag=aws_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
+            run_flag=aws_cluster_init(workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_D")==0){
-            run_flag=hwcloud_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
+            run_flag=hwcloud_cluster_init(workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_E")==0){
-            run_flag=baiducloud_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
+            run_flag=baiducloud_cluster_init(workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_F")==0){
-            run_flag=azure_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
+            run_flag=azure_cluster_init(workdir,crypto_keyfile,&tf_this_run);
         }
         else if(strcmp(cloud_flag,"CLOUD_G")==0){
-            run_flag=gcp_cluster_init(cluster_name,workdir,crypto_keyfile,&tf_this_run);
+            run_flag=gcp_cluster_init(workdir,crypto_keyfile,&tf_this_run);
         }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now." RESET_DISPLAY "\n");
