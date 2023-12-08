@@ -1450,14 +1450,8 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 57;
         }
-        if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
-            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
-            check_and_cleanup(workdir);
-            return 3;
-        }
         run_flag=cluster_init_conf(cluster_name,batch_flag,code_loc_flag_var,url_code_root_var,argc,argv);
         if(run_flag!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster configuration option(s) may be incorrect.\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"INIT_CONFIG_FAILED",58);
             check_and_cleanup(workdir);
             return 58;
@@ -1884,17 +1878,11 @@ int main(int argc, char* argv[]){
     }
 
     if(cluster_state_flag==0){
-        if(command_flag==2){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not running. Please wake up first.\n");
-        }
-        else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] The switched cluster is not running. Please wake up first.\n");
-        }
         if(strcmp(final_command,"addc")==0){
-            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --all" RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster not running. Use " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD " to wake it up." RESET_DISPLAY "\n");
         }
         else{
-            printf("|          Command: " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --min | --all" RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster not running. Use " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --all | --min" RESET_DISPLAY FATAL_RED_BOLD " to wake it up." RESET_DISPLAY "\n");
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_IS_ASLEEP",43);
         check_and_cleanup(workdir);

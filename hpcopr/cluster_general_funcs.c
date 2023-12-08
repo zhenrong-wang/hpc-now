@@ -2416,7 +2416,7 @@ int check_reconfigure_list(char* workdir, int print_flag){
     }
     while(fgetline(file_p,single_line)==0){
         if(*(single_line+0)=='+'||*(single_line+0)=='|'){
-            printf("|          %s\n",single_line);
+            printf("|         %s\n",single_line);
         }
     }
     return 0;
@@ -2612,48 +2612,6 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     sprintf(cmdline,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,cluster_registry,SYSTEM_CMD_REDIRECT);
     return system(cmdline);
 }
-
-/*int create_protection(char* workdir, int minutes){
-    char protection_file[FILENAME_LENGTH]="";
-    char deprotect_bat[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    FILE* file_p=NULL;
-    time_t rawtime;
-    struct tm* timeinfo;
-    time(&rawtime);
-    timeinfo=localtime(&rawtime);
-#ifdef _WIN32
-    sprintf(protection_file,"%s\\%s",workdir,PROTECTION_FILE_NAME);
-    sprintf(deprotect_bat,"%s\\deprotect.bat",workdir);
-#else
-    sprintf(protection_file,"%s/%s",workdir,protection_file);
-#endif
-    file_p=fopen(protection_file,"w+");
-    if(file_p==NULL){
-        return -1;
-    }
-    fprintf(file_p,"ARRANGED AT: %d/%d/%d-%d:%d:%d\n",timeinfo->tm_year+1900,timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec);
-    fprintf(file_p,"WAIT_PERIOD: %d minutes.\n",minutes);
-    fclose(file_p);
-#ifdef _WIN32
-    file_p=fopen(deprotect_bat,"w+");
-    if(file_p==NULL){
-        return -1;
-    }
-    fprintf(file_p,"del /f /q %s %s",protection_file,SYSTEM_CMD_REDIRECT);
-    fclose(file_p);
-    sprintf(cmdline,"schtasks /create /tn deprotect /tr %s /sc minute 1",deprotect_bat);
-#else
-
-#endif
-    return 0;
-}
-int check_protection(char* workdir){
-    return 0;
-}
-int delete_protection(char* workdir){
-    return 0;
-}*/
 
 int modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer){
     if(strlen(line_buffer)==0){
@@ -2969,12 +2927,15 @@ FILE* check_regions_list_file(char* cluster_name){
     return file_p;
 }
 
-int list_cloud_regions(char* cluster_name){
+int list_cloud_regions(char* cluster_name, int format_flag){
     int i=0;
     char line_buffer[LINE_LENGTH_TINY]="";
     FILE* file_p=check_regions_list_file(cluster_name);
     if(file_p==NULL){
         return -1;
+    }
+    if(format_flag!=0){
+        putchar('\n');
     }
     while(!feof(file_p)){
         fngetline(file_p,line_buffer,LINE_LENGTH_TINY-1);
@@ -2982,18 +2943,26 @@ int list_cloud_regions(char* cluster_name){
             continue;
         }
         if(contain_or_not(line_buffer,"[Region:")==0){
-            printf("%s\n",line_buffer);
+            if(format_flag!=0){
+                printf("|       +- %s\n",line_buffer);
+            }
+            else{
+                printf("%s\n",line_buffer);
+            }
             i++;
         }
     }
     fclose(file_p);
+    if(format_flag!=0){
+        putchar('\n');
+    }
     if(i==0){
         return 1;
     }
     return 0;
 }
 
-int list_cloud_zones(char* cluster_name, char* region){
+int list_cloud_zones(char* cluster_name, char* region, int format_flag){
     int i=0;
     char line_buffer[LINE_LENGTH_TINY]="";
     char region_ext[64]="";
@@ -3002,17 +2971,28 @@ int list_cloud_zones(char* cluster_name, char* region){
         return -1;
     }
     snprintf(region_ext,64,"[%s]",region);
+    if(format_flag!=0){
+        putchar('\n');
+    }
     while(!feof(file_p)){
         fngetline(file_p,line_buffer,LINE_LENGTH_TINY-1);
         if(*(line_buffer+0)!='['){
             continue;
         }
         if(contain_or_not(line_buffer,region_ext)==0){
-            printf("%s\n",line_buffer);
+            if(format_flag!=0){
+                printf("|       +- %s\n",line_buffer);
+            }
+            else{
+                printf("%s\n",line_buffer);
+            }
             i++;
         }
     }
     fclose(file_p);
+    if(format_flag!=0){
+        putchar('\n');
+    }
     if(i==0){
         return 1;
     }
@@ -3086,7 +3066,6 @@ int get_default_zone(char* cluster_name, char* region, char* default_zone){
     snprintf(region_ext1,63,"[Region:%s]",region);
     snprintf(region_ext2,63,"[%s]",region);
     if(find_and_get(region_list,region_ext1,"","",2,region_ext2,"","",' ',2,default_zone)!=0){
-        printf("%s   -- %s",region_list,default_zone);
         return 1;
     }
     return 0;

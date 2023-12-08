@@ -118,8 +118,8 @@ int start_rdp_connection(char* cluster_workdir, char* username, int password_fla
 int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role, int password_flag);
 
 FILE* check_regions_list_file(char* cluster_name);
-int list_cloud_regions(char* cluster_name);
-int list_cloud_zones(char* cluster_name, char* region);
+int list_cloud_regions(char* cluster_name, int format_flag);
+int list_cloud_zones(char* cluster_name, char* region, int format_flag);
 int valid_region_or_not(char* cluster_name, char* region);
 int valid_region_zone_or_not(char* cluster_name, char* region, char* zone);
 int get_default_zone(char* cluster_name, char* region, char* default_zone);

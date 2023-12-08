@@ -235,7 +235,6 @@ int create_init_dirs(char* workdir, char* stackdir, char* vaultdir, char* logdir
 }
 
 int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_flag_local, char* url_code_root, int argc, char* argv[]){
-//    char* region_id, char* zone_id, char* node_num, char* hpc_user_num, char* master_inst, char* compute_inst, char* os_image, char* ht_flag
     char cloud_flag[16]="";
     char workdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH_EXT]="";
@@ -244,7 +243,30 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     char logdir[DIR_LENGTH_EXT]="";
     char tf_prep_conf[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
+    char confirm[8]="";
     char cloud_name[16]="";
+    FILE* file_p=NULL;
+    char default_region[32]="";
+    char real_region[128]="";
+    char default_zone[64]="";
+    char real_zone[128]="";
+    int default_node_num=1;
+    char real_node_num_string[128]="";
+    int real_node_num;
+    int default_user_num=3;
+    char real_user_num_string[128]="";
+    int real_user_num;
+    char default_master_inst[16]="";
+    char real_master_inst[128]="";
+    char default_compute_inst[16]="";
+    char real_compute_inst[128]="";
+    char default_os_image[64]="";
+    char real_os_image[128]="";
+    char real_ht_flag[128]="";
+    char real_nfs_volume[128]="";
+    int real_nfs_vol;
+    char app_inst_script_url_specified[LOCATION_LENGTH]="";
+    char app_inst_pkgs_url_specified[LOCATION_LENGTH]="";
 
     get_workdir(workdir,cluster_name);
     if(get_cloud_flag(workdir,cloud_flag)!=0){
@@ -287,38 +309,22 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     sprintf(tf_prep_conf,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(tf_prep_conf)==0){
         if(cmd_flag_check(argc,argv,"--force")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please use " RESET_DISPLAY WARN_YELLO_BOLD "--force" RESET_DISPLAY FATAL_RED_BOLD " flag to override current config." RESET_DISPLAY "\n");
-            return -3; // If the conf file already exists, exit, unless force specified.
+            if(batch_flag_local==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Please use " RESET_DISPLAY WARN_YELLO_BOLD "--force" RESET_DISPLAY FATAL_RED_BOLD " flag to override the current config file." RESET_DISPLAY "\n");
+                return -3; // If the conf file already exists, exit, unless force specified.
+            }
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Config file found. Input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to use it, others to abandon.\n");
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+            fflush(stdin);
+            scanf("%7s",confirm);
+            getchar();
+            if(strcmp(confirm,CONFIRM_STRING)==0){
+                return 0;
+            }
         }
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Previous config file abandoned. Creating a new one.\n");
     }
-    FILE* file_p=fopen(tf_prep_conf,"w+");
-    if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a configuration file." RESET_DISPLAY "\n");
-        return -1;
-    }
-    char default_region[32]="";
-    char real_region[128]="";
-    char default_zone[64]="";
-    char real_zone[128]="";
-    int default_node_num=1;
-    char real_node_num_string[128]="";
-    int real_node_num;
-    int default_user_num=3;
-    char real_user_num_string[128]="";
-    int real_user_num;
-    char default_master_inst[16]="";
-    char real_master_inst[128]="";
-    char default_compute_inst[16]="";
-    char real_compute_inst[128]="";
-    char default_os_image[64]="";
-    char real_os_image[128]="";
-    char real_ht_flag[128]="";
-    char real_nfs_volume[128]="";
-    int real_nfs_vol;
-    char app_inst_script_url_specified[LOCATION_LENGTH]="";
-    char app_inst_pkgs_url_specified[LOCATION_LENGTH]="";
-    char confirm[8]="";
-
+    
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         strcpy(default_region,"cn-hangzhou");
         strcpy(default_zone,"cn-hangzhou-j");
@@ -371,12 +377,12 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     strcpy(real_ht_flag,"ON");
     if(cmd_keyword_check(argc,argv,"--rg",real_region)!=0){
         if(batch_flag_local!=0){
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to select a region (Default: " HIGH_GREEN_BOLD "%s" RESET_DISPLAY "): ",default_region);
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "select" RESET_DISPLAY " a region (Default: " GENERAL_BOLD "%s" RESET_DISPLAY "): ",default_region);
             fflush(stdin);
             scanf("%7s",confirm);
             getchar();
             if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
-                list_cloud_regions(cluster_name);
+                list_cloud_regions(cluster_name,1);
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
                 fflush(stdin);
                 scanf("%127s",real_region);
@@ -391,7 +397,7 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         }
     }
     if(valid_region_or_not(cluster_name,real_region)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The region name %s is invalid. Exit now." RESET_DISPLAY "\n",real_region);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The region name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",real_region);
         goto invalid_conf;
     }
     if(strcmp(cloud_flag,"CLOUD_F")!=0){
@@ -401,12 +407,12 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         }
         if(cmd_keyword_check(argc,argv,"--az",real_zone)!=0){
             if(batch_flag_local!=0){
-                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to select a zone (Default: " HIGH_GREEN_BOLD "%s" RESET_DISPLAY "): ",default_zone);
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "select" RESET_DISPLAY " a zone (Default: " GENERAL_BOLD "%s" RESET_DISPLAY "): ",default_zone);
                 fflush(stdin);
                 scanf("%7s",confirm);
                 getchar();
                 if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
-                    list_cloud_zones(cluster_name,real_region);
+                    list_cloud_zones(cluster_name,real_region,1);
                     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
                     fflush(stdin);
                     scanf("%127s",real_zone);
@@ -421,13 +427,13 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
             }
         }
         if(valid_region_zone_or_not(cluster_name,real_region,real_zone)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The zone name %s is invalid for region %s. Exit now." RESET_DISPLAY "\n",real_zone,real_region);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The zone name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid for region " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " . Exit now." RESET_DISPLAY "\n",real_zone,real_region);
             goto invalid_conf;
         }
     }
     if(cmd_keyword_check(argc,argv,"--nn",real_node_num_string)!=0){
         if(batch_flag_local!=0){
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to specify node num (Default: " HIGH_GREEN_BOLD "%d" RESET_DISPLAY "): ",default_node_num);
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "specify" RESET_DISPLAY " node num (Default: " GENERAL_BOLD "%d" RESET_DISPLAY "): ",default_node_num);
             fflush(stdin);
             scanf("%7s",confirm);
             getchar();
@@ -450,12 +456,12 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         real_node_num=string_to_positive_num(real_node_num_string);
     }
     if(real_node_num<MINIMUM_ADD_NODE_NUMBER||real_node_num>MAXIMUM_ADD_NODE_NUMBER){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The node num %d is out of range. Using the default %d." RESET_DISPLAY "\n",real_node_num,default_node_num);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The node num " RESET_DISPLAY GENERAL_BOLD "%d" RESET_DISPLAY WARN_YELLO_BOLD " is out of range. Using the default " RESET_DISPLAY GENERAL_BOLD "%d" RESET_DISPLAY " .\n",real_node_num,default_node_num);
         real_node_num=default_node_num;
     }
     if(cmd_keyword_check(argc,argv,"--un",real_user_num_string)!=0){
         if(batch_flag_local!=0){
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to specify user num (Default: " HIGH_GREEN_BOLD "%d" RESET_DISPLAY "): ",default_user_num);
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "specify" RESET_DISPLAY " user num (Default: " GENERAL_BOLD "%d" RESET_DISPLAY "): ",default_user_num);
             fflush(stdin);
             scanf("%7s",confirm);
             getchar();
@@ -478,12 +484,12 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         real_user_num=string_to_positive_num(real_user_num_string);
     }
     if(real_user_num<MINIMUM_ADD_USER_NUNMBER||real_node_num>MAXIMUM_ADD_USER_NUMBER){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The user num %d is out of range. Using the default %d." RESET_DISPLAY "\n",real_user_num,default_user_num);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The user num " RESET_DISPLAY GENERAL_BOLD "%d" RESET_DISPLAY WARN_YELLO_BOLD " is out of range. Using the default" RESET_DISPLAY GENERAL_BOLD "%d" RESET_DISPLAY " .\n",real_user_num,default_user_num);
         real_user_num=default_user_num;
     }
     if(cmd_keyword_check(argc,argv,"--mi",real_master_inst)!=0){
         if(batch_flag_local!=0){
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to select an instance type for master (Default: " HIGH_GREEN_BOLD "%s" RESET_DISPLAY "): ",default_master_inst);
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "select" RESET_DISPLAY " a master node type (Default: " GENERAL_BOLD "%s" RESET_DISPLAY "): ",default_master_inst);
             fflush(stdin);
             scanf("%7s",confirm);
             getchar();
@@ -506,12 +512,12 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         }
     }
     if(valid_vm_config_or_not(workdir,real_master_inst)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The instance type %s is invalid. Exit now." RESET_DISPLAY "\n",real_master_inst);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The instance type " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",real_master_inst);
         goto invalid_conf;
     }
     if(cmd_keyword_check(argc,argv,"--ci",real_compute_inst)!=0){
         if(batch_flag_local!=0){
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to select an instance type for compute (Default: " HIGH_GREEN_BOLD "%s" RESET_DISPLAY "): ",default_compute_inst);
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "select" RESET_DISPLAY " a compute node type (Default: " GENERAL_BOLD "%s" RESET_DISPLAY "): ",default_compute_inst);
             fflush(stdin);
             scanf("%7s",confirm);
             getchar();
@@ -534,12 +540,12 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         }
     }
     if(valid_vm_config_or_not(workdir,real_compute_inst)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The instance type %s is invalid. Exit now." RESET_DISPLAY "\n",real_compute_inst);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The instance type " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",real_compute_inst);
         goto invalid_conf;
     }
     if(cmd_keyword_check(argc,argv,"--os",real_os_image)!=0){
         if(batch_flag_local!=0){
-            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to specify an os type or image_ID (Default: " HIGH_GREEN_BOLD "%s" RESET_DISPLAY "): ",default_os_image);
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "specify" RESET_DISPLAY " an OS type or image_ID (Default: " GENERAL_BOLD "%s" RESET_DISPLAY "): ",default_os_image);
             fflush(stdin);
             scanf("%7s",confirm);
             getchar();
@@ -560,7 +566,7 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(cmd_keyword_check(argc,argv,"--ht",real_ht_flag)!=0){
             if(batch_flag_local!=0){
-                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD "OFF" RESET_DISPLAY " to turn off hyperthreading (Default: " HIGH_GREEN_BOLD "ON" RESET_DISPLAY "): ");
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD "OFF" RESET_DISPLAY " to " WARN_YELLO_BOLD "turn off" RESET_DISPLAY " hyperthreading (Default: " GENERAL_BOLD "ON" RESET_DISPLAY "): ");
                 fflush(stdin);
                 scanf("%7s",confirm);
                 getchar();
@@ -577,13 +583,13 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         }
     }
     if(strcmp(real_ht_flag,"ON")!=0&&strcmp(real_ht_flag,"OFF")!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The ht flag %s is invalid. Using to default ON." RESET_DISPLAY "\n",real_ht_flag);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The ht flag " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is invalid. Using to default " RESET_DISPLAY GENERAL_BOLD "ON" RESET_DISPLAY " .\n",real_ht_flag);
         strcpy(real_ht_flag,"ON");
     }
     if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0){
         if(cmd_keyword_check(argc,argv,"--vol",real_nfs_volume)!=0){
             if(batch_flag_local!=0){
-                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to specify NFS initial volume in GB (Default: " HIGH_GREEN_BOLD "100" RESET_DISPLAY "): ");
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "specify" RESET_DISPLAY " NFS initial volume in GB (Default: " GENERAL_BOLD "100" RESET_DISPLAY "): ");
                 fflush(stdin);
                 scanf("%7s",confirm);
                 getchar();
@@ -606,27 +612,32 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
             real_nfs_vol=string_to_positive_num(real_nfs_volume);
         }
         if(real_nfs_vol<100||real_node_num>32000){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] The volume %d is out of range. Using the default 100." RESET_DISPLAY "\n",real_nfs_vol);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The volume " RESET_DISPLAY GENERAL_BOLD "%d" RESET_DISPLAY WARN_YELLO_BOLD " is out of range. Using the default " RESET_DISPLAY GENERAL_BOLD "100" RESET_DISPLAY " .\n",real_nfs_vol);
             real_nfs_vol=100;
         }
     }
     if(cmd_keyword_check(argc,argv,"--inst",app_inst_script_url_specified)==0){
         if(valid_loc_format_or_not(app_inst_script_url_specified)==0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Using a self-defined app_inst_script_url %s." RESET_DISPLAY "\n",app_inst_script_url_specified);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Using a self-defined app_inst_script_url " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY "\n",app_inst_script_url_specified);
             strncpy(url_app_inst_root_var,app_inst_script_url_specified,LOCATION_LENGTH-1);
         }
         else{
-            printf("[ -INFO- ] The app_inst_script_url %s is invalid. Using the default.",app_inst_script_url_specified);
+            printf("[ -INFO- ] The app_inst_script_url " GENERAL_BOLD "%s" RESET_DISPLAY " is invalid. Using the default.",app_inst_script_url_specified);
         }
     }
     if(cmd_keyword_check(argc,argv,"--repo",app_inst_pkgs_url_specified)==0){
         if(valid_loc_format_or_not(app_inst_pkgs_url_specified)==0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Using a self-defined app_inst_pkgs_url %s." RESET_DISPLAY "\n",app_inst_pkgs_url_specified);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Using a self-defined app_inst_pkgs_url " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY "\n",app_inst_pkgs_url_specified);
             strncpy(url_app_pkgs_root_var,app_inst_pkgs_url_specified,LOCATION_LENGTH-1);
         }
         else{
-            printf("[ -INFO- ] The app_inst_script_url %s is invalid. Using the default.",app_inst_pkgs_url_specified);
+            printf("[ -INFO- ] The app_inst_script_url " GENERAL_BOLD "%s" RESET_DISPLAY " is invalid. Using the default.",app_inst_pkgs_url_specified);
         }
+    }
+    file_p=fopen(tf_prep_conf,"w+");
+    if(file_p==NULL){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a configuration file." RESET_DISPLAY "\n");
+        return -1;
     }
     fprintf(file_p,"# This file is generated and maintained by the HPC-NOW services. We do not recommend\n");
     fprintf(file_p,"# to edit it manually. If need to do so, please follow the strict format.\n");
@@ -655,7 +666,6 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     return 0;
 
 invalid_conf:
-    fclose(file_p);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,tf_prep_conf,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 1;
@@ -819,12 +829,12 @@ int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info){
     printf("|          Number of Users:       %d\n",init_info->hpc_user_num);
     printf("|          Master Node Instance:  %s\n",init_info->master_inst);
     printf("|          Compute Node Instance: %s\n",init_info->compute_inst);
-    printf("|          OS Image:              %s\n" RESET_DISPLAY,init_info->os_image_raw);
+    printf("|          OS Image:              %s" RESET_DISPLAY "\n",init_info->os_image_raw);
     if(strcmp(init_info->ht_flag,"OFF")==0){
-        printf("|          Hyperthreading:        %s\n" RESET_DISPLAY,init_info->ht_flag);
+        printf(HIGH_GREEN_BOLD "|          Hyperthreading:        %s" RESET_DISPLAY "\n",init_info->ht_flag);
     }
     if(init_info->hpc_nfs_volume>0){
-        printf("|          Shared Volume (GB):    %d\n" RESET_DISPLAY,init_info->hpc_nfs_volume);
+        printf(HIGH_GREEN_BOLD "|          Shared Volume (GB):    %d" RESET_DISPLAY "\n",init_info->hpc_nfs_volume);
     }
     return confirm_to_init_cluster(init_info->cluster_id,batch_flag_local);
 }
