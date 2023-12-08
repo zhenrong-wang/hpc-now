@@ -1151,7 +1151,6 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     insert_lines(filename_temp,"#INSERT_AMI_HERE",os_image);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     if(threads==1){ //Hyperthreading off
-        printf("%d------\n",threads);
         sprintf(string_temp,"cpu_core_count = %d",cpu_core_num);
         insert_lines(filename_temp,"#INSERT_HT_HERE",string_temp);
         insert_lines(filename_temp,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
