@@ -1,8 +1,8 @@
 # This file is generated and maintained by the HPC-NOW services. We do not recommend
 # to edit it manually. If need to do so, please follow the strict format.
 cluster_id          : hpcnow
-region_id           : cn-hangzhou
-zone_id             : cn-hangzhou-j
+region_id           : bj
+zone_id             : cn-bj-a
 node_num            : 1
 hpc_user_num        : 3
 master_init_param   : db skip

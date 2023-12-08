@@ -1401,28 +1401,6 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     return 0;
 }
 
-int check_reconfigure_list(char* workdir, int print_flag){
-    char stackdir[DIR_LENGTH]="";
-    char single_line[64]="";
-    char reconf_list[FILENAME_LENGTH]="";
-    FILE* file_p=NULL;
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(reconf_list,"%s%sreconf.list",stackdir,PATH_SLASH);
-    if((file_p=fopen(reconf_list,"r"))==NULL){
-        return -1;
-    }
-    if(print_flag==0){
-        fclose(file_p);
-        return 0;
-    }
-    while(fgetline(file_p,single_line)==0){
-        if(*(single_line+0)=='+'||*(single_line+0)=='|'){
-            printf("|          %s\n",single_line);
-        }
-    }
-    return 0;
-}
-
 int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_config, char* htflag, tf_exec_config* tf_run){
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";

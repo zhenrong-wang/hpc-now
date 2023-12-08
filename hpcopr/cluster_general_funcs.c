@@ -1789,6 +1789,25 @@ int confirm_to_operate_cluster(char* current_cluster_name, int batch_flag_local)
     return 0;
 }
 
+// 0: continue
+// 1: stop
+int confirm_to_init_cluster(char* current_cluster_name, int batch_flag_local){
+    if(batch_flag_local==0){
+        return 0;
+    }
+    char confirm[64]="";
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please check the summary above and input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to continue.\n");
+    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
+    fflush(stdin);
+    scanf("%63s",confirm);
+    getchar();
+    if(strcmp(confirm,CONFIRM_STRING)!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. Denied.\n");
+        return 1;
+    }
+    return 0;
+}
+
 /* 
  * return -1: skipped due to batch mode
  * return 1 : user explicitly denied
@@ -2382,6 +2401,28 @@ int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords){
     }
     fclose(file_p);
     fclose(file_p_base);
+    return 0;
+}
+
+int check_reconfigure_list(char* workdir, int print_flag){
+    char stackdir[DIR_LENGTH]="";
+    char single_line[64]="";
+    char reconf_list[FILENAME_LENGTH]="";
+    FILE* file_p=NULL;
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(reconf_list,"%s%sreconf.list",stackdir,PATH_SLASH);
+    if((file_p=fopen(reconf_list,"r"))==NULL){
+        return -1;
+    }
+    if(print_flag==0){
+        fclose(file_p);
+        return 0;
+    }
+    while(fgetline(file_p,single_line)==0){
+        if(*(single_line+0)=='+'||*(single_line+0)=='|'){
+            printf("|          %s\n",single_line);
+        }
+    }
     return 0;
 }
 
@@ -2984,6 +3025,8 @@ int list_cloud_zones(char* cluster_name, char* region){
     return 0;
 }
 
+//return 0: valid
+//return 1: invalid
 int valid_region_or_not(char* cluster_name, char* region){
     char line_buffer[LINE_LENGTH_TINY]="";
     char region_ext[64]="";
@@ -2995,6 +3038,25 @@ int valid_region_or_not(char* cluster_name, char* region){
     while(!feof(file_p)){
         fngetline(file_p,line_buffer,LINE_LENGTH_TINY-1);
         if(contain_or_not(line_buffer,region_ext)==0){
+            fclose(file_p);
+            return 0;
+        }
+    }
+    fclose(file_p);
+    return 1;
+}
+
+int valid_region_zone_or_not(char* cluster_name, char* region, char* zone){
+    char line_buffer[LINE_LENGTH_TINY]="";
+    char zone_ext[64]="";
+    FILE* file_p=check_regions_list_file(cluster_name);
+    if(file_p==NULL){
+        return -1;
+    }
+    snprintf(zone_ext,63,"[%s] %s",region,zone);
+    while(!feof(file_p)){
+        fngetline(file_p,line_buffer,LINE_LENGTH_TINY-1);
+        if(contain_or_not(line_buffer,zone_ext)==0){
             fclose(file_p);
             return 0;
         }
@@ -3018,4 +3080,22 @@ int valid_zone_or_not(char* cluster_name, char* zone){
     }
     fclose(file_p);
     return 1;
+}
+
+int get_default_zone(char* cluster_name, char* region, char* default_zone){
+    char workdir[DIR_LENGTH]="";
+    char stackdir[DIR_LENGTH]="";
+    char region_list[FILENAME_LENGTH]="";
+    char region_ext1[64]="";
+    char region_ext2[64]="";
+    get_workdir(workdir,cluster_name);
+    create_and_get_stackdir(workdir,stackdir);
+    sprintf(region_list,"%s%sregions.list",stackdir,PATH_SLASH);
+    snprintf(region_ext1,63,"[Region:%s]",region);
+    snprintf(region_ext2,63,"[%s]",region);
+    if(find_and_get(region_list,region_ext1,"","",2,region_ext2,"","",' ',2,default_zone)!=0){
+        printf("%s   -- %s",region_list,default_zone);
+        return 1;
+    }
+    return 0;
 }

@@ -55,6 +55,7 @@ int delete_local_tf_config(char* stackdir);
 int valid_vm_config_or_not(char* workdir, char* vm_config);
 
 int confirm_to_operate_cluster(char* current_cluster_name, int batch_flag_local);
+int confirm_to_init_cluster(char* current_cluster_name, int batch_flag_local);
 int prompt_to_confirm(const char* prompt_string, const char* confirm_string, int batch_flag_local);
 int prompt_to_confirm_args(const char* prompt_string, const char* confirm_string, int batch_flag_local, int argc, char** argv, char* cmd_flag);
 int prompt_to_input(const char* prompt_string, char* reply_string, int batch_flag_local);
@@ -92,6 +93,8 @@ int exit_current_cluster(void);
 int delete_from_cluster_registry(char* deleted_cluster_name);
 int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords);
 
+int check_reconfigure_list(char* workdir, int print_flag);
+
 int modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer);
 int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag);
 int generate_bceconfig(char* vaultdir, char* region_id, char* bucket_ak, char* bucket_sk);
@@ -118,6 +121,8 @@ FILE* check_regions_list_file(char* cluster_name);
 int list_cloud_regions(char* cluster_name);
 int list_cloud_zones(char* cluster_name, char* region);
 int valid_region_or_not(char* cluster_name, char* region);
+int valid_region_zone_or_not(char* cluster_name, char* region, char* zone);
+int get_default_zone(char* cluster_name, char* region, char* default_zone);
 int valid_zone_or_not(char* cluster_name, char* zone);
 
 #endif

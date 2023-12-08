@@ -725,6 +725,8 @@ int file_empty_or_not(char* filename){
     }
 }
 
+//return 0: exists
+//return non-zero: not exists.
 int folder_exist_or_not(char* foldername){
     char filename[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -1073,13 +1075,16 @@ int cmd_flag_check(int argc, char** argv, char* flag_string){
     return 1;
 }
 
+//return 0: found the keyword
+//return 1: not found
+//make sure the dest array has 128 width.
 int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string){
     int i,j;
     for(i=2;i<argc-1;i++){
         if(strcmp(argv[i],key_word)==0){
             j=i+1;
             if(cmd_flg_or_not(argv[j])!=0&&cmd_key_or_not(argv[j])!=0){
-                strcpy(kwd_string,argv[j]);
+                strncpy(kwd_string,argv[j],127);
                 return 0;
             }
             else{

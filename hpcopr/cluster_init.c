@@ -43,7 +43,7 @@ void reset_initinfo(cluster_initinfo* init_info, char* cluster_id){
     init_info->node_num=0;
     init_info->hpc_user_num=0;
     init_info->hpc_nfs_volume=0;
-    strcpy(init_info->master_init_param,"");
+    strcpy(init_info->master_init_param,"db skip");
     strcpy(init_info->master_passwd,"");
     strcpy(init_info->compute_passwd,"");
     strcpy(init_info->master_inst,"");
@@ -55,13 +55,71 @@ void reset_initinfo(cluster_initinfo* init_info, char* cluster_id){
 
 void empty_initinfo(cluster_initinfo* init_info){
     reset_initinfo(init_info,"");
+    strcpy(init_info->master_init_param,"");
+}
+
+int get_static_conf_files(char* confdir, char* cloud_name, int code_loc_flag, char* url_code_root){
+    char cmdline[CMDLINE_LENGTH]="";
+    char url_code[DIR_LENGTH_EXT]="";
+    char filename_temp[FILENAME_LENGTH]="";
+
+    if(strcmp(cloud_name,"alicloud")!=0&&strcmp(cloud_name,"aws")!=0&&strcmp(cloud_name,"azure")!=0&&strcmp(cloud_name,"baidu")&&strcmp(cloud_name,"gcp")!=0&&strcmp(cloud_name,"hwcloud")!=0&&strcmp(cloud_name,"qcloud")!=0){
+        return 1;
+    }
+    if(valid_loc_format_or_not(url_code_root)!=0){
+        return 1;
+    }
+    if(code_loc_flag==1){
+        sprintf(url_code,"%s%s%s%s",url_code_root,PATH_SLASH,cloud_name,PATH_SLASH);
+    }
+    else{
+        sprintf(url_code,"%s%s/",url_code_root,cloud_name);
+    }
+    snprintf(filename_temp,511,"%s%sreconf.list",confdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        if(code_loc_flag==1){
+            sprintf(cmdline,"%s %s%sreconf.list %s %s",COPY_FILE_CMD,url_code,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"curl %sreconf.list -o %s -s",url_code,filename_temp);
+        }
+        if(system(cmdline)!=0){
+            return 2;
+        }
+    }
+    snprintf(filename_temp,511,"%s%sregions.list",confdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        if(code_loc_flag==1){
+            sprintf(cmdline,"%s %s%sregions.list %s %s",COPY_FILE_CMD,url_code,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
+        }
+        else{
+            sprintf(cmdline,"curl %sregions.list -o %s -s",url_code,filename_temp);
+        }
+        if(system(cmdline)!=0){
+            return 2;
+        }
+    }
+    if(strcmp(cloud_name,"alicloud")==0||strcmp(cloud_name,"qcloud")==0){
+        snprintf(filename_temp,511,"%s%snas_zones.list",confdir,PATH_SLASH);
+        if(file_exist_or_not(filename_temp)!=0){
+            if(code_loc_flag==1){
+                sprintf(cmdline,"%s %s%snas_zons_%s.txt %s %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,filename_temp,SYSTEM_CMD_REDIRECT);
+            }
+            else{
+                sprintf(cmdline,"curl %snas_zons_%s.txt -o %s -s",url_code,cloud_name,filename_temp);
+            }
+            if(system(cmdline)!=0){
+                return 2;
+            }
+        }
+    }
+    return 0;
 }
 
 int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_loc_flag, char* url_code_root){
     char cmdline[CMDLINE_LENGTH]="";
     char url_code[DIR_LENGTH_EXT]="";
     char tf_conf[FILENAME_LENGTH]="";
-
     if(strcmp(cloud_name,"alicloud")!=0&&strcmp(cloud_name,"aws")!=0&&strcmp(cloud_name,"azure")!=0&&strcmp(cloud_name,"baidu")&&strcmp(cloud_name,"gcp")!=0&&strcmp(cloud_name,"hwcloud")!=0&&strcmp(cloud_name,"qcloud")!=0){
         return 1;
     }
@@ -144,35 +202,6 @@ int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_l
     if(system(cmdline)!=0){
         return 2;
     }
-    if(code_loc_flag==1){
-        sprintf(cmdline,"%s %s%sreconf.list %s%sreconf.list %s",COPY_FILE_CMD,url_code,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %sreconf.list -o %s%sreconf.list -s",url_code,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        return 2;
-    }
-    if(code_loc_flag==1){
-        sprintf(cmdline,"%s %s%sregions.list %s%sregions.list %s",COPY_FILE_CMD,url_code,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        sprintf(cmdline,"curl %sregions.list -o %s%sregions.list -s",url_code,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        return 2;
-    }
-    if(strcmp(cloud_name,"alicloud")==0||strcmp(cloud_name,"qcloud")==0){
-        if(code_loc_flag==1){
-            sprintf(cmdline,"%s %s%snas_zons_%s.txt %s%snas_zones.list %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        }
-        else{
-            sprintf(cmdline,"curl %snas_zons_%s.txt -o %s%snas_zones.list -s",url_code,cloud_name,stackdir,PATH_SLASH);
-        }
-        if(system(cmdline)!=0){
-            return 2;
-        }
-    }
     return 0;
 }
 
@@ -205,22 +234,56 @@ int create_init_dirs(char* workdir, char* stackdir, char* vaultdir, char* logdir
     return 0;
 }
 
-int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
+int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_flag_local, char* url_code_root, int argc, char* argv[]){
 //    char* region_id, char* zone_id, char* node_num, char* hpc_user_num, char* master_inst, char* compute_inst, char* os_image, char* ht_flag
     char cloud_flag[16]="";
     char workdir[DIR_LENGTH]="";
-    get_workdir(workdir,cluster_name);
-    get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
-        return -5;
-    }
+    char confdir[DIR_LENGTH_EXT]="";
+    char stackdir[DIR_LENGTH_EXT]="";
+    char vaultdir[DIR_LENGTH_EXT]="";
+    char logdir[DIR_LENGTH_EXT]="";
     char tf_prep_conf[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    sprintf(cmdline,"%s %s%sconf %s",MKDIR_CMD,workdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    sprintf(tf_prep_conf,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
+    char cloud_name[16]="";
+
+    get_workdir(workdir,cluster_name);
+    if(get_cloud_flag(workdir,cloud_flag)!=0){
+        return -1;
+    }
+    if(strcmp(cloud_flag,"CLOUD_A")==0){
+        strcpy(cloud_name,"alicloud");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_B")==0){
+        strcpy(cloud_name,"qcloud");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_C")==0){
+        strcpy(cloud_name,"aws");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
+        strcpy(cloud_name,"hwcloud");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
+        strcpy(cloud_name,"baidu");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        strcpy(cloud_name,"azure");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
+        strcpy(cloud_name,"gcp");
+    }
+    else{
+        return -5;
+    }
+    if(create_init_dirs(workdir,stackdir,vaultdir,logdir,confdir)!=0){
+        return -1;
+    }
+    if(get_static_conf_files(confdir,cloud_flag,code_loc_flag_local,url_code_root)!=0){
+        return -1;
+    }
+    sprintf(tf_prep_conf,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(tf_prep_conf)==0){
         if(cmd_flag_check(argc,argv,"--force")!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please use " RESET_DISPLAY WARN_YELLO_BOLD "--force" RESET_DISPLAY FATAL_RED_BOLD " flag to override current config." RESET_DISPLAY "\n");
             return -3; // If the conf file already exists, exit, unless force specified.
         }
     }
@@ -230,179 +293,348 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     }
     char default_region[32]="";
     char real_region[128]="";
-    char default_zone[36]="";
+    char default_zone[64]="";
     char real_zone[128]="";
     int default_node_num=1;
     char real_node_num_string[128]="";
+    int real_node_num;
     int default_user_num=3;
     char real_user_num_string[128]="";
-    char* default_master_inst="a8c16g";
-    char* default_master_inst_hwcloud="i8c16g";
-    char* default_master_inst_azure="i4c8g";
-    char* default_master_inst_gcp="a4c8g";
+    int real_user_num;
+    char default_master_inst[16]="";
     char real_master_inst[128]="";
-    char* default_compute_inst="a4c8g";
-    char* default_compute_inst_hwcloud="i4c8g";
-    char* default_compute_inst_azure="i4c8g";
-    char* default_compute_inst_gcp="a4c8g";
+    char default_compute_inst[16]="";
     char real_compute_inst[128]="";
-    char* default_os_image="centoss9";
-    char* default_os_image_hwcloud="rocky9";
+    char default_os_image[64]="";
     char real_os_image[128]="";
-    char* default_ht_flag="ON";
     char real_ht_flag[128]="";
     char real_nfs_volume[128]="";
+    int real_nfs_vol;
     char app_inst_script_url_specified[LOCATION_LENGTH]="";
     char app_inst_pkgs_url_specified[LOCATION_LENGTH]="";
-    int sum_temp;
+    char confirm[8]="";
 
-    cmd_keyword_check(argc,argv,"--rg",real_region);
-    cmd_keyword_check(argc,argv,"--az",real_zone);
-    cmd_keyword_check(argc,argv,"--nn",real_node_num_string);
-    cmd_keyword_check(argc,argv,"--un",real_user_num_string);
-    cmd_keyword_check(argc,argv,"--mi",real_master_inst);
-    cmd_keyword_check(argc,argv,"--ci",real_compute_inst);
-    cmd_keyword_check(argc,argv,"--os",real_os_image);
-    cmd_keyword_check(argc,argv,"--ht",real_ht_flag);
-    cmd_keyword_check(argc,argv,"--vol",real_nfs_volume);
-    cmd_keyword_check(argc,argv,"--inst",app_inst_script_url_specified);
-    cmd_keyword_check(argc,argv,"--repo",app_inst_pkgs_url_specified);
-
-    if(strlen(real_node_num_string)!=0){
-        sum_temp=string_to_positive_num(real_node_num_string);
-        if(sum_temp<MINIMUM_ADD_NODE_NUMBER||sum_temp>MAXIMUM_ADD_NODE_NUMBER){
-            fclose(file_p);
-            sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,tf_prep_conf,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            return 1;
-        }
-    }
-
-    if(strlen(real_user_num_string)!=0){
-        sum_temp=string_to_positive_num(real_user_num_string);
-        if(sum_temp<MINIMUM_ADD_USER_NUNMBER||sum_temp>MAXIMUM_ADD_USER_NUMBER){
-            fclose(file_p);
-            sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,tf_prep_conf,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            return 1;
-        }
-    }
-    
-    if(strcmp(real_ht_flag,"ON")!=0&&strcmp(real_ht_flag,"OFF")!=0){
-        strcpy(real_ht_flag,"");
-    }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         strcpy(default_region,"cn-hangzhou");
         strcpy(default_zone,"cn-hangzhou-j");
+        strcpy(default_master_inst,"a8c16g");
+        strcpy(default_compute_inst,"a4c8g");
+        strcpy(default_os_image,"centoss9");
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         strcpy(default_region,"ap-guangzhou");
         strcpy(default_zone,"ap-guangzhou-6");
+        strcpy(default_master_inst,"a8c16g");
+        strcpy(default_compute_inst,"a4c8g");
+        strcpy(default_os_image,"centoss9");
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         strcpy(default_region,"cn-northwest-1");
         strcpy(default_zone,"cn-northwest-1a");
+        strcpy(default_master_inst,"a8c16g");
+        strcpy(default_compute_inst,"a4c8g");
+        strcpy(default_os_image,"centoss9");
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
         strcpy(default_region,"cn-north-4");
         strcpy(default_zone,"cn-north-4a");
+        strcpy(default_master_inst,"i8c16g");
+        strcpy(default_compute_inst,"i4c8g");
+        strcpy(default_os_image,"rocky9");
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         strcpy(default_region,"bj");
         strcpy(default_zone,"cn-bj-a");
+        strcpy(default_master_inst,"a8c16g");
+        strcpy(default_compute_inst,"a4c8g");
+        strcpy(default_os_image,"centoss9");
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
         strcpy(default_region,"az.Japan-East"); //Azure
         strcpy(default_zone,"*NULL*");
+        strcpy(default_master_inst,"i4c8g");
+        strcpy(default_compute_inst,"i4c8g");
+        strcpy(default_os_image,"*Oracle_Linux_9.2*-IMMUTABLE");
     }
     else{
         strcpy(default_region,"us-central1");
         strcpy(default_zone,"us-central1-a");
+        strcpy(default_master_inst,"a4c8g");
+        strcpy(default_compute_inst,"a4c8g");
+        strcpy(default_os_image,"centoss9");
     }
+    strcpy(real_ht_flag,"ON");
 
-    if(strlen(real_region)==0){
-        strcpy(real_region,default_region);
-    }
-    if(strlen(real_zone)==0){
-        strcpy(real_zone,default_zone);
-    }
-    if(strlen(real_node_num_string)==0){
-        sprintf(real_node_num_string,"%d",default_node_num);
-    }
-    if(strlen(real_user_num_string)==0){
-        sprintf(real_user_num_string,"%d",default_user_num);
-    }
-    if(strlen(real_master_inst)==0){
-        if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
-            strcpy(real_master_inst,default_master_inst);
-        }
-        else if(strcmp(cloud_flag,"CLOUD_D")==0){
-            strcpy(real_master_inst,default_master_inst_hwcloud);
-        }
-        else if(strcmp(cloud_flag,"CLOUD_F")==0){
-            strcpy(real_master_inst,default_master_inst_azure);
-        }
-        else{
-            strcpy(real_master_inst,default_master_inst_gcp);
-        }
-    }
-    if(strlen(real_compute_inst)==0){
-        if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
-            strcpy(real_compute_inst,default_compute_inst);
-        }
-        else if(strcmp(cloud_flag,"CLOUD_D")==0){
-            strcpy(real_compute_inst,default_compute_inst_hwcloud);
-        }
-        else if(strcmp(cloud_flag,"CLOUD_F")==0){
-            strcpy(real_compute_inst,default_compute_inst_azure);
-        }
-        else{
-            strcpy(real_compute_inst,default_compute_inst_gcp);
-        }
-    }
-    if(strlen(real_os_image)==0){
-        if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0){
-            strcpy(real_os_image,default_os_image);
-        }
-        else if(strcmp(cloud_flag,"CLOUD_D")==0){
-            strcpy(real_os_image,default_os_image_hwcloud);
-        }
-        else{
-            strcpy(real_os_image,"*Oracle_Linux_9.2*");
-        }
-    }
-    if(strlen(real_ht_flag)==0){
-        strcpy(real_ht_flag,default_ht_flag);
-    }
-    if(strlen(app_inst_script_url_specified)>0&&valid_loc_format_or_not(app_inst_script_url_specified)==0){
-        strncpy(url_app_inst_root_var,app_inst_script_url_specified,LOCATION_LENGTH-1);
-    }
-    if(strlen(app_inst_pkgs_url_specified)>0&&valid_loc_format_or_not(app_inst_pkgs_url_specified)==0){
-        strncpy(url_app_pkgs_root_var,app_inst_pkgs_url_specified,LOCATION_LENGTH-1);
-    }
-
-    if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0){
-        sum_temp=string_to_positive_num(real_nfs_volume);
-        if(sum_temp==0||sum_temp<0){
-            if(strcmp(cloud_flag,"CLOUD_G")!=0){
-                strcpy(real_nfs_volume,"300");
+    if(cmd_keyword_check(argc,argv,"--rg",real_region)!=0){
+        if(batch_flag_local!=0){
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to select a region (Default: " HIGH_GREEN_BOLD "%s" RESET_DISPLAY "): ",default_region);
+            fflush(stdin);
+            scanf("%7s",confirm);
+            getchar();
+            if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
+                list_cloud_regions(cluster_name);
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
+                fflush(stdin);
+                scanf("%127s",real_region);
+                getchar();
             }
             else{
-                strcpy(real_nfs_volume,"100");
+                strcpy(real_region,default_region);
             }
+        }
+        else{
+            strcpy(real_region,default_region);
+        }
+    }
+    if(valid_region_or_not(cluster_name,real_region)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The region name %s is invalid. Exit now." RESET_DISPLAY "\n",real_region);
+        goto invalid_conf;
+    }
+    if(strcmp(cloud_flag,"CLOUD_F")!=0){
+        if(get_default_zone(cluster_name,real_region,default_zone)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The regions.list file may be incorrect. Exit now." RESET_DISPLAY "\n");
+            goto invalid_conf;
+        }
+        if(cmd_keyword_check(argc,argv,"--az",real_zone)!=0){
+            if(batch_flag_local!=0){
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to select a zone (Default: " HIGH_GREEN_BOLD "%s" RESET_DISPLAY "): ",default_zone);
+                fflush(stdin);
+                scanf("%7s",confirm);
+                getchar();
+                if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
+                    list_cloud_zones(cluster_name,real_region);
+                    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
+                    fflush(stdin);
+                    scanf("%127s",real_zone);
+                    getchar();
+                }
+                else{
+                    strcpy(real_zone,default_zone);
+                }
+            }
+            else{
+                strcpy(real_zone,default_zone);
+            }
+        }
+        if(valid_region_zone_or_not(cluster_name,real_region,real_zone)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The zone name %s is invalid for region %s. Exit now." RESET_DISPLAY "\n",real_zone,real_region);
+            goto invalid_conf;
+        }
+    }
+    if(cmd_keyword_check(argc,argv,"--nn",real_node_num_string)!=0){
+        if(batch_flag_local!=0){
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to specify node num (Default: " HIGH_GREEN_BOLD "%d" RESET_DISPLAY "): ",default_node_num);
+            fflush(stdin);
+            scanf("%7s",confirm);
+            getchar();
+            if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a number [Range: %d-%d]: ",MINIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
+                fflush(stdin);
+                scanf("%127s",real_node_num_string);
+                getchar();
+                real_node_num=string_to_positive_num(real_node_num_string);
+            }
+            else{
+                real_node_num=default_node_num;
+            }
+        }
+        else{
+            real_node_num=default_node_num;
+        }
+    }
+    else{
+        real_node_num=string_to_positive_num(real_node_num_string);
+    }
+    if(real_node_num<MINIMUM_ADD_NODE_NUMBER||real_node_num>MAXIMUM_ADD_NODE_NUMBER){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The node num %d is out of range. Using the default %d." RESET_DISPLAY "\n",real_node_num,default_node_num);
+        real_node_num=default_node_num;
+    }
+    if(cmd_keyword_check(argc,argv,"--un",real_user_num_string)!=0){
+        if(batch_flag_local!=0){
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to specify user num (Default: " HIGH_GREEN_BOLD "%d" RESET_DISPLAY "): ",default_user_num);
+            fflush(stdin);
+            scanf("%7s",confirm);
+            getchar();
+            if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a number [Range: %d-%d]: ",MINIMUM_ADD_USER_NUNMBER,MAXIMUM_ADD_USER_NUMBER);
+                fflush(stdin);
+                scanf("%127s",real_user_num_string);
+                getchar();
+                real_user_num=string_to_positive_num(real_user_num_string);
+            }
+            else{
+                real_user_num=default_user_num;
+            }
+        }
+        else{
+            real_user_num=default_user_num;
+        }
+    }
+    else{
+        real_user_num=string_to_positive_num(real_user_num_string);
+    }
+    if(real_user_num<MINIMUM_ADD_USER_NUNMBER||real_node_num>MAXIMUM_ADD_USER_NUMBER){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The user num %d is out of range. Using the default %d." RESET_DISPLAY "\n",real_user_num,default_user_num);
+        real_user_num=default_user_num;
+    }
+    if(cmd_keyword_check(argc,argv,"--mi",real_master_inst)!=0){
+        if(batch_flag_local!=0){
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to select an instance type for master (Default: " HIGH_GREEN_BOLD "%s" RESET_DISPLAY "): ",default_master_inst);
+            fflush(stdin);
+            scanf("%7s",confirm);
+            getchar();
+            if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
+                if(check_reconfigure_list(workdir,1)!=0){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] The reconf.list file may be incorrect. Exit now." RESET_DISPLAY "\n");
+                    goto invalid_conf; 
+                }
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
+                fflush(stdin);
+                scanf("%127s",real_master_inst);
+                getchar();
+            }
+            else{
+                strcpy(real_master_inst,default_master_inst);
+            }
+        }
+        else{
+            strcpy(real_master_inst,default_master_inst);
+        }
+    }
+    if(valid_vm_config_or_not(workdir,real_master_inst)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The instance type %s is invalid. Exit now." RESET_DISPLAY "\n",real_master_inst);
+        goto invalid_conf;
+    }
+    if(cmd_keyword_check(argc,argv,"--ci",real_compute_inst)!=0){
+        if(batch_flag_local!=0){
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to select an instance type for compute (Default: " HIGH_GREEN_BOLD "%s" RESET_DISPLAY "): ",default_compute_inst);
+            fflush(stdin);
+            scanf("%7s",confirm);
+            getchar();
+            if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
+                if(check_reconfigure_list(workdir,1)!=0){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] The reconf.list file may be incorrect. Exit now." RESET_DISPLAY "\n");
+                    goto invalid_conf; 
+                }
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
+                fflush(stdin);
+                scanf("%127s",real_compute_inst);
+                getchar();
+            }
+            else{
+                strcpy(real_compute_inst,default_compute_inst);
+            }
+        }
+        else{
+            strcpy(real_compute_inst,default_compute_inst);
+        }
+    }
+    if(valid_vm_config_or_not(workdir,real_compute_inst)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The instance type %s is invalid. Exit now." RESET_DISPLAY "\n",real_compute_inst);
+        goto invalid_conf;
+    }
+    if(cmd_keyword_check(argc,argv,"--os",real_os_image)!=0){
+        if(batch_flag_local!=0){
+            printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to specify an os type or image_ID (Default: " HIGH_GREEN_BOLD "%s" RESET_DISPLAY "): ",default_os_image);
+            fflush(stdin);
+            scanf("%7s",confirm);
+            getchar();
+            if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " : ");
+                fflush(stdin);
+                scanf("%127s",real_os_image);
+                getchar();
+            }
+            else{
+                strcpy(real_os_image,default_os_image);
+            }
+        }
+        else{
+            strcpy(real_os_image,default_os_image);
+        }
+    }
+    if(strcmp(cloud_flag,"CLOUD_C")==0){
+        if(cmd_keyword_check(argc,argv,"--ht",real_ht_flag)!=0){
+            if(batch_flag_local!=0){
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD "OFF" RESET_DISPLAY " to turn off hyperthreading (Default: " HIGH_GREEN_BOLD "ON" RESET_DISPLAY "): ");
+                fflush(stdin);
+                scanf("%7s",confirm);
+                getchar();
+                if(strcmp(confirm,"OFF")==0){
+                    strcpy(real_ht_flag,"OFF");
+                }
+                else{
+                    strcpy(real_ht_flag,"ON");
+                }
+            }
+            else{
+                strcpy(real_ht_flag,"ON");
+            }
+        }
+    }
+    if(strcmp(real_ht_flag,"ON")!=0&&strcmp(real_ht_flag,"OFF")!=0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The ht flag %s is invalid. Using to default ON." RESET_DISPLAY "\n",real_ht_flag);
+        strcpy(real_ht_flag,"ON");
+    }
+    if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0){
+        if(cmd_keyword_check(argc,argv,"--vol",real_nfs_volume)!=0){
+            if(batch_flag_local!=0){
+                printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to specify NFS initial volume in GB (Default: " HIGH_GREEN_BOLD "100" RESET_DISPLAY "): ");
+                fflush(stdin);
+                scanf("%7s",confirm);
+                getchar();
+                if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
+                    printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a number [Range: 100-32000]: ");
+                    fflush(stdin);
+                    scanf("%127s",real_nfs_volume);
+                    getchar();
+                    real_nfs_vol=string_to_positive_num(real_nfs_volume);
+                }
+                else{
+                    real_nfs_vol=100;
+                }
+            }
+            else{
+                real_nfs_vol=100;
+            }
+        }
+        else{
+            real_nfs_vol=string_to_positive_num(real_nfs_volume);
+        }
+        if(real_nfs_vol<100||real_node_num>32000){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The volume %d is out of range. Using the default 100." RESET_DISPLAY "\n",real_nfs_vol);
+            real_nfs_vol=100;
+        }
+    }
+    if(cmd_keyword_check(argc,argv,"--inst",app_inst_script_url_specified)==0){
+        if(valid_loc_format_or_not(app_inst_script_url_specified)==0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Using a self-defined app_inst_script_url %s." RESET_DISPLAY "\n",app_inst_script_url_specified);
+            strncpy(url_app_inst_root_var,app_inst_script_url_specified,LOCATION_LENGTH-1);
+        }
+        else{
+            printf("[ -INFO- ] The app_inst_script_url %s is invalid. Using the default.",app_inst_script_url_specified);
+        }
+    }
+    if(cmd_keyword_check(argc,argv,"--repo",app_inst_pkgs_url_specified)==0){
+        if(valid_loc_format_or_not(app_inst_pkgs_url_specified)==0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Using a self-defined app_inst_pkgs_url %s." RESET_DISPLAY "\n",app_inst_pkgs_url_specified);
+            strncpy(url_app_pkgs_root_var,app_inst_pkgs_url_specified,LOCATION_LENGTH-1);
+        }
+        else{
+            printf("[ -INFO- ] The app_inst_script_url %s is invalid. Using the default.",app_inst_pkgs_url_specified);
         }
     }
     fprintf(file_p,"# This file is generated and maintained by the HPC-NOW services. We do not recommend\n");
     fprintf(file_p,"# to edit it manually. If need to do so, please follow the strict format.\n");
     fprintf(file_p,"ITEM_NAME           : CONFIGURATION  \n");
-    fprintf(file_p,"cluster_id          : %s [IMMUTABLE]\n",cluster_name);
+    fprintf(file_p,"cluster_id          : %s do-not-change\n",cluster_name);
     fprintf(file_p,"region_id           : %s\n",real_region);
     fprintf(file_p,"zone_id             : %s\n",real_zone);
-    fprintf(file_p,"node_num            : %s\n",real_node_num_string);
-    fprintf(file_p,"hpc_user_num        : %s\n",real_user_num_string);
-    fprintf(file_p,"master_init_param   : db skip\n");
-    fprintf(file_p,"master_passwd       : *AUTOGEN*\n");
-    fprintf(file_p,"compute_passwd      : *AUTOGEN*\n");
+    fprintf(file_p,"node_num            : %d\n",real_node_num);
+    fprintf(file_p,"hpc_user_num        : %d\n",real_user_num);
+    fprintf(file_p,"master_init_param   : db skip do-not-change\n");
+    fprintf(file_p,"master_passwd       : *AUTOGEN* you-can-modify\n");
+    fprintf(file_p,"compute_passwd      : *AUTOGEN* you-can-modify\n");
     fprintf(file_p,"master_inst         : %s\n",real_master_inst);
     if(strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         fprintf(file_p,"master_bandwidth    : 50\n");
@@ -417,6 +649,12 @@ int cluster_init_conf(char* cluster_name, int argc, char* argv[]){
     }
     fclose(file_p);
     return 0;
+
+invalid_conf:
+    fclose(file_p);
+    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,tf_prep_conf,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    return 1;
 }
 
 int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, cluster_initinfo* init_info){
@@ -427,7 +665,6 @@ int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, clust
     char conf_line_buffer[256]="";
     char header[64]="";
     char tail[64]="";
-    char tail_ext[64]="";
     char node_inst_ext[128]="";
     int read_conf_lines=0;
     int sum_temp=0;
@@ -440,7 +677,8 @@ int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, clust
         }
         get_seq_string(conf_line_buffer,' ',1,header);
         get_seq_string(conf_line_buffer,' ',3,tail);
-        if(strcmp(header,"cluster_id")==0){
+        if(strcmp(header,"cluster_id")==0||strcmp(header,"master_init_param")==0){
+            read_conf_lines++;
             continue; // The cluster id is immutable. Skip it.
         }
         else if(strcmp(header,"region_id")==0){
@@ -485,11 +723,6 @@ int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, clust
                 return 1;
             }
             init_info->hpc_user_num=sum_temp;
-            read_conf_lines++;
-        }
-        else if(strcmp(header,"master_init_param")==0){
-            get_seq_string(conf_line_buffer,' ',4,tail_ext);
-            snprintf(init_info->master_init_param,255,"%s %s",tail,tail_ext);
             read_conf_lines++;
         }
         else if(strcmp(header,"master_passwd")==0){
@@ -538,7 +771,7 @@ int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, clust
         }
         else if(strcmp(header,"nfs_volume")==0){
             sum_temp=string_to_positive_num(tail);
-            if(sum_temp<1||sum_temp>32000){
+            if(sum_temp<100||sum_temp>32000){
                 fclose(file_p);
                 return 1;
             }
@@ -573,7 +806,8 @@ void print_read_conf_failed(int read_conf_flag){
     }
 }
 
-void print_conf_summary(cluster_initinfo* init_info){
+int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info){
+    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
     printf("|          Cluster ID:            %s\n",init_info->cluster_id);
     printf("|          Region:                %s\n",init_info->region_id);
     printf("|          Availability Zone:     %s\n",init_info->zone_id);
@@ -588,6 +822,7 @@ void print_conf_summary(cluster_initinfo* init_info){
     if(init_info->hpc_nfs_volume>0){
         printf("|          Shared Volume (GB):    %d\n" RESET_DISPLAY,init_info->hpc_nfs_volume);
     }
+    return confirm_to_init_cluster(init_info->cluster_id,batch_flag_local);
 }
 
 int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bucket_sk, char* az_subscription_id, char* az_tenant_id, char* bucket_info_file, char* cloud_flag){
@@ -683,7 +918,7 @@ void generate_tf_files(char* stackdir){
     system(cmdline);
 }
 
-int aws_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
         return -3;
@@ -833,9 +1068,10 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run
         sprintf(unique_cluster_id,"%s-%s",init_info.cluster_id,randstr);
         fclose(file_p);
     }
-    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    print_conf_summary(&init_info);
-
+    if(print_conf_summary(batch_flag_local,&init_info)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,2);
+        return 1; // user denied.
+    }
     generate_sshkey(sshkey_folder,pubkey);
 
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
@@ -1052,7 +1288,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run
     return 0;
 }
 
-int qcloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
         return -3;
@@ -1161,9 +1397,10 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_
         sprintf(unique_cluster_id,"%s-%s",init_info.cluster_id,randstr);
         fclose(file_p);
     }
-    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    print_conf_summary(&init_info);
-
+    if(print_conf_summary(batch_flag_local,&init_info)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,2);
+        return 1; // user denied.
+    }
     generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
@@ -1376,7 +1613,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_
     return 0;
 }
 
-int alicloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
         return -3;
@@ -1485,9 +1722,10 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* t
         sprintf(unique_cluster_id,"%s-%s",init_info.cluster_id,randstr);
         fclose(file_p);
     }
-    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    print_conf_summary(&init_info);
-
+    if(print_conf_summary(batch_flag_local,&init_info)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,2);
+        return 1; // user denied.
+    }
     generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
@@ -1721,7 +1959,7 @@ int hw_intel_amd_generation(const char* region_id, char* intel_generation, char*
     }
 }
 
-int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
         return -3;
@@ -1827,8 +2065,10 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf
         sprintf(unique_cluster_id,"%s-%s",init_conf.cluster_id,randstr);
         fclose(file_p);
     }
-    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    print_conf_summary(&init_conf);
+    if(print_conf_summary(batch_flag_local,&init_conf)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,2);
+        return 1; // user denied.
+    }
 
     intel_flavor_flag=hw_intel_amd_generation(init_conf.region_id,intel_generation,amd_generation,&amd_flavor_flag);
     generate_sshkey(sshkey_folder,pubkey);
@@ -2061,7 +2301,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf
     return 0;
 }
 
-int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
         return -3;
@@ -2172,10 +2412,11 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config*
         strcpy(db_inst,"i2c2g");
         strcpy(natgw_inst,"i2c2g");
     }
-    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    print_conf_summary(&init_conf);
+    if(print_conf_summary(batch_flag_local,&init_conf)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,2);
+        return 1; // user denied.
+    }
     generate_sshkey(sshkey_folder,pubkey);
-
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
     global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
@@ -2398,7 +2639,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config*
     return 0;
 }
 
-int azure_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
         return -3;
@@ -2499,11 +2740,12 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_r
         sprintf(unique_cluster_id,"%s-%s",init_conf.cluster_id,randstr);
         fclose(file_p);
     }
-    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    print_conf_summary(&init_conf);
+    if(print_conf_summary(batch_flag_local,&init_conf)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,2);
+        return 1; // user denied.
+    }
     generate_sshkey(sshkey_folder,pubkey);
     generate_random_string(random_storage_account);
-
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     global_replace(filename_temp,"BLANK_CLIENT_ID",access_key);
     global_replace(filename_temp,"BLANK_SECRET_KEY",secret_key);
@@ -2673,7 +2915,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_r
     return 0;
 }
 
-int gcp_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
+int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
         return -3;
@@ -2776,10 +3018,12 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run
         sprintf(unique_cluster_id,"%s-%s",init_conf.cluster_id,randstr);
         fclose(file_p);
     }
-    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    print_conf_summary(&init_conf);
+    if(print_conf_summary(batch_flag_local,&init_conf)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,2);
+        gcp_credential_convert(workdir,"delete",0);
+        return 1; // user denied.
+    }
     generate_sshkey(sshkey_folder,pubkey);
-    
     get_cloud_flag(workdir,cloud_flag);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(keyfile_path,"%s%s.key.json",vaultdir,PATH_SLASH);
