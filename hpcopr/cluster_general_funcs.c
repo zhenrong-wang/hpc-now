@@ -1395,6 +1395,8 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     return 0;
 }
 
+//return 0: cluster is empty
+//return 1: not empty
 int cluster_empty_or_not(char* workdir){
     char statefile[FILENAME_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
