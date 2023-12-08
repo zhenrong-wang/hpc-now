@@ -630,11 +630,9 @@ int delete_local_tf_config(char* stackdir){
 //return 0, valid
 //return non-0, invalid
 int valid_vm_config_or_not(char* workdir, char* vm_config){
-    char stackdir[DIR_LENGTH]="";
     char config_list_file[FILENAME_LENGTH]="";
     char vm_config_ext[64]="";
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(config_list_file,"%s%sreconf.list",stackdir,PATH_SLASH);
+    sprintf(config_list_file,"%s%sconf%sreconf.list",workdir,PATH_SLASH,PATH_SLASH);
     if(file_empty_or_not(config_list_file)<1){
         return -1;
     }
@@ -2405,12 +2403,10 @@ int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords){
 }
 
 int check_reconfigure_list(char* workdir, int print_flag){
-    char stackdir[DIR_LENGTH]="";
     char single_line[64]="";
     char reconf_list[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(reconf_list,"%s%sreconf.list",stackdir,PATH_SLASH);
+    sprintf(reconf_list,"%s%sconf%sreconf.list",workdir,PATH_SLASH,PATH_SLASH);
     if((file_p=fopen(reconf_list,"r"))==NULL){
         return -1;
     }
@@ -2966,11 +2962,9 @@ int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role, int p
 //If not, return -1;
 FILE* check_regions_list_file(char* cluster_name){
     char workdir[DIR_LENGTH]="";
-    char stackdir[DIR_LENGTH]="";
     char region_list[FILENAME_LENGTH]="";
     get_workdir(workdir,cluster_name);
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(region_list,"%s%sregions.list",stackdir,PATH_SLASH);
+    sprintf(region_list,"%s%sconf%sregions.list",workdir,PATH_SLASH,PATH_SLASH);
     FILE* file_p=fopen(region_list,"r");
     return file_p;
 }
@@ -3084,13 +3078,11 @@ int valid_zone_or_not(char* cluster_name, char* zone){
 
 int get_default_zone(char* cluster_name, char* region, char* default_zone){
     char workdir[DIR_LENGTH]="";
-    char stackdir[DIR_LENGTH]="";
     char region_list[FILENAME_LENGTH]="";
     char region_ext1[64]="";
     char region_ext2[64]="";
     get_workdir(workdir,cluster_name);
-    create_and_get_stackdir(workdir,stackdir);
-    sprintf(region_list,"%s%sregions.list",stackdir,PATH_SLASH);
+    sprintf(region_list,"%s%sconf%sregions.list",workdir,PATH_SLASH,PATH_SLASH);
     snprintf(region_ext1,63,"[Region:%s]",region);
     snprintf(region_ext2,63,"[%s]",region);
     if(find_and_get(region_list,region_ext1,"","",2,region_ext2,"","",' ',2,default_zone)!=0){

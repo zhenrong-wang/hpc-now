@@ -138,10 +138,10 @@ int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_l
     if(file_exist_or_not(tf_conf)==1){
         printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one." RESET_DISPLAY "\n");
         if(code_loc_flag==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s %s", COPY_FILE_CMD,url_code,PATH_SLASH,tf_conf,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s %s", COPY_FILE_CMD,url_code,PATH_SLASH,tf_conf,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s", url_code,tf_conf);
+            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s", url_code,tf_conf);
         }
         if(system(cmdline)!=0){
             return 2;
@@ -248,6 +248,7 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
 
     get_workdir(workdir,cluster_name);
     if(get_cloud_flag(workdir,cloud_flag)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag." RESET_DISPLAY "\n");
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
@@ -272,12 +273,15 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         strcpy(cloud_name,"gcp");
     }
     else{
-        return -5;
-    }
-    if(create_init_dirs(workdir,stackdir,vaultdir,logdir,confdir)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag." RESET_DISPLAY "\n");
         return -1;
     }
-    if(get_static_conf_files(confdir,cloud_flag,code_loc_flag_local,url_code_root)!=0){
+    if(create_init_dirs(workdir,stackdir,vaultdir,logdir,confdir)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create working directories for this cluster." RESET_DISPLAY "\n");
+        return -1;
+    }
+    if(get_static_conf_files(confdir,cloud_name,code_loc_flag_local,url_code_root)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the static files for this cluster." RESET_DISPLAY "\n");
         return -1;
     }
     sprintf(tf_prep_conf,"%s%stf_prep.conf",confdir,PATH_SLASH);
@@ -289,6 +293,7 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     }
     FILE* file_p=fopen(tf_prep_conf,"w+");
     if(file_p==NULL){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a configuration file." RESET_DISPLAY "\n");
         return -1;
     }
     char default_region[32]="";
@@ -364,7 +369,6 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         strcpy(default_os_image,"centoss9");
     }
     strcpy(real_ht_flag,"ON");
-
     if(cmd_keyword_check(argc,argv,"--rg",real_region)!=0){
         if(batch_flag_local!=0){
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to select a region (Default: " HIGH_GREEN_BOLD "%s" RESET_DISPLAY "): ",default_region);
@@ -645,7 +649,7 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         fprintf(file_p,"hyperthreading      : %s\n",real_ht_flag);
     }
     if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0){
-        fprintf(file_p,"nfs_volume          : %s\n",real_nfs_volume);
+        fprintf(file_p,"nfs_volume          : %d\n",real_nfs_vol);
     }
     fclose(file_p);
     return 0;
@@ -983,7 +987,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         return 2;
     }    
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%sreconf.list",confdir,PATH_SLASH);
     read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_info);
     if(read_conf_flag!=0){
         print_read_conf_failed(read_conf_flag);
@@ -1147,6 +1151,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     insert_lines(filename_temp,"#INSERT_AMI_HERE",os_image);
     global_replace(filename_temp,"RG_NAME",unique_cluster_id);
     if(threads==1){ //Hyperthreading off
+        printf("%d------\n",threads);
         sprintf(string_temp,"cpu_core_count = %d",cpu_core_num);
         insert_lines(filename_temp,"#INSERT_HT_HERE",string_temp);
         insert_lines(filename_temp,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
@@ -1347,7 +1352,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
         return 2;
     }
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%sreconf.list",confdir,PATH_SLASH);
     read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_info);
     if(read_conf_flag!=0){
         print_read_conf_failed(read_conf_flag);
@@ -1355,7 +1360,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
         return 3;
     }
     node_user_num_fix(&init_info.node_num,&init_info.hpc_user_num);
-    sprintf(filename_temp,"%s%snas_zones.list",stackdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%snas_zones.list",confdir,PATH_SLASH);
     if(find_multi_keys(filename_temp,init_info.zone_id,"","","","")>0){
         strcpy(NAS_Zone,init_info.zone_id);
     }
@@ -1672,7 +1677,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
         return 2;
     }
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%sreconf.list",confdir,PATH_SLASH);
     read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_info);
     if(read_conf_flag!=0){
         print_read_conf_failed(read_conf_flag);
@@ -1680,7 +1685,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
         return 3;
     }
     node_user_num_fix(&init_info.node_num,&init_info.hpc_user_num);
-    sprintf(filename_temp,"%s%snas_zones.list",stackdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%snas_zones.list",confdir,PATH_SLASH);
     if(find_multi_keys(filename_temp,init_info.zone_id,"","","","")>0){
         strcpy(NAS_Zone,init_info.zone_id);
     }
@@ -2022,7 +2027,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
         return 2;
     }
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%sreconf.list",confdir,PATH_SLASH);
     read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_conf);
     if(read_conf_flag!=0){
         print_read_conf_failed(read_conf_flag);
@@ -2361,7 +2366,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
         return 2;
     }
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%sreconf.list",confdir,PATH_SLASH);
     read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_conf);
     if(read_conf_flag!=0){
         print_read_conf_failed(read_conf_flag);
@@ -2703,7 +2708,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
         return 2;
     }
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%sreconf.list",confdir,PATH_SLASH);
     read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_conf);
     if(read_conf_flag!=0){
         print_read_conf_failed(read_conf_flag);
@@ -2973,7 +2978,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         return 2;
     }
     sprintf(conf_file,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    sprintf(filename_temp,"%s%sreconf.list",stackdir,PATH_SLASH);
+    sprintf(filename_temp,"%s%sreconf.list",confdir,PATH_SLASH);
     read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_conf);
     if(read_conf_flag!=0){
         print_read_conf_failed(read_conf_flag);

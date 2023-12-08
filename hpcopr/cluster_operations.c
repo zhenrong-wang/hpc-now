@@ -1985,10 +1985,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_alicloud_root,confdir,PATH_SLASH);
+            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_alicloud_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -1996,10 +1996,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_qcloud_root,confdir,PATH_SLASH);
+            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_qcloud_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2007,10 +2007,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_aws_root,confdir,PATH_SLASH);
+            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_aws_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2018,10 +2018,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_hwcloud_root,confdir,PATH_SLASH);
+            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_hwcloud_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2029,10 +2029,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_baiducloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_baiducloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_baiducloud_root,confdir,PATH_SLASH);
+            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_baiducloud_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2040,10 +2040,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_azure_root,confdir,PATH_SLASH);
+            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_azure_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2051,10 +2051,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf %s%stf_prep.conf %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf -s -o %s%stf_prep.conf",url_gcp_root,confdir,PATH_SLASH);
+            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_gcp_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
