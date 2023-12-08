@@ -1,14 +1,15 @@
 [Region:cn-hangzhou] Hangzhou [Default]
+[cn-hangzhou] cn-hangzhou-j [Default]
 [cn-hangzhou] cn-hangzhou-b
 [cn-hangzhou] cn-hangzhou-e
 [cn-hangzhou] cn-hangzhou-f
 [cn-hangzhou] cn-hangzhou-g
 [cn-hangzhou] cn-hangzhou-h
 [cn-hangzhou] cn-hangzhou-i
-[cn-hangzhou] cn-hangzhou-j   [Default]
 [cn-hangzhou] cn-hangzhou-k
 
 [Region:cn-beijing] Beijing
+[cn-beijing] cn-beijing-j
 [cn-beijing] cn-beijing-a
 [cn-beijing] cn-beijing-b
 [cn-beijing] cn-beijing-c
@@ -18,7 +19,6 @@
 [cn-beijing] cn-beijing-g
 [cn-beijing] cn-beijing-h
 [cn-beijing] cn-beijing-i
-[cn-beijing] cn-beijing-j
 [cn-beijing] cn-beijing-k
 [cn-beijing] cn-beijing-l
 

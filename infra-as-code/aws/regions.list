@@ -1,11 +1,11 @@
 [Region:cn-north-1] [CN]Beijing
 [cn-north-1] cn-north-1a
-[cn-north-1] cn-north-1b
+[cn-north-1] cn-north-1b [Default]
 
 [Region:cn-northwest-1] [CN]Ningxia [Default]
 [cn-northwest-1] cn-northwest-1a
 [cn-northwest-1] cn-northwest-1b
-[cn-northwest-1] cn-northwest-1c
+[cn-northwest-1] cn-northwest-1c [Default]
 
 [Region:us-east-1] N.Virginia [Default]
 [us-east-1] us-east-1a

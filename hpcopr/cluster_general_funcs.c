@@ -3067,7 +3067,7 @@ int get_default_zone(char* cluster_name, char* region, char* default_zone){
     sprintf(region_list,"%s%sconf%sregions.list",workdir,PATH_SLASH,PATH_SLASH);
     snprintf(region_ext1,63,"[Region:%s]",region);
     snprintf(region_ext2,63,"[%s]",region);
-    if(find_and_get(region_list,region_ext1,"","",2,region_ext2,"","",' ',2,default_zone)!=0){
+    if(find_and_get(region_list,region_ext1,"","",2,region_ext2,"[Default]","",' ',2,default_zone)!=0){
         return 1;
     }
     return 0;
