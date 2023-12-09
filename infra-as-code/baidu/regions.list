@@ -5,21 +5,21 @@
 [bj] cn-bj-f
 
 [Region:bd] Baoding
-[bd] cn-bd-b
+[bd] cn-bd-b [Default]
 [bd] cn-bd-c
 [bd] cn-bd-d
 
 [Region:gz] Guangzhou
-[gz] cn-gz-c
-[gz] cn-gz-d
+[gz] cn-gz-c 
+[gz] cn-gz-d [Default]
 [gz] cn-gz-f
 
 [Region:su] Suzhou
-[su] cn-su-a
+[su] cn-su-a 
 [su] cn-su-b
 [su] cn-su-d
-[su] cn-su-f
+[su] cn-su-f [Default]
 [su] cn-su-h
 
 [Region:hk] HongKong
-[hk] cn-hk-a
+[hk] cn-hk-a [Default]

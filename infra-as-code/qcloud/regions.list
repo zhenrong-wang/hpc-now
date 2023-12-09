@@ -8,22 +8,22 @@
 
 [Region:ap-chengdu] Chengdu
 [ap-chengdu] ap-chengdu-1
-[ap-chengdu] ap-chengdu-2
+[ap-chengdu] ap-chengdu-2 [Default]
 
 [Region:ap-chongqing] Chongqing
-[ap-chongqing] ap-chongqing-1
+[ap-chongqing] ap-chongqing-1 [Default]
 
 [Region:ap-shanghai] Shanghai
 [ap-shanghai] ap-shanghai-1
 [ap-shanghai] ap-shanghai-2
 [ap-shanghai] ap-shanghai-3
 [ap-shanghai] ap-shanghai-4
-[ap-shanghai] ap-shanghai-5
+[ap-shanghai] ap-shanghai-5 [Default]
 
 [Region:ap-nanjing] Nanjing
 [ap-nanjing] ap-nanjing-1
 [ap-nanjing] ap-nanjing-2
-[ap-nanjing] ap-nanjing-3
+[ap-nanjing] ap-nanjing-3 [Default]
 
 [Region:ap-beijing] Beijing
 [ap-beijing] ap-beijing-1
@@ -31,45 +31,45 @@
 [ap-beijing] ap-beijing-3
 [ap-beijing] ap-beijing-4
 [ap-beijing] ap-beijing-5
-[ap-beijing] ap-beijing-6
+[ap-beijing] ap-beijing-6 [Default]
 [ap-beijing] ap-beijing-7
 
 [Region:ap-singapore] Singapore
 [ap-singapore] ap-singapore-1
 [ap-singapore] ap-singapore-2
-[ap-singapore] ap-singapore-3
+[ap-singapore] ap-singapore-3 [Default]
 [ap-singapore] ap-singapore-4
 
 [Region:ap-bangkok] Bangkok
 [ap-bangkok] ap-bangkok-1
-[ap-bangkok] ap-bangkok-2
-
+[ap-bangkok] ap-bangkok-2 [Default]
+ 
 [Region:ap-seoul] Seoul
 [ap-seoul] ap-seoul-1
-[ap-seoul] ap-seoul-2
+[ap-seoul] ap-seoul-2 [Default]
 
 [Region:ap-mumbai] Mumbai
-[ap-mumbai] ap-mumbai-1
+[ap-mumbai] ap-mumbai-1 [Default]
 
 [Region:ap-tokyo] Tokyo
 [ap-tokyo] ap-tokyo-1
-[ap-tokyo] ap-tokyo-2
+[ap-tokyo] ap-tokyo-2 [Default]
 
 [Region:ap-hongkong] HongKong
 [ap-hongkong] ap-hongkong-1
 [ap-hongkong] ap-hongkong-2
-[ap-hongkong] ap-hongkong-3
+[ap-hongkong] ap-hongkong-3 [Default]
 
 [Region:na-siliconvalley] SiliconValley
 [na-siliconvalley] na-siliconvalley-1
-[na-siliconvalley] na-siliconvalley-2
+[na-siliconvalley] na-siliconvalley-2 [Default]
 
 [Region:na-ashburn] Virginia
 [na-ashburn] na-ashburn-1
-[na-ashburn] na-ashburn-2
+[na-ashburn] na-ashburn-2 [Default]
 
 [Region:eu-frankfurt] Frankfurt
-[eu-frankfurt] eu-frankfurt-1
+[eu-frankfurt] eu-frankfurt-1 [Default]
 
 [Region:na-toronto] Toronto
-[na-toronto] na-toronto-1
+[na-toronto] na-toronto-1 [Default]
