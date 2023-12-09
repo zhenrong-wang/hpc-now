@@ -167,13 +167,25 @@ if [ -f /root/hostfile ]; then
   fi
   rm -rf /tmp/utils
   tar zvxf /hpc_apps/root_apps/init_master.tar.gz -C /tmp
-else
+  if [ $? -ne 0 ]; then
+    echo -e "[ FATAL: ] Failed to extract init utils to master node."
+    exit
+  fi
   if [ ! -f /hpc_apps/root_apps/init_compute.tar.gz ]; then
-    mkdir -p /hpc_apps/root_apps
     wget ${url_utils}init_compute.tar.gz -O /hpc_apps/root_apps/init_compute.tar.gz
   fi
+else
   rm -rf /tmp/utils
   tar zvxf /hpc_apps/root_apps/init_compute.tar.gz -C /tmp
+  if [ $? -ne 0 ]; then
+    rm -rf /tmp/utils
+    wget ${url_utils}init_compute.tar.gz -O /root/init_compute.tar.gz
+    tar zvxf /hpc_apps/root_apps/init_master.tar.gz -C /tmp
+    if [ $? -ne 0 ]; then
+      echo -e "[ FATAL: ] Failed to extract init utils to compute node."
+      exit
+    fi
+  fi
 fi
 
 /bin/cp -r ${scripts_path}* /usr/hpc-now/
