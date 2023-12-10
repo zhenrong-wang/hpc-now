@@ -1204,7 +1204,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
+            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -1540,7 +1540,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
+            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -1856,7 +1856,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
+            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -2217,7 +2217,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
+            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -2540,7 +2540,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
+            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -2828,7 +2828,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
+            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -3127,7 +3127,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Please run " HIGH_GREEN_BOLD "hpcopr viewlog --err --hist" RESET_DISPLAY " for details.\n");
+            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             gcp_credential_convert(workdir,"delete",0);
             return 7;
         }
