@@ -4,18 +4,28 @@
  * Originally written by Zhenrong WANG
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
- 
-+-----------+-----------+
-| AMD       | INTEL     |
-+-----------+-----------+
-| a128c256g | i128c256g |
-| a96c192g  | i96c192g  |
-| a64c128g  | i64c128g  |
-| a48c96g   | i48c96g   |
-| a32c64g   | i32c64g   |
-| a24c48g   | i24c48g   |
-| a16c32g   | i16c32g   |
-| a8c16g    | i8c16g    |
-| a4c8g     | i4c8g     |
-| a2c4g     | i2c4g     |
-+-----------+-----------+
+
++--------------------+--------------------+
+| AMD [1]            | INTEL              |
++--------------------+--------------------+
+| a232c432g [2]      |                    |
+| a192c384g [2]      |                    |
+| a128c256g          | i128c256g  [3]     |
+| a96c192g           | i96c192g   [4]     |
+|                    | i88c384g   [5]     |
+| a64c128g           | i64c128g           |
+| a48c96g            | i48c96g            |
+| a32c64g            | i32c64g            |
+| a24c48g            | i24c48g            |
+| a16c32g            | i16c32g            |
+| a8c16g             | i8c16g             |
+| a4c8g              | i4c8g              |
+| a2c4g              | i2c4g              |
++--------------------+--------------------+
+| IMPORTANT NOTES:
+| [1] AMD ONLY available for cn-north-4, cn-east-2, and cn-south-1
+| [2] ONLY availabld for cn-south-1
+| [3] ONLY available for cn- regions
+| [4] ONLY available for cn- regions and tr-west-1, ap-southeast-4
+| [5] ONLY available for ap-southeast-3 (Singapore)
+| Please read the notes above before selecting one config.

@@ -37,21 +37,25 @@
 [Region:cn-south-2] Shenzhen
 [cn-south-2] cn-south-2a [Default]
 
-[Region:la-north-2] Mexico
+[Region:na-mexico-1] Mexico-1
 [la-north-2] la-north-2a
 [la-north-2] la-north-2c [Default]
 
-[Region:la-south-2] Mexico
+[Region:la-north-2] Mexico-2
+[la-north-2] la-north-2a
+[la-north-2] la-north-2c [Default]
+
+[Region:la-south-2] SanDiego
 [la-south-2] la-south-2a [Default]
 
-[Region:eu-west-0] Paris
-[eu-west-0] eu-west-0a
-[eu-west-0] eu-west-0b
-[eu-west-0] eu-west-0c [Default]
+[*Region:eu-west-0] Paris
+[*eu-west-0] eu-west-0a
+[*eu-west-0] eu-west-0b
+[*eu-west-0] eu-west-0c [Default]
 
-[Region:eu-west-101] Dublin
-[eu-west-101] eu-west-101a
-[eu-west-101] eu-west-101b [Default]
+[*Region:eu-west-101] Dublin
+[*eu-west-101] eu-west-101a
+[*eu-west-101] eu-west-101b [Default]
 
 [Region:tr-west-1] Turkey
 [tr-west-1] tr-west-1a
@@ -84,3 +88,12 @@
 [Region:ap-southeast-1] HongKong
 [ap-southeast-1] ap-southeast-1a
 [ap-southeast-1] ap-southeast-1b [Default]
+
+[Region:af-south-1] SouthAfrica
+[af-south-1] af-south-1a
+[af-south-1] af-south-1b [Default]
+[af-south-1] af-south-1c
+
+[Region:sa-brazil-1] SaoPaulo
+[sa-brazil-1] sa-brazil-1a
+[sa-brazil-1] sa-brazil-1b [Default]

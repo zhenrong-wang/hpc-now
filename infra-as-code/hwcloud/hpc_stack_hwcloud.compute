@@ -10,7 +10,7 @@ resource "huaweicloud_compute_instance" "COMPUTE_NODE_N" {
   availability_zone = "DEFAULT_ZONE_ID"
   security_group_ids = [huaweicloud_networking_secgroup.group_intra.id]
   image_id = data.huaweicloud_images_images.OS_IMAGE.images[0].id
-  flavor_id = data.huaweicloud_compute_flavors.COMPUTE_INST.ids[0]
+  flavor_id = "${var.COMPUTE_INST}"
   system_disk_type = "GPSSD"
   system_disk_size = 40
   network {

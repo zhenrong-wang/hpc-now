@@ -1946,31 +1946,35 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     return 0;
 }
 
-int hw_intel_amd_generation(const char* region_id, char* intel_generation, char* amd_generation, int* amd_flag){
+int hw_vm_series(const char* region_id, char* intel_generation, char* tiny_series_name, int* amd_flag){
     if(strcmp(region_id,"cn-north-4")==0||strcmp(region_id,"cn-east-3")==0||strcmp(region_id,"cn-south-1")==0){
         *amd_flag=0;
-        strcpy(amd_generation,"ac7");
     }
     else{
-        *amd_flag=1;
-        strcpy(amd_generation,"");
+        *amd_flag=1; // No amd available
     }
-    if(strcmp(region_id,"na-mexico-1")==0||strcmp(region_id,"na-mexico-2")==0||strcmp(region_id,"sa-brazil-1")==0||strcmp(region_id,"la-south-2")==0||strcmp(region_id,"af-south-1")==0){
+    if(strcmp(region_id,"cn-north-4")==0||strcmp(region_id,"cn-north-9")==0||strcmp(region_id,"cn-east-3")==0||strcmp(region_id,"cn-south-1")==0||strcmp(region_id,"cn-southwest-2")==0){
+        strcpy(intel_generation,"c7");
+    }
+    else if(strcmp(region_id,"ap-southeast-4")==0||strcmp(region_id,"tr-west-1")==0){
+        strcpy(intel_generation,"c7n");
+    }
+    else if(strcmp(region_id,"la-north-2")==0||strcmp(region_id,"af-south-1")){
+        strcpy(intel_generation,"c6s");
+    }
+    else{
         strcpy(intel_generation,"c6");
-        return 1;
     }
-    else if(strcmp(region_id,"ap-southeast-1")==0){
-        strcpy(intel_generation,"c7");
-        return 2;
+    if(strcmp(region_id,"cn-north-9")==0||strcmp(region_id,"cn-east-3")==0||strcmp(region_id,"cn-southwest-2")==0||strcmp(region_id,"ap-southeast-1")==0){
+        strcpy(tiny_series_name,"s6");
     }
-    else if(strcmp(region_id,"tr-west-1")==0||strcmp(region_id,"ap-southeast-4")==0||strcmp(region_id,"ap-southeast-3")==0||strcmp(region_id,"ap-southeast-2")==0){
-        strcpy(intel_generation,"c7");
-        return 3;
+    else if(strcmp(region_id,"ap-southeast-4")==0||strcmp(region_id,"tr-west-1")==0){
+        strcpy(tiny_series_name,"s7n");
     }
     else{
-        strcpy(intel_generation,"c7");
-        return 4;
+        strcpy(tiny_series_name,"t6");
     }
+    return 0;
 }
 
 int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
@@ -2015,9 +2019,8 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     char compute_cpu_vendor[8]="";
     int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
     int amd_flavor_flag=1;
-    char intel_generation[8]="";
-    char amd_generation[8]="";
-    int intel_flavor_flag=0;
+    char intel_generation[16]="";
+    char tiny_series_name[16]="";
     char usage_logfile[FILENAME_LENGTH]="";
     int i;
 
@@ -2084,7 +2087,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
         return 1; // user denied.
     }
 
-    intel_flavor_flag=hw_intel_amd_generation(init_conf.region_id,intel_generation,amd_generation,&amd_flavor_flag);
+    hw_vm_series(init_conf.region_id,intel_generation,tiny_series_name,&amd_flavor_flag);
     generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
@@ -2120,22 +2123,8 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
     global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    if(amd_flavor_flag==1){
-        insert_lines(filename_temp,"#AMD_MACHINE_START","/*");
-        insert_lines(filename_temp,"#AMD_MACHINE_END","*/");
-    }
-    else{
-        global_replace(filename_temp,"AMD_GENERATION",amd_generation);
-    }
-    if(intel_flavor_flag==1||intel_flavor_flag==3){
-        insert_lines(filename_temp,"#C7_SPECIFIC","/*");
-        insert_lines(filename_temp,"#C6S_SPECIFIC","*/");
-    }
-    else if(intel_flavor_flag==2){
-        insert_lines(filename_temp,"#C7_SPECIFIC","/*");
-        insert_lines(filename_temp,"#C7N_HK_SPECIFIC","*/");
-    }
     global_replace(filename_temp,"INTEL_GENERATION",intel_generation);
+    global_replace(filename_temp,"TINY_SERIE_NAME",tiny_series_name);
 
     file_p=fopen(filename_temp,"a");
     sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
@@ -2269,15 +2258,8 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     sprintf(current_time,"%d:%d:%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
     master_vcpu=get_cpu_num(init_conf.master_inst);
     compute_vcpu=get_cpu_num(init_conf.compute_inst);
-    sprintf(filename_temp,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
-    reset_string(string_temp);
-    find_and_get(filename_temp,"flavor_id","","",1,"flavor_id","","",'.',3,string_temp);
-    database_vcpu=get_cpu_num(string_temp);
-    reset_string(string_temp);
-    sprintf(filename_temp,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"flavor_id","","",1,"flavor_id","","",'.',3,string_temp);
-    natgw_vcpu=get_cpu_num(string_temp);
-    reset_string(string_temp);
+    database_vcpu=1;
+    natgw_vcpu=1;
     if(*(init_conf.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }

@@ -859,8 +859,10 @@ int getstate(char* workdir, char* crypto_filename){
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_D")==0){
-        find_and_get(master_tf,"flavor_id","","",1,"flavor_id","","",'.',3,master_config);
-        find_and_get(compute_template,"flavor_id","","",1,"flavor_id","","",'.',3,compute_config);
+        find_and_get(master_tf,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,master_config);
+        find_and_get(compute_template,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp);
+        get_seq_string(string_temp,'}',1,compute_config);
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         find_and_get(master_tf,"instance_spec","","",1,"instance_spec","","",'.',3,master_config);
