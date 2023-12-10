@@ -180,7 +180,7 @@ else
   if [ $? -ne 0 ]; then
     rm -rf /tmp/utils
     wget ${url_utils}init_compute.tar.gz -O /root/init_compute.tar.gz
-    tar zvxf /hpc_apps/root_apps/init_master.tar.gz -C /tmp
+    tar zvxf /root/init_compute.tar.gz -C /tmp
     if [ $? -ne 0 ]; then
       echo -e "[ FATAL: ] Failed to extract init utils to compute node."
       exit

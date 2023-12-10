@@ -361,7 +361,7 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         strcpy(default_os_image,"centoss9");
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        strcpy(default_region,"az.Japan-East"); //Azure
+        strcpy(default_region,"Japan-East"); //Azure
         strcpy(default_zone,"*NULL*");
         strcpy(default_master_inst,"i4c8g");
         strcpy(default_compute_inst,"i4c8g");
@@ -430,6 +430,9 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
             printf(FATAL_RED_BOLD "[ FATAL: ] The zone name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid for region " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " . Exit now." RESET_DISPLAY "\n",real_zone,real_region);
             goto invalid_conf;
         }
+    }
+    else{
+        strcpy(real_zone,"null no-need-to-specify");
     }
     if(cmd_keyword_check(argc,argv,"--nn",real_node_num_string)!=0){
         if(batch_flag_local!=0){
@@ -643,7 +646,12 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     fprintf(file_p,"# to edit it manually. If need to do so, please follow the strict format.\n");
     fprintf(file_p,"ITEM_NAME           : CONFIGURATION  \n");
     fprintf(file_p,"cluster_id          : %s do-not-change\n",cluster_name);
-    fprintf(file_p,"region_id           : %s\n",real_region);
+    if(strcmp(cloud_flag,"CLOUD_F")!=0){
+        fprintf(file_p,"region_id           : %s\n",real_region);
+    }
+    else{
+        fprintf(file_p,"region_id           : az.%s\n",real_region);
+    }
     fprintf(file_p,"zone_id             : %s\n",real_zone);
     fprintf(file_p,"node_num            : %d\n",real_node_num);
     fprintf(file_p,"hpc_user_num        : %d\n",real_user_num);
