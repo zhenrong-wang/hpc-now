@@ -363,7 +363,7 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
         strcpy(default_region,"Japan-East"); //Azure
         strcpy(default_zone,"*NULL*");
-        strcpy(default_master_inst,"i4c8g");
+        strcpy(default_master_inst,"i8c16g");
         strcpy(default_compute_inst,"i4c8g");
         strcpy(default_os_image,"*Oracle_Linux_9.2*-IMMUTABLE");
     }
