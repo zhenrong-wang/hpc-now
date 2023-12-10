@@ -103,10 +103,10 @@ int get_static_conf_files(char* confdir, char* cloud_name, int code_loc_flag, ch
         snprintf(filename_temp,511,"%s%snas_zones.list",confdir,PATH_SLASH);
         if(file_exist_or_not(filename_temp)!=0){
             if(code_loc_flag==1){
-                sprintf(cmdline,"%s %s%snas_zons_%s.txt %s %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,filename_temp,SYSTEM_CMD_REDIRECT);
+                sprintf(cmdline,"%s %s%snas_zones_%s.txt %s %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,filename_temp,SYSTEM_CMD_REDIRECT);
             }
             else{
-                sprintf(cmdline,"curl %snas_zons_%s.txt -o %s -s",url_code,cloud_name,filename_temp);
+                sprintf(cmdline,"curl %snas_zones_%s.txt -o %s -s",url_code,cloud_name,filename_temp);
             }
             if(system(cmdline)!=0){
                 return 2;
