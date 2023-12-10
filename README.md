@@ -61,7 +61,7 @@ Thanks to [Terraform](http://www.terraform.io) and [openTofu](https://github.com
 
 In this project, we are developing several components:
 
--  **installer**  : HPC-NOW service installer. It requires administrator or root privilege to run.
+-  **installer**  : HPC-NOW service installer. It requires administrator or root privilege to run [why?](#35-the-installer-commands).
 -  **hpcopr**     : HPC Operator. The main component that manages the HPC clusters, users, jobs, data, monitoring, usage, etc.
 -  **now-crypto** : An independent cryptography module that encrypts and decrypts the files containing sensitive information.
 -  **hpcmgr**    : A utility running in every cluster's master node to communicate with the operator.
@@ -120,7 +120,7 @@ If everything goes well, the binaries will be built to the `build` folder.
 
 ### **Step 1. Run the installer**
 
-*Administrator or root privilege is required.*
+*Temporary Administrator or root privilege is required to run the installer [why?](#35-the-installer-commands).*
 
 - For **Microsoft Windows** : 
     
