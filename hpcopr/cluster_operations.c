@@ -863,7 +863,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     }
     printf(GENERAL_BOLD "                            C A U T I O N !\n\n");
     printf("|* YOU ARE DELETING THE WHOLE CLUSTER - INCLUDING ALL THE NODES AND DATA!\n");
-    printf("|*                       THIS OPERATION IS UNRECOVERABLE!\n\n");
+    printf("|*                  THIS OPERATION IS UNRECOVERABLE!\n\n");
     printf("                            C A U T I O N !\n");
     if(strcmp(force_flag,"force")==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Destroying the current cluster *WITHOUT* confirmation." RESET_DISPLAY "\n");

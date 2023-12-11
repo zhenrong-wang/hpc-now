@@ -32,6 +32,7 @@ rm -rf /hpc_apps && rm -rf /hpc_data
 ln -s /mnt/sdb/hpc_apps /hpc_apps
 ln -s /mnt/sdb/hpc_data /hpc_data
 yum -y install rpcbind nfs-utils
+echo -e "${huaweicloud_compute_volume_attach.master_disk_attach.id}" >> /dev/null 2>&1
 mount -t nfs -o vers=4.0 ${huaweicloud_compute_instance.master.access_ip_v4}:/mnt/sdb/hpc_apps /mnt/sdb/hpc_apps
 mount -t nfs -o vers=4.0 ${huaweicloud_compute_instance.master.access_ip_v4}:/mnt/sdb/hpc_data /mnt/sdb/hpc_data
 echo -e "${huaweicloud_compute_instance.master.access_ip_v4}:/mnt/sdb/hpc_apps /mnt/sdb/hpc_apps nfs vers=4,minorversion=0,hard,timeo=600,retrans=2 0 0" >> /etc/fstab
