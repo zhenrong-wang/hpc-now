@@ -29,6 +29,7 @@ resource "tencentcloud_instance" "COMPUTE_NODE_N" {
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 mkdir /hpc_apps && mkdir /hpc_data
 hostnamectl set-hostname COMPUTE_NODE_N
+echo "${var.compute_passwd}" | passwd root --stdin >> /dev/null 2>&1
 yum -y install nfs-utils
 mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_apps.mount_ip}:/ /hpc_apps
 mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_data.mount_ip}:/ /hpc_data

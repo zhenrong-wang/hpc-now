@@ -26,6 +26,7 @@ resource "alicloud_instance" "master" {
 #!/bin/bash
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 hostnamectl set-hostname master
+echo -e "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
 rm -rf /root/.ssh/id_rsa.pub
 rm -rf /root/.ssh/id_rsa
 rm -rf /root/.ssh/authorized_keys
