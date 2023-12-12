@@ -2073,6 +2073,7 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     sprintf(cmdline,"%s %s%stf_prep.conf",EDITOR_CMD,confdir,PATH_SLASH);
     system(cmdline);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The configuration file has been modified and saved.\n");
     return 0;
 }
 

@@ -310,8 +310,8 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     if(file_exist_or_not(tf_prep_conf)==0){
         if(cmd_flag_check(argc,argv,"--force")!=0){
             if(batch_flag_local==0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Please use " RESET_DISPLAY WARN_YELLO_BOLD "--force" RESET_DISPLAY FATAL_RED_BOLD " flag to override the current config file." RESET_DISPLAY "\n");
-                return -3; // If the conf file already exists, exit, unless force specified.
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Config file found (downloaded or saved). Using it now." RESET_DISPLAY "\n");
+                return 0; // If the conf file already exists, exit, unless force specified or batch mode.
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Config file found. Input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to use it, others to abandon.\n");
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
@@ -321,8 +321,14 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
             if(strcmp(confirm,CONFIRM_STRING)==0){
                 return 0;
             }
+            else{
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Previous config file abandoned. Creating a new one.\n");
+            }
         }
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Previous config file abandoned. Creating a new one.\n");
+        else{
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Config file found (downloaded or saved). Using it now." RESET_DISPLAY "\n");
+            return 0;
+        }   
     }
     
     if(strcmp(cloud_flag,"CLOUD_A")==0){
