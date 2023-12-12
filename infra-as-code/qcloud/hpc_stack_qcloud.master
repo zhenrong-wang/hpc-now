@@ -27,12 +27,12 @@ resource "tencentcloud_instance" "master" {
   user_data_raw = <<EOF
 #!/bin/bash
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+hostnamectl set-hostname master
+echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
 yum -y install at
 systemctl start atd && systemctl enable atd
 mkdir /hpc_apps && mkdir /hpc_data
 mkdir -p /usr/hpc-now/
-hostnamectl set-hostname master
-echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
 rm -rf /root/.ssh/id_rsa.pub
 rm -rf /root/.ssh/id_rsa
 rm -rf /root/.ssh/authorized_keys
