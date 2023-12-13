@@ -424,22 +424,47 @@ int byte_write_decryption(FILE* file_p, uint_8bit (*state)[4]){
     return 0;
 }
 
+uint_8bit char_to_hex(unsigned char x){
+    if(x=='0'||x=='9'){
+        return x-='0';
+    }
+    else if(x>'0'&&x<'9'){
+        return x-='0';
+    }
+    else if(x=='A'||x=='F'){
+        return x-'A'+10;
+    }
+    else if(x>'A'&&x<'F'){
+        return x-'A'+10;
+    }
+    else if(x=='a'||x=='f'){
+        return x-'a'+10;
+    }
+    else if(x>'a'&&x<'f'){
+        return x-'a'+10;
+    }
+    else{
+        return 255;
+    }
+}
+
 //convert an MD5(char [32]) to a 128-bit AES key.
 int md5convert(unsigned char* md5string, uint_8bit* key, uint_8bit key_length){
     int length=strlen(md5string);
     int i;
     uint_8bit a,b;
+    uint_8bit m,n;
     if(length!=32){ //If the md5string width is not 32, stop and exit.
         return -1;
     }
     for(i=0;i<32;i++){
-        if(md5string[i]<'0'||md5string[i]>'z'){
+        if(md5string[i]<'0'||md5string[i]>'f'){
             return -1;
         }
         else if(md5string[i]>'9'&&md5string[i]<'A'){
             return -1;
         }
-        else if(md5string[i]>'Z'&&md5string[i]<'a'){
+        else if(md5string[i]>'F'&&md5string[i]<'a'){
             return -1;
         }
         else{
@@ -450,8 +475,11 @@ int md5convert(unsigned char* md5string, uint_8bit* key, uint_8bit key_length){
         return -3;
     }
     for(i=0;i<16;i++){
-        a=md5string[i]&0x0F; //Get the lower 4 bits
-        b=md5string[i+1]&0x0F; //Get the lower 4 bits
+        a=char_to_hex(md5string[i<<1])&0x0F; //Get the lower 4 bits
+        b=char_to_hex(md5string[(i<<1)^0x01])&0x0F; //Get the lower 4 bits
+        if(a==255||b==255){
+            return -1;
+        }
         key[i]=(a<<4)^b;
     }
     return 0;
