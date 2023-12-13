@@ -31,17 +31,17 @@ int cluster_role_detect(char* workdir, char* cluster_role, char* cluster_role_ex
     sprintf(cloud_secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     sprintf(cluster_summary,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
     sprintf(user_passwords,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
-    if(file_empty_or_not(cloud_secret_file)>1){
+    if(file_empty_or_not(cloud_secret_file)>0){
         strcpy(cluster_role,"opr");
         strcpy(cluster_role_ext,"opr  ");
         return 0;
     }
-    if(file_empty_or_not(cluster_summary)>1){
+    if(file_empty_or_not(cluster_summary)>0){
         strcpy(cluster_role,"admin");
         strcpy(cluster_role_ext,"admin");
         return 0;
     }
-    if(file_empty_or_not(user_passwords)>1){
+    if(file_empty_or_not(user_passwords)>0){
         strcpy(cluster_role,"user");
         strcpy(cluster_role_ext,"user ");
         return 0;
