@@ -154,10 +154,7 @@ int rot_left(uint_32bit a, uint_8bit n, uint_32bit* b){
     uint_8bit a2=get_byte(a,2);
     uint_8bit a1=get_byte(a,1);
     uint_8bit a0=get_byte(a,0);
-    if(n>3){
-        return -1; //Make sure the rotation rounds<3
-    }
-    else if(n==0){
+    if(n==0){
         *b=a; //If no rotation, just copy the number and return 0
         return 0;
     }
@@ -173,6 +170,9 @@ int rot_left(uint_32bit a, uint_8bit n, uint_32bit* b){
         *b=((a0<<24)&0xFF000000)^((a3<<16)&0xFF0000)^((a2<<8)&0xFF00)^(a1&0xFF); //Push the bytes to b, with rotation 3
         return 0;
     }
+    else{
+        return -1; //Make sure the rotation rounds<3
+    }
 }
 
 //Right-direction rotation is a reverse rotation to left.
@@ -181,7 +181,7 @@ int rot_right(uint_32bit a, uint_8bit n, uint_32bit* b){
 }
 
 int ShiftRows(uint_8bit (*state)[4]){
-    int i,j;
+    int i;
     uint_32bit a,b;
     for(i=1;i<4;i++){
         a=assem_row(state[i]);
@@ -194,7 +194,7 @@ int ShiftRows(uint_8bit (*state)[4]){
 }
 
 int InvShiftRows(uint_8bit (*state)[4]){
-    int i,j;
+    int i;
     uint_32bit a,b;
     for(i=1;i<4;i++){
         a=assem_row(state[i]);
@@ -424,7 +424,7 @@ int byte_write_decryption(FILE* file_p, uint_8bit (*state)[4]){
     return 0;
 }
 
-uint_8bit char_to_hex(unsigned char x){
+uint_8bit char_to_hex(char x){
     if(x=='0'||x=='9'){
         return x-='0';
     }
@@ -449,11 +449,10 @@ uint_8bit char_to_hex(unsigned char x){
 }
 
 //convert an MD5(char [32]) to a 128-bit AES key.
-int md5convert(unsigned char* md5string, uint_8bit* key, uint_8bit key_length){
+int md5convert(char* md5string, uint_8bit* key, uint_8bit key_length){
     int length=strlen(md5string);
     int i;
     uint_8bit a,b;
-    uint_8bit m,n;
     if(length!=32){ //If the md5string width is not 32, stop and exit.
         return -1;
     }

@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.2.1.0027"
+#define CORE_VERSION_CODE "0.3.1.0001"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -26,7 +26,7 @@
 #define HPC_NOW_ROOT_DIR "c:\\programdata\\hpc-now\\"
 #define TF_LOCAL_PLUGINS "c:\\programdata\\hpc-now-tf\\"
 
-#define NOW_CRYPTO_EXEC "c:\\hpc-now\\utils\\now-crypto.exe"
+#define NOW_CRYPTO_EXEC "c:\\hpc-now\\utils\\now-crypto-aes.exe"
 #define TERRAFORM_EXEC "c:\\hpc-now\\utils\\terraform.exe"
 #define TOFU_EXEC "c:\\hpc-now\\utils\\tofu.exe"
 #define HPCOPR_EXEC "C:\\hpc-now\\hpcopr.exe"
@@ -92,7 +92,7 @@
 #define HPC_NOW_ROOT_DIR "/usr/.hpc-now/"
 #define TF_LOCAL_PLUGINS "/usr/share/terraform/"
 
-#define NOW_CRYPTO_EXEC "/home/hpc-now/.bin/utils/now-crypto.exe"
+#define NOW_CRYPTO_EXEC "/home/hpc-now/.bin/utils/now-crypto-aes.exe"
 #define TERRAFORM_EXEC "/home/hpc-now/.bin/utils/terraform"
 #define TOFU_EXEC "/home/hpc-now/.bin/utils/tofu"
 #define HPCOPR_EXEC "/home/hpc-now/.bin/hpcopr"
@@ -158,7 +158,7 @@
 #define HPC_NOW_ROOT_DIR "/Applications/.hpc-now/"
 #define TF_LOCAL_PLUGINS "/Library/Application Support/io.terraform/"
 
-#define NOW_CRYPTO_EXEC "/Users/hpc-now/.bin/utils/now-crypto.exe"
+#define NOW_CRYPTO_EXEC "/Users/hpc-now/.bin/utils/now-crypto-aes.exe"
 #define TERRAFORM_EXEC "/Users/hpc-now/.bin/utils/terraform"
 #define TOFU_EXEC "/Users/hpc-now/.bin/utils/tofu"
 #define HPCOPR_EXEC "/Users/hpc-now/.bin/hpcopr"

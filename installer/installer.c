@@ -66,14 +66,14 @@ void print_help_installer(void){
     printf("|     <> ABSOLUTE_PATH general_option advanced_option(s)\n");
     printf("|         -> Example 1: C:\\Users\\ABC\\installer.exe install --accept\n");
     printf("|     <> RELATIVE_PATH general_option advanced_options\n");
-    printf("|         -> Example 2: .\\installer.exe install --cloc .\\now-crypto.exe\n");
+    printf("|         -> Example 2: .\\installer.exe install --cloc .\\now-crypto-aes.exe\n");
 #else
     printf("| Usage: Open a Terminal.\n");
     printf("|        Type the command using either ways below:\n");
     printf("|     <> sudo ABSOLUTE_PATH general_option advanced_option(s)\n");
     printf("|         -> Example 1: sudo /home/ABC/installer.exe install --accept\n");
     printf("|     <> sudo RELATIVE_PATH general_option advanced_option(s)\n");
-    printf("|         -> Example 2: sudo ./installer.exe install --cloc ./now-crypto.exe\n");
+    printf("|         -> Example 2: sudo ./installer.exe install --cloc ./now-crypto-aes.exe\n");
 #endif
     printf("| general_option:\n");
     printf("|        install          : Install or repair the HPC-NOW Services on your device.\n");
@@ -90,7 +90,7 @@ void print_help_installer(void){
     printf("|                           filesystem path are accepted. You should guarantee that\n");
     printf("|                           the location points to a valid hpcopr executable.\n");
     printf("|        --cloc LOC   * Only valid for install or update option.\n");
-    printf("|                         : Provide your own location of now-crypto.exe, similar to\n");
+    printf("|                         : Provide your own location of now-crypto, similar to\n");
     printf("|                           the --hloc parameter above.\n");
     printf("|        --hver VER   * Only valid when hpcoprloc is absent.\n");
     printf("|                         : Specify the version code of hpcopr, i.e. 0.2.0.0161\n");
@@ -351,16 +351,16 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
         sprintf(cmdline1,"%s %s %s %s ",COPY_FILE_CMD,hpcopr_loc,HPCOPR_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
     if(crypto_loc_flag==-1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto.exe' from the default URL.\n");
-        sprintf(cmdline2,"curl -s %snow-crypto-%s.exe -o %s",DEFAULT_URL_NOW_CRYPTO,FILENAME_SUFFIX_SHORT,NOW_CRYPTO_EXEC);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto' from the default URL.\n");
+        sprintf(cmdline2,"curl -s %snow-crypto-aes-%s.exe -o %s",DEFAULT_URL_NOW_CRYPTO,FILENAME_SUFFIX_SHORT,NOW_CRYPTO_EXEC);
     }
     else if(crypto_loc_flag==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto.exe' from the specified URL:\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto' from the specified URL:\n");
         printf("|       -> %s\n",now_crypto_loc);
         sprintf(cmdline2,"curl -s %s -o %s",now_crypto_loc,NOW_CRYPTO_EXEC);
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the component 'now-crypto.exe' from local place:\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the component 'now-crypto' from local place:\n");
         printf("|       -> %s\n",now_crypto_loc);
         sprintf(cmdline2,"%s %s %s %s",COPY_FILE_CMD,now_crypto_loc,NOW_CRYPTO_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
@@ -372,7 +372,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'hpcopr'." RESET_DISPLAY "\n");
         }
         if(run_flag2!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'now-crypto.exe'." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'now-crypto'." RESET_DISPLAY "\n");
         }
         printf(FATAL_RED_BOLD "[ FATAL: ] This installation process is terminated. If you specified the\n");
         printf("|          location of hpcopr executable, please make sure the location \n");
@@ -427,7 +427,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'hpcopr'." RESET_DISPLAY "\n");
         }
         if(run_flag2!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'now-crypto.exe'." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'now-crypto'." RESET_DISPLAY "\n");
         }
         printf(FATAL_RED_BOLD "[ FATAL: ] This installation process is terminated. If you specified the\n");
         printf("|          location of hpcopr executable, please make sure the location \n");
@@ -499,7 +499,7 @@ linux_install_done:
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'hpcopr'." RESET_DISPLAY "\n");
         }
         if(run_flag2!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'now-crypto.exe'." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'now-crypto'." RESET_DISPLAY "\n");
         }
         printf(FATAL_RED_BOLD "[ FATAL: ] This installation process is terminated. If you specified the\n");
         printf("|          location of hpcopr executable, please make sure the location \n");
@@ -718,8 +718,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     system("takeown /f c:\\hpc-now\\hpcopr.exe /d y > nul 2>&1");
     system("icacls c:\\hpc-now\\hpcopr.exe /grant Administrators:F > nul 2>&1");
-    system("takeown /f c:\\hpc-now\\utils\\now-crypto.exe /d y > nul 2>&1");
-    system("icacls c:\\hpc-now\\utils\\now-crypto.exe /grant Administrators:F > nul 2>&1");
+    system("takeown /f c:\\hpc-now\\utils\\now-crypto-aes.exe /d y > nul 2>&1");
+    system("icacls c:\\hpc-now\\utils\\now-crypto-aes.exe /grant Administrators:F > nul 2>&1");
 #elif __linux__
     if(system("ls -la /home/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
         printf("[ -INFO- ] Moving previous utilities to the new directory ...\n");
@@ -766,16 +766,16 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         sprintf(cmdline1,"%s %s %s %s ",COPY_FILE_CMD,hpcopr_loc,HPCOPR_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
     if(crypto_loc_flag==-1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto.exe' from the default URL.\n");
-        sprintf(cmdline2,"curl -s %snow-crypto-%s.exe -o %s",DEFAULT_URL_NOW_CRYPTO,FILENAME_SUFFIX_SHORT,NOW_CRYPTO_EXEC);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto' from the default URL.\n");
+        sprintf(cmdline2,"curl -s %snow-crypto-aes-%s.exe -o %s",DEFAULT_URL_NOW_CRYPTO,FILENAME_SUFFIX_SHORT,NOW_CRYPTO_EXEC);
     }
     else if(crypto_loc_flag==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto.exe' from the specified URL:\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto' from the specified URL:\n");
         printf("|       -> %s\n",now_crypto_loc);
         sprintf(cmdline2,"curl -s %s -o %s",now_crypto_loc,NOW_CRYPTO_EXEC);
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the component 'now-crypto.exe' from local place:\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the component 'now-crypto' from local place:\n");
         printf("|       -> %s\n",now_crypto_loc);
         sprintf(cmdline2,"%s %s %s %s",COPY_FILE_CMD,now_crypto_loc,NOW_CRYPTO_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
@@ -786,7 +786,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'hpcopr'." RESET_DISPLAY "\n");
         }
         if(run_flag2!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'now-crypto.exe'." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'now-crypto'." RESET_DISPLAY "\n");
         }
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to update the HPC-NOW services. Please check and make sure:\n");
         printf("|          1. The HPC-NOW Services have been installed previously.\n");
@@ -810,7 +810,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
-    system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto.exe /grant hpc-now:F /t > nul 2>&1");
+    system("icacls c:\\ProgramData\\hpc-now\\bin\\now-crypto-aes.exe /grant hpc-now:F /t > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
     if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){

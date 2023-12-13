@@ -989,24 +989,24 @@ int check_and_install_prerequisitions(int repair_flag){
 
     file_check_flag=file_validity_check(NOW_CRYPTO_EXEC,repair_flag,md5_now_crypto_var);
     if(file_check_flag==1){
-        printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the now-crypto.exe ...\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the now-crypto executable ...\n");
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         if(now_crypto_loc_flag_var==1){
 #ifdef _WIN32
-            sprintf(cmdline,"copy /y %s\\now-crypto-win.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            sprintf(cmdline,"copy /y %s\\now-crypto-aes-win.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __linux__
-            sprintf(cmdline,"/bin/cp %s/now-crypto-lin.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            sprintf(cmdline,"/bin/cp %s/now-crypto-aes-lin.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __APPLE__
-            sprintf(cmdline,"/bin/cp %s/now-crypto-dwn.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            sprintf(cmdline,"/bin/cp %s/now-crypto-aes-dwn.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #endif
         }
         else{
 #ifdef _WIN32
-            sprintf(cmdline,"curl %snow-crypto-win.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            sprintf(cmdline,"curl %snow-crypto-aes-win.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __linux__
-            sprintf(cmdline,"curl %snow-crypto-lin.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            sprintf(cmdline,"curl %snow-crypto-aes-lin.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __APPLE__
-            sprintf(cmdline,"curl %snow-crypto-dwn.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            sprintf(cmdline,"curl %snow-crypto-aes-dwn.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #endif
         }
 //        printf("%s,,,,,\"\n",cmdline);

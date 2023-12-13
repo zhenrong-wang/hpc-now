@@ -258,7 +258,7 @@ int reset_vers_md5_vars(void){
     }
     if(tf_loc_flag_var==1&&now_crypto_loc_flag_var==1){
         sprintf(tf_md5_file,"%s%stf-md5-%s-v2.dat",url_tf_root_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
-        sprintf(crypto_md5_file,"%s%scrypto-md5-%s-v2.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
+        sprintf(crypto_md5_file,"%s%scrypto-md5-%s-v3.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
         if(file_exist_or_not(tf_md5_file)!=0||file_exist_or_not(crypto_md5_file)!=0){
             fclose(file_p);
             return -1;
@@ -277,7 +277,7 @@ int reset_vers_md5_vars(void){
     else if(tf_loc_flag_var==0&&now_crypto_loc_flag_var==0){
         fclose(file_p);
         sprintf(cmdline1,"curl -s %stf-md5-%s-v2.dat >> %s",url_tf_root_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
-        sprintf(cmdline2,"curl -s %scrypto-md5-%s-v2.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
+        sprintf(cmdline2,"curl -s %scrypto-md5-%s-v3.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
         if(system(cmdline1)!=0||system(cmdline2)!=0){
             return 1;
         }
@@ -288,7 +288,7 @@ int reset_vers_md5_vars(void){
         if(system(cmdline1)!=0){
             return 1;
         }
-        sprintf(crypto_md5_file,"%s%scrypto-md5-%s-v2.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
+        sprintf(crypto_md5_file,"%s%scrypto-md5-%s-v3.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
         if(file_exist_or_not(crypto_md5_file)!=0){
             return -1;
         }  
@@ -311,7 +311,7 @@ int reset_vers_md5_vars(void){
         }
         fclose(file_p_1);
         fclose(file_p);
-        sprintf(cmdline2,"curl -s %scrypto-md5-%s-v2.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
+        sprintf(cmdline2,"curl -s %scrypto-md5-%s-v3.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
         if(system(cmdline2)!=0){
             return 1;
         }
