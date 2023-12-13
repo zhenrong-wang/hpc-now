@@ -952,14 +952,14 @@ int valid_loc_format_or_not(char* loc_string){
 
 int get_valid_verlist(void){
     char cmdline[CMDLINE_LENGTH]="";
-    sprintf(cmdline,"curl -s %sverlist.txt",DEFAULT_URL_HPCOPR_LATEST);
+    sprintf(cmdline,"curl -s %sverlist-0.3.x.txt",DEFAULT_URL_HPCOPR_LATEST);
     return system(cmdline);
 }
 
 int version_valid(char* hpcopr_ver){
     char cmdline[CMDLINE_LENGTH]="";
     char ver_ext[256]="";
-    sprintf(cmdline,"curl -s %sverlist.txt -o verlist.tmp",DEFAULT_URL_HPCOPR_LATEST);
+    sprintf(cmdline,"curl -s %sverlist-0.3.x.txt -o verlist.tmp",DEFAULT_URL_HPCOPR_LATEST);
     if(system(cmdline)!=0){
         return -1;
     }
