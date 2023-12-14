@@ -16,6 +16,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #define CRYPTO_VERSION "0.3.0"
 
@@ -361,23 +364,73 @@ int now_AES_decryption(uint_8bit (*state)[4], uint_8bit (*out)[4], uint_8bit* ke
     return 0;
 }
 
+int get_file_size(char* filename){
+    int fd=-1;
+    struct stat file_stat;
+    fd=open(filename,O_RDONLY);
+    if(fd==-1){
+        return -1;
+    }
+    if(fstat(fd,&file_stat)==-1){
+        close(fd);;
+        return -1;
+    }
+    close(fd);
+    return file_stat.st_size;
+}
+
+uint_8bit get_padding_num(char* filename){
+    int flag=get_file_size(filename);
+    if(flag==-1){
+        return -1;
+    }
+    return 16-flag%16;
+}
+
 //Read 128bit per time.
-int byte_read(FILE* file_p, uint_8bit (*state)[4]){
+//return -1: FILE I/O error
+//return 1: read 0 bytes
+//return 3: Padding and file end
+//return 0: continue reading
+int byte_read_encryption(FILE* file_p, uint_8bit (*state)[4]){
     uint_8bit buffer[16]={0x00};
+    uint_8bit read_flag;
+    uint_8bit padding_num;
+    uint_8bit flag=0;
+    uint_8bit* pt_head=state[0];
+    uint_8bit* pt;
     int i,j;
     if(file_p==NULL){
         return -1;
     }
-    if(!feof(file_p)){
-        fread(buffer,sizeof(buffer),1,file_p);
+    read_flag=fread(buffer,sizeof(uint_8bit),16,file_p)^0x00; // Read 128 bit
+    if(read_flag==0){
+        return 1;
     }
-    for(i=0;i<4;i++){
-        for(j=0;j<4;j++){
-            state[j][i]=*(buffer+i*4+j);
+    padding_num=16-read_flag;
+    i=0;
+    flag=0;
+    pt=pt_head+i;
+    while(flag+padding_num<16){
+        *(pt)=*(buffer+flag);
+        flag++;
+        pt+=4;
+        if(flag%4==0){
+            i++;
+            pt=pt_head+i;
         }
     }
-    if(feof(file_p)){
-        return 1;
+    for(j=0;j<padding_num;j++){
+        *(pt)=padding_num;
+        pt+=4;
+        flag++;
+        if(flag%4==0){
+            i++;
+            pt=pt_head+i;
+        }
+    }
+    if(padding_num!=0){
+        return 3;
     }
     return 0;
 }
@@ -401,21 +454,68 @@ int byte_write_encryption(FILE* file_p, uint_8bit (*state)[4]){
     return 0;
 }
 
-//Write to an decrypted file
-//When the paddling 0x00 found, will exit and report to the upper-level function
-int byte_write_decryption(FILE* file_p, uint_8bit (*state)[4]){
+//Read an decrypted file. 128bit per time.
+//The decrypted file is already 128bit width
+//return -1: FILE I/O error, faild to read the file
+//return -3: Abnormal. Not supposed to happen.
+//return 0: continue reading without eof
+//return 1: Find end found.
+int byte_read_decryption(FILE* file_p, uint_8bit (*state)[4]){
+    uint_8bit buffer[16]={0x00};
     int i,j;
-    uint_8bit* pt_head=state[0];
-    uint_8bit* pt;
+    int read_flag=0;
     if(file_p==NULL){
         return -1;
     }
+    read_flag=fread(buffer,sizeof(uint_8bit),16,file_p); // Read 128 bit
+    if(read_flag!=0&&read_flag!=16){
+        return -3;
+    }
+    else if(read_flag==0){
+        return 1;
+    }
+    for(i=0;i<4;i++){
+        for(j=0;j<4;j++){
+            state[j][i]=*(buffer+i*4+j);
+        }
+    }
+    return 0; // Continue reading.
+}
+
+//Write to an decrypted file
+//If last_block_flag==0, then write last block and check padding; else write normal block.
+//When the paddling 0x00 found, will exit and report to the upper-level function
+//return -1: FILE I/O output error
+//return 1*: Write end exit the loop
+//return 0: Continue writing. 
+int byte_write_decryption(FILE* file_p, uint_8bit (*state)[4], uint_8bit last_block_flag){
+    int i,j;
+    uint_8bit* pt_head=state[0];
+    uint_8bit* pt;
+    uint_8bit padding_num;
+    uint_8bit flag=0;
+    if(file_p==NULL){
+        return -1;
+    }
+    if(last_block_flag==0){
+        padding_num=state[3][3]; //Getting the padding number
+        i=0;
+        pt=pt_head+i;  //Put the pointer to the top of the next column
+        while(flag<16-padding_num){
+            fwrite(pt,1,1,file_p);
+            pt+=4;
+            flag++;
+            if(flag%4==0){
+                i++; //every 4 bytes written, i++
+                pt=pt_head+i;
+            }
+        }
+        return 1; // Skip the extra bytes.
+    }
+    // Output the buffer 4x4 to file_p
     for(i=0;i<4;i++){
         pt=pt_head+i;
         for(j=0;j<4;j++){
-            if((*pt^0x00)==0){
-                return 1;
-            }
             fwrite(pt,1,1,file_p);
             pt+=4;
         }
@@ -491,6 +591,7 @@ int md5convert(char* md5string, uint_8bit* key, uint_8bit key_length){
 //return -3: FILE WRITE ERROR
 //return 5: AES failed
 //return 0: Normal Exit.
+//return -5: Attempt to decrypt a file that is not encrypted
 int file_encryption_decryption(char* option, char* orig_file, char* target_file, char* md5_string){
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         return 1; //Option incorrect.
@@ -499,10 +600,18 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
     int read_flag,write_flag;
     uint_8bit state[4][4]={0x00};
     uint_8bit output[4][4]={0x00};
+    unsigned long decrypt_read_blocks;
+    unsigned long i;
+    int padding_num=get_padding_num(orig_file);
     if(md5convert(md5_string,key,16)!=0){
         return 3; //Not a valid MD5 String
     }
-
+    if(padding_num==-1){
+        return -1;
+    }
+    if(strcmp(option,"decrypt")==0&&padding_num!=16){ //An AES encrypted file's padding num should be zero.
+        return -5;
+    }
     FILE* file_p=fopen(orig_file,"rb");
     if(file_p==NULL){
         return -1;
@@ -514,10 +623,19 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
     }
     if(strcmp(option,"encrypt")==0){
         while(1){
-            read_flag=byte_read(file_p,state);
+            read_flag=byte_read_encryption(file_p,state);
             if(read_flag==-1){
                 fclose(file_p_out);
                 return -1;
+            }
+            if(read_flag==1){ //If read 0 && padding_num=16, keep going, otherwise, exit
+                if(padding_num==16){
+                    memset(state,padding_num&0x10,16);
+                }
+                else{
+                    printf("[ -INFO- ] Encryption Done from file %s to file %s.\n",orig_file,target_file);
+                    break;
+                }
             }
             if(now_AES_encryption(state,output,key,16)!=0){
                 fclose(file_p);
@@ -528,16 +646,17 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
                 fclose(file_p);
                 return -3;
             }
-            if(read_flag==1){
+            if(read_flag==1||read_flag==3){
                 printf("[ -INFO- ] Encryption Done from file %s to file %s.\n",orig_file,target_file);
                 break;
             }
         }
     }
     else{
-        while(1){
-            read_flag=byte_read(file_p,state);
-            if(read_flag==-1){
+        decrypt_read_blocks=get_file_size(orig_file)>>4; //Get the block number, use >> 4 instead of /16
+        for(i=0;i<decrypt_read_blocks;i++){
+            read_flag=byte_read_decryption(file_p,state);
+            if(read_flag==-1||read_flag==-3){
                 fclose(file_p_out);
                 return -1;
             }
@@ -546,12 +665,17 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
                 fclose(file_p_out);
                 return 5;
             }
-            write_flag=byte_write_decryption(file_p_out,output);
+            if(i==decrypt_read_blocks-1){
+                write_flag=byte_write_decryption(file_p_out,output,0);
+            }
+            else{
+                write_flag=byte_write_decryption(file_p_out,output,1);
+            }
             if(write_flag==-1){
                 fclose(file_p);
                 return -3;
             }
-            else if(write_flag==1||read_flag==1){
+            else if(write_flag==1){
                 printf("[ -INFO- ] Decryption Done from file %s to file %s.\n",orig_file,target_file);
                 break;
             }
@@ -564,7 +688,7 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
 
 /* 
  * return 1: Not enough parameters: 
- *   Format: now-crypto.exe OPTION ORIGINAL_FILE_PATH TARGET_FILE_PATH MD5_STRING
+ *    +-> Format: now-crypto.exe OPTION ORIGINAL_FILE_PATH TARGET_FILE_PATH MD5_STRING
  * return 5: Option is invalid
  * return 3: Not a valid MD5 string
  * return 7: FILE I/O: read error
@@ -573,7 +697,8 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
  * return 0: Normally exit.
  */
 int main(int argc,char *argv[]){
-    printf("Version: %s\n",CRYPTO_VERSION);
+    printf("[ -INFO- ] AES-128 ECB crypto module for HPC-NOW. Version: %s\n",CRYPTO_VERSION);
+    printf("|          Shanghai HPC-NOW Technologies. All right reserved. License: MIT\n");
     int run_flag=0;
     if(argc!=5){
         printf("[ FATAL: ] Not Enough parameters.\n"); 
