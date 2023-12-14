@@ -304,16 +304,13 @@ void print_state(uint_8bit (*state)[4]){
     printf("\n");
 }
 
-int now_AES_encryption(uint_8bit (*state)[4], uint_8bit (*out)[4], uint_8bit* key, uint_8bit key_length){
-    now_aes_key AES_key;
-    if(key==NULL||state==NULL||out==NULL){
+//Improved, move the key_expansion out of the encryption process
+int now_AES_ECB_encryption(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_key* AES_key){
+    if(state==NULL||out==NULL||AES_key==NULL){
         return -1;
     }
-    if(key_expansion(key,key_length,&AES_key)!=0){
-        return -3;
-    }
     int i,j;
-    uint_32bit* key_pointer=AES_key.encryption_key;
+    uint_32bit* key_pointer=AES_key->encryption_key;
     AddRoundKey(state,key_pointer);
     for(i=1;i<10;i++){
         key_pointer+=4;
@@ -334,16 +331,12 @@ int now_AES_encryption(uint_8bit (*state)[4], uint_8bit (*out)[4], uint_8bit* ke
     return 0;
 }
 
-int now_AES_decryption(uint_8bit (*state)[4], uint_8bit (*out)[4], uint_8bit* key, uint_8bit key_length){
-    now_aes_key AES_key;
-    if(key==NULL||state==NULL||out==NULL){
+int now_AES_ECB_decryption(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_key* AES_key){
+    if(AES_key==NULL||state==NULL||out==NULL){
         return -1;
     }
-    if(key_expansion(key,key_length,&AES_key)!=0){
-        return -3;
-    }
     int i,j;
-    uint_32bit* key_pointer=(AES_key.encryption_key+40);
+    uint_32bit* key_pointer=AES_key->encryption_key+40;
     AddRoundKey(state,key_pointer);
     for(i=1;i<10;i++){
         key_pointer-=4;
@@ -592,6 +585,7 @@ int md5convert(char* md5string, uint_8bit* key, uint_8bit key_length){
 //return 5: AES failed
 //return 0: Normal Exit.
 //return -5: Attempt to decrypt a file that is not encrypted
+//return 7: Failed to expand the key.
 int file_encryption_decryption(char* option, char* orig_file, char* target_file, char* md5_string){
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         return 1; //Option incorrect.
@@ -600,6 +594,7 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
     int read_flag,write_flag;
     uint_8bit state[4][4]={0x00};
     uint_8bit output[4][4]={0x00};
+    now_aes_key AES_key;
     unsigned long decrypt_read_blocks;
     unsigned long i;
     int padding_num=get_padding_num(orig_file);
@@ -621,6 +616,11 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
         fclose(file_p);
         return -3;
     }
+    if(key_expansion(key,16,&AES_key)!=0){
+        fclose(file_p);
+        fclose(file_p_out);
+        return 7;
+    }
     if(strcmp(option,"encrypt")==0){
         while(1){
             read_flag=byte_read_encryption(file_p,state);
@@ -637,7 +637,7 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
                     break;
                 }
             }
-            if(now_AES_encryption(state,output,key,16)!=0){
+            if(now_AES_ECB_encryption(state,output,&AES_key)!=0){
                 fclose(file_p);
                 fclose(file_p_out);
                 return 5;
@@ -660,7 +660,7 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
                 fclose(file_p_out);
                 return -1;
             }
-            if(now_AES_decryption(state,output,key,16)!=0){
+            if(now_AES_ECB_decryption(state,output,&AES_key)!=0){
                 fclose(file_p);
                 fclose(file_p_out);
                 return 5;
