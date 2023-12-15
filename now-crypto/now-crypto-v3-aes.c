@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <time.h>
 
 #define CRYPTO_VERSION "0.3.0"
 
@@ -73,20 +74,6 @@ const uint_8bit inv_s_box[256]={
 
 const uint_32bit round_con[10]={
     0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000, 0x1B000000, 0x36000000
-};
-
-const uint_8bit MixColumnMatrix[4][4] = {
-    {0x02, 0x03, 0x01, 0x01},
-    {0x01, 0x02, 0x03, 0x01},
-    {0x01, 0x01, 0x02, 0x03},
-    {0x03, 0x01, 0x01, 0x02}
-};
-
-const uint_8bit InvMixColumnMatrix[4][4] = {
-    {0x0E, 0x0B, 0x0D, 0x09},
-    {0x09, 0x0E, 0x0B, 0x0D},
-    {0x0D, 0x09, 0x0E, 0x0B},
-    {0x0B, 0x0D, 0x09, 0x0E}
 };
 
 //Get an 8-bit(1 byte) from a given 32 bit number.
@@ -144,10 +131,30 @@ uint_32bit assem_row(uint_8bit* short_nums){
     return ((short_nums[0]<<24)&0xFF000000)^((short_nums[1]<<16)&0xFF0000)^((short_nums[2]<<8)&0xFF00)^((short_nums[3])&0xFF); //Push 4 8-bit integers to a 32-bit integer.
 }
 
+//Push 16 8bit number to state
+void assem_state(uint_8bit (*state)[4], uint_8bit* head_pt){
+    uint_8bit i,j;;
+    for(i=0;i<4;i++){
+        for(j=0;j<4;j++){
+            state[j][i]=*(head_pt+i*4+j);
+        }
+    }
+}
+
 //Deassemble a 32bit number into 4 8bit numbers
 void deassem_row(uint_32bit a, uint_8bit* short_nums){
     for(int i=0;i<4;i++){
         short_nums[i]=get_byte(a,3-i);
+    }
+}
+
+//Pull 16 8bit number to a one-dimensional array
+void deassem_out(uint_8bit (*out)[4], uint_8bit* head_pt){
+    uint_8bit i,j;;
+    for(i=0;i<4;i++){
+        for(j=0;j<4;j++){
+            *(head_pt+i*4+j)=out[j][i];
+        }
     }
 }
 
@@ -253,15 +260,26 @@ void InvSubBytes(uint_8bit (*state)[4]){
 }
 
 void MixColumns(uint_8bit (*state)[4]){
+    const uint_8bit MixColumnMatrix[4][4] = {
+        {0x02, 0x03, 0x01, 0x01},
+        {0x01, 0x02, 0x03, 0x01},
+        {0x01, 0x01, 0x02, 0x03},
+        {0x03, 0x01, 0x01, 0x02}
+    };
     uint_8bit temp[4][4];
     uint_8bit s0,s1,s2,s3;
     int i,j;
-    for(i=0;i<4;i++){
+    memcpy(temp,state,16*sizeof(uint_8bit)); //Use memcpy to eliminate the loop below
+    /*for(i=0;i<4;i++){
         for(j=0;j<4;j++){
             temp[i][j]=state[i][j];
         }
-    }
+    }*/
     for(i=0;i<4;i++){
+        //state[i][0]=GaloisMultipleGeneral(MixColumnMatrix[i][0],temp[0][0])^GaloisMultipleGeneral(MixColumnMatrix[i][1],temp[1][0])^GaloisMultipleGeneral(MixColumnMatrix[i][2],temp[2][0])^GaloisMultipleGeneral(MixColumnMatrix[i][3],temp[3][0]);
+        //state[i][1]=GaloisMultipleGeneral(MixColumnMatrix[i][0],temp[0][1])^GaloisMultipleGeneral(MixColumnMatrix[i][1],temp[1][1])^GaloisMultipleGeneral(MixColumnMatrix[i][2],temp[2][1])^GaloisMultipleGeneral(MixColumnMatrix[i][3],temp[3][1]);
+        //state[i][2]=GaloisMultipleGeneral(MixColumnMatrix[i][0],temp[0][2])^GaloisMultipleGeneral(MixColumnMatrix[i][1],temp[1][2])^GaloisMultipleGeneral(MixColumnMatrix[i][2],temp[2][2])^GaloisMultipleGeneral(MixColumnMatrix[i][3],temp[3][2]);
+        //state[i][3]=GaloisMultipleGeneral(MixColumnMatrix[i][0],temp[0][3])^GaloisMultipleGeneral(MixColumnMatrix[i][1],temp[1][3])^GaloisMultipleGeneral(MixColumnMatrix[i][2],temp[2][3])^GaloisMultipleGeneral(MixColumnMatrix[i][3],temp[3][3]);
         for(j=0;j<4;j++){
             s0=GaloisMultipleGeneral(MixColumnMatrix[i][0],temp[0][j]);
             s1=GaloisMultipleGeneral(MixColumnMatrix[i][1],temp[1][j]);
@@ -273,15 +291,26 @@ void MixColumns(uint_8bit (*state)[4]){
 }
 
 void InvMixColums(uint_8bit (*state)[4]){
+    const uint_8bit InvMixColumnMatrix[4][4] = {
+        {0x0E, 0x0B, 0x0D, 0x09},
+        {0x09, 0x0E, 0x0B, 0x0D},
+        {0x0D, 0x09, 0x0E, 0x0B},
+        {0x0B, 0x0D, 0x09, 0x0E}
+    };
     int i,j;
     uint_8bit temp[4][4];
     uint_8bit s0,s1,s2,s3;
-    for(i=0;i<4;i++){
+    memcpy(temp,state,16*sizeof(uint_8bit)); //Use memcpy to eliminate the loop below
+    /*for(i=0;i<4;i++){
         for(j=0;j<4;j++){
             temp[i][j]=state[i][j];
         }
-    }
+    }*/
     for(i=0;i<4;i++){
+        //state[i][0]=GaloisMultipleGeneral(MixColumnMatrix[i][0],temp[0][0])^GaloisMultipleGeneral(MixColumnMatrix[i][1],temp[1][0])^GaloisMultipleGeneral(MixColumnMatrix[i][2],temp[2][0])^GaloisMultipleGeneral(MixColumnMatrix[i][3],temp[3][0]);
+        //state[i][1]=GaloisMultipleGeneral(MixColumnMatrix[i][0],temp[0][1])^GaloisMultipleGeneral(MixColumnMatrix[i][1],temp[1][1])^GaloisMultipleGeneral(MixColumnMatrix[i][2],temp[2][1])^GaloisMultipleGeneral(MixColumnMatrix[i][3],temp[3][1]);
+        //state[i][2]=GaloisMultipleGeneral(MixColumnMatrix[i][0],temp[0][2])^GaloisMultipleGeneral(MixColumnMatrix[i][1],temp[1][2])^GaloisMultipleGeneral(MixColumnMatrix[i][2],temp[2][2])^GaloisMultipleGeneral(MixColumnMatrix[i][3],temp[3][2]);
+        //state[i][3]=GaloisMultipleGeneral(MixColumnMatrix[i][0],temp[0][3])^GaloisMultipleGeneral(MixColumnMatrix[i][1],temp[1][3])^GaloisMultipleGeneral(MixColumnMatrix[i][2],temp[2][3])^GaloisMultipleGeneral(MixColumnMatrix[i][3],temp[3][3]);
         for(j=0;j<4;j++){
             s0=GaloisMultipleGeneral(InvMixColumnMatrix[i][0],temp[0][j]);
             s1=GaloisMultipleGeneral(InvMixColumnMatrix[i][1],temp[1][j]);
@@ -305,11 +334,11 @@ void print_state(uint_8bit (*state)[4]){
 }
 
 //Improved, move the key_expansion out of the encryption process
-int now_AES_ECB_encryption(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_key* AES_key){
+int aes_ecb_encryption_core(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_key* AES_key){
     if(state==NULL||out==NULL||AES_key==NULL){
         return -1;
     }
-    int i,j;
+    int i;
     uint_32bit* key_pointer=AES_key->encryption_key;
     AddRoundKey(state,key_pointer);
     for(i=1;i<10;i++){
@@ -323,19 +352,20 @@ int now_AES_ECB_encryption(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_k
     SubBytes(state);
     ShiftRows(state);
     AddRoundKey(state,key_pointer);
-    for(i=0;i<4;i++){
+    memcpy(out,state,16*sizeof(uint_8bit));
+    /*for(i=0;i<4;i++){
         for(j=0;j<4;j++){
             out[i][j]=state[i][j];
         }
-    }
+    }*/
     return 0;
 }
 
-int now_AES_ECB_decryption(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_key* AES_key){
+int aes_ecb_decryption_core(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_key* AES_key){
     if(AES_key==NULL||state==NULL||out==NULL){
         return -1;
     }
-    int i,j;
+    int i;
     uint_32bit* key_pointer=AES_key->encryption_key+40;
     AddRoundKey(state,key_pointer);
     for(i=1;i<10;i++){
@@ -349,15 +379,16 @@ int now_AES_ECB_decryption(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_k
     InvShiftRows(state);
     InvSubBytes(state);
     AddRoundKey(state,key_pointer);
-    for(i=0;i<4;i++){
+    memcpy(out,state,16*sizeof(uint_8bit));
+    /*for(i=0;i<4;i++){
         for(j=0;j<4;j++){
             out[i][j]=state[i][j];
         }
-    }
+    }*/
     return 0;
 }
 
-int get_file_size(char* filename){
+long get_file_size(char* filename){
     int fd=-1;
     struct stat file_stat;
     fd=open(filename,O_RDONLY);
@@ -372,149 +403,87 @@ int get_file_size(char* filename){
     return file_stat.st_size;
 }
 
-uint_8bit get_padding_num(char* filename){
-    int flag=get_file_size(filename);
-    if(flag==-1){
-        return -1;
+//should return a value between 1-16
+//if 0xFF get, filesize is invalid.
+uint_8bit get_padding_num(long filesize){
+    if(filesize<0){
+        return 0xFF;
     }
-    return 16-flag%16;
+    return 16-filesize%16;
 }
 
-//Read 128bit per time.
-//return -1: FILE I/O error
-//return 1: read 0 bytes
-//return 3: Padding and file end
-//return 0: continue reading
-int byte_read_encryption(FILE* file_p, uint_8bit (*state)[4]){
-    uint_8bit buffer[16]={0x00};
-    uint_8bit read_flag;
+
+uint_8bit get_file_padding_num(char* filename){
+    long filesize=get_file_size(filename);
+    if(filesize<0){
+        return 0xFF;
+    }
+    return 16-filesize%16;
+}
+
+//Load a file to dynamically-allocated memory, and return the beginning position
+//return NULL: FAILED
+//CAUTION! Dynamic allocation is here! Do free them after using!!!
+//buffer_size: byte
+uint_8bit* malloc_read_encryption(char* input, unsigned long* buffer_size){
+    long filesize=get_file_size(input);
     uint_8bit padding_num;
-    uint_8bit flag=0;
-    uint_8bit* pt_head=state[0];
-    uint_8bit* pt;
-    int i,j;
-    if(file_p==NULL){
-        return -1;
+    unsigned long buffer_size_temp;
+    if(filesize==-1){
+        *buffer_size=0;
+        return NULL;
     }
-    read_flag=fread(buffer,sizeof(uint_8bit),16,file_p)^0x00; // Read 128 bit
-    if(read_flag==0){
-        return 1;
+    padding_num=get_padding_num(filesize);
+    if(padding_num==0xFF){
+        *buffer_size=0;
+        return NULL;
     }
-    padding_num=16-read_flag;
-    i=0;
-    flag=0;
-    pt=pt_head+i;
-    while(flag+padding_num<16){
-        *(pt)=*(buffer+flag);
-        flag++;
-        pt+=4;
-        if(flag%4==0){
-            i++;
-            pt=pt_head+i;
-        }
+    if(padding_num==0x00){
+        buffer_size_temp=sizeof(uint_8bit)*(filesize+16); // Add another 4x4 block.
     }
-    for(j=0;j<padding_num;j++){
-        *(pt)=padding_num;
-        pt+=4;
-        flag++;
-        if(flag%4==0){
-            i++;
-            pt=pt_head+i;
-        }
+    else{
+        buffer_size_temp=sizeof(uint_8bit)*(filesize+padding_num);
     }
-    if(padding_num!=0){
-        return 3;
+    uint_8bit* buffer=(uint_8bit*)malloc(buffer_size_temp);
+    if(buffer==NULL){
+        *buffer_size=0;
+        return NULL;
     }
-    return 0;
+    *buffer_size=buffer_size_temp; //If allocated successfully, then export the size
+    memset(buffer,padding_num,buffer_size_temp); //Initialize the buffer with padding_num;
+    return buffer;
 }
 
-//Write to an encrypted file with paddling 0x00
-int byte_write_encryption(FILE* file_p, uint_8bit (*state)[4]){
-    int i,j;
-    uint_8bit* pt_head=state[0];
-    uint_8bit* pt;
-    if(file_p==NULL){
-        return -1;
+//return NULL: Didn't allocate
+//return others: Allocated the buffer_size byte memory.
+uint_8bit* malloc_write(unsigned long buffer_size){
+    if(buffer_size==0){
+        return NULL;
     }
-    for(i=0;i<4;i++){
-        pt=pt_head+i;
-        for(j=0;j<4;j++){
-            fwrite(pt,1,1,file_p);
-            pt+=4;
-        }
-        pt=state[0]+i;
-    }
-    return 0;
+    uint_8bit* buffer=(uint_8bit*)malloc(buffer_size);
+    return buffer;
 }
 
-//Read an decrypted file. 128bit per time.
-//The decrypted file is already 128bit width
-//return -1: FILE I/O error, faild to read the file
-//return -3: Abnormal. Not supposed to happen.
-//return 0: continue reading without eof
-//return 1: Find end found.
-int byte_read_decryption(FILE* file_p, uint_8bit (*state)[4]){
-    uint_8bit buffer[16]={0x00};
-    int i,j;
-    int read_flag=0;
-    if(file_p==NULL){
-        return -1;
+//Load a file to dynamically-allocated memory, and return the beginning position
+//return NULL: FAILED
+//CAUTION! Dynamic allocation is here! Do free them after using!!!
+//buffer_size: byte
+uint_8bit* malloc_read_decryption(char* input, unsigned long* buffer_size){
+    long filesize=get_file_size(input);
+    unsigned long buffer_size_temp;
+    if(filesize<1||filesize%16!=0){
+        *buffer_size=0;
+        return NULL;  //encrypted file size cannot be 0, and the filesize must be 16x
     }
-    read_flag=fread(buffer,sizeof(uint_8bit),16,file_p); // Read 128 bit
-    if(read_flag!=0&&read_flag!=16){
-        return -3;
+    buffer_size_temp=sizeof(uint_8bit)*(unsigned long)filesize;
+    uint_8bit* buffer=(uint_8bit*)malloc(buffer_size_temp);
+    if(buffer==NULL){
+        *buffer_size=0;
+        return NULL;
     }
-    else if(read_flag==0){
-        return 1;
-    }
-    for(i=0;i<4;i++){
-        for(j=0;j<4;j++){
-            state[j][i]=*(buffer+i*4+j);
-        }
-    }
-    return 0; // Continue reading.
-}
-
-//Write to an decrypted file
-//If last_block_flag==0, then write last block and check padding; else write normal block.
-//When the paddling 0x00 found, will exit and report to the upper-level function
-//return -1: FILE I/O output error
-//return 1*: Write end exit the loop
-//return 0: Continue writing. 
-int byte_write_decryption(FILE* file_p, uint_8bit (*state)[4], uint_8bit last_block_flag){
-    int i,j;
-    uint_8bit* pt_head=state[0];
-    uint_8bit* pt;
-    uint_8bit padding_num;
-    uint_8bit flag=0;
-    if(file_p==NULL){
-        return -1;
-    }
-    if(last_block_flag==0){
-        padding_num=state[3][3]; //Getting the padding number
-        i=0;
-        pt=pt_head+i;  //Put the pointer to the top of the next column
-        while(flag<16-padding_num){
-            fwrite(pt,1,1,file_p);
-            pt+=4;
-            flag++;
-            if(flag%4==0){
-                i++; //every 4 bytes written, i++
-                pt=pt_head+i;
-            }
-        }
-        return 1; // Skip the extra bytes.
-    }
-    // Output the buffer 4x4 to file_p
-    for(i=0;i<4;i++){
-        pt=pt_head+i;
-        for(j=0;j<4;j++){
-            fwrite(pt,1,1,file_p);
-            pt+=4;
-        }
-        pt=state[0]+i;
-    }
-    return 0;
+    *buffer_size=buffer_size_temp; //If allocated successfully, then export the size
+    memset(buffer,0x00,buffer_size_temp); //Initialize the buffer with padding_num;
+    return buffer;
 }
 
 uint_8bit char_to_hex(char x){
@@ -577,111 +546,172 @@ int md5convert(char* md5string, uint_8bit* key, uint_8bit key_length){
     return 0;
 }
 
-
-//return 1: Option incorrect
-//return 3: Not a valid MD5 string
-//return -1: FILE READ ERROR
-//return -3: FILE WRITE ERROR
-//return 5: AES failed
-//return 0: Normal Exit.
-//return -5: Attempt to decrypt a file that is not encrypted
-//return 7: Failed to expand the key.
-int file_encryption_decryption(char* option, char* orig_file, char* target_file, char* md5_string){
-    if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
-        return 1; //Option incorrect.
-    }
-    uint_8bit key[16]={0x00};
-    int read_flag,write_flag;
+//bulk read a file and encrypt it.
+//return -1: input file cannot be opened
+//return -3: output file cannot be created
+//return -5: failed to allocate mem for reading
+//return -7: failed to allocate mem for writing
+//return 1:  failed to write completely to the file
+//return 3:  Not a valid key string
+//return 5:  key expansion failed.
+//return 127: AES_CORE_ERROR
+//return 0: normal exit
+int now_aes_ecb_file_encryption(char* input, char* output, char* md5_string){
+    unsigned long buffer_size;
+    unsigned long i,block_num;    
+    uint_8bit* pt_read;
+    uint_8bit* pt_write;
     uint_8bit state[4][4]={0x00};
-    uint_8bit output[4][4]={0x00};
+    uint_8bit out[4][4]={0x00};
+    uint_8bit key[16]={0x00};
     now_aes_key AES_key;
-    unsigned long decrypt_read_blocks;
-    unsigned long i;
-    int padding_num=get_padding_num(orig_file);
     if(md5convert(md5_string,key,16)!=0){
         return 3; //Not a valid MD5 String
     }
-    if(padding_num==-1){
+    if(key_expansion(key,16,&AES_key)!=0){
+        return 5;
+    }
+    FILE* file_p_in=fopen(input,"rb");
+    if(file_p_in==NULL){
         return -1;
     }
-    if(strcmp(option,"decrypt")==0&&padding_num!=16){ //An AES encrypted file's padding num should be zero.
-        return -5;
-    }
-    FILE* file_p=fopen(orig_file,"rb");
-    if(file_p==NULL){
-        return -1;
-    }
-    FILE* file_p_out=fopen(target_file,"wb+");
+    FILE* file_p_out=fopen(output,"wb+");
     if(file_p_out==NULL){
-        fclose(file_p);
+        fclose(file_p_in);
         return -3;
     }
-    if(key_expansion(key,16,&AES_key)!=0){
-        fclose(file_p);
+    uint_8bit* read_buffer=malloc_read_encryption(input,&buffer_size);
+    if(read_buffer==NULL){
+        fclose(file_p_in);
         fclose(file_p_out);
-        return 7;
+        return -5;
     }
-    if(strcmp(option,"encrypt")==0){
-        while(1){
-            read_flag=byte_read_encryption(file_p,state);
-            if(read_flag==-1){
-                fclose(file_p_out);
-                return -1;
-            }
-            if(read_flag==1){ //If read 0 && padding_num=16, keep going, otherwise, exit
-                if(padding_num==16){
-                    memset(state,padding_num&0x10,16);
-                }
-                else{
-                    printf("[ -INFO- ] Encryption Done from file %s to file %s.\n",orig_file,target_file);
-                    break;
-                }
-            }
-            if(now_AES_ECB_encryption(state,output,&AES_key)!=0){
-                fclose(file_p);
-                fclose(file_p_out);
-                return 5;
-            }
-            if(byte_write_encryption(file_p_out,output)!=0){
-                fclose(file_p);
-                return -3;
-            }
-            if(read_flag==1||read_flag==3){
-                printf("[ -INFO- ] Encryption Done from file %s to file %s.\n",orig_file,target_file);
-                break;
-            }
+    uint_8bit* write_buffer=malloc_write(buffer_size);
+    if(write_buffer==NULL){
+        free(read_buffer);
+        fclose(file_p_in);
+        fclose(file_p_out);
+        return -7; 
+    }
+    if(fread(read_buffer,sizeof(uint_8bit),buffer_size,file_p_in)!=buffer_size){}
+    pt_read=read_buffer;
+    pt_write=write_buffer;
+    block_num=buffer_size>>4; //Get the block number;
+    i=0;
+    while(i<block_num){
+        assem_state(state,pt_read);
+        if(aes_ecb_encryption_core(state,out,&AES_key)!=0){
+            free(read_buffer);
+            free(write_buffer);
+            fclose(file_p_in);
+            fclose(file_p_out);
+            return 127; //If AES core error, collect garbages and report 127;
         }
+        deassem_out(out,pt_write);
+        pt_read+=16; //Move to next block
+        pt_write+=16; //Move to next block
+        i++;
     }
-    else{
-        decrypt_read_blocks=get_file_size(orig_file)>>4; //Get the block number, use >> 4 instead of /16
-        for(i=0;i<decrypt_read_blocks;i++){
-            read_flag=byte_read_decryption(file_p,state);
-            if(read_flag==-1||read_flag==-3){
-                fclose(file_p_out);
-                return -1;
-            }
-            if(now_AES_ECB_decryption(state,output,&AES_key)!=0){
-                fclose(file_p);
-                fclose(file_p_out);
-                return 5;
-            }
-            if(i==decrypt_read_blocks-1){
-                write_flag=byte_write_decryption(file_p_out,output,0);
-            }
-            else{
-                write_flag=byte_write_decryption(file_p_out,output,1);
-            }
-            if(write_flag==-1){
-                fclose(file_p);
-                return -3;
-            }
-            else if(write_flag==1){
-                printf("[ -INFO- ] Decryption Done from file %s to file %s.\n",orig_file,target_file);
-                break;
-            }
+    if(fwrite(write_buffer,sizeof(uint_8bit),buffer_size,file_p_out)!=buffer_size){
+        free(read_buffer);
+        free(write_buffer);
+        fclose(file_p_in);
+        fclose(file_p_out);
+        return 1;
+    }
+    free(read_buffer);
+    free(write_buffer);
+    fclose(file_p_in);
+    fclose(file_p_out);
+    return 0;
+}
+
+//bulk read a file and decrypt it.
+//return -1: input file cannot be opened
+//return -3: output file cannot be created
+//return -5: failed to allocate mem for reading
+//return -7: failed to allocate mem for writing
+//return 1:  failed to write completely to the file
+//return 3:  Not a valid key string
+//return 5:  key expansion failed.
+//return 7:  Not a valid encrypted file
+//return 9:  Invalid padding number
+//return 127: AES_CORE_ERROR
+//return 0: normal exit
+int now_aes_ecb_file_decryption(char* input, char* output, char* md5_string){
+    unsigned long buffer_size;
+    unsigned long i,block_num;    
+    uint_8bit* pt_read;
+    uint_8bit* pt_write;
+    uint_8bit state[4][4]={0x00};
+    uint_8bit out[4][4]={0x00};
+    uint_8bit padding_num;   
+    uint_8bit key[16]={0x00};
+    now_aes_key AES_key;
+    if(md5convert(md5_string,key,16)!=0){
+        return 3; //Not a valid MD5 String
+    }
+    if(key_expansion(key,16,&AES_key)!=0){
+        return 5;
+    }
+    FILE* file_p_in=fopen(input,"rb");
+    if(file_p_in==NULL){
+        return -1;
+    }
+    FILE* file_p_out=fopen(output,"wb+");
+    if(file_p_out==NULL){
+        fclose(file_p_in);
+        return -3;
+    }
+    uint_8bit* read_buffer=malloc_read_decryption(input,&buffer_size);
+    if(read_buffer==NULL){
+        fclose(file_p_in);
+        fclose(file_p_out);
+        return -5;
+    }
+    uint_8bit* write_buffer=malloc_write(buffer_size);
+    if(write_buffer==NULL){
+        free(read_buffer);
+        fclose(file_p_in);
+        fclose(file_p_out);
+        return -7; 
+    }
+    if(fread(read_buffer,sizeof(uint_8bit),buffer_size,file_p_in)!=buffer_size){
+        free(read_buffer);
+        free(write_buffer);
+        fclose(file_p_in);
+        fclose(file_p_out);
+        return 7;  //Not a valid encrypted file.
+    }
+    pt_read=read_buffer;
+    pt_write=write_buffer;
+    block_num=buffer_size>>4; //Get the block number;
+    i=0;
+    while(i<block_num){
+        assem_state(state,pt_read);
+        if(aes_ecb_decryption_core(state,out,&AES_key)!=0){
+            free(read_buffer);
+            free(write_buffer);
+            fclose(file_p_in);
+            fclose(file_p_out);
+            return 127; //If AES core error, collect garbages and report 127;
         }
+        deassem_out(out,pt_write);
+        pt_read+=16; //Move to next block
+        pt_write+=16; //Move to next block
+        i++;
     }
-    fclose(file_p);
+    padding_num=out[3][3];
+    if(fwrite(write_buffer,sizeof(uint_8bit),buffer_size-padding_num,file_p_out)!=buffer_size-padding_num){
+        free(read_buffer);
+        free(write_buffer);
+        fclose(file_p_in);
+        fclose(file_p_out);
+        return 1;
+    }
+    free(read_buffer);
+    free(write_buffer);
+    fclose(file_p_in);
     fclose(file_p_out);
     return 0;
 }
@@ -689,53 +719,73 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
 /* 
  * return 1: Not enough parameters: 
  *    +-> Format: now-crypto.exe OPTION ORIGINAL_FILE_PATH TARGET_FILE_PATH MD5_STRING
- * return 5: Option is invalid
- * return 3: Not a valid MD5 string
- * return 7: FILE I/O: read error
- * return 9: FILE I/O: write error
- * return 11: AES error, probably a bug
- * return 13: Not an AES encrypted file.
- * return 15: Failed to expand the key. Key may be invalid.
- * return 0: Normally exit.
+ * return 3: Option is invalid
+ * return 5: FILE I/O: read error
+ * return 7: FILE I/O: write error
+ * return 9: Memory Alloc Error
+ * return 11: File write incomplete
+ * return 13: Not a valid key.
+ * return 15: Failed to expand key
+ * return 17: Not an AES encrypted file
+ * return 127: AES error, probably a bug
+ * return 0: Normal exit.
  */
 int main(int argc,char *argv[]){
+    clock_t start,stop;
+    start=clock();
     printf("[ -INFO- ] AES-128 ECB crypto module for HPC-NOW. Version: %s\n",CRYPTO_VERSION);
-    printf("|          Shanghai HPC-NOW Technologies. All right reserved. License: MIT\n");
+    printf("|          Shanghai HPC-NOW Technologies Co., Ltd. License: MIT\n");
     int run_flag=0;
     if(argc!=5){
-        printf("[ FATAL: ] Not Enough parameters.\n"); 
+        printf("[ FATAL: ] Command format is not correct. STRICT format:\n"); 
+        printf("|        +-> ./aes-ecb.exe OPTION INPUT_FILE OUTPUT_FILE MD5_STRING\n"); 
         return 1;
     }
-    run_flag=file_encryption_decryption(argv[1],argv[2],argv[3],argv[4]);
-    if(run_flag==1){
+    if(strcmp(argv[1],"encrypt")!=0&&strcmp(argv[1],"decrypt")!=0){
         printf("[ FATAL: ] Option is invalid.\n");
-        return 5;
-    }
-    else if(run_flag==3){
-        printf("[ FATAL: ] Not a valid crypto-key.\n");
         return 3;
     }
-    else if(run_flag==-1){
+    else if(strcmp(argv[1],"encrypt")==0){
+        run_flag=now_aes_ecb_file_encryption(argv[2],argv[3],argv[4]);
+    }
+    else{
+        run_flag=now_aes_ecb_file_decryption(argv[2],argv[3],argv[4]);
+    }
+    if(run_flag==-1){
         printf("[ FATAL: ] File read error.\n");
-        return 7;
+        return 5;
     }
     else if(run_flag==-3){
         printf("[ FATAL: ] File write error.\n");
+        return 7;
+    }
+    else if(run_flag==-5||run_flag==-7){
+        printf("[ FATAL: ] Memory allocation failed.\n");
         return 9;
     }
-    else if(run_flag==5){
-        printf("[ FATAL: ] AES error. Please report this bug.\n");
+    else if(run_flag==1){
+        printf("[ FATAL: ] Failed to write the output file completely.\n");
         return 11;
     }
-    else if(run_flag==-5){
-        printf("[ FATAL: ] Probably you are not decrypting an AES encrypted file.\n");
+    else if(run_flag==3){
+        printf("[ FATAL: ] Not a valid crypto-key.\n");
         return 13;
     }
-    else if(run_flag==7){
-        printf("[ FATAL: ] Failed to expand the key.\n");
+    else if(run_flag==5){
+        printf("[ FATAL: ] AES: Failed to expand the key.\n");
         return 15;
     }
+    else if(run_flag==7||run_flag==9){
+        printf("[ FATAL: ] Probably you are not decrypting an AES encrypted file.\n");
+        return 17;
+    }
+    else if(run_flag==127){
+        printf("[ FATAL: ] AES error. Please report this bug.\n");
+        return 127;
+    }
     else{
+        stop=clock();
+        printf("[ -INFO- ] %s %s to %s %lfsec(s).\n",argv[1],argv[2],argv[3],(double)(stop-start)*1.0/CLOCKS_PER_SEC);
         return 0; 
     }
 }
