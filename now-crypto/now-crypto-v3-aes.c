@@ -694,6 +694,8 @@ int file_encryption_decryption(char* option, char* orig_file, char* target_file,
  * return 7: FILE I/O: read error
  * return 9: FILE I/O: write error
  * return 11: AES error, probably a bug
+ * return 13: Not an AES encrypted file.
+ * return 15: Failed to expand the key. Key may be invalid.
  * return 0: Normally exit.
  */
 int main(int argc,char *argv[]){
@@ -724,6 +726,14 @@ int main(int argc,char *argv[]){
     else if(run_flag==5){
         printf("[ FATAL: ] AES error. Please report this bug.\n");
         return 11;
+    }
+    else if(run_flag==-5){
+        printf("[ FATAL: ] Probably you are not decrypting an AES encrypted file.\n");
+        return 13;
+    }
+    else if(run_flag==7){
+        printf("[ FATAL: ] Failed to expand the key.\n");
+        return 15;
     }
     else{
         return 0; 
