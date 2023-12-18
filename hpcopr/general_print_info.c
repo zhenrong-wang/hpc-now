@@ -547,6 +547,7 @@ void list_all_commands(void){
     printf(HIGH_GREEN_BOLD "     help  usage  monman  history  syserr \n");
     printf("     ssh  rdp \n");
     printf("     set-tf configloc  showloc  showmd5  resetloc " RESET_DISPLAY "\n");
+    printf("     encrypt decrypt " RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 3.  Cluster Initialization: " RESET_DISPLAY "\n");
     printf(HIGH_GREEN_BOLD "     cloud-info  rotate-key  get-conf  edit-conf \n");
     printf("     rm-conf  init  rebuild " RESET_DISPLAY "\n");
