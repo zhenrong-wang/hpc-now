@@ -200,6 +200,7 @@ int fgetline(FILE* file_p, char* line_string){
 //Aims to replace the fgetline() if validated.
 //Users must make sure that the max_length equals or smaller than the size of the array
 //Otherwise, overflow will definately occur.
+//return 0: get successed.
 int fngetline(FILE* file_p, char* line_string, unsigned int max_length){
     int ch='\0';
     int i=0;
@@ -547,6 +548,8 @@ int calc_str_num(char* line, char split_ch){
     }
 }
 
+//return -1: get finished
+//return 0: get_successed
 int get_seq_string(char* line, char split_ch, int string_seq, char* get_string){
     int total_string_num=calc_str_num(line,split_ch);
     int i=0,j=0;
@@ -1097,6 +1100,28 @@ int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string){
     return 1;
 }
 
+//return 0: found the keyword
+//return 1: not found
+//make sure the dest array has 128 width.
+int cmd_keyword_ncheck(int argc, char** argv, char* key_word, char* kwd_string, unsigned int n){
+    int i,j;
+    for(i=2;i<argc-1;i++){
+        if(strcmp(argv[i],key_word)==0){
+            j=i+1;
+            if(cmd_flg_or_not(argv[j])!=0&&cmd_key_or_not(argv[j])!=0){
+                strncpy(kwd_string,argv[j],n);
+                return 0;
+            }
+            else{
+                strcpy(kwd_string,"");
+                return 1;
+            }
+        }
+    }
+    strcpy(kwd_string,"");
+    return 1;
+}
+
 int include_string_or_not(int cmd_c, char** cmds, char* string){
     int i;
     for(i=0;i<cmd_c;i++){
@@ -1249,6 +1274,8 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     return 0;
 }
 
+//return 0: successfully get md5sum
+//return -1: failed to get the md5sum
 int get_crypto_key(char* crypto_key_filename, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
     FILE* md5_tmp=NULL;
@@ -1262,7 +1289,9 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
 #elif _WIN32
     sprintf(cmdline,"certutil -hashfile \"%s\" md5 > c:\\programdata\\md5.txt.tmp",crypto_key_filename);
 #endif
-    system(cmdline);
+    if(system(cmdline)!=0){
+        return -1;
+    }
 #ifdef _WIN32
     md5_tmp=fopen("c:\\programdata\\md5.txt.tmp","r");
 #else

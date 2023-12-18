@@ -182,7 +182,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         getchar();
     }
 
-    if(cmd_keyword_check(argc,argv,"--jdata",job_data)!=0){
+    if(cmd_keyword_ncheck(argc,argv,"--jdata",job_data,255)!=0){
         if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Job data directory not specified. Use --jdata JOB_DIR." RESET_DISPLAY "\n");
             return 17;

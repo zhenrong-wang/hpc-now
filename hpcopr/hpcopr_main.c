@@ -116,6 +116,8 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "ssh,gen,UNAME",
     "rdp,gen,UNAME",
     "set-tf,gen,NULL",
+    "decrypt,gen,NULL",
+    "encrypt,gen,NULL",
     "configloc,gen,NULL",
     "showloc,gen,NULL",
     "resetloc,gen,NULL",
@@ -205,6 +207,7 @@ char jobman_commands[3][COMMAND_STRING_LENGTH_MAX]={
 19 Prereq - Vers and md5 Error
 21 CLUSTER_NAME_CHECK_FAILED
 23 INVALID_KEYPAIR
+24 DECRYPTION_ENCRYPTION_FAILED
 25 Not Operating Clusters
 26 INVALID_USER_NAME
 27 EMPTY_CLUSTER_OR_IN_PROGRESS
@@ -268,7 +271,7 @@ int main(int argc, char* argv[]){
     int confirm_flag=0;
     int usrmgr_check_flag=0;
     char workdir[DIR_LENGTH]="";
-    char cluster_name[CLUSTER_ID_LENGTH_MAX]="";
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char new_cluster_name[128]="";
     char gcp_flag[8]="";
     char key_echo_flag[8]="";
@@ -549,6 +552,40 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
+    if(strcmp(final_command,"decrypt")==0||strcmp(final_command,"encrypt")==0){
+        if(cmd_flag_check(argc,argv,"--all")==0){
+            run_flag=encrypt_decrypt_clusters("all",final_command,batch_flag);
+        }
+        else{
+            if(cmd_keyword_ncheck(argc,argv,"-c",string_temp,255)==0){
+                run_flag=encrypt_decrypt_clusters(string_temp,final_command,batch_flag);
+            }
+            else{
+                if(batch_flag==0){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a cluster list by " RESET_DISPLAY WARN_YELLO_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or use " RESET_DISPLAY WARN_YELLO_BOLD "--all" RESET_DISPLAY FATAL_RED_BOLD "." RESET_DISPLAY "\n");
+                    write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
+                    check_and_cleanup(workdir);
+                    return 25;
+                    
+                }
+                list_all_cluster_names(2);
+                printf("[ -INFO- ] Input a list of clusters seperated by " HIGH_GREEN_BOLD ":" RESET_DISPLAY ", e.g. " HIGH_GREEN_BOLD "cluster1:cluster2" RESET_DISPLAY " : ");
+                fflush(stdin);
+                scanf("%255s",string_temp);
+                getchar();
+                run_flag=encrypt_decrypt_clusters(string_temp,final_command,batch_flag);
+            }
+        }
+        if(run_flag!=0){
+            write_operation_log("NULL",operation_log,argc,argv,"OPERATION_SUCCEEDED",24);
+            check_and_cleanup("");
+            return 24;
+        }
+        write_operation_log("NULL",operation_log,argc,argv,"OPERATION_SUCCEEDED",0);
+        check_and_cleanup("");
+        return 0;
+    }
+
     if(strcmp(final_command,"resetloc")==0){
         run_flag=reset_locations();
         if(run_flag==0){
@@ -686,7 +723,7 @@ int main(int argc, char* argv[]){
             run_flag=glance_clusters("all",crypto_keyfile);
         }
         else{
-            if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0&&show_current_cluster(workdir,cluster_name,0)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"-c",cluster_name,24)!=0&&show_current_cluster(workdir,cluster_name,0)!=0){
                 list_all_cluster_names(1);
                 run_flag=prompt_to_input_required_args("Select a cluster name from the list above.",cluster_name,batch_flag,argc,argv,"-c");
                 if(run_flag!=0){
@@ -817,7 +854,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"import")==0){
-        cmd_keyword_check(argc,argv,"-s",import_source);
+        cmd_keyword_ncheck(argc,argv,"-s",import_source,511);
         cmd_keyword_check(argc,argv,"-p",pass_word);
         run_flag=import_cluster(import_source,pass_word,crypto_keyfile,batch_flag);
         if(run_flag!=0){
@@ -862,7 +899,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup("");
             return 0;
         }
-        if(cmd_keyword_check(argc,argv,"-c",cluster_name)!=0){
+        if(cmd_keyword_ncheck(argc,argv,"-c",cluster_name,24)!=0){
             if(batch_flag==0){
                 list_all_cluster_names(1);
                 printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY WARN_YELLO_BOLD "-c CLUSTER_NAME" RESET_DISPLAY FATAL_RED_BOLD " ." RESET_DISPLAY "\n");
@@ -1120,8 +1157,8 @@ int main(int argc, char* argv[]){
 
     if(strcmp(final_command,"rotate-key")==0){
         get_cloud_flag(workdir,cloud_flag);
-        cmd_keyword_check(argc,argv,"--ak",cloud_ak);
-        cmd_keyword_check(argc,argv,"--sk",cloud_sk);
+        cmd_keyword_ncheck(argc,argv,"--ak",cloud_ak,255);
+        cmd_keyword_ncheck(argc,argv,"--sk",cloud_sk,255);
         run_flag=prompt_to_confirm_args("Echo the credentials to this window (RISKY)?",CONFIRM_STRING,batch_flag,argc,argv,"--echo");
         if(run_flag==2||run_flag==0){
             strcpy(key_echo_flag,"echo");
@@ -1172,9 +1209,9 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 49;
         }
-        cmd_keyword_check(argc,argv,"--ul",user_name_list);
+        cmd_keyword_ncheck(argc,argv,"--ul",user_name_list,1023);
         cmd_keyword_check(argc,argv,"-p",pass_word);
-        cmd_keyword_check(argc,argv,"-d",export_dest);
+        cmd_keyword_ncheck(argc,argv,"-d",export_dest,511);
         run_flag=prompt_to_confirm_args("Export the admin privilege? (Default: no)",CONFIRM_STRING,batch_flag,argc,argv,"--admin");
         if(run_flag==2||run_flag==0){
             strcpy(string_temp,"admin");
@@ -1238,7 +1275,7 @@ int main(int argc, char* argv[]){
             }
         }
         if(strcmp(data_cmd,"put")==0||strcmp(data_cmd,"get")==0||strcmp(data_cmd,"copy")==0||strcmp(data_cmd,"move")==0||strcmp(data_cmd,"cp")==0||strcmp(data_cmd,"mv")==0||strcmp(data_cmd,"rput")==0||strcmp(data_cmd,"rget")==0){
-            if(cmd_keyword_check(argc,argv,"-s",source_path)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"-s",source_path,511)!=0){
                 if(batch_flag==0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] No source path specified. Use -s SOURCE_PATH ." RESET_DISPLAY "\n");
                     write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -1254,7 +1291,7 @@ int main(int argc, char* argv[]){
                 scanf("%511s",source_path);
                 getchar();
             }
-            if(cmd_keyword_check(argc,argv,"-d",destination_path)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"-d",destination_path,511)!=0){
                 if(batch_flag==0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] No destination path specified. Use -d DEST_PATH ." RESET_DISPLAY "\n");
                     write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -1272,7 +1309,7 @@ int main(int argc, char* argv[]){
             }
         }
         else{
-            if(cmd_keyword_check(argc,argv,"-t",target_path)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"-t",target_path,511)!=0){
                 if(batch_flag==0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] No target path specified. Use -t TARGET_PATH ." RESET_DISPLAY "\n");
                     write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -1918,7 +1955,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 9;
         }
-        cmd_keyword_check(argc,argv,"--repo",repo_loc);
+        cmd_keyword_ncheck(argc,argv,"--repo",repo_loc,383);
         if(strcmp(app_cmd,"store")==0){
             prompt_to_input_optional_args("Specify installation shell scripts location?",CONFIRM_STRING,"Input either an URL or a local path.",inst_loc,batch_flag,argc,argv,"--inst");
             run_flag=app_list(workdir,"all",user_name,"",SSHKEY_DIR,"",inst_loc);
@@ -2013,7 +2050,7 @@ int main(int argc, char* argv[]){
             run_flag=job_list(workdir,user_name,SSHKEY_DIR);
         }
         else{
-            if(cmd_keyword_check(argc,argv,"--jid",job_id)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"--jid",job_id,31)!=0){
                 job_list(workdir,user_name,SSHKEY_DIR);
                 if(batch_flag==0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] No jobID specified. Use --jid JOB_ID ." RESET_DISPLAY "\n");

@@ -210,7 +210,171 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
     return 0;
 }
 
-int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_flag, tf_exec_config* tf_run){
+//return 1: option incorrect
+//return -1: Registry empty
+//return -3: FILE I/O error
+//return 3: User dened.
+
+int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_local){
+    if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Please specify an option: encrypt or decrypt." RESET_DISPLAY "\n");
+        return 1;
+    }
+    if(file_empty_or_not(ALL_CLUSTER_REGISTRY)<1){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The registry is empty. Have you created any clusters?" RESET_DISPLAY "\n");
+        return -1;
+    }
+    char cluster_name_temp[LINE_LENGTH_SHORT]=""; //Here we have to use a wider array.
+    char cluster_workdir_temp[DIR_LENGTH]="";
+    char registry_line_buffer[LINE_LENGTH_SHORT]="";
+    char registry_copy[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    int flag,final_flag=0;
+    int i=1;
+    if(strcmp(option,"decrypt")==0){
+        printf(GENERAL_BOLD "                              C A U T I O N !\n\n");
+        printf(RESET_DISPLAY WARN_YELLO_BOLD "|* VERY RISKY!!! YOU KNOW WHAT YOU ARE DOING!" RESET_DISPLAY GENERAL_BOLD "\n");
+        if(strcmp(cluster_list,"all")==0){
+            printf("|* Will decrypt the files related to " RESET_DISPLAY WARN_YELLO_BOLD "ALL" RESET_DISPLAY GENERAL_BOLD " the clusters!\n");
+        }
+        else{
+            printf("|* Will decrypt the files related to clusters " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "!\n",cluster_list);
+        }
+        printf(RESET_DISPLAY WARN_YELLO_BOLD "|* YOU MUST ENCRYPT THEM AS SOON AS POSSIBLE! VERY RISKY!!!" RESET_DISPLAY GENERAL_BOLD "\n\n");
+        printf("                              C A U T I O N !" RESET_DISPLAY "\n");
+    }
+    else{
+        printf(GENERAL_BOLD "                              C A U T I O N !\n\n");
+        printf("|* Encrypting the cluster files with AES-128bit Module.\n");
+        printf("                              C A U T I O N !" RESET_DISPLAY "\n");
+    }
+    flag=prompt_to_confirm("ARE YOUR SURE TO CONTINUE?",CONFIRM_STRING,batch_flag_local);
+    if(flag==1){
+        return 3;
+    }
+    if(strcmp(cluster_list,"all")==0){
+        sprintf(cmdline,"%s %s %s.copy %s",COPY_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
+        if(system(cmdline)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] FILE I/O error when copying registry." RESET_DISPLAY "\n");
+            return -3;
+        }
+        sprintf(registry_copy,"%s.copy",ALL_CLUSTER_REGISTRY);
+        FILE* file_p=fopen(registry_copy,"r");
+        if(file_p==NULL){
+            printf(FATAL_RED_BOLD "[ FATAL: ] FILE I/O error when opening copied registry." RESET_DISPLAY "\n");
+            return -3;
+        }
+        while(fngetline(file_p,registry_line_buffer,LINE_LENGTH_SHORT)==0){
+            get_seq_string(registry_line_buffer,' ',4,cluster_name_temp);
+            if(cluster_name_check(cluster_name_temp)!=-127){
+                printf("[ -WARN- ] Cluster name %s is not valid. Skipped it.\n",cluster_name_temp);
+                final_flag++;
+                continue;
+            }
+            if(strcmp(option,"decrypt")==0){
+                flag=decrypt_single_cluster(cluster_name_temp,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
+                if(flag!=0){
+                    printf("[ -WARN- ] Failed to decrypt files of the cluster %s. Error code: %d.\n",cluster_name_temp,flag);
+                    final_flag++;
+                }
+                else{
+                    printf("[ -INFO- ] Decrypted files of the cluster %s.\n",cluster_name_temp);
+                }
+            }
+            else{
+                get_workdir(cluster_workdir_temp,cluster_name_temp);
+                delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
+                printf("[ -INFO- ] Encrypted files of the cluster %s.\n",cluster_name_temp);
+            }
+        }
+        fclose(file_p);
+        if(final_flag!=0){
+            printf("[ -WARN- ] %s finished with %d failed cluster(s).\n",option,final_flag);
+        }
+        else{
+            printf("[ -WARN- ] %s finished successfully.\n",option);
+        }
+        return 0;
+    }
+    while(get_seq_string(cluster_list,':',i,cluster_name_temp)==0){
+        if(cluster_name_check(cluster_name_temp)!=-127){
+            printf("[ -WARN- ] Cluster name %s is not valid. Skipped it.\n",cluster_name_temp);
+            final_flag++;
+            continue;
+        }
+        if(strcmp(option,"decrypt")==0){
+            flag=decrypt_single_cluster(cluster_name_temp,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
+            if(flag!=0){
+                printf("[ -WARN- ] Failed to decrypt files of the cluster %s. Error code: %d.\n",cluster_name_temp,flag);
+                final_flag++;
+            }
+            else{
+                printf("[ -INFO- ] Decrypted files of the cluster %s.\n",cluster_name_temp);
+            }
+            i++;
+        }
+        else{
+            get_workdir(cluster_workdir_temp,cluster_name_temp);
+            delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
+            printf("[ -INFO- ] Encrypted files of the cluster %s.\n",cluster_name_temp);
+        }
+    }
+    if(final_flag!=0){
+        printf("[ -WARN- ] %s finished with %d failed cluster(s).\n",option,final_flag);
+    }
+    else{
+        printf("[ -WARN- ] %s finished successfully.\n",option);
+    }
+    return 0;
+}
+
+//return -1: cluster_registry not found
+//return -3: cluster_name incorrect
+//return -5: cloud_flag error or vaultdir error
+//return -7: failed to get the key md5
+//return 0: decryption finished
+int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, char* crypto_keyfile){
+    char target_cluster_workdir[DIR_LENGTH]="";
+    char target_cluster_vaultdir[DIR_LENGTH]="";
+    char cloud_flag[32]="";
+    char md5sum[64]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    if(file_empty_or_not(ALL_CLUSTER_REGISTRY)<1){
+        return -1;
+    }
+    if(cluster_name_check(target_cluster_name)!=-127){
+        return -3;
+    }
+    get_workdir(target_cluster_workdir,target_cluster_name);
+    if(get_cloud_flag(target_cluster_workdir,cloud_flag)!=0||create_and_get_vaultdir(target_cluster_workdir,target_cluster_vaultdir)!=0){
+        return -5;
+    }
+    if(get_crypto_key(crypto_keyfile,md5sum)!=0){
+        return -7;
+    }
+    
+    decrypt_files(target_cluster_workdir,crypto_keyfile); //Delete the /stack files.
+    
+    // Now, decrypt the /vault files.
+    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
+    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%suser_passwords.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
+    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    sprintf(filename_temp,"%s%sbucket_info.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
+    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    if(strcmp(cloud_flag,"CLOUD_G")==0){ //Decrypt the special bucket secrets
+        sprintf(filename_temp,"%s%sbucket_key.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
+        decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    }
+    if(strcmp(cloud_flag,"CLOUD_E")==0){ //Decrypt the special bucket secrets
+        sprintf(filename_temp,"%s%scredentials",target_cluster_vaultdir,PATH_SLASH);
+        decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    }
+    decrypt_cloud_secrets(now_crypto_exec,target_cluster_workdir,md5sum);
+    return 0;
+}
+
+int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_flag, tf_exec_config* tf_run){
     if(strlen(target_cluster_name)<CLUSTER_ID_LENGTH_MIN||strlen(target_cluster_name)>CLUSTER_ID_LENGTH_MAX){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is invalid.\n" RESET_DISPLAY,target_cluster_name);
         return 1;
@@ -340,7 +504,6 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     char az_subscription_id[AKSK_LENGTH]="";
     char az_tenant_id[AKSK_LENGTH]="";
     char md5sum[33]="";
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
     int ak_length,sk_length;
     char* cluster_registry=ALL_CLUSTER_REGISTRY;
     int run_flag;
@@ -427,7 +590,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         system(cmdline);
         create_and_get_vaultdir(new_workdir,new_vaultdir);
         get_crypto_key(crypto_keyfile,md5sum);
-        sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,secret_key,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
         run_flag=system(cmdline);
         if(run_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. Abort." RESET_DISPLAY "\n");
@@ -577,7 +740,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,filename_temp,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -608,7 +771,6 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     char filename_temp2[FILENAME_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
-    char *now_crypto_exec=NOW_CRYPTO_EXEC;
     int ak_length,sk_length;
     char* keypair_temp=NULL;
     char access_key[AKSK_LENGTH]="";
@@ -666,7 +828,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         }
         fclose(file_p);
         get_crypto_key(crypto_keyfile,md5sum);
-        sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,secret_key,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
         run_flag=system(cmdline);
         if(run_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. The key keeps unchanged." RESET_DISPLAY "\n");
@@ -825,7 +987,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         return 3;
     }
     get_crypto_key(crypto_keyfile,md5sum);
-    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,filename_temp,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -833,11 +995,11 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     sprintf(filename_temp,"%s%shpc_stack_base.tf.tmp",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
         sprintf(filename_temp2,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
-        sprintf(cmdline,"%s decrypt %s %s %s %s",now_crypto_exec,filename_temp,filename_temp2,md5sum,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s decrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp,filename_temp2,md5sum,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         global_replace(filename_temp2,access_key_prev,access_key);
         global_replace(filename_temp2,secret_key_prev,secret_key);
-        sprintf(cmdline,"%s encrypt %s %s %s %s",now_crypto_exec,filename_temp2,filename_temp,md5sum,SYSTEM_CMD_REDIRECT);
+        sprintf(cmdline,"%s encrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp2,filename_temp,md5sum,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally.\n");

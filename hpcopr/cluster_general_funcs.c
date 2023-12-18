@@ -405,7 +405,6 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     if(file_exist_or_not(secret_file)!=0){
         return 1;
     }
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
     if(file_exist_or_not(crypto_key_file)!=0){
         return 1;
     }
@@ -420,7 +419,7 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
-    sprintf(cmdline,"%s decrypt %s %s.dat %s %s",now_crypto_exec,secret_file,secret_file,md5,SYSTEM_CMD_REDIRECT);
+    sprintf(cmdline,"%s decrypt %s %s.dat %s %s",NOW_CRYPTO_EXEC,secret_file,secret_file,md5,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(filename_temp,"%s.dat",secret_file);
     file_p=fopen(filename_temp,"r");
@@ -687,91 +686,148 @@ int decrypt_single_file_general(char* now_crypto_exec, char* source_file, char* 
     }
 }
 
+//decrypt ALL the files in /stack
+//
 int decrypt_files(char* workdir, char* crypto_key_filename){
     char filename_temp[FILENAME_LENGTH]="";
     char md5sum[33]="";
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char stackdir[DIR_LENGTH]="";
     int compute_node_num=0;
     int i;
     create_and_get_stackdir(workdir,stackdir);
-    get_crypto_key(crypto_key_filename,md5sum);
+    if(get_crypto_key(crypto_key_filename,md5sum)!=0){
+        return -1;
+    }
     sprintf(filename_temp,"%s%shpc_stack_base.tf.tmp",stackdir,PATH_SLASH);
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sterraform.tfstate.tmp",stackdir,PATH_SLASH);
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sterraform.tfstate.backup.tmp",stackdir,PATH_SLASH);
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_master.tf.tmp",stackdir,PATH_SLASH);
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_database.tf.tmp",stackdir,PATH_SLASH);
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_natgw.tf.tmp",stackdir,PATH_SLASH);
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
         compute_node_num=get_compute_node_num(filename_temp,"all");
     }
     for(i=1;i<compute_node_num+1;i++){
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf.tmp",stackdir,PATH_SLASH,i);
-        decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+        decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     }
     return 0;
 }
 
-void encrypt_and_delete(char* now_crypto_exec, char* filename, char* md5sum){
+int encrypt_and_delete(char* now_crypto_exec, char* filename, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
+    int run_flag;
     if(file_exist_or_not(filename)==0){
         sprintf(cmdline,"%s encrypt %s %s.tmp %s %s",now_crypto_exec,filename,filename,md5sum,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            return -1;
+        }
         sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }
+    else{
+        return 0;
     }
 }
 
+// Encrypt and delete all the *potentially* decrypted sensitive files.
+// Including those in /stack, and /vaultdir
+//return -1: Folder Error
+//return -3: Failed to get the crypto key md5 string
+//return 0: deleted done
 int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     char filename_temp[FILENAME_LENGTH]="";
     char md5sum[33]="";
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     int compute_node_num=0;
     int i;
-    create_and_get_stackdir(workdir,stackdir);
-    create_and_get_vaultdir(workdir,vaultdir);
-    get_crypto_key(crypto_key_filename,md5sum);
+    if(create_and_get_stackdir(workdir,stackdir)!=0||create_and_get_vaultdir(workdir,vaultdir)!=0){
+        return -1;
+    }
+    if(get_crypto_key(crypto_key_filename,md5sum)!=0){
+        return -3;
+    }
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%scredentials",vaultdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+
+    encrypt_cloud_secrets(NOW_CRYPTO_EXEC,workdir,md5sum); //This is very important. AND ALSO RISKY!
+
     sprintf(filename_temp,"%s%sbucket_key.txt",vaultdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sterraform.tfstate.backup",stackdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
-    encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
         compute_node_num=get_compute_node_num(filename_temp,"all");
     }
     for(i=1;i<compute_node_num+1;i++){
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
-        encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+        encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     }
     return 0;
 }
+
+int decrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
+    char cmdline[CMDLINE_LENGTH]="";
+    char vaultdir[DIR_LENGTH];
+    char key_file[FILENAME_LENGTH]="";
+    if(create_and_get_vaultdir(workdir,vaultdir)!=0){
+        return -1;
+    }
+    sprintf(key_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(key_file)!=0){
+        return -1;
+    }
+    sprintf(cmdline,"%s decrypt %s %s%scloud_secrets_VERY_RISKY.txt %s %s",now_crypto_exec,key_file,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+    return system(cmdline);
+}
+
+int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
+    char cmdline[CMDLINE_LENGTH]="";
+    char vaultdir[DIR_LENGTH];
+    char key_file[FILENAME_LENGTH]="";
+    if(create_and_get_vaultdir(workdir,vaultdir)!=0){
+        return -1;
+    }
+    sprintf(key_file,"%s%scloud_secrets_VERY_RISKY.txt",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(key_file)!=0){
+        return 0; // If the decrypted file is absent, skip.
+    }
+    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,key_file,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+    return system(cmdline);
+}
+
 
 /*
  * Key words for currentstate:
@@ -1140,18 +1196,18 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
     char master_address[32]="";
     char master_address_prev[32]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char* now_crypto_exec=NOW_CRYPTO_EXEC;
+
     get_crypto_key(crypto_keyfile,md5sum);
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     find_and_get(filename_temp,"Master","Node","IP:",1,"Master","Node","IP:",' ',4,master_address_prev);
     get_state_value(workdir,"master_public_ip:",master_address);
     if(strcmp(master_address,master_address_prev)!=0){
         sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
         global_replace(filename_temp,master_address_prev,master_address);
-        encrypt_and_delete(now_crypto_exec,filename_temp,md5sum);
+        encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     }
     else{
         sprintf(cmdline,"%s %s%sCLUSTER_SUMMARY.txt %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -2541,6 +2597,9 @@ int check_and_cleanup(char* prev_workdir){
     return 0;
 }
 
+//header flag=0: print a header
+//header flag=1: don't print a header and a blank line at the end
+//header flag=others: don't print a header or a blank line at the end
 int list_all_cluster_names(int header_flag){
     FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
     char registry_line[LINE_LENGTH_SHORT]="";
@@ -2733,6 +2792,8 @@ int decrypt_bcecredentials(char* workdir){
     return decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
 }
 
+//key_flag=0, gcp_secrets; key_flag!=0, bucket_secrets;
+//operation="decrypt", decrypt; others, encrypt
 int gcp_credential_convert(char* workdir, const char* operation, int key_flag){
     char md5sum[64]="";
     char vaultdir[DIR_LENGTH]="";

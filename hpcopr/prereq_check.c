@@ -1332,7 +1332,7 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is empty. Please init first." RESET_DISPLAY "\n",cluster_name);
             return -7;
         }
-        if(cmd_keyword_check(argc,argv,"-u",string_temp)!=0){
+        if(cmd_keyword_ncheck(argc,argv,"-u",string_temp,255)!=0){
             if(batch_flag!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid user name from the list below. \n");
                 hpc_user_list(workdir,CRYPTO_KEY_FILE,0);

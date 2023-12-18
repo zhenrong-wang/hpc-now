@@ -159,6 +159,16 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "configloc" RESET_DISPLAY "   :~ Configure the locations for the terraform binaries, providers\n");
         printf("|              :~ IaC templates and shell scripts.\n");
     }
+    if(strcmp(cmd_name,"decrypt")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "decrypt" RESET_DISPLAY "   :~ " WARN_YELLO_BOLD "VERY RISKY!" RESET_DISPLAY " Decrypt files related to a cluster list.\n");
+        printf("|   -c CLUSTER_LIST ~ A list in format of " HIGH_CYAN_BOLD "cluster1:cluster2:..." RESET_DISPLAY "\n");
+        printf("|   --all           ~ All the clusters in current registry, " GENERAL_BOLD "this option has higher priority." RESET_DISPLAY "\n");
+    }
+    if(strcmp(cmd_name,"encrypt")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "encrypt" RESET_DISPLAY "   :~ Encrypt files related to a cluster list.\n");
+        printf("|   -c CLUSTER_LIST ~ A list in format of " HIGH_CYAN_BOLD "cluster1:cluster2:..." RESET_DISPLAY "\n");
+        printf("|   --all           ~ All the clusters in current registry, " GENERAL_BOLD "this option has higher priority." RESET_DISPLAY "\n");
+    }
     if(strcmp(cmd_name,"showloc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "showloc" RESET_DISPLAY "     :~ Show the current configured locations.\n");
     }
