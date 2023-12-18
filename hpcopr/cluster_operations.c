@@ -359,6 +359,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
 //return -3: cluster_name incorrect
 //return -5: cloud_flag error or vaultdir error
 //return -7: failed to get the key md5
+//return 1: already decrypted
 //return 0: decryption finished
 int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, char* crypto_keyfile){
     char target_cluster_workdir[DIR_LENGTH]="";
@@ -376,10 +377,12 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     if(get_cloud_flag(target_cluster_workdir,cloud_flag)!=0||create_and_get_vaultdir(target_cluster_workdir,target_cluster_vaultdir)!=0){
         return -5;
     }
+    if(decryption_status(target_cluster_workdir)!=0){
+        return -9;
+    }
     if(get_crypto_key(crypto_keyfile,md5sum)!=0){
         return -7;
     }
-    
     decrypt_files(target_cluster_workdir,crypto_keyfile); //Delete the /stack files.
     
     // Now, decrypt the /vault files.
