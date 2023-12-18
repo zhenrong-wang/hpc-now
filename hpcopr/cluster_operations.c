@@ -343,7 +343,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             flag=decrypt_single_cluster(cluster_list,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
             if(flag!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt files of the cluster %s. Error code: %d." RESET_DISPLAY "\n",cluster_list,flag);
-                delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
+                delete_decrypted_files(cluster_list,CRYPTO_KEY_FILE);
                 return 7;
             }
             else{
@@ -352,7 +352,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             }
         }
         else{
-            delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
+            delete_decrypted_files(cluster_list,CRYPTO_KEY_FILE);
             printf(GENERAL_BOLD "[ -INFO- ] Encrypted files of the cluster %s." RESET_DISPLAY "\n",cluster_list);
             return 0;
         }
