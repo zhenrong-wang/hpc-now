@@ -1075,7 +1075,7 @@ int main(int argc, char* argv[]){
         else{
             level_flag=0;
         }
-        if(check_pslock(workdir)!=0){
+        if(check_pslock(workdir,decryption_status(workdir))!=0){
             if(cluster_empty_or_not(workdir)!=0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * Graph NOT updated !\n" RESET_DISPLAY "\n",cluster_name);
             }
@@ -1406,7 +1406,7 @@ int main(int argc, char* argv[]){
         }
     }
 
-    if(check_pslock(workdir)==1){
+    if(check_pslock(workdir,decryption_status(workdir))==1){
         printf(FATAL_RED_BOLD "[ FATAL: ] Another process is operating this cluster, please wait and retry.\n");
         printf("|          Exit now." RESET_DISPLAY "\n");
         write_operation_log(cluster_name,operation_log,argc,argv,"PROCESS_LOCKED",53);
