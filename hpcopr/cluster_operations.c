@@ -300,6 +300,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         if(cluster_name_check(cluster_name_temp)!=-127){
             printf("[ -WARN- ] Cluster name %s is not valid. Skipped it.\n",cluster_name_temp);
             final_flag++;
+            i++;
             continue;
         }
         if(strcmp(option,"decrypt")==0){
