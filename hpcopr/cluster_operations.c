@@ -215,6 +215,9 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
 //return -3: FILE I/O error
 //return 3: User dened.
 
+//return 5: cluster name invalid of a single cluster.
+//return 7: Failed to decrypt a single cluster
+
 int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_local){
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify an option: encrypt or decrypt." RESET_DISPLAY "\n");
@@ -267,38 +270,61 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         while(fngetline(file_p,registry_line_buffer,LINE_LENGTH_SHORT)==0){
             get_seq_string(registry_line_buffer,' ',4,cluster_name_temp);
             if(cluster_name_check(cluster_name_temp)!=-127){
-                printf("[ -WARN- ] Cluster name %s is not valid. Skipped it.\n",cluster_name_temp);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Cluster name %s is not valid. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
                 final_flag++;
                 continue;
             }
             if(strcmp(option,"decrypt")==0){
                 flag=decrypt_single_cluster(cluster_name_temp,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
                 if(flag!=0){
-                    printf("[ -WARN- ] Failed to decrypt files of the cluster %s. Error code: %d.\n",cluster_name_temp,flag);
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt files of the cluster %s. Error code: %d." RESET_DISPLAY "\n",cluster_name_temp,flag);
                     final_flag++;
                 }
                 else{
-                    printf("[ -INFO- ] Decrypted files of the cluster %s.\n",cluster_name_temp);
+                    printf(GENERAL_BOLD "[ -INFO- ] Decrypted files of the cluster %s." RESET_DISPLAY "\n",cluster_name_temp);
                 }
             }
             else{
                 get_workdir(cluster_workdir_temp,cluster_name_temp);
                 delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
-                printf("[ -INFO- ] Encrypted files of the cluster %s.\n",cluster_name_temp);
+                printf(GENERAL_BOLD "[ -INFO- ] Encrypted files of the cluster %s." RESET_DISPLAY "\n",cluster_name_temp);
             }
         }
         fclose(file_p);
         if(final_flag!=0){
-            printf("[ -WARN- ] %s finished with %d failed cluster(s).\n",option,final_flag);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] %s finished with %d failed cluster(s)." RESET_DISPLAY "\n",option,final_flag);
         }
         else{
-            printf("[ -WARN- ] %s finished successfully.\n",option);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] %s finished successfully." RESET_DISPLAY "\n",option);
         }
         return 0;
     }
+    if(contain_or_not(cluster_list,":")!=0){
+        if(cluster_name_check(cluster_list)!=-127){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is not valid." RESET_DISPLAY "\n",cluster_list);
+            return 5;
+        }
+        if(strcmp(option,"decrypt")==0){
+            flag=decrypt_single_cluster(cluster_list,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
+            if(flag!=0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt files of the cluster %s. Error code: %d." RESET_DISPLAY "\n",cluster_list,flag);
+                delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
+                return 7;
+            }
+            else{
+                printf(GENERAL_BOLD "[ -INFO- ] Decrypted files of the cluster %s." RESET_DISPLAY "\n",cluster_list);
+                return 0;
+            }
+        }
+        else{
+            delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
+            printf(GENERAL_BOLD "[ -INFO- ] Encrypted files of the cluster %s." RESET_DISPLAY "\n",cluster_list);
+            return 0;
+        }
+    }
     while(get_seq_string(cluster_list,':',i,cluster_name_temp)==0){
         if(cluster_name_check(cluster_name_temp)!=-127){
-            printf("[ -WARN- ] Cluster name %s is not valid. Skipped it.\n",cluster_name_temp);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Cluster name %s is not valid. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
             final_flag++;
             i++;
             continue;
@@ -306,25 +332,25 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         if(strcmp(option,"decrypt")==0){
             flag=decrypt_single_cluster(cluster_name_temp,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
             if(flag!=0){
-                printf("[ -WARN- ] Failed to decrypt files of the cluster %s. Error code: %d.\n",cluster_name_temp,flag);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt files of the cluster %s. Error code: %d." RESET_DISPLAY "\n",cluster_name_temp,flag);
                 final_flag++;
             }
             else{
-                printf("[ -INFO- ] Decrypted files of the cluster %s.\n",cluster_name_temp);
+                printf(GENERAL_BOLD "[ -INFO- ] Decrypted files of the cluster %s." RESET_DISPLAY "\n",cluster_name_temp);
             }
             i++;
         }
         else{
             get_workdir(cluster_workdir_temp,cluster_name_temp);
             delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
-            printf("[ -INFO- ] Encrypted files of the cluster %s.\n",cluster_name_temp);
+            printf(GENERAL_BOLD "[ -INFO- ] Encrypted files of the cluster %s." RESET_DISPLAY "\n",cluster_name_temp);
         }
     }
     if(final_flag!=0){
-        printf("[ -WARN- ] %s finished with %d failed cluster(s).\n",option,final_flag);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] %s finished with %d failed cluster(s)." RESET_DISPLAY "\n",option,final_flag);
     }
     else{
-        printf("[ -WARN- ] %s finished successfully.\n",option);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] %s finished successfully." RESET_DISPLAY "\n",option);
     }
     return 0;
 }
