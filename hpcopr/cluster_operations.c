@@ -279,10 +279,10 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             printf("|* Will decrypt the files related to clusters " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " !\n",cluster_list);
         }
         printf("|* YOU MUST ENCRYPT THEM AS SOON AS POSSIBLE! THIS IS VERY RISKY!!!\n\n");
-        printf("                              C A U T I O N !" RESET_DISPLAY "\n");
+        printf("                              C A U T I O N !" RESET_DISPLAY "\n\n");
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ] Encrypting the cluster's sensitive files with AES-128bit Module." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Encrypting the cluster's sensitive files with now-crypto." RESET_DISPLAY "\n");
     }
     flag=prompt_to_confirm("ARE YOUR SURE TO CONTINUE?",CONFIRM_STRING,batch_flag_local);
     if(flag==1){
@@ -314,13 +314,13 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
                     final_flag++;
                 }
                 else{
-                    printf(GENERAL_BOLD "[ -INFO- ] Decrypted files of the cluster %s." RESET_DISPLAY "\n",cluster_name_temp);
+                    printf(GENERAL_BOLD "[ -INFO- ] Decrypted SENSITIVE files of the cluster %s." RESET_DISPLAY "\n",cluster_name_temp);
                 }
             }
             else{
                 get_workdir(cluster_workdir_temp,cluster_name_temp);
                 delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
-                printf(GENERAL_BOLD "[ -INFO- ] Encrypted files of the cluster %s." RESET_DISPLAY "\n",cluster_name_temp);
+                printf(GENERAL_BOLD "[ -INFO- ] Encrypted sensitive files of the cluster %s." RESET_DISPLAY "\n",cluster_name_temp);
             }
         }
         fclose(file_p);
