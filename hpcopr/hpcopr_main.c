@@ -1003,7 +1003,7 @@ int main(int argc, char* argv[]){
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Trying to ssh " HIGH_GREEN_BOLD "%s@%s" RESET_DISPLAY ".\n",user_name,cluster_name);
         if(strcmp(user_name,"root")==0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] SSH as root is VERY RISKY and *NOT* recommended! Only for operator or admins." RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] SSH as root is VERY RISKY and *NOT* recommended !" RESET_DISPLAY "\n");
         }
         run_flag=cluster_ssh(workdir,user_name,cluster_role);
         if(run_flag==-1){

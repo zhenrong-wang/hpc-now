@@ -1314,8 +1314,8 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
         get_workdir(workdir,cluster_name);
         cluster_role_detect(workdir,cluster_role,cluster_role_ext);
         if(decryption_status(workdir)!=0){
-            printf(FATAL_RED_BOLD "[ !WARN! ] VERY RISKY !!! The cluster's files are not encrypted or protected !!!\n");
-            printf("|          Run " WARN_YELLO_BOLD "hpcopr encrypt --all -b" RESET_DISPLAY FATAL_RED_BOLD " OR " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr encrypt -c %s -b" RESET_DISPLAY "\n",cluster_name);
+            printf(FATAL_RED_BOLD "\n[ !WARN! ] VERY RISKY !!! The cluster's files are not encrypted or protected !!!\n");
+            printf("|          Run " WARN_YELLO_BOLD "hpcopr encrypt --all -b" RESET_DISPLAY FATAL_RED_BOLD " OR " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr encrypt -c %s -b" RESET_DISPLAY "\n\n",cluster_name);
         }
         if(strcmp(role_flag,"opr")==0&&strcmp(cluster_role,"opr")!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " needs the " WARN_YELLO_BOLD "operator" FATAL_RED_BOLD " to execute.\n",argv[1]);
