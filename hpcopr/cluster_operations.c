@@ -236,7 +236,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
     int i=1;
     if(strcmp(option,"decrypt")==0){
         printf(FATAL_RED_BOLD "                              C A U T I O N !\n\n");
-        printf("|* THIS OPERATION IS VERY RISKY!!! *YOU KNOW WHAT YOU ARE DOING!*\n");
+        printf("|* THIS OPERATION IS VERY RISKY!!! *YOU KNOW WHAT YOU ARE DOING!!!*\n");
         if(strcmp(cluster_list,"all")==0){
             printf("|* Will decrypt the files related to " RESET_DISPLAY WARN_YELLO_BOLD "ALL" RESET_DISPLAY FATAL_RED_BOLD " the clusters!\n");
         }
