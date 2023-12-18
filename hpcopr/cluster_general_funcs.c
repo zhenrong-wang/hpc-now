@@ -813,10 +813,12 @@ int decrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
     return system(cmdline);
 }
 
+//return -7: SOMETHING FATAL happened.
 int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH];
     char key_file[FILENAME_LENGTH]="";
+    int flag=0;
     if(create_and_get_vaultdir(workdir,vaultdir)!=0){
         return -1;
     }
@@ -825,7 +827,12 @@ int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
         return 0; // If the decrypted file is absent, skip.
     }
     sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,key_file,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
-    return system(cmdline);
+    flag=system(cmdline);
+    if(flag==0){ //If Encrypted successfully, then delete the decrypted one.
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,key_file,SYSTEM_CMD_REDIRECT);
+        return system(cmdline);
+    }
+    return -7;
 }
 
 
