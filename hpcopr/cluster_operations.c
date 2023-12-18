@@ -90,12 +90,12 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             fclose(file_p);
             return 0;
         }
-        decrypt_files(temp_cluster_workdir,crypto_keyfile);
+        //decrypt_files(temp_cluster_workdir,crypto_keyfile);
         printf(GENERAL_BOLD "| switch : <> ");
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
             printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
         }
-        delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+        //delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         fclose(file_p);
         return 0;
     }
@@ -137,12 +137,12 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                     i++;
                     continue;
                 }
-                decrypt_files(temp_cluster_workdir,crypto_keyfile);
+                //decrypt_files(temp_cluster_workdir,crypto_keyfile);
                 i++;
                 if(graph(temp_cluster_workdir,crypto_keyfile,3)!=0){
                     printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
                 }
-                delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+                //delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }
         }
         fclose(file_p);
@@ -176,11 +176,11 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             }
             return 0;
         }
-        decrypt_files(temp_cluster_workdir,crypto_keyfile);
+        //decrypt_files(temp_cluster_workdir,crypto_keyfile);
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
             printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
         }
-        delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
+        //delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
     }
 }
