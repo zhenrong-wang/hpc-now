@@ -573,7 +573,7 @@ int check_pslock(char* workdir, int decrypt_flag){
     create_and_get_stackdir(workdir,stackdir);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        if(decrypt_flag==0){ //If not decrypted
+        if(decrypt_flag!=0){ //If also decrypted, return 0
             return 0;
         }
         else{
