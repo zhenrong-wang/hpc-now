@@ -311,6 +311,7 @@ int main(int argc, char* argv[]){
     char cmdline[CMDLINE_LENGTH]="";
     char cluster_role[8]="";
     int cluster_state_flag=0;
+    int decrypt_flag=0;
     jobinfo job_info;
 
     print_header();
@@ -380,7 +381,7 @@ int main(int argc, char* argv[]){
         system(cmdline);
     }
 
-    command_flag=command_parser(argc,argv,command_name_prompt,workdir,cluster_name,user_name,cluster_role);
+    command_flag=command_parser(argc,argv,command_name_prompt,workdir,cluster_name,user_name,cluster_role,&decrypt_flag);
     if(command_flag==-1){
         print_help("all");
         return 0;
@@ -406,6 +407,10 @@ int main(int argc, char* argv[]){
     else if(command_flag==1){
         check_and_cleanup(workdir);
         return 5;
+    }
+    if(decrypt_flag==1){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is decrypted. Encrypting it for security." RESET_DISPLAY "\n",cluster_name);
+        encrypt_decrypt_clusters(cluster_name,"encrypt",0); //This operation is automatic. Use 0 as the batch flag.
     }
     if(strcmp(final_command,"help")==0){
         if(cmd_flag_check(argc,argv,"--all")==0){

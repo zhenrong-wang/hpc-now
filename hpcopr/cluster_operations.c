@@ -266,9 +266,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         printf("                              C A U T I O N !" RESET_DISPLAY "\n");
     }
     else{
-        printf(GENERAL_BOLD "                              C A U T I O N !\n\n");
-        printf("|* Encrypting the cluster files with AES-128bit Module.\n\n");
-        printf("                              C A U T I O N !" RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Encrypting the cluster's sensitive files with AES-128bit Module." RESET_DISPLAY "\n");
     }
     flag=prompt_to_confirm("ARE YOUR SURE TO CONTINUE?",CONFIRM_STRING,batch_flag_local);
     if(flag==1){

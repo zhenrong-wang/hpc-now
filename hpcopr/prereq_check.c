@@ -1215,7 +1215,13 @@ int command_name_check(char* command_name_input, char* command_prompt, char* rol
     return 200+closest;
 }
 
-int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name, char* user_name, char* cluster_role){
+//return -1: No command
+//return 200+: command error
+//return -3: cluster name invalid
+//return -7: cluste empty
+//return -5: username invalid
+//return 1: role incorrect
+int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name, char* user_name, char* cluster_role, int* decrypt_flag){
     int command_flag=0;
     int max_time_temp=0;
     char temp_cluster_name_specified[128]="";
@@ -1313,10 +1319,6 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
         strcpy(cluster_name,temp_cluster_name);
         get_workdir(workdir,cluster_name);
         cluster_role_detect(workdir,cluster_role,cluster_role_ext);
-        if(decryption_status(workdir)!=0){
-            printf(FATAL_RED_BOLD "\n[ !WARN! ] VERY RISKY!!! The cluster's sensitive files are not encrypted!\n");
-            printf("|          Run " WARN_YELLO_BOLD "hpcopr encrypt --all -b" RESET_DISPLAY FATAL_RED_BOLD " OR " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr encrypt -c %s -b" RESET_DISPLAY "\n\n",cluster_name);
-        }
         if(strcmp(role_flag,"opr")==0&&strcmp(cluster_role,"opr")!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " needs the " WARN_YELLO_BOLD "operator" FATAL_RED_BOLD " to execute.\n",argv[1]);
             printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Current role: %s . Please contact the operator.\n",cluster_role);
@@ -1326,6 +1328,12 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
             printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " needs the " WARN_YELLO_BOLD "operator" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "admin" FATAL_RED_BOLD " to execute.\n",argv[1]); 
             printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Current role: %s . Please contact the operator.\n",cluster_role);
             return 1;
+        }
+        if(decryption_status(workdir)!=0){
+            *decrypt_flag=1;
+        }
+        else{
+            *decrypt_flag=0;
         }
         if(check_local_tf_config(workdir,filename_temp)==0){
             tf_local_config_flag=get_tf_running(&tf_this_run,filename_temp);
