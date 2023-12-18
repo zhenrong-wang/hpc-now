@@ -1510,7 +1510,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         }
         else{
             if(decrypt_flag!=0){
-                printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s  %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method,decrypt_prompt);
+                printf(FATAL_RED_BOLD "%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s  %s" RESET_DISPLAY "\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method,decrypt_prompt);
             }
             else{
                 printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method);
