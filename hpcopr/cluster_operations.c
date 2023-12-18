@@ -94,7 +94,12 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         //decrypt_files(temp_cluster_workdir,crypto_keyfile);
         printf(GENERAL_BOLD "| switch : <> ");
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
-            printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+            if(decrypt_flag!=0){
+                printf(FATAL_RED_BOLD "%s | %s | %s | * EMPTY CLUSTER * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+            }
+            else{
+                printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+            }
         }
         //delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         fclose(file_p);
@@ -102,7 +107,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         max_cluster_name_length=get_max_cluster_name_length();
-        while(fgetline(file_p,registry_line)==0){
+        while(fngetline(file_p,registry_line,255)==0){
             if(strlen(registry_line)!=0){
                 get_seq_string(registry_line,' ',4,temp_cluster_name);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
@@ -131,7 +136,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 decrypt_flag=decryption_status(temp_cluster_workdir);
                 if(status_flag!=0){
                     if(decrypt_flag!=0){
-                        printf("%s | %s | %s | * OPERATION-IN-PROGRESS * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
+                        printf(FATAL_RED_BOLD "%s | %s | %s | * OPERATION-IN-PROGRESS * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
                     }
                     else{
                         printf("%s | %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
@@ -142,7 +147,12 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 //decrypt_files(temp_cluster_workdir,crypto_keyfile);
                 i++;
                 if(graph(temp_cluster_workdir,crypto_keyfile,3)!=0){
-                    printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
+                    if(decrypt_flag!=0){
+                        printf(FATAL_RED_BOLD "%s | %s | %s | * EMPTY CLUSTER * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
+                    }
+                    else{
+                        printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
+                    }
                 }
                 //delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
             }
@@ -182,7 +192,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         //decrypt_files(temp_cluster_workdir,crypto_keyfile);
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
             if(decrypt_flag!=0){
-                printf("%s | %s | %s | * EMPTY CLUSTER * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
+                printf(FATAL_RED_BOLD "%s | %s | %s | * EMPTY CLUSTER * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
             }
             else{
                 printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
