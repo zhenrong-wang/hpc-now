@@ -236,14 +236,14 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
     int i=1;
     if(strcmp(option,"decrypt")==0){
         printf(GENERAL_BOLD "                              C A U T I O N !\n\n");
-        printf(RESET_DISPLAY WARN_YELLO_BOLD "|* VERY RISKY!!! YOU KNOW WHAT YOU ARE DOING!" RESET_DISPLAY GENERAL_BOLD "\n");
+        printf(RESET_DISPLAY WARN_YELLO_BOLD "|* THIS OPERATION IS VERY RISKY!!! YOU KNOW WHAT YOU ARE DOING!" RESET_DISPLAY GENERAL_BOLD "\n");
         if(strcmp(cluster_list,"all")==0){
             printf("|* Will decrypt the files related to " RESET_DISPLAY WARN_YELLO_BOLD "ALL" RESET_DISPLAY GENERAL_BOLD " the clusters!\n");
         }
         else{
-            printf("|* Will decrypt the files related to clusters " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "!\n",cluster_list);
+            printf("|* Will decrypt the files related to clusters " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY GENERAL_BOLD " !\n",cluster_list);
         }
-        printf(RESET_DISPLAY WARN_YELLO_BOLD "|* YOU MUST ENCRYPT THEM AS SOON AS POSSIBLE! VERY RISKY!!!" RESET_DISPLAY GENERAL_BOLD "\n\n");
+        printf(RESET_DISPLAY WARN_YELLO_BOLD "|* YOU MUST ENCRYPT THEM AS SOON AS POSSIBLE! THIS IS VERY RISKY!!!" RESET_DISPLAY GENERAL_BOLD "\n\n");
         printf("                              C A U T I O N !" RESET_DISPLAY "\n");
     }
     else{
