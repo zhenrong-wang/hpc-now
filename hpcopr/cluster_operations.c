@@ -295,7 +295,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             printf(WARN_YELLO_BOLD "[ -WARN- ] %s finished with %d failed cluster(s)." RESET_DISPLAY "\n",option,final_flag);
         }
         else{
-            printf(GENERAL_BOLD "[ -WARN- ] %s finished successfully." RESET_DISPLAY "\n",option);
+            printf(GENERAL_BOLD "[ -INFO- ] %s finished successfully." RESET_DISPLAY "\n",option);
         }
         return 0;
     }
