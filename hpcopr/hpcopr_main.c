@@ -408,10 +408,6 @@ int main(int argc, char* argv[]){
         check_and_cleanup(workdir);
         return 5;
     }
-    if(decrypt_flag==1){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is decrypted." RESET_DISPLAY "\n",cluster_name);
-        encrypt_decrypt_clusters(cluster_name,"encrypt",0); //This operation is automatic. Use 0 as the batch flag.
-    }
     if(strcmp(final_command,"help")==0){
         if(cmd_flag_check(argc,argv,"--all")==0){
             print_help("all");
@@ -663,8 +659,13 @@ int main(int argc, char* argv[]){
         check_and_cleanup("");
         return 19;
     }
+
+    //Automatically encrypt the decrypted files for a specific cluster.
+    if(decrypt_flag==1){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is decrypted." RESET_DISPLAY "\n",cluster_name);
+        encrypt_decrypt_clusters(cluster_name,"encrypt",0); //This operation is automatic. Use 0 as the batch flag.
+    }
     
-    cluster_state_flag=cluster_asleep_or_not(workdir);
     if(strcmp(final_command,"new-cluster")==0){
         cmd_keyword_check(argc,argv,"--cname",new_cluster_name);
         cmd_keyword_check(argc,argv,"--sk",cloud_sk);
@@ -998,7 +999,8 @@ int main(int argc, char* argv[]){
         check_and_cleanup(workdir);
         return 0;
     }
-
+    
+    cluster_state_flag=cluster_asleep_or_not(workdir);
     if(strcmp(final_command,"ssh")==0){
         if(cluster_state_flag==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to wake up the cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " first.\n" RESET_DISPLAY,cluster_name);
