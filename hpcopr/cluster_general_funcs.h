@@ -49,7 +49,7 @@ int tf_exec_config_validation(tf_exec_config* tf_run);
 int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, char* crypto_keyfile, int silent_flag);
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
 int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bucket_flag, char* root_flag);
-int check_pslock(char* workdir);
+int check_pslock(char* workdir, int decrypt_flag);
 
 int create_local_tf_config(tf_exec_config* tf_run,char* stackdir);
 int check_local_tf_config(char* workdir, char* tf_running_config_local);

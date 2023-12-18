@@ -409,7 +409,7 @@ int main(int argc, char* argv[]){
         return 5;
     }
     if(decrypt_flag==1){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is decrypted. Encrypting it for security." RESET_DISPLAY "\n",cluster_name);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is decrypted." RESET_DISPLAY "\n",cluster_name);
         encrypt_decrypt_clusters(cluster_name,"encrypt",0); //This operation is automatic. Use 0 as the batch flag.
     }
     if(strcmp(final_command,"help")==0){

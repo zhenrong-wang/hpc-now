@@ -79,8 +79,8 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         }
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
         cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext);
-        status_flag=check_pslock(temp_cluster_workdir);
         decrypt_flag=decryption_status(temp_cluster_workdir);
+        status_flag=check_pslock(temp_cluster_workdir,decrypt_flag);
         if(status_flag!=0){
             if(decrypt_flag!=0){
                 printf(FATAL_RED_BOLD "| switch : <> %s | %s | %s | * OPERATION-IN-PROGRESS * !DECRYPTED! *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
@@ -132,8 +132,8 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 else{
                     strcpy(temp_cluster_name_column,temp_cluster_name);
                 }
-                status_flag=check_pslock(temp_cluster_workdir);
                 decrypt_flag=decryption_status(temp_cluster_workdir);
+                status_flag=check_pslock(temp_cluster_workdir,decrypt_flag);
                 if(status_flag!=0){
                     if(decrypt_flag!=0){
                         printf(FATAL_RED_BOLD "%s | %s | %s | * OPERATION-IN-PROGRESS * !DECRYPTED! *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
@@ -178,8 +178,8 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         else{
             printf(RESET_DISPLAY "|        : <> ");
         }
-        status_flag=check_pslock(temp_cluster_workdir);
         decrypt_flag=decryption_status(temp_cluster_workdir);
+        status_flag=check_pslock(temp_cluster_workdir,decrypt_flag);
         if(status_flag!=0){
             if(decrypt_flag!=0){
                 printf(FATAL_RED_BOLD "%s | %s | %s | * OPERATION-IN-PROGRESS * !DECRYPTED! *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
@@ -227,7 +227,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please run " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY " to check. Exit now.\n");
             return -5;
         }
-        if(check_pslock(target_cluster_workdir)!=0){
+        if(check_pslock(target_cluster_workdir,decryption_status(target_cluster_workdir))!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is in operation progress and cannot be refreshed." RESET_DISPLAY "\n");
             return 3;
         }
@@ -251,10 +251,8 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
 //return -1: Registry empty
 //return -3: FILE I/O error
 //return 3: User dened.
-
 //return 5: cluster name invalid of a single cluster.
 //return 7: Failed to decrypt a single cluster
-
 int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_local){
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify an option: encrypt or decrypt." RESET_DISPLAY "\n");

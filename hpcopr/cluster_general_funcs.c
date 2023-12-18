@@ -565,16 +565,20 @@ int get_cpu_num(const char* vm_model){
     return cpu_num;
 }
 
-//return -1: LOCKED AND DECRYPTED
-//return 1: LOCKED but not decrypted, operation in progress
-//return 0: normal status
-int check_pslock(char* workdir){
+//return 1: Locked: (terraform.tfstate was found and the cluster is not decrypted)
+//return 0: Unlocked: (terraform.tfstate was not found; or, terraform.tfstate was found bug the cluster is decrypted)
+int check_pslock(char* workdir, int decrypt_flag){
     char stackdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        return 1;
+        if(decrypt_flag==0){ //If not decrypted
+            return 0;
+        }
+        else{
+            return 1;
+        }
     }
     else{
         return 0;
