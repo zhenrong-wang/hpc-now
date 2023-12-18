@@ -574,12 +574,7 @@ int check_pslock(char* workdir){
     create_and_get_stackdir(workdir,stackdir);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        if(decryption_status(workdir)==1){
-            return -1;
-        }
-        else{
-            return 1;
-        }
+        return 1;
     }
     else{
         return 0;
@@ -825,10 +820,12 @@ int decrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
 //return 0: encrypted
 int decryption_status(char* workdir){
     char vaultdir[DIR_LENGTH]="";
-    char decrypt_file[FILENAME_LENGTH]="";
+    char decrypt_file1[FILENAME_LENGTH]="";
+    char decrypt_file2[FILENAME_LENGTH]="";
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(decrypt_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(decrypt_file)==0){
+    sprintf(decrypt_file1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    sprintf(decrypt_file2,"%s%scloud_secrets_VERY_RISKY.txt",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(decrypt_file1)==0||file_exist_or_not(decrypt_file2)==0){
         return 1;
     }
     return 0;
@@ -1390,9 +1387,15 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     int current_cluster_name_length=0;
     int i;
     int j;
+    int decrypt_flag=0;
+    char decrypt_prompt[32]="";
     create_and_get_stackdir(workdir,stackdir);
     get_cluster_name(cluster_name,workdir);
     sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
+    decrypt_flag=decryption_status(workdir);
+    if(decrypt_flag!=0){
+        strcpy(decrypt_prompt,"* DECRYPTED-VERY-RISKY! *");
+    }
     if(file_empty_or_not(statefile)<1||get_cloud_flag(workdir,cloud_flag)==-1){
         return 1;
     }
@@ -1440,21 +1443,24 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0){
             printf("|          +-shared_storage(%s GB)\n",shared_volume);
         }
+        if(decrypt_flag!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] VERY RISKY!!! The cluster is not encrypted or protected!" RESET_DISPLAY "\n");
+        }
     }
     else if(graph_level==1){
         if(strlen(shared_volume)!=0){
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method,decrypt_prompt);
         }
         else{
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s \n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method,decrypt_prompt);
         }
     }
     else if(graph_level==2){
         if(strlen(shared_volume)!=0){
-            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method);
+            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method,decrypt_prompt);
         }
         else{
-            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method);
+            printf("%s,%s,%s,%s,%s,%s,%d,%d,%s,%s,%s,%s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method,decrypt_prompt);
         }
     }
     else{
@@ -1471,10 +1477,10 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             strcpy(cluster_name_column,cluster_name);
         }
         if(strlen(shared_volume)!=0){
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s | %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method,decrypt_prompt);
         }
         else{
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s \n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method,decrypt_prompt);
         }
     }
     printf(RESET_DISPLAY);
