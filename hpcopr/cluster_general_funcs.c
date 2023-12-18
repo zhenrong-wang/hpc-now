@@ -1444,15 +1444,15 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             printf("|          +-shared_storage(%s GB)\n",shared_volume);
         }
         if(decrypt_flag!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] VERY RISKY!!! The cluster is not encrypted or protected!" RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] VERY RISKY!!! The cluster is decrypted and NOT protected!" RESET_DISPLAY "\n");
         }
     }
     else if(graph_level==1){
         if(strlen(shared_volume)!=0){
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method,decrypt_prompt);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s  %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method,decrypt_prompt);
         }
         else{
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method,decrypt_prompt);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s  %s\n",cluster_name,cluster_role,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method,decrypt_prompt);
         }
     }
     else if(graph_level==2){
@@ -1477,10 +1477,10 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             strcpy(cluster_name_column,cluster_name);
         }
         if(strlen(shared_volume)!=0){
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s | %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method,decrypt_prompt);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s  %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,shared_volume,payment_method,decrypt_prompt);
         }
         else{
-            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s | %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method,decrypt_prompt);
+            printf("%s | %s | %s | %s %s %s | %d/%d | %s | %s | %s  %s\n",cluster_name_column,cluster_role_ext,cloud_flag,master_address,master_config,master_status,running_node_num,node_num,compute_config,ht_status_ext,payment_method,decrypt_prompt);
         }
     }
     printf(RESET_DISPLAY);
