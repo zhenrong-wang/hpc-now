@@ -33,6 +33,7 @@ int encrypt_and_delete(char* now_crypto_exec, char* filename, char* md5sum);
 int delete_decrypted_files(char* workdir, char* crypto_key_filename);
 int decrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum);
 int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum);
+int decryption_status(char* workdir);
 int getstate(char* workdir, char* crypto_keyfile);
 int get_state_value(char* workdir, char* key, char* value);
 int generate_sshkey(char* sshkey_folder, char* pubkey);

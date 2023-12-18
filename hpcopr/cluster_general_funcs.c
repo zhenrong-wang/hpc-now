@@ -813,6 +813,17 @@ int decrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
     return system(cmdline);
 }
 
+int decryption_status(char* workdir){
+    char vaultdir[DIR_LENGTH]="";
+    char decrypt_file[FILENAME_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    sprintf(decrypt_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(decrypt_file)==0){
+        return 1;
+    }
+    return 0;
+}
+
 //return -7: SOMETHING FATAL happened.
 int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
