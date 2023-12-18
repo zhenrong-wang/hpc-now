@@ -565,13 +565,21 @@ int get_cpu_num(const char* vm_model){
     return cpu_num;
 }
 
+//return -1: LOCKED AND DECRYPTED
+//return 1: LOCKED but not decrypted, operation in progress
+//return 0: normal status
 int check_pslock(char* workdir){
     char stackdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     create_and_get_stackdir(workdir,stackdir);
     sprintf(filename_temp,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        return 1;
+        if(decryption_status(workdir)==1){
+            return -1;
+        }
+        else{
+            return 1;
+        }
     }
     else{
         return 0;
@@ -813,6 +821,8 @@ int decrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
     return system(cmdline);
 }
 
+//return 1: decrypted
+//return 0: encrypted
 int decryption_status(char* workdir){
     char vaultdir[DIR_LENGTH]="";
     char decrypt_file[FILENAME_LENGTH]="";

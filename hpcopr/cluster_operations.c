@@ -67,6 +67,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     int max_cluster_name_length=0;
     int i=0;
     int j=0;
+    int status_flag;
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now." RESET_DISPLAY "\n");
         return -1;
@@ -78,8 +79,14 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         }
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
         cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext);
-        if(check_pslock(temp_cluster_workdir)!=0){
-            printf(GENERAL_BOLD "| switch : <> %s | %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+        status_flag=check_pslock(temp_cluster_workdir);
+        if(status_flag!=0){
+            if(status_flag==1){
+                printf(GENERAL_BOLD "| switch : <> %s | %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+            }
+            else{
+                printf(FATAL_RED_BOLD "| switch : <> %s | %s | %s | * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+            }
             fclose(file_p);
             return 0;
         }
@@ -119,8 +126,14 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 else{
                     strcpy(temp_cluster_name_column,temp_cluster_name);
                 }
-                if(check_pslock(temp_cluster_workdir)!=0){
-                    printf("%s | %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
+                status_flag=check_pslock(temp_cluster_workdir);
+                if(status_flag!=0){
+                    if(status_flag==1){
+                        printf("%s | %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
+                    }
+                    else{
+                        printf(FATAL_RED_BOLD "%s | %s | %s | * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
+                    }
                     i++;
                     continue;
                 }
@@ -153,8 +166,14 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         else{
             printf(RESET_DISPLAY "|        : <> ");
         }
-        if(check_pslock(temp_cluster_workdir)!=0){
-            printf("%s | %s | %s | * OPERATION-IN-PROGRESS * " RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
+        status_flag=check_pslock(temp_cluster_workdir);
+        if(status_flag!=0){
+            if(status_flag==1){
+                printf("%s | %s | %s | * OPERATION-IN-PROGRESS * " RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
+            }
+            else{
+                printf(FATAL_RED_BOLD "%s | %s | %s | * DECRYPTED-VERY-RISKY! * " RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
+            }
             return 0;
         }
         decrypt_files(temp_cluster_workdir,crypto_keyfile);
