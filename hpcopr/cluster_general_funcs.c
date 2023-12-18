@@ -1394,7 +1394,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_flag=decryption_status(workdir);
     if(decrypt_flag!=0){
-        strcpy(decrypt_prompt,"* DECRYPTED-VERY-RISKY! *");
+        strcpy(decrypt_prompt,"* !DECRYPTED! *");
     }
     if(file_empty_or_not(statefile)<1||get_cloud_flag(workdir,cloud_flag)==-1){
         return 1;

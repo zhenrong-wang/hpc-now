@@ -83,7 +83,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         decrypt_flag=decryption_status(temp_cluster_workdir);
         if(status_flag!=0){
             if(decrypt_flag!=0){
-                printf(FATAL_RED_BOLD "| switch : <> %s | %s | %s | * OPERATION-IN-PROGRESS * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+                printf(FATAL_RED_BOLD "| switch : <> %s | %s | %s | * OPERATION-IN-PROGRESS * !DECRYPTED! *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
             }
             else{
                 printf(GENERAL_BOLD "| switch : <> %s | %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
@@ -95,7 +95,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         printf(GENERAL_BOLD "| switch : <> ");
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
             if(decrypt_flag!=0){
-                printf(FATAL_RED_BOLD "%s | %s | %s | * EMPTY CLUSTER * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
+                printf(FATAL_RED_BOLD "%s | %s | %s | * EMPTY CLUSTER * !DECRYPTED! *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
             }
             else{
                 printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
@@ -136,7 +136,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 decrypt_flag=decryption_status(temp_cluster_workdir);
                 if(status_flag!=0){
                     if(decrypt_flag!=0){
-                        printf(FATAL_RED_BOLD "%s | %s | %s | * OPERATION-IN-PROGRESS * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
+                        printf(FATAL_RED_BOLD "%s | %s | %s | * OPERATION-IN-PROGRESS * !DECRYPTED! *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
                     }
                     else{
                         printf("%s | %s | %s | * OPERATION-IN-PROGRESS *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
@@ -148,7 +148,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 i++;
                 if(graph(temp_cluster_workdir,crypto_keyfile,3)!=0){
                     if(decrypt_flag!=0){
-                        printf(FATAL_RED_BOLD "%s | %s | %s | * EMPTY CLUSTER * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
+                        printf(FATAL_RED_BOLD "%s | %s | %s | * EMPTY CLUSTER * !DECRYPTED! *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
                     }
                     else{
                         printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name_column,cluster_role_ext,cloud_flag);
@@ -182,7 +182,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         decrypt_flag=decryption_status(temp_cluster_workdir);
         if(status_flag!=0){
             if(decrypt_flag!=0){
-                printf(FATAL_RED_BOLD "%s | %s | %s | * OPERATION-IN-PROGRESS * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
+                printf(FATAL_RED_BOLD "%s | %s | %s | * OPERATION-IN-PROGRESS * !DECRYPTED! *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
             }
             else{
                 printf("%s | %s | %s | * OPERATION-IN-PROGRESS * " RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
@@ -192,7 +192,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         //decrypt_files(temp_cluster_workdir,crypto_keyfile);
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
             if(decrypt_flag!=0){
-                printf(FATAL_RED_BOLD "%s | %s | %s | * EMPTY CLUSTER * DECRYPTED-VERY-RISKY! *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
+                printf(FATAL_RED_BOLD "%s | %s | %s | * EMPTY CLUSTER * !DECRYPTED! *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
             }
             else{
                 printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
