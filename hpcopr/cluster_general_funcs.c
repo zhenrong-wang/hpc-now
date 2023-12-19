@@ -824,12 +824,21 @@ int decrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
 //return 0: encrypted
 int decryption_status(char* workdir){
     char vaultdir[DIR_LENGTH]="";
-    char decrypt_file1[FILENAME_LENGTH]="";
-    char decrypt_file2[FILENAME_LENGTH]="";
+    char secret_file[FILENAME_LENGTH]="";
+    char secret_file_decrypted[FILENAME_LENGTH]="";
+    char user_passwords_decrypted[FILENAME_LENGTH]="";
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(decrypt_file1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    sprintf(decrypt_file2,"%s%scloud_secrets_VERY_RISKY.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(decrypt_file1)==0||file_exist_or_not(decrypt_file2)==0){
+    
+    sprintf(secret_file,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    sprintf(user_passwords_decrypted,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    sprintf(secret_file_decrypted,"%s%scloud_secrets_VERY_RISKY.txt",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(secret_file)==0){
+        if(file_exist_or_not(secret_file_decrypted)==0){
+            return 1;
+        }
+        return 0;
+    }
+    if(file_exist_or_not(user_passwords_decrypted)==0){
         return 1;
     }
     return 0;
@@ -1448,7 +1457,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             printf("|          +-shared_storage(%s GB)\n",shared_volume);
         }
         if(decrypt_flag!=0){
-            printf(FATAL_RED_BOLD "[ -WARN- ] VERY RISKY!!! The cluster is decrypted and NOT protected!" RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "|        VERY RISKY!!! The cluster is decrypted and NOT protected!" RESET_DISPLAY "\n");
         }
     }
     else if(graph_level==1){
