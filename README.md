@@ -326,16 +326,16 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 
 ### **Cluster Operation**
 
-- `delc`         Delete specified compute nodes:
-- `addc`         Add compute nodes to current cluster. You must specify how many to be added.
-- `shutdownc`    Shutdown specified compute nodes. Similar to 'delc', you can specify to shut down all or part of the compute nodes by the param 'all' or 'NUM'.
-- `turnonc`      Turn on specified compute nodes. Similar to 'delc', you can specify to turn on all or part of the compute nodes by the parameter 'all' or 'NUM'.
+- `delc`         Delete specified compute nodes. You must specify how many to be added, or use `--nn all`
+- `addc`         Add compute nodes to current cluster. You must specify how many to be added by `--nn NUM`.
+- `shutdownc`    Shutdown specified compute nodes. Similar to 'delc', you can specify to shut down all or part of the compute nodes by the param `--nn NUM` or `--nn all`.
+- `turnonc`      Turn on specified compute nodes. Similar to 'delc', you can specify to turn on all or part of the compute nodes by the parameter `--nn NUM` or `--nn all`. 
 - `reconfc`      Reconfigure all the compute nodes.
 - `reconfm`      Reconfigure the master node.
 - `sleep`        Turn off all the nodes (management and compute) of the cluster.
 - `wakeup`       Wake up the cluster nodes.
 - `nfsup`        Increase the cluster’s NFS shared volume (in GB, only for Huaweicloud, Google Cloud Platform, and Microsoft Azure).
-- `destroy`      *DESTROY* the whole cluster - including all the resources & data.
+- `destroy`      **DESTROY** the whole cluster - including all the resources & data.
 - `payment`      Switch the payment method between on-demand and monthly (not applicable for AWS, Google Cloud Platform, or Microsoft Azure).
 
 ### **Cluster User Management**
