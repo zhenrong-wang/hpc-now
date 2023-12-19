@@ -301,6 +301,8 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 
 *Advanced - For developers:*
 
+- `decrypt`      VERY RISKY! Decrypt sensitive files of a cluster list or all.
+- `encrypt`      Encrypt sensitive files of a cluster list or all.
 - `set-tf`       Set the running configurations for openTofu or terraform
 - `configloc`    Configure the locations for the terraform binaries, providers, IaC templates and shell scripts.
 - `showloc`      Show the current configured locations.
