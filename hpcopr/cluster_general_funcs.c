@@ -2650,7 +2650,7 @@ int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir)
     }
     sprintf(user_sshkey_encrypted,"%s%s.%s%s%s.key.tmp",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,user_name);
     sprintf(user_sshkey_decrypted,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,user_name);
-    if(file_exist_or_not(user_sshkey_encrypted)!=0||file_exist_or_not(user_sshkey_decrypted)!=0){
+    if(file_exist_or_not(user_sshkey_encrypted)!=0&&file_exist_or_not(user_sshkey_decrypted)!=0){
         return 1;
     }
     else{
