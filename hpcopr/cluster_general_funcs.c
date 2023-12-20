@@ -156,7 +156,7 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
     else{
         get_cluster_name(cluster_name,workdir);
         snprintf(private_key_encrypted,511,"%s%s.%s%s%s.key.tmp",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
-        if(decrypt_user_privkey(private_key_encrypted,sshkey_dir)!=0){
+        if(decrypt_user_privkey(private_key_encrypted,CRYPTO_KEY_FILE)!=0){
             return -3;
         }
         snprintf(private_key,511,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
@@ -397,7 +397,7 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char
     }
     else{
         snprintf(private_key_encrypted,511,"%s%s.%s%s%s.key.tmp",sshkey_folder,PATH_SLASH,cluster_name,PATH_SLASH,username);
-        if(decrypt_user_privkey(private_key_encrypted,sshkey_folder)!=0){
+        if(decrypt_user_privkey(private_key_encrypted,CRYPTO_KEY_FILE)!=0){
             return -3;
         }
         snprintf(private_key,511,"%s%s.%s%s%s.key",sshkey_folder,PATH_SLASH,cluster_name,PATH_SLASH,username);
@@ -2336,7 +2336,7 @@ int cluster_ssh(char* workdir, char* username, char* role_flag, char* sshkey_dir
     }
     else{
         snprintf(private_sshkey_encrypted,511,"%s%s.%s%s%s.key.tmp",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
-        if(decrypt_user_privkey(private_sshkey_encrypted,sshkey_dir)!=0){
+        if(decrypt_user_privkey(private_sshkey_encrypted,CRYPTO_KEY_FILE)!=0){
             return -3;
         }
         snprintf(private_sshkey,511,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
