@@ -257,8 +257,8 @@ int reset_vers_md5_vars(void){
         return -1;
     }
     if(tf_loc_flag_var==1&&now_crypto_loc_flag_var==1){
-        sprintf(tf_md5_file,"%s%stf-md5-%s-v2.dat",url_tf_root_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
-        sprintf(crypto_md5_file,"%s%scrypto-md5-%s-v3.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
+        snprintf(tf_md5_file,511,"%s%stf-md5-%s-v2.dat",url_tf_root_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
+        snprintf(crypto_md5_file,511,"%s%scrypto-md5-%s-v3.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
         if(file_exist_or_not(tf_md5_file)!=0||file_exist_or_not(crypto_md5_file)!=0){
             fclose(file_p);
             return -1;
@@ -276,19 +276,19 @@ int reset_vers_md5_vars(void){
     }
     else if(tf_loc_flag_var==0&&now_crypto_loc_flag_var==0){
         fclose(file_p);
-        sprintf(cmdline1,"curl -s %stf-md5-%s-v2.dat >> %s",url_tf_root_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
-        sprintf(cmdline2,"curl -s %scrypto-md5-%s-v3.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
+        snprintf(cmdline1,2047,"curl -s %stf-md5-%s-v2.dat >> %s",url_tf_root_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
+        snprintf(cmdline2,2047,"curl -s %scrypto-md5-%s-v3.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
         if(system(cmdline1)!=0||system(cmdline2)!=0){
             return 1;
         }
     }
     else if(tf_loc_flag_var==0&&now_crypto_loc_flag_var==1){
         fclose(file_p);
-        sprintf(cmdline1,"curl -s %stf-md5-%s-v2.dat >> %s",url_tf_root_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
+        snprintf(cmdline1,2047,"curl -s %stf-md5-%s-v2.dat >> %s",url_tf_root_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
         if(system(cmdline1)!=0){
             return 1;
         }
-        sprintf(crypto_md5_file,"%s%scrypto-md5-%s-v3.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
+        snprintf(crypto_md5_file,511,"%s%scrypto-md5-%s-v3.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
         if(file_exist_or_not(crypto_md5_file)!=0){
             return -1;
         }  
@@ -300,7 +300,7 @@ int reset_vers_md5_vars(void){
         fclose(file_p);
     }
     else if(tf_loc_flag_var==1&&now_crypto_loc_flag_var==0){
-        sprintf(tf_md5_file,"%s%stf-md5-%s-v2.dat",url_tf_root_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
+        snprintf(tf_md5_file,511,"%s%stf-md5-%s-v2.dat",url_tf_root_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
         if(file_exist_or_not(tf_md5_file)!=0){
             fclose(file_p);
             return -1;
@@ -311,7 +311,7 @@ int reset_vers_md5_vars(void){
         }
         fclose(file_p_1);
         fclose(file_p);
-        sprintf(cmdline2,"curl -s %scrypto-md5-%s-v3.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
+        snprintf(cmdline2,2047,"curl -s %scrypto-md5-%s-v3.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
         if(system(cmdline2)!=0){
             return 1;
         }
@@ -664,7 +664,7 @@ int update_tf_running(char* new_tf_runner, char* new_dbg_level, int new_max_time
     }
     if(new_max_time>MAXIMUM_WAIT_TIME-1&&new_max_time<MAXIMUM_WAIT_TIME_EXT+1){
         find_and_get(TF_RUNNING_CONFIG,"max_wait_sec:","","",1,"max_wait_sec:","","",' ',2,prev_config);
-        sprintf(new_max_time_string,"%d",new_max_time);
+        snprintf(new_max_time_string,7,"%d",new_max_time);
         if(strcmp(prev_config,new_max_time_string)!=0){
             find_and_replace(TF_RUNNING_CONFIG,"max_wait_sec:","","","","",prev_config,new_max_time_string);
             i++;

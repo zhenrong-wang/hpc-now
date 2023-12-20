@@ -377,7 +377,7 @@ int main(int argc, char* argv[]){
     }
 #endif
     if(folder_exist_or_not(GENERAL_CONF_DIR)!=0){
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,GENERAL_CONF_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,2047,"%s %s %s",MKDIR_CMD,GENERAL_CONF_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 
@@ -1860,10 +1860,10 @@ int main(int argc, char* argv[]){
         //printf("\n\n %s \n\n",user_cmd);
         hpc_user_list(workdir,crypto_keyfile,0);
         if(strcmp(user_cmd,"add")==0){
-            sprintf(string_temp,"Input a *UNIQUE* username (A-Z | a-z | 0-9 | - , Length %d-%d",USERNAME_LENGTH_MIN,USERNAME_LENGTH_MAX);
+            snprintf(string_temp,255,"Input a *UNIQUE* username (A-Z | a-z | 0-9 | - , Length %d-%d",USERNAME_LENGTH_MIN,USERNAME_LENGTH_MAX);
         }
         else{
-            sprintf(string_temp,"Please select a username.");
+            strcpy(string_temp,"Please select a username.");
         }
         if(cmd_keyword_check(argc,argv,"-u",user_name)!=0&&prompt_to_input(string_temp,user_name,batch_flag)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Username not specified." RESET_DISPLAY "\n");

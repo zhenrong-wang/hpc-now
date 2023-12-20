@@ -72,7 +72,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         scanf("%127s",app_name);
         getchar();
     }
-    sprintf(filename_temp,"%s%s.tmp%sapp_check.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
+    snprintf(filename_temp,511,"%s%s.tmp%sapp_check.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
     app_list(workdir,"check",user_name,app_name,sshkey_dir,filename_temp,"");
     run_flag=find_multi_keys(filename_temp,"not available","","","","");
     if(run_flag>0){
@@ -122,7 +122,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         scanf("%127s",string_temp);
         getchar();
         if(strcmp(string_temp,"y")==0||strcmp(string_temp,"yes")==0||strcmp(string_temp,"Y")==0||strcmp(string_temp,"YES")==0||strcmp(string_temp,"Yes")==0){
-            sprintf(job_name,"%s-job",user_name);
+            snprintf(job_name,127,"%s-job",user_name);
         }
         else{
             strcpy(job_name,string_temp);
@@ -242,10 +242,10 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
     char filename_temp[FILENAME_LENGTH]="";
     char remote_filename_temp[FILENAME_LENGTH]="";
     int i,run_flag=0;
-    sprintf(dirname_temp,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(dirname_temp,383,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    snprintf(cmdline,2047,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
-    sprintf(filename_temp,"%s%sjob_submit_info.tmp",dirname_temp,PATH_SLASH);
+    snprintf(filename_temp,511,"%s%sjob_submit_info.tmp",dirname_temp,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
         return -1;
@@ -259,14 +259,14 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
     fprintf(file_p,"Job Executable ::%s\n",job_info->job_exec);
     fprintf(file_p,"Data Directory ::%s",job_info->job_data);
     fclose(file_p);
-    sprintf(remote_filename_temp,"/tmp/job_submit_info_%s.tmp",user_name);
+    snprintf(remote_filename_temp,511,"/tmp/job_submit_info_%s.tmp",user_name);
     remote_copy(workdir,sshkey_dir,filename_temp,remote_filename_temp,user_name,"put","",0);
-    sprintf(remote_commands,"hpcmgr submit %s",remote_filename_temp);
+    snprintf(remote_commands,2047,"hpcmgr submit %s",remote_filename_temp);
     run_flag=remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,2,"","");
     if(run_flag!=0){
         return 1;
     }
-    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     if(strcmp(job_info->echo_flag,"true")==0){
         printf("\n");
@@ -277,8 +277,8 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
             sleep(1);
         }
         printf("\n");
-        sprintf(filename_temp,"%s/%s_run.log",job_info->job_data,job_info->job_name);
-        sprintf(remote_commands,"tail -f %s",filename_temp);
+        snprintf(filename_temp,511,"%s/%s_run.log",job_info->job_data,job_info->job_name);
+        snprintf(remote_commands,2047,"tail -f %s",filename_temp);
         remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,2,"","");
     }
     else{
@@ -295,10 +295,10 @@ int job_list(char* workdir, char* user_name, char* sshkey_dir){
     FILE* file_p=NULL;
     char cmdline[CMDLINE_LENGTH]="";
     get_cluster_name(cluster_name,workdir);
-    sprintf(dirname_temp,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(dirname_temp,383,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    snprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
-    sprintf(job_list_cache,"%s%sjob_list_%s.txt",dirname_temp,PATH_SLASH,cluster_name);
+    snprintf(job_list_cache,511,"%s%sjob_list_%s.txt",dirname_temp,PATH_SLASH,cluster_name);
     remote_exec_general(workdir,sshkey_dir,user_name,"sacct","",0,3,job_list_cache,NULL_STREAM);
     if(file_exist_or_not(job_list_cache)!=0){
         return -1;
@@ -313,7 +313,7 @@ int job_list(char* workdir, char* user_name, char* sshkey_dir){
         printf("%s\n",string_temp);
     }
     fclose(file_p);
-    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,job_list_cache,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,job_list_cache,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 0;
 }
@@ -328,10 +328,10 @@ int job_cancel(char* workdir, char* user_name, char* sshkey_dir, char* job_id, i
         }
         job_list(workdir,user_name,SSHKEY_DIR);
         prompt_to_input("Please input a jobID from the list above.",string_temp,batch_flag_local);
-        sprintf(remote_commands,"scancel --verbose %s",job_id);
+        snprintf(remote_commands,2047,"scancel --verbose %s",job_id);
     }
     else{
-        sprintf(remote_commands,"scancel --verbose %s",job_id);
+        snprintf(remote_commands,2047,"scancel --verbose %s",job_id);
     }
     return remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,3,"","");
 }

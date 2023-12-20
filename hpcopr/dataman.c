@@ -143,46 +143,46 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"copy")==0){
-            sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else if(strcmp(cmd_type,"put")==0){
-            sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s cp %s %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s -e oss-%s.aliyuncs.com -i %s -k %s cp %s %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         if(strcmp(cmd_type,"copy")==0){
-            sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s cp %s%s %s%s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s -e cos.%s.myqcloud.com -i %s -k %s cp %s%s %s%s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else if(strcmp(cmd_type,"put")==0){
-            sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s cp %s %s%s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s -e cos.%s.myqcloud.com -i %s -k %s cp %s %s%s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s cp %s%s %s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s -e cos.%s.myqcloud.com -i %s -k %s cp %s%s %s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(strcmp(cmd_type,"copy")==0){
-            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 cp %s%s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 cp %s%s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else if(strcmp(cmd_type,"put")==0){
-            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 cp %s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 cp %s %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 cp %s%s %s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 cp %s%s %s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
         if(strcmp(cmd_type,"copy")==0){
-            sprintf(cmdline,"%s cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s%s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s%s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else if(strcmp(cmd_type,"put")==0){
-            sprintf(cmdline,"%s cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s %s%s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s %s%s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
@@ -191,49 +191,49 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         }
         create_and_get_vaultdir(workdir,vaultdir);
         if(strcmp(cmd_type,"copy")==0){
-            sprintf(cmdline,"%s bos cp %s%s %s%s %s %s --conf-path %s",BCECMD_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag,vaultdir);
+            snprintf(cmdline,2047,"%s bos cp %s%s %s%s %s %s --conf-path %s",BCECMD_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag,vaultdir);
         }
         else if(strcmp(cmd_type,"put")==0){
-            sprintf(cmdline,"%s bos cp %s %s%s %s %s --conf-path %s",BCECMD_EXEC,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag,vaultdir);
+            snprintf(cmdline,2047,"%s bos cp %s %s%s %s %s --conf-path %s",BCECMD_EXEC,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag,vaultdir);
         }
         else{
-            sprintf(cmdline,"%s bos cp %s%s %s %s %s --conf-path %s",BCECMD_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag,vaultdir);
+            snprintf(cmdline,2047,"%s bos cp %s%s %s %s %s --conf-path %s",BCECMD_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag,vaultdir);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
         get_azure_info(workdir,az_subscription_id,az_tenant_id);
         if(strcmp(cmd_type,"copy")==0){
-            sprintf(cmdline,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s%s %s%s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s%s %s%s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else if(strcmp(cmd_type,"put")==0){
-            sprintf(cmdline,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s %s%s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s %s%s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s%s %s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s%s %s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_source_path,real_target_path,real_rflag,real_fflag);
         }
     }
     else{
         create_and_get_vaultdir(workdir,vaultdir);
         gcp_credential_convert(workdir,"decrypt",1);
-        sprintf(cmdline,"%s auth activate-service-account --key-file=%s%s.bucket_key.json %s",GCLOUD_CLI,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,2047,"%s auth activate-service-account --key-file=%s%s.bucket_key.json %s",GCLOUD_CLI,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
             gcp_credential_convert(workdir,"delete",1);
             return 1;
         }
         if(strcmp(cmd_type,"copy")==0){
-            sprintf(cmdline,"%s storage cp %s%s %s%s %s",GCLOUD_CLI,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag);
+            snprintf(cmdline,2047,"%s storage cp %s%s %s%s %s",GCLOUD_CLI,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag);
         }
         else if(strcmp(cmd_type,"put")==0){
-            sprintf(cmdline,"%s storage cp %s %s%s %s",GCLOUD_CLI,real_source_path,bucket_address,real_target_path,real_rflag);
+            snprintf(cmdline,2047,"%s storage cp %s %s%s %s",GCLOUD_CLI,real_source_path,bucket_address,real_target_path,real_rflag);
         }
         else{
-            sprintf(cmdline,"%s storage cp %s%s %s %s",GCLOUD_CLI,bucket_address,real_source_path,real_target_path,real_rflag);
+            snprintf(cmdline,2047,"%s storage cp %s%s %s %s",GCLOUD_CLI,bucket_address,real_source_path,real_target_path,real_rflag);
         }
     }
     if(system(cmdline)!=0){
         unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
-            sprintf(cmdline,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,2047,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
         else if(strcmp(cloud_flag,"CLOUD_G")==0){
@@ -244,7 +244,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
     else{
         unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
-            sprintf(cmdline,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,2047,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
         else if(strcmp(cloud_flag,"CLOUD_G")==0){
@@ -300,34 +300,34 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
     bucket_path_check(remote_path,hpc_user,real_remote_path);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"delete")==0){
-            sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s rm %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s -e oss-%s.aliyuncs.com -i %s -k %s rm %s%s %s %s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s -e oss-%s.aliyuncs.com -i %s -k %s ls %s%s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path);
+            snprintf(cmdline,2047,"%s -e oss-%s.aliyuncs.com -i %s -k %s ls %s%s",OSSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         if(strcmp(cmd_type,"delete")==0){
-            sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s rm %s%s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s -e cos.%s.myqcloud.com -i %s -k %s rm %s%s %s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s -e cos.%s.myqcloud.com -i %s -k %s ls %s%s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag);
+            snprintf(cmdline,2047,"%s -e cos.%s.myqcloud.com -i %s -k %s ls %s%s %s",COSCLI_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(strcmp(cmd_type,"delete")==0){
-            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 rm %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 rm %s%s %s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 ls %s%s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag);
+            snprintf(cmdline,2047,"%s AWS_ACCESS_KEY_ID=%s&&%s AWS_SECRET_ACCESS_KEY=%s&&%s AWS_DEFAULT_REGION=%s&&%s s3 ls %s%s %s",SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,region_id,S3CLI_EXEC,bucket_address,real_remote_path,real_rflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
         if(strcmp(cmd_type,"delete")==0){
-            sprintf(cmdline,"%s rm -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s rm -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s ls -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag);
+            snprintf(cmdline,2047,"%s ls -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s",OBSUTIL_EXEC,region_id,bucket_ak,bucket_sk,bucket_address,real_remote_path,real_rflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
@@ -336,10 +336,10 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
         }
         create_and_get_vaultdir(workdir,vaultdir);
         if(strcmp(cmd_type,"delete")==0){
-            sprintf(cmdline,"%s bos rm %s%s %s %s --conf-path %s",BCECMD_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag,vaultdir);
+            snprintf(cmdline,2047,"%s bos rm %s%s %s %s --conf-path %s",BCECMD_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag,vaultdir);
         }
         else{
-            sprintf(cmdline,"%s bos ls %s%s %s --summerize --conf-path %s",BCECMD_EXEC,bucket_address,real_remote_path,real_rflag,vaultdir);
+            snprintf(cmdline,2047,"%s bos ls %s%s %s --summerize --conf-path %s",BCECMD_EXEC,bucket_address,real_remote_path,real_rflag,vaultdir);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
@@ -347,31 +347,31 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
             return -1;
         }
         if(strcmp(cmd_type,"delete")==0){
-            sprintf(cmdline,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s remove %s%s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag);
+            snprintf(cmdline,2047,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s remove %s%s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_remote_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(cmdline,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s list %s%s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_remote_path);
+            snprintf(cmdline,2047,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s list %s%s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_remote_path);
         }
     }
     else{
         create_and_get_vaultdir(workdir,vaultdir);
         gcp_credential_convert(workdir,"decrypt",1);
-        sprintf(cmdline,"%s auth activate-service-account --key-file=%s%s.bucket_key.json %s",GCLOUD_CLI,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,2047,"%s auth activate-service-account --key-file=%s%s.bucket_key.json %s",GCLOUD_CLI,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
             gcp_credential_convert(workdir,"delete",1);
             return 1;
         }
         if(strcmp(cmd_type,"delete")==0){
-            sprintf(cmdline,"%s storage rm %s%s %s --all-versions",GCLOUD_CLI,bucket_address,real_remote_path,real_rflag);
+            snprintf(cmdline,2047,"%s storage rm %s%s %s --all-versions",GCLOUD_CLI,bucket_address,real_remote_path,real_rflag);
         }
         else{
-            sprintf(cmdline,"%s storage ls %s%s %s --readable-sizes --long",GCLOUD_CLI,bucket_address,real_remote_path,real_rflag);
+            snprintf(cmdline,2047,"%s storage ls %s%s %s --readable-sizes --long",GCLOUD_CLI,bucket_address,real_remote_path,real_rflag);
         }
     }
     if(system(cmdline)!=0){
         unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
-            sprintf(cmdline,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,2047,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
         else if(strcmp(cloud_flag,"CLOUD_G")==0){
@@ -382,7 +382,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
     else{
         unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
-            sprintf(cmdline,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,2047,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
         else if(strcmp(cloud_flag,"CLOUD_G")==0){
@@ -431,21 +431,21 @@ int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_p
         if(path_flag1==path_flag2){
             if(path_flag1==0){
                 if(strcmp(hpc_user,"user1")==0||strcmp(hpc_user,"root")==0){
-                    sprintf(remote_commands,"sudo mv %s %s %s &",real_source_path,real_target_path,real_rf_flag);
+                    snprintf(remote_commands,2047,"sudo mv %s %s %s &",real_source_path,real_target_path,real_rf_flag);
                 }
                 else{
-                    sprintf(remote_commands,"mv %s %s %s &",real_source_path,real_target_path,real_rf_flag);
+                    snprintf(remote_commands,2047,"mv %s %s %s &",real_source_path,real_target_path,real_rf_flag);
                 }
             }
             else{
                 if(strcmp(hpc_user,"user1")==0){
-                    sprintf(remote_commands,"sudo mv /home/user1/%s /home/user1/%s %s &",real_source_path,real_target_path,real_rf_flag);
+                    snprintf(remote_commands,2047,"sudo mv /home/user1/%s /home/user1/%s %s &",real_source_path,real_target_path,real_rf_flag);
                 }
                 else if(strcmp(hpc_user,"root")==0){
-                    sprintf(remote_commands,"mv /root/%s /root/%s %s &",real_source_path,real_target_path,real_rf_flag);
+                    snprintf(remote_commands,2047,"mv /root/%s /root/%s %s &",real_source_path,real_target_path,real_rf_flag);
                 }
                 else{
-                    sprintf(remote_commands,"mv /home/%s/%s /home/%s/%s %s &",hpc_user,real_source_path,hpc_user,real_target_path,real_rf_flag);
+                    snprintf(remote_commands,2047,"mv /home/%s/%s /home/%s/%s %s &",hpc_user,real_source_path,hpc_user,real_target_path,real_rf_flag);
                 }
             }
             run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
@@ -457,10 +457,10 @@ int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_p
     else{
         if(path_flag1==path_flag2){
             if(strcmp(hpc_user,"user1")==0||strcmp(hpc_user,"root")==0){
-                sprintf(remote_commands,"sudo /bin/cp %s %s %s &",real_source_path,real_target_path,real_rf_flag);
+                snprintf(remote_commands,2047,"sudo /bin/cp %s %s %s &",real_source_path,real_target_path,real_rf_flag);
             }
             else{
-                sprintf(remote_commands,"/bin/cp %s %s %s &",real_source_path,real_target_path,real_rf_flag);
+                snprintf(remote_commands,2047,"/bin/cp %s %s %s &",real_source_path,real_target_path,real_rf_flag);
             }
             run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
         }
@@ -489,10 +489,10 @@ int direct_rm_ls_mkdir(char* workdir, char* hpc_user, char* sshkey_dir, char* re
     char remote_commands[CMDLINE_LENGTH]="";
     if(direct_path_check(remote_path,hpc_user,real_remote_path)!=0){
         if(strcmp(hpc_user,"root")==0){
-            sprintf(real_remote_path,"/root/%s",remote_path);
+            snprintf(real_remote_path,383,"/root/%s",remote_path);
         }
         else{
-            sprintf(real_remote_path,"/home/%s/%s",hpc_user,remote_path);
+            snprintf(real_remote_path,383,"/home/%s/%s",hpc_user,remote_path);
         }
     }
     if(strcmp(force_flag,"force")==0&&strcmp(recursive_flag,"recursive")==0){
@@ -509,24 +509,24 @@ int direct_rm_ls_mkdir(char* workdir, char* hpc_user, char* sshkey_dir, char* re
     }
     if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
         if(strcmp(cmd_type,"rm")==0){
-            sprintf(remote_commands,"sudo rm %s %s",real_rf_flag,real_remote_path);
+            snprintf(remote_commands,2047,"sudo rm %s %s",real_rf_flag,real_remote_path);
         }
         else if(strcmp(cmd_type,"ls")==0){
-            sprintf(remote_commands,"sudo ls -la %s",real_remote_path);
+            snprintf(remote_commands,2047,"sudo ls -la %s",real_remote_path);
         }
         else{
-            sprintf(remote_commands,"sudo mkdir -p %s",real_remote_path);
+            snprintf(remote_commands,2047,"sudo mkdir -p %s",real_remote_path);
         }
     }
     else{
         if(strcmp(cmd_type,"rm")==0){
-            sprintf(remote_commands,"rm %s %s",real_rf_flag,real_remote_path);
+            snprintf(remote_commands,2047,"rm %s %s",real_rf_flag,real_remote_path);
         }
         else if(strcmp(cmd_type,"ls")==0){
-            sprintf(remote_commands,"ls -la %s",real_remote_path);
+            snprintf(remote_commands,2047,"ls -la %s",real_remote_path);
         }
         else{
-            sprintf(remote_commands,"mkdir -p %s",real_remote_path);
+            snprintf(remote_commands,2047,"mkdir -p %s",real_remote_path);
         }
     }
     run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
@@ -548,18 +548,18 @@ int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char
     direct_path_check(remote_path,hpc_user,real_remote_path);
     if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
         if(strcmp(cmd_type,"tail")!=0){
-            sprintf(remote_commands,"sudo %s %s",cmd_type,real_remote_path);
+            snprintf(remote_commands,2047,"sudo %s %s",cmd_type,real_remote_path);
         }
         else{
-            sprintf(remote_commands,"sudo %s -f %s",cmd_type,real_remote_path);
+            snprintf(remote_commands,2047,"sudo %s -f %s",cmd_type,real_remote_path);
         }
     }
     else{
         if(strcmp(cmd_type,"tail")!=0){
-            sprintf(remote_commands,"%s %s",cmd_type,real_remote_path);
+            snprintf(remote_commands,2047,"%s %s",cmd_type,real_remote_path);
         }
         else{
-            sprintf(remote_commands,"%s -f %s",cmd_type,real_remote_path);
+            snprintf(remote_commands,2047,"%s -f %s",cmd_type,real_remote_path);
         }
     }
     run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
@@ -625,42 +625,42 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"ossutil64 -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s %s %s",region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"ossutil64 -e oss-%s.aliyuncs.com -i %s -k %s cp %s%s %s %s %s",region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"ossutil64 -e oss-%s.aliyuncs.com -i %s -k %s cp %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"ossutil64 -e oss-%s.aliyuncs.com -i %s -k %s cp %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"coscli -e cos.%s.myqcloud.com -i %s -k %s cp %s%s %s %s %s",region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"coscli -e cos.%s.myqcloud.com -i %s -k %s cp %s%s %s %s %s",region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"coscli -e cos.%s.myqcloud.com -i %s -k %s cp %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"coscli -e cos.%s.myqcloud.com -i %s -k %s cp %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"export AWS_ACCESS_KEY_ID=%s&&export AWS_SECRET_ACCESS_KEY=%s&&export AWS_DEFAULT_REGION=%s&&aws s3 cp %s%s %s %s %s",bucket_ak,bucket_sk,region_id,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"export AWS_ACCESS_KEY_ID=%s&&export AWS_SECRET_ACCESS_KEY=%s&&export AWS_DEFAULT_REGION=%s&&aws s3 cp %s%s %s %s %s",bucket_ak,bucket_sk,region_id,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"export AWS_ACCESS_KEY_ID=%s&&export AWS_SECRET_ACCESS_KEY=%s&&export AWS_DEFAULT_REGION=%s&&aws s3 cp %s %s%s %s %s",bucket_ak,bucket_sk,region_id,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"export AWS_ACCESS_KEY_ID=%s&&export AWS_SECRET_ACCESS_KEY=%s&&export AWS_DEFAULT_REGION=%s&&aws s3 cp %s %s%s %s %s",bucket_ak,bucket_sk,region_id,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"obscli cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s %s",region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"obscli cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s %s",region_id,bucket_ak,bucket_sk,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"obscli cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"obscli cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s %s%s %s %s",region_id,bucket_ak,bucket_sk,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"bcecmd bos cp %s%s %s %s %s --conf-path /hpc_data/cluster_data/.bucket_creds/",bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"bcecmd bos cp %s%s %s %s %s --conf-path /hpc_data/cluster_data/.bucket_creds/",bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"bcecmd bos cp %s %s%s %s %s --conf-path /hpc_data/cluster_data/.bucket_creds/",real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"bcecmd bos cp %s %s%s %s %s --conf-path /hpc_data/cluster_data/.bucket_creds/",real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
@@ -668,19 +668,19 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
             return -1;
         }
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"export AZCOPY_AUTO_LOGIN_TYPE=SPN&&export AZCOPY_SPA_APPLICATION_ID=%s&&export AZCOPY_SPA_CLIENT_SECRET=%s&&export AZCOPY_TENANT_ID=%s&&azcopy cp %s%s %s %s %s --log-level=ERROR",bucket_ak,bucket_sk,az_tenant_id,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"export AZCOPY_AUTO_LOGIN_TYPE=SPN&&export AZCOPY_SPA_APPLICATION_ID=%s&&export AZCOPY_SPA_CLIENT_SECRET=%s&&export AZCOPY_TENANT_ID=%s&&azcopy cp %s%s %s %s %s --log-level=ERROR",bucket_ak,bucket_sk,az_tenant_id,bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            sprintf(remote_commands,"export AZCOPY_AUTO_LOGIN_TYPE=SPN&&export AZCOPY_SPA_APPLICATION_ID=%s&&export AZCOPY_SPA_CLIENT_SECRET=%s&&export AZCOPY_TENANT_ID=%s&&azcopy cp %s %s%s %s %s --log-level=ERROR",bucket_ak,bucket_sk,az_tenant_id,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,2047,"export AZCOPY_AUTO_LOGIN_TYPE=SPN&&export AZCOPY_SPA_APPLICATION_ID=%s&&export AZCOPY_SPA_CLIENT_SECRET=%s&&export AZCOPY_TENANT_ID=%s&&azcopy cp %s %s%s %s %s --log-level=ERROR",bucket_ak,bucket_sk,az_tenant_id,real_source_path,bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else{
         remote_exec_general(workdir,sshkey_dir,hpc_user,"gcloud auth activate-service-account --key-file=/hpc_data/cluster_data/.bucket_key.json >> /dev/null 2>&1","-n",0,1,"","");
         if(strcmp(cmd_type,"rget")==0){
-            sprintf(remote_commands,"gcloud storage cp %s%s %s %s",bucket_address,real_source_path,real_dest_path,real_rflag);
+            snprintf(remote_commands,2047,"gcloud storage cp %s%s %s %s",bucket_address,real_source_path,real_dest_path,real_rflag);
         }
         else{
-            sprintf(remote_commands,"gcloud storage cp %s %s%s %s",real_source_path,bucket_address,real_dest_path,real_rflag);
+            snprintf(remote_commands,2047,"gcloud storage cp %s %s%s %s",real_source_path,bucket_address,real_dest_path,real_rflag);
         }
     }
     run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
