@@ -2319,24 +2319,39 @@ int check_down_nodes(char* workdir){
     return get_compute_node_num(statefile,"down");
 }
 
-int cluster_ssh(char* workdir, char* username, char* role_flag){
+int cluster_ssh(char* workdir, char* username, char* sshkey_dir, char* role_flag){
     char master_address[64]="";
     char cmdline[CMDLINE_LENGTH]="";
+    char private_sshkey_encrypted[FILENAME_LENGTH]="";
     char private_sshkey[FILENAME_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    int run_flag;
     get_state_value(workdir,"master_public_ip:",master_address);
     get_cluster_name(cluster_name,workdir);
     if(strcmp(role_flag,"opr")==0){
-        snprintf(private_sshkey,511,"%s%snow-cluster-login",SSHKEY_DIR,PATH_SLASH);
+        if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE)!=0){
+            return -5;
+        }
+        snprintf(private_sshkey,511,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
     }
     else{
-        snprintf(private_sshkey,511,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,username);
+        snprintf(private_sshkey_encrypted,511,"%s%s.%s%s%s.key.tmp",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
+        if(decrypt_user_privkey(private_sshkey_encrypted,sshkey_dir)!=0){
+            return -3;
+        }
+        snprintf(private_sshkey,511,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
     }
     if(file_exist_or_not(private_sshkey)!=0){
         return -1;
     }
     snprintf(cmdline,2047,"ssh -i %s -o StrictHostKeyChecking=no %s@%s",private_sshkey,username,master_address);
-    return system(cmdline);
+    run_flag=system(cmdline);
+    snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,private_sshkey,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    if(run_flag!=0){
+        return 1;
+    }
+    return 0;
 }
 
 int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag){
