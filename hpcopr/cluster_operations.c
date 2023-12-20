@@ -291,7 +291,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
     }
     if(strcmp(cluster_list,"all")==0){
         if(check_pslock_all()!=0){      
-            printf(FATAL_RED_BOLD "[ FATAL: ] Locked cluster(s) found. You cannot encrypt/decrypt all." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Locked (operation-in-progress) cluster(s) found, exit." RESET_DISPLAY "\n");
             return -5;
         }
         sprintf(cmdline,"%s %s %s.copy %s",COPY_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
@@ -347,7 +347,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         }
         get_workdir(cluster_workdir_temp,cluster_list);
         if(check_pslock(cluster_workdir_temp,decryption_status(cluster_workdir_temp))!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster %s is locked. You cannot encrypt/decrypt it." RESET_DISPLAY "\n",cluster_list);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster %s is currently locked (operation-in-progress)." RESET_DISPLAY "\n",cluster_list);
             return -5;
         }
         if(strcmp(option,"decrypt")==0){
@@ -379,7 +379,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         }
         get_workdir(cluster_workdir_temp,cluster_name_temp);
         if(check_pslock(cluster_workdir_temp,decryption_status(cluster_workdir_temp))!=0){
-            printf(WARN_YELLO_BOLD "[ FATAL: ] The cluster %s is locked. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
+            printf(WARN_YELLO_BOLD "[ FATAL: ] The cluster %s is locked (operation-in-progress). Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
             final_flag++;
             i++;
             continue;
