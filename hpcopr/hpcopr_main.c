@@ -1012,7 +1012,7 @@ int main(int argc, char* argv[]){
         if(strcmp(user_name,"root")==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] SSH as root is VERY RISKY and *NOT* recommended !" RESET_DISPLAY "\n");
         }
-        run_flag=cluster_ssh(workdir,user_name,cluster_role);
+        run_flag=cluster_ssh(workdir,user_name,cluster_role,SSHKEY_DIR);
         if(run_flag==-1){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the ssh key. You can still try to use password to login." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"FILE_I/O_ERROR",127);
