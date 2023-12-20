@@ -90,7 +90,7 @@ int check_internet(void){
 int check_internet_google(void){
     char cmdline[CMDLINE_LENGTH]="";
     char google_connectivity_flag[FILENAME_LENGTH];
-    snprintf(google_connectivity_flagz,511,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
+    snprintf(google_connectivity_flag,511,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
     FILE* file_p=fopen(google_connectivity_flag,"w+");
     if(file_p==NULL){
         return -1;

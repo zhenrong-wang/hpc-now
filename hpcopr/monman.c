@@ -172,7 +172,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
     char end_date[32]="";
     char end_time[32]="";
     char temp_date[32]="";
-    char temp_time_final[32]="";
+    char temp_time_final[40]="";
     char temp_time[30]="";
     char node_name_list_converted[256][16]={""};
     char real_export_dest[DIR_LENGTH_EXT]="";
@@ -290,7 +290,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
         fgetline(file_p,mon_data_line);
         get_seq_string(mon_data_line,',',1,temp_date);
         get_seq_string(mon_data_line,',',2,temp_time);
-        snprintf(temp_time_final,31,"%s:0",temp_time);
+        snprintf(temp_time_final,39,"%s:0",temp_time);
         datetime_to_num(temp_date,temp_time_final,&time_tm_tmp);
         time_tmp=mktime(&time_tm_tmp);
 //        printf("*******%ld**%ld***%ld,,,,,%d,,,,,%ld\n",time1,time2,time_tmp,interval_num,(time_tmp-time1)%(interval_num*60));

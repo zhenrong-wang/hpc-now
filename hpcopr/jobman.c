@@ -296,7 +296,7 @@ int job_list(char* workdir, char* user_name, char* sshkey_dir){
     char cmdline[CMDLINE_LENGTH]="";
     get_cluster_name(cluster_name,workdir);
     snprintf(dirname_temp,383,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
-    snprintf(cmdline,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,2047,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     snprintf(job_list_cache,511,"%s%sjob_list_%s.txt",dirname_temp,PATH_SLASH,cluster_name);
     remote_exec_general(workdir,sshkey_dir,user_name,"sacct","",0,3,job_list_cache,NULL_STREAM);
