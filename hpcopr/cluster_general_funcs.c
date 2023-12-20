@@ -849,9 +849,10 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     if(get_crypto_key(crypto_key_filename,md5sum)!=0){
         return -3;
     }
+    if(get_cluster_name(cluster_name,workdir)!=0){
+        return -5;
+    }
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
-    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%scredentials",vaultdir,PATH_SLASH);
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
@@ -882,6 +883,65 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
         sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
         encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     }
+    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+    return 0;
+}
+
+int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char* crypto_keyfile){
+    if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
+        return -7;
+    }
+    char workdir[DIR_LENGTH]="";
+    char vaultdir[DIR_LENGTH]="";
+    char user_passwords[FILENAME_LENGTH]="";
+    char user_line[LINE_LENGTH_TINY];
+    char user_name_temp[32]="";
+    char user_ssh_privkey[FILENAME_LENGTH]="";
+    char md5sum[64]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    if(get_workdir(workdir,cluster_name)!=0){
+        return -1;
+    }
+    if(create_and_get_vaultdir(workdir,vaultdir)!=0){
+        return -1;
+    }
+    if(get_crypto_key(crypto_keyfile,md5sum)!=0){
+        return -3;
+    }
+    snprintf(user_passwords,511,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(user_passwords)!=0){
+        snprintf(user_passwords,511,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
+        decrypt_single_file(NOW_CRYPTO_EXEC,user_passwords,md5sum);
+    }
+    snprintf(user_passwords,511,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    FILE* file_p=fopen(user_passwords,"r");
+    if(file_p==NULL){
+        return -5;
+    }
+    while(!feof(user_passwords)){
+        fngetline(file_p,user_line,127);
+        get_seq_string(user_line,' ',2,user_name_temp);
+        if(strcmp(option,"encrypt")==0){
+            snprintf(user_ssh_privkey,511,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,user_name_temp);
+            encrypt_and_delete(NOW_CRYPTO_EXEC,user_ssh_privkey,md5sum);
+        }
+        else{
+            snprintf(user_ssh_privkey,511,"%s%s.%s%s%s.key.tmp",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,user_name_temp);
+            decrypt_single_file(NOW_CRYPTO_EXEC,user_ssh_privkey,md5sum);
+        }
+    }
+    fclose(file_p);
+    if(strcmp(option,"encrypt")==0){
+        snprintf(user_ssh_privkey,511,"%s%s.%s%sroot.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,user_name_temp);
+        encrypt_and_delete(NOW_CRYPTO_EXEC,user_ssh_privkey,md5sum);
+    }
+    else{
+        snprintf(user_ssh_privkey,511,"%s%s.%s%sroot.key.tmp",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,user_name_temp);
+        decrypt_single_file(NOW_CRYPTO_EXEC,user_ssh_privkey,md5sum);
+    }
+    snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,user_passwords,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
     return 0;
 }
 

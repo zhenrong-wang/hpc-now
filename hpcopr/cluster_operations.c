@@ -308,9 +308,12 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
                 continue;
             }
             if(strcmp(option,"decrypt")==0){
+                get_workdir(cluster_workdir_temp,cluster_name_temp);
                 flag=decrypt_single_cluster(cluster_name_temp,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
                 if(flag!=0){
                     printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt files of the cluster %s. Error code: %d." RESET_DISPLAY "\n",cluster_name_temp,flag);
+                    encrypt_decrypt_all_user_ssh_privkeys(cluster_name_temp,"encrypt",CRYPTO_KEY_FILE);
+                    delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
                     final_flag++;
                 }
                 else{
@@ -318,7 +321,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
                 }
             }
             else{
-                get_workdir(cluster_workdir_temp,cluster_name_temp);
+                encrypt_decrypt_all_user_ssh_privkeys(cluster_name_temp,"encrypt",CRYPTO_KEY_FILE);
                 delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
                 printf(GENERAL_BOLD "[ -INFO- ] Encrypted sensitive files of the cluster %s." RESET_DISPLAY "\n",cluster_name_temp);
             }
@@ -342,6 +345,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             flag=decrypt_single_cluster(cluster_list,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
             if(flag!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt files of the cluster %s. Error code: %d." RESET_DISPLAY "\n",cluster_list,flag);
+                encrypt_decrypt_all_user_ssh_privkeys(cluster_list,"encrypt",CRYPTO_KEY_FILE);
                 delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
                 return 7;
             }
@@ -351,6 +355,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             }
         }
         else{
+            encrypt_decrypt_all_user_ssh_privkeys(cluster_list,"encrypt",CRYPTO_KEY_FILE);
             delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
             printf(GENERAL_BOLD "[ -INFO- ] Encrypted files of the cluster %s." RESET_DISPLAY "\n",cluster_list);
             return 0;
@@ -363,10 +368,13 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             i++;
             continue;
         }
+        get_workdir(cluster_workdir_temp,cluster_name_temp);
         if(strcmp(option,"decrypt")==0){
             flag=decrypt_single_cluster(cluster_name_temp,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
             if(flag!=0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt files of the cluster %s. Error code: %d." RESET_DISPLAY "\n",cluster_name_temp,flag);
+                encrypt_decrypt_all_user_ssh_privkeys(cluster_name_temp,"encrypt",CRYPTO_KEY_FILE);
+                delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
                 final_flag++;
             }
             else{
@@ -375,7 +383,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             i++;
         }
         else{
-            get_workdir(cluster_workdir_temp,cluster_name_temp);
+            encrypt_decrypt_all_user_ssh_privkeys(cluster_name_temp,"encrypt",CRYPTO_KEY_FILE);
             delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
             printf(GENERAL_BOLD "[ -INFO- ] Encrypted files of the cluster %s." RESET_DISPLAY "\n",cluster_name_temp);
         }
@@ -417,8 +425,10 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     if(get_crypto_key(crypto_keyfile,md5sum)!=0){
         return -7;
     }
+    if(encrypt_decrypt_all_user_ssh_privkeys(target_cluster_name,"decrypt",crypto_keyfile)!=0){
+        return 1;
+    }
     decrypt_files(target_cluster_workdir,crypto_keyfile); //Delete the /stack files.
-    
     // Now, decrypt the /vault files.
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
     decrypt_single_file(now_crypto_exec,filename_temp,md5sum);

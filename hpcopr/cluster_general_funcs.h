@@ -20,6 +20,9 @@ int chmod_ssh_privkey(char* ssh_privkey);
 int encrypt_user_privkey(char* ssh_privkey, char* crypto_keyfile);
 int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char* sshkey_dir, char* crypto_keyfile);
 void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir);
+
+int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char* crypto_keyfile);
+
 //Deprecated!
 int generate_sshkey(char* sshkey_folder, char* pubkey); //This is deprecated!
 int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile);
