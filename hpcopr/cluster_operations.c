@@ -332,6 +332,8 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             }
         }
         fclose(file_p);
+        snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,registry_copy,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
         if(final_flag!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] %s finished with %d failed cluster(s)." RESET_DISPLAY "\n",option,final_flag);
         }
