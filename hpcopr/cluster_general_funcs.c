@@ -849,9 +849,6 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     if(get_crypto_key(crypto_key_filename,md5sum)!=0){
         return -3;
     }
-    if(get_cluster_name(cluster_name,workdir)!=0){
-        return -5;
-    }
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%scredentials",vaultdir,PATH_SLASH);
@@ -900,9 +897,7 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
     char user_ssh_privkey[FILENAME_LENGTH]="";
     char md5sum[64]="";
     char cmdline[CMDLINE_LENGTH]="";
-    if(get_workdir(workdir,cluster_name)!=0){
-        return -1;
-    }
+    get_workdir(workdir,cluster_name);
     if(create_and_get_vaultdir(workdir,vaultdir)!=0){
         return -1;
     }
@@ -919,7 +914,7 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
     if(file_p==NULL){
         return -5;
     }
-    while(!feof(user_passwords)){
+    while(!feof(file_p)){
         fngetline(file_p,user_line,127);
         get_seq_string(user_line,' ',2,user_name_temp);
         if(strcmp(option,"encrypt")==0){
@@ -933,11 +928,11 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
     }
     fclose(file_p);
     if(strcmp(option,"encrypt")==0){
-        snprintf(user_ssh_privkey,511,"%s%s.%s%sroot.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,user_name_temp);
+        snprintf(user_ssh_privkey,511,"%s%s.%s%sroot.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH);
         encrypt_and_delete(NOW_CRYPTO_EXEC,user_ssh_privkey,md5sum);
     }
     else{
-        snprintf(user_ssh_privkey,511,"%s%s.%s%sroot.key.tmp",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,user_name_temp);
+        snprintf(user_ssh_privkey,511,"%s%s.%s%sroot.key.tmp",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH);
         decrypt_single_file(NOW_CRYPTO_EXEC,user_ssh_privkey,md5sum);
     }
     snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,user_passwords,SYSTEM_CMD_REDIRECT);
