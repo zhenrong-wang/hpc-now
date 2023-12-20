@@ -989,16 +989,16 @@ int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
     if(create_and_get_vaultdir(workdir,vaultdir)!=0){
         return -1;
     }
-    sprintf(key_file,"%s%scloud_secrets_VERY_RISKY.txt",vaultdir,PATH_SLASH);
+    snprintf(key_file,511,"%s%scloud_secrets_VERY_RISKY.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(key_file)!=0){
         return 0; // If the decrypted file is absent, skip.
     }
-    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,key_file,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,2047,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,key_file,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     flag=system(cmdline);
-    printf("%s,,,,%d,,,\n",cmdline,flag);
+//    printf("%s,,,,%d,,,\n",cmdline,flag);
     if(flag==0){ //If Encrypted successfully, then delete the decrypted one.
-        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,key_file,SYSTEM_CMD_REDIRECT);
-        printf("%s\n",cmdline);
+        snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,key_file,SYSTEM_CMD_REDIRECT);
+//        printf("%s\n",cmdline);
         return system(cmdline);
     }
     return -7;

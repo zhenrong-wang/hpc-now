@@ -307,8 +307,8 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
                 final_flag++;
                 continue;
             }
+            get_workdir(cluster_workdir_temp,cluster_name_temp);
             if(strcmp(option,"decrypt")==0){
-                get_workdir(cluster_workdir_temp,cluster_name_temp);
                 flag=decrypt_single_cluster(cluster_name_temp,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
                 if(flag!=0){
                     printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt files of the cluster %s. Error code: %d." RESET_DISPLAY "\n",cluster_name_temp,flag);
