@@ -743,6 +743,7 @@ int get_compute_node_num(char* statefile, char* option){
 
 //return -1: source file not exist
 //return 0: normal exit
+//Decrypt a file with suffix to a file without .tmp suffix. e.g. text.txt.tmp to text.txt
 int decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum){
     char filename_new[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
