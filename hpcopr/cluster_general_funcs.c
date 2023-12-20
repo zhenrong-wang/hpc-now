@@ -910,6 +910,12 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     return 0;
 }
 
+
+//return -7: option error
+//return -5: user_registry_failed to decrypt
+//return -3: failed to get the crypto key
+//return -1: failed to get the vaultdir
+//return 0: normal exit
 int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char* crypto_keyfile){
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         return -7;
@@ -929,15 +935,18 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
     if(get_crypto_key(crypto_keyfile,md5sum)!=0){
         return -3;
     }
-    snprintf(user_passwords,511,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(user_passwords)!=0){
-        snprintf(user_passwords,511,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
+    snprintf(user_passwords,511,"%s%suser_passwords.txt",vaultdir,PATH_SLASH); //Decrypted user registry
+    if(file_exist_or_not(user_passwords)!=0){ //If not decrypted
+        snprintf(user_passwords,511,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH); //Encrypted user registry
+        if(file_exist_or_not(user_passwords)!=0){
+            return 0; //The cluster is empty.
+        }
         decrypt_single_file(NOW_CRYPTO_EXEC,user_passwords,md5sum);
     }
     snprintf(user_passwords,511,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(user_passwords,"r");
     if(file_p==NULL){
-        return -5;
+        return -5; //Failed to decrypt the user registry
     }
     while(!feof(file_p)){
         fngetline(file_p,user_line,127);

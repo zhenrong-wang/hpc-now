@@ -425,6 +425,7 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     char target_cluster_vaultdir[DIR_LENGTH]="";
     char cloud_flag[32]="";
     char md5sum[64]="";
+    int run_flag;
     char filename_temp[FILENAME_LENGTH]="";
     if(file_empty_or_not(ALL_CLUSTER_REGISTRY)<1){
         return -1;
@@ -442,7 +443,8 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     if(get_crypto_key(crypto_keyfile,md5sum)!=0){
         return -7;
     }
-    if(encrypt_decrypt_all_user_ssh_privkeys(target_cluster_name,"decrypt",crypto_keyfile)!=0){
+    run_flag=encrypt_decrypt_all_user_ssh_privkeys(target_cluster_name,"decrypt",crypto_keyfile);
+    if(run_flag!=0&&run_flag!=-5){
         return 1;
     }
     decrypt_files(target_cluster_workdir,crypto_keyfile); //Delete the /stack files.
