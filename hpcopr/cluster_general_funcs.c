@@ -660,6 +660,31 @@ int check_pslock(char* workdir, int decrypt_flag){
     }
 }
 
+//return -1: REGISTRY is missing
+//return 1: one or more clusters are locked
+//return 0: all clusters are not locked
+int check_pslock_all(void){
+    char line_buffer[256]="";
+    char cluster_name_temp[128]="";
+    char cluster_workdir_temp[DIR_LENGTH]="";
+    int flag=0;
+    FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
+    if(file_p==NULL){
+        return -1;
+    }
+    while(!feof(file_p)){
+        fngetline(file_p,line_buffer,255);
+        get_seq_string(line_buffer,' ',4,cluster_name_temp);
+        get_workdir(cluster_workdir_temp,cluster_name_temp);
+        if(check_pslock(cluster_workdir_temp,decryption_status(cluster_workdir_temp))!=0){
+            fclose(file_p);
+            return 1;
+        }
+    }
+    fclose(file_p);
+    return 0;
+}
+
 int create_local_tf_config(tf_exec_config* tf_run, char* stackdir){
     char filename_temp[FILENAME_LENGTH]="";
     sprintf(filename_temp,"%s%s.tf_running.conf.local",stackdir,PATH_SLASH);

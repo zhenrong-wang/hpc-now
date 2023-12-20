@@ -253,6 +253,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
 //return 3: User dened.
 //return 5: cluster name invalid of a single cluster.
 //return 7: Failed to decrypt a single cluster
+//return -5: PS locked!
 int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_local){
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify an option: encrypt or decrypt." RESET_DISPLAY "\n");
@@ -289,6 +290,10 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         return 3;
     }
     if(strcmp(cluster_list,"all")==0){
+        if(check_pslock_all()!=0){      
+            printf(FATAL_RED_BOLD "[ FATAL: ] Locked cluster(s) found. You cannot encrypt/decrypt all." RESET_DISPLAY "\n");
+            return -5;
+        }
         sprintf(cmdline,"%s %s %s.copy %s",COPY_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] FILE I/O error when copying registry." RESET_DISPLAY "\n");
@@ -341,6 +346,10 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             return 5;
         }
         get_workdir(cluster_workdir_temp,cluster_list);
+        if(check_pslock(cluster_workdir_temp,decryption_status(cluster_workdir_temp))!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster %s is locked. You cannot encrypt/decrypt it." RESET_DISPLAY "\n",cluster_list);
+            return -5;
+        }
         if(strcmp(option,"decrypt")==0){
             flag=decrypt_single_cluster(cluster_list,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
             if(flag!=0){
@@ -369,6 +378,12 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             continue;
         }
         get_workdir(cluster_workdir_temp,cluster_name_temp);
+        if(check_pslock(cluster_workdir_temp,decryption_status(cluster_workdir_temp))!=0){
+            printf(WARN_YELLO_BOLD "[ FATAL: ] The cluster %s is locked. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
+            final_flag++;
+            i++;
+            continue;
+        }
         if(strcmp(option,"decrypt")==0){
             flag=decrypt_single_cluster(cluster_name_temp,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
             if(flag!=0){
