@@ -2497,7 +2497,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rebuilding the cluster users now ...\n");
     file_p=fopen(user_passwords,"r");
     get_cluster_name(cluster_name,workdir);
-    get_user_sshkey(cluster_name,"root","ENABLED",sshkey_folder);
+    get_user_sshkey(cluster_name,"root","ENABLED",sshkey_folder,crypto_keyfile);
     while(!feof(file_p)){
         fgetline(file_p,user_line_temp);
         if(strlen(user_line_temp)==0){
@@ -2505,7 +2505,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
         }
         get_seq_string(user_line_temp,' ',2,username_temp);
         get_seq_string(user_line_temp,' ',4,user_status_temp);
-        get_user_sshkey(cluster_name,username_temp,user_status_temp,sshkey_folder);
+        get_user_sshkey(cluster_name,username_temp,user_status_temp,sshkey_folder,crypto_keyfile);
     }
     fclose(file_p);
     delete_decrypted_user_passwords(workdir);

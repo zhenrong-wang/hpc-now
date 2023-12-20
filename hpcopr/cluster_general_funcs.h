@@ -15,9 +15,19 @@ void get_latest_hosts(char* stackdir, char* hostfile_latest);
 int decrypt_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_info);
 int get_cloud_flag(char* workdir, char* cloud_flag);
 int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option, char* recursive_flag, int silent_flag);
-int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char* sshkey_dir);
-int activate_sshkey(char* ssh_privkey);
+
+int chmod_ssh_privkey(char* ssh_privkey);
+int encrypt_user_privkey(char* ssh_privkey, char* crypto_keyfile);
+int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char* sshkey_dir, char* crypto_keyfile);
 void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir);
+//Deprecated!
+int generate_sshkey(char* sshkey_folder, char* pubkey); //This is deprecated!
+int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile);
+int get_opr_pubkey(char* sshkey_folder, char* pubkey, unsigned int length);
+int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile);
+int encrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile);
+int decrypt_user_privkey(char* ssh_privkey_encrypted, char* crypto_keyfile);
+
 int create_and_get_vaultdir(char* workdir, char* vaultdir);
 int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes);
 int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char* commands, char* extra_options, int delay_minutes, int silent_flag, char* std_redirect, char* err_redirect);
@@ -36,7 +46,6 @@ int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum);
 int decryption_status(char* workdir);
 int getstate(char* workdir, char* crypto_keyfile);
 int get_state_value(char* workdir, char* key, char* value);
-int generate_sshkey(char* sshkey_folder, char* pubkey);
 int update_cluster_summary(char* workdir, char* crypto_keyfile);
 int archive_log(char* logarchive, char* logfile);
 void update_compute_template(char* stackdir, char* cloud_flag);

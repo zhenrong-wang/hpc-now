@@ -972,7 +972,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char nat_os_image[64]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
-    char pubkey[LINE_LENGTH]="";
+    char pubkey[1024]="";
     int number_of_vcpu=0;
     int cpu_core_num=0;
     int threads;
@@ -1002,6 +1002,9 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     }
     sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
+    }
+    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -1100,8 +1103,6 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
     }
-    generate_sshkey(sshkey_folder,pubkey);
-
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
     global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
@@ -1305,10 +1306,10 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_info.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder);
+    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
     for(i=0;i<init_info.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -1339,7 +1340,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
-    char pubkey[LINE_LENGTH]="";
+    char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
@@ -1366,6 +1367,9 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     }
     sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
+    }
+    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -1429,7 +1433,6 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
     }
-    generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
     global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
@@ -1630,10 +1633,10 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_info.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder);
+    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
     for(i=0;i<init_info.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -1664,7 +1667,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
-    char pubkey[LINE_LENGTH]="";
+    char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
@@ -1691,6 +1694,9 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     }
     sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
+    }
+    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -1754,7 +1760,6 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
     }
-    generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
     global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
@@ -1949,10 +1954,10 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_info.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder);
+    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
     for(i=0;i<init_info.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -2014,7 +2019,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     char string_temp[128]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
-    char pubkey[LINE_LENGTH]="";
+    char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
@@ -2044,6 +2049,9 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     }
     sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
+    }
+    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -2102,7 +2110,6 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     }
 
     hw_vm_series(init_conf.region_id,intel_generation,tiny_series_name,&amd_flavor_flag);
-    generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
     global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
@@ -2300,10 +2307,10 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder);
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
     for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -2333,7 +2340,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     char string_temp[128]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
-    char pubkey[LINE_LENGTH]="";
+    char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
@@ -2362,6 +2369,9 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     }
     sprintf(filename_temp,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
+    }
+    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -2426,7 +2436,6 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
     }
-    generate_sshkey(sshkey_folder,pubkey);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(string_temp,"vpc-%s",unique_cluster_id);
     global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
@@ -2633,10 +2642,10 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder);
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
     for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -2674,7 +2683,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char random_storage_account[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
-    char pubkey[LINE_LENGTH]="";
+    char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
@@ -2704,6 +2713,9 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
         return -1;
     }
     if(get_azure_info(workdir,subscription_id,tenant_id)!=0){
+        return -1;
+    }
+    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -2754,7 +2766,6 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
     }
-    generate_sshkey(sshkey_folder,pubkey);
     generate_random_string(random_storage_account);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     global_replace(filename_temp,"BLANK_CLIENT_ID",access_key);
@@ -2914,10 +2925,10 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder);
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
     for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -2948,7 +2959,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char gcp_project_id[128]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
-    char pubkey[LINE_LENGTH]="";
+    char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
     char database_root_passwd[PASSWORD_STRING_LENGTH]="";
@@ -2973,6 +2984,9 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         return -1;
     }
     if(gcp_credential_convert(workdir,"decrypt",0)!=0){
+        return -1;
+    }
+    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -3033,7 +3047,6 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         gcp_credential_convert(workdir,"delete",0);
         return 1; // user denied.
     }
-    generate_sshkey(sshkey_folder,pubkey);
     get_cloud_flag(workdir,cloud_flag);
     sprintf(filename_temp,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     sprintf(keyfile_path,"%s%s.key.json",vaultdir,PATH_SLASH);
@@ -3217,10 +3230,10 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     sync_statefile(workdir,sshkey_folder);
     sprintf(cmdline,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder);
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
     for(i=0;i<init_conf.hpc_user_num;i++){
         sprintf(string_temp,"user%d",i+1);
-        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);

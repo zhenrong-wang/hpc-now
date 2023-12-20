@@ -201,16 +201,20 @@ int fgetline(FILE* file_p, char* line_string){
 //Users must make sure that the max_length equals or smaller than the size of the array
 //Otherwise, overflow will definately occur.
 //return 0: get successed.
+//return -127: length invalid.
+//return -1: FILE not exist
+//return 1: EOF found and read nothing.
+//return 127: maxlength 
 int fngetline(FILE* file_p, char* line_string, unsigned int max_length){
     int ch='\0';
     int i=0;
     if(max_length<1){
-        return 127;
+        return -127;
     }
     if(file_p==NULL){
         return -1;
     }
-    reset_string(line_string);
+    memset(line_string,'\0',max_length);
     do{
         ch=fgetc(file_p);
         if(ch!=EOF&&ch!='\n'){
@@ -219,9 +223,8 @@ int fngetline(FILE* file_p, char* line_string, unsigned int max_length){
         }
     }while(ch!=EOF&&ch!='\n'&&i!=max_length); // Be careful! This function can only handle lines <= 4096 chars. Extra chars will be ommited
     if(i==max_length){
-        return -127; // When returns this value, the outcome will be unpredictable.
+        return 127; // When returns this value, the outcome will be unpredictable.
     }
-    *(line_string+i)='\0'; // This is very dangerous. You need to guarantee the length of line_string is long enough!
     if(ch==EOF&&i==0){
         return 1;
     }

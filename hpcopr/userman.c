@@ -278,7 +278,7 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
             fprintf(file_p,"username: %s %s STATUS:ENABLED\n",username,password);
             fclose(file_p);
             get_cluster_name(cluster_name,workdir);
-            get_user_sshkey(cluster_name,username,"ENABLED",sshkey_dir);
+            get_user_sshkey(cluster_name,username,"ENABLED",sshkey_dir,crypto_keyfile);
             printf("[ -DONE- ] The user %s has been added to your cluster successfully.\n",username);
             encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
             return 0;
