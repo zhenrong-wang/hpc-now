@@ -71,7 +71,7 @@ int add_to_cluster_registry(char* new_cluster_name, char* import_flag){
 //return non-zero: failed
 //return 0: succeeded
 int create_and_get_stackdir(char* workdir, char* stackdir){
-    int base_length=strlen(HPC_NOW_ROOT_DIR)+16;
+    int base_length=strlen(HPC_NOW_ROOT_DIR)+7;
     if(strlen(workdir)<base_length){
         strcpy(stackdir,"");
         return 1;
@@ -320,7 +320,7 @@ void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
 //return 0: succeeded
 //return non-zero: failed
 int create_and_get_vaultdir(char* workdir, char* vaultdir){
-    int base_length=strlen(HPC_NOW_ROOT_DIR)+16;
+    int base_length=strlen(HPC_NOW_ROOT_DIR)+7;
     if(strlen(workdir)<base_length){
         strcpy(vaultdir,"");
         return 1;
