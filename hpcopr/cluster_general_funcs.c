@@ -673,7 +673,9 @@ int check_pslock_all(void){
     }
     while(!feof(file_p)){
         fngetline(file_p,line_buffer,255);
-        get_seq_string(line_buffer,' ',4,cluster_name_temp);
+        if(get_seq_string(line_buffer,' ',4,cluster_name_temp)!=0){
+            continue;
+        }
         get_workdir(cluster_workdir_temp,cluster_name_temp);
         if(check_pslock(cluster_workdir_temp,decryption_status(cluster_workdir_temp))!=0){
             fclose(file_p);
