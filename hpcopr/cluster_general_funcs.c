@@ -2629,10 +2629,14 @@ int input_user_passwd(char* password_string, int batch_flag_local){
     return 0;
 }
 
+//return 0: user exist
+//return non zero: user not exist.
 int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir){
     char workdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char user_sshkey_encrypted[FILENAME_LENGTH]="";
+    char user_sshkey_decrypted[FILENAME_LENGTH]="";
     get_workdir(workdir,cluster_name);
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
@@ -2644,9 +2648,9 @@ int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir)
             return 2;
         }
     }
-    char user_sshkey[FILENAME_LENGTH]="";
-    sprintf(user_sshkey,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,user_name);
-    if(file_exist_or_not(user_sshkey)!=0){
+    sprintf(user_sshkey_encrypted,"%s%s.%s%s%s.key.tmp",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,user_name);
+    sprintf(user_sshkey_decrypted,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,user_name);
+    if(file_exist_or_not(user_sshkey_encrypted)!=0||file_exist_or_not(user_sshkey_decrypted)!=0){
         return 1;
     }
     else{
