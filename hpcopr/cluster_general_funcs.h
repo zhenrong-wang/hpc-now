@@ -79,7 +79,7 @@ int prompt_to_input_required_args(const char* prompt_string, char* reply_string,
 int prompt_to_input_optional_args(const char* prompt_confirm, const char* confirm_string, const char* prompt_string, char* reply_string, int batch_flag_local,int argc, char** argv, char* cmd_keyword);
 
 int check_down_nodes(char* workdir);
-int cluster_ssh(char* workdir, char* username, char* cluster_role);
+int cluster_ssh(char* workdir, char* username, char* cluster_role, char* sshkey_dir);
 int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
 void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);

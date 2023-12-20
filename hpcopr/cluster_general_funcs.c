@@ -2319,7 +2319,7 @@ int check_down_nodes(char* workdir){
     return get_compute_node_num(statefile,"down");
 }
 
-int cluster_ssh(char* workdir, char* username, char* sshkey_dir, char* role_flag){
+int cluster_ssh(char* workdir, char* username, char* role_flag, char* sshkey_dir){
     char master_address[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char private_sshkey_encrypted[FILENAME_LENGTH]="";
