@@ -995,6 +995,7 @@ int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
     }
     sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,key_file,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     flag=system(cmdline);
+    printf("%s,,,,%d,,,\n",cmdline,flag);
     if(flag==0){ //If Encrypted successfully, then delete the decrypted one.
         sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,key_file,SYSTEM_CMD_REDIRECT);
         printf("%s\n",cmdline);
