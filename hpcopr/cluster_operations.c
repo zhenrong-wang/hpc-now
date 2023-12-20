@@ -501,7 +501,12 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
     sprintf(tf_archive_err_log,"%s%slog%stf_prep.err.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
     sprintf(cloud_secrets,"%s%svault%s.secrets.key",cluster_workdir,PATH_SLASH,PATH_SLASH);
     if(file_empty_or_not(cloud_secrets)<1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing the " HIGH_CYAN_BOLD "*imported*" RESET_DISPLAY " cluster from local client ...\n");
+        if(strcmp(force_flag,"force")!=0){
+            if(prompt_to_confirm("[ -INFO- ] Removing the *imported* cluster from local.",CONFIRM_STRING,1)==1){
+                return 5;
+            }
+        }
+        printf(GENERAL_BOLD "[ -INFO- ] Removing the *imported* cluster from local." RESET_DISPLAY "\n");
         goto remove_files;
     }
     if(strcmp(force_flag,"force")==0){
