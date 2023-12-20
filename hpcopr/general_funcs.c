@@ -1136,6 +1136,9 @@ int include_string_or_not(int cmd_c, char** cmds, char* string){
 }
 
 int file_cr_clean(char* filename){
+#ifdef _WIN32
+    return 0; //For Windows 32 environment, there is no need to clean the \r char.
+#else
     if(file_exist_or_not(filename)!=0){
         return -1;
     }
@@ -1168,6 +1171,7 @@ int file_cr_clean(char* filename){
     snprintf(cmdline,2047,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
+#endif
 }
 
 /* This function is risky! It overwrites the original file*/
