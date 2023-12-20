@@ -667,7 +667,6 @@ int check_pslock_all(void){
     char line_buffer[256]="";
     char cluster_name_temp[128]="";
     char cluster_workdir_temp[DIR_LENGTH]="";
-    int flag=0;
     FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
     if(file_p==NULL){
         return -1;
