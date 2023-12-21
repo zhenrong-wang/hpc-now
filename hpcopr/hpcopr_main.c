@@ -569,8 +569,8 @@ int main(int argc, char* argv[]){
                     return 25;
                     
                 }
-                list_all_cluster_names(2);
-                printf("[ -INFO- ] Input a list of clusters seperated by " HIGH_GREEN_BOLD ":" RESET_DISPLAY ", e.g. " HIGH_GREEN_BOLD "cluster1:cluster2" RESET_DISPLAY " : ");
+                list_all_cluster_names(1);
+                printf("[ -INFO- ] Input a list in the format " HIGH_GREEN_BOLD "cluster1:cluster2" RESET_DISPLAY " : ");
                 fflush(stdin);
                 scanf("%255s",string_temp);
                 getchar();
