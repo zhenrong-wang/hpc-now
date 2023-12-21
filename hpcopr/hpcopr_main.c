@@ -494,7 +494,7 @@ int main(int argc, char* argv[]){
             run_flag=check_and_install_prerequisitions(2);
         }
         else{
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Skipped checking the connectivity to GCP." RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Skipped checking GCP connectivity if previously checked." RESET_DISPLAY "\n");
             run_flag=check_and_install_prerequisitions(0); // Check GCP Connectivity.
         }
         if(run_flag!=0){
