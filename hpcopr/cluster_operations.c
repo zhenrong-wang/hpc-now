@@ -502,7 +502,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
     sprintf(cloud_secrets,"%s%svault%s.secrets.key",cluster_workdir,PATH_SLASH,PATH_SLASH);
     if(file_empty_or_not(cloud_secrets)<1){
         if(strcmp(force_flag,"force")!=0){
-            if(prompt_to_confirm("[ -INFO- ] Removing the *imported* cluster from local.",CONFIRM_STRING,1)==1){
+            if(prompt_to_confirm("Removing the *imported* cluster from local.",CONFIRM_STRING,1)==1){
                 return 5;
             }
         }
