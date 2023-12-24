@@ -9,14 +9,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <math.h>
 
 #ifdef _WIN32
 #include "..\\hpcopr\\now_macros.h"
 #include "..\\hpcopr\\general_funcs.h"
+#include "..\\hpcopr\\now_md5.h"
 #else
 #include "../hpcopr/now_macros.h"
 #include "../hpcopr/general_funcs.h"
+#include "../hpcopr/now_md5.h"
 #endif
 
 #include "installer.h"
@@ -63,16 +64,16 @@ void print_help_installer(void){
 #ifdef _WIN32
     printf("| Usage: Open a command prompt window *WITH* the Administrator Role.\n");
     printf("|        Type the command using either ways below:\n");
-    printf("|     <> ABSOLUTE_PATH general_option advanced_option(s)\n");
+    printf("|     +- ABSOLUTE_PATH general_option advanced_option(s)\n");
     printf("|         -> Example 1: C:\\Users\\ABC\\installer.exe install --accept\n");
-    printf("|     <> RELATIVE_PATH general_option advanced_options\n");
+    printf("|     +- RELATIVE_PATH general_option advanced_options\n");
     printf("|         -> Example 2: .\\installer.exe install --cloc .\\now-crypto-aes.exe\n");
 #else
     printf("| Usage: Open a Terminal.\n");
     printf("|        Type the command using either ways below:\n");
-    printf("|     <> sudo ABSOLUTE_PATH general_option advanced_option(s)\n");
+    printf("|     +- sudo ABSOLUTE_PATH general_option advanced_option(s)\n");
     printf("|         -> Example 1: sudo /home/ABC/installer.exe install --accept\n");
-    printf("|     <> sudo RELATIVE_PATH general_option advanced_option(s)\n");
+    printf("|     +- sudo RELATIVE_PATH general_option advanced_option(s)\n");
     printf("|         -> Example 2: sudo ./installer.exe install --cloc ./now-crypto-aes.exe\n");
 #endif
     printf("| general_option:\n");
@@ -482,10 +483,10 @@ linux_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          Please follow the steps below:\n");
-    printf(HIGH_CYAN_BOLD "|     <> SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
+    printf(HIGH_CYAN_BOLD "|     +- SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("|          " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr envcheck" RESET_DISPLAY "\n");
     printf("|          * You will be required to input the password for the current sudoer.\n");
-    printf(GENERAL_BOLD "|     <> USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "|     +- USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
     printf("|          1. " HIGH_GREEN_BOLD "sudo passwd hpc-now" RESET_DISPLAY "\n");
     printf("|          * You will be required to set a password without echo.\n");
     printf("|          2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "\n");
@@ -554,10 +555,10 @@ mac_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          Please follow the steps below:\n");
-    printf(HIGH_CYAN_BOLD "|     <> SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
+    printf(HIGH_CYAN_BOLD "|     +- SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("|          " HIGH_GREEN_BOLD "cd /Applications && sudo -u hpc-now hpcopr envcheck" RESET_DISPLAY "\n");
     printf("|          * You will be required to input the password for the current sudoer.\n");
-    printf(GENERAL_BOLD "|     <> USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "|     +- USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
     printf("|          1. " HIGH_GREEN_BOLD "sudo dscl . -passwd /Users/hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY "\n");
     printf("|          2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "\n");
     printf("|          * You will be required to input the password set just now.\n");

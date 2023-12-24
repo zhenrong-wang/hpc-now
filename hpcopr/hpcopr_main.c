@@ -32,6 +32,7 @@
 #include "dataman.h"
 #include "transfer.h"
 #include "monman.h"
+#include "now_md5.h"
 #include "appman.h"
 #include "jobman.h"
 #include "userman.h"

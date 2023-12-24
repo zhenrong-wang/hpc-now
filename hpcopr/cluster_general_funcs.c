@@ -118,7 +118,9 @@ int get_cloud_flag(char* workdir, char* cloud_flag){
 int decrypt_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_info){
     char vaultdir[DIR_LENGTH]="";
     char md5sum[64]="";
-    get_crypto_key(crypto_keyfile,md5sum);
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
+        return -1;
+    }
     create_and_get_vaultdir(workdir,vaultdir);
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(bucket_info,"%s%sbucket_info.txt.tmp",vaultdir,PATH_SLASH);
@@ -190,7 +192,7 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
 
 int encrypt_user_privkey(char* ssh_privkey, char* crypto_keyfile){
     char md5sum[64]="";
-    if(get_crypto_key(crypto_keyfile,md5sum)!=0){
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -1;
     }
     if(encrypt_and_delete(NOW_CRYPTO_EXEC,ssh_privkey,md5sum)!=0){
@@ -204,7 +206,7 @@ int decrypt_user_privkey(char* ssh_privkey_encrypted, char* crypto_keyfile){
     char ssh_privkey[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     int i;
-    if(get_crypto_key(crypto_keyfile,md5sum)!=0){
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -1;
     }
     if(decrypt_single_file(NOW_CRYPTO_EXEC,ssh_privkey_encrypted,md5sum)!=0){
@@ -490,7 +492,7 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     char get_sk[128]="";
     char get_cloud_flag[32]="";
     FILE* file_p=NULL;
-    if(get_crypto_key(crypto_key_file,md5)!=0){
+    if(get_nmd5sum(crypto_key_file,md5,64)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
@@ -806,7 +808,7 @@ int decrypt_files(char* workdir, char* crypto_key_filename){
     int compute_node_num=0;
     int i;
     create_and_get_stackdir(workdir,stackdir);
-    if(get_crypto_key(crypto_key_filename,md5sum)!=0){
+    if(get_nmd5sum(crypto_key_filename,md5sum,33)!=0){
         return -1;
     }
     sprintf(filename_temp,"%s%shpc_stack_base.tf.tmp",stackdir,PATH_SLASH);
@@ -873,7 +875,7 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     if(create_and_get_stackdir(workdir,stackdir)!=0||create_and_get_vaultdir(workdir,vaultdir)!=0){
         return -1;
     }
-    if(get_crypto_key(crypto_key_filename,md5sum)!=0){
+    if(get_nmd5sum(crypto_key_filename,md5sum,33)!=0){
         return -3;
     }
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
@@ -934,7 +936,7 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
     if(create_and_get_vaultdir(workdir,vaultdir)!=0){
         return -1;
     }
-    if(get_crypto_key(crypto_keyfile,md5sum)!=0){
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -3;
     }
     snprintf(user_passwords,511,"%s%suser_passwords.txt",vaultdir,PATH_SLASH); //Decrypted user registry
@@ -1086,7 +1088,9 @@ int getstate(char* workdir, char* crypto_filename){
     FILE* file_p_hostfile=NULL;
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
-    get_crypto_key(crypto_filename,md5sum);
+    if(get_nmd5sum(crypto_filename,md5sum,64)!=0){
+        return -1;
+    }
     sprintf(tfstate,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     if(file_exist_or_not(tfstate)!=0){
         sprintf(filename_temp,"%s%sterraform.tfstate.tmp",stackdir,PATH_SLASH);
@@ -1400,7 +1404,7 @@ int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile){
             }
         }
     } // If pubkey file found, and encrypt failed, then generate a new key pair
-    if(get_crypto_key(crypto_keyfile,md5sum)!=0){
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -3; //Failed to get the crypto key
     }
     snprintf(cmdline,2047,"%s %s%snow-cluster-login* %s",DELETE_FILE_CMD,sshkey_folder,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -1455,7 +1459,7 @@ int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile){
     char cmdline[CMDLINE_LENGTH]="";
     char md5sum[64]="";
     int run_flag;
-    if(get_crypto_key(crypto_keyfile,md5sum)!=0){
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -1;
     }
     snprintf(privkey_file_encrypted,511,"%s%snow-cluster-login.tmp",sshkey_folder,PATH_SLASH);
@@ -1476,7 +1480,7 @@ int encrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile){
     char privkey_file[FILENAME_LENGTH]="";
     char md5sum[64]="";
     int run_flag;
-    if(get_crypto_key(crypto_keyfile,md5sum)!=0){
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -1;
     }
     snprintf(privkey_file,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
@@ -1526,7 +1530,9 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
     char master_address_prev[32]="";
     char filename_temp[FILENAME_LENGTH]="";
 
-    get_crypto_key(crypto_keyfile,md5sum);
+    if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
+        return -1;
+    }
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
@@ -2103,7 +2109,9 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     char region_id[32]="";
     char cloud_flag[16]="";
 
-    get_crypto_key(crypto_keyfile,md5sum);
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
+        return -3;
+    }
     get_cloud_flag(workdir,cloud_flag);
     create_and_get_vaultdir(workdir,vaultdir);
     create_and_get_stackdir(workdir,stackdir);
@@ -2427,7 +2435,9 @@ int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, c
     char header[16]="";
     char tail[64]="";
     sprintf(filename_temp,"%s%svault%sbucket_info.txt.tmp",workdir,PATH_SLASH,PATH_SLASH);
-    get_crypto_key(crypto_keyfile,md5sum);
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
+        return -3;
+    }
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     sprintf(filename_temp,"%s%svault%sbucket_info.txt",workdir,PATH_SLASH,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
@@ -2538,7 +2548,9 @@ int decrypt_user_passwords(char* workdir, char* crypto_keyfile){
     char filename_temp[FILENAME_LENGTH]="";
     char* crypto_exec=NOW_CRYPTO_EXEC;
     char md5sum[64]="";
-    get_crypto_key(crypto_keyfile,md5sum); 
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
+        return -3;
+    }  
     sprintf(filename_temp,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         return -1;
@@ -2561,14 +2573,20 @@ void delete_decrypted_user_passwords(char* workdir){
     system(cmdline);
 }
 
-void encrypt_and_delete_user_passwords(char* workdir, char* crypto_keyfile){
+int encrypt_and_delete_user_passwords(char* workdir, char* crypto_keyfile){
     char vaultdir[DIR_LENGTH]="";
     char md5sum[64]="";
     char filename_temp[FILENAME_LENGTH]="";
     create_and_get_vaultdir(workdir,vaultdir);
-    get_crypto_key(crypto_keyfile,md5sum);
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
+        return -1;
+    }
     sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+    int run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+    if(run_flag!=0){
+        return 1;
+    }
+    return 0;
 }
 
 int sync_user_passwords(char* workdir, char* sshkey_dir){
@@ -3173,10 +3191,16 @@ int decrypt_bcecredentials(char* workdir){
     char md5sum[64]="";
     char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    get_crypto_key(CRYPTO_KEY_FILE,md5sum);
+    if(get_nmd5sum(CRYPTO_KEY_FILE,md5sum,64)!=0){
+        return -1;
+    }
     create_and_get_vaultdir(workdir,vaultdir);
     sprintf(filename_temp,"%s%scredentials.tmp",vaultdir,PATH_SLASH);
-    return decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+    int run_flag=decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+    if(run_flag!=0){
+        return 1;
+    }
+    return 0;
 }
 
 //key_flag=0, gcp_secrets; key_flag!=0, bucket_secrets;
@@ -3187,7 +3211,11 @@ int gcp_credential_convert(char* workdir, const char* operation, int key_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char keyfile_encrypted[FILENAME_LENGTH]="";
     char keyfile_decrypted[FILENAME_LENGTH]="";
-    get_crypto_key(CRYPTO_KEY_FILE,md5sum);
+    int run_flag;
+
+    if(get_nmd5sum(CRYPTO_KEY_FILE,md5sum,64)!=0){
+        return -3;
+    }
     create_and_get_vaultdir(workdir,vaultdir);
     if(key_flag==0){
         sprintf(keyfile_encrypted,"%s%s.secrets.key",vaultdir,PATH_SLASH);
@@ -3199,7 +3227,11 @@ int gcp_credential_convert(char* workdir, const char* operation, int key_flag){
     }
     if(strcmp(operation,"decrypt")==0){
         if(file_exist_or_not(keyfile_decrypted)!=0){
-            return decrypt_single_file_general(NOW_CRYPTO_EXEC,keyfile_encrypted,keyfile_decrypted,md5sum);
+            run_flag=decrypt_single_file_general(NOW_CRYPTO_EXEC,keyfile_encrypted,keyfile_decrypted,md5sum);
+            if(run_flag!=0){
+                return 1;
+            }
+            return 0;
         }
         else{
             return 0;
@@ -3208,7 +3240,11 @@ int gcp_credential_convert(char* workdir, const char* operation, int key_flag){
     else{
         if(file_exist_or_not(keyfile_decrypted)==0){
             sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,keyfile_decrypted,SYSTEM_CMD_REDIRECT_NULL);
-            return system(cmdline);
+            run_flag=system(cmdline);
+            if(run_flag!=0){
+                return 1;
+            }
+            return 0;
         }
         else{
             return 0;
@@ -3247,7 +3283,9 @@ int password_to_clipboard(char* cluster_workdir, char* username){
     FILE* file_p=NULL;
     create_and_get_vaultdir(cluster_workdir,vaultdir);
     if(strcmp(username,"root")==0){
-        get_crypto_key(CRYPTO_KEY_FILE,md5sum);
+        if(get_nmd5sum(CRYPTO_KEY_FILE,md5sum,64)!=0){
+            return -3;
+        }
         sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
         decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
         sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);

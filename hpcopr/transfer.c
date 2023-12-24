@@ -207,7 +207,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     else{
         strcpy(real_password,password);
     }
-    password_hash(real_password,md5sum_trans);
+    password_hash(real_password,md5sum_trans,64);
     local_path_parser(export_target_file,filename_temp);
     if(strlen(filename_temp)==0){
         if(batch_flag_local==0){
@@ -272,7 +272,11 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     system(cmdline);
     
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exporting related files ...\n");
-    get_crypto_key(crypto_keyfile,md5sum_current);
+    if(get_nmd5sum(crypto_keyfile,md5sum_current,64)!=0){
+        snprintf(cmdline,2047,"%s %s %s",DELETE_FOLDER_CMD,tmp_root,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        return -5;
+    }
     snprintf(source_file,511,"%s%sbucket_info.txt.tmp",current_vaultdir,PATH_SLASH);
     snprintf(target_file,511,"%s%sbucket_info.txt",tmp_vaultdir,PATH_SLASH);
     decrypt_single_file_general(NOW_CRYPTO_EXEC,source_file,target_file,md5sum_current);
@@ -474,8 +478,11 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     else{
         strcpy(real_password,password);
     }
-    password_hash(real_password,md5sum_password);
-    get_crypto_key(crypto_keyfile,md5sum_local);
+    password_hash(real_password,md5sum_password,64);
+    if(get_nmd5sum(crypto_keyfile,md5sum_local,64)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
+        return -1;
+    }
     snprintf(tmp_import_root,383,"%s%simport",HPC_NOW_ROOT_DIR,PATH_SLASH);
     snprintf(cmdline,2047,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
     system(cmdline);

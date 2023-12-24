@@ -440,7 +440,7 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     if(decryption_status(target_cluster_workdir)!=0){
         return -9;
     }
-    if(get_crypto_key(crypto_keyfile,md5sum)!=0){
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -7;
     }
     run_flag=encrypt_decrypt_all_user_ssh_privkeys(target_cluster_name,"decrypt",crypto_keyfile);
@@ -683,7 +683,10 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         sprintf(cmdline,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         create_and_get_vaultdir(new_workdir,new_vaultdir);
-        get_crypto_key(crypto_keyfile,md5sum);
+        if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
+            return -3;
+        }
         sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
         run_flag=system(cmdline);
         if(run_flag!=0){
@@ -833,7 +836,10 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     sprintf(cmdline,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
-    get_crypto_key(crypto_keyfile,md5sum);
+    if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
+        return -3;
+    }
     sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
@@ -921,7 +927,10 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             return -1;
         }
         fclose(file_p);
-        get_crypto_key(crypto_keyfile,md5sum);
+        if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
+            return -3;
+        }
         sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
         run_flag=system(cmdline);
         if(run_flag!=0){
@@ -1080,7 +1089,12 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         system(cmdline);
         return 3;
     }
-    get_crypto_key(crypto_keyfile,md5sum);
+    if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
+        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        return -3;
+    }
     sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);

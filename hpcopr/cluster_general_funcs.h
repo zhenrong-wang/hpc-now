@@ -89,7 +89,7 @@ int get_ucid(char* workdir, char* ucid_string);
 
 int decrypt_user_passwords(char* workdir, char* crypto_keyfile);
 void delete_decrypted_user_passwords(char* workdir);
-void encrypt_and_delete_user_passwords(char* workdir, char* crypto_keyfile);
+int encrypt_and_delete_user_passwords(char* workdir, char* crypto_keyfile);
 int sync_user_passwords(char* workdir, char* sshkey_dir);
 int sync_statefile(char* workdir, char* sshkey_dir);
 

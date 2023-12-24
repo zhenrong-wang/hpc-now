@@ -24,13 +24,18 @@ elif [ "$1" = "build" ]; then
     rm -rf ./installer/libgfuncs.a
     ar -rc ./installer/libgfuncs.a ./installer/gfuncs.o
     rm -rf ./installer/gfuncs.o
-    gcc ./installer/installer.c -Wall ./installer/libgfuncs.a -lm -o ./build/installer-lin-${installer_version_code}.exe
+    gcc -c ./hpcopr/now_md5.c -Wall -o ./installer/md5.o
+    rm -rf ./installer/libmd5.a
+    ar -rc ./installer/libmd5.a ./installer/md5.o
+    rm -rf ./installer/md5.o
+    gcc ./installer/installer.c -Wall ./installer/libgfuncs.a ./installer/libmd5.a -o ./build/installer-lin-${installer_version_code}.exe
 #    gcc ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto-lin.exe
     gcc ./now-crypto/now-crypto-v3-aes.c -Wall -Ofast -o ./build/now-crypto-aes-lin.exe
     gcc ./hpcmgr/hpcmgr.c -Wall -lm -o ./build/hpcmgr.exe
     gcc ./now-server/now-server.c -Wall -o ./build/now-server.exe
     chmod +x ./build/*
     rm -rf ./installer/libgfuncs.a
+    rm -rf ./installer/libmd5.a
 elif [ "$1" = "delete" ]; then
     echo -e "[ START: ] Deleting the binaries now ..."
     rm -rf ./build/*

@@ -25,9 +25,14 @@ if "%~1"=="" (
 	gcc -c .\hpcopr\general_funcs.c -o .\installer\gfuncs.o
 	del /f /s /q .\installer\libgfuncs.a
 	ar -rc .\installer\libgfuncs.a .\installer\gfuncs.o
-	gcc .\installer\installer.c .\installer\libgfuncs.a -Wall -o .\build\installer-win-%installer_version_code%.exe
+	gcc -c .\hpcopr\now_md5.c -o .\installer\md5.o
+    del /f /s /q .\installer\libmd5.a
+    ar -rc .\installer\libmd5.a .\installer\md5.o
+	gcc .\installer\installer.c .\installer\libgfuncs.a .\installer\libmd5.a -Wall -o .\build\installer-win-%installer_version_code%.exe
 	del /f /s /q .\installer\libgfuncs.a
 	del /f /s /q .\installer\gfuncs.o
+	del /f /s /q .\installer\libmd5.a
+	del /f /s /q .\installer\md5.o
 ::	gcc .\now-crypto\now-crypto.c -Wall -o .\build\now-crypto-win.exe
 	gcc .\now-crypto\now-crypto-v3-aes.c -Wall -Ofast -o .\build\now-crypto-aes-win.exe
 ) else if "%~1"=="delete" (

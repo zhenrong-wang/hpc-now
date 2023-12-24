@@ -22,6 +22,7 @@
 #endif
 
 #include "now_macros.h"
+#include "now_md5.h"
 #include "general_funcs.h"
 
 char command_flags[CMD_FLAG_NUM][16]={
@@ -1281,6 +1282,7 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
 
 //return 0: successfully get md5sum
 //return -1: failed to get the md5sum
+//THIS FUNCTION IS DEPRECATED.
 int get_crypto_key(char* crypto_key_filename, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
     FILE* md5_tmp=NULL;
@@ -1319,13 +1321,33 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     return 0;
 }
 
-int password_hash(char* password, char* md5_hash){
+//Please *DO* make sure the md5sum_length equals to the md5sum_string array length
+//return -3: the given length is invalid
+//return 1: get_md5 failed
+//return 0: get_md5 succeeded
+int get_nmd5sum(char* filename, char md5sum_string[], int md5sum_length){
+    if(md5sum_length<33){
+        return -3;
+    }
+    memset(md5sum_string,'\0',md5sum_length);
+    int run_flag=now_md5_for_file(filename,md5sum_string,md5sum_length);
+    if(run_flag!=0){
+        return 1;
+    }
+    return 0;
+}
+
+int password_hash(char* password, char md5_hash[], int md5_length){
     if(strlen(password)==0){
         return -3;
+    }
+    if(md5_length<33){
+        return -5;
     }
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char string_temp[16]="";
+    int run_flag;
     generate_random_string(string_temp);
     FILE* file_p=NULL;
 #ifdef _WIN32
@@ -1347,10 +1369,11 @@ int password_hash(char* password, char* md5_hash){
     fprintf(file_p,"%s\r\n",password);
     fclose(file_p);
 #endif
-    get_crypto_key(filename_temp,md5_hash);
+    //get_crypto_key(filename_temp,md5_hash);
+    run_flag=get_nmd5sum(filename_temp,md5_hash,md5_length);
     snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
-    if(strlen(md5_hash)>0){
+    if(run_flag==0){
         return 0;
     }
     else{

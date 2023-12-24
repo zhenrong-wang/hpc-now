@@ -38,7 +38,8 @@ int file_cr_clean(char* filename);
 int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overwrite_flag);
 int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag);
 int get_crypto_key(char* crypto_key_filename, char* md5sum);
-int password_hash(char* password, char* md5_hash);
+int get_nmd5sum(char* filename, char md5sum_string[], int md5sum_length);
+int password_hash(char* password, char md5_hash[], int md5_length);
 
 int cmd_flg_or_not(char* argv);
 int cmd_key_or_not(char* argv);
