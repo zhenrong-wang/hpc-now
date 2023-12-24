@@ -572,27 +572,27 @@ mac_install_done:
 int uninstall_services(void){
     char doubleconfirm[128]="";
     // Double confirmation is needed.
-    printf(GENERAL_BOLD "|*                                C A U T I O N !                                  \n");
-    printf("|*                                                                                 \n");
-    printf("|*   YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM THE ISSUES BELOW:   \n");
-    printf("|*                                                                                 \n");
-    printf("|*   1. You have *DESTROYED* all the clusters managed by this device.              \n");
-    printf("|*      This is * !!! EXTREMELY IMPORTANT !!! *                                    \n");
-    printf("|*   2. You have *CHECKED* your cloud service account and all the resources        \n");
-    printf("|*      created by the HPC-NOW services on this device have been destructed.       \n");
-    printf("|*   3. You have *EXPORTED* the usage log and systemlog to a permenant directory,  \n");
-    printf("|*      You can run 'hpcopr syslog' and 'hpcopr usage' to get the logs and save    \n");
-    printf("|*      them to a directory such as /Users/ANOTHER_USER                            \n");
-    printf("|*                                                                                 \n");
-    printf("|*                       THIS OPERATION IS UNRECOVERABLE!                          \n");
-    printf("|*                                                                                 \n");
-    printf("|*                                C A U T I O N !                                  \n");
-    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "|*                              C A U T I O N !\n");
+    printf("|*\n");
+    printf("|* YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM THE ISSUES BELOW:\n");
+    printf("|*\n");
+    printf("|* 1. You have *DESTROYED* all the clusters managed by this device.\n");
+    printf("|*    This is * !!! EXTREMELY IMPORTANT !!! *\n");
+    printf("|* 2. You have *CHECKED* your cloud service account and all the resources\n");
+    printf("|*    created by the HPC-NOW services on this device have been destructed.\n");
+    printf("|* 3. You have *EXPORTED* the usage log and systemlog to a permenant directory,\n");
+    printf("|*    You can run 'hpcopr syslog' and 'hpcopr usage' to get the logs and save\n");
+    printf("|*    them to a directory such as /Users/ANOTHER_USER\n");
+    printf("|*\n");
+    printf("|*                     THIS OPERATION IS UNRECOVERABLE!\n");
+    printf("|*\n");
+    printf("|*                              C A U T I O N !\n");
+    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm:\n" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%127s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You denied the operation.\n");
         printf("|          Nothing changed.\n");
         return 1;
     }
@@ -686,18 +686,18 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         return 1;
     }
 #endif
-    printf(GENERAL_BOLD "|*                                C A U T I O N !                                  \n");
-    printf("|*                                                                                 \n");
-    printf("|*     YOU ARE UPDATING THE HPC-NOW SERVICES. THE CURRENT hpcopr BINARY WILL BE    \n");
-    printf("|*     REPLACED. IF YOU UPDATE WITH THE --hloc AND/OR --cloc OPTIONS, PLEASE MAKE  \n");
-    printf("|*     SURE THE LOCATION(S) POINT(S) TO VALID EXECUTABLE(S).                       \n");
-    printf("|*                                                                                 \n");
-    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm this operation:\n" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "|*                            C A U T I O N !\n");
+    printf("|*\n");
+    printf("|* YOU ARE UPDATING THE HPC-NOW SERVICES. THE CURRENT hpcopr BINARY WILL BE\n");
+    printf("|* REPLACED. IF YOU UPDATE WITH THE --hloc AND/OR --cloc OPTIONS, PLEASE MAKE\n");
+    printf("|* SURE THE LOCATION(S) POINT(S) TO VALID EXECUTABLE(S).\n");
+    printf("|*\n");
+    printf("| ARE YOU SURE? Only 'y-e-s' is accepted to double confirm:\n" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%127s",doubleconfirm);
     if(strcmp(doubleconfirm,"y-e-s")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You chose to deny this operation.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only 'y-e-s' is accepted to confirm. You denied the operation.\n");
         printf("|          Nothing changed.\n");
         return 1;
     }
