@@ -146,7 +146,7 @@ char hex_4bit_to_char(uint_8bit hex_4bit){
     }
 }
 
-int md5_array_to_string(uint_8bit md5_array[], char md5sum_string[], uint_8bit md5sum_len){
+int md5_array_to_string(uint_8bit md5_array[], char md5sum_string[], int md5sum_len){
     if(md5sum_len<33){ //There should be a '\0' and the end, so the length should be > 32
         return -1;
     }

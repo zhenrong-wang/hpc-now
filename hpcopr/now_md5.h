@@ -30,7 +30,7 @@ void assemb_buffer32(uint_8bit buffer_8bit[], uint_32bit buffer_32bit[]);
 int now_md5_core_transform(uint_32bit state[], uint_32bit buffer[]);
 void state_to_md5array(uint_32bit state[], uint_8bit md5_array[]);
 char hex_4bit_to_char(uint_8bit hex_4bit);
-int md5_array_to_string(uint_8bit md5_array[], char md5sum_string[], uint_8bit md5sum_len);
+int md5_array_to_string(uint_8bit md5_array[], char md5sum_string[], int md5sum_len);
 int now_md5_for_file(char* input_file, char md5sum_string[], int md5sum_len);
 
 #endif
