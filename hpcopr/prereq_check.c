@@ -1310,13 +1310,13 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
                 strcpy(cluster_name_source,"input");
             }
             else{
-                list_all_cluster_names(0);
                 if(strlen(temp_cluster_name)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,temp_cluster_name);
                 }
                 else{
                     printf(FATAL_RED_BOLD "[ FATAL: ] No cluster specified or switched. Use " WARN_YELLO_BOLD "-c" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "switch" FATAL_RED_BOLD " to one." RESET_DISPLAY "\n");
                 }
+                list_all_cluster_names(1);
                 return -3;
             }
         }
