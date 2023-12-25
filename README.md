@@ -86,9 +86,7 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 - **GNU/Linux Distros**: `curl` `tar` `unzip`
 - **macOS (Darwin)**   : `curl` `tar` `unzip`
 
-*If the utility `curl` is not pre-installed, please manually install it from the [official site](https://curl.se/download.html), and add the PATH to the system environment variables.*
-
-*Usually, `tar` and `unzip` are pre-installed.*
+*If the utility `curl` is not pre-installed, please manually install it from the [official site](https://curl.se/download.html), and add the PATH to the system environment variables. Usually, `tar` and `unzip` are pre-installed.*
 
 ## **3.1 Build**
 
