@@ -1381,39 +1381,6 @@ int password_hash(char* password, char md5_hash[], int md5_length){
     }
 }
 
-// Used the system utilities. Actually we should write a real base64 decode function.
-int base64decode(char* encoded_string, char* export_path){
-    if(file_creation_test(export_path)!=0){
-        return 1;
-    }
-    char cmdline[CMDLINE_LENGTH_EXT]=""; // Stack Overflow will occur if the encoded string exceeds 4096
-    int run_flag;
-#ifdef _WIN32
-    char filename_temp[FILENAME_LENGTH]="";
-    FILE* file_p=NULL;
-    snprintf(filename_temp,511,"%s%sbase64_convert.tmp",DESTROYED_DIR,PATH_SLASH);
-    file_p=fopen(filename_temp,"w+");
-    if(file_p==NULL){
-        return 3;
-    }
-    fprintf(file_p,"%s",encoded_string);
-    fclose(file_p);
-    snprintf(cmdline,2047,"certutil -decode %s %s %s",filename_temp,export_path,SYSTEM_CMD_REDIRECT_NULL);
-    run_flag=system(cmdline);
-    snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
-#else
-    snprintf(cmdline,2047,"echo \"%s\" | base64 -d > %s 2>/dev/null",encoded_string,export_path);
-    run_flag=system(cmdline);
-#endif
-    if(run_flag!=0){
-        return 5;
-    }
-    else{
-        return 0;
-    }
-}
-
 int windows_path_to_string(char* input_string, char* new_string){
 #ifndef _WIN32
     strcpy(new_string,input_string);
@@ -1454,4 +1421,141 @@ int windows_path_to_string(char* input_string, char* new_string){
     strcpy(new_string,string_buffer);
     return 0;
 #endif
+}
+
+// This function is deprecated!
+int base64decode_deprecated(char* encoded_string, char* export_path){
+    if(file_creation_test(export_path)!=0){
+        return 1;
+    }
+    char cmdline[CMDLINE_LENGTH_EXT]=""; // Stack Overflow will occur if the encoded string exceeds 4096
+    int run_flag;
+#ifdef _WIN32
+    char filename_temp[FILENAME_LENGTH]="";
+    FILE* file_p=NULL;
+    snprintf(filename_temp,511,"%s%sbase64_convert.tmp",DESTROYED_DIR,PATH_SLASH);
+    file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        return 3;
+    }
+    fprintf(file_p,"%s",encoded_string);
+    fclose(file_p);
+    snprintf(cmdline,2047,"certutil -decode %s %s %s",filename_temp,export_path,SYSTEM_CMD_REDIRECT_NULL);
+    run_flag=system(cmdline);
+    snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+#else
+    snprintf(cmdline,2047,"echo \"%s\" | base64 -d > %s 2>/dev/null",encoded_string,export_path);
+    run_flag=system(cmdline);
+#endif
+    if(run_flag!=0){
+        return 5;
+    }
+    else{
+        return 0;
+    }
+}
+
+//memory allocated!
+char* base64_clear_CRLF(char orig[], int length){
+    char* new_string=(char*)malloc(sizeof(char)*length+1);
+    memset(new_string,'\0',sizeof(char)*length+1);
+    int j=0;
+    for(int i=0;i<length;i++){
+        if(orig[i]!='\r'&&orig[i]!='\n'){
+            *(new_string+j)=orig[i];
+            j++;
+        }
+    }
+    return new_string;
+}
+
+//Convert a base64 char to an unsigned char
+unsigned char get_base64_index(char base64_char){
+    if(base64_char=='='){
+        return 253;
+    }
+    else if(base64_char=='+'){
+        return 62;
+    }
+    else if(base64_char=='/'){
+        return 63;
+    }
+    else if(base64_char>64&&base64_char<91){
+        return base64_char-65;
+    }
+    else if(base64_char>47&&base64_char<58){
+        return base64_char+4;
+    }
+    else if(base64_char>96&&base64_char<123){
+        return base64_char-71;
+    }
+    else{
+        return 255; //Illegal!
+    }
+}
+
+//decode a base64 string and print to a file.
+int base64decode(char* encoded_string, char* export_path){
+    char* encoded_string_new=base64_clear_CRLF(encoded_string,strlen(encoded_string));
+    unsigned long length=strlen(encoded_string_new);
+    unsigned char* decoded_string=(unsigned char*)malloc(sizeof(unsigned char)*length);
+    memset(decoded_string,'\0',length);
+    unsigned long group=length>>2;
+    unsigned long i,j=0;
+    unsigned char ch0,ch1,ch2,ch3;
+    //unsigned char char0,char1,char2;
+    if(length%4!=0||length<4){
+        return -3;
+    }
+    for(i=0;i<group-1;i++){
+        ch0=get_base64_index(encoded_string_new[i*4]);
+        ch1=get_base64_index(encoded_string_new[i*4+1]);
+        ch2=get_base64_index(encoded_string_new[i*4+2]);
+        ch3=get_base64_index(encoded_string_new[i*4+3]);
+        if(ch0>63||ch1>63||ch2>63||ch3>63){
+            free(encoded_string_new);
+            free(decoded_string);
+            return 1; //Illegal format
+        }
+        *(decoded_string+j)=(ch0<<2)|(ch1>>4);
+        *(decoded_string+j+1)=(ch1<<4)|(ch2>>2);
+        *(decoded_string+j+2)=(ch2<<6)|ch3;
+        j+=3;
+    }
+    ch0=get_base64_index(encoded_string_new[i*4]);
+    ch1=get_base64_index(encoded_string_new[i*4+1]);
+    ch2=get_base64_index(encoded_string_new[i*4+2]);
+    ch3=get_base64_index(encoded_string_new[i*4+3]);
+    if(ch0>63||ch1>63||ch2==255||ch3==255){
+        free(encoded_string_new);
+        free(decoded_string);
+        return 1; //Illegal format
+    }
+    if(ch3!=253&&ch2==253){
+        free(encoded_string_new);
+        free(decoded_string);
+        return 1; //Illegal format
+    }
+    *(decoded_string+j)=(ch0<<2)|(ch1>>4);
+    if(ch3==253){
+        if(ch2!=253){
+            *(decoded_string+j+1)=(ch1<<4)|(ch2>>2);
+        }
+    }
+    else{
+        *(decoded_string+j+1)=(ch1<<4)|(ch2>>2);
+        *(decoded_string+j+2)=ch2<<6|ch3;
+    }
+    free(encoded_string_new);
+    //printf(":::::: %s :::::\n",decoded_string);
+    FILE* file_p=fopen(export_path,"w+");
+    if(file_p==NULL){
+        free(decoded_string);
+        return -1;
+    }
+    fprintf(file_p,"%s",decoded_string);
+    fclose(file_p);
+    free(decoded_string);
+    return 0;
 }
