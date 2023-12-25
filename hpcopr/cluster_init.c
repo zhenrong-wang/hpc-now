@@ -927,6 +927,8 @@ void clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int conditio
         system(cmdline);
         snprintf(cmdline,2047,"%s %s%sUCID_LATEST.txt %s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
+        snprintf(cmdline,2047,"%s %s%suser_passwords.txt.tmp %s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
         snprintf(cmdline,2047,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
