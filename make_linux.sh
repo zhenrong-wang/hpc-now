@@ -19,8 +19,8 @@ elif [ "$1" = "build" ]; then
     echo -e "[ START: ] Building the binaries now (including hpcmgr and now-server) ..."
     mkdir -p ./build
     rm -rf ./build/*
-    gcc ./hpcopr/*.c -Wall -lm -o ./build/hpcopr-lin-${hpcopr_version_code}.exe
-    gcc -c ./hpcopr/general_funcs.c -Wall -lm -o ./installer/gfuncs.o
+    gcc ./hpcopr/*.c -Wall -o ./build/hpcopr-lin-${hpcopr_version_code}.exe
+    gcc -c ./hpcopr/general_funcs.c -Wall -o ./installer/gfuncs.o
     rm -rf ./installer/libgfuncs.a
     ar -rc ./installer/libgfuncs.a ./installer/gfuncs.o
     rm -rf ./installer/gfuncs.o
@@ -29,9 +29,9 @@ elif [ "$1" = "build" ]; then
     ar -rc ./installer/libmd5.a ./installer/md5.o
     rm -rf ./installer/md5.o
     gcc ./installer/installer.c -Wall ./installer/libgfuncs.a ./installer/libmd5.a -o ./build/installer-lin-${installer_version_code}.exe
-#    gcc ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto-lin.exe
+#    gcc ./now-crypto/now-crypto.c -Wall -o ./build/now-crypto-lin.exe
     gcc ./now-crypto/now-crypto-v3-aes.c -Wall -Ofast -o ./build/now-crypto-aes-lin.exe
-    gcc ./hpcmgr/hpcmgr.c -Wall -lm -o ./build/hpcmgr.exe
+    gcc ./hpcmgr/hpcmgr.c -Wall -o ./build/hpcmgr.exe
     gcc ./now-server/now-server.c -Wall -o ./build/now-server.exe
     chmod +x ./build/*
     rm -rf ./installer/libgfuncs.a

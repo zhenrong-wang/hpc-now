@@ -6,7 +6,7 @@
  */
 
 #include <string.h>
-#include <math.h>
+//#include <math.h>
 #include <time.h>
 
 #ifndef _WIN32
@@ -33,13 +33,16 @@ void datetime_to_num(char* date_string, char* time_string, struct tm* datetime_n
         }
     }
     for(i=0;i<position1;i++){
-        year+=(*(date_string+i)-'0')*pow(10,position1-1-i);
+        year=year*10+(*(date_string+i)-'0');
+        //year+=(*(date_string+i)-'0')*pow(10,position1-1-i);
     }
     for(i=position1+1;i<position2;i++){
-        month+=(*(date_string+i)-'0')*pow(10,position2-i-1);
+        month=month*10+(*(date_string+i)-'0');
+        //month+=(*(date_string+i)-'0')*pow(10,position2-i-1);
     }
     for(i=position2+1;i<strlen(date_string);i++){
-        day+=(*(date_string+i)-'0')*pow(10,strlen(date_string)-i-1);
+        day=day*10+(*(date_string+i)-'0');
+        //day+=(*(date_string+i)-'0')*pow(10,strlen(date_string)-i-1);
     }
 
     for(i=0;i<strlen(date_string);i++){
@@ -55,13 +58,15 @@ void datetime_to_num(char* date_string, char* time_string, struct tm* datetime_n
         }
     }
     for(i=0;i<position1;i++){
-        hour+=(*(time_string+i)-'0')*pow(10,position1-1-i);
+        hour=hour*10+(*(time_string+i)-'0');
     }
     for(i=position1+1;i<position2;i++){
-        min+=(*(time_string+i)-'0')*pow(10,position2-i-1);
+        min=min*10+(*(time_string+i)-'0');
+        //min+=(*(time_string+i)-'0')*pow(10,position2-i-1);
     }
     for(i=position2+1;i<strlen(time_string);i++){
-        sec+=(*(time_string+i)-'0')*pow(10,strlen(time_string)-i-1);
+        sec=sec*10+(*(time_string+i)-'0');
+        //sec+=(*(time_string+i)-'0')*pow(10,strlen(time_string)-i-1);
     }
     datetime_num->tm_year=year-1900;
     datetime_num->tm_mon=month-1;

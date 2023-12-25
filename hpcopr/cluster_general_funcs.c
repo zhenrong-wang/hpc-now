@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
+//#include <math.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -637,7 +637,8 @@ int get_cpu_num(const char* vm_model){
         }
     }
     for(i=1;i<c_index;i++){
-        cpu_num+=(*(vm_model+i)-'0')*pow(10,c_index-i-1);
+        cpu_num=cpu_num*10+(*(vm_model+i)-'0');
+        //cpu_num+=(*(vm_model+i)-'0')*pow(10,c_index-i-1);
     }
     return cpu_num;
 }
