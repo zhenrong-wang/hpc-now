@@ -236,11 +236,15 @@ int fngetline(FILE* file_p, char* line_string, unsigned int max_length){
 
 //contain: return 0
 //not contain: return 1
+//return -1: MEM ERROR!
 int contain_or_not(const char* line, const char* findkey){
     int length_line=strlen(line);
     int length_findkey=strlen(findkey);
     int i,j;
     char* string_temp=(char *)malloc(sizeof(char)*(length_findkey+1));
+    if(string_temp==NULL){
+        return -1;
+    }
     for(i=0;i<length_findkey;i++){
         *(string_temp+i)='\0';
     }
@@ -345,6 +349,9 @@ int line_replace(char* orig_line, char* new_line, char* orig_string, char* new_s
     char* temp_string=(char *)malloc(sizeof(char)*(length_orig+1));
     int i,j;
     int k=0,k2;
+    if(temp_string==NULL){
+        return -1;
+    }
     for(i=0;i<length_orig+1;i++){
         *(temp_string+i)='\0';
     }
@@ -1458,8 +1465,11 @@ int base64decode_deprecated(char* encoded_string, char* export_path){
 
 //memory allocated!
 char* base64_clear_CRLF(char orig[], int length){
-    char* new_string=(char*)malloc(sizeof(char)*length+1);
-    memset(new_string,'\0',sizeof(char)*length+1);
+    char* new_string=(char*)malloc(sizeof(char)*(length+1));
+    if(new_string==NULL){
+        return NULL;
+    }
+    memset(new_string,'\0',length+1);
     int j=0;
     for(int i=0;i<length;i++){
         if(orig[i]!='\r'&&orig[i]!='\n'){
@@ -1496,20 +1506,33 @@ unsigned char get_base64_index(char base64_char){
 }
 
 //decode a base64 string and print to a file.
+//return -1: MEM ALLOC FAILED
+//return -3: length invalid
+//return 1: Format invalid
+//return -5: FILE Output error
+//return 0: Normal exit
 int base64decode(char* encoded_string, char* export_path){
     char* encoded_string_new=base64_clear_CRLF(encoded_string,strlen(encoded_string));
+    if(encoded_string_new==NULL){
+        return -1;
+    }
     unsigned long length=strlen(encoded_string_new);
+    if(length%4!=0||length<4){
+        free(encoded_string_new);
+        return -3;
+    }
     unsigned char* decoded_string=(unsigned char*)malloc(sizeof(unsigned char)*length);
+    if(decoded_string==NULL){
+        free(encoded_string_new);
+        return -1;
+    }
     memset(decoded_string,'\0',length);
+    
     unsigned long group=length>>2;
     unsigned long i,j=0;
     unsigned char ch0,ch1,ch2,ch3;
     //unsigned char char0,char1,char2;
-    if(length%4!=0||length<4){
-        free(encoded_string_new);
-        free(decoded_string);
-        return -3;
-    }
+    
     for(i=0;i<group-1;i++){
         ch0=get_base64_index(encoded_string_new[i*4]);
         ch1=get_base64_index(encoded_string_new[i*4+1]);
@@ -1550,14 +1573,77 @@ int base64decode(char* encoded_string, char* export_path){
         *(decoded_string+j+2)=ch2<<6|ch3;
     }
     free(encoded_string_new);
-    //printf(":::::: %s :::::\n",decoded_string);
+    //printf("%s\n",decoded_string);
     FILE* file_p=fopen(export_path,"w+");
     if(file_p==NULL){
         free(decoded_string);
-        return -1;
+        return -5;
     }
     fprintf(file_p,"%s",decoded_string);
     fclose(file_p);
     free(decoded_string);
     return 0;
 }
+
+//return -1: MEM ALLOC FAILED
+//return -3: Original length invalid
+//return -5: FILE output Error
+//return 0: Normal exit
+int base64encode(char* plain_string, char* export_path){
+    char encode_chars[64]={
+        'A','B','C','D','E','F','G','H',
+        'I','J','K','L','M','N','O','P',
+        'Q','R','S','T','U','V','W','X',
+        'Y','Z','a','b','c','d','e','f',
+        'g','h','i','j','k','l','m','n',
+        'o','p','q','r','s','t','u','v',
+        'w','x','y','z','0','1','2','3',
+        '4','5','6','7','8','9','+','/'
+    };
+    unsigned long length=strlen(plain_string);
+    if(length<1){
+        return -3; //The original length should be at least 1;
+    }
+    char* encoded_string=(char*)malloc(sizeof(char)*((length*3)>>1)); //Alloc 1.5x mem
+    if(encoded_string==NULL){
+        return -1; 
+    }
+    unsigned long i,j=0;
+    unsigned long group=length/3;
+    unsigned short extra=length%3;
+    memset(encoded_string,'\0',(length*3)>>1);
+    for(i=0;i<group;i++){
+        *(encoded_string+j)=encode_chars[plain_string[i*3]>>2];
+        *(encoded_string+j+1)=encode_chars[((plain_string[i*3]&0x03)<<4)|(plain_string[i*3+1]>>4)];
+        *(encoded_string+j+2)=encode_chars[((plain_string[i*3+1]&0x0F)<<2)|(plain_string[i*3+2]>>6)];
+        *(encoded_string+j+3)=encode_chars[plain_string[i*3+2]&0x3F];
+        j=j+4;
+    }
+    if(extra==1){
+        *(encoded_string+j)=encode_chars[plain_string[i*3]>>2];
+        *(encoded_string+j+1)=encode_chars[(plain_string[i*3]&0x03)<<4];
+        *(encoded_string+j+2)='=';
+        *(encoded_string+j+3)='=';
+    }
+    else if(extra==2){
+        *(encoded_string+j)=encode_chars[plain_string[i*3]>>2];
+        *(encoded_string+j+1)=encode_chars[((plain_string[i*3]&0x03)<<4)|(plain_string[i*3+1]>>4)];
+        *(encoded_string+j+2)=encode_chars[(plain_string[i*3+1]&0x0F)<<2];
+        *(encoded_string+j+3)='=';
+    }
+    //printf("%s\n",encoded_string);
+    FILE* file_p=fopen(export_path,"w+");
+    if(file_p==NULL){
+        free(encoded_string);
+        return -5;
+    }
+    fprintf(file_p,"%s",encoded_string);
+    free(encoded_string);
+    fclose(file_p);
+    return 0;
+}
+
+/*int main(){
+    base64decode("KihlbmNvZGVkX3N0cmluZytqKzIpPWVuY29kZV9jaGFyc1soKHBsYWluX3N0cmluZ1tpKjMrMV0mMHgwRik8PDIpfChwbGFpbl9zdHJpbmdbaSozKzJdPj42KV07TK==","");
+    base64encode("*(encoded_string+j+2)=encode_chars[((plain_string[i*3+1]&0x0F)<<2)|(plain_string[i*3+2]>>6)];L","");
+}*/

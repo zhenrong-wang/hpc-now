@@ -55,5 +55,6 @@ int base64decode_deprecated(char* encoded_string, char* exported_path);
 char* base64_clear_CRLF(char orig[], int length);
 unsigned char get_base64_index(char base64_char);
 int base64decode(char* encoded_string, char* export_path);
+int base64encode(char* plain_string, char* export_path);
 
 #endif
