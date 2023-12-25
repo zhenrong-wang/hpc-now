@@ -6,7 +6,6 @@
  */
 
 #include <string.h>
-//#include <math.h>
 #include <time.h>
 
 #ifndef _WIN32
