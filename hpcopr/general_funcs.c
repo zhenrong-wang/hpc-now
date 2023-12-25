@@ -1506,6 +1506,8 @@ int base64decode(char* encoded_string, char* export_path){
     unsigned char ch0,ch1,ch2,ch3;
     //unsigned char char0,char1,char2;
     if(length%4!=0||length<4){
+        free(encoded_string_new);
+        free(decoded_string);
         return -3;
     }
     for(i=0;i<group-1;i++){
