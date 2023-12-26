@@ -572,7 +572,7 @@ mac_install_done:
 int uninstall_services(void){
     char doubleconfirm[128]="";
     // Double confirmation is needed.
-    printf(GENERAL_BOLD "|* C A U T I O N !\n");
+    printf(WARN_YELLO_BOLD "|* C A U T I O N !\n");
     printf("|* YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM THE ISSUES BELOW:\n");
     printf("|* 1. You have *DESTROYED* all the clusters managed by this device.\n");
     printf("|*    This is * !!! EXTREMELY IMPORTANT !!! *\n");
@@ -682,7 +682,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         return 1;
     }
 #endif
-    printf(GENERAL_BOLD "|* C A U T I O N !\n");
+    printf(WARN_YELLO_BOLD "|* C A U T I O N !\n");
     printf("|* YOU ARE UPDATING THE HPC-NOW SERVICES. THE CURRENT hpcopr BINARY WILL BE\n");
     printf("|* REPLACED. IF YOU UPDATE WITH THE --hloc AND/OR --cloc OPTIONS, PLEASE MAKE\n");
     printf("|* SURE THE LOCATION(S) POINT(S) TO VALID EXECUTABLE(S).\n");

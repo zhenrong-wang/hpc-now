@@ -686,7 +686,7 @@ int configure_locations(int batch_flag_local){
     int format_flag=0;
     FILE* file_p=NULL;
 
-    printf(GENERAL_BOLD "|* C A U T I O N !\n");
+    printf(WARN_YELLO_BOLD "|* C A U T I O N !\n");
     printf("|* YOU ARE MODIFYING THE LOCATIONS OF COMPONENTS FOR THE HPC-NOW SERVICES!\n");
     printf("|* YOUR NEED TO MAKE SURE:\n");
     printf("|* 1. The locations - either URLs or local filesystem paths are valid.\n");
