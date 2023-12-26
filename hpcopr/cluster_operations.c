@@ -339,6 +339,15 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         else{
             printf(GENERAL_BOLD "[ -INFO- ] %s finished successfully." RESET_DISPLAY "\n",option);
         }
+        // Now decrypt/encrypt the operator's private SSH key. That is SSHKEY_DIR/now-cluster-login
+        if(strcmp(option,"decrypt")==0){
+            decrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE);
+            printf(GENERAL_BOLD "[ -INFO- ] Decrypted the operator's private SSH key." RESET_DISPLAY "\n");
+        }
+        else{
+            encrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE);
+            printf(GENERAL_BOLD "[ -INFO- ] Encrypted the operator's private SSH key." RESET_DISPLAY "\n");
+        }
         return 0;
     }
     if(contain_or_not(cluster_list,":")!=0){
