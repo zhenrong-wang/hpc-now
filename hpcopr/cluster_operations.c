@@ -523,7 +523,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
     if(cluster_empty_or_not(cluster_workdir)!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is *NOT* empty!" RESET_DISPLAY "\n");
         glance_clusters(target_cluster_name,crypto_keyfile);
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? This operation is *NOT* recoverable!" RESET_DISPLAY "\n");
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? It is *NOT* recoverable!" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: " );
         fflush(stdin);
         scanf("%63s",doubleconfirm);
@@ -536,12 +536,12 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
             scanf("%63s",doubleconfirm);
             getchar();
             if(strcmp(doubleconfirm,target_cluster_name)!=0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only %s is accepted to confirm. You chose to deny this operation.\n",target_cluster_name);
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only %s is accepted to confirm. Operation denied.\n",target_cluster_name);
                 return 5;
             }
         }
         else{
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. Operation denied.\n");
             return 5;
         }
     }
@@ -553,7 +553,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
         scanf("%63s",doubleconfirm);
         getchar();
         if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. Operation denied.\n");
             return 5;
         }
     }
@@ -1460,7 +1460,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
                 scanf("%127s",string_temp);
                 getchar();
                 if(strcmp(string_temp,CONFIRM_STRING)!=0){
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You denied this operation. Exit now.\n");
                     return 1;
                 }
             }
@@ -1598,7 +1598,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
                 scanf("%127s",string_temp);
                 getchar();
                 if(strcmp(string_temp,CONFIRM_STRING)!=0){
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You chose to deny this operation. Exit now.\n");
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You denied this operation. Exit now.\n");
                     return 1;
                 }
             }
