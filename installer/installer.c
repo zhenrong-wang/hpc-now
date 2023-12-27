@@ -647,7 +647,6 @@ int set_opr_password(char* opr_password){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the current files." RESET_DISPLAY "\n");
         if(run_flag>20){
             printf(GENERAL_BOLD "\n[ -INFO- ]" RESET_DISPLAY " Rolling back with previous crypto password ...\n");
-            //encrypt_decrypt_clusters("all","encrypt",0);
         }
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Operation failed and password unchanged." RESET_DISPLAY "\n");
         restore_perm_windows();
