@@ -237,13 +237,15 @@ The **`installer`** is designed to manage the installation/update/removal of the
 - `install`    Install the HPC-NOW services and components.
 - `update`     Update the HPC-NOW services and components.
 - `uninstall`  Uninstall the HPC-NOW services completely. **CAUTION! You must destroy/remove all the clusters managed in current device before running this command! Otherwise, out-of-manage cloud resource may occur!**
-- `help`       Read the help doc for `installer`
-- `version`    Display the version of the `installer`, not the `hpcopr`
-- `verlist`    List out all the available versions provided in the public repository
+- `help`       Read the help doc for `installer`.
+- `setpass`    Set/rotate/change/update the operator's password.
+- `version`    Display the version of the `installer`, not the `hpcopr`.
+- `verlist`    List out all the available versions provided in the public repository.
 
 ### **Advanced Options(Optional)**
 
 - `--accept`    Automatically accept the MIT License terms of this software.
+- `--pass PASSWORD`  Specify the operator's crypto password.
 - `--hloc LOCATION`  The location (an URL or a valid local path) of the `hpcopr` CLI.
 - `--cloc LOCATION`  The location (an URL or a valid local path) of the `now-crypto` binary.
 - `--hver VERSION` Specify a version of the `hpcopr` CLI, default: latest version.
