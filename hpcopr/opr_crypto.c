@@ -14,29 +14,67 @@
 #include "cluster_general_funcs.h"
 #include "opr_crypto.h"
 
-//return 1: option incorrect
-//return -1: Registry empty
-//return -3: FILE I/O error
-//return 3: User dened.
-//return 5: cluster name invalid of a single cluster.
-//return 7: Failed to decrypt a single cluster
-//return 20+: Failed to decrypt all
-//return -5: PS locked!
+/*
+ * return 1: option error
+ * 
+ * When specifying 'all', return values: 
+ *   0 - normal
+ *  -1 - Empty registry and decrypted/encrypted ssh key
+ * -11 - Empty registry and failed to decrypt/encrypt ssh key
+ *  -5 - Locked clusters found
+ *  -3 - Failed to copy/open registry, not quite possible
+ * 20+ - Failed to decrypt/encrypt some clusters
+ * 
+ * When cluster_list is a single cluster name, return values:
+ *   0 - normal
+ *  -1 - Empty registry
+ *   5 - Invalide cluster name
+ *  -5 - Locked cluster
+ *   7 - Failed to decrypt
+ * 
+ * When cluster_list is a list, return values:
+ *  0  - normal
+ * 20+ - Failed to decrypt/encrypt some clusters
+ */
 int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_local){
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify an option: encrypt or decrypt." RESET_DISPLAY "\n");
         return 1;
     }
+    int final_flag=0;
     if(file_empty_or_not(ALL_CLUSTER_REGISTRY)<1){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The registry is empty. Have you created any clusters?" RESET_DISPLAY "\n");
-        return -1;
+        printf(GENERAL_BOLD "[ -INFO- ] The registry is empty, will not encrypt/decrypt clusters." RESET_DISPLAY "\n");
+        if(strcmp(cluster_list,"all")==0){
+            if(strcmp(option,"decrypt")==0){
+                if(decrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE)!=0){
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt the operator's private SSH key." RESET_DISPLAY "\n");
+                    final_flag++;
+                }
+                else{
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Decrypted" RESET_DISPLAY " the operator's private SSH key.\n");
+                }
+            }
+            else{
+                if(encrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE)!=0){
+                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to encrypt the operator's private SSH key." RESET_DISPLAY "\n");
+                    final_flag++;
+                }
+                else{
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Encrypted" RESET_DISPLAY " the operator's private SSH key.\n");
+                }
+            }
+        }
+        if(final_flag==0){
+            return -1;
+        }
+        return -11;
     }
     char cluster_name_temp[LINE_LENGTH_SHORT]=""; //Here we have to use a wider array.
     char cluster_workdir_temp[DIR_LENGTH]="";
     char registry_line_buffer[LINE_LENGTH_SHORT]="";
     char registry_copy[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    int flag,final_flag=0;
+    int flag;
     int i=1;
     if(strcmp(option,"decrypt")==0){
         if(strcmp(cluster_list,"all")==0){
