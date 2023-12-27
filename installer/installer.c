@@ -679,12 +679,17 @@ int set_opr_password(char* opr_password){
     if(encrypt_decrypt_clusters("all","encrypt",0)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt files with new crypto key file." RESET_DISPLAY "\n");
 #ifdef _WIN32
+        system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
+        system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
+        system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
+#endif
+        return 5;
+    }
+#ifdef _WIN32
     system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
     system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
 #endif
-        return 5;
-    }
     printf( GENERAL_BOLD "\n[ -DONE- ] The operator password has been updated." RESET_DISPLAY "\n");
     return 0;
 }
