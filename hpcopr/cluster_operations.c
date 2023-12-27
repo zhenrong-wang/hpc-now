@@ -158,7 +158,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         }
         fclose(file_p);
         if(i==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The registry is empty. Have you created any clusters?" RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The local cluster registry is empty." RESET_DISPLAY "\n");
             return 0;
         }
         return 0;
