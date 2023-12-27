@@ -602,15 +602,13 @@ int set_opr_password(char* opr_password){
 #ifdef _WIN32
     if(system("net user hpc-now > nul 2>&1")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
-        printf("|          installed. Please install it first in order to update.\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf("|          installed. Please install it first in order to update." RESET_DISPLAY "\n");
         return -3;
     }
 #else
     if(system("id hpc-now >> /dev/null 2>&1")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
-        printf("|          installed. Please install it first in order to update.\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf("|          installed. Please install it first in order to update." RESET_DISPLAY "\n");
         return -3;
     }
 #endif
@@ -647,6 +645,7 @@ int set_opr_password(char* opr_password){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the current files." RESET_DISPLAY "\n");
         if(run_flag>20){
             printf(GENERAL_BOLD "\n[ -INFO- ]" RESET_DISPLAY " Rolling back with previous crypto password ...\n");
+            encrypt_decrypt_clusters("all","encrypt",0);
         }
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Operation failed and password unchanged." RESET_DISPLAY "\n");
         restore_perm_windows();
