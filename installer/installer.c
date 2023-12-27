@@ -150,7 +150,7 @@ int license_confirmation(void){
         return 1;
     }
     printf("\n");
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " If you accept the terms and conditions above, please input 'accept',\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " If you accept the terms and conditions above, please input " WARN_YELLO_BOLD "accept" RESET_DISPLAY ",\n");
     printf("|          If you do not accept, this installation will exit immediately.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please input ( case-sensitive ): ");
     fflush(stdin);
@@ -644,7 +644,7 @@ int set_opr_password(char* opr_password){
     if(run_flag!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the current files." RESET_DISPLAY "\n");
         if(run_flag>20){
-            printf(GENERAL_BOLD "\n[ -INFO- ]" RESET_DISPLAY " Rolling back with previous crypto password ...\n");
+            printf(WARN_YELLO_BOLD "\n[ -WARN- ] Rolling back with previous crypto password ..." RESET_DISPLAY "\n");
             encrypt_decrypt_clusters("all","encrypt",0);
         }
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Operation failed and password unchanged." RESET_DISPLAY "\n");
