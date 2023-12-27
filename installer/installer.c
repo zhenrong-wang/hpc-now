@@ -705,7 +705,7 @@ int uninstall_services(void){
     printf("|*         3. You have *EXPORTED* the usage logs and system logs to a \n");
     printf("|*            permenant directory by 'hpcopr syslog' and 'hpcopr usage'\n");
     printf("|*            commands.\n");
-    printf("|*         THIS OPERATION IS UNRECOVERABLE!\n");
+    printf("|*         THIS OPERATION IS UNRECOVERABLE!" RESET_DISPLAY "\n\n");
     printf("[ -INFO- ] ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm:\n\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
@@ -808,7 +808,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("|*         YOU ARE UPDATING THE HPC-NOW SERVICES. THE hpcopr executable\n");
     printf("|*         WILL BE REPLACED. IF YOU UPDATE WITH THE --hloc AND/OR --cloc\n");
-    printf("|*         OPTIONS, PLEASE MAKE SURE THEY ARE VALID.\n");
+    printf("|*         OPTIONS, PLEASE MAKE SURE THEY ARE VALID." RESET_DISPLAY "\n\n");
     printf("[ -INFO- ] ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm:\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);

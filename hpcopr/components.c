@@ -698,7 +698,7 @@ int configure_locations(int batch_flag_local){
     printf("|*             the docs and confirm your structure in advance.\n");
     printf("|*         THE HPCOPR WILL ONLY CHECK THE FORMAT OF YOUR INPUTS, WILL\n");
     printf("|*         *NOT* CHECK WHETHER LOCATIONS ARE VALID OR NOT. INVALID \n");
-    printf("|*         LOCATIONS MAY DAMAGE THE HPC-NOW SERVICES!\n");
+    printf("|*         LOCATIONS MAY DAMAGE THE HPC-NOW SERVICES!" RESET_DISPLAY "\n\n");
     
     if(prompt_to_confirm("ARE YOU SURE ?",CONFIRM_STRING,batch_flag_local)==1){
         return 1;
