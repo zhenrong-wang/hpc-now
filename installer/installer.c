@@ -627,14 +627,19 @@ int set_opr_password(char* opr_password){
         strncpy(opr_passwd_temp,opr_password,19);
     }
     printf(GENERAL_BOLD "\n[ -INFO- ] Decrypting current files with previous crypto password..." RESET_DISPLAY "\n");
+#ifdef _WIN32
+    system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
+    system("takeown /f  c:\\programdata\\hpc-now /r /d y > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now\\* /grant Administrators:F > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
+    system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
+#endif
     if(encrypt_decrypt_clusters("all","decrypt",0)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the current files." RESET_DISPLAY "\n");
         return 3;
     }
     generate_random_passwd(random_string);
 #ifdef _WIN32
-    system("icacls c:\\programdata\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
-    system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
     file_p=fopen("c:\\programdata\\hpc-now\\now_crypto_seed.lock","w+");
 #elif __linux__
     system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
@@ -653,6 +658,9 @@ int set_opr_password(char* opr_password){
     fclose(file_p);
 #ifdef _WIN32
     system("attrib +h +s +r c:\\programdata\\hpc-now\\now_crypto_seed.lock");
+    system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
+    system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
 #elif __linux__
     system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");   
