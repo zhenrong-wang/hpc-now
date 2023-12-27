@@ -214,10 +214,10 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
     }
     get_workdir(target_cluster_workdir,target_cluster_name);
     if(strcmp(force_flag,"force")==0){
-        printf(WARN_YELLO_BOLD "|* C A U T I O N !\n");
-        printf("|* YOU ARE REFRESHING THE CLUSTER *WITHOUT* CHECKING OPERATION LOCK STATUS!\n");
-        printf("|* PLEASE MAKE SURE CURRENTLY THE CLUSTER IS *NOT* IN A OPERATION PROGRESS!\n");
-        printf("|* C A U T I O N !" RESET_DISPLAY "\n");
+        printf(WARN_YELLO_BOLD "|*         C A U T I O N !\n");
+        printf("|*         YOU ARE REFRESHING THE CLUSTER WITHOUT CHECKING OPERATION LOCK\n");
+        printf("|*         STATUS! PLEASE MAKE SURE THE CLUSTER IS *NOT* IN OPERATION!\n");
+        printf("|*         C A U T I O N !" RESET_DISPLAY "\n");
     }
     else{
         if(cluster_empty_or_not(target_cluster_workdir)==0){
@@ -663,17 +663,17 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     FILE* file_p=NULL;
     int run_flag;
     
-    printf(WARN_YELLO_BOLD "|* C A U T I O N !\n");
-    printf("|* YOU ARE ROTATING THE CLOUD KEYPAIR, WHICH MAY DAMAGE THIS CLUSTER.\n");
-    printf("|* BEFORE PROCEEDING, PLEASE MAKE SURE:\n");
-    printf("|* 1. If the current cluster is NOT empty, your new key pair *MUST* comes from\n");
-    printf("|*    the *SAME* cloud vendor AND account. This is *EXTREMELY IMPORTANT* !!!\n");
-    printf("|* 2. If the current cluster is empty, your new key pair can come from another\n");
-    printf("|*    account of the *SAME* vendor.\n");
-    printf("|* 3. Your new key pair is valid and able to manage cloud resources.\n");
-    printf("|*    This is * !!! VERY IMPORTANT !!! *\n");
-    printf("|* THIS OPERATION IS UNRECOVERABLE!\n");
-    printf("|* C A U T I O N !" RESET_DISPLAY "\n");
+    printf(WARN_YELLO_BOLD "|*         C A U T I O N !\n");
+    printf("|*         YOU ARE ROTATING THE CLOUD KEY, WHICH MAY DAMAGE THIS CLUSTER.\n");
+    printf("|*         BEFORE PROCEEDING, PLEASE MAKE SURE:\n");
+    printf("|*         1. If the current cluster is NOT empty, the new key MUST comes\n");
+    printf("|*            from the SAME cloud vendor AND account.\n");
+    printf("|*         2. If the current cluster is empty, your new key pair can come\n");
+    printf("|*            from another account of the SAME vendor.\n");
+    printf("|*         3. Your new key is valid and able to manage cloud resources.\n");
+    printf("|*            This is *!!! VERY IMPORTANT !!!*\n");
+    printf("|*         THIS OPERATION IS UNRECOVERABLE!\n");
+    printf("|*         C A U T I O N !" RESET_DISPLAY "\n");
     
     if(prompt_to_confirm("ARE YOU SURE ?",CONFIRM_STRING,batch_flag_local)==1){
         return 1;
@@ -909,10 +909,10 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
         printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
         return -3;
     }
-    printf(WARN_YELLO_BOLD "|* C A U T I O N !\n");
-    printf("|* YOU ARE DELETING THE WHOLE CLUSTER - INCLUDING ALL THE NODES AND DATA!\n");
-    printf("|* THIS OPERATION IS UNRECOVERABLE!\n");
-    printf("|* C A U T I O N !" RESET_DISPLAY "\n");
+    printf(WARN_YELLO_BOLD "|*         C A U T I O N !\n");
+    printf("|*         DELETING THE WHOLE CLUSTER - INCLUDING ALL THE NODES AND DATA!\n");
+    printf("|*         THIS OPERATION IS UNRECOVERABLE!\n");
+    printf("|*         C A U T I O N !" RESET_DISPLAY "\n");
     if(strcmp(force_flag,"force")==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Destroying the current cluster *WITHOUT* confirmation." RESET_DISPLAY "\n");
     }
@@ -2191,12 +2191,12 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     FILE* file_p=NULL;
     int i;
     int compute_node_num=0;
-    printf(WARN_YELLO_BOLD "|* C A U T I O N !\n");
-    printf("|* YOU ARE REBUILDING THE CLUSTER NODES! YOUR CRITICAL NODES WILL BE\n");
-    printf("|* REMOVED AND RECREATED ! THIS OPERATION MAY FAIL DUE TO VARIOUS REASONS.\n");
-    printf("|* IF ANYTHING GOES WRONG, YOU WILL HAVE TO DESTROY THE WHOLE CLUSTER\n");
-    printf("|* AND RE-INIT ! Usually we do not recommend users to do this operation.\n");
-    printf("|* C A U T I O N !" RESET_DISPLAY "\n");
+    printf(WARN_YELLO_BOLD "|*         C A U T I O N !\n");
+    printf("|*         YOU ARE REBUILDING THE CLUSTER NODES! YOUR CRITICAL NODES WILL\n");
+    printf("|*         BE REMOVED AND RECREATED ! THIS OPERATION MAY FAIL DUE TO VAR-\n");
+    printf("|*         -IOUS REASONS, YOU WILL HAVE TO DESTROY THE WHOLE CLUSTER AND\n");
+    printf("|*         RE-INIT! THIS OPERATION IS NOT RECOMMENDED.\n");
+    printf("|*         C A U T I O N !" RESET_DISPLAY "\n");
 
     if(prompt_to_confirm("ARE YOU SURE ?",CONFIRM_STRING,batch_flag_local)==1){
         return 1;
