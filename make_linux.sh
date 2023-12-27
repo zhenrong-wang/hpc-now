@@ -20,7 +20,6 @@ elif [ "$1" = "build" ]; then
     mkdir -p ./build
     rm -rf ./build/*
     gcc ./hpcopr/*.c -Wall -o ./build/hpcopr-lin-${hpcopr_version_code}.exe
-
     gcc -c ./hpcopr/general_funcs.c -Wall -o ./installer/gfuncs.o
     gcc -c ./hpcopr/opr_crypto.c -Wall -o ./installer/ocrypto.o
     gcc -c ./hpcopr/cluster_general_funcs.c -Wall -o ./installer/cgfuncs.o
