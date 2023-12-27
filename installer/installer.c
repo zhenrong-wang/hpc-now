@@ -76,29 +76,29 @@ void print_help_installer(void){
     printf("|     - Example 2: " HIGH_GREEN_BOLD "sudo ./installer.exe install --cloc ./now-crypto-aes.exe" RESET_DISPLAY "\n");
 #endif
     printf("|   " GENERAL_BOLD "General Options (REQUIRED):" RESET_DISPLAY "\n");
-    printf("|     install       : Install or repair the HPC-NOW Services on your device.\n");
-    printf("|     update        : Update the hpcopr to the latest or your own version.\n");
-    printf("|     uninstall     : Remove the HPC-NOW services and all relevant data.\n");
-    printf("|     help          : Show this information.\n");
-    printf("|     version       : Show the version code of this installer.\n");
-    printf("|     setpass       : Update the operator's password.\n");
-    printf("|     verlist       : Show the available version list of hpcopr.\n");
+    printf("|     " HIGH_GREEN_BOLD "install" RESET_DISPLAY "       : Install or repair the HPC-NOW Services on your device.\n");
+    printf("|     " HIGH_GREEN_BOLD "update" RESET_DISPLAY "        : Update the hpcopr to the latest or your own version.\n");
+    printf("|     " HIGH_GREEN_BOLD "uninstall" RESET_DISPLAY "     : Remove the HPC-NOW services and all relevant data.\n");
+    printf("|     " HIGH_GREEN_BOLD "setpass" RESET_DISPLAY "       : Update the operator's password.\n");
+    printf("|     " HIGH_GREEN_BOLD "help" RESET_DISPLAY "          : Show this information.\n");
+    printf("|     " HIGH_GREEN_BOLD "version" RESET_DISPLAY "       : Show the version code of this installer.\n");
+    printf("|     " HIGH_GREEN_BOLD "verlist" RESET_DISPLAY "       : Show the available version list of hpcopr.\n");
     printf("|   " GENERAL_BOLD "Advanced Options (OPTIONAL):" RESET_DISPLAY "\n");
-    printf("|     --accept      : accept the license terms and skip reading them.\n");
-    printf("|     --pass PASS * Only valid for install or update option.\n");
-    printf("|                   : Set/update the operator's password that includes 3 of 4 types:\n");
-    printf("|                     " WARN_YELLO_BOLD "A-Z  a-z  0-9  " SPECIAL_PASSWORD_CHARS RESET_DISPLAY "\n");
-    printf("|     --hloc LOC  * Only valid for install or update option.\n");
+    printf("|     --pass PASS * Only valid for " HIGH_GREEN_BOLD "install" RESET_DISPLAY " or " HIGH_GREEN_BOLD "setpass" RESET_DISPLAY " option.\n");
+    printf("|                   : Set/update the operator's password that includes 3\n");
+    printf("|                     of 4 types:" WARN_YELLO_BOLD "A-Z  a-z  0-9  " SPECIAL_PASSWORD_CHARS RESET_DISPLAY "\n");
+    printf("|     --hloc LOC  * Only valid for " HIGH_GREEN_BOLD "install" RESET_DISPLAY " or " HIGH_GREEN_BOLD "update" RESET_DISPLAY " option.\n");
     printf("|                   : Provide your own location of hpcopr, both URL and local\n");
     printf("|                     filesystem path are accepted. You should guarantee that\n");
     printf("|                     the location points to a valid hpcopr executable.\n");
-    printf("|     --cloc LOC  * Only valid for install or update option.\n");
+    printf("|     --cloc LOC  * Only valid for " HIGH_GREEN_BOLD "install" RESET_DISPLAY " or " HIGH_GREEN_BOLD "update" RESET_DISPLAY " option.\n");
     printf("|                   : Provide your own location of now-crypto, similar to\n");
     printf("|                     the --hloc parameter above.\n");
-    printf("|     --hver VER  * Only valid when hpcoprloc is absent.\n");
+    printf("|     --hver VER  * Only valid when " GENERAL_BOLD "--hloc LOC" RESET_DISPLAY " is absent.\n");
     printf("|                   : Specify the version code of hpcopr, i.e. 0.2.0.0161\n");
     printf("|     --rdp         : Install the RDP client for GNU/Linux or macOS. Default:\n");
     printf("|                     GNU/Linux: Remmina | macOS: Microsoft RDP\n");
+    printf("|     --accept      : accept the license terms and skip reading them.\n");
 }
 
 /*
@@ -123,8 +123,7 @@ int check_current_user_root(void){
 #else
     if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
         print_help_installer();
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] Please either switch to users with admin privilege and run the installer\n");
-        printf("|          with 'sudo', or switch to the root user. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] Please either run with 'sudo', or switch to the root/admin." RESET_DISPLAY "\n");
         print_tail_installer();
         return -1;    
     }
@@ -150,14 +149,14 @@ int license_confirmation(void){
         return 1;
     }
     printf("\n");
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " If you accept the terms and conditions above, please input " WARN_YELLO_BOLD "accept" RESET_DISPLAY ",\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " If you accept the terms above, please input " WARN_YELLO_BOLD "accept " RESET_DISPLAY ".\n");
     printf("|          If you do not accept, this installation will exit immediately.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please input ( case-sensitive ): ");
     fflush(stdin);
     scanf("%63s",confirmation);
     if(strcmp(confirmation,"accept")!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " This installation process is terminated because you didn't accept the\n");
-        printf("|          terms and conditions in the license. Exit now.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " This installation process is terminated because you didn't accept\n");
+        printf("|          the terms in the license.\n");
         return -1;
     }
     return 0;
