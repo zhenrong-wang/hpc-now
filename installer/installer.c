@@ -583,6 +583,14 @@ mac_install_done:
 #endif
 }
 
+void restore_perm_windows(void){
+#ifdef _WIN32
+    system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
+    system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
+    system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
+#endif
+}
+
 //If the opr_password is not 0, the password is valid.
 //return -3: Not installed
 //return -1: FILE input error
@@ -610,6 +618,7 @@ int set_opr_password(char* opr_password){
     char* ch=NULL;
     char opr_passwd_temp[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
+    int run_flag;
     if(strlen(opr_password)==0){
         ch=GETPASS_FUNC("[ INPUT: ] Specify a password (length < 20, without echo): ");
         strncpy(opr_passwd_temp,ch,19);
@@ -633,13 +642,17 @@ int set_opr_password(char* opr_password){
     system("icacls c:\\programdata\\hpc-now\\* /grant Administrators:F /t > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
 #endif
-    if(encrypt_decrypt_clusters("all","decrypt",0)!=0){
+    run_flag=encrypt_decrypt_clusters("all","decrypt",0);
+    if(run_flag!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the current files." RESET_DISPLAY "\n");
-#ifdef _WIN32
-        system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
-        system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
-        system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
-#endif
+        if(run_flag>20){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back with previous crypto password ...\n");
+            encrypt_decrypt_clusters("all","encrypt",0);
+        }
+        else{
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Operation failed and nothing changed. Exit now.\n");
+        }
+        restore_perm_windows();
         return 3;
     }
     generate_random_passwd(random_string);
@@ -654,11 +667,7 @@ int set_opr_password(char* opr_password){
     file_p=fopen("/Applications/.hpc-now/.now_crypto_seed.lock","w+");
 #endif
     if(file_p==NULL){
-#ifdef _WIN32
-        system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
-        system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
-        system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
-#endif
+        restore_perm_windows();
         return -1;
     }
     fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
@@ -678,18 +687,10 @@ int set_opr_password(char* opr_password){
     printf(GENERAL_BOLD "\n[ -INFO- ] Encrypting files with the new crypto password..." RESET_DISPLAY "\n");
     if(encrypt_decrypt_clusters("all","encrypt",0)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt files with new crypto key file." RESET_DISPLAY "\n");
-#ifdef _WIN32
-        system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
-        system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
-        system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
-#endif
+        restore_perm_windows();
         return 5;
     }
-#ifdef _WIN32
-    system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
-    system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
-#endif
+    restore_perm_windows();
     printf( GENERAL_BOLD "\n[ -DONE- ] The operator password has been updated." RESET_DISPLAY "\n");
     return 0;
 }
