@@ -696,7 +696,7 @@ int set_opr_password(char* opr_password){
 int uninstall_services(void){
     char doubleconfirm[128]="";
     // Double confirmation is needed.
-    printf(WARN_YELLO_BOLD "|*         C A U T I O N !\n");
+    printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("|*         YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM:\n");
     printf("|*         1. You have *DESTROYED* all the clusters managed by this\n");
     printf("|*            device. This is *!!! EXTREMELY IMPORTANT !!!*\n");
@@ -706,7 +706,6 @@ int uninstall_services(void){
     printf("|*            permenant directory by 'hpcopr syslog' and 'hpcopr usage'\n");
     printf("|*            commands.\n");
     printf("|*         THIS OPERATION IS UNRECOVERABLE!\n");
-    printf("|*         C A U T I O N !" RESET_DISPLAY "\n");
     printf("[ -INFO- ] ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm:\n\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
@@ -806,11 +805,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         return 1;
     }
 #endif
-    printf(WARN_YELLO_BOLD "|*         C A U T I O N !\n");
+    printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("|*         YOU ARE UPDATING THE HPC-NOW SERVICES. THE hpcopr executable\n");
     printf("|*         WILL BE REPLACED. IF YOU UPDATE WITH THE --hloc AND/OR --cloc\n");
     printf("|*         OPTIONS, PLEASE MAKE SURE THEY ARE VALID.\n");
-    printf("|*         C A U T I O N !" RESET_DISPLAY "\n");
     printf("[ -INFO- ] ARE YOU SURE? Only " WARN_YELLO_BOLD "y-e-s" RESET_DISPLAY " is accepted to confirm:\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
