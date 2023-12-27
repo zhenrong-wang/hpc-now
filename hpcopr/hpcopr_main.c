@@ -33,6 +33,7 @@
 #include "transfer.h"
 #include "monman.h"
 #include "now_md5.h"
+#include "opr_crypto.h"
 #include "appman.h"
 #include "jobman.h"
 #include "userman.h"

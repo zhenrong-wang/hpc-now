@@ -105,7 +105,8 @@ char command_keywords[CMD_KWDS_NUM][32]={
     "--hver",
     "--dbg-level",
     "--max-time",
-    "--tf-run"
+    "--tf-run",
+    "--pass"
 };
 
 int string_to_positive_num(char* string){
@@ -157,12 +158,17 @@ int get_key_value(char* filename, char* key, char ch, char* value){
     return 1;
 }
 
+//This function is going to be deprecated
 void reset_string(char* orig_string){
     int length=strlen(orig_string);
     int i;
     for(i=0;i<length;i++){
         *(orig_string+i)='\0';
     }
+}
+
+void reset_nstring(char orig_string[], unsigned int length){
+    memset(orig_string,'\0',length);
 }
 /* 
  * Potential risk: If the line_string array is not long enough, there might be overflow! The users should make sure the defined line_string is long enough
@@ -757,6 +763,8 @@ int folder_exist_or_not(char* foldername){
     }
 }
 
+//return 0: The password is complex enough
+//return 1: The password is not complex enough
 int password_complexity_check(char* password, const char* special_chars){
     int i,length=strlen(password);
     int uppercase_flag=0;
@@ -803,13 +811,14 @@ int password_complexity_check(char* password, const char* special_chars){
     }
 }
 
+//Make sure the password[] is 20 width
 int generate_random_passwd(char* password){
     int i,total_times,rand_num;
     struct timeval current_time;
     char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
     char password_temp[PASSWORD_STRING_LENGTH]="";
     unsigned int seed_num;
-    for(total_times=0;total_times<10;total_times++){
+    for(total_times=0;total_times<16;total_times++){
         for(i=0;i<PASSWORD_LENGTH;i++){
             GETTIMEOFDAY_FUNC(&current_time,NULL);
             seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
@@ -824,7 +833,12 @@ int generate_random_passwd(char* password){
             strcpy(password,password_temp);
             return 0;
         }
-        reset_string(password_temp);
+        if(total_times!=15){
+            reset_nstring(password_temp,20);
+        }
+        else{
+            strcpy(password,password_temp);
+        }
     }
     return 1;
 }

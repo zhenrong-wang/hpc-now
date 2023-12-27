@@ -25,7 +25,9 @@
         "types.h": "c",
         "socket.h": "c",
         "in.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "now_md5.h": "c",
+        "opr_crypto.h": "c"
     },
     "C_Cpp.dimInactiveRegions": true
 }

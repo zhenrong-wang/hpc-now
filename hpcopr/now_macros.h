@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0013"
+#define CORE_VERSION_CODE "0.3.1.0015"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -242,7 +242,7 @@
 #define COMMAND_STRING_LENGTH_MAX 64
 #define CONF_LINE_NUM 11
 #define CMD_FLAG_NUM 30
-#define CMD_KWDS_NUM 48
+#define CMD_KWDS_NUM 49
 
 #define SPECIAL_PASSWORD_CHARS "~@&(){}[]=,.!#$"
 

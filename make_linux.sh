@@ -20,22 +20,21 @@ elif [ "$1" = "build" ]; then
     mkdir -p ./build
     rm -rf ./build/*
     gcc ./hpcopr/*.c -Wall -o ./build/hpcopr-lin-${hpcopr_version_code}.exe
+
     gcc -c ./hpcopr/general_funcs.c -Wall -o ./installer/gfuncs.o
-    rm -rf ./installer/libgfuncs.a
-    ar -rc ./installer/libgfuncs.a ./installer/gfuncs.o
-    rm -rf ./installer/gfuncs.o
+    gcc -c ./hpcopr/opr_crypto.c -Wall -o ./installer/ocrypto.o
+    gcc -c ./hpcopr/cluster_general_funcs.c -Wall -o ./installer/cgfuncs.o
+    gcc -c ./hpcopr/time_process.c -Wall -o ./installer/tproc.o
+    gcc -c ./hpcopr/general_print_info.c -Wall -o ./installer/gprint.o
     gcc -c ./hpcopr/now_md5.c -Wall -o ./installer/md5.o
-    rm -rf ./installer/libmd5.a
-    ar -rc ./installer/libmd5.a ./installer/md5.o
-    rm -rf ./installer/md5.o
-    gcc ./installer/installer.c -Wall ./installer/libgfuncs.a ./installer/libmd5.a -o ./build/installer-lin-${installer_version_code}.exe
-#    gcc ./now-crypto/now-crypto.c -Wall -o ./build/now-crypto-lin.exe
+    ar -rc ./installer/libnow.a ./installer/gfuncs.o ./installer/ocrypto.o ./installer/cgfuncs.o ./installer/tproc.o ./installer/md5.o ./installer/gprint.o
+    gcc ./installer/installer.c -Wall ./installer/libnow.a -o ./build/installer-lin-${installer_version_code}.exe
     gcc ./now-crypto/now-crypto-v3-aes.c -Wall -Ofast -o ./build/now-crypto-aes-lin.exe
     gcc ./hpcmgr/hpcmgr.c -Wall -o ./build/hpcmgr.exe
     gcc ./now-server/now-server.c -Wall -o ./build/now-server.exe
     chmod +x ./build/*
-    rm -rf ./installer/libgfuncs.a
-    rm -rf ./installer/libmd5.a
+    rm -rf ./installer/*.a
+    rm -rf ./installer/*.o
 elif [ "$1" = "delete" ]; then
     echo -e "[ START: ] Deleting the binaries now ..."
     rm -rf ./build/*

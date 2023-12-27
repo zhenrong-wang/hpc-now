@@ -13,11 +13,11 @@
 #ifdef _WIN32
 #include "..\\hpcopr\\now_macros.h"
 #include "..\\hpcopr\\general_funcs.h"
-#include "..\\hpcopr\\now_md5.h"
+#include "..\\hpcopr\\opr_crypto.h"
 #else
 #include "../hpcopr/now_macros.h"
 #include "../hpcopr/general_funcs.h"
-#include "../hpcopr/now_md5.h"
+#include "../hpcopr/opr_crypto.h"
 #endif
 
 #include "installer.h"
@@ -62,42 +62,43 @@ void print_tail_installer(void){
 // Print out help info for this installer
 void print_help_installer(void){
 #ifdef _WIN32
-    printf("| Usage: Open a command prompt window *WITH* the Administrator Role.\n");
-    printf("|        Type the command using either ways below:\n");
-    printf("|     +- ABSOLUTE_PATH general_option advanced_option(s)\n");
-    printf("|         -> Example 1: C:\\Users\\ABC\\installer.exe install --accept\n");
-    printf("|     +- RELATIVE_PATH general_option advanced_options\n");
-    printf("|         -> Example 2: .\\installer.exe install --cloc .\\now-crypto-aes.exe\n");
+    printf(GENERAL_BOLD "| USAGE: Open a Command Prompt Window as Administrator.\n");
+    printf("|        Type the command using either way below:" RESET_DISPLAY "\n");
+    printf("|   + " GENERAL_BOLD "ABSOLUTE_PATH GENERAL_OPTION ADVANCED_OPTION(S)" RESET_DISPLAY "\n");
+    printf("|     - Example 1: " HIGH_GREEN_BOLD "C:\\Users\\ABC\\installer.exe install --accept" RESET_DISPLAY "\n");
+    printf("|   + " GENERAL_BOLD "RELATIVE_PATH GENERAL_OPTION ADVANCED_OPTION(S)" RESET_DISPLAY "\n");
+    printf("|     - Example 2: " HIGH_GREEN_BOLD ".\\installer.exe install --cloc .\\now-crypto-aes.exe" RESET_DISPLAY "\n");
 #else
-    printf("| Usage: Open a Terminal.\n");
-    printf("|        Type the command using either ways below:\n");
-    printf("|     +- sudo ABSOLUTE_PATH general_option advanced_option(s)\n");
-    printf("|         -> Example 1: sudo /home/ABC/installer.exe install --accept\n");
-    printf("|     +- sudo RELATIVE_PATH general_option advanced_option(s)\n");
-    printf("|         -> Example 2: sudo ./installer.exe install --cloc ./now-crypto-aes.exe\n");
+    printf(GENERAL_BOLD "| USAGE: Open a Terminal and type the command using either way below:" RESET_DISPLAY "\n");
+    printf("|   + " GENERAL_BOLD "sudo ABSOLUTE_PATH GENERAL_OPTION ADVANCED_OPTION(S)" RESET_DISPLAY "\n");
+    printf("|     - Example 1: " HIGH_GREEN_BOLD "sudo /home/ABC/installer.exe install --accept" RESET_DISPLAY "\n");
+    printf("|   + " GENERAL_BOLD "sudo RELATIVE_PATH GENERAL_OPTION ADVANCED_OPTION(S)" RESET_DISPLAY "\n");
+    printf("|     - Example 2: " HIGH_GREEN_BOLD "sudo ./installer.exe install --cloc ./now-crypto-aes.exe" RESET_DISPLAY "\n");
 #endif
-    printf("| general_option:\n");
-    printf("|        install          : Install or repair the HPC-NOW Services on your device.\n");
-    printf("|        update           : Update the hpcopr to the latest or your own version.\n");
-    printf("|        uninstall        : Remove the HPC-NOW services and all relevant data.\n");
-    printf("|        help             : Show this information.\n");
-    printf("|        version          : Show the version code of this installer.\n");
-    printf("|        verlist          : Show the available version list of hpcopr.\n");
-    printf(GENERAL_BOLD "|        * You MUST specify one of the general options above." RESET_DISPLAY "\n");
-    printf("| advanced_option (for developers, optional):\n");
-    printf("|        --accept         : accept the license terms and skip reading them.\n");
-    printf("|        --hloc LOC   * Only valid for install or update option.\n");
-    printf("|                         : Provide your own location of hpcopr, both URL and local\n");
-    printf("|                           filesystem path are accepted. You should guarantee that\n");
-    printf("|                           the location points to a valid hpcopr executable.\n");
-    printf("|        --cloc LOC   * Only valid for install or update option.\n");
-    printf("|                         : Provide your own location of now-crypto, similar to\n");
-    printf("|                           the --hloc parameter above.\n");
-    printf("|        --hver VER   * Only valid when hpcoprloc is absent.\n");
-    printf("|                         : Specify the version code of hpcopr, i.e. 0.2.0.0161\n");
-    printf("|        --rdp            : Install the RDP client for GNU/Linux or macOS.\n");
-    printf("|                           GNU/Linux: Remmina | macOS: Microsoft RDP\n");
-    printf(GENERAL_BOLD "|        * You can specify any or all of the advanced options above." RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "| General Options (REQUIRED):" RESET_DISPLAY "\n");
+    printf("|   install       : Install or repair the HPC-NOW Services on your device.\n");
+    printf("|   update        : Update the hpcopr to the latest or your own version.\n");
+    printf("|   uninstall     : Remove the HPC-NOW services and all relevant data.\n");
+    printf("|   help          : Show this information.\n");
+    printf("|   version       : Show the version code of this installer.\n");
+    printf("|   setpass       : Update the operator's password.\n");
+    printf("|   verlist       : Show the available version list of hpcopr.\n");
+    printf(GENERAL_BOLD "| Advanced Options (OPTIONAL):" RESET_DISPLAY "\n");
+    printf("|   --accept      : accept the license terms and skip reading them.\n");
+    printf("|   --pass PASS * Only valid for install or update option.\n");
+    printf("|                 : Set/update the operator's password that includes 3 of 4 types:\n");
+    printf("|                   " WARN_YELLO_BOLD "A-Z  a-z  0-9  " SPECIAL_PASSWORD_CHARS RESET_DISPLAY "\n");
+    printf("|   --hloc LOC  * Only valid for install or update option.\n");
+    printf("|                 : Provide your own location of hpcopr, both URL and local\n");
+    printf("|                   filesystem path are accepted. You should guarantee that\n");
+    printf("|                   the location points to a valid hpcopr executable.\n");
+    printf("|   --cloc LOC  * Only valid for install or update option.\n");
+    printf("|                 : Provide your own location of now-crypto, similar to\n");
+    printf("|                   the --hloc parameter above.\n");
+    printf("|   --hver VER  * Only valid when hpcoprloc is absent.\n");
+    printf("|                 : Specify the version code of hpcopr, i.e. 0.2.0.0161\n");
+    printf("|   --rdp         : Install the RDP client for GNU/Linux or macOS. Default:\n");
+    printf("|                   GNU/Linux: Remmina | macOS: Microsoft RDP\n");
 }
 
 /*
@@ -169,10 +170,12 @@ int license_confirmation(void){
 // 3. Create the crypto key file for further encryption and decryption
 // 4. Manage the folder permissions
 
-int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int crypto_loc_flag, char* now_crypto_loc, int rdp_flag){
+int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, char* opr_password, int crypto_loc_flag, char* now_crypto_loc, int rdp_flag){
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
+    char* ch=NULL;
+    char opr_passwd_temp[PASSWORD_STRING_LENGTH]="";
 #ifdef __linux__
     char linux_packman[8]="";
 #endif
@@ -304,8 +307,20 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     system("mkdir -p /Applications/.hpc-now >> /dev/null 2>&1");
     system("chmod -R 700 /Applications/.hpc-now >> /dev/null 2>&1");
 #endif
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a random file for encryption/decryption ...\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a file for encryption/decryption ...\n");
     generate_random_passwd(random_string);
+    if(strlen(opr_password)==0){
+        ch=GETPASS_FUNC("[ INPUT: ] Specify a operator password (length < 20):");
+        strncpy(opr_passwd_temp,ch,19);
+        if(strlen(ch)>19||password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
+            generate_random_passwd(opr_passwd_temp);
+            printf(WARN_YELLO_BOLD "\n[ -WARN- ] The password is invalid. Generated: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
+        }
+        else{
+            printf(GENERAL_BOLD "\n[ -INFO- ] Specified password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
+        }
+        reset_string(ch);
+    }
 #ifdef _WIN32
     file_p=fopen("c:\\programdata\\hpc-now\\now_crypto_seed.lock","w+");
 #elif __linux__
@@ -319,7 +334,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, in
     fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
     fprintf(file_p,"PLEASE DO NOT HANDLE THIS FILE MANNUALLY! OTHERWISE THE SERVICE WILL BE CORRUPTED!\n");
     fprintf(file_p,"SHANGHAI HPC-NOW TECHNOLOGIES CO., LTD | info@hpc-now.com | https://www.hpc-now.com\n\n");
-    fprintf(file_p,"%s\n",random_string);
+    fprintf(file_p,"SALT_STRING: %s\nUSER_STRING: %s\n\nEND OF LOCKED NOW CRYPTO KEY FILE\n",random_string,opr_passwd_temp);
     fclose(file_p);
 #ifdef _WIN32
     system("attrib +h +s +r c:\\programdata\\hpc-now\\now_crypto_seed.lock");
@@ -483,10 +498,10 @@ linux_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          Please follow the steps below:\n");
-    printf(HIGH_CYAN_BOLD "|     +- SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
+    printf(HIGH_CYAN_BOLD "|      + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("|          " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr envcheck" RESET_DISPLAY "\n");
     printf("|          * You will be required to input the password for the current sudoer.\n");
-    printf(GENERAL_BOLD "|     +- USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "|      + USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
     printf("|          1. " HIGH_GREEN_BOLD "sudo passwd hpc-now" RESET_DISPLAY "\n");
     printf("|          * You will be required to set a password without echo.\n");
     printf("|          2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "\n");
@@ -555,10 +570,10 @@ mac_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
     printf("|          Please follow the steps below:\n");
-    printf(HIGH_CYAN_BOLD "|     +- SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
+    printf(HIGH_CYAN_BOLD "|      + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("|          " HIGH_GREEN_BOLD "cd /Applications && sudo -u hpc-now hpcopr envcheck" RESET_DISPLAY "\n");
     printf("|          * You will be required to input the password for the current sudoer.\n");
-    printf(GENERAL_BOLD "|     +- USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "|      + USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
     printf("|          1. " HIGH_GREEN_BOLD "sudo dscl . -passwd /Users/hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY "\n");
     printf("|          2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "\n");
     printf("|          * You will be required to input the password set just now.\n");
@@ -566,6 +581,92 @@ mac_install_done:
     printf(GENERAL_BOLD"[ -DONE- ] Enjoy you Cloud HPC journey! Exit now." RESET_DISPLAY "\n");
     return 0;    
 #endif
+}
+
+//If the opr_password is not 0, the password is valid.
+//return -3: Not installed
+//return -1: FILE input error
+//return 1: password invalid
+//return 3: failed to decrypt
+//return 5: failed to encrypt
+//return 0: normal exit
+int set_opr_password(char* opr_password){
+#ifdef _WIN32
+    if(system("net user hpc-now > nul 2>&1")!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
+        printf("|          installed. Please install it first in order to update.\n");
+        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        return -3;
+    }
+#else
+    if(system("id hpc-now >> /dev/null 2>&1")!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
+        printf("|          installed. Please install it first in order to update.\n");
+        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        return -3;
+    }
+#endif
+    char random_string[PASSWORD_STRING_LENGTH]="";
+    char* ch=NULL;
+    char opr_passwd_temp[PASSWORD_STRING_LENGTH]="";
+    FILE* file_p=NULL;
+    if(strlen(opr_password)==0){
+        ch=GETPASS_FUNC("[ INPUT: ] Specify a password (length < 20, without echo): ");
+        strncpy(opr_passwd_temp,ch,19);
+        if(strlen(ch)>19||password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
+            printf(FATAL_RED_BOLD "\n[ FATAL: ] The password " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",ch);
+            return 1;
+        }
+        else{
+            printf(GENERAL_BOLD "\n[ -INFO- ] Specified password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
+            reset_string(ch);
+        }
+    }
+    else{
+        printf(GENERAL_BOLD "\n[ -INFO- ] Specified password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_password);
+        strncpy(opr_passwd_temp,opr_password,19);
+    }
+    printf(GENERAL_BOLD "\n[ -INFO- ] Decrypting current files with previous crypto password..." RESET_DISPLAY "\n");
+    if(encrypt_decrypt_clusters("all","decrypt",0)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the current files." RESET_DISPLAY "\n");
+        return 3;
+    }
+    generate_random_passwd(random_string);
+#ifdef _WIN32
+    system("icacls c:\\programdata\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
+    system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
+    file_p=fopen("c:\\programdata\\hpc-now\\now_crypto_seed.lock","w+");
+#elif __linux__
+    system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+    file_p=fopen("/usr/.hpc-now/.now_crypto_seed.lock","w+");
+#elif __APPLE__
+    system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+    file_p=fopen("/Applications/.hpc-now/.now_crypto_seed.lock","w+");
+#endif
+    if(file_p==NULL){
+        return -1;
+    }
+    fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
+    fprintf(file_p,"PLEASE DO NOT HANDLE THIS FILE MANNUALLY! OTHERWISE THE SERVICE WILL BE CORRUPTED!\n");
+    fprintf(file_p,"SHANGHAI HPC-NOW TECHNOLOGIES CO., LTD | info@hpc-now.com | https://www.hpc-now.com\n\n");
+    fprintf(file_p,"SALT_STRING: %s\nUSER_STRING: %s\n\nEND OF LOCKED NOW CRYPTO KEY FILE\n",random_string,opr_passwd_temp);
+    fclose(file_p);
+#ifdef _WIN32
+    system("attrib +h +s +r c:\\programdata\\hpc-now\\now_crypto_seed.lock");
+#elif __linux__
+    system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+    system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");   
+#elif __APPLE__
+    system("chown -R root:root /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+    system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+#endif
+    printf(GENERAL_BOLD "\n[ -INFO- ] Encrypting files with the new crypto password..." RESET_DISPLAY "\n");
+    if(encrypt_decrypt_clusters("all","encrypt",0)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt files with new crypto key file." RESET_DISPLAY "\n");
+        return 5;
+    }
+    printf( GENERAL_BOLD "\n[ -DONE- ] The operator password has been updated." RESET_DISPLAY "\n");
+    return 0;
 }
 
 // Forcely uninstall the HPC-NOW services
@@ -949,7 +1050,10 @@ int valid_loc_format_or_not(char* loc_string){
 int get_valid_verlist(void){
     char cmdline[CMDLINE_LENGTH]="";
     sprintf(cmdline,"curl -s %sverlist-0.3.x.txt",DEFAULT_URL_HPCOPR_LATEST);
-    return system(cmdline);
+    if(system(cmdline)!=0){
+        return 1;
+    }
+    return 0;
 }
 
 int version_valid(char* hpcopr_ver){
@@ -972,27 +1076,40 @@ int version_valid(char* hpcopr_ver){
     }
 }
 
+//return 1: current user is not root
+//return 2: License not accepted
+//return 3: internet connection failed
+//return 4: option incorrect
+//return 5: no option
+//return 7: version list failed to get
+//return 9: uninstallation failed
+//return 11: Failed to set password
+//return 13: Failed to update
+//return 15: Failed to install
+//return 0: Normal exit
 int main(int argc, char* argv[]){
     int run_flag=0;
     int hpcopr_loc_flag=-1;
     int crypto_loc_flag=-1;
     char hpcopr_loc[LOCATION_LENGTH]="";
     char now_crypto_loc[LOCATION_LENGTH]="";
+    char opr_password_arg[32]="";
+    char opr_password[PASSWORD_STRING_LENGTH]="";
     char hpcopr_ver[256]="";
     int rdp_flag=cmd_flag_check(argc,argv,"--rdp");
     print_header_installer();
     if(check_current_user_root()!=0){
-        return -1;
+        return 1;
     }
     if(check_internet_installer()!=0){
         print_tail_installer();
-        return -3;
+        return 3;
     }  
     if(argc==1){
         print_help_installer();
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Please specify option(s). Exit now." RESET_DISPLAY "\n");
         print_tail_installer();
-        return 1;
+        return 5;
     }
     if(strcmp(argv[1],"help")==0){
         print_help_installer();
@@ -1009,7 +1126,10 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"verlist")==0){
         run_flag=get_valid_verlist();
         print_tail_installer();
-        return run_flag;
+        if(run_flag!=0){
+            return 7;
+        }
+        return 0;
     }
 
     if(strcmp(argv[1],"uninstall")==0){
@@ -1018,26 +1138,58 @@ int main(int argc, char* argv[]){
         }
         if(run_flag!=0){
             print_tail_installer();
-            return 1;
+            return 2;
         }
         run_flag=uninstall_services();
         print_tail_installer();
-        return run_flag;
+        if(run_flag!=0){
+            return 9;
+        }
+        return 0;
     }
 
-    if(strcmp(argv[1],"update")!=0&&strcmp(argv[1],"install")!=0){
+    if(strcmp(argv[1],"update")!=0&&strcmp(argv[1],"install")!=0&&strcmp(argv[1],"setpass")!=0){
         print_help_installer();
         printf(FATAL_RED_BOLD "\n[ FATAL: ] The specified general option " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n", argv[1]);
         print_tail_installer();
-        return 1;
+        return 4;
     }
-
-    cmd_keyword_check(argc,argv,"--hloc",hpcopr_loc);
-    cmd_keyword_check(argc,argv,"--cloc",now_crypto_loc);
-    cmd_keyword_check(argc,argv,"--hver",hpcopr_ver);
+    if(cmd_flag_check(argc,argv,"--accept")!=0){
+        if(license_confirmation()!=0){
+            print_tail_installer();
+            return 2;
+        }
+    }
+    if(strcmp(argv[1],"setpass")==0||strcmp(argv[1],"install")==0){
+        cmd_keyword_ncheck(argc,argv,"--pass",opr_password_arg,31);
+        if(strlen(opr_password_arg)==0){
+            strcpy(opr_password,"");
+        }
+        else if(strlen(opr_password_arg)>19){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The password " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY WARN_YELLO_BOLD " is too long." RESET_DISPLAY "\n",opr_password_arg);
+            strcpy(opr_password,"");
+        }
+        else{
+            strncpy(opr_password,opr_password_arg,19);
+            if(password_complexity_check(opr_password,SPECIAL_PASSWORD_CHARS)!=0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The password " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY WARN_YELLO_BOLD " is not complex enough." RESET_DISPLAY "\n",opr_password_arg);
+                strcpy(opr_password,"");
+            }
+        }
+    }
+    if(strcmp(argv[1],"setpass")==0){
+        run_flag=set_opr_password(opr_password);
+        print_tail_installer();
+        if(run_flag!=0){
+            return 11;
+        }
+        return 0;
+    }
+    cmd_keyword_ncheck(argc,argv,"--hloc",hpcopr_loc,383);
+    cmd_keyword_ncheck(argc,argv,"--cloc",now_crypto_loc,383);
+    cmd_keyword_ncheck(argc,argv,"--hver",hpcopr_ver,255);
     hpcopr_loc_flag=valid_loc_format_or_not(hpcopr_loc);
     crypto_loc_flag=valid_loc_format_or_not(now_crypto_loc);
-
     if(hpcopr_loc_flag!=-1){
         strcpy(hpcopr_ver,"");
     }
@@ -1057,20 +1209,20 @@ int main(int argc, char* argv[]){
             }
         }
     }
-    if(cmd_flag_check(argc,argv,"--accept")!=0){
-        if(license_confirmation()!=0){
-            print_tail_installer();
-            return 1;
-        }
-    }
     if(strcmp(argv[1],"update")==0){
         run_flag=update_services(hpcopr_loc_flag,hpcopr_loc,hpcopr_ver,crypto_loc_flag,now_crypto_loc,rdp_flag);
         print_tail_installer();
-        return run_flag;
+        if(run_flag!=0){
+            return 13;
+        }
+        return 0;
     }
-    if(strcmp(argv[1],"install")==0){
-        run_flag=install_services(hpcopr_loc_flag,hpcopr_loc,hpcopr_ver,crypto_loc_flag,now_crypto_loc,rdp_flag);
+    else{
+        run_flag=install_services(hpcopr_loc_flag,hpcopr_loc,hpcopr_ver,opr_password,crypto_loc_flag,now_crypto_loc,rdp_flag);
         print_tail_installer();
-        return run_flag;
+        if(run_flag!=0){
+            return 15;
+        }
+        return 0;
     }
 }

@@ -10,7 +10,8 @@
 
 int string_to_positive_num(char* string);
 int get_key_value(char* filename, char* key, char ch, char* value);
-void reset_string(char* orig_string);
+void reset_string(char* orig_string); //This function is going to be deprecated
+void reset_nstring(char orig_string[], unsigned int length);
 int fgetline(FILE* file_p, char* line_string);
 int fngetline(FILE* file_p, char* line_string, unsigned int max_length);
 int contain_or_not(const char* line, const char* findkey);

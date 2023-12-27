@@ -11,8 +11,6 @@
 int switch_to_cluster(char* target_cluster_name);
 int glance_clusters(char* target_cluster_name, char* crypto_keyfile);
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_flag, tf_exec_config* tf_run);
-int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_local);
-int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, char* crypto_keyfile); //Decrypt sensitive files of a cluster
 int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_flag, tf_exec_config* tf_run);
 int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* az_subscription, char* az_tenant, char* echo_flag, char* gcp_flag, int batch_flag_local);
 int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile, char* echo_flag, int batch_flag_local);
