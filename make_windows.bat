@@ -22,19 +22,17 @@ if "%~1"=="" (
 	del /s /q /f .\build\*
 	echo [ -INFO- ] Bulding new binaries with the gcc ...
 	gcc .\hpcopr\*.c -Wall -o .\build\hpcopr-win-%hpcopr_version_code%.exe
-	gcc -c .\hpcopr\general_funcs.c -o .\installer\gfuncs.o
-	del /f /s /q .\installer\libgfuncs.a
-	ar -rc .\installer\libgfuncs.a .\installer\gfuncs.o
-	gcc -c .\hpcopr\now_md5.c -o .\installer\md5.o
-    del /f /s /q .\installer\libmd5.a
-    ar -rc .\installer\libmd5.a .\installer\md5.o
-	gcc .\installer\installer.c .\installer\libgfuncs.a .\installer\libmd5.a -Wall -o .\build\installer-win-%installer_version_code%.exe
-	del /f /s /q .\installer\libgfuncs.a
-	del /f /s /q .\installer\gfuncs.o
-	del /f /s /q .\installer\libmd5.a
-	del /f /s /q .\installer\md5.o
-::	gcc .\now-crypto\now-crypto.c -Wall -o .\build\now-crypto-win.exe
+	gcc -c .\hpcopr\general_funcs.c -Wall -o .\installer\gfuncs.o
+    gcc -c .\hpcopr\opr_crypto.c -Wall -o .\installer\ocrypto.o
+    gcc -c .\hpcopr\cluster_general_funcs.c -Wall -o .\installer\cgfuncs.o
+    gcc -c .\hpcopr\time_process.c -Wall -o .\installer\tproc.o
+    gcc -c .\hpcopr\general_print_info.c -Wall -o .\installer\gprint.o
+    gcc -c .\hpcopr\now_md5.c -Wall -o .\installer\md5.o
+    ar -rc .\installer\libnow.a .\installer\gfuncs.o .\installer\ocrypto.o .\installer\cgfuncs.o .\installer\tproc.o .\installer\md5.o .\installer\gprint.o
+	gcc .\installer\installer.c .\installer\libnow.a -Wall -o .\build\installer-win-%installer_version_code%.exe
 	gcc .\now-crypto\now-crypto-v3-aes.c -Wall -Ofast -o .\build\now-crypto-aes-win.exe
+	del /f /s /q .\installer\*.a
+	del /f /s /q .\installer\*.o	
 ) else if "%~1"=="delete" (
 	echo [ START: ] Deleting the binaries now ...
 	del /s /q /f .\build\*

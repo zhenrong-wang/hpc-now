@@ -21,20 +21,18 @@ elif [ "$1" = "build" ]; then
     mkdir -p ./build
     rm -rf ./build/*
     clang ./hpcopr/*.c -Wall -o ./build/hpcopr-dwn-${hpcopr_version_code}.exe
-    clang -c ./hpcopr/general_funcs.c -o ./installer/gfuncs.o
-    rm -rf ./installer/libgfuncs.a
-    ar -rc ./installer/libgfuncs.a ./installer/gfuncs.o
-    rm -rf ./installer/gfuncs.o
+    clang -c ./hpcopr/general_funcs.c -Wall -o ./installer/gfuncs.o
+    clang -c ./hpcopr/opr_crypto.c -Wall -o ./installer/ocrypto.o
+    clang -c ./hpcopr/cluster_general_funcs.c -Wall -o ./installer/cgfuncs.o
+    clang -c ./hpcopr/time_process.c -Wall -o ./installer/tproc.o
+    clang -c ./hpcopr/general_print_info.c -Wall -o ./installer/gprint.o
     clang -c ./hpcopr/now_md5.c -Wall -o ./installer/md5.o
-    rm -rf ./installer/libmd5.a
-    ar -rc ./installer/libmd5.a ./installer/md5.o
-    rm -rf ./installer/md5.o
-    clang ./installer/installer.c ./installer/libgfuncs.a ./installer/libmd5.a -Wall -o ./build/installer-dwn-${installer_version_code}.exe
-#    clang ./now-crypto/now-crypto.c -Wall -lm -o ./build/now-crypto-dwn.exe
+    ar -rc ./installer/libnow.a ./installer/gfuncs.o ./installer/ocrypto.o ./installer/cgfuncs.o ./installer/tproc.o ./installer/md5.o ./installer/gprint.o
+    clang ./installer/installer.c ./installer/libnow.a -Wall -o ./build/installer-dwn-${installer_version_code}.exe
     clang ./now-crypto/now-crypto-v3-aes.c -Wall -Ofast -o ./build/now-crypto-aes-dwn.exe
     chmod +x ./build/*
-    rm -rf ./installer/libgfuncs.a
-    rm -rf ./installer/libmd5.a
+    rm -rf ./installer/*.a
+    rm -rf ./installer/*.o
 elif [ "$1" = "delete" ]; then
     echo "[ START: ] Deleting the binaries now ..."
     rm -rf ./build/*
