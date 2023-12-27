@@ -86,7 +86,7 @@ void print_help_installer(void){
     printf("|   " GENERAL_BOLD "Advanced Options (OPTIONAL):" RESET_DISPLAY "\n");
     printf("|     --pass PASS * Only valid for " HIGH_GREEN_BOLD "install" RESET_DISPLAY " or " HIGH_GREEN_BOLD "setpass" RESET_DISPLAY " option.\n");
     printf("|                   : Set/update the operator's password that includes 3\n");
-    printf("|                     of 4 types:" WARN_YELLO_BOLD "A-Z  a-z  0-9  " SPECIAL_PASSWORD_CHARS RESET_DISPLAY "\n");
+    printf("|                     of 4 types: " WARN_YELLO_BOLD "A-Z  a-z  0-9  " SPECIAL_PASSWORD_CHARS RESET_DISPLAY "\n");
     printf("|     --hloc LOC  * Only valid for " HIGH_GREEN_BOLD "install" RESET_DISPLAY " or " HIGH_GREEN_BOLD "update" RESET_DISPLAY " option.\n");
     printf("|                   : Provide your own location of hpcopr, both URL and local\n");
     printf("|                     filesystem path are accepted. You should guarantee that\n");
