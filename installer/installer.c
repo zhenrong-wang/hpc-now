@@ -629,11 +629,17 @@ int set_opr_password(char* opr_password){
     printf(GENERAL_BOLD "\n[ -INFO- ] Decrypting current files with previous crypto password..." RESET_DISPLAY "\n");
 #ifdef _WIN32
     system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
+    system("takeown /f  c:\\programdata\\hpc-now /r /d y > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now\\* /grant Administrators:F /t > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
 #endif
     if(encrypt_decrypt_clusters("all","decrypt",0)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the current files." RESET_DISPLAY "\n");
+#ifdef _WIN32
+        system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
+        system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
+        system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
+#endif
         return 3;
     }
     generate_random_passwd(random_string);
@@ -648,6 +654,11 @@ int set_opr_password(char* opr_password){
     file_p=fopen("/Applications/.hpc-now/.now_crypto_seed.lock","w+");
 #endif
     if(file_p==NULL){
+#ifdef _WIN32
+        system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
+        system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
+        system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
+#endif
         return -1;
     }
     fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
@@ -667,13 +678,13 @@ int set_opr_password(char* opr_password){
     printf(GENERAL_BOLD "\n[ -INFO- ] Encrypting files with the new crypto password..." RESET_DISPLAY "\n");
     if(encrypt_decrypt_clusters("all","encrypt",0)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt files with new crypto key file." RESET_DISPLAY "\n");
-        return 5;
-    }
 #ifdef _WIN32
     system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
     system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
 #endif
+        return 5;
+    }
     printf( GENERAL_BOLD "\n[ -DONE- ] The operator password has been updated." RESET_DISPLAY "\n");
     return 0;
 }
