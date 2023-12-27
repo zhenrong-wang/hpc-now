@@ -50,17 +50,11 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
                     printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt the operator's private SSH key." RESET_DISPLAY "\n");
                     final_flag++;
                 }
-                else{
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Decrypted" RESET_DISPLAY " the operator's private SSH key.\n");
-                }
             }
             else{
                 if(encrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE)!=0){
                     printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to encrypt the operator's private SSH key." RESET_DISPLAY "\n");
                     final_flag++;
-                }
-                else{
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Encrypted" RESET_DISPLAY " the operator's private SSH key.\n");
                 }
             }
         }
@@ -148,17 +142,11 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt the operator's private SSH key." RESET_DISPLAY "\n");
                 final_flag++;
             }
-            else{
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Decrypted" RESET_DISPLAY " the operator's private SSH key.\n");
-            }
         }
         else{
             if(encrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE)!=0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to encrypt the operator's private SSH key." RESET_DISPLAY "\n");
                 final_flag++;
-            }
-            else{
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Encrypted" RESET_DISPLAY " the operator's private SSH key.\n");
             }
         }
         if(final_flag!=0){
