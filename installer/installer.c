@@ -633,7 +633,7 @@ int set_opr_password(char* opr_password){
         printf(GENERAL_BOLD "\n[ -INFO- ] Specified password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_password);
         strncpy(opr_passwd_temp,opr_password,19);
     }
-    printf(GENERAL_BOLD "\n[ -INFO- ] Decrypting current files with previous crypto password..." RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "\n[ STEP 1 ] Decrypting current files with previous crypto password..." RESET_DISPLAY "\n");
 #ifdef _WIN32
     system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
     system("takeown /f  c:\\programdata\\hpc-now /r /d y > nul 2>&1");
@@ -680,7 +680,7 @@ int set_opr_password(char* opr_password){
     system("chown -R root:root /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
 #endif
-    printf(GENERAL_BOLD "\n[ -INFO- ] Encrypting files with the new crypto password..." RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "\n[ STEP 2 ] Encrypting files with the new crypto password..." RESET_DISPLAY "\n");
     if(encrypt_decrypt_clusters("all","encrypt",0)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt files with new crypto key file." RESET_DISPLAY "\n");
         restore_perm_windows();

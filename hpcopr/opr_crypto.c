@@ -40,14 +40,14 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
     int i=1;
     if(strcmp(option,"decrypt")==0){
         if(strcmp(cluster_list,"all")==0){
-            printf(FATAL_RED_BOLD "|* VERY RISKY! Decrypting files of " RESET_DISPLAY WARN_YELLO_BOLD "ALL" RESET_DISPLAY FATAL_RED_BOLD " the clusters!" RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "|*         VERY RISKY! Decrypting files of " RESET_DISPLAY WARN_YELLO_BOLD "ALL" RESET_DISPLAY FATAL_RED_BOLD " the clusters!" RESET_DISPLAY "\n");
         }
         else{
-            printf(FATAL_RED_BOLD "|* VERY RISKY! Decrypting files of cluster(s) " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " !" RESET_DISPLAY "\n",cluster_list);
+            printf(FATAL_RED_BOLD "|*         VERY RISKY! Decrypting files of cluster(s) " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " !" RESET_DISPLAY "\n",cluster_list);
         }
     }
     else{
-        printf(FATAL_RED_BOLD "|* Encrypting the cluster's sensitive files with now-crypto." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "|*         Encrypting the cluster's sensitive files with now-crypto." RESET_DISPLAY "\n");
     }
     flag=prompt_to_confirm("ARE YOUR SURE TO CONTINUE?",CONFIRM_STRING,batch_flag_local);
     if(flag==1){
