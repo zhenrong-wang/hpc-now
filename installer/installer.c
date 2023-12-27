@@ -76,29 +76,29 @@ void print_help_installer(void){
     printf("|     - Example 2: " HIGH_GREEN_BOLD "sudo ./installer.exe install --cloc ./now-crypto-aes.exe" RESET_DISPLAY "\n");
 #endif
     printf(GENERAL_BOLD "| General Options (REQUIRED):" RESET_DISPLAY "\n");
-    printf("|   install       : Install or repair the HPC-NOW Services on your device.\n");
-    printf("|   update        : Update the hpcopr to the latest or your own version.\n");
-    printf("|   uninstall     : Remove the HPC-NOW services and all relevant data.\n");
-    printf("|   help          : Show this information.\n");
-    printf("|   version       : Show the version code of this installer.\n");
-    printf("|   setpass       : Update the operator's password.\n");
-    printf("|   verlist       : Show the available version list of hpcopr.\n");
+    printf("|     install       : Install or repair the HPC-NOW Services on your device.\n");
+    printf("|     update        : Update the hpcopr to the latest or your own version.\n");
+    printf("|     uninstall     : Remove the HPC-NOW services and all relevant data.\n");
+    printf("|     help          : Show this information.\n");
+    printf("|     version       : Show the version code of this installer.\n");
+    printf("|     setpass       : Update the operator's password.\n");
+    printf("|     verlist       : Show the available version list of hpcopr.\n");
     printf(GENERAL_BOLD "| Advanced Options (OPTIONAL):" RESET_DISPLAY "\n");
-    printf("|   --accept      : accept the license terms and skip reading them.\n");
-    printf("|   --pass PASS * Only valid for install or update option.\n");
-    printf("|                 : Set/update the operator's password that includes 3 of 4 types:\n");
-    printf("|                   " WARN_YELLO_BOLD "A-Z  a-z  0-9  " SPECIAL_PASSWORD_CHARS RESET_DISPLAY "\n");
-    printf("|   --hloc LOC  * Only valid for install or update option.\n");
-    printf("|                 : Provide your own location of hpcopr, both URL and local\n");
-    printf("|                   filesystem path are accepted. You should guarantee that\n");
-    printf("|                   the location points to a valid hpcopr executable.\n");
-    printf("|   --cloc LOC  * Only valid for install or update option.\n");
-    printf("|                 : Provide your own location of now-crypto, similar to\n");
-    printf("|                   the --hloc parameter above.\n");
-    printf("|   --hver VER  * Only valid when hpcoprloc is absent.\n");
-    printf("|                 : Specify the version code of hpcopr, i.e. 0.2.0.0161\n");
-    printf("|   --rdp         : Install the RDP client for GNU/Linux or macOS. Default:\n");
-    printf("|                   GNU/Linux: Remmina | macOS: Microsoft RDP\n");
+    printf("|     --accept      : accept the license terms and skip reading them.\n");
+    printf("|     --pass PASS * Only valid for install or update option.\n");
+    printf("|                   : Set/update the operator's password that includes 3 of 4 types:\n");
+    printf("|                     " WARN_YELLO_BOLD "A-Z  a-z  0-9  " SPECIAL_PASSWORD_CHARS RESET_DISPLAY "\n");
+    printf("|     --hloc LOC  * Only valid for install or update option.\n");
+    printf("|                   : Provide your own location of hpcopr, both URL and local\n");
+    printf("|                     filesystem path are accepted. You should guarantee that\n");
+    printf("|                     the location points to a valid hpcopr executable.\n");
+    printf("|     --cloc LOC  * Only valid for install or update option.\n");
+    printf("|                   : Provide your own location of now-crypto, similar to\n");
+    printf("|                     the --hloc parameter above.\n");
+    printf("|     --hver VER  * Only valid when hpcoprloc is absent.\n");
+    printf("|                   : Specify the version code of hpcopr, i.e. 0.2.0.0161\n");
+    printf("|     --rdp         : Install the RDP client for GNU/Linux or macOS. Default:\n");
+    printf("|                     GNU/Linux: Remmina | macOS: Microsoft RDP\n");
 }
 
 /*
