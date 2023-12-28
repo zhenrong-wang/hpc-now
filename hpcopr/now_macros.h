@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0015"
+#define CORE_VERSION_CODE "0.3.1.0017"
 
 #ifdef _WIN32
 #define PATH_SLASH "\\"
@@ -244,7 +244,7 @@
 #define CMD_FLAG_NUM 30
 #define CMD_KWDS_NUM 49
 
-#define SPECIAL_PASSWORD_CHARS "~@&(){}[]=,.!#$"
+#define SPECIAL_PASSWORD_CHARS "~@&(){}[]=,.;:!#$%%+-/|'\"\\" 
 
 /* Usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/COPYING"

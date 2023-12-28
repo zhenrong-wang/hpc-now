@@ -98,7 +98,7 @@ void print_help_installer(void){
     printf("|                   : Specify the version code of hpcopr, i.e. 0.2.0.0161\n");
     printf("|     --rdp         : Install the RDP client for GNU/Linux or macOS. Default:\n");
     printf("|                     GNU/Linux: Remmina | macOS: Microsoft RDP\n");
-    printf("|     --accept      : accept the license terms and skip reading them.\n");
+    printf("|     --accept      : accept the license terms to " HIGH_GREEN_BOLD "install" RESET_DISPLAY " or " HIGH_GREEN_BOLD "update" RESET_DISPLAY ".\n");
 }
 
 /*
@@ -1153,13 +1153,6 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(argv[1],"uninstall")==0){
-        if(cmd_flag_check(argc,argv,"--accept")!=0){
-            run_flag=license_confirmation();
-        }
-        if(run_flag!=0){
-            print_tail_installer();
-            return 2;
-        }
         run_flag=uninstall_services();
         print_tail_installer();
         if(run_flag!=0){
@@ -1174,8 +1167,8 @@ int main(int argc, char* argv[]){
         print_tail_installer();
         return 4;
     }
-    if(cmd_flag_check(argc,argv,"--accept")!=0){
-        if(license_confirmation()!=0){
+    if(strcmp(argv[1],"install")==0||strcmp(argv[1],"update")==0){
+        if(cmd_flag_check(argc,argv,"--accept")!=0&&license_confirmation()!=0){
             print_tail_installer();
             return 2;
         }

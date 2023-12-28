@@ -72,14 +72,14 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
     int i=1;
     if(strcmp(option,"decrypt")==0){
         if(strcmp(cluster_list,"all")==0){
-            printf(FATAL_RED_BOLD "|*         VERY RISKY! Decrypting files of " RESET_DISPLAY WARN_YELLO_BOLD "ALL" RESET_DISPLAY FATAL_RED_BOLD " the clusters!" RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "|*         VERY RISKY! Decrypting files of " RESET_DISPLAY GENERAL_BOLD "ALL" RESET_DISPLAY WARN_YELLO_BOLD " the clusters!" RESET_DISPLAY "\n");
         }
         else{
-            printf(FATAL_RED_BOLD "|*         VERY RISKY! Decrypting files of cluster(s) " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " !" RESET_DISPLAY "\n",cluster_list);
+            printf(WARN_YELLO_BOLD "|*         VERY RISKY! Decrypting files of cluster(s) " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " !" RESET_DISPLAY "\n",cluster_list);
         }
     }
     else{
-        printf(FATAL_RED_BOLD "|*         Encrypting the cluster's sensitive files with now-crypto." RESET_DISPLAY "\n");
+        printf(WARN_YELLO_BOLD "|*         Encrypting the cluster's sensitive files with now-crypto-aes." RESET_DISPLAY "\n");
     }
     flag=prompt_to_confirm("ARE YOUR SURE TO CONTINUE?",CONFIRM_STRING,batch_flag_local);
     if(flag==1){
@@ -118,13 +118,13 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
                     final_flag++;
                 }
                 else{
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Decrypted" RESET_DISPLAY " sensitive files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_name_temp);
+                    printf(GENERAL_BOLD "[ -INFO- ] Decrypted" RESET_DISPLAY " sensitive files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_name_temp);
                 }
             }
             else{
                 encrypt_decrypt_all_user_ssh_privkeys(cluster_name_temp,"encrypt",CRYPTO_KEY_FILE);
                 delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Encrypted" RESET_DISPLAY " sensitive files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_name_temp);
+                printf(GENERAL_BOLD "[ -INFO- ] Encrypted" RESET_DISPLAY " sensitive files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_name_temp);
             }
         }
         fclose(file_p);
@@ -134,7 +134,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             printf(WARN_YELLO_BOLD "[ -WARN- ] Cluster(s) %sion finished with %d failed cluster(s)." RESET_DISPLAY "\n",option,final_flag);
         }
         else{
-            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY WARN_YELLO_BOLD " Cluster(s) %sion" RESET_DISPLAY " finished successfully.\n",option);
+            printf(GENERAL_BOLD "[ -DONE- ] Cluster(s) %sion" RESET_DISPLAY " finished successfully.\n",option);
         }
         // Now decrypt/encrypt the operator's private SSH key. That is SSHKEY_DIR/now-cluster-login
         if(strcmp(option,"decrypt")==0){
@@ -175,14 +175,14 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
                 return 7;
             }
             else{
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Decrypted" RESET_DISPLAY " files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_list);
+                printf(GENERAL_BOLD "[ -INFO- ] Decrypted" RESET_DISPLAY " files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_list);
                 return 0;
             }
         }
         else{
             encrypt_decrypt_all_user_ssh_privkeys(cluster_list,"encrypt",CRYPTO_KEY_FILE);
             delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Encrypted" RESET_DISPLAY " files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_list);
+            printf(GENERAL_BOLD "[ -INFO- ] Encrypted" RESET_DISPLAY " files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_list);
             return 0;
         }
     }
@@ -209,21 +209,21 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
                 final_flag++;
             }
             else{
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Decrypted" RESET_DISPLAY " files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_name_temp);
+                printf(GENERAL_BOLD "[ -INFO- ] Decrypted" RESET_DISPLAY " files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_name_temp);
             }
             i++;
         }
         else{
             encrypt_decrypt_all_user_ssh_privkeys(cluster_name_temp,"encrypt",CRYPTO_KEY_FILE);
             delete_decrypted_files(cluster_workdir_temp,CRYPTO_KEY_FILE);
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY WARN_YELLO_BOLD " Encrypted" RESET_DISPLAY " files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_name_temp);
+            printf(GENERAL_BOLD "[ -INFO- ] Encrypted" RESET_DISPLAY " files of the cluster " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",cluster_name_temp);
         }
     }
     if(final_flag!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Cluster(s) %sion finished with %d failed cluster(s)." RESET_DISPLAY "\n",option,final_flag);
     }
     else{
-        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY WARN_YELLO_BOLD " Cluster(s) %sion" RESET_DISPLAY " finished successfully.\n",option);
+        printf(GENERAL_BOLD "[ -DONE- ] Cluster(s) %sion" RESET_DISPLAY " finished successfully.\n",option);
     }
     if(final_flag!=0){
         return 20+final_flag;
