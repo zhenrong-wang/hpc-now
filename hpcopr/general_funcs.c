@@ -162,7 +162,6 @@ int get_key_nvalue(char* filename, unsigned int linelen_max, char* key, char ch,
         reset_nstring(value_buffer,valen_max);
         get_seq_nstring(line_buffer,ch,1,key_buffer,strlen(key)+8);
         get_seq_nstring(line_buffer,ch,2,value_buffer,valen_max);
-        //printf("%s\t%s\t%s\n",line_buffer,key_buffer,value_buffer);
         if(strcmp(key,key_buffer)==0){
             strncpy(value,value_buffer,valen_max-1);
             fclose(file_p);

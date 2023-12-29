@@ -146,7 +146,7 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
     char cluster_role[16]="";
     char cluster_role_ext[32]="";
     int run_flag;
-    get_state_value(workdir,"master_public_ip:",remote_address);
+    get_state_nvalue(workdir,"master_public_ip:",remote_address,32);
     cluster_role_detect(workdir,cluster_role,cluster_role_ext);
     if(strcmp(username,"root")==0&&strcmp(cluster_role,"opr")==0){
         if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE)!=0){
@@ -356,7 +356,7 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     char private_key[FILENAME_LENGTH]="";
     char remote_address[32]="";
     int run_flag;
-    if(get_state_value(workdir,"master_public_ip:",remote_address)!=0){
+    if(get_state_nvalue(workdir,"master_public_ip:",remote_address,32)!=0){
         return -7;
     }
     if(decrypt_opr_privkey(sshkey_folder,CRYPTO_KEY_FILE)!=0){
@@ -385,7 +385,7 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char cluster_role[16]="";
     char cluster_role_ext[32]="";
-    if(get_state_value(workdir,"master_public_ip:",remote_address)!=0){
+    if(get_state_nvalue(workdir,"master_public_ip:",remote_address,32)!=0){
         return -7;
     }
     get_cluster_name(cluster_name,workdir);
@@ -545,7 +545,7 @@ int display_cloud_info(char* workdir){
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
         get_ak_sk(filename_temp,CRYPTO_KEY_FILE,cloud_ak,cloud_sk_buffer,cloud_flag_buffer);
         if(strcmp(cloud_flag,"CLOUD_F")==0){  
-            get_azure_info(workdir,az_subscription_id,az_tenant_id);
+            get_azure_ninfo(workdir,LINE_LENGTH_SHORT,az_subscription_id,az_tenant_id,128);
         }
     }
     else{
@@ -610,6 +610,22 @@ int get_azure_info(char* workdir, char* az_subscription_id, char* az_tenant_id){
         return 1;
     }
 //    printf("\n%s\n%s\n",az_subscription_id,az_tenant_id);
+    return 0;
+}
+
+int get_azure_ninfo(char* workdir, unsigned int linelen_max, char* az_subscription_id, char* az_tenant_id, unsigned int id_len_max){
+    char vaultdir[DIR_LENGTH]="";
+    char az_extra_info_file[FILENAME_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    snprintf(az_extra_info_file,FILENAME_LENGTH-1,"%s%s.az_extra.info",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(az_extra_info_file)!=0){
+        return -1;
+    }
+    get_key_nvalue(az_extra_info_file,linelen_max,"azure_subscription_id:",' ',az_subscription_id,id_len_max);
+    get_key_nvalue(az_extra_info_file,linelen_max,"azure_tenant_id:",' ',az_tenant_id,id_len_max);
+    if(strlen(az_subscription_id)==0||strlen(az_tenant_id)==0){
+        return 1;
+    }
     return 0;
 }
 
@@ -756,15 +772,15 @@ int valid_vm_config_or_not(char* workdir, char* vm_config){
 }
 
 int get_compute_node_num(char* statefile, char* option){
-    char get_num[4]="";
+    char get_num[8]="";
     if(strcmp(option,"all")==0){
-        get_key_value(statefile,"total_compute_nodes:",' ',get_num); 
+        get_key_nvalue(statefile,LINE_LENGTH_SHORT,"total_compute_nodes:",' ',get_num,8); 
     }
     else if(strcmp(option,"on")==0){
-        get_key_value(statefile,"running_compute_nodes:",' ',get_num); 
+        get_key_nvalue(statefile,LINE_LENGTH_SHORT,"running_compute_nodes:",' ',get_num,8); 
     }
     else{
-        get_key_value(statefile,"down_compute_nodes:",' ',get_num); 
+        get_key_nvalue(statefile,LINE_LENGTH_SHORT,"down_compute_nodes:",' ',get_num,8); 
     }
     return string_to_positive_num(get_num);
 }
@@ -1374,6 +1390,14 @@ int get_state_value(char* workdir, char* key, char* value){
     return get_key_value(statefile,key,' ',value);
 }
 
+int get_state_nvalue(char* workdir, char* key, char* value, unsigned int valen_max){
+    char stackdir[DIR_LENGTH]="";
+    char statefile[FILENAME_LENGTH]="";
+    create_and_get_stackdir(workdir,stackdir);
+    snprintf(statefile,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
+    return get_key_nvalue(statefile,LINE_LENGTH_SHORT,key,' ',value,valen_max);
+}
+
 //Generate Operator SSHKEY pair and ecnrypt the private key.
 int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile){
     char cmdline[CMDLINE_LENGTH]="";
@@ -1540,7 +1564,7 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     find_and_get(filename_temp,"Master","Node","IP:",1,"Master","Node","IP:",' ',4,master_address_prev);
-    get_state_value(workdir,"master_public_ip:",master_address);
+    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
     if(strcmp(master_address,master_address_prev)!=0){
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
         global_replace(filename_temp,master_address_prev,master_address);
@@ -1694,7 +1718,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     int node_num=0;
     char node_num_string[8]="";
     int running_node_num=0;
-    char running_node_num_string[4]="";
+    char running_node_num_string[8]="";
     int max_cluster_name_length=get_max_cluster_name_length();
     int current_cluster_name_length=0;
     int i;
@@ -1713,21 +1737,21 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     }
     cluster_role_detect(workdir,cluster_role,cluster_role_ext);
     //printf("HERE!\n");
-    get_key_value(statefile,"master_public_ip:",' ',master_address);
-    get_key_value(statefile,"master_status:",' ',master_status);
-    get_key_value(statefile,"database_status:",' ',db_status);
-    get_key_value(statefile,"master_config:",' ',master_config);
-    get_key_value(statefile,"compute_config:",' ',compute_config);
-    get_key_value(statefile,"ht_flag:",' ',ht_status);
-    get_key_value(statefile,"total_compute_nodes:",' ',node_num_string);
-    get_key_value(statefile,"payment_method:",' ',payment_method);
-    get_key_value(statefile,"shared_volume_gb:",' ',shared_volume);
+    get_key_nvalue(statefile,LINE_LENGTH_SHORT,"master_public_ip:",' ',master_address,32);
+    get_key_nvalue(statefile,LINE_LENGTH_SHORT,"master_status:",' ',master_status,16);
+    get_key_nvalue(statefile,LINE_LENGTH_SHORT,"database_status:",' ',db_status,16);
+    get_key_nvalue(statefile,LINE_LENGTH_SHORT,"master_config:",' ',master_config,16);
+    get_key_nvalue(statefile,LINE_LENGTH_SHORT,"compute_config:",' ',compute_config,16);
+    get_key_nvalue(statefile,LINE_LENGTH_SHORT,"ht_flag:",' ',ht_status,16);
+    get_key_nvalue(statefile,LINE_LENGTH_SHORT,"total_compute_nodes:",' ',node_num_string,8);
+    get_key_nvalue(statefile,LINE_LENGTH_SHORT,"payment_method:",' ',payment_method,16);
+    get_key_nvalue(statefile,LINE_LENGTH_SHORT,"shared_volume_gb:",' ',shared_volume,16);
     if(strlen(ht_status)!=0){
         snprintf(ht_status_ext,31,"HT-%s",ht_status);
     }
     //printf("HERE!\n");
     node_num=string_to_positive_num(node_num_string);
-    get_key_value(statefile,"running_compute_nodes:",' ',running_node_num_string);
+    get_key_nvalue(statefile,LINE_LENGTH_SHORT,"running_compute_nodes:",' ',running_node_num_string,8);
     running_node_num=string_to_positive_num(running_node_num_string);
     if(strcmp(payment_method,"month")==0){
         strcpy(payment_method_long,"Monthly PrePaid & Automatic Renewal");
@@ -1742,9 +1766,9 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         printf("|          +-+-db(%s)\n",db_status);
         for(i=0;i<node_num;i++){
             snprintf(string_temp,31,"compute%d_private_ip:",i+1);
-            get_key_value(statefile,string_temp,' ',compute_address);
+            get_key_nvalue(statefile,string_temp,' ',compute_address);
             snprintf(string_temp,31,"compute%d_status:",i+1);
-            get_key_value(statefile,string_temp,' ',compute_status);
+            get_key_nvalue(statefile,LINE_LENGTH_SHORT,string_temp,' ',compute_status,16);
             if(strlen(ht_status_ext)!=0){
                 printf("|            +-+-compute%d(%s,%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config,ht_status_ext);
             }
@@ -1852,12 +1876,12 @@ int cluster_empty_or_not(char* workdir){
 int cluster_asleep_or_not(char* workdir){
     char master_state[32]="";
     char running_compute_nodes[8]="";
-    get_state_value(workdir,"master_status:",master_state);
+    get_state_nvalue(workdir,"master_status:",master_state,32);
     if(strcmp(master_state,"running")!=0&&strcmp(master_state,"Running")!=0&&strcmp(master_state,"RUNNING")!=0){
         return 0;
     }
     else{
-        get_state_value(workdir,"running_compute_nodes:",running_compute_nodes);
+        get_state_nvalue(workdir,"running_compute_nodes:",running_compute_nodes,8);
         if(strcmp(running_compute_nodes,"0")==0){
             return 1;
         }
@@ -1872,7 +1896,7 @@ int cluster_full_running_or_not(char* workdir){
         return 1;
     }
     char down_compute_nodes[8]="";
-    get_state_value(workdir,"down_compute_nodes:",down_compute_nodes);
+    get_state_nvalue(workdir,"down_compute_nodes:",down_compute_nodes,8);
     if(strcmp(down_compute_nodes,"0")==0){
         return 0;
     }
@@ -1988,8 +2012,8 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     find_and_get(filename_temp,"CLUSTER_ID","","",1,"CLUSTER_ID","","",' ',3,cluster_id);
     find_and_get(filename_temp,"REGION_ID","","",1,"REGION_ID","","",' ',3,cloud_region);
     snprintf(unique_cluster_id,63,"%s-%s",cluster_id,randstr);
-    get_state_value(workdir,"master_config:",master_config);
-    get_state_value(workdir,"compute_config:",compute_config);
+    get_state_nvalue(workdir,"master_config:",master_config,16);
+    get_state_nvalue(workdir,"compute_config:",compute_config,16);
     get_cloud_flag(workdir,cloud_vendor);
     time(&current_time_long);
     time_p=gmtime(&current_time_long);
@@ -2123,8 +2147,8 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
         return -3;
     }
-    get_azure_info(workdir,az_subscription_id,az_tenant_id);
-    get_state_value(workdir,"master_public_ip:",master_address);
+    get_azure_ninfo(workdir,LINE_LENGTH_SHORT,az_subscription_id,az_tenant_id,128);
+    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
     printf(WARN_YELLO_BOLD "\n+------------ HPC-NOW CLUSTER SENSITIVE INFORMATION: ------------+" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD "| Unique Cluster ID: " RESET_DISPLAY "%s\n",unique_cluster_id);
     printf(WARN_YELLO_BOLD "+-------------- CLUSTER PORTAL AND *CREDENTIALS* ----------------+" RESET_DISPLAY "\n");
@@ -2347,7 +2371,7 @@ int cluster_ssh(char* workdir, char* username, char* role_flag, char* sshkey_dir
     char private_sshkey[FILENAME_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     int run_flag;
-    get_state_value(workdir,"master_public_ip:",master_address);
+    get_state_nvalue(workdir,"master_public_ip:",master_address,64);
     get_cluster_name(cluster_name,workdir);
     if(strcmp(role_flag,"opr")==0){
         if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE)!=0){
@@ -3403,7 +3427,7 @@ int start_rdp_connection(char* cluster_workdir, char* username, int password_fla
     if(get_cluster_name(cluster_name,cluster_workdir)!=0){
         return 3;
     }
-    if(get_state_value(cluster_workdir,"master_public_ip:",master_address)!=0){
+    if(get_state_nvalue(cluster_workdir,"master_public_ip:",master_address,32)!=0){
         return 5;
     }
     if(generate_rdp_file(cluster_name,master_address,username)!=0){

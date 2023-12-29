@@ -267,7 +267,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
         return 3;
     }
     get_workdir(cluster_workdir,target_cluster_name);
-    get_state_value(cluster_workdir,"payment_method:",curr_payment_method);
+    get_state_nvalue(cluster_workdir,"payment_method:",curr_payment_method,16);
     if(strcmp(curr_payment_method,"month")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
         return -1;
@@ -902,7 +902,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     char curr_payment_method[16]="";
     int i;
     int compute_node_num=0;
-    get_state_value(workdir,"payment_method:",curr_payment_method);
+    get_state_nvalue(workdir,"payment_method:",curr_payment_method,16);
     if(strcmp(curr_payment_method,"month")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
         return -3;
@@ -1522,7 +1522,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         }
     }
     else{
-        get_state_value(workdir,"ht_flag:",prev_htflag);
+        get_state_nvalue(workdir,"ht_flag:",prev_htflag,8);
         if(strcmp(htflag,"ON")!=0&&strcmp(htflag,"OFF")!=0){
             ht_diff_flag=0;
         }
@@ -1745,7 +1745,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a positive number as the new volume." RESET_DISPLAY "\n");
         return 3;
     }
-    get_state_value(workdir,"shared_volume_gb:",prev_volume);
+    get_state_nvalue(workdir,"shared_volume_gb:",prev_volume,16);
     prev_volume_num=string_to_positive_num(prev_volume);
     if(new_volume_num<prev_volume_num){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a new volume larger than the previous volume %d." RESET_DISPLAY "\n",prev_volume_num);
@@ -2359,7 +2359,7 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
     }
     create_and_get_stackdir(workdir,stackdir);
     snprintf(statefile,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
-    get_state_value(workdir,"payment_method:",curr_payment_method);
+    get_state_nvalue(workdir,"payment_method:",curr_payment_method,8);
     if(strcmp(curr_payment_method,new_payment_method)==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The cluster payment has already been " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD "." RESET_DISPLAY "\n",curr_payment_method);
         return 3;

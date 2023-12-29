@@ -36,7 +36,10 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
 int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char* commands, char* extra_options, int delay_minutes, int silent_flag, char* std_redirect, char* err_redirect);
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag);
 int display_cloud_info(char* workdir);
+
 int get_azure_info(char* workdir, char* az_subscription_id, char* az_tenant_id);
+int get_azure_ninfo(char* workdir, unsigned int linelen_max, char* az_subscription_id, char* az_tenant_id, unsigned int id_len_max);
+
 int get_cpu_num(const char* vm_model);
 int get_compute_node_num(char* currentstate_file, char* option);
 int decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum);
@@ -48,7 +51,10 @@ int decrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum);
 int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum);
 int decryption_status(char* workdir);
 int getstate(char* workdir, char* crypto_keyfile);
+
 int get_state_value(char* workdir, char* key, char* value);
+int get_state_nvalue(char* workdir, char* key, char* value, unsigned int valen_max);
+
 int update_cluster_summary(char* workdir, char* crypto_keyfile);
 int archive_log(char* logarchive, char* logfile);
 void update_compute_template(char* stackdir, char* cloud_flag);

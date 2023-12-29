@@ -29,8 +29,8 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     char node_num_string[128]="";
     char node_cores_string[128]="";
     char duration_hours_string[128]="";
-    char cluster_node_num_string[4]="";
-    char cluster_node_cores_string[4]="";
+    char cluster_node_num_string[8]="";
+    char cluster_node_cores_string[8]="";
     char filename_temp[FILENAME_LENGTH]="";
     char app_name[128]="";
     char exec_name[128]="";
@@ -46,8 +46,8 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     int num_temp=0;
     int i;
 
-    get_state_value(workdir,"total_compute_nodes:",cluster_node_num_string);
-    get_state_value(workdir,"compute_node_cores:",cluster_node_cores_string);
+    get_state_nvalue(workdir,"total_compute_nodes:",cluster_node_num_string,8);
+    get_state_nvalue(workdir,"compute_node_cores:",cluster_node_cores_string,8);
     cluster_node_num=string_to_positive_num(cluster_node_num_string);
     cluster_node_cores=string_to_positive_num(cluster_node_cores_string);
 

@@ -1247,7 +1247,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         }
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     }
-    get_state_value(workdir,"master_public_ip:",master_address);
+    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,init_info.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
@@ -1574,7 +1574,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
         sleep(1);
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
-    get_state_value(workdir,"master_public_ip:",master_address);
+    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,init_info.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
@@ -1895,7 +1895,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     find_and_get(filename_temp,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk);
     snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_state_value(workdir,"master_public_ip:",master_address);
+    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,init_info.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
@@ -2255,7 +2255,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
         sleep(1);
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
-    get_state_value(workdir,"master_public_ip:",master_address);
+    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
@@ -2583,7 +2583,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
         sleep(1);
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
-    get_state_value(workdir,"master_public_ip:",master_address);
+    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
@@ -2716,7 +2716,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
         return -1;
     }
-    if(get_azure_info(workdir,subscription_id,tenant_id)!=0){
+    if(get_azure_ninfo(workdir,LINE_LENGTH_SHORT,subscription_id,tenant_id,256)!=0){
         return -1;
     }
     if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
@@ -2872,7 +2872,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
         sleep(1);
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
-    get_state_value(workdir,"master_public_ip:",master_address);
+    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(bucket_id,init_conf.region_id,bucket_ak,bucket_sk,subscription_id,tenant_id,filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
@@ -3181,7 +3181,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     save_bucket_info(randstr,init_conf.region_id,bucket_selflink,"","","",filename_temp,cloud_flag);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
     
-    get_state_value(workdir,"master_public_ip:",master_address);
+    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: gs: %s\nNetDisk Region: %s\nNetDisk Self Link: %s\nNetDisk Short Link: gs://%s\n",master_address,init_conf.master_passwd,randstr,init_conf.region_id,bucket_selflink,randstr);

@@ -200,7 +200,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        get_azure_info(workdir,az_subscription_id,az_tenant_id);
+        get_azure_ninfo(workdir,LINE_LENGTH_SHORT,az_subscription_id,az_tenant_id,128);
         if(strcmp(cmd_type,"copy")==0){
             snprintf(cmdline,2047,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s%s %s%s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucket_ak,SET_ENV_CMD,bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucket_address,real_source_path,bucket_address,real_target_path,real_rflag,real_fflag);
         }
@@ -342,7 +342,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        if(get_azure_info(workdir,az_subscription_id,az_tenant_id)!=0){
+        if(get_azure_ninfo(workdir,LINE_LENGTH_SHORT,az_subscription_id,az_tenant_id,128)!=0){
             return -1;
         }
         if(strcmp(cmd_type,"delete")==0){
@@ -663,7 +663,7 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        if(get_azure_info(workdir,az_subscription_id,az_tenant_id)!=0){
+        if(get_azure_ninfo(workdir,LINE_LENGTH_SHORT,az_subscription_id,az_tenant_id,128)!=0){
             return -1;
         }
         if(strcmp(cmd_type,"rget")==0){

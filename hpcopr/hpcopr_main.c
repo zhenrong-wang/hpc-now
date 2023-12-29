@@ -1703,7 +1703,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 9;
         }
-        get_state_value(workdir,"shared_volume_gb:",string_temp2);
+        get_state_nvalue(workdir,"shared_volume_gb:",string_temp2,16);
         if(string_to_positive_num(string_temp)<string_to_positive_num(string_temp2)){
             printf(FATAL_RED_BOLD "[ FATAL: ] The new volume %s is not larger than the previous %s." RESET_DISPLAY "\n",string_temp,string_temp2);
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
