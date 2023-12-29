@@ -1766,7 +1766,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         printf("|          +-+-db(%s)\n",db_status);
         for(i=0;i<node_num;i++){
             snprintf(string_temp,31,"compute%d_private_ip:",i+1);
-            get_key_nvalue(statefile,string_temp,' ',compute_address);
+            get_key_nvalue(statefile,LINE_LENGTH_SHORT,string_temp,' ',compute_address,32);
             snprintf(string_temp,31,"compute%d_status:",i+1);
             get_key_nvalue(statefile,LINE_LENGTH_SHORT,string_temp,' ',compute_status,16);
             if(strlen(ht_status_ext)!=0){
@@ -2140,7 +2140,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     if(get_nucid(workdir,unique_cluster_id,32)!=0){
         return -1;
     }
-    if(get_bucket_info(workdir,crypto_keyfile,&bucketinfo)!=0){
+    if(get_bucket_ninfo(workdir,crypto_keyfile,LINE_LENGTH_SHORT,&bucketinfo)!=0){
         return -3;
     }
     get_azure_ninfo(workdir,LINE_LENGTH_SHORT,az_subscription_id,az_tenant_id,128);
@@ -2540,20 +2540,20 @@ int get_bucket_ninfo(char* workdir, char* crypto_keyfile, unsigned int linelen_m
         return 3;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%svault%sbucket_info.txt",workdir,PATH_SLASH,PATH_SLASH);
-    if(get_key_nvalue(filename_temp,LINE_LENGTH_SHORT,"BUCKET:",' ',bucketinfo->bucket_address,128)==0){
+    if(get_key_nvalue(filename_temp,linelen_max,"BUCKET:",' ',bucketinfo->bucket_address,128)==0){
         i++;
     }
-    if(get_key_nvalue(filename_temp,LINE_LENGTH_SHORT,"REGION:",' ',bucketinfo->region_id,32)==0){
+    if(get_key_nvalue(filename_temp,linelen_max,"REGION:",' ',bucketinfo->region_id,32)==0){
         i++;
     }
-    if(get_key_nvalue(filename_temp,LINE_LENGTH_SHORT,"BUCKET_AK:",' ',bucketinfo->bucket_ak,128)==0){
+    if(get_key_nvalue(filename_temp,linelen_max,"BUCKET_AK:",' ',bucketinfo->bucket_ak,128)==0){
         i++;
     }
-    if(get_key_nvalue(filename_temp,LINE_LENGTH_SHORT,"BUCKET_SK:",' ',bucketinfo->bucket_sk,128)==0){
+    if(get_key_nvalue(filename_temp,linelen_max,"BUCKET_SK:",' ',bucketinfo->bucket_sk,128)==0){
         i++;
     }
     if(strlen(bucketinfo->bucket_ak)==0){
-        get_key_nvalue(filename_temp,LINE_LENGTH_SHORT,"BUCKET_LINK:",' ',bucketinfo->bucket_ak,128);
+        get_key_nvalue(filename_temp,linelen_max,"BUCKET_LINK:",' ',bucketinfo->bucket_ak,128);
         i++;
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
