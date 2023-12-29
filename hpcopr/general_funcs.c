@@ -128,6 +128,8 @@ int string_to_positive_num(char* string){
 
 /*
  * This function is more secure than get_key_value.
+ * return 0: get_succeeded
+ * return non-zero: not succeeded
  */
 int get_key_nvalue(char* filename, unsigned int linelen_max, char* key, char ch, char value[], unsigned int valen_max){
     if(linelen_max<1||valen_max<1||strlen(key)==0||ch=='\0'){

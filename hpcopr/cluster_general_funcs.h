@@ -8,6 +8,13 @@
 #ifndef CLUSTER_GENERAL_FUNCS_H
 #define CLUSTER_GENERAL_FUNCS_H
 
+typedef struct{
+    char bucket_address[128];
+    char region_id[32];
+    char bucket_ak[128];
+    char bucket_sk[128];
+} bucket_info;
+
 int cluster_role_detect(char* workdir, char* cluster_role, char* cluster_role_ext);
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag);
 int create_and_get_stackdir(char* workdir, char* stackdir);
@@ -89,7 +96,10 @@ int cluster_ssh(char* workdir, char* username, char* cluster_role, char* sshkey_
 int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
 void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);
+
 int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, char* region_id, char* bucket_ak, char* bucket_sk);
+int get_bucket_ninfo(char* workdir, char* crypto_keyfile, unsigned int linelen_max, bucket_info* bucketinfo);
+
 int tail_f_for_windows(char* filename);
 
 int get_ucid(char* workdir, char* ucid_string);

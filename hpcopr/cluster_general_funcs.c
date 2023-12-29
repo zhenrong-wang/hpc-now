@@ -2094,7 +2094,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
         return 1;
     }
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    char real_username[USERNAME_LENGTH_MAX]="";
+    char real_username[32]="";
     if(strlen(username)>0){
         get_cluster_name(cluster_name,workdir);
         if(user_name_quick_check(cluster_name,username,SSHKEY_DIR)!=0){
@@ -2102,7 +2102,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
             strcpy(real_username,"");
         }
         else{
-            strcpy(real_username,username);
+            strncpy(real_username,username,31);
         }
     }
     else{
@@ -2119,22 +2119,18 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
-    char single_line[LINE_LENGTH]="";
+    char single_line[LINE_LENGTH_SHORT]="";
     FILE* file_p=NULL;
     char filename_temp[FILENAME_LENGTH]="";
     char unique_cluster_id[32]="";
     char username_temp[32]="";
     char password[32]="";
-    char enable_flag[16]="";
+    char enable_flag[32]="";
     char master_address[32]="";
-    char bucket_address[128]="";
     char az_tenant_id[128]="";
     char az_subscription_id[128]="";
-    char bucket_ak[128]="";
-    char bucket_sk[128]="";
-    char region_id[32]="";
+    bucket_info bucketinfo;
     char cloud_flag[16]="";
-
     if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -3;
     }
@@ -2144,7 +2140,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     if(get_nucid(workdir,unique_cluster_id,32)!=0){
         return -1;
     }
-    if(get_bucket_info(workdir,crypto_keyfile,bucket_address,region_id,bucket_ak,bucket_sk)!=0){
+    if(get_bucket_info(workdir,crypto_keyfile,&bucketinfo)!=0){
         return -3;
     }
     get_azure_ninfo(workdir,LINE_LENGTH_SHORT,az_subscription_id,az_tenant_id,128);
@@ -2158,18 +2154,18 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     else{
         printf(GENERAL_BOLD "| Cluster IP Address: " RESET_DISPLAY "%s\n",master_address);
     }
-    printf(GENERAL_BOLD "| Cloud Region: " RESET_DISPLAY "%s\n",region_id);
+    printf(GENERAL_BOLD "| Cloud Region: " RESET_DISPLAY "%s\n",bucketinfo.region_id);
     if(strlen(az_tenant_id)>0){
         printf(GENERAL_BOLD "| Azure Tenant ID: " RESET_DISPLAY "%s\n",az_tenant_id);
     }
-    printf(GENERAL_BOLD "| Bucket Address:" RESET_DISPLAY " %s\n",bucket_address);
+    printf(GENERAL_BOLD "| Bucket Address:" RESET_DISPLAY " %s\n",bucketinfo.bucket_address);
     if(strcmp(cloud_flag,"CLOUD_G")==0){
-        printf(GENERAL_BOLD "| Bucket URL Link:" RESET_DISPLAY " %s\n",bucket_ak); 
+        printf(GENERAL_BOLD "| Bucket URL Link:" RESET_DISPLAY " %s\n",bucketinfo.bucket_ak); 
     }
     if(bucketflag==1){
         if(strcmp(cloud_flag,"CLOUD_G")!=0){
-            printf(GENERAL_BOLD "| Bucket AccessKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_ak);
-            printf(GENERAL_BOLD "| Bucket SecretKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucket_sk);
+            printf(GENERAL_BOLD "| Bucket AccessKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucketinfo.bucket_ak);
+            printf(GENERAL_BOLD "| Bucket SecretKey: " RESET_DISPLAY GREY_LIGHT "%s\n" RESET_DISPLAY,bucketinfo.bucket_sk);
         }
         else{
             snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_key.txt.tmp",vaultdir,PATH_SLASH);
@@ -2196,17 +2192,19 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     }
     
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
-    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
+    if(decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum)!=0){
         return -7;
     }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"r");
-    while(fngetline(file_p,single_line,5120)==0){
+    if(file_p==NULL){
+        return -7;
+    }
+    while(fngetline(file_p,single_line,LINE_LENGTH_SHORT)!=1){
         if(strlen(single_line)!=0){
             get_seq_nstring(single_line,' ',2,username_temp,32);
             get_seq_nstring(single_line,' ',3,password,32);
-            get_seq_nstring(single_line,' ',4,enable_flag,16);
+            get_seq_nstring(single_line,' ',4,enable_flag,32);
             if(strlen(real_username)==0||strcmp(real_username,username_temp)==0){
                 if(strcmp(enable_flag,"STATUS:DISABLED")==0){
                     printf(GENERAL_BOLD "| Username: %s    Password: " RESET_DISPLAY GREY_LIGHT "%s " RESET_DISPLAY WARN_YELLO_BOLD "%s\n" RESET_DISPLAY,username_temp,password,enable_flag);
@@ -2217,6 +2215,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
             }
         }
     }
+    fclose(file_p);
     printf(WARN_YELLO_BOLD "+---------- DO NOT DISCLOSE THE INFORMATION TO OTHERS -----------+" RESET_DISPLAY "\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
@@ -2525,6 +2524,61 @@ int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, c
         else{
             return 0;
         }
+    }
+}
+
+int get_bucket_ninfo(char* workdir, char* crypto_keyfile, unsigned int linelen_max, bucket_info* bucketinfo){
+    char cmdline[CMDLINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char md5sum[64]="";
+    int i=0;
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%svault%sbucket_info.txt.tmp",workdir,PATH_SLASH,PATH_SLASH);
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
+        return -3;
+    }
+    if(decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum)!=0){
+        return 3;
+    }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%svault%sbucket_info.txt",workdir,PATH_SLASH,PATH_SLASH);
+    if(get_key_nvalue(filename_temp,LINE_LENGTH_SHORT,"BUCKET:",' ',bucketinfo->bucket_address,128)==0){
+        i++;
+    }
+    if(get_key_nvalue(filename_temp,LINE_LENGTH_SHORT,"REGION:",' ',bucketinfo->region_id,32)==0){
+        i++;
+    }
+    if(get_key_nvalue(filename_temp,LINE_LENGTH_SHORT,"BUCKET_AK:",' ',bucketinfo->bucket_ak,128)==0){
+        i++;
+    }
+    if(get_key_nvalue(filename_temp,LINE_LENGTH_SHORT,"BUCKET_SK:",' ',bucketinfo->bucket_sk,128)==0){
+        i++;
+    }
+    if(strlen(bucketinfo->bucket_ak)==0){
+        get_key_nvalue(filename_temp,LINE_LENGTH_SHORT,"BUCKET_LINK:",' ',bucketinfo->bucket_ak,128);
+        i++;
+    }
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    if(contain_or_not(bucketinfo->bucket_address,"gs://")==0){
+        if(i!=3){
+            strcpy(bucketinfo->bucket_address,"");
+            strcpy(bucketinfo->region_id,"");
+            strcpy(bucketinfo->bucket_ak,"");
+            strcpy(bucketinfo->bucket_sk,"");
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }
+    if(i!=4){
+        strcpy(bucketinfo->bucket_address,"");
+        strcpy(bucketinfo->region_id,"");
+        strcpy(bucketinfo->bucket_ak,"");
+        strcpy(bucketinfo->bucket_sk,"");
+        return 1;
+    }
+    else{
+        return 0;
     }
 }
 
