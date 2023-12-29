@@ -16,7 +16,7 @@ int check_current_user(void);
 int install_bucket_clis(int silent_flag);
 int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_version, char* md5_exec, char* md5_zip, int force_repair_flag, char* seq_code);
 int check_and_install_prerequisitions(int repair_flag);
-int command_name_check(char* command_name_input, char* command_prompt, char* role_flag, char* cu_flag);
-int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name, char* user_name, char* cluster_role, int* decrypt_flag);
+int command_name_check(char* command_name_input, char command_prompt[], unsigned int prompt_len_max, char role_flag[], char cu_flag[], unsigned int flaglen_max);
+int command_parser(int argc, char** argv, char command_name_prompt[], unsigned int prompt_len_max, char workdir[], unsigned int dir_len_max, char cluster_name[], unsigned int cluster_name_len_max, char user_name[], unsigned int user_name_len_max, char cluster_role[], unsigned int role_len_max, int* decrypt_flag);
 
 #endif

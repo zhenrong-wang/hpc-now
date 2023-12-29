@@ -49,7 +49,6 @@ void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_fla
     }
 }
 
-
 int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
     if(decrypt_flag==0){
         if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
@@ -59,15 +58,15 @@ int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
     char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char single_line[LINE_LENGTH_SHORT]="";
-    char username[USERNAME_LENGTH_MAX]="";
+    char username[32]="";
     char enable_flag[16]="";
     FILE* file_p=NULL;
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"r");
-    while(fgetline(file_p,single_line)==0){
-        get_seq_string(single_line,' ',2,username);
-        get_seq_string(single_line,' ',4,enable_flag);
+    while(fngetline(file_p,single_line,LINE_LENGTH_SHORT)==0){
+        get_seq_nstring(single_line,' ',2,username,32);
+        get_seq_nstring(single_line,' ',4,enable_flag,16);
         if(strcmp(enable_flag,"STATUS:ENABLED")==0){
             printf(HIGH_GREEN_BOLD "|          +- username: %s %s" RESET_DISPLAY "\n",username,enable_flag);
         }
@@ -94,7 +93,7 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
     char remote_commands[CMDLINE_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(strcmp(username,"root")==0||strcmp(username,"user1")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected and cannot be deleted." RESET_DISPLAY "\n");
         delete_decrypted_user_passwords(workdir);
@@ -104,9 +103,9 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
         delete_decrypted_user_passwords(workdir);
         return -3;
     }
-    sprintf(remote_commands,"echo y-e-s | hpcmgr users delete %s os",username);
+    snprintf(remote_commands,CMDLINE_LENGTH-1,"echo y-e-s | hpcmgr users delete %s os",username);
     if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
-        sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s",username);
+        snprintf(remote_commands,CMDLINE_LENGTH-1,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s",username);
         if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the user %s from your cluster. Exit now.\n" RESET_DISPLAY,username);
             delete_decrypted_user_passwords(workdir);
@@ -159,7 +158,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
     char user_registry_file[FILENAME_LENGTH]="";
     char remote_commands[CMDLINE_LENGTH]="";
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(strcmp(username,"root")==0||strcmp(username,"user1")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected, cannot be enabled/disabled." RESET_DISPLAY "\n");
         delete_decrypted_user_passwords(workdir);
@@ -169,17 +168,17 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
         delete_decrypted_user_passwords(workdir);
         return -3;
     }
-    sprintf(username_ext," %s ",username);
+    snprintf(username_ext,127," %s ",username);
     if(find_multi_keys(user_registry_file,username_ext,new_keywords,"","","")>0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The user " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is already " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY,username,new_keywords);
         delete_decrypted_user_passwords(workdir);
         return -5;
     }
     if(strcmp(option,"enable")==0){
-        sprintf(remote_commands,"hpcmgr users add %s",username);
+        snprintf(remote_commands,CMDLINE_LENGTH-1,"hpcmgr users add %s",username);
     }
     else{
-        sprintf(remote_commands,"hpcmgr users delete %s",username);
+        snprintf(remote_commands,CMDLINE_LENGTH-1,"hpcmgr users delete %s",username);
     }
     if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
         find_and_replace(user_registry_file,username_ext,"","","","",prev_keywords_ext,new_keywords_ext);
@@ -210,7 +209,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
     char remote_commands[CMDLINE_LENGTH]="";
 
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(strcmp(username,"root")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Modifying root user password is not allowed." RESET_DISPLAY "\n");
         delete_decrypted_user_passwords(workdir);
@@ -224,12 +223,12 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
         delete_decrypted_user_passwords(workdir);
         return -5;
     }
-    sprintf(remote_commands,"echo \"%s\" | passwd %s --stdin",password,username);
+    snprintf(remote_commands,CMDLINE_LENGTH-1,"echo \"%s\" | passwd %s --stdin",password,username);
     if(remote_exec_general(workdir,ssheky_dir,"root",remote_commands,"-n",0,0,"","")==0){
-        sprintf(username_ext,"username: %s ",username);
-        sprintf(password_ext," %s ",password);
+        snprintf(username_ext,127,"username: %s ",username);
+        snprintf(password_ext,127," %s ",password);
         find_and_get(user_registry_file,username_ext,"","",1,username_ext,"","",' ',3,password_prev);
-        sprintf(password_prev_ext," %s ",password_prev);
+        snprintf(password_prev_ext,127," %s ",password_prev);
         find_and_replace(user_registry_file,username_ext,"","","","",password_prev_ext,password_ext);
         sync_user_passwords(workdir,ssheky_dir);
         encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
@@ -257,7 +256,7 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
 
     FILE* file_p=NULL;
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(user_registry_file,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(user_registry_file)!=0){
         return -1;
     }
@@ -269,9 +268,9 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
         delete_decrypted_user_passwords(workdir);
         return -5;
     }
-    sprintf(remote_commands,"hpcmgr users add %s %s",username,password);
+    snprintf(remote_commands,CMDLINE_LENGTH-1,"hpcmgr users add %s %s",username,password);
     if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
-        sprintf(remote_commands,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s | grep 'STATUS:ENABLED'",username);
+        snprintf(remote_commands,CMDLINE_LENGTH-1,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s | grep 'STATUS:ENABLED'",username);
         if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
             printf("[ -INFO- ] Updating the local user-info registry ...\n");
             file_p=fopen(user_registry_file,"a");

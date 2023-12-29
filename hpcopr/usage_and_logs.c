@@ -26,13 +26,13 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
         printf("|          cluster, or there are internal errors. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
-    sprintf(cmdline,"%s %s %s.tmp %s",COPY_FILE_CMD,logfile,logfile,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.tmp %s",COPY_FILE_CMD,logfile,logfile,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     if(strcmp(view_option,"read")==0){
-        sprintf(cmdline,"more %s.tmp",logfile);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"more %s.tmp",logfile);
     }
     else{
-        sprintf(cmdline,"%s %s.tmp",CAT_FILE_CMD,logfile);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.tmp",CAT_FILE_CMD,logfile);
     }
     system(cmdline);
     if(strlen(export_dest)==0){
@@ -43,7 +43,7 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
         return 0;
     }
     else{
-        sprintf(cmdline,"%s %s %s %s",COPY_FILE_CMD,logfile,export_dest,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,logfile,export_dest,SYSTEM_CMD_REDIRECT);
         run_flag=system(cmdline);
         if(run_flag!=0){
             printf(FATAL_RED_BOLD "\n[ FATAL: ] Failed to export the log to " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " .\n",export_dest);

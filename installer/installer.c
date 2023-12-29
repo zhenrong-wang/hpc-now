@@ -718,19 +718,19 @@ int uninstall_services(void){
 #ifdef _WIN32
     system("tasklist /FI \"USERNAME eq hpc-now\" > c:\\programdata\\hpc-now-tasks.txt.tmp 2>nul");
     FILE* file_p=fopen("c:\\programdata\\hpc-now-tasks.txt.tmp","r");
-    char line_buffer[256]="";
-    char pid[8]="";
+    char line_buffer[LINE_LENGTH_SHORT]="";
+    char pid[16]="";
     char cmdline[CMDLINE_LENGTH]="";
     if(file_p==NULL){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to creat/get the tasklist of hpc-now." RESET_DISPLAY "\n");
     }
     else{
-        fgetline(file_p,line_buffer);
-        fgetline(file_p,line_buffer);
-        fgetline(file_p,line_buffer);
+        fngetline(file_p,line_buffer,LINE_LENGTH_SHORT);
+        fngetline(file_p,line_buffer,LINE_LENGTH_SHORT);
+        fngetline(file_p,line_buffer,LINE_LENGTH_SHORT);
         while(!feof(file_p)){
-            fgetline(file_p,line_buffer);
-            get_seq_string(line_buffer,' ',2,pid);
+            fngetline(file_p,line_buffer,LINE_LENGTH_SHORT);
+            get_seq_nstring(line_buffer,' ',2,pid,16);
             snprintf(cmdline,2047,"taskkill /pid %s > nul 2>&1",pid);
             system(cmdline);
         }
@@ -1174,7 +1174,7 @@ int main(int argc, char* argv[]){
         }
     }
     if(strcmp(argv[1],"setpass")==0||strcmp(argv[1],"install")==0){
-        cmd_keyword_ncheck(argc,argv,"--pass",opr_password_arg,31);
+        cmd_keyword_ncheck(argc,argv,"--pass",opr_password_arg,32);
         if(strlen(opr_password_arg)==0){
             strcpy(opr_password,"");
         }
@@ -1198,9 +1198,9 @@ int main(int argc, char* argv[]){
         }
         return 0;
     }
-    cmd_keyword_ncheck(argc,argv,"--hloc",hpcopr_loc,383);
-    cmd_keyword_ncheck(argc,argv,"--cloc",now_crypto_loc,383);
-    cmd_keyword_ncheck(argc,argv,"--hver",hpcopr_ver,255);
+    cmd_keyword_ncheck(argc,argv,"--hloc",hpcopr_loc,384);
+    cmd_keyword_ncheck(argc,argv,"--cloc",now_crypto_loc,384);
+    cmd_keyword_ncheck(argc,argv,"--hver",hpcopr_ver,256);
     hpcopr_loc_flag=valid_loc_format_or_not(hpcopr_loc);
     crypto_loc_flag=valid_loc_format_or_not(now_crypto_loc);
     if(hpcopr_loc_flag!=-1){

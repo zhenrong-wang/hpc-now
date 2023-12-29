@@ -61,7 +61,7 @@ extern char md5_gcp_tf_var[64];
 extern char md5_gcp_tf_zip_var[64];
 
 extern int batch_flag;
-extern char final_command[512];
+extern char final_command[64];
 extern tf_exec_config tf_this_run;
 
 extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
@@ -111,16 +111,16 @@ int check_internet_google(void){
 
 int get_google_connectivity(void){
     char google_connectivity_flag[FILENAME_LENGTH]="";
-    char line_buffer[256]="";
+    char line_buffer[LINE_LENGTH_TINY]="";
     char connectivity_status[16]="";
     snprintf(google_connectivity_flag,511,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
     FILE* file_p=fopen(google_connectivity_flag,"r");
     if(file_p==NULL){
         return -1;
     }
-    fgetline(file_p,line_buffer);
+    fngetline(file_p,line_buffer,LINE_LENGTH_TINY);
     fclose(file_p);
-    get_seq_string(line_buffer,' ',2,connectivity_status);
+    get_seq_nstring(line_buffer,' ',2,connectivity_status,16);
     if(strcmp(connectivity_status,"SUCCEEDED")==0){
         return 0;
     }
@@ -711,7 +711,7 @@ int check_and_install_prerequisitions(int repair_flag){
     fclose(file_p);
     snprintf(cmdline,2047,"del /f /s /q c:\\programdata\\appdata.txt.tmp %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_seq_string(appdata_dir,'\\',3,home_path);
+    get_seq_nstring(appdata_dir,'\\',3,home_path,64);
     snprintf(dotssh_dir,127,"c:\\users\\%s\\.ssh",home_path);
     if(folder_exist_or_not(TF_LOCAL_PLUGINS)!=0){
         snprintf(cmdline,2047,"%s %s %s",MKDIR_CMD,TF_LOCAL_PLUGINS,SYSTEM_CMD_REDIRECT);
@@ -1170,7 +1170,7 @@ int check_and_install_prerequisitions(int repair_flag){
     return 0;
 }
 
-int command_name_check(char* command_name_input, char* command_prompt, char* role_flag, char* cu_flag){
+int command_name_check(char* command_name_input, char command_prompt[], unsigned int prompt_len_max, char role_flag[], char cu_flag[], unsigned int flaglen_max){
     int i;
     int j;
     int diff_current=0;
@@ -1181,10 +1181,10 @@ int command_name_check(char* command_name_input, char* command_prompt, char* rol
     char command_temp[32]="";
     int closest=0;
     for(i=0;i<COMMAND_NUM;i++){
-        get_seq_string(commands[i],',',1,command_temp);
+        get_seq_nstring(commands[i],',',1,command_temp,32);
         if(strcmp(command_name_input,command_temp)==0){
-            get_seq_string(commands[i],',',2,role_flag);
-            get_seq_string(commands[i],',',3,cu_flag);
+            get_seq_nstring(commands[i],',',2,role_flag,flaglen_max);
+            get_seq_nstring(commands[i],',',3,cu_flag,flaglen_max);
             return 0;
         }
         diff_current=0;
@@ -1204,7 +1204,6 @@ int command_name_check(char* command_name_input, char* command_prompt, char* rol
         if(*(command_name_input+j+1)==*(command_temp+j+1)){
             equal_flag++;
         }
-//        printf("%s,%d,%d,%d,%d\n",commands[i],equal_flag,closest,diff_current,diff_prev);
         if(equal_flag>equal_flag_prev&&diff_current<diff_prev){
             closest=i;
             equal_flag_prev=equal_flag;
@@ -1212,20 +1211,26 @@ int command_name_check(char* command_name_input, char* command_prompt, char* rol
             continue;
         }
     }
-    get_seq_string(commands[closest],',',1,command_temp);
+    get_seq_nstring(commands[closest],',',1,command_temp,32);
     strcpy(role_flag,"");
     strcpy(cu_flag,"");
-    strcpy(command_prompt,command_temp);
+    strncpy(command_prompt,command_temp,prompt_len_max-1);
     return 200+closest;
 }
 
-//return -1: No command
-//return 200+: command error
-//return -3: cluster name invalid
-//return -7: cluste empty
-//return -5: username invalid
-//return 1: role incorrect
-int command_parser(int argc, char** argv, char* command_name_prompt, char* workdir, char* cluster_name, char* user_name, char* cluster_role, int* decrypt_flag){
+/* 
+ * return -9: length not correct
+ * return -7: cluste empty
+ * return -5: username invalid
+ * return -3: cluster name invalid
+ * return -1: No command
+ * return 1: role incorrect
+ * return 200+: command error
+ */
+int command_parser(int argc, char** argv, char command_name_prompt[], unsigned int prompt_len_max, char workdir[], unsigned int dir_len_max, char cluster_name[], unsigned int cluster_name_len_max, char user_name[], unsigned int user_name_len_max, char cluster_role[], unsigned int role_len_max, int* decrypt_flag){
+    if(prompt_len_max<32||dir_len_max<DIR_LENGTH_SHORT||cluster_name_len_max<CLUSTER_ID_LENGTH_MAX_PLUS||user_name_len_max<USERNAME_LENGTH_MAX||role_len_max<8){
+        return -1;
+    }
     int command_flag=0;
     int max_time_temp=0;
     char temp_cluster_name_specified[128]="";
@@ -1233,14 +1238,14 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
     char temp_cluster_name_switched[128]="";
     char temp_cluster_name[128]="";
     char temp_workdir[DIR_LENGTH]="";
-    char string_temp[256]="";
+    char string_temp[64]="";
     char cluster_name_source[16]="";
 
     if(argc<2){
         list_all_commands();
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a " HIGH_GREEN_BOLD "command" RESET_DISPLAY " : " HIGH_GREEN_BOLD);
         fflush(stdin);
-        scanf("%511s",final_command);
+        scanf("%63s",final_command);
         getchar();
         printf(RESET_DISPLAY);
     }
@@ -1250,19 +1255,19 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
             return -1;
         }
         else{
-            strncpy(final_command,argv[1],512);
+            strncpy(final_command,argv[1],63);
         }
     }
     else{
         if(strcmp(argv[1],"-b")==0){
             batch_flag=0;
-            strncpy(final_command,argv[2],512);
+            strncpy(final_command,argv[2],63);
         }
         else{
             if(cmd_flag_check(argc,argv,"-b")==0){
                 batch_flag=0;
             }
-            strncpy(final_command,argv[1],512);
+            strncpy(final_command,argv[1],63);
         }
     }
 
@@ -1272,12 +1277,12 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
     int tf_local_config_flag=127; //will be reset to -1~3 after get_tf_running_config()function
     char filename_temp[FILENAME_LENGTH]="";
 
-    command_flag=command_name_check(final_command,command_name_prompt,role_flag,cu_flag);
+    command_flag=command_name_check(final_command,command_name_prompt,prompt_len_max,role_flag,cu_flag,16);
     if(command_flag!=0){
         return command_flag;
     }
     if(strcmp(cu_flag,"UNAME")==0||strcmp(cu_flag,"CNAME")==0){
-        flag1=cmd_keyword_check(argc,argv,"-c",temp_cluster_name_specified);
+        flag1=cmd_keyword_ncheck(argc,argv,"-c",temp_cluster_name_specified,128);
         if(flag1==0){
             strcpy(temp_cluster_name,temp_cluster_name_specified);
             strcpy(cluster_name_source,"specified");
@@ -1320,7 +1325,7 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
             }
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " cluster name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",cluster_name_source,temp_cluster_name);
-        strcpy(cluster_name,temp_cluster_name);
+        strncpy(cluster_name,temp_cluster_name,cluster_name_len_max-1);
         get_workdir(workdir,cluster_name);
         cluster_role_detect(workdir,cluster_role,cluster_role_ext);
         if(strcmp(role_flag,"opr")==0&&strcmp(cluster_role,"opr")!=0){
@@ -1348,13 +1353,13 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is empty. Please init first." RESET_DISPLAY "\n",cluster_name);
             return -7;
         }
-        if(cmd_keyword_ncheck(argc,argv,"-u",string_temp,255)!=0){
+        if(cmd_keyword_ncheck(argc,argv,"-u",string_temp,64)!=0){
             if(batch_flag!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid user name from the list below. \n");
                 hpc_user_list(workdir,CRYPTO_KEY_FILE,0);
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
-                scanf("%255s",string_temp);
+                scanf("%63s",string_temp);
                 getchar();
                 if(user_name_quick_check(cluster_name,string_temp,SSHKEY_DIR)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] The input user name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,string_temp);
@@ -1373,14 +1378,14 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
             return -5;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the user name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",string_temp);
-        strcpy(user_name,string_temp);
+        strncpy(user_name,string_temp,user_name_len_max-1);
     }
     
     if(tf_local_config_flag==127){ // If not get_tf_running for local workdir
         get_tf_running(&tf_this_run,TF_RUNNING_CONFIG); //goes to the global static one
         // the command args have the higher priority
         // flush any values previously get
-        cmd_keyword_check(argc,argv,"--tf-run",string_temp);
+        cmd_keyword_ncheck(argc,argv,"--tf-run",string_temp,64);
         if(strcmp(string_temp,"tofu")==0){
             strcpy(tf_this_run.tf_runner,TOFU_EXEC);
             strcpy(tf_this_run.tf_runner_type,"tofu");
@@ -1389,11 +1394,11 @@ int command_parser(int argc, char** argv, char* command_name_prompt, char* workd
             strcpy(tf_this_run.tf_runner,TERRAFORM_EXEC);
             strcpy(tf_this_run.tf_runner_type,"terraform");
         }
-        cmd_keyword_check(argc,argv,"--dbg-level",string_temp); //Get the global option: debug level
+        cmd_keyword_ncheck(argc,argv,"--dbg-level",string_temp,64); //Get the global option: debug level
         if(strcmp(string_temp,"trace")==0||strcmp(string_temp,"debug")==0||strcmp(string_temp,"info")==0||strcmp(string_temp,"warn")==0||strcmp(string_temp,"error")==0||strcmp(string_temp,"off")==0||strcmp(string_temp,"TRACE")==0||strcmp(string_temp,"DEBUG")==0||strcmp(string_temp,"INFO")==0||strcmp(string_temp,"WARN")==0||strcmp(string_temp,"ERROR")==0||strcmp(string_temp,"OFF")==0){
             strcpy(tf_this_run.dbg_level,"warn");
         }
-        cmd_keyword_check(argc,argv,"--max-time",string_temp); //Get the global option: tf maximum execution time.
+        cmd_keyword_ncheck(argc,argv,"--max-time",string_temp,16); //Get the global option: tf maximum execution time.
         max_time_temp=string_to_positive_num(string_temp);
         if(max_time_temp>MAXIMUM_WAIT_TIME-1&&max_time_temp<MAXIMUM_WAIT_TIME_EXT+1){
             tf_this_run.max_wait_time=max_time_temp;

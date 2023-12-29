@@ -88,7 +88,7 @@ char md5_gcp_tf_var[64]="";
 char md5_gcp_tf_zip_var[64]="";
 
 int batch_flag=1; // If batch_flag=0: Batch Mode. If batch_flag!=0: interactive mode. use the -b flag
-char final_command[512]="";
+char final_command[64]="";
 tf_exec_config tf_this_run;
 
 /*
@@ -273,7 +273,7 @@ int main(int argc, char* argv[]){
     int confirm_flag=0;
     int usrmgr_check_flag=0;
     char workdir[DIR_LENGTH]="";
-    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char cluster_name[32]="";
     char new_cluster_name[128]="";
     char gcp_flag[8]="";
     char key_echo_flag[8]="";
@@ -281,7 +281,7 @@ int main(int argc, char* argv[]){
     char cloud_sk[AKSK_LENGTH]="";
     char stream_name[128]="";
     char log_type[128]="";
-    char user_name[128]="";
+    char user_name[32]="";
     char pass_word[128]="";
     char user_name_list[1024]="";
     char vault_bucket_flag[8]="";
@@ -311,7 +311,7 @@ int main(int argc, char* argv[]){
     char string_temp3[256]="";
     char string_temp4[4]="";
     char cmdline[CMDLINE_LENGTH]="";
-    char cluster_role[8]="";
+    char cluster_role[16]="";
     int cluster_state_flag=0;
     int decrypt_flag=0;
     jobinfo job_info;
@@ -383,7 +383,7 @@ int main(int argc, char* argv[]){
         system(cmdline);
     }
 
-    command_flag=command_parser(argc,argv,command_name_prompt,workdir,cluster_name,user_name,cluster_role,&decrypt_flag);
+    command_flag=command_parser(argc,argv,command_name_prompt,128,workdir,DIR_LENGTH,cluster_name,32,user_name,32,cluster_role,16,&decrypt_flag);
     if(command_flag==-1){
         print_help("all");
         return 0;
@@ -415,7 +415,7 @@ int main(int argc, char* argv[]){
             print_help("all");
             return 0;
         }
-        if(cmd_keyword_check(argc,argv,"--cmd",string_temp)!=0){
+        if(cmd_keyword_ncheck(argc,argv,"--cmd",string_temp,256)!=0){
             if(batch_flag==0){
                 print_help("all");
                 return 0;
@@ -428,7 +428,7 @@ int main(int argc, char* argv[]){
             list_all_commands();
             prompt_to_input("Select one from the list above.",string_temp,batch_flag);
         }
-        if(command_name_check(string_temp,command_name_prompt,string_temp2,string_temp3)>199){
+        if(command_name_check(string_temp,command_name_prompt,128,string_temp2,string_temp3,16)>199){
             printf(FATAL_RED_BOLD "[ FATAL: ] The specified command name is incorrect. Did you mean " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " ?\n" RESET_DISPLAY,command_name_prompt);
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup("");
@@ -560,7 +560,7 @@ int main(int argc, char* argv[]){
             run_flag=encrypt_decrypt_clusters("all",final_command,batch_flag);
         }
         else{
-            if(cmd_keyword_ncheck(argc,argv,"-c",string_temp,255)==0){
+            if(cmd_keyword_ncheck(argc,argv,"-c",string_temp,256)==0){
                 run_flag=encrypt_decrypt_clusters(string_temp,final_command,batch_flag);
             }
             else{
@@ -669,11 +669,11 @@ int main(int argc, char* argv[]){
     }
     
     if(strcmp(final_command,"new-cluster")==0){
-        cmd_keyword_check(argc,argv,"--cname",new_cluster_name);
-        cmd_keyword_check(argc,argv,"--sk",cloud_sk);
-        cmd_keyword_check(argc,argv,"--ak",cloud_ak);
-        cmd_keyword_check(argc,argv,"--az-sid",string_temp);
-        cmd_keyword_check(argc,argv,"--az-tid",string_temp2);
+        cmd_keyword_ncheck(argc,argv,"--cname",new_cluster_name,128);
+        cmd_keyword_ncheck(argc,argv,"--sk",cloud_sk,256);
+        cmd_keyword_ncheck(argc,argv,"--ak",cloud_ak,256);
+        cmd_keyword_ncheck(argc,argv,"--az-sid",string_temp,256);
+        cmd_keyword_ncheck(argc,argv,"--az-tid",string_temp2,256);
 
         run_flag=prompt_to_confirm_args("Echo the input/imported credentials to this window (RISKY)?",CONFIRM_STRING,batch_flag,argc,argv,"--echo");
         if(run_flag==2||run_flag==0){
@@ -731,7 +731,7 @@ int main(int argc, char* argv[]){
             run_flag=glance_clusters("all",crypto_keyfile);
         }
         else{
-            if(cmd_keyword_ncheck(argc,argv,"-c",cluster_name,24)!=0&&show_current_cluster(workdir,cluster_name,0)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"-c",cluster_name,32)!=0&&show_current_cluster(workdir,cluster_name,0)!=0){
                 list_all_cluster_names(1);
                 run_flag=prompt_to_input_required_args("Select a cluster name from the list above.",cluster_name,batch_flag,argc,argv,"-c");
                 if(run_flag!=0){
@@ -862,8 +862,8 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"import")==0){
-        cmd_keyword_ncheck(argc,argv,"-s",import_source,511);
-        cmd_keyword_check(argc,argv,"-p",pass_word);
+        cmd_keyword_ncheck(argc,argv,"-s",import_source,512);
+        cmd_keyword_ncheck(argc,argv,"-p",pass_word,128);
         run_flag=import_cluster(import_source,pass_word,crypto_keyfile,batch_flag);
         if(run_flag!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"IMPORT_FAILED",32);
@@ -907,7 +907,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup("");
             return 0;
         }
-        if(cmd_keyword_ncheck(argc,argv,"-c",cluster_name,24)!=0){
+        if(cmd_keyword_ncheck(argc,argv,"-c",cluster_name,32)!=0){
             if(batch_flag==0){
                 list_all_cluster_names(1);
                 printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY WARN_YELLO_BOLD "-c CLUSTER_NAME" RESET_DISPLAY FATAL_RED_BOLD " ." RESET_DISPLAY "\n");
@@ -1129,7 +1129,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 49;
         }
-        if(batch_flag!=0&&cmd_keyword_check(argc,argv,"-u",user_name)!=0){
+        if(batch_flag!=0&&cmd_keyword_ncheck(argc,argv,"-u",user_name,32)!=0){
             hpc_user_list(workdir,crypto_keyfile,0);
         }
         prompt_to_input_optional_args("Display credentials of a specific user? (Default: all users except root)",CONFIRM_STRING_QUICK,"Select a user from the list above.",user_name,batch_flag,argc,argv,"-u");
@@ -1166,8 +1166,8 @@ int main(int argc, char* argv[]){
 
     if(strcmp(final_command,"rotate-key")==0){
         get_cloud_flag(workdir,cloud_flag);
-        cmd_keyword_ncheck(argc,argv,"--ak",cloud_ak,255);
-        cmd_keyword_ncheck(argc,argv,"--sk",cloud_sk,255);
+        cmd_keyword_ncheck(argc,argv,"--ak",cloud_ak,256);
+        cmd_keyword_ncheck(argc,argv,"--sk",cloud_sk,256);
         run_flag=prompt_to_confirm_args("Echo the credentials to this window (RISKY)?",CONFIRM_STRING,batch_flag,argc,argv,"--echo");
         if(run_flag==2||run_flag==0){
             strcpy(key_echo_flag,"echo");
@@ -1218,9 +1218,9 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 49;
         }
-        cmd_keyword_ncheck(argc,argv,"--ul",user_name_list,1023);
-        cmd_keyword_check(argc,argv,"-p",pass_word);
-        cmd_keyword_ncheck(argc,argv,"-d",export_dest,511);
+        cmd_keyword_ncheck(argc,argv,"--ul",user_name_list,1024);
+        cmd_keyword_ncheck(argc,argv,"-p",pass_word,128);
+        cmd_keyword_ncheck(argc,argv,"-d",export_dest,512);
         run_flag=prompt_to_confirm_args("Export the admin privilege? (Default: no)",CONFIRM_STRING,batch_flag,argc,argv,"--admin");
         if(run_flag==2||run_flag==0){
             strcpy(string_temp,"admin");
@@ -1245,7 +1245,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 49;
         }
-        if(cmd_keyword_check(argc,argv,"--dcmd",data_cmd)!=0){
+        if(cmd_keyword_ncheck(argc,argv,"--dcmd",data_cmd,128)!=0){
             if(batch_flag==0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] No dataman subcmd specified. Use --dcmd SUBCMD ." RESET_DISPLAY "\n");
                 write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -1284,7 +1284,7 @@ int main(int argc, char* argv[]){
             }
         }
         if(strcmp(data_cmd,"put")==0||strcmp(data_cmd,"get")==0||strcmp(data_cmd,"copy")==0||strcmp(data_cmd,"move")==0||strcmp(data_cmd,"cp")==0||strcmp(data_cmd,"mv")==0||strcmp(data_cmd,"rput")==0||strcmp(data_cmd,"rget")==0){
-            if(cmd_keyword_ncheck(argc,argv,"-s",source_path,511)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"-s",source_path,512)!=0){
                 if(batch_flag==0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] No source path specified. Use -s SOURCE_PATH ." RESET_DISPLAY "\n");
                     write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -1300,7 +1300,7 @@ int main(int argc, char* argv[]){
                 scanf("%511s",source_path);
                 getchar();
             }
-            if(cmd_keyword_ncheck(argc,argv,"-d",destination_path,511)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"-d",destination_path,512)!=0){
                 if(batch_flag==0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] No destination path specified. Use -d DEST_PATH ." RESET_DISPLAY "\n");
                     write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -1318,7 +1318,7 @@ int main(int argc, char* argv[]){
             }
         }
         else{
-            if(cmd_keyword_ncheck(argc,argv,"-t",target_path,511)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"-t",target_path,512)!=0){
                 if(batch_flag==0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] No target path specified. Use -t TARGET_PATH ." RESET_DISPLAY "\n");
                     write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -1812,7 +1812,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"userman")==0){
-        if(cmd_keyword_check(argc,argv,"--ucmd",user_cmd)!=0){
+        if(cmd_keyword_ncheck(argc,argv,"--ucmd",user_cmd,128)!=0){
             if(batch_flag==0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] No userman subcmd specified. Use --ucmd SUBCMD ." RESET_DISPLAY "\n");
                 write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -1867,14 +1867,14 @@ int main(int argc, char* argv[]){
         else{
             strcpy(string_temp,"Please select a username.");
         }
-        if(cmd_keyword_check(argc,argv,"-u",user_name)!=0&&prompt_to_input(string_temp,user_name,batch_flag)!=0){
+        if(cmd_keyword_ncheck(argc,argv,"-u",user_name,32)!=0&&prompt_to_input(string_temp,user_name,batch_flag)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Username not specified." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
         }
         if(strcmp(user_cmd,"add")==0||strcmp(user_cmd,"passwd")==0){
-            if(cmd_keyword_check(argc,argv,"-p",pass_word)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"-p",pass_word,128)!=0){
                 if(input_user_passwd(pass_word,batch_flag)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] Password not specified." RESET_DISPLAY "\n");
                     write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
@@ -1936,7 +1936,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"appman")==0){
-        if(cmd_keyword_check(argc,argv,"--acmd",app_cmd)!=0){
+        if(cmd_keyword_ncheck(argc,argv,"--acmd",app_cmd,128)!=0){
             if(batch_flag==0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] No appman subcmd specified. Use --acmd SUBCMD ." RESET_DISPLAY "\n");
                 write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -1964,7 +1964,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 9;
         }
-        cmd_keyword_ncheck(argc,argv,"--repo",repo_loc,383);
+        cmd_keyword_ncheck(argc,argv,"--repo",repo_loc,384);
         if(strcmp(app_cmd,"store")==0){
             prompt_to_input_optional_args("Specify installation shell scripts location?",CONFIRM_STRING,"Input either an URL or a local path.",inst_loc,batch_flag,argc,argv,"--inst");
             run_flag=app_list(workdir,"all",user_name,"",SSHKEY_DIR,"",inst_loc);
@@ -1981,7 +1981,7 @@ int main(int argc, char* argv[]){
             run_flag=appman_update_conf(workdir,inst_loc,repo_loc,SSHKEY_DIR,"");
         }
         else{
-            if(cmd_keyword_check(argc,argv,"--app",app_name)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"--app",app_name,128)!=0){
                 if(batch_flag==0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] No app name specified. Use --app APP_NAME ." RESET_DISPLAY "\n");
                     write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -2019,7 +2019,7 @@ int main(int argc, char* argv[]){
         if(cluster_state_flag==1){
             printf(WARN_YELLO_BOLD "[ -WARN- ] No compute node is running." RESET_DISPLAY "\n");
         }
-        if(cmd_keyword_check(argc,argv,"--jcmd",job_cmd)!=0){
+        if(cmd_keyword_ncheck(argc,argv,"--jcmd",job_cmd,128)!=0){
             if(batch_flag==0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] No jobman subcmd specified. Use --jcmd SUBCMD ." RESET_DISPLAY "\n");
                 write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -2059,7 +2059,7 @@ int main(int argc, char* argv[]){
             run_flag=job_list(workdir,user_name,SSHKEY_DIR);
         }
         else{
-            if(cmd_keyword_ncheck(argc,argv,"--jid",job_id,31)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"--jid",job_id,32)!=0){
                 job_list(workdir,user_name,SSHKEY_DIR);
                 if(batch_flag==0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] No jobID specified. Use --jid JOB_ID ." RESET_DISPLAY "\n");

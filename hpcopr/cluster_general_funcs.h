@@ -85,7 +85,9 @@ void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);
 int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, char* region_id, char* bucket_ak, char* bucket_sk);
 int tail_f_for_windows(char* filename);
+
 int get_ucid(char* workdir, char* ucid_string);
+int get_nucid(char* workdir, char* ucid_string, unsigned int ucid_strlen_max);
 
 int decrypt_user_passwords(char* workdir, char* crypto_keyfile);
 void delete_decrypted_user_passwords(char* workdir);

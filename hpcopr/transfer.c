@@ -84,9 +84,9 @@ int user_list_check(char* cluster_name, char* user_list_read, char* user_list_fi
     int k=0;
     int valid_user_num=0;
     char user_list_buffer[1024]="";
-    char username_temp[USERNAME_LENGTH_MAX]="";
+    char username_temp[32]="";
     do{
-        get_seq_string(user_list_read,':',i,username_temp);
+        get_seq_nstring(user_list_read,':',i,username_temp,32);
         if(strcmp(username_temp,"user1")==0){
             *user1_flag=1;
         }
@@ -127,8 +127,8 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char filename_temp_2[FILENAME_LENGTH]="";
     char filename_temp_3[FILENAME_LENGTH]="";
     char filename_temp_4[FILENAME_LENGTH]="";
-    char username_temp[USERNAME_LENGTH_MAX]="";
-    char username_temp_2[USERNAME_LENGTH_MAX]="";
+    char username_temp[32]="";
+    char username_temp_2[32]="";
     char* password_temp;
     char real_password[128]="";
     char real_export_file[FILENAME_LENGTH_EXT]="";
@@ -298,10 +298,10 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         file_p_tmp=fopen(filename_temp_2,"w+");
         do{
             i++;
-            get_seq_string(real_user_list,':',i,username_temp);
+            get_seq_nstring(real_user_list,':',i,username_temp,32);
             file_p=fopen(filename_temp,"r");
             while(fngetline(file_p,user_line_buffer,255)==0){
-                get_seq_string(user_line_buffer,' ',2,username_temp_2);
+                get_seq_nstring(user_line_buffer,' ',2,username_temp_2,32);
                 if(strcmp(username_temp,username_temp_2)==0){
                     fprintf(file_p_tmp,"%s\n",user_line_buffer);
                     goto next_user;
@@ -572,7 +572,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     file_p=fopen(filename_temp,"r");
     while(!feof(file_p)){
         fngetline(file_p,user_line_buffer,255);
-        get_seq_string(user_line_buffer,' ',2,username_temp);
+        get_seq_nstring(user_line_buffer,' ',2,username_temp,64);
         snprintf(filename_temp_2,511,"%s%s%s.key.tmp",cluster_sshkey_dir,PATH_SLASH,username_temp);
         decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp_2,md5sum_password);
         snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename_temp_2,SYSTEM_CMD_REDIRECT);

@@ -50,9 +50,9 @@ int get_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* mon_data_fi
 }
 
 int update_all_mon_data(char* cluster_registry, char* sshkey_dir){
-    char cluster_name_temp[128]="";
+    char cluster_name_temp[64]="";
     char mon_data_file_temp[FILENAME_LENGTH]="";
-    char registry_line[256]="";
+    char registry_line[LINE_LENGTH_SHORT]="";
     int run_flag;
     int updated=0;
     FILE* file_p=fopen(cluster_registry,"r");
@@ -60,11 +60,11 @@ int update_all_mon_data(char* cluster_registry, char* sshkey_dir){
         return -1;
     }
     while(!feof(file_p)){
-        fgetline(file_p,registry_line);
+        fngetline(file_p,registry_line,LINE_LENGTH_SHORT);
         if(strlen(registry_line)==0){
             continue;
         }
-        get_seq_string(cluster_name_temp,' ',4,cluster_name_temp);
+        get_seq_nstring(cluster_name_temp,' ',4,cluster_name_temp,64);
         run_flag=get_cluster_mon_data(cluster_name_temp,sshkey_dir,mon_data_file_temp);
         if(run_flag==0){
             updated++;
@@ -74,13 +74,13 @@ int update_all_mon_data(char* cluster_registry, char* sshkey_dir){
 }
 
 int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_string, char* time_string){
-    char ymd[64]="";
-    char year[32]="";
-    char month[32]="";
-    char mday[32]="";
-    char hour_min[64]="";
-    char hour[32]="";
-    char min[32]="";
+    char ymd[32]="";
+    char year[8]="";
+    char month[8]="";
+    char mday[8]="";
+    char hour_min[8]="";
+    char hour[8]="";
+    char min[8]="";
     int i=0;
     int year_num,month_num,day_num,hour_num,min_num;
     time_t current_time_long;
@@ -105,13 +105,13 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
         }
         return -1;
     }
-    get_seq_string(datetime_input,'@',1,ymd);
-    get_seq_string(datetime_input,'@',2,hour_min);
-    get_seq_string(ymd,'-',1,year);
-    get_seq_string(ymd,'-',2,month);
-    get_seq_string(ymd,'-',3,mday);
-    get_seq_string(hour_min,':',1,hour);
-    get_seq_string(hour_min,':',2,min);
+    get_seq_nstring(datetime_input,'@',1,ymd,32);
+    get_seq_nstring(datetime_input,'@',2,hour_min,8);
+    get_seq_nstring(ymd,'-',1,year,8);
+    get_seq_nstring(ymd,'-',2,month,8);
+    get_seq_nstring(ymd,'-',3,mday,8);
+    get_seq_nstring(hour_min,':',1,hour,8);
+    get_seq_nstring(hour_min,':',2,min,8);
     
     year_num=string_to_positive_num(year);
     month_num=string_to_positive_num(month);
@@ -268,7 +268,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
         printf("|          " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",node_name_list);
         node_filter_flag=calc_str_num(node_name_list,':');
         for(i=0;i<node_filter_flag;i++){
-            get_seq_string(node_name_list,':',i+1,node_name_list_converted[i]);
+            get_seq_nstring(node_name_list,':',i+1,node_name_list_converted[i],16);
         }
     }
 
@@ -282,13 +282,13 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
     }
 
     file_p=fopen(cluster_mon_data_file,"r");
-    fgetline(file_p,mon_data_line);
-    fgetline(file_p,mon_data_line);
+    fngetline(file_p,mon_data_line,LINE_LENGTH_SHORT);
+    fngetline(file_p,mon_data_line,LINE_LENGTH_SHORT);
     fprintf(file_p_2,"%s\n",mon_data_line);
     while(!feof(file_p)){
-        fgetline(file_p,mon_data_line);
-        get_seq_string(mon_data_line,',',1,temp_date);
-        get_seq_string(mon_data_line,',',2,temp_time);
+        fngetline(file_p,mon_data_line,LINE_LENGTH_SHORT);
+        get_seq_nstring(mon_data_line,',',1,temp_date,32);
+        get_seq_nstring(mon_data_line,',',2,temp_time,30);
         snprintf(temp_time_final,39,"%s:0",temp_time);
         datetime_to_num(temp_date,temp_time_final,&time_tm_tmp);
         time_tmp=mktime(&time_tm_tmp);
@@ -304,7 +304,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
                 fprintf(file_p_2,"%s\n",mon_data_line);
             }
             else{
-                get_seq_string(mon_data_line,',',4,node_name_temp);
+                get_seq_nstring(mon_data_line,',',4,node_name_temp,32);
                 for(i=0;i<node_filter_flag;i++){
                     if(strcmp(node_name_temp,node_name_list_converted[i])==0){
                         fprintf(file_p_2,"%s\n",mon_data_line);

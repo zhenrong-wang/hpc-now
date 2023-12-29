@@ -38,7 +38,7 @@ int appman_update_conf(char* workdir, const char* new_inst_loc, const char* new_
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Updating the location(s) now ...\n");
-        sprintf(remote_commands,"hpcmgr appman-conf-update --inst=%s --repo=%s",new_inst_loc,new_repo_loc);
+        snprintf(remote_commands,2047,"hpcmgr appman-conf-update --inst=%s --repo=%s",new_inst_loc,new_repo_loc);
         run_flag=remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-t",0,3,std_redirect,NULL_STREAM);
     }
     if(run_flag==0){
@@ -66,11 +66,11 @@ int app_list(char* workdir, char* option, char* user_name, char* app_name, char*
         run_flag=remote_exec_general(workdir,sshkey_dir,user_name,"hpcmgr applist avail","-t",0,3,std_redirect,NULL_STREAM);
     }
     else if(strcmp(option,"check")==0){
-        sprintf(remote_commands,"hpcmgr applist check --app=%s",app_name);
+        snprintf(remote_commands,2047,"hpcmgr applist check --app=%s",app_name);
         run_flag=remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"-t",0,3,std_redirect,NULL_STREAM);
     }
     else{
-        sprintf(remote_commands,"hpcmgr applist --inst=%s",inst_loc);
+        snprintf(remote_commands,2047,"hpcmgr applist --inst=%s",inst_loc);
         run_flag=remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-t",0,3,std_redirect,NULL_STREAM);
     }
     if(run_flag!=0){
@@ -223,10 +223,10 @@ int app_operation(char* workdir, char* user_name, char* option, char* app_name, 
     char remote_commands[CMDLINE_LENGTH]="";
     int run_flag=0;
     if(strcmp(option,"build")==0||strcmp(option,"install")==0){
-        sprintf(remote_commands,"nohup hpcmgr %s --app=%s --inst=%s --repo=%s > /hpc_apps/%s_apps/appman_%s.log 2>&1 &",option,app_name,inst_loc,repo_loc,user_name,app_name);
+        snprintf(remote_commands,2047,"nohup hpcmgr %s --app=%s --inst=%s --repo=%s > /hpc_apps/%s_apps/appman_%s.log 2>&1 &",option,app_name,inst_loc,repo_loc,user_name,app_name);
     }
     else{
-        sprintf(remote_commands,"nohup hpcmgr remove --app=%s --inst=%s > /hpc_apps/%s_apps/appman_%s.log 2>&1 &",app_name,inst_loc,user_name,app_name);
+        snprintf(remote_commands,2047,"nohup hpcmgr remove --app=%s --inst=%s > /hpc_apps/%s_apps/appman_%s.log 2>&1 &",app_name,inst_loc,user_name,app_name);
     }
     
     run_flag=remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,2,"","");
@@ -235,7 +235,7 @@ int app_operation(char* workdir, char* user_name, char* option, char* app_name, 
     }
     printf(GENERAL_BOLD "[ -INFO- ] App operation is in progress. Detailed info as below.\n");
     printf("|          You can press 'ctrl C' to stop viewing the log.\n" RESET_DISPLAY "\n");
-    sprintf(remote_commands,"tail -f /hpc_apps/%s_apps/appman_%s.log",user_name,app_name);
+    snprintf(remote_commands,2047,"tail -f /hpc_apps/%s_apps/appman_%s.log",user_name,app_name);
     run_flag=remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"-t",0,1,"","");
     if(run_flag!=0){
         return 3;

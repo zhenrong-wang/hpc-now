@@ -409,33 +409,33 @@ void print_about(void){
 int read_license(char* option){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    sprintf(filename_temp,"%s%sMIT.LICENSE",NOW_LIC_DIR,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sMIT.LICENSE",NOW_LIC_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
 #ifdef _WIN32
-        sprintf(cmdline,"notepad %s",filename_temp);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"notepad %s",filename_temp);
         system(cmdline);
         return 0;
 #else
         if(strcmp(option,"print")==0){
-            sprintf(cmdline,"%s %s",CAT_FILE_CMD,filename_temp);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s",CAT_FILE_CMD,filename_temp);
         }
         else{
-            sprintf(cmdline,"more %s",filename_temp);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"more %s",filename_temp);
         }
         system(cmdline);
         return 0;
 #endif
     }
 #ifdef _WIN32
-    sprintf(cmdline,"curl -s %s",URL_LICENSE);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %s",URL_LICENSE);
     system(cmdline);
     return 0;
 #else
     if(strcmp(option,"print")==0){
-        sprintf(cmdline,"curl -s %s",URL_LICENSE);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %s",URL_LICENSE);
     }
     else{
-        sprintf(cmdline,"curl -s %s | more",URL_LICENSE);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %s | more",URL_LICENSE);
     }
     system(cmdline);
     return 0;

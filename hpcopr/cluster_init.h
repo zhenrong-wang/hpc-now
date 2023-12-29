@@ -21,14 +21,14 @@ typedef struct {
     char master_inst[16];
     int master_bandwidth;
     char compute_inst[16];
-    char os_image_raw[32];
+    char os_image_raw[96];
     char ht_flag[8];
 } cluster_initinfo; // For future use if needed.
 
 void reset_initinfo(cluster_initinfo* init_info, char* cluster_id);
 void empty_initinfo(cluster_initinfo* init_info);
 int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_flag_local, char* url_code_root, int argc, char* argv[]);
-int create_init_dirs(char* workdir, char* stackdir, char* vaultdir, char* logdir, char* confdir);
+int create_init_dirs(char* workdir, char* stackdir, char* vaultdir, char* logdir, char* confdir, unsigned int dirlen_max);
 int get_static_conf_files(char* confdir, char* cloud_name, int code_loc_flag, char* url_code_root);
 int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_loc_flag, char* url_code_root);
 int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, cluster_initinfo* init_info);

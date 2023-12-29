@@ -126,7 +126,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         else{
             strcpy(job_name,string_temp);
         }
-        reset_string(string_temp);
+        reset_nstring(string_temp,128);
     }
 
     if(cmd_keyword_check(argc,argv,"--jtime",duration_hours_string)!=0){
@@ -152,7 +152,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
                 duration_hours=num_temp;
             }
         }
-        reset_string(string_temp);
+        reset_nstring(string_temp,128);
     }
     else{
         if(strcmp(duration_hours_string,"y")==0||strcmp(duration_hours_string,"yes")==0||strcmp(duration_hours_string,"Y")==0||strcmp(duration_hours_string,"YES")==0||strcmp(duration_hours_string,"Yes")==0){
@@ -181,7 +181,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         getchar();
     }
 
-    if(cmd_keyword_ncheck(argc,argv,"--jdata",job_data,255)!=0){
+    if(cmd_keyword_ncheck(argc,argv,"--jdata",job_data,256)!=0){
         if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Job data directory not specified. Use --jdata JOB_DIR." RESET_DISPLAY "\n");
             return 17;
@@ -194,7 +194,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         getchar();
     }
 
-    reset_string(string_temp);
+    reset_nstring(string_temp,128);
     for(i=0;i<3;i++){
         *(string_temp+i)=*(job_data+i);
     }
@@ -290,7 +290,7 @@ int job_list(char* workdir, char* user_name, char* sshkey_dir){
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char dirname_temp[DIR_LENGTH]="";
     char job_list_cache[FILENAME_LENGTH]="";
-    char string_temp[256]="";
+    char string_temp[LINE_LENGTH_SHORT]="";
     FILE* file_p=NULL;
     char cmdline[CMDLINE_LENGTH]="";
     get_cluster_name(cluster_name,workdir);
@@ -305,7 +305,7 @@ int job_list(char* workdir, char* user_name, char* sshkey_dir){
     printf("\n");
     file_p=fopen(job_list_cache,"r");
     while(!feof(file_p)){
-        fgetline(file_p,string_temp);
+        fngetline(file_p,string_temp,LINE_LENGTH_SHORT);
         if(strlen(string_temp)==0){
             continue;
         }

@@ -108,7 +108,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         max_cluster_name_length=get_max_cluster_name_length();
         while(fngetline(file_p,registry_line,255)==0){
             if(strlen(registry_line)!=0){
-                get_seq_string(registry_line,' ',4,temp_cluster_name);
+                get_seq_nstring(registry_line,' ',4,temp_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS);
                 get_workdir(temp_cluster_workdir,temp_cluster_name);
                 get_cloud_flag(temp_cluster_workdir,cloud_flag);
                 cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext);
@@ -260,7 +260,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
     char tf_archive_err_log[FILENAME_LENGTH]="";
     char curr_payment_method[16]="";
     FILE* file_p=NULL;
-    sprintf(log_trash,"%s%slog_trashbin.txt",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    snprintf(log_trash,FILENAME_LENGTH-1,"%s%slog_trashbin.txt",HPC_NOW_ROOT_DIR,PATH_SLASH);
     if(cluster_name_check(target_cluster_name)!=-127){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is not in the registry.\n" RESET_DISPLAY,target_cluster_name);
         list_all_cluster_names(1);
@@ -272,11 +272,11 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
         printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
         return -1;
     }
-    sprintf(tf_realtime_log,"%s%slog%stf_prep.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(tf_archive_log,"%s%slog%stf_prep.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(tf_realtime_err_log,"%s%slog%stf_prep.err.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(tf_archive_err_log,"%s%slog%stf_prep.err.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(cloud_secrets,"%s%svault%s.secrets.key",cluster_workdir,PATH_SLASH,PATH_SLASH);
+    snprintf(tf_realtime_log,FILENAME_LENGTH-1,"%s%slog%stf_prep.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
+    snprintf(tf_archive_log,FILENAME_LENGTH-1,"%s%slog%stf_prep.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
+    snprintf(tf_realtime_err_log,FILENAME_LENGTH-1,"%s%slog%stf_prep.err.log",cluster_workdir,PATH_SLASH,PATH_SLASH);
+    snprintf(tf_archive_err_log,FILENAME_LENGTH-1,"%s%slog%stf_prep.err.log.archive",cluster_workdir,PATH_SLASH,PATH_SLASH);
+    snprintf(cloud_secrets,FILENAME_LENGTH-1,"%s%svault%s.secrets.key",cluster_workdir,PATH_SLASH,PATH_SLASH);
     if(file_empty_or_not(cloud_secrets)<1){
         if(strcmp(force_flag,"force")!=0){
             if(prompt_to_confirm("Removing the *imported* cluster from local.",CONFIRM_STRING,1)==1){
@@ -352,9 +352,9 @@ destroy_cluster:
 
 remove_files:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing all the related files ...\n");
-    sprintf(cmdline,"%s %s %s",DELETE_FOLDER_CMD,cluster_workdir,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,cluster_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%s.%s %s",DELETE_FOLDER_CMD,SSHKEY_DIR,PATH_SLASH,target_cluster_name,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.%s %s",DELETE_FOLDER_CMD,SSHKEY_DIR,PATH_SLASH,target_cluster_name,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Deleting the cluster from the registry ...\n");
     delete_from_cluster_registry(target_cluster_name);
@@ -456,23 +456,23 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             return 3;
         }
         fclose(file_p_2);
-        sprintf(new_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,input_cluster_name,PATH_SLASH);
-        sprintf(cmdline,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
+        snprintf(new_workdir,DIR_LENGTH-1,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,input_cluster_name,PATH_SLASH);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         create_and_get_vaultdir(new_workdir,new_vaultdir);
         if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
             return -3;
         }
-        sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
         run_flag=system(cmdline);
         if(run_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. Abort." RESET_DISPLAY "\n");
-            sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,secret_key,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,secret_key,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             return 5;
         }
-        sprintf(filename_temp,"%s%scloud_flag.flg",new_vaultdir,PATH_SLASH);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_flag.flg",new_vaultdir,PATH_SLASH);
         file_p=fopen(filename_temp,"w+");
         if(file_p!=NULL){
             fprintf(file_p,"CLOUD_G\n");
@@ -480,11 +480,11 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         }
         if(strcmp(echo_flag,"echo")==0){
             printf(GREY_LIGHT);
-            sprintf(cmdline,"%s %s",CAT_FILE_CMD,secret_key);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s",CAT_FILE_CMD,secret_key);
             system(cmdline);
             printf(RESET_DISPLAY);
         }
-        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,secret_key,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,secret_key,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         add_to_cluster_registry(input_cluster_name,"");
         switch_to_cluster(input_cluster_name);
@@ -605,27 +605,27 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     else{
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now." RESET_DISPLAY "\n");
         fclose(file_p);
-        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 5;
     }
-    sprintf(new_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,input_cluster_name,PATH_SLASH);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
+    snprintf(new_workdir,DIR_LENGTH-1,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,input_cluster_name,PATH_SLASH);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     create_and_get_vaultdir(new_workdir,new_vaultdir);
     if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
         return -3;
     }
-    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     if(strcmp(cloud_flag,"CLOUD_F")==0){
-        sprintf(cmdline,"%s %s %s%s %s",MOVE_FILE_CMD,filename_temp_2,new_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s%s %s",MOVE_FILE_CMD,filename_temp_2,new_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    sprintf(filename_temp,"%s%scloud_flag.flg",new_vaultdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_flag.flg",new_vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     if(file_p!=NULL){
         fprintf(file_p,"%s\n",cloud_flag);
@@ -707,7 +707,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
             return -3;
         }
-        sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
         run_flag=system(cmdline);
         if(run_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. The key keeps unchanged." RESET_DISPLAY "\n");
@@ -717,7 +717,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         }
         if(strcmp(echo_flag,"echo")==0){
             printf(GREY_LIGHT);
-            sprintf(cmdline,"%s %s",CAT_FILE_CMD,secret_key);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s",CAT_FILE_CMD,secret_key);
             system(cmdline);
             printf(RESET_DISPLAY);
         }
@@ -741,7 +741,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         printf("|          Please check the available disk space. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
-    sprintf(filename_temp2,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp2)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently there is no secrets keypair. This working directory may be\n");
         printf("|          corrputed, which is very unusual. Please contact us via:\n");
@@ -861,29 +861,29 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     else{
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now." RESET_DISPLAY "\n");
         fclose(file_p);
-        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 3;
     }
     if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return -3;
     }
-    sprintf(cmdline,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     create_and_get_stackdir(workdir,stackdir);
-    sprintf(filename_temp,"%s%shpc_stack_base.tf.tmp",stackdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf.tmp",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        sprintf(filename_temp2,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
-        sprintf(cmdline,"%s decrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp,filename_temp2,md5sum,SYSTEM_CMD_REDIRECT);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s decrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp,filename_temp2,md5sum,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         global_replace(filename_temp2,access_key_prev,access_key);
         global_replace(filename_temp2,secret_key_prev,secret_key);
-        sprintf(cmdline,"%s encrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp2,filename_temp,md5sum,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp2,filename_temp,md5sum,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally.\n");
@@ -922,7 +922,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     create_and_get_vaultdir(workdir,vaultdir);
     create_and_get_stackdir(workdir,stackdir);
     decrypt_files(workdir,crypto_keyfile);
-    sprintf(dot_terraform,"%s%s.terraform",stackdir,PATH_SLASH);
+    snprintf(dot_terraform,FILENAME_LENGTH-1,"%s%s.terraform",stackdir,PATH_SLASH);
     if(folder_exist_or_not(dot_terraform)==0){
         if(tf_execution(tf_run,"destroy",workdir,crypto_keyfile,1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (1/2)..." RESET_DISPLAY "\n");
@@ -942,13 +942,13 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
         }
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The whole cluster has been destroyed successfully.\n");
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Upating the usage records ...\n");
-        sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
         compute_node_num=get_compute_node_num(filename_temp,"all");
         update_usage_summary(workdir,crypto_keyfile,"master","stop");
         update_usage_summary(workdir,crypto_keyfile,"database","stop");
         update_usage_summary(workdir,crypto_keyfile,"natgw","stop");
         for(i=0;i<compute_node_num;i++){
-            sprintf(string_temp,"compute%d",i+1);
+            snprintf(string_temp,LINE_LENGTH_SHORT-1,"compute%d",i+1);
             update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
         }
     }
@@ -957,26 +957,26 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Deleting all the related local files and folders ...\n");
     delete_decrypted_files(workdir,crypto_keyfile);
-    sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%s*.tf %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s*.tf %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%s*.tmp %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s*.tmp %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%scurrentstate %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%scurrentstate %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%scompute_template %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%scompute_template %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%shostfile_latest %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shostfile_latest %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%s*.tmp %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s*.tmp %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%s*.txt %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s*.txt %s%s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%sconf%stf_prep.conf %s%sconf%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,workdir,PATH_SLASH,PATH_SLASH,workdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sconf%stf_prep.conf %s%sconf%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,workdir,PATH_SLASH,PATH_SLASH,workdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     get_cluster_name(cluster_name,workdir);
-    sprintf(cmdline,"%s %s%s.%s %s",DELETE_FOLDER_CMD,SSHKEY_DIR,PATH_SLASH,cluster_name,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.%s %s",DELETE_FOLDER_CMD,SSHKEY_DIR,PATH_SLASH,cluster_name,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     delete_local_tf_config(stackdir);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been destroyed successfully.\n");
@@ -995,7 +995,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
     char filename_temp[FILENAME_LENGTH]="";
     int compute_node_num=0;
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
@@ -1003,7 +1003,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
     fscanf(file_p,"%63s",unique_cluster_id);
     fclose(file_p);
     create_and_get_stackdir(workdir,stackdir);
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1025,19 +1025,19 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
             }
         }
         else{
-            sprintf(string_temp,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified to delete %d from %d compute node(s).",del_num,compute_node_num);
+            snprintf(string_temp,127,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified to delete %d from %d compute node(s).",del_num,compute_node_num);
             printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
                 system(cmdline);
-                sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf* %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,i,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute%d.tf* %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,i,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
                 system(cmdline);
             }
             if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){ 
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
                 for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                    sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,i,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+                    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,i,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
                     system(cmdline);
                 }
                 if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1059,7 +1059,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
             remote_exec(workdir,sshkey_dir,"connect",1);
             remote_exec(workdir,sshkey_dir,"all",2);
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
-                sprintf(string_temp,"compute%d",i);
+                snprintf(string_temp,127,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
             }
             printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been deleted.\n");
@@ -1067,19 +1067,19 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
             return 0;
         }
     }
-    sprintf(string_temp,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified to delete *ALL* the %d compute node(s).",compute_node_num);
+    snprintf(string_temp,127,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified to delete *ALL* the %d compute node(s).",compute_node_num);
     printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
-        sprintf(cmdline,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,i,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,i,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,i,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute%d.tf %s%s %s",MOVE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,i,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1101,7 +1101,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
     remote_exec(workdir,sshkey_dir,"connect",1);
     remote_exec(workdir,sshkey_dir,"all",2);
     for(i=1;i<compute_node_num+1;i++){
-        sprintf(string_temp,"compute%d",i);
+        snprintf(string_temp,127,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been deleted.\n");
@@ -1128,26 +1128,26 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         printf(FATAL_RED_BOLD "[ FATAL: ] The number of nodes to be added is out of range (1-%d). Exit now.\n" RESET_DISPLAY,MAXIMUM_ADD_NODE_NUMBER);
         return -1;
     }
-    sprintf(string_temp,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified to add %d compute node(s).",add_number);
+    snprintf(string_temp,127,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified to add %d compute node(s).",add_number);
     printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster operation is in progress ...\n");
     create_and_get_stackdir(workdir,stackdir);
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     current_node_num=get_compute_node_num(filename_temp,"all");
     for(i=0;i<add_number;i++){
-        sprintf(cmdline,"%s %s%scompute_template %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1+current_node_num,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%scompute_template %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1+current_node_num,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1+current_node_num);
-        sprintf(string_temp,"compute%d",i+1+current_node_num);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1+current_node_num);
+        snprintf(string_temp,127,"compute%d",i+1+current_node_num);
         global_replace(filename_temp,"compute1",string_temp);
-        sprintf(string_temp,"comp%d",i+1+current_node_num);
+        snprintf(string_temp,127,"comp%d",i+1+current_node_num);
         global_replace(filename_temp,"comp1",string_temp);
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         for(i=0;i<add_number;i++){
-            sprintf(cmdline,"%s %s%shpc_stack_compute%d.tf",DELETE_FILE_CMD,stackdir,PATH_SLASH,i+1+current_node_num);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute%d.tf",DELETE_FILE_CMD,stackdir,PATH_SLASH,i+1+current_node_num);
             system(cmdline);
         }
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1169,7 +1169,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     remote_exec(workdir,sshkey_dir,"connect",7);
     remote_exec(workdir,sshkey_dir,"all",8);
     for(i=0;i<add_number;i++){
-        sprintf(string_temp,"compute%d",current_node_num+i+1);
+        snprintf(string_temp,127,"compute%d",current_node_num+i+1);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been added.\n");
@@ -1189,7 +1189,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     char node_name[16]="";
     int compute_node_num=0;
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
@@ -1201,7 +1201,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1234,17 +1234,17 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
             }
         }
         else{
-            sprintf(string_temp,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You planned to shutdown %d from %d compute node(s).",down_num,compute_node_num);
+            snprintf(string_temp,127,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You planned to shutdown %d from %d compute node(s).",down_num,compute_node_num);
             printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
             for(i=compute_node_num-down_num+1;i<compute_node_num+1;i++){
-                sprintf(node_name,"compute%d",i);
+                snprintf(node_name,15,"compute%d",i);
                 node_file_to_stop(stackdir,node_name,cloud_flag);
             }
             if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
                 for(i=compute_node_num-down_num+1;i<compute_node_num+1;i++){
-                    sprintf(node_name,"compute%d",i);
+                    snprintf(node_name,15,"compute%d",i);
                     node_file_to_running(stackdir,node_name,cloud_flag);
                 }
                 if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1263,24 +1263,24 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
             sync_statefile(workdir,SSHKEY_DIR);
             delete_decrypted_files(workdir,crypto_keyfile);
             for(i=compute_node_num-down_num+1;i<compute_node_num+1;i++){
-                sprintf(string_temp,"compute%d",i);
+                snprintf(string_temp,127,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
             }
             printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been deleted.\n");
             return 0;
         }
     }
-    sprintf(string_temp,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You planned to shutdown *ALL* the %d compute node(s).",compute_node_num);
+    snprintf(string_temp,127,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You planned to shutdown *ALL* the %d compute node(s).",compute_node_num);
     printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
-        sprintf(node_name,"compute%d",i);
+        snprintf(node_name,15,"compute%d",i);
         node_file_to_stop(stackdir,node_name,cloud_flag);
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(node_name,"compute%d",i);
+            snprintf(node_name,15,"compute%d",i);
             node_file_to_running(stackdir,node_name,cloud_flag);
         }
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1297,7 +1297,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
     for(i=1;i<compute_node_num+1;i++){
-        sprintf(string_temp,"compute%d",i);
+        snprintf(string_temp,127,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
     sync_statefile(workdir,SSHKEY_DIR);
@@ -1320,7 +1320,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     int compute_node_num=0;
     int compute_node_num_on=0;
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
@@ -1332,7 +1332,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1372,17 +1372,17 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
             }
         }
         else{
-            sprintf(string_temp,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You planned to turn on %d compute node(s).",on_num);
+            snprintf(string_temp,127,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You planned to turn on *ALL* the %d compute node(s).",compute_node_num);
             printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
             for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
-                sprintf(node_name,"compute%d",i);
+                snprintf(node_name,15,"compute%d",i);
                 node_file_to_running(stackdir,node_name,cloud_flag);
             }
             if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
                 for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
-                    sprintf(node_name,"compute%d",i);
+                    snprintf(node_name,15,"compute%d",i);
                     node_file_to_stop(stackdir,node_name,cloud_flag);
                 }
                 if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1402,24 +1402,24 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
             remote_exec(workdir,sshkey_dir,"quick",1);
             delete_decrypted_files(workdir,crypto_keyfile);
             for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
-                sprintf(string_temp,"compute%d",i);
+                snprintf(string_temp,127,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
             }
             printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been turned on.\n");
             return 0;
         }
     }
-    sprintf(string_temp,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You planned to turn on *ALL* the %d compute node(s).",compute_node_num);
+    snprintf(string_temp,127,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You planned to turn on *ALL* the %d compute node(s).",compute_node_num);
     printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     for(i=compute_node_num_on+1;i<compute_node_num+1;i++){
-        sprintf(node_name,"compute%d",i);
+        snprintf(node_name,15,"compute%d",i);
         node_file_to_running(stackdir,node_name,cloud_flag);
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ...\n");
         for(i=compute_node_num_on+1;i<compute_node_num+1;i++){
-            sprintf(node_name,"compute%d",i);
+            snprintf(node_name,15,"compute%d",i);
             node_file_to_stop(stackdir,node_name,cloud_flag);
         }
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1439,7 +1439,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     remote_exec(workdir,sshkey_dir,"quick",1);
     delete_decrypted_files(workdir,crypto_keyfile);
     for(i=compute_node_num_on+1;i<compute_node_num+1;i++){
-        sprintf(string_temp,"compute%d",i);
+        snprintf(string_temp,127,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been turned on.\n");
@@ -1471,7 +1471,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     }
     create_and_get_stackdir(workdir,stackdir);
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     compute_node_num=get_compute_node_num(filename_temp,"all");
     compute_node_down_num=get_compute_node_num(filename_temp,"down");
     if(compute_node_num==0){
@@ -1479,28 +1479,28 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         return -3;
     }
     decrypt_files(workdir,crypto_keyfile);
-    sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
-    sprintf(string_temp,"\"%s\"",new_config);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
+    snprintf(string_temp,63,"\"%s\"",new_config);
     if(find_multi_keys(filename_temp,string_temp,"","","","")==0||find_multi_keys(filename_temp,string_temp,"","","","")<0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid compute configuration. Exit now." RESET_DISPLAY "\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
-    sprintf(filename_temp,"%s%scompute_template",stackdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
     if(strcmp(cloud_flag,"CLOUD_D")==0){
         find_and_get(filename_temp,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp);
-        get_seq_string(string_temp,'}',1,prev_config);
+        get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,prev_config);
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
         find_and_get(filename_temp,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
-        get_seq_string(string_temp,'}',1,prev_config);
+        get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
         find_and_get(filename_temp,"machine_type","","",1,"machine_type","","",'.',2,string_temp);
-        get_seq_string(string_temp,'}',1,prev_config);
+        get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else{
         find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
@@ -1515,8 +1515,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             return 1;
         }
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
-            sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+            snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             global_replace(filename_temp,prev_config,new_config);
         }
@@ -1535,8 +1535,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             return 1;
         }
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(filename_temp2,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
-            sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
+            snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp2,filename_temp2,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             if(config_diff_flag!=0){
                 global_replace(filename_temp2,prev_config,new_config);
@@ -1546,7 +1546,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             if(ht_diff_flag!=0){
                 delete_lines_by_kwd(filename_temp2,"cpu_core_count =",1);
                 delete_lines_by_kwd(filename_temp2,"cpu_threads_per_core =",1);
-                sprintf(string_temp2,"cpu_core_count = %d",cpu_core_num);
+                snprintf(string_temp2,63,"cpu_core_count = %d",cpu_core_num);
                 insert_lines(filename_temp2,"#INSERT_HT_HERE",string_temp2);
                 if(strcmp(prev_htflag,"ON")==0){
                     insert_lines(filename_temp2,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
@@ -1561,7 +1561,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 delete_lines_by_kwd(filename_temp2,"cpu_threads_per_core =",1);
                 if(strcmp(prev_htflag,"OFF")==0){
                     insert_lines(filename_temp2,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
-                    sprintf(string_temp2,"cpu_core_count = %d",cpu_core_num);
+                    snprintf(string_temp2,63,"cpu_core_count = %d",cpu_core_num);
                     insert_lines(filename_temp2,"#INSERT_HT_HERE",string_temp2);
                     reinit_flag=1;
                 }
@@ -1569,12 +1569,11 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             //printf("----%d\n",cpu_core_num);
         }
     }
-
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(filename_temp,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
-            sprintf(cmdline,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+            snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
             system(cmdline);
         }
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1587,7 +1586,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         return 3;
     }
     for(i=1;i<compute_node_num+1;i++){
-        sprintf(node_name_temp,"compute%d",i);
+        snprintf(node_name_temp,31,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,node_name_temp,"stop");
     }
     update_compute_template(stackdir,cloud_flag);
@@ -1614,7 +1613,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     }
     delete_decrypted_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
-        sprintf(node_name_temp,"compute%d",i);
+        snprintf(node_name_temp,31,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,node_name_temp,"start");
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The compute nodes have been reconfigured.\n");
@@ -1624,7 +1623,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     else{
         printf(GENERAL_BOLD "|         " RESET_DISPLAY " Changing the compute node(s), the process may need 1 minute.\n");
     }
-    sprintf(cmdline,"%s %s%s*bak %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s*bak %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     return 0;
 }
@@ -1652,28 +1651,28 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     }
 
     decrypt_files(workdir,crypto_keyfile);
-    sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
-    sprintf(string_temp,"\"%s\"",new_config);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
+    snprintf(string_temp,63,"\"%s\"",new_config);
     if(find_multi_keys(filename_temp,string_temp,"","","","")==0||find_multi_keys(filename_temp,string_temp,"","","","")<0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid master node configuration. Exit now." RESET_DISPLAY "\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
-    sprintf(filename_temp,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
     if(strcmp(cloud_flag,"CLOUD_D")==0){
         find_and_get(filename_temp,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp);
-        get_seq_string(string_temp,'}',1,prev_config);
+        get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,prev_config);
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
         find_and_get(filename_temp,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
-        get_seq_string(string_temp,'}',1,prev_config);
+        get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
         find_and_get(filename_temp,"machine_type","","",1,"machine_type","","",'.',2,string_temp);
-        get_seq_string(string_temp,'}',1,prev_config);
+        get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else{
         find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
@@ -1683,13 +1682,13 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         delete_decrypted_files(workdir,crypto_keyfile);
         return 1;
     }
-    sprintf(filename_temp,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
-    sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     global_replace(filename_temp,prev_config,new_config);
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
-        sprintf(cmdline,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
@@ -1700,7 +1699,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -3;
     }
-    sprintf(cmdline,"%s %s.bak %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.bak %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     update_usage_summary(workdir,crypto_keyfile,"master","stop");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
@@ -1755,13 +1754,13 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Expanding the volume from %d to %d GB, this operation is NOT reversible!\n",prev_volume_num,new_volume_num);
     create_and_get_stackdir(workdir,stackdir);
     decrypt_files(workdir,crypto_keyfile);
-    sprintf(filename_temp,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
-    sprintf(cmdline,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     find_and_replace(filename_temp,"#-#-#","","","","",prev_volume,new_volume);
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
-        sprintf(cmdline,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
@@ -1772,7 +1771,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -3;
     }
-    sprintf(cmdline,"%s %s.bak %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.bak %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     if(strcmp(cloud_flag,"CLOUD_F")==0){
         strcpy(cmdline,"resize2fs /dev/sdc");
@@ -1802,7 +1801,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     char node_name[16]="";
     int compute_node_num=0;
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
@@ -1814,7 +1813,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     if(find_multi_keys(filename_temp,"running","","","","")==0&&find_multi_keys(filename_temp,"Running","","","","")==0&&find_multi_keys(filename_temp,"RUNNING","","","","")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
         printf("|          Command: hpcopr wakeup --all | --min . Exit now." RESET_DISPLAY "\n");
@@ -1828,7 +1827,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     node_file_to_stop(stackdir,"database",cloud_flag);
     node_file_to_stop(stackdir,"natgw",cloud_flag);
     for(i=1;i<compute_node_num+1;i++){
-        sprintf(node_name,"compute%d",i);
+        snprintf(node_name,15,"compute%d",i);
         node_file_to_stop(stackdir,node_name,cloud_flag);
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1837,7 +1836,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
         node_file_to_running(stackdir,"database",cloud_flag);
         node_file_to_running(stackdir,"natgw",cloud_flag);
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(node_name,"compute%d",i);
+            snprintf(node_name,15,"compute%d",i);
             node_file_to_running(stackdir,node_name,cloud_flag);
         }
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1857,7 +1856,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     update_usage_summary(workdir,crypto_keyfile,"database","stop");
     update_usage_summary(workdir,crypto_keyfile,"natgw","stop");
     for(i=1;i<compute_node_num+1;i++){
-        sprintf(string_temp,"compute%d",i);
+        snprintf(string_temp,127,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
     update_cluster_summary(workdir,crypto_keyfile);
@@ -1883,7 +1882,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     char node_name[16]="";
     int compute_node_num=0;
     create_and_get_vaultdir(workdir,vaultdir);
-    sprintf(filename_temp,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
@@ -1898,7 +1897,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     if(strcmp(option,"minimal")==0&&cluster_asleep_or_not(workdir)!=0){
         return 3;
     }
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(filename_temp,"all");
@@ -1913,7 +1912,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     node_file_to_running(stackdir,"natgw",cloud_flag);
     if(strcmp(option,"all")==0){
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(node_name,"compute%d",i);
+            snprintf(node_name,15,"compute%d",i);
             node_file_to_running(stackdir,node_name,cloud_flag);
         }
     }
@@ -1924,7 +1923,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
         node_file_to_stop(stackdir,"natgw",cloud_flag);
         if(strcmp(option,"all")==0){
             for(i=1;i<compute_node_num+1;i++){
-                sprintf(node_name,"compute%d",i);
+                snprintf(node_name,15,"compute%d",i);
                 node_file_to_stop(stackdir,node_name,cloud_flag);
             }
         }
@@ -1958,7 +1957,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     update_usage_summary(workdir,crypto_keyfile,"natgw","start");
     if(strcmp(option,"all")==0){
         for(i=1;i<compute_node_num+1;i++){
-            sprintf(string_temp,"compute%d",i);
+            snprintf(string_temp,127,"compute%d",i);
             update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
         }
     }
@@ -2004,38 +2003,38 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
 
     create_and_get_vaultdir(workdir,vaultdir);
     if(code_loc_flag_var==1){
-        sprintf(url_alicloud_root,"%s%salicloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-        sprintf(url_qcloud_root,"%s%sqcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-        sprintf(url_aws_root,"%s%saws%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-        sprintf(url_hwcloud_root,"%s%shwcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-        sprintf(url_baiducloud_root,"%s%sbaidu%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-        sprintf(url_azure_root,"%s%sazure%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
-        sprintf(url_gcp_root,"%s%sgcp%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        snprintf(url_alicloud_root,LOCATION_LENGTH_EXTENDED-1,"%s%salicloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        snprintf(url_qcloud_root,LOCATION_LENGTH_EXTENDED-1,"%s%sqcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        snprintf(url_aws_root,LOCATION_LENGTH_EXTENDED-1,"%s%saws%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        snprintf(url_hwcloud_root,LOCATION_LENGTH_EXTENDED-1,"%s%shwcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        snprintf(url_baiducloud_root,LOCATION_LENGTH_EXTENDED-1,"%s%sbaidu%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        snprintf(url_azure_root,LOCATION_LENGTH_EXTENDED-1,"%s%sazure%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
+        snprintf(url_gcp_root,LOCATION_LENGTH_EXTENDED-1,"%s%sgcp%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
     }
     else{
-        sprintf(url_alicloud_root,"%salicloud/",url_code_root_var);
-        sprintf(url_qcloud_root,"%sqcloud/",url_code_root_var);
-        sprintf(url_aws_root,"%saws/",url_code_root_var);
-        sprintf(url_hwcloud_root,"%shwcloud/",url_code_root_var);
-        sprintf(url_baiducloud_root,"%sbaidu/",url_code_root_var);
-        sprintf(url_azure_root,"%sazure/",url_code_root_var);
-        sprintf(url_gcp_root,"%sgcp/",url_code_root_var);
+        snprintf(url_alicloud_root,LOCATION_LENGTH_EXTENDED-1,"%salicloud/",url_code_root_var);
+        snprintf(url_qcloud_root,LOCATION_LENGTH_EXTENDED-1,"%sqcloud/",url_code_root_var);
+        snprintf(url_aws_root,LOCATION_LENGTH_EXTENDED-1,"%saws/",url_code_root_var);
+        snprintf(url_hwcloud_root,LOCATION_LENGTH_EXTENDED-1,"%shwcloud/",url_code_root_var);
+        snprintf(url_baiducloud_root,LOCATION_LENGTH_EXTENDED-1,"%sbaidu/",url_code_root_var);
+        snprintf(url_azure_root,LOCATION_LENGTH_EXTENDED-1,"%sazure/",url_code_root_var);
+        snprintf(url_gcp_root,LOCATION_LENGTH_EXTENDED-1,"%sgcp/",url_code_root_var);
     }
     get_cloud_flag(workdir,cloud_flag);
-    sprintf(confdir,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    sprintf(cmdline,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
+    snprintf(confdir,DIR_LENGTH+15,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(filename_temp,"%s%stf_prep.conf",confdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        sprintf(cmdline,"%s %s %s.prev %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.prev %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_alicloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_alicloud_root,confdir,PATH_SLASH);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_alicloud_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2043,10 +2042,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_qcloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_qcloud_root,confdir,PATH_SLASH);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_qcloud_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2054,10 +2053,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_aws_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_aws_root,confdir,PATH_SLASH);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_aws_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2065,10 +2064,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_hwcloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_hwcloud_root,confdir,PATH_SLASH);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_hwcloud_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2076,10 +2075,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_baiducloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_baiducloud_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_baiducloud_root,confdir,PATH_SLASH);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_baiducloud_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2087,10 +2086,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_azure_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_azure_root,confdir,PATH_SLASH);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_azure_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2098,10 +2097,10 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     }
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
         if(code_loc_flag_var==1){
-            sprintf(cmdline,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf.v2 %s%stf_prep.conf %s",COPY_FILE_CMD,url_gcp_root,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         }
         else{
-            sprintf(cmdline,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_gcp_root,confdir,PATH_SLASH);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf_prep.conf.v2 -s -o %s%stf_prep.conf",url_gcp_root,confdir,PATH_SLASH);
         }
         if(system(cmdline)!=0){
             return 1;
@@ -2110,13 +2109,13 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     else{
         return 1;
     }
-    sprintf(filename_temp,"%s%stf_prep.conf",confdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%stf_prep.conf",confdir,PATH_SLASH);
     find_and_replace(filename_temp,"CLUSTER_ID","","","","","hpcnow",cluster_name);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Default configuration file has been downloaded.\n");
     if(strcmp(edit_flag,"edit")!=0){
         return 0;
     }
-    sprintf(cmdline,"%s %s%stf_prep.conf",EDITOR_CMD,confdir,PATH_SLASH);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf",EDITOR_CMD,confdir,PATH_SLASH);
     system(cmdline);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The configuration file has been modified and saved.\n");
     return 0;
@@ -2131,7 +2130,7 @@ int edit_configuration_file(char* cluster_name, char* crypto_keyfile, int batch_
     }
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    sprintf(filename_temp,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         run_flag=prompt_to_confirm("Cluster configuration file not found. Would you like to get one?",CONFIRM_STRING_QUICK,batch_flag_local);
         if(run_flag!=0){
@@ -2140,7 +2139,7 @@ int edit_configuration_file(char* cluster_name, char* crypto_keyfile, int batch_
         get_default_conf(cluster_name,crypto_keyfile,"edit");
         return 0;
     }
-    sprintf(cmdline,"%s %s",EDITOR_CMD,filename_temp);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s",EDITOR_CMD,filename_temp);
     system(cmdline);
     return 0;
 }
@@ -2153,12 +2152,12 @@ int remove_conf(char* cluster_name){
     }
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    sprintf(filename_temp,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         return 1;
     }
     else{
-        sprintf(cmdline,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 0;
     }
@@ -2208,18 +2207,18 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
         printf("|          * Will try to rebuild " WARN_YELLO_BOLD "all" RESET_DISPLAY " the cluster nodes.\n");
     }
     create_and_get_stackdir(workdir,stackdir);
-    sprintf(cmdline,"%s %s%stmp %s && %s %s%stmp%s* %s",MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stmp %s && %s %s%stmp%s* %s",MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%shpc_stack_master.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_master.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%shpc_stack_compute*.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute*.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     if(strcmp(option,"mcdb")==0||strcmp(option,"all")==0){
-        sprintf(cmdline,"%s %s%shpc_stack_database.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_database.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     if(strcmp(option,"all")==0){
-        sprintf(cmdline,"%s %s%shpc_stack_natgw.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_natgw.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     remote_exec_general(workdir,sshkey_folder,"root","/usr/hpc-now/profile_bkup_rstr.sh backup","-n",0,0,"","");
@@ -2227,34 +2226,34 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing previous nodes ...\n");
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the previous nodes. Rolling back now ..." RESET_DISPLAY "\n");
-        sprintf(cmdline,"%s %s%stmp%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,stackdir,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stmp%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,stackdir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        sprintf(cmdline,"%s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         delete_decrypted_files(workdir,crypto_keyfile);
         return 3;
     }
-    sprintf(cmdline,"%s %s%stmp%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,stackdir,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stmp%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,stackdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    sprintf(cmdline,"%s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     decrypt_files(workdir,crypto_keyfile);
     get_cloud_flag(workdir,cloud_flag);
     node_file_to_running(stackdir,"master",cloud_flag);
     node_file_to_running(stackdir,"natgw",cloud_flag);
     node_file_to_running(stackdir,"database",cloud_flag);
-    sprintf(filename_temp,"%s%scurrentstate",stackdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     compute_node_num=get_compute_node_num(filename_temp,"all");
     for(i=1;i<compute_node_num+1;i++){
-        sprintf(node_name,"compute%d",i);
+        snprintf(node_name,15,"compute%d",i);
         node_file_to_running(stackdir,node_name,cloud_flag);
     }
 
     create_and_get_vaultdir(workdir,vaultdir);
     decrypt_user_passwords(workdir,crypto_keyfile);
-    sprintf(user_passwords,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    sprintf(base_tf,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
-    sprintf(master_tf,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
+    snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    snprintf(base_tf,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
+    snprintf(master_tf,FILENAME_LENGTH-1,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
     update_tf_passwords(base_tf,master_tf,user_passwords);
 
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully removed previous nodes. Rebuilding new nodes ...\n");
@@ -2320,12 +2319,12 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     get_cluster_name(cluster_name,workdir);
     get_user_sshkey(cluster_name,"root","ENABLED",sshkey_folder,crypto_keyfile);
     while(!feof(file_p)){
-        fgetline(file_p,user_line_temp);
+        fngetline(file_p,user_line_temp,256);
         if(strlen(user_line_temp)==0){
             continue;
         }
-        get_seq_string(user_line_temp,' ',2,username_temp);
-        get_seq_string(user_line_temp,' ',4,user_status_temp);
+        get_seq_nstring(user_line_temp,' ',2,username_temp,64);
+        get_seq_nstring(user_line_temp,' ',4,user_status_temp,32);
         get_user_sshkey(cluster_name,username_temp,user_status_temp,sshkey_folder,crypto_keyfile);
     }
     fclose(file_p);
@@ -2359,7 +2358,7 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
         return -3;
     }
     create_and_get_stackdir(workdir,stackdir);
-    sprintf(statefile,"%s%scurrentstate",stackdir,PATH_SLASH);
+    snprintf(statefile,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     get_state_value(workdir,"payment_method:",curr_payment_method);
     if(strcmp(curr_payment_method,new_payment_method)==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The cluster payment has already been " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD "." RESET_DISPLAY "\n",curr_payment_method);
@@ -2407,42 +2406,42 @@ int view_run_log(char* workdir, char* stream, char* run_option, char* view_optio
     }
     if(strcmp(run_option,"realtime")!=0&&strcmp(run_option,"archive")!=0){
         if(strcmp(real_stream,"std")==0){
-            sprintf(logfile,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
+            snprintf(logfile,FILENAME_LENGTH-1,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
         }
         else if(strcmp(real_stream,"err")==0){
-            sprintf(logfile,"%s%slog%stf_prep.err.log",workdir,PATH_SLASH,PATH_SLASH);
+            snprintf(logfile,FILENAME_LENGTH-1,"%s%slog%stf_prep.err.log",workdir,PATH_SLASH,PATH_SLASH);
         }
         else{
-            sprintf(logfile,"%s%slog%stf_dbg.log",workdir,PATH_SLASH,PATH_SLASH);
+            snprintf(logfile,FILENAME_LENGTH-1,"%s%slog%stf_dbg.log",workdir,PATH_SLASH,PATH_SLASH);
         }
     }
     else if(strcmp(run_option,"realtime")==0){
         if(strcmp(real_stream,"std")==0){
-            sprintf(logfile,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
+            snprintf(logfile,FILENAME_LENGTH-1,"%s%slog%stf_prep.log",workdir,PATH_SLASH,PATH_SLASH);
         }
         else if(strcmp(real_stream,"err")==0){
-            sprintf(logfile,"%s%slog%stf_prep.err.log",workdir,PATH_SLASH,PATH_SLASH);
+            snprintf(logfile,FILENAME_LENGTH-1,"%s%slog%stf_prep.err.log",workdir,PATH_SLASH,PATH_SLASH);
         }
         else{
-            sprintf(logfile,"%s%slog%stf_dbg.log",workdir,PATH_SLASH,PATH_SLASH);
+            snprintf(logfile,FILENAME_LENGTH-1,"%s%slog%stf_dbg.log",workdir,PATH_SLASH,PATH_SLASH);
         }
     }
     else{
         if(strcmp(real_stream,"std")==0){
-            sprintf(logfile,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
+            snprintf(logfile,FILENAME_LENGTH-1,"%s%slog%stf_prep.log.archive",workdir,PATH_SLASH,PATH_SLASH);
         }
         else if(strcmp(real_stream,"err")==0){
-            sprintf(logfile,"%s%slog%stf_prep.err.log.archive",workdir,PATH_SLASH,PATH_SLASH);
+            snprintf(logfile,FILENAME_LENGTH-1,"%s%slog%stf_prep.err.log.archive",workdir,PATH_SLASH,PATH_SLASH);
         }
         else{
-            sprintf(logfile,"%s%slog%stf_dbg.log.archive",workdir,PATH_SLASH,PATH_SLASH);
+            snprintf(logfile,FILENAME_LENGTH-1,"%s%slog%stf_dbg.log.archive",workdir,PATH_SLASH,PATH_SLASH);
         }
     }
     if(file_exist_or_not(logfile)!=0){
         return -1;
     }
     if(strcmp(view_option,"print")==0){
-        sprintf(cmdline,"%s %s",CAT_FILE_CMD,logfile);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s",CAT_FILE_CMD,logfile);
         system(cmdline);
     }
     else{
@@ -2451,19 +2450,19 @@ int view_run_log(char* workdir, char* stream, char* run_option, char* view_optio
             printf(WARN_YELLO_BOLD "[ -INFO- ] Time is up. Please run this command again." RESET_DISPLAY "\n");
         }
 #else
-        sprintf(cmdline,"tail -f %s",logfile);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tail -f %s",logfile);
         system(cmdline);
 #endif
     }
     if(strlen(export_dest)!=0){
         local_path_parser(export_dest,real_export_dest);
         if(folder_exist_or_not(real_export_dest)==0){
-            sprintf(cmdline,"%s %s %s%s %s",COPY_FILE_CMD,logfile,real_export_dest,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s%s %s",COPY_FILE_CMD,logfile,real_export_dest,PATH_SLASH,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the logfile to the specified folder " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",real_export_dest);
         }
         else if(file_creation_test(real_export_dest)==0){
-            sprintf(cmdline,"%s %s %s %s",COPY_FILE_CMD,logfile,real_export_dest,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,logfile,real_export_dest,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the logfile to the specified file " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",real_export_dest);
         }

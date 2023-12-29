@@ -124,8 +124,8 @@ int valid_ver_or_not(char* version_code){
 int valid_ver_or_not_tofu(char* version_code){
     char head[32]="";
     char tail[32]="";
-    get_seq_string(version_code,'-',1,head);
-    get_seq_string(version_code,'-',2,tail);
+    get_seq_nstring(version_code,'-',1,head,32);
+    get_seq_nstring(version_code,'-',2,tail,32);
     if(valid_ver_or_not(head)!=0){
         return 1;
     }
@@ -133,7 +133,7 @@ int valid_ver_or_not_tofu(char* version_code){
 }
 
 int get_vers_md5_vars(void){
-    char vers_md5_line[LINE_LENGTH]=""; //Actually we have to rewrite the fgetline, but lets keep it like this for now
+    char vers_md5_line[LINE_LENGTH_SHORT]=""; //Actually we have to rewrite the fgetline, but lets keep it like this for now
     char header[256]="";
     char version[256]="";
     char exec_md5[256]="";
@@ -144,13 +144,13 @@ int get_vers_md5_vars(void){
         return -1;
     }
     while(!feof(file_p)){
-        if(fgetline(file_p,vers_md5_line)!=0){
+        if(fngetline(file_p,vers_md5_line,LINE_LENGTH_SHORT)!=0){
             continue;
         }
-        get_seq_string(vers_md5_line,' ',1,header);
-        get_seq_string(vers_md5_line,' ',2,version);
-        get_seq_string(vers_md5_line,' ',3,exec_md5);
-        get_seq_string(vers_md5_line,' ',4,zip_md5);
+        get_seq_nstring(vers_md5_line,' ',1,header,256);
+        get_seq_nstring(vers_md5_line,' ',2,version,256);
+        get_seq_nstring(vers_md5_line,' ',3,exec_md5,256);
+        get_seq_nstring(vers_md5_line,' ',4,zip_md5,256);
         
         if(strcmp(header,"terraform:")==0){
             if(valid_ver_or_not(version)==0&&valid_md5_or_not(exec_md5)==0&&valid_md5_or_not(zip_md5)==0){
@@ -249,7 +249,7 @@ int reset_vers_md5_vars(void){
     char crypto_md5_file[FILENAME_LENGTH]="";
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
-    char md5_line[LINE_LENGTH_MID]=""; //Risky!
+    char md5_line[LINE_LENGTH_SHORT]=""; //Risky!
     FILE* file_p_1=NULL;
     FILE* file_p_2=NULL;
     if(strlen(url_tf_root_var)==0||strlen(url_now_crypto_var)==0){
@@ -265,11 +265,11 @@ int reset_vers_md5_vars(void){
         }
         file_p_1=fopen(tf_md5_file,"r");
         file_p_2=fopen(crypto_md5_file,"r");
-        while(fgetline(file_p_1,md5_line)==0){
+        while(fngetline(file_p_1,md5_line,LINE_LENGTH_SHORT)==0){
             fprintf(file_p,"%s\n",md5_line);
         }
         fclose(file_p_1);
-        fgetline(file_p_2,md5_line);
+        fngetline(file_p_2,md5_line,LINE_LENGTH_SHORT);
         fprintf(file_p,"%s\n",md5_line);
         fclose(file_p_2);
         fclose(file_p);
@@ -294,7 +294,7 @@ int reset_vers_md5_vars(void){
         }  
         file_p=fopen(VERS_MD5_CONF_FILE,"a");
         file_p_2=fopen(crypto_md5_file,"r");
-        fgetline(file_p_2,md5_line);
+        fngetline(file_p_2,md5_line,LINE_LENGTH_SHORT);
         fprintf(file_p,"%s\n",md5_line);
         fclose(file_p_2);
         fclose(file_p);
@@ -306,7 +306,7 @@ int reset_vers_md5_vars(void){
             return -1;
         }
         file_p_1=fopen(tf_md5_file,"r");
-        while(fgetline(file_p_1,md5_line)==0){
+        while(fngetline(file_p_1,md5_line,LINE_LENGTH_SHORT)==0){
             fprintf(file_p,"%s\n",md5_line);
         }
         fclose(file_p_1);
@@ -321,14 +321,14 @@ int reset_vers_md5_vars(void){
 
 int show_vers_md5vars(void){
     FILE* file_p=fopen(VERS_MD5_CONF_FILE,"r");
-    char vers_and_md5[LINE_LENGTH_MID]=""; //Risky!
+    char vers_and_md5[LINE_LENGTH_SHORT]=""; //Risky!
     if(file_p==NULL){
         printf("[ -FATAL- ] Failed to open the md5 file. Please try 'hpcopr envcheck',\n");
         printf("|           or 'hpcopr configloc'. Or run 'hpcopr repair',\n");
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY "Col.1:Component  Col.2:Version  Col.3 Exec_md5  Col.4:Zip_md5\n");
-    while(fgetline(file_p,vers_and_md5)==0){
+    while(fngetline(file_p,vers_and_md5,LINE_LENGTH_SHORT)!=1){
         printf("|  %s\n",vers_and_md5);
     }
     fclose(file_p);
@@ -420,18 +420,18 @@ int reset_locations(void){
 
 int get_locations(void){
     char location_line[LOCATION_LENGTH_EXTENDED]="";
-    char header_string[64]="";
+    char header_string[LINE_LENGTH_TINY]="";
     char loc_string[LOCATION_LENGTH]="";
-    char title_string[256]="";
+    char title_string[LINE_LENGTH_SHORT]="";
     int i=0;
     if(file_exist_or_not(LOCATION_CONF_FILE)!=0){
         return -1;
     }
     FILE* file_p=fopen(LOCATION_CONF_FILE,"r");
-    fgetline(file_p,title_string);
-    while(fgetline(file_p,location_line)==0){
-        get_seq_string(location_line,' ',1,header_string);
-        get_seq_string(location_line,' ',2,loc_string);
+    fngetline(file_p,title_string,LINE_LENGTH_SHORT);
+    while(fngetline(file_p,location_line,LOCATION_LENGTH_EXTENDED)!=1){
+        get_seq_nstring(location_line,' ',1,header_string,LINE_LENGTH_TINY);
+        get_seq_nstring(location_line,' ',2,loc_string,LOCATION_LENGTH);
         if(strcmp(header_string,"tf_binary_root:")==0){
             strcpy(url_tf_root_var,loc_string);
 #ifdef _WIN32
@@ -510,7 +510,7 @@ int show_locations(void){
         printf("|           or 'hpcopr configloc'. Or run 'hpcopr repair',\n");
         return -1;
     }
-    fgetline(file_p,loc_string);
+    fngetline(file_p,loc_string,LOCATION_LENGTH);
     printf("\n");
     for(i=0;i<DEFAULT_LOCATIONS_COUNT;i++){
         fscanf(file_p,"%63s%383s",header,loc_string);
@@ -539,7 +539,7 @@ int reset_tf_running(void){
 //Any failed config will be reset to the default one
 int get_tf_running(tf_exec_config* tf_config, char* tf_config_file){
     FILE* file_p=fopen(tf_config_file,"r");
-    char conf_line[1024]="";
+    char conf_line[LINE_LENGTH_SHORT]="";
     char header[256]="";
     char tail[512]="";
     int time,get_flag=0;
@@ -551,11 +551,11 @@ int get_tf_running(tf_exec_config* tf_config, char* tf_config_file){
         return -1;
     }
     while(!feof(file_p)){
-        if(fgetline(file_p,conf_line)!=0){
+        if(fngetline(file_p,conf_line,LINE_LENGTH_SHORT)!=0){
             continue;
         }
-        get_seq_string(conf_line,' ',1,header);
-        get_seq_string(conf_line,' ',2,tail);
+        get_seq_nstring(conf_line,' ',1,header,256);
+        get_seq_nstring(conf_line,' ',2,tail,511);
         if(strcmp(header,"tf_execution:")==0){
             if(strcmp(tail,TOFU_EXEC)==0){
                 strcpy(tf_config->tf_runner,TOFU_EXEC);
@@ -606,18 +606,18 @@ int get_tf_running(tf_exec_config* tf_config, char* tf_config_file){
 
 int show_tf_running_config(void){
     FILE* file_p=fopen(TF_RUNNING_CONFIG,"r");
-    char conf_line[1024]="";
-    char header[256]="";
-    char tail[512]="";
+    char conf_line[LINE_LENGTH_SHORT]="";
+    char header[LINE_LENGTH_TINY]="";
+    char tail[LINE_LENGTH_SHORT]="";
     if(file_p==NULL){
         return -1;
     }
     while(!feof(file_p)){
-        if(fgetline(file_p,conf_line)!=0){
+        if(fngetline(file_p,conf_line,LINE_LENGTH_SHORT)!=0){
             continue;
         }
-        get_seq_string(conf_line,' ',1,header);
-        get_seq_string(conf_line,' ',2,tail);
+        get_seq_nstring(conf_line,' ',1,header,LINE_LENGTH_TINY);
+        get_seq_nstring(conf_line,' ',2,tail,LINE_LENGTH_SHORT);
         if(strcmp(header,"tf_execution:")==0||strcmp(header,"tf_dbg_level:")==0||strcmp(header,"max_wait_sec:")==0){
             printf("|   " GENERAL_BOLD "%s" RESET_DISPLAY "  %s\n",header,tail);
         }

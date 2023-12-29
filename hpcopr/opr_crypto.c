@@ -63,7 +63,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         }
         return -11;
     }
-    char cluster_name_temp[LINE_LENGTH_SHORT]=""; //Here we have to use a wider array.
+    char cluster_name_temp[32]=""; //Here we have to use a wider array.
     char cluster_workdir_temp[DIR_LENGTH]="";
     char registry_line_buffer[LINE_LENGTH_SHORT]="";
     char registry_copy[FILENAME_LENGTH]="";
@@ -90,19 +90,19 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             printf(FATAL_RED_BOLD "[ FATAL: ] Locked (operation-in-progress) cluster(s) found, exit." RESET_DISPLAY "\n");
             return -5;
         }
-        sprintf(cmdline,"%s %s %s.copy %s",COPY_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.copy %s",COPY_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] FILE I/O error when copying registry." RESET_DISPLAY "\n");
             return -3;
         }
-        sprintf(registry_copy,"%s.copy",ALL_CLUSTER_REGISTRY);
+        snprintf(registry_copy,CMDLINE_LENGTH-1,"%s.copy",ALL_CLUSTER_REGISTRY);
         FILE* file_p=fopen(registry_copy,"r");
         if(file_p==NULL){
             printf(FATAL_RED_BOLD "[ FATAL: ] FILE I/O error when opening copied registry." RESET_DISPLAY "\n");
             return -3;
         }
         while(fngetline(file_p,registry_line_buffer,LINE_LENGTH_SHORT)==0){
-            get_seq_string(registry_line_buffer,' ',4,cluster_name_temp);
+            get_seq_nstring(registry_line_buffer,' ',4,cluster_name_temp,32);
             if(cluster_name_check(cluster_name_temp)!=-127){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Cluster name %s is not valid. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
                 final_flag++;
@@ -186,7 +186,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             return 0;
         }
     }
-    while(get_seq_string(cluster_list,':',i,cluster_name_temp)==0){
+    while(get_seq_nstring(cluster_list,':',i,cluster_name_temp,32)==0){
         if(cluster_name_check(cluster_name_temp)!=-127){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Cluster name %s is not valid. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
             final_flag++;
@@ -268,18 +268,18 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     }
     decrypt_files(target_cluster_workdir,crypto_keyfile); //Delete the /stack files.
     // Now, decrypt the /vault files.
-    sprintf(filename_temp,"%s%sCLUSTER_SUMMARY.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
     decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
-    sprintf(filename_temp,"%s%suser_passwords.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
     decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
-    sprintf(filename_temp,"%s%sbucket_info.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
     decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
     if(strcmp(cloud_flag,"CLOUD_G")==0){ //Decrypt the special bucket secrets
-        sprintf(filename_temp,"%s%sbucket_key.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_key.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
         decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
     }
     if(strcmp(cloud_flag,"CLOUD_E")==0){ //Decrypt the special bucket secrets
-        sprintf(filename_temp,"%s%scredentials",target_cluster_vaultdir,PATH_SLASH);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scredentials",target_cluster_vaultdir,PATH_SLASH);
         decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
     }
     decrypt_cloud_secrets(now_crypto_exec,target_cluster_workdir,md5sum);
