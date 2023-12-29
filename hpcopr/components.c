@@ -647,26 +647,26 @@ int update_tf_running(char* new_tf_runner, char* new_dbg_level, int new_max_time
             strcpy(new_tf_runner_path,TOFU_EXEC);
             strcpy(prev_runner_assume,"terraform");
         }
-        find_and_get(TF_RUNNING_CONFIG,"tf_execution:","","",1,"tf_execution:","","",' ',2,prev_config);
+        find_and_nget(TF_RUNNING_CONFIG,LINE_LENGTH_SHORT,"tf_execution:","","",1,"tf_execution:","","",' ',2,prev_config,128);
         if(strcmp(prev_config,new_tf_runner_path)!=0){
-            find_and_replace(TF_RUNNING_CONFIG,"tf_execution:","","","","",prev_config,new_tf_runner_path);
+            find_and_nreplace(TF_RUNNING_CONFIG,LINE_LENGTH_SHORT,"tf_execution:","","","","",prev_config,new_tf_runner_path);
             i++;
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Updated tf execution from " GENERAL_BOLD "%s" RESET_DISPLAY " to " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",prev_runner_assume,new_tf_runner);
         }
     }
     if(strcmp(new_dbg_level,"trace")==0||strcmp(new_dbg_level,"debug")==0||strcmp(new_dbg_level,"info")==0||strcmp(new_dbg_level,"warn")==0||strcmp(new_dbg_level,"error")==0||strcmp(new_dbg_level,"off")==0||strcmp(new_dbg_level,"TRACE")==0||strcmp(new_dbg_level,"DEBUG")==0||strcmp(new_dbg_level,"INFO")==0||strcmp(new_dbg_level,"WARN")==0||strcmp(new_dbg_level,"ERROR")==0||strcmp(new_dbg_level,"OFF")==0){
-        find_and_get(TF_RUNNING_CONFIG,"tf_dbg_level:","","",1,"tf_dbg_level:","","",' ',2,prev_config);
+        find_and_nget(TF_RUNNING_CONFIG,LINE_LENGTH_SHORT,"tf_dbg_level:","","",1,"tf_dbg_level:","","",' ',2,prev_config,128);
         if(strcmp(prev_config,new_dbg_level)!=0){
-            find_and_replace(TF_RUNNING_CONFIG,"tf_dbg_level:","","","","",prev_config,new_dbg_level);
+            find_and_nreplace(TF_RUNNING_CONFIG,LINE_LENGTH_SHORT,"tf_dbg_level:","","","","",prev_config,new_dbg_level);
             i++;
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Updated debug log level from " GENERAL_BOLD "%s" RESET_DISPLAY " to " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",prev_config,new_dbg_level);
         }
     }
     if(new_max_time>MAXIMUM_WAIT_TIME-1&&new_max_time<MAXIMUM_WAIT_TIME_EXT+1){
-        find_and_get(TF_RUNNING_CONFIG,"max_wait_sec:","","",1,"max_wait_sec:","","",' ',2,prev_config);
+        find_and_nget(TF_RUNNING_CONFIG,LINE_LENGTH_SHORT,"max_wait_sec:","","",1,"max_wait_sec:","","",' ',2,prev_config,128);
         snprintf(new_max_time_string,7,"%d",new_max_time);
         if(strcmp(prev_config,new_max_time_string)!=0){
-            find_and_replace(TF_RUNNING_CONFIG,"max_wait_sec:","","","","",prev_config,new_max_time_string);
+            find_and_nreplace(TF_RUNNING_CONFIG,LINE_LENGTH_SHORT,"max_wait_sec:","","","","",prev_config,new_max_time_string);
             i++;
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Updated max wait time from " GENERAL_BOLD "%s" RESET_DISPLAY " to " GENERAL_BOLD "%s" RESET_DISPLAY ".\n",prev_config,new_max_time_string);
         }

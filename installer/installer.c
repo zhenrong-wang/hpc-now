@@ -1084,7 +1084,7 @@ int version_valid(char* hpcopr_ver){
         return -1;
     }
     snprintf(ver_ext,255,"< %s >",hpcopr_ver);
-    if(find_multi_keys("verlist.tmp",ver_ext,"","","","")>0){
+    if(find_multi_nkeys("verlist.tmp",LINE_LENGTH_SHORT,ver_ext,"","","","")>0){
         snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,"verlist.tmp",SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
         return 0;

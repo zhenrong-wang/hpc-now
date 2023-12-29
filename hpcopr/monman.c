@@ -22,9 +22,18 @@
 #include "general_print_info.h"
 #include "monman.h"
 
+/*
+ * Return -1: Failed to get the workdir
+ * Return -5: Cluster asleep and mon_data empty
+ * Return -3: Cluster asleep but mon_data not empty
+ * Return  1: Cluster not asleep, but seems remote copy failed
+ * Return  0: Remote copy succeeded
+ */
 int get_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* mon_data_file){
     char workdir[DIR_LENGTH]="";
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        return -1;
+    }
     char mon_data_dir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     snprintf(mon_data_dir,383,"%s%smon_data",HPC_NOW_ROOT_DIR,PATH_SLASH);

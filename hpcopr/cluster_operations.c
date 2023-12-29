@@ -106,10 +106,12 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         max_cluster_name_length=get_max_cluster_name_length();
-        while(fngetline(file_p,registry_line,255)==0){
+        while(fngetline(file_p,registry_line,255)!=1){
             if(strlen(registry_line)!=0){
                 get_seq_nstring(registry_line,' ',4,temp_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS);
-                get_workdir(temp_cluster_workdir,temp_cluster_name);
+                if(get_nworkdir(temp_cluster_workdir,DIR_LENGTH,temp_cluster_name)!=0){
+                    continue;
+                }
                 get_cloud_flag(temp_cluster_workdir,cloud_flag);
                 cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
@@ -168,7 +170,9 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         return 3;
     }
     else{
-        get_workdir(temp_cluster_workdir,target_cluster_name);
+        if(get_nworkdir(temp_cluster_workdir,DIR_LENGTH,target_cluster_name)!=0){
+            return 3;
+        }
         get_cloud_flag(temp_cluster_workdir,cloud_flag);
         cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext);
         if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,target_cluster_name)==0){
@@ -212,7 +216,10 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not in the registry. Exit now." RESET_DISPLAY "\n");
         return -3;
     }
-    get_workdir(target_cluster_workdir,target_cluster_name);
+    if(get_nworkdir(target_cluster_workdir,DIR_LENGTH,target_cluster_name)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
+        return -3;
+    }
     if(strcmp(force_flag,"force")==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
         printf("|*         YOU ARE REFRESHING THE CLUSTER WITHOUT CHECKING OPERATION LOCK\n");
@@ -266,7 +273,10 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
         list_all_cluster_names(1);
         return 3;
     }
-    get_workdir(cluster_workdir,target_cluster_name);
+    if(get_nworkdir(cluster_workdir,DIR_LENGTH,target_cluster_name)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
+        return 3;
+    }
     get_state_nvalue(cluster_workdir,"payment_method:",curr_payment_method,16);
     if(strcmp(curr_payment_method,"month")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
@@ -450,7 +460,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the key file %s. Exit now." RESET_DISPLAY "\n",secret_key);
             return -1;
         }
-        if(find_multi_keys(secret_key,"\"project_id\":","","","","")<1||find_multi_keys(secret_key,"\"private_key\":","","","","")<1){
+        if(find_multi_nkeys(secret_key,LINE_LENGTH_SHORT,"\"project_id\":","","","","")<1||find_multi_nkeys(secret_key,LINE_LENGTH_SHORT,"\"private_key\":","","","","")<1){
             printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid. Exit now." RESET_DISPLAY "\n",secret_key);
             fclose(file_p_2);
             return 3;
@@ -697,7 +707,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the key file %s. Exit now." RESET_DISPLAY "\n",secret_key);
             return -1;
         }
-        if(find_multi_keys(secret_key,"\"project_id\":","","","","")<1||find_multi_keys(secret_key,"\"private_key\":","","","","")<1){
+        if(find_multi_nkeys(secret_key,LINE_LENGTH_SHORT,"\"project_id\":","","","","")<1||find_multi_nkeys(secret_key,LINE_LENGTH_SHORT,"\"private_key\":","","","","")<1){
             printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid. Exit now." RESET_DISPLAY "\n",secret_key);
             fclose(file_p);
             return -1;
@@ -1119,13 +1129,12 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     int current_node_num=0;
     char* sshkey_dir=SSHKEY_DIR;
     if(strlen(add_number_string)>2||strlen(add_number_string)<1){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The number of nodes to be added is invalid. A number (1-%d) is needed.\n",MAXIMUM_ADD_NODE_NUMBER);
-        printf("           Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] The number of nodes to be added is invalid. A number (1-%d) is needed." RESET_DISPLAY "\n",MAXIMUM_ADD_NODE_NUMBER);
         return -1;
     }
     add_number=string_to_positive_num(add_number_string);
     if(add_number<MINIMUM_ADD_NODE_NUMBER||add_number>MAXIMUM_ADD_NODE_NUMBER){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The number of nodes to be added is out of range (1-%d). Exit now.\n" RESET_DISPLAY,MAXIMUM_ADD_NODE_NUMBER);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The number of nodes to be added is out of range (1-%d).\n" RESET_DISPLAY,MAXIMUM_ADD_NODE_NUMBER);
         return -1;
     }
     snprintf(string_temp,127,GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified to add %d compute node(s).",add_number);
@@ -1481,29 +1490,29 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     decrypt_files(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     snprintf(string_temp,63,"\"%s\"",new_config);
-    if(find_multi_keys(filename_temp,string_temp,"","","","")==0||find_multi_keys(filename_temp,string_temp,"","","","")<0){
+    if(find_multi_nkeys(filename_temp,LINE_LENGTH_SMALL,string_temp,"","","","")==0||find_multi_nkeys(filename_temp,LINE_LENGTH_SMALL,string_temp,"","","","")<0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid compute configuration. Exit now." RESET_DISPLAY "\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
     if(strcmp(cloud_flag,"CLOUD_D")==0){
-        find_and_get(filename_temp,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
-        find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,prev_config);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"instance_spec","","",1,"instance_spec","","",'.',3,prev_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        find_and_get(filename_temp,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
-        find_and_get(filename_temp,"machine_type","","",1,"machine_type","","",'.',2,string_temp);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"machine_type","","",1,"machine_type","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else{
-        find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"instance_type","","",1,"instance_type","","",'.',3,prev_config,16);
     }
 
     config_diff_flag=strcmp(prev_config,new_config);
@@ -1653,29 +1662,29 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     decrypt_files(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     snprintf(string_temp,63,"\"%s\"",new_config);
-    if(find_multi_keys(filename_temp,string_temp,"","","","")==0||find_multi_keys(filename_temp,string_temp,"","","","")<0){
+    if(find_multi_nkeys(filename_temp,LINE_LENGTH_SMALL,string_temp,"","","","")==0||find_multi_nkeys(filename_temp,LINE_LENGTH_SMALL,string_temp,"","","","")<0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid master node configuration. Exit now." RESET_DISPLAY "\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
     if(strcmp(cloud_flag,"CLOUD_D")==0){
-        find_and_get(filename_temp,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
-        find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,prev_config);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"instance_spec","","",1,"instance_spec","","",'.',3,prev_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        find_and_get(filename_temp,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
-        find_and_get(filename_temp,"machine_type","","",1,"machine_type","","",'.',2,string_temp);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"machine_type","","",1,"machine_type","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,prev_config,16);
     }
     else{
-        find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,prev_config);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"instance_type","","",1,"instance_type","","",'.',3,prev_config,16);
     }
     if(strcmp(prev_config,new_config)==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified configuration is the same as previous configuration.\n");
@@ -1757,7 +1766,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    find_and_replace(filename_temp,"#-#-#","","","","",prev_volume,new_volume);
+    find_and_nreplace(filename_temp,LINE_LENGTH_SMALL,"#-#-#","","","","",prev_volume,new_volume);
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
@@ -1814,7 +1823,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
         return -1;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
-    if(find_multi_keys(filename_temp,"running","","","","")==0&&find_multi_keys(filename_temp,"Running","","","","")==0&&find_multi_keys(filename_temp,"RUNNING","","","","")==0){
+    if(find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,"running","","","","")==0&&find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,"Running","","","","")==0&&find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,"RUNNING","","","","")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
         printf("|          Command: hpcopr wakeup --all | --min . Exit now." RESET_DISPLAY "\n");
         return 1;
@@ -1982,9 +1991,17 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     return 0;
 }
 
+/*
+ * Return -3: failed to get workdir
+ * Return -1: Cluster not empty
+ * return  1: Failed to get conf
+ * return  0: Get succeeded
+ */
 int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     char workdir[DIR_LENGTH]="";
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        return -3;
+    }
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
     }
@@ -2110,7 +2127,7 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
         return 1;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    find_and_replace(filename_temp,"CLUSTER_ID","","","","","hpcnow",cluster_name);
+    find_and_nreplace(filename_temp,LINE_LENGTH_SHORT,"CLUSTER_ID","","","","","hpcnow",cluster_name);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Default configuration file has been downloaded.\n");
     if(strcmp(edit_flag,"edit")!=0){
         return 0;
@@ -2121,10 +2138,18 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     return 0;
 }
 
+/*
+ * Return -3: Failed to get workdir
+ * Return -1: Cluster not empty
+ * Return  1: User denied
+ * Return  0: Normal exit
+ */
 int edit_configuration_file(char* cluster_name, char* crypto_keyfile, int batch_flag_local){
     char workdir[DIR_LENGTH]="";
     int run_flag;
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        return -3;
+    }
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
     }
@@ -2144,9 +2169,17 @@ int edit_configuration_file(char* cluster_name, char* crypto_keyfile, int batch_
     return 0;
 }
 
+/*
+ * Return -3: Failed to get workdir
+ * Return -1: Cluster not empty
+ * Return  1: User denied
+ * Return  0: Normal exit
+ */
 int remove_conf(char* cluster_name){
     char workdir[DIR_LENGTH]="";
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        return -3;
+    }
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
     }
@@ -2345,10 +2378,13 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
     char curr_payment_method[8]="";
     char statefile[FILENAME_LENGTH]="";
     if(cluster_name_check(cluster_name)!=-127){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " already exists in the registry." RESET_DISPLAY "\n",cluster_name);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is not in the registry." RESET_DISPLAY "\n",cluster_name);
         return 1;
     }
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
+        return 1;
+    }
     get_cloud_flag(workdir,cloud_flag);
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] This operation is not valid for the current Cloud %s. Exit now." RESET_DISPLAY "\n",cloud_flag);

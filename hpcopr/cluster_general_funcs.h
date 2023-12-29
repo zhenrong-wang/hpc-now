@@ -120,6 +120,8 @@ int username_check_select(char* user_registry, char* username_input);
 int delete_user_from_registry(char* user_registry_file, char* username);
 
 void get_workdir(char* cluster_workdir, char* cluster_name);
+int get_nworkdir(char* cluster_workdir, unsigned int dirlen_max, char* cluster_name);
+
 int get_cluster_name(char* cluster_name, char* cluster_workdir);
 int create_cluster_registry(void);
 int list_all_cluster_names(int header_flag);
@@ -141,6 +143,8 @@ int gcp_credential_convert(char* workdir, const char* operation, int key_flag);
  * If silent_flag== other_number, Will only show the warning
  */
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag);
+int show_current_ncluster(char* cluster_workdir, unsigned int dirlen_max, char* current_cluster_name, unsigned int cluster_name_len_max, int silent_flag);
+
 int current_cluster_or_not(char* current_indicator, char* cluster_name);
 int cluster_name_check(char* cluster_name);
 int check_and_cleanup(char* prev_workdir);

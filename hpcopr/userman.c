@@ -169,7 +169,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
         return -3;
     }
     snprintf(username_ext,127," %s ",username);
-    if(find_multi_keys(user_registry_file,username_ext,new_keywords,"","","")>0){
+    if(find_multi_nkeys(user_registry_file,LINE_LENGTH_SHORT,username_ext,new_keywords,"","","")>0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The user " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is already " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY,username,new_keywords);
         delete_decrypted_user_passwords(workdir);
         return -5;
@@ -181,7 +181,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
         snprintf(remote_commands,CMDLINE_LENGTH-1,"hpcmgr users delete %s",username);
     }
     if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
-        find_and_replace(user_registry_file,username_ext,"","","","",prev_keywords_ext,new_keywords_ext);
+        find_and_nreplace(user_registry_file,LINE_LENGTH_SHORT,username_ext,"","","","",prev_keywords_ext,new_keywords_ext);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully %s the user %s.\n",new_keywords,username);
         encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
         return 0;
@@ -227,9 +227,9 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
     if(remote_exec_general(workdir,ssheky_dir,"root",remote_commands,"-n",0,0,"","")==0){
         snprintf(username_ext,127,"username: %s ",username);
         snprintf(password_ext,127," %s ",password);
-        find_and_get(user_registry_file,username_ext,"","",1,username_ext,"","",' ',3,password_prev);
+        find_and_nget(user_registry_file,LINE_LENGTH_SHORT,username_ext,"","",1,username_ext,"","",' ',3,password_prev,21);
         snprintf(password_prev_ext,127," %s ",password_prev);
-        find_and_replace(user_registry_file,username_ext,"","","","",password_prev_ext,password_ext);
+        find_and_nreplace(user_registry_file,LINE_LENGTH_SHORT,username_ext,"","","","",password_prev_ext,password_ext);
         sync_user_passwords(workdir,ssheky_dir);
         encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully updated the password for user %s.\n",username);

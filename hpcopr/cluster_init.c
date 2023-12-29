@@ -270,7 +270,10 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     char app_inst_script_url_specified[LOCATION_LENGTH]="";
     char app_inst_pkgs_url_specified[LOCATION_LENGTH]="";
 
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
+        return -1;
+    }
     if(get_cloud_flag(workdir,cloud_flag)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag." RESET_DISPLAY "\n");
         return -1;
@@ -765,7 +768,7 @@ int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, clust
         }
         else if(strcmp(header,"master_inst")==0){
             snprintf(node_inst_ext,127," %s ",tail);
-            if(find_multi_keys(reconf_list,node_inst_ext,"","","","")<1){
+            if(find_multi_nkeys(reconf_list,LINE_LENGTH_SHORT,node_inst_ext,"","","","")<1){
                 fclose(file_p);
                 return 2;
             }
@@ -784,7 +787,7 @@ int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, clust
         }
         else if(strcmp(header,"compute_inst")==0){
             snprintf(node_inst_ext,127," %s ",tail);
-            if(find_multi_keys(reconf_list,node_inst_ext,"","","","")<1){
+            if(find_multi_nkeys(reconf_list,LINE_LENGTH_SHORT,node_inst_ext,"","","","")<1){
                 fclose(file_p);
                 return 2;
             }
@@ -1392,7 +1395,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     }
     node_user_num_fix(&init_info.node_num,&init_info.hpc_user_num);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%snas_zones.list",confdir,PATH_SLASH);
-    if(find_multi_keys(filename_temp,init_info.zone_id,"","","","")>0){
+    if(find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,init_info.zone_id,"","","","")>0){
         strcpy(NAS_Zone,init_info.zone_id);
     }
     else{
@@ -1719,7 +1722,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     }
     node_user_num_fix(&init_info.node_num,&init_info.hpc_user_num);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%snas_zones.list",confdir,PATH_SLASH);
-    if(find_multi_keys(filename_temp,init_info.zone_id,"","","","")>0){
+    if(find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,init_info.zone_id,"","","","")>0){
         strcpy(NAS_Zone,init_info.zone_id);
     }
     else{

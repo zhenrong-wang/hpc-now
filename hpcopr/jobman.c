@@ -73,7 +73,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
     snprintf(filename_temp,511,"%s%s.tmp%sapp_check.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
     app_list(workdir,"check",user_name,app_name,sshkey_dir,filename_temp,"");
-    run_flag=find_multi_keys(filename_temp,"not available","","","","");
+    run_flag=find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,"not available","","","","");
     if(run_flag>0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified app " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",app_name);
         return -5;
