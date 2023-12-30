@@ -32,6 +32,7 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
 
 //Deprecated!
 int generate_sshkey(char* sshkey_folder, char* pubkey); //This is deprecated!
+
 int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile);
 int get_opr_pubkey(char* sshkey_folder, char* pubkey, unsigned int length);
 int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile);
@@ -139,11 +140,6 @@ int generate_bceconfig(char* vaultdir, char* region_id, char* bucket_ak, char* b
 int decrypt_bcecredentials(char* workdir);
 int gcp_credential_convert(char* workdir, const char* operation, int key_flag);
 
-/*
- * If silent_flag==1, verbose. Will tell the user which cluster is active
- * If silent_flag==0, silent. Will print nothing
- * If silent_flag== other_number, Will only show the warning
- */
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag);
 int show_current_ncluster(char* cluster_workdir, unsigned int dirlen_max, char* current_cluster_name, unsigned int cluster_name_len_max, int silent_flag); //Newer function
 
@@ -163,6 +159,7 @@ int list_cloud_zones(char* cluster_name, char* region, int format_flag);
 int valid_region_or_not(char* cluster_name, char* region);
 int valid_region_zone_or_not(char* cluster_name, char* region, char* zone);
 int get_default_zone(char* cluster_name, char* region, char* default_zone);
+int get_default_nzone(char* cluster_name, char* region, char* default_zone, unsigned int zone_len_max);
 int valid_zone_or_not(char* cluster_name, char* zone);
 
 #endif

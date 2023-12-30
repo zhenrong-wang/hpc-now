@@ -3096,25 +3096,26 @@ int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int 
  * Return 0: Get current cluster and workdir
  */
 int show_current_ncluster(char* cluster_workdir, unsigned int dirlen_max, char* current_cluster_name, unsigned int cluster_name_len_max, int silent_flag){
-    FILE* file_p=NULL;
-    if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)==0){
+    if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)<1){
         if(silent_flag!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Currently you are not operating any cluster." RESET_DISPLAY "\n");
         }
         return 1;
     }
-    else{
-        file_p=fopen(CURRENT_CLUSTER_INDICATOR,"r");
-        fscanf(file_p,"%31s",current_cluster_name);
-        if(silent_flag==1){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Current cluster:" HIGH_GREEN_BOLD " %s" RESET_DISPLAY ".\n",current_cluster_name);
+    FILE* file_p=fopen(CURRENT_CLUSTER_INDICATOR,"r");
+    fngetline(file_p,current_cluster_name,cluster_name_len_max);
+    fclose(file_p);
+    if(get_nworkdir(cluster_workdir,dirlen_max,current_cluster_name)!=0){
+        if(silent_flag!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Currently you are not operating any cluster." RESET_DISPLAY "\n");
         }
-        fclose(file_p);
-        if(get_nworkdir(cluster_workdir,dirlen_max,current_cluster_name)==0){
-            return 0;
-        }
+        exit_current_cluster();
         return 1;
     }
+    if(silent_flag==1){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Current cluster:" HIGH_GREEN_BOLD " %s" RESET_DISPLAY ".\n",current_cluster_name);
+    }
+    return 0;
 }
 
 int current_cluster_or_not(char* current_indicator, char* cluster_name){
@@ -3176,7 +3177,7 @@ int check_and_cleanup(char* prev_workdir){
     char current_workdir[DIR_LENGTH]="";
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(strlen(prev_workdir)!=0){
-        if(show_current_cluster(current_workdir,current_cluster_name,0)==1){
+        if(show_current_ncluster(current_workdir,DIR_LENGTH,current_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,0)==1){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no switched cluster." RESET_DISPLAY "\n");
         }
         else{
@@ -3767,6 +3768,23 @@ int get_default_zone(char* cluster_name, char* region, char* default_zone){
     snprintf(region_ext1,63,"[Region:%s]",region);
     snprintf(region_ext2,63,"[%s]",region);
     if(find_and_get(region_list,region_ext1,"","",16,region_ext2,"[Default]","",' ',2,default_zone)!=0){
+        return 1;
+    }
+    return 0;
+}
+
+int get_default_nzone(char* cluster_name, char* region, char* default_zone, unsigned int zone_len_max){
+    char workdir[DIR_LENGTH]="";
+    char region_list[FILENAME_LENGTH]="";
+    char region_ext1[64]="";
+    char region_ext2[64]="";
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        return -1;
+    }
+    snprintf(region_list,FILENAME_LENGTH-1,"%s%sconf%sregions.list",workdir,PATH_SLASH,PATH_SLASH);
+    snprintf(region_ext1,63,"[Region:%s]",region);
+    snprintf(region_ext2,63,"[%s]",region);
+    if(find_and_nget(region_list,LINE_LENGTH_SHORT,region_ext1,"","",16,region_ext2,"[Default]","",' ',2,default_zone,zone_len_max)!=0){
         return 1;
     }
     return 0;

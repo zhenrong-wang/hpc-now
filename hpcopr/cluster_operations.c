@@ -36,7 +36,7 @@ int switch_to_cluster(char* target_cluster_name){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is not in the registry.\n" RESET_DISPLAY, target_cluster_name);
         return 1;
     }
-    if(show_current_cluster(temp_workdir,temp_cluster_name,0)==0){
+    if(show_current_ncluster(temp_workdir,DIR_LENGTH,temp_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,0)==0){
         if(strcmp(temp_cluster_name,target_cluster_name)==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Operating the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " now. No need to switch.\n",target_cluster_name);
             return 3;
@@ -72,7 +72,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         return -1;
     }
     if(strlen(target_cluster_name)==0){
-        if(show_current_cluster(temp_cluster_workdir,temp_cluster_name,0)==1){
+        if(show_current_ncluster(temp_cluster_workdir,DIR_LENGTH,temp_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,0)==1){
             fclose(file_p);
             return 1;
         }

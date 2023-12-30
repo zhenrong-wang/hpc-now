@@ -731,7 +731,7 @@ int main(int argc, char* argv[]){
             run_flag=glance_clusters("all",crypto_keyfile);
         }
         else{
-            if(cmd_keyword_ncheck(argc,argv,"-c",cluster_name,32)!=0&&show_current_cluster(workdir,cluster_name,0)!=0){
+            if(cmd_keyword_ncheck(argc,argv,"-c",cluster_name,32)!=0&&show_current_ncluster(workdir,DIR_LENGTH,cluster_name,32,0)!=0){
                 list_all_cluster_names(1);
                 run_flag=prompt_to_input_required_args("Select a cluster name from the list above.",cluster_name,batch_flag,argc,argv,"-c");
                 if(run_flag!=0){

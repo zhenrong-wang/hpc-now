@@ -1288,7 +1288,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
             strcpy(cluster_name_source,"specified");
         }
         else{
-            flag2=show_current_cluster(temp_workdir,temp_cluster_name_switched,0);
+            flag2=show_current_ncluster(temp_workdir,DIR_LENGTH,temp_cluster_name_switched,32,0);
             if(flag2==0){
                 strcpy(temp_cluster_name,temp_cluster_name_switched);
                 strcpy(cluster_name_source,"switched");

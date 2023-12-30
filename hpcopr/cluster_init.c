@@ -412,7 +412,7 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         goto invalid_conf;
     }
     if(strcmp(cloud_flag,"CLOUD_F")!=0){
-        if(get_default_zone(cluster_name,real_region,default_zone)!=0){
+        if(get_default_nzone(cluster_name,real_region,default_zone,64)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The regions.list file may be incorrect. Exit now." RESET_DISPLAY "\n");
             goto invalid_conf;
         }
