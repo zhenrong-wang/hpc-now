@@ -155,7 +155,9 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
         snprintf(private_key,511,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
     }
     else{
-        get_cluster_name(cluster_name,workdir);
+        if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+            return -7;
+        }
         snprintf(private_key_encrypted,511,"%s%s.%s%s%s.key.tmp",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
         if(decrypt_user_privkey(private_key_encrypted,CRYPTO_KEY_FILE)!=0){
             return -3;
@@ -285,13 +287,15 @@ int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char
     char ssh_privkey_remote[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char workdir[DIR_LENGTH];
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)){
+        return -1;
+    }
     snprintf(sshkey_subdir,383,"%s%s.%s",sshkey_dir,PATH_SLASH,cluster_name);
     if(folder_exist_or_not(sshkey_subdir)!=0){
         snprintf(cmdline,2047,"%s %s %s",MKDIR_CMD,sshkey_subdir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     snprintf(ssh_privkey,511,"%s%s%s.key",sshkey_subdir,PATH_SLASH,user_name);
-    get_workdir(workdir,cluster_name);
     if(strcmp(user_name,"root")==0){
         snprintf(ssh_privkey_remote,511,"/root/.ssh/id_rsa");
     }
@@ -388,9 +392,11 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char
     char cluster_role[16]="";
     char cluster_role_ext[32]="";
     if(get_state_nvalue(workdir,"master_public_ip:",remote_address,32)!=0){
+        return -5;
+    }
+    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -7;
     }
-    get_cluster_name(cluster_name,workdir);
     cluster_role_detect(workdir,cluster_role,cluster_role_ext);
     if(strcmp(username,"root")==0&&strcmp(cluster_role,"opr")==0){
         if(decrypt_opr_privkey(sshkey_folder,CRYPTO_KEY_FILE)!=0){
@@ -696,7 +702,9 @@ int check_pslock_all(void){
         if(get_seq_nstring(line_buffer,' ',4,cluster_name_temp,32)!=0){
             continue;
         }
-        get_workdir(cluster_workdir_temp,cluster_name_temp);
+        if(get_nworkdir(cluster_workdir_temp,DIR_LENGTH,cluster_name_temp)!=0){
+            continue;
+        }
         if(check_pslock(cluster_workdir_temp,decryption_status(cluster_workdir_temp))!=0){
             fclose(file_p);
             return 1;
@@ -902,9 +910,7 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
-
     encrypt_cloud_secrets(NOW_CRYPTO_EXEC,workdir,md5sum); //This is very important. AND ALSO RISKY!
-
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_key.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
@@ -932,15 +938,17 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     return 0;
 }
 
-
-//return -7: option error
-//return -5: user_registry_failed to decrypt
-//return -3: failed to get the crypto key
-//return -1: failed to get the vaultdir
-//return 0: normal exit
+/* 
+ * return  1: option error
+ * return -7: Failed to get a valid working directory
+ * return -5: user_registry_failed to decrypt
+ * return -3: failed to get the crypto key
+ * return -1: failed to get the vaultdir
+ * return  0: normal exit
+ */
 int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char* crypto_keyfile){
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
-        return -7;
+        return 1;
     }
     char workdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -950,7 +958,9 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
     char user_ssh_privkey[FILENAME_LENGTH]="";
     char md5sum[64]="";
     char cmdline[CMDLINE_LENGTH]="";
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        return -7;
+    }
     if(create_and_get_vaultdir(workdir,vaultdir)!=0){
         return -1;
     }
@@ -1581,7 +1591,7 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
 
 /* Should write a real C function, instead of calling system commands. But it is totally OK.*/
 int archive_log(char* logarchive, char* logfile){
-    char line_buffer[LINE_LENGTH]="";
+    char line_buffer[LINE_LENGTH_SMALL]="";
     time_t current_time_long;
     struct tm* time_p=NULL;
     time(&current_time_long);
@@ -1595,7 +1605,7 @@ int archive_log(char* logarchive, char* logfile){
     }
     FILE* file_p_2=fopen(logfile,"r");
     fprintf(file_p,"\n\n# TIMESTAMP OF THIS ARCHIVE: %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    while(fngetline(file_p_2,line_buffer,5120)==0){
+    while(fngetline(file_p_2,line_buffer,LINE_LENGTH_SMALL)!=1){
         fprintf(file_p,"%s\n",line_buffer);
     }
     fclose(file_p_2);
@@ -1697,7 +1707,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     if(graph_level<0||graph_level>3){
         return -1;
     }
-    char cluster_name[64]="";
+    char cluster_name[32]="";
     char master_address[32]="";
     char master_status[16]="";
     char master_config[16]="";
@@ -1728,7 +1738,9 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     int decrypt_flag=0;
     char decrypt_prompt[32]="";
     create_and_get_stackdir(workdir,stackdir);
-    get_cluster_name(cluster_name,workdir);
+    if(get_cluster_nname(cluster_name,32,workdir)!=0){
+        return -7;
+    }
     snprintf(statefile,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_flag=decryption_status(workdir);
     if(decrypt_flag!=0){
@@ -2093,12 +2105,16 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
 
 int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bucket_flag, char* root_flag){
     if(cluster_empty_or_not(workdir)==0){
+        print_empty_cluster_info();
         return 1;
     }
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char real_username[32]="";
     if(strlen(username)>0){
-        get_cluster_name(cluster_name,workdir);
+        if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
+            return -7;
+        }
         if(user_name_quick_check(cluster_name,username,SSHKEY_DIR)!=0){
             printf(WARN_YELLO_BOLD "\n[ -WARN- ] The specified username '%s' is invalid or unauthorized.\n" RESET_DISPLAY,username);
             strcpy(real_username,"");
@@ -2134,15 +2150,18 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     bucket_info bucketinfo;
     char cloud_flag[16]="";
     if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cryoto key." RESET_DISPLAY "\n");
         return -3;
     }
     get_cloud_flag(workdir,cloud_flag);
     create_and_get_vaultdir(workdir,vaultdir);
     create_and_get_stackdir(workdir,stackdir);
     if(get_nucid(workdir,unique_cluster_id,32)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the UNIQUE cluster ID." RESET_DISPLAY "\n");
         return -1;
     }
     if(get_bucket_ninfo(workdir,crypto_keyfile,LINE_LENGTH_SHORT,&bucketinfo)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the the information." RESET_DISPLAY "\n");
         return -3;
     }
     get_azure_ninfo(workdir,LINE_LENGTH_SHORT,az_subscription_id,az_tenant_id,128);
@@ -2195,11 +2214,13 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
     if(decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt and display the user registry." RESET_DISPLAY "\n");
         return -7;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt and display the user registry." RESET_DISPLAY "\n");
         return -7;
     }
     while(fngetline(file_p,single_line,LINE_LENGTH_SHORT)!=1){
@@ -2373,7 +2394,9 @@ int cluster_ssh(char* workdir, char* username, char* role_flag, char* sshkey_dir
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     int run_flag;
     get_state_nvalue(workdir,"master_public_ip:",master_address,64);
-    get_cluster_name(cluster_name,workdir);
+    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+        return -7;
+    }
     if(strcmp(role_flag,"opr")==0){
         if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE)!=0){
             return -5;
@@ -2631,7 +2654,7 @@ int get_ucid(char* workdir, char* ucid_string){
 }
 
 int get_nucid(char* workdir, char* ucid_string, unsigned int ucid_strlen_max){
-    if(ucid_strlen_max<1){
+    if(ucid_strlen_max<11){
         strcpy(ucid_string,"");
         return -1;
     }
@@ -2766,15 +2789,20 @@ int input_user_passwd(char* password_string, int batch_flag_local){
     return 0;
 }
 
-//return 0: user exist
-//return non zero: user not exist.
+/* 
+ * Return  0: User exists
+ * Return -1: Failed to get a valid working directory
+ * Return 1 and 2: User doesn't exist
+ */
 int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir){
     char workdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char user_sshkey_encrypted[FILENAME_LENGTH]="";
     char user_sshkey_decrypted[FILENAME_LENGTH]="";
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        return -1;
+    }
     create_and_get_vaultdir(workdir,vaultdir);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
     if(strcmp(user_name,"root")==0){
@@ -2887,7 +2915,7 @@ int delete_user_from_registry(char* user_registry_file, char* username){
         fclose(file_p_2);
         return -1;
     }
-    while(fngetline(file_p,single_line,256)==0){
+    while(fngetline(file_p,single_line,LINE_LENGTH_SHORT)!=1){
         get_seq_nstring(single_line,' ',2,username_temp,32);
         if(strcmp(username_temp,username)==0){
             continue;
@@ -2905,6 +2933,10 @@ void get_workdir(char* cluster_workdir, char* cluster_name){
     sprintf(cluster_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,PATH_SLASH);
 }
 
+/*
+ * IMPORTANT: You must guarantee the dirlen_max is larger than 280
+ * This function is better than get_workdir because it is more secure and added return value
+ */
 int get_nworkdir(char* cluster_workdir, unsigned int dirlen_max, char* cluster_name){
     if(strlen(cluster_name)<CLUSTER_ID_LENGTH_MIN||dirlen_max<strlen(cluster_name)+DIR_LENGTH_SHORT){
         strcpy(cluster_workdir,"");
@@ -2927,6 +2959,29 @@ int get_cluster_name(char* cluster_name, char* cluster_workdir){
         if(strlen(dir_buffer)==0){
             if(cluster_name_check(dir_buffer2)==0||cluster_name_check(dir_buffer2)==-127){
                 strcpy(cluster_name,dir_buffer2);
+                return 0;
+            }
+        }
+        else{
+            strcpy(dir_buffer2,dir_buffer);
+        }
+    }
+    return 1;
+}
+
+int get_cluster_nname(char* cluster_name, unsigned int cluster_name_len_max, char* cluster_workdir){
+    char* path_seprator_str=PATH_SLASH;
+    char path_seprator=path_seprator_str[0];
+    int i=0;
+    char dir_buffer[128]="";
+    char dir_buffer2[128]="";  
+    // Max directory depth: 16
+    while(i<16){
+        i++;
+        get_seq_nstring(cluster_workdir,path_seprator,i,dir_buffer,128);
+        if(strlen(dir_buffer)==0){
+            if(cluster_name_check(dir_buffer2)==0||cluster_name_check(dir_buffer2)==-127){
+                strncpy(cluster_name,dir_buffer2,cluster_name_len_max-1);
                 return 0;
             }
         }
@@ -2985,7 +3040,7 @@ int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords){
 }
 
 int check_reconfigure_list(char* workdir, int print_flag){
-    char single_line[64]="";
+    char single_line[LINE_LENGTH_TINY]="";
     char reconf_list[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
     snprintf(reconf_list,FILENAME_LENGTH-1,"%s%sconf%sreconf.list",workdir,PATH_SLASH,PATH_SLASH);
@@ -2996,7 +3051,7 @@ int check_reconfigure_list(char* workdir, int print_flag){
         fclose(file_p);
         return 0;
     }
-    while(fngetline(file_p,single_line,64)==0){
+    while(fngetline(file_p,single_line,LINE_LENGTH_TINY)!=1){
         if(*(single_line+0)=='+'||*(single_line+0)=='|'){
             printf("|         %s\n",single_line);
         }
@@ -3005,9 +3060,12 @@ int check_reconfigure_list(char* workdir, int print_flag){
 }
 
 /*  
- * If silent_flag==1, verbose. Will tell the user which cluster is active
- * If silent_flag==0, silent. Will print nothing
- * If silent_flag== other_number, Will only show the warning
+ * If silent_flag=1, verbose. Will tell the user which cluster is active
+ * If silent_flag=0, silent. Will print nothing
+ * If silent_flag= other_number, Will only show the warning
+ * 
+ * Return 1: No current cluster
+ * Return 0: Get current cluster and workdir
  */
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag){
     FILE* file_p=NULL;
@@ -3029,6 +3087,14 @@ int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int 
     }
 }
 
+/*  
+ * If silent_flag=1, verbose. Will tell the user which cluster is active
+ * If silent_flag=0, silent. Will print nothing
+ * If silent_flag= other_number, Will only show the warning
+ * 
+ * Return 1: No current cluster or get cluster_workdir failed
+ * Return 0: Get current cluster and workdir
+ */
 int show_current_ncluster(char* cluster_workdir, unsigned int dirlen_max, char* current_cluster_name, unsigned int cluster_name_len_max, int silent_flag){
     FILE* file_p=NULL;
     if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)==0){
@@ -3044,8 +3110,10 @@ int show_current_ncluster(char* cluster_workdir, unsigned int dirlen_max, char* 
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Current cluster:" HIGH_GREEN_BOLD " %s" RESET_DISPLAY ".\n",current_cluster_name);
         }
         fclose(file_p);
-        get_workdir(cluster_workdir,current_cluster_name);
-        return 0;
+        if(get_nworkdir(cluster_workdir,dirlen_max,current_cluster_name)==0){
+            return 0;
+        }
+        return 1;
     }
 }
 
@@ -3162,7 +3230,7 @@ int list_all_cluster_names(int header_flag){
     else{
         printf("\n");
     }
-    while(fngetline(file_p,registry_line,256)!=1){
+    while(fngetline(file_p,registry_line,LINE_LENGTH_SHORT)!=1){
         if(strlen(registry_line)!=0){
             if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
                 printf(RESET_DISPLAY "|        : %s\n" RESET_DISPLAY,registry_line);
@@ -3512,7 +3580,7 @@ int start_rdp_connection(char* cluster_workdir, char* username, int password_fla
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     int run_flag;
     
-    if(get_cluster_name(cluster_name,cluster_workdir)!=0){
+    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,cluster_workdir)!=0){
         return 3;
     }
     if(get_state_nvalue(cluster_workdir,"master_public_ip:",master_address,32)!=0){
@@ -3543,12 +3611,16 @@ int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role, int p
     return start_rdp_connection(cluster_workdir,username,password_flag);
 }
 
-//If the file exists, return 0
-//If not, return -1;
+/* 
+ * If file exists, return the file pointer
+ * Otherwise, return NULL
+ */
 FILE* check_regions_list_file(char* cluster_name){
     char workdir[DIR_LENGTH]="";
     char region_list[FILENAME_LENGTH]="";
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        return NULL;
+    }
     snprintf(region_list,FILENAME_LENGTH-1,"%s%sconf%sregions.list",workdir,PATH_SLASH,PATH_SLASH);
     FILE* file_p=fopen(region_list,"r");
     return file_p;
@@ -3688,7 +3760,9 @@ int get_default_zone(char* cluster_name, char* region, char* default_zone){
     char region_list[FILENAME_LENGTH]="";
     char region_ext1[64]="";
     char region_ext2[64]="";
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        return -1;
+    }
     snprintf(region_list,FILENAME_LENGTH-1,"%s%sconf%sregions.list",workdir,PATH_SLASH,PATH_SLASH);
     snprintf(region_ext1,63,"[Region:%s]",region);
     snprintf(region_ext2,63,"[%s]",region);

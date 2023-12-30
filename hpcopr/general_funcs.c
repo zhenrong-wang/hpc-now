@@ -267,17 +267,19 @@ int fgetline(FILE* file_p, char* line_string){
  * Users must make sure that the max_length equals or smaller than the size of the array
  * Otherwise, overflow will definately occur.
  * Automatically add '\0' to the line_string, therefore, the max_length equals to the real width of the array
+ * 
+ * Return Vals:
  * return 0: get successed.
- * return -127: length invalid.
+ * return -3: length invalid.
  * return -1: FILE not exist
- * return 1: EOF found and read nothing.
- * return 127: maxlength
+ * return  1: EOF found and read nothing.
+ * return  2: maxlength
  */
 int fngetline(FILE* file_p, char line_string[], unsigned int max_length){
     int ch='\0';
     int i=0;
     if(max_length<1){
-        return -127;
+        return -3;
     }
     if(file_p==NULL){
         return -1;
@@ -291,7 +293,7 @@ int fngetline(FILE* file_p, char line_string[], unsigned int max_length){
         }
     }while(ch!=EOF&&ch!='\n'&&i<max_length-1); //Reserve a char for '\0'
     if(i==max_length-1){
-        return 127; // When returns this value, the line is not read completely.
+        return 2; // When returns this value, the line is not read completely.
     }
     if(ch==EOF&&i==0){
         return 1; //Read nothing
@@ -472,7 +474,7 @@ int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string,
         fclose(file_p_tmp);
         return -5;
     }
-    while(fngetline(file_p,single_line,linelen_max)==0){
+    while(fngetline(file_p,single_line,linelen_max)!=1){
         contain_count=contain_or_nnot(single_line,orig_string);
         if(contain_count<1){
             fprintf(file_p_tmp,"%s\n",single_line);
@@ -1435,7 +1437,7 @@ int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char*
     }
     int line_num=0;
     int i;
-    while(fngetline(file_p,single_line,linelen_max)==0){
+    while(fngetline(file_p,single_line,linelen_max)!=1){
         if(contain_or_nnot(single_line,keyword)>0){
             contain_flag=1;
             break;

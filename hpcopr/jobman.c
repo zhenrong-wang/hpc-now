@@ -293,7 +293,9 @@ int job_list(char* workdir, char* user_name, char* sshkey_dir){
     char string_temp[LINE_LENGTH_SHORT]="";
     FILE* file_p=NULL;
     char cmdline[CMDLINE_LENGTH]="";
-    get_cluster_name(cluster_name,workdir);
+    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+        return -7;
+    }
     snprintf(dirname_temp,383,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
     snprintf(cmdline,2047,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);

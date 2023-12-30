@@ -101,14 +101,18 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             printf(FATAL_RED_BOLD "[ FATAL: ] FILE I/O error when opening copied registry." RESET_DISPLAY "\n");
             return -3;
         }
-        while(fngetline(file_p,registry_line_buffer,LINE_LENGTH_SHORT)==0){
+        while(fngetline(file_p,registry_line_buffer,LINE_LENGTH_SHORT)!=1){
             get_seq_nstring(registry_line_buffer,' ',4,cluster_name_temp,32);
             if(cluster_name_check(cluster_name_temp)!=-127){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Cluster name %s is not valid. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
                 final_flag++;
                 continue;
             }
-            get_workdir(cluster_workdir_temp,cluster_name_temp);
+            if(get_nworkdir(cluster_workdir_temp,DIR_LENGTH,cluster_name_temp)!=0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get workdir of %s. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
+                final_flag++;
+                continue;
+            }
             if(strcmp(option,"decrypt")==0){
                 flag=decrypt_single_cluster(cluster_name_temp,NOW_CRYPTO_EXEC,CRYPTO_KEY_FILE);
                 if(flag!=0){
@@ -161,7 +165,10 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             printf(FATAL_RED_BOLD "[ FATAL: ] Cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is not valid." RESET_DISPLAY "\n",cluster_list);
             return 5;
         }
-        get_workdir(cluster_workdir_temp,cluster_list);
+        if(get_nworkdir(cluster_workdir_temp,DIR_LENGTH,cluster_list)!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get workdir of %s. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
+            return 5;
+        }
         if(check_pslock(cluster_workdir_temp,decryption_status(cluster_workdir_temp))!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster %s is currently locked (operation-in-progress)." RESET_DISPLAY "\n",cluster_list);
             return -5;
@@ -193,7 +200,12 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             i++;
             continue;
         }
-        get_workdir(cluster_workdir_temp,cluster_name_temp);
+        if(get_nworkdir(cluster_workdir_temp,DIR_LENGTH,cluster_name_temp)!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get workdir of %s. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
+            final_flag++;
+            i++;
+            continue;
+        }
         if(check_pslock(cluster_workdir_temp,decryption_status(cluster_workdir_temp))!=0){
             printf(WARN_YELLO_BOLD "[ FATAL: ] The cluster %s is locked (operation-in-progress). Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
             final_flag++;
@@ -233,12 +245,14 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
     }
 }
 
-//return -1: cluster_registry not found
-//return -3: cluster_name incorrect
-//return -5: cloud_flag error or vaultdir error
-//return -7: failed to get the key md5
-//return 1: already decrypted
-//return 0: decryption finished
+/*
+ * return -1: cluster_registry not found
+ * return -3: cluster_name incorrect or failed to get workdir
+ * return -5: cloud_flag error or vaultdir error
+ * return -7: failed to get the key md5
+ * return 1: already decrypted
+ * return 0: decryption finished
+ */
 int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, char* crypto_keyfile){
     char target_cluster_workdir[DIR_LENGTH]="";
     char target_cluster_vaultdir[DIR_LENGTH]="";
@@ -252,7 +266,9 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     if(cluster_name_check(target_cluster_name)!=-127){
         return -3;
     }
-    get_workdir(target_cluster_workdir,target_cluster_name);
+    if(get_nworkdir(target_cluster_workdir,DIR_LENGTH,target_cluster_name)!=0){
+        return -3;
+    }
     if(get_cloud_flag(target_cluster_workdir,cloud_flag)!=0||create_and_get_vaultdir(target_cluster_workdir,target_cluster_vaultdir)!=0){
         return -5;
     }

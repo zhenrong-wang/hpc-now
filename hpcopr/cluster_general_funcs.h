@@ -45,7 +45,7 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
 int display_cloud_info(char* workdir);
 
 int get_azure_info(char* workdir, char* az_subscription_id, char* az_tenant_id);
-int get_azure_ninfo(char* workdir, unsigned int linelen_max, char* az_subscription_id, char* az_tenant_id, unsigned int id_len_max);
+int get_azure_ninfo(char* workdir, unsigned int linelen_max, char* az_subscription_id, char* az_tenant_id, unsigned int id_len_max); //Newer function
 
 int get_cpu_num(const char* vm_model);
 int get_compute_node_num(char* currentstate_file, char* option);
@@ -60,7 +60,7 @@ int decryption_status(char* workdir);
 int getstate(char* workdir, char* crypto_keyfile);
 
 int get_state_value(char* workdir, char* key, char* value);
-int get_state_nvalue(char* workdir, char* key, char* value, unsigned int valen_max);
+int get_state_nvalue(char* workdir, char* key, char* value, unsigned int valen_max); //Newer function
 
 int update_cluster_summary(char* workdir, char* crypto_keyfile);
 int archive_log(char* logarchive, char* logfile);
@@ -98,12 +98,12 @@ void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);
 
 int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, char* region_id, char* bucket_ak, char* bucket_sk);
-int get_bucket_ninfo(char* workdir, char* crypto_keyfile, unsigned int linelen_max, bucket_info* bucketinfo);
+int get_bucket_ninfo(char* workdir, char* crypto_keyfile, unsigned int linelen_max, bucket_info* bucketinfo); //Newer function
 
 int tail_f_for_windows(char* filename);
 
 int get_ucid(char* workdir, char* ucid_string);
-int get_nucid(char* workdir, char* ucid_string, unsigned int ucid_strlen_max);
+int get_nucid(char* workdir, char* ucid_string, unsigned int ucid_strlen_max); //Newer function
 
 int decrypt_user_passwords(char* workdir, char* crypto_keyfile);
 void delete_decrypted_user_passwords(char* workdir);
@@ -120,9 +120,11 @@ int username_check_select(char* user_registry, char* username_input);
 int delete_user_from_registry(char* user_registry_file, char* username);
 
 void get_workdir(char* cluster_workdir, char* cluster_name);
-int get_nworkdir(char* cluster_workdir, unsigned int dirlen_max, char* cluster_name);
+int get_nworkdir(char* cluster_workdir, unsigned int dirlen_max, char* cluster_name); //Newer function
 
 int get_cluster_name(char* cluster_name, char* cluster_workdir);
+int get_cluster_nname(char* cluster_name, unsigned int cluster_name_len_max, char* cluster_workdir); //Newer function
+
 int create_cluster_registry(void);
 int list_all_cluster_names(int header_flag);
 int exit_current_cluster(void);
@@ -143,7 +145,7 @@ int gcp_credential_convert(char* workdir, const char* operation, int key_flag);
  * If silent_flag== other_number, Will only show the warning
  */
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag);
-int show_current_ncluster(char* cluster_workdir, unsigned int dirlen_max, char* current_cluster_name, unsigned int cluster_name_len_max, int silent_flag);
+int show_current_ncluster(char* cluster_workdir, unsigned int dirlen_max, char* current_cluster_name, unsigned int cluster_name_len_max, int silent_flag); //Newer function
 
 int current_cluster_or_not(char* current_indicator, char* cluster_name);
 int cluster_name_check(char* cluster_name);

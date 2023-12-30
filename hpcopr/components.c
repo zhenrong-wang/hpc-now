@@ -144,9 +144,7 @@ int get_vers_md5_vars(void){
         return -1;
     }
     while(!feof(file_p)){
-        if(fngetline(file_p,vers_md5_line,LINE_LENGTH_SHORT)!=0){
-            continue;
-        }
+        fngetline(file_p,vers_md5_line,LINE_LENGTH_SHORT);
         get_seq_nstring(vers_md5_line,' ',1,header,256);
         get_seq_nstring(vers_md5_line,' ',2,version,256);
         get_seq_nstring(vers_md5_line,' ',3,exec_md5,256);
@@ -265,7 +263,7 @@ int reset_vers_md5_vars(void){
         }
         file_p_1=fopen(tf_md5_file,"r");
         file_p_2=fopen(crypto_md5_file,"r");
-        while(fngetline(file_p_1,md5_line,LINE_LENGTH_SHORT)==0){
+        while(fngetline(file_p_1,md5_line,LINE_LENGTH_SHORT)!=1){
             fprintf(file_p,"%s\n",md5_line);
         }
         fclose(file_p_1);
@@ -306,7 +304,7 @@ int reset_vers_md5_vars(void){
             return -1;
         }
         file_p_1=fopen(tf_md5_file,"r");
-        while(fngetline(file_p_1,md5_line,LINE_LENGTH_SHORT)==0){
+        while(fngetline(file_p_1,md5_line,LINE_LENGTH_SHORT)!=1){
             fprintf(file_p,"%s\n",md5_line);
         }
         fclose(file_p_1);

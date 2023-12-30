@@ -106,7 +106,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         max_cluster_name_length=get_max_cluster_name_length();
-        while(fngetline(file_p,registry_line,255)!=1){
+        while(fngetline(file_p,registry_line,LINE_LENGTH_SHORT)!=1){
             if(strlen(registry_line)!=0){
                 get_seq_nstring(registry_line,' ',4,temp_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS);
                 if(get_nworkdir(temp_cluster_workdir,DIR_LENGTH,temp_cluster_name)!=0){
@@ -917,6 +917,10 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
         printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
         return -3;
     }
+    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
+        return -7;
+    }
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("|*         DELETING THE WHOLE CLUSTER - INCLUDING ALL THE NODES AND DATA!\n");
     printf("|*         THIS OPERATION IS UNRECOVERABLE!" RESET_DISPLAY "\n\n");
@@ -985,7 +989,6 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     system(cmdline);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sconf%stf_prep.conf %s%sconf%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,workdir,PATH_SLASH,PATH_SLASH,workdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    get_cluster_name(cluster_name,workdir);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.%s %s",DELETE_FOLDER_CMD,SSHKEY_DIR,PATH_SLASH,cluster_name,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     delete_local_tf_config(stackdir);
@@ -2213,13 +2216,16 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     char* sshkey_folder=SSHKEY_DIR;
     char cloud_flag[16]="";
     char node_name[16]="";
-    char cluster_name[64]="";
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char username_temp[64]="";
     char user_status_temp[32]="";
     char user_line_temp[256]="";
     FILE* file_p=NULL;
     int i;
     int compute_node_num=0;
+    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+        return -7;
+    }
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("|*         YOU ARE REBUILDING THE CLUSTER NODES! YOUR CRITICAL NODES WILL\n");
     printf("|*         BE REMOVED AND RECREATED ! THIS OPERATION MAY FAIL DUE TO VAR-\n");
@@ -2349,7 +2355,6 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     remote_exec_general(workdir,sshkey_folder,"root","/usr/hpc-now/profile_bkup_rstr.sh restore","-n",0,0,"","");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rebuilding the cluster users now ...\n");
     file_p=fopen(user_passwords,"r");
-    get_cluster_name(cluster_name,workdir);
     get_user_sshkey(cluster_name,"root","ENABLED",sshkey_folder,crypto_keyfile);
     while(!feof(file_p)){
         fngetline(file_p,user_line_temp,256);

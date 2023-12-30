@@ -134,7 +134,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char real_export_file[FILENAME_LENGTH_EXT]="";
     char real_export_folder[FILENAME_LENGTH_EXT]="";
     char export_filename[1024]="";
-    char user_line_buffer[256]="";
+    char user_line_buffer[LINE_LENGTH_SHORT]="";
     char real_user_list[1024]="";
     char md5sum_current[64]="";
     char md5sum_trans[64]="";
@@ -145,7 +145,6 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     int export_user_num=0;
     FILE* file_p_tmp=NULL;
     FILE* file_p=NULL;
-
     time_t current_time_long;
     char current_date[12]="";
     char current_time[12]="";
@@ -156,7 +155,11 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     snprintf(current_date,11,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
     snprintf(current_time,11,"%d-%d-%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
 
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
+        return -7;
+    }
+
     if(strlen(user_list)==0){
         if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] User list specified. Use --ul USER_LIST." RESET_DISPLAY "\n");
@@ -300,7 +303,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
             i++;
             get_seq_nstring(real_user_list,':',i,username_temp,32);
             file_p=fopen(filename_temp,"r");
-            while(fngetline(file_p,user_line_buffer,255)==0){
+            while(fngetline(file_p,user_line_buffer,LINE_LENGTH_SHORT)==0){
                 get_seq_nstring(user_line_buffer,' ',2,username_temp_2,32);
                 if(strcmp(username_temp,username_temp_2)==0){
                     fprintf(file_p_tmp,"%s\n",user_line_buffer);
@@ -495,7 +498,12 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         system(cmdline);
         return -5;
     }
-    get_workdir(workdir,cluster_name_buffer);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name_buffer)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
+        snprintf(cmdline,2047,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        return -7;
+    }
     if(cluster_name_check(cluster_name_buffer)==-127){
         create_and_get_vaultdir(workdir,vaultdir);
         snprintf(filename_temp,511,"%s%s.secrets.key",vaultdir,PATH_SLASH);
@@ -608,9 +616,13 @@ int update_cluster_status(char* cluster_name, char* currentstate){
     char workdir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    get_workdir(workdir,cluster_name);
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+        return -1;
+    }
     create_and_get_stackdir(workdir,stackdir);
     snprintf(cmdline,2047,"%s %s %s%scurrentstate %s",COPY_FILE_CMD,currentstate,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    return 0;
+    if(system(cmdline)==0){
+        return 0;
+    }
+    return 1;
 }

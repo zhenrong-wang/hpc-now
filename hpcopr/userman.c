@@ -16,7 +16,9 @@
 
 int usrmgr_prereq_check(char* workdir, char* ucmd, int batch_mode_flag){
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    get_cluster_name(cluster_name,workdir);
+    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+        return -7;
+    }
     if(cluster_asleep_or_not(workdir)==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The cluster %s is not running. Please wake up first." RESET_DISPLAY "\n",cluster_name);
         return -1;
@@ -64,7 +66,7 @@ int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
     create_and_get_vaultdir(workdir,vaultdir);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"r");
-    while(fngetline(file_p,single_line,LINE_LENGTH_SHORT)==0){
+    while(fngetline(file_p,single_line,LINE_LENGTH_SHORT)!=1){
         get_seq_nstring(single_line,' ',2,username,32);
         get_seq_nstring(single_line,' ',4,enable_flag,16);
         if(strcmp(enable_flag,"STATUS:ENABLED")==0){
@@ -93,6 +95,9 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
     char remote_commands[CMDLINE_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     create_and_get_vaultdir(workdir,vaultdir);
+    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+        return -7;
+    }
     snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(strcmp(username,"root")==0||strcmp(username,"user1")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected and cannot be deleted." RESET_DISPLAY "\n");
@@ -114,7 +119,6 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
         else{
             delete_user_from_registry(user_registry_file,username);
             encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
-            get_cluster_name(cluster_name,workdir);
             delete_user_sshkey(cluster_name,username,sshkey_dir);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully deleted user %s.\n",username);
             return 0;
@@ -256,6 +260,9 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
 
     FILE* file_p=NULL;
     create_and_get_vaultdir(workdir,vaultdir);
+    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+        return -7;
+    }
     snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(user_registry_file)!=0){
         return -1;
@@ -276,7 +283,6 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
             file_p=fopen(user_registry_file,"a");
             fprintf(file_p,"username: %s %s STATUS:ENABLED\n",username,password);
             fclose(file_p);
-            get_cluster_name(cluster_name,workdir);
             get_user_sshkey(cluster_name,username,"ENABLED",sshkey_dir,crypto_keyfile);
             printf("[ -DONE- ] The user %s has been added to your cluster successfully.\n",username);
             encrypt_and_delete_user_passwords(workdir,crypto_keyfile);

@@ -695,7 +695,7 @@ int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, clust
         return -3; // If the conf file doesn't exist, exit.
     }
     FILE* file_p=fopen(conf_file,"r");
-    char conf_line_buffer[256]="";
+    char conf_line_buffer[LINE_LENGTH_SHORT]="";
     char header[64]="";
     char tail[64]="";
     char node_inst_ext[128]="";
@@ -705,7 +705,7 @@ int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, clust
 
     reset_initinfo(init_info,cluster_id);
     while(!feof(file_p)){
-        if(fngetline(file_p,conf_line_buffer,255)!=0){
+        if(fngetline(file_p,conf_line_buffer,LINE_LENGTH_SHORT)!=0){
             continue;
         }
         get_seq_nstring(conf_line_buffer,' ',1,header,64);
@@ -955,7 +955,7 @@ void generate_tf_files(char* stackdir){
 
 int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+    if(get_cluster_nname(cluster_id_from_workdir,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -3;
     }
     char stackdir[DIR_LENGTH]="";
@@ -1326,7 +1326,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
 
 int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+    if(get_cluster_nname(cluster_id_from_workdir,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -3;
     }
     char stackdir[DIR_LENGTH]="";
@@ -1653,7 +1653,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
 
 int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+    if(get_cluster_nname(cluster_id_from_workdir,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -3;
     }
     char stackdir[DIR_LENGTH]="";
@@ -2005,7 +2005,7 @@ int hw_vm_series(const char* region_id, char* intel_generation, char* tiny_serie
 
 int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+    if(get_cluster_nname(cluster_id_from_workdir,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -3;
     }
     char stackdir[DIR_LENGTH]="";
@@ -2327,7 +2327,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
 
 int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+    if(get_cluster_nname(cluster_id_from_workdir,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -3;
     }
     char stackdir[DIR_LENGTH]="";
@@ -2667,7 +2667,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
 
 int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+    if(get_cluster_nname(cluster_id_from_workdir,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -3;
     }
     char stackdir[DIR_LENGTH]="";
@@ -2945,7 +2945,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
 
 int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    if(get_cluster_name(cluster_id_from_workdir,workdir)!=0){
+    if(get_cluster_nname(cluster_id_from_workdir,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -3;
     }
     char stackdir[DIR_LENGTH]="";

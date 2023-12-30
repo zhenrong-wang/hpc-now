@@ -1219,7 +1219,7 @@ int command_name_check(char* command_name_input, char command_prompt[], unsigned
 }
 
 /* 
- * return -9: length not correct
+ * return -9: Failed to get workdir
  * return -7: cluste empty
  * return -5: username invalid
  * return -3: cluster name invalid
@@ -1233,10 +1233,10 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
     }
     int command_flag=0;
     int max_time_temp=0;
-    char temp_cluster_name_specified[128]="";
+    char temp_cluster_name_specified[32]="";
     int flag1,flag2;
-    char temp_cluster_name_switched[128]="";
-    char temp_cluster_name[128]="";
+    char temp_cluster_name_switched[32]="";
+    char temp_cluster_name[32]="";
     char temp_workdir[DIR_LENGTH]="";
     char string_temp[64]="";
     char cluster_name_source[16]="";
@@ -1282,7 +1282,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
         return command_flag;
     }
     if(strcmp(cu_flag,"UNAME")==0||strcmp(cu_flag,"CNAME")==0){
-        flag1=cmd_keyword_ncheck(argc,argv,"-c",temp_cluster_name_specified,128);
+        flag1=cmd_keyword_ncheck(argc,argv,"-c",temp_cluster_name_specified,32);
         if(flag1==0){
             strcpy(temp_cluster_name,temp_cluster_name_specified);
             strcpy(cluster_name_source,"specified");
@@ -1305,7 +1305,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
                 list_all_cluster_names(1);
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
-                scanf("%127s",temp_cluster_name);
+                scanf("%31s",temp_cluster_name);
                 getchar();
                 if(cluster_name_check(temp_cluster_name)!=-127){
                     printf(FATAL_RED_BOLD "[ FATAL: ] The input cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,temp_cluster_name);
@@ -1326,7 +1326,9 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " cluster name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",cluster_name_source,temp_cluster_name);
         strncpy(cluster_name,temp_cluster_name,cluster_name_len_max-1);
-        get_workdir(workdir,cluster_name);
+        if(get_nworkdir(workdir,dir_len_max,cluster_name)!=0){
+            return -9;
+        }
         cluster_role_detect(workdir,cluster_role,cluster_role_ext);
         if(strcmp(role_flag,"opr")==0&&strcmp(cluster_role,"opr")!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " needs the " WARN_YELLO_BOLD "operator" FATAL_RED_BOLD " to execute.\n",argv[1]);
