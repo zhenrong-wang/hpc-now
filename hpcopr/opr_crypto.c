@@ -51,7 +51,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
     char registry_line_buffer[LINE_LENGTH_SHORT]="";
     char registry_copy[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    int flag=0;
+    int run_flag,flag=0;
     int i=1;
     if(strcmp(option,"decrypt")==0){
         if(strcmp(cluster_list,"all")==0){
@@ -76,14 +76,16 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             return -5;
         }
         if(strcmp(option,"decrypt")==0){ /* decrypt/encrypt the operator's private SSH key. That is SSHKEY_DIR/now-cluster-login*/
-            if(decrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE,1)!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt the operator's private SSH key." RESET_DISPLAY "\n");
+            run_flag=decrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE,1);
+            if(run_flag!=0&&run_flag!=2){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the operator's private SSH key." RESET_DISPLAY "\n");
                 return -11;
             }
         }
         else{
-            if(encrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE)!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to encrypt the operator's private SSH key." RESET_DISPLAY "\n");
+            run_flag=encrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE);
+            if(run_flag!=0&&run_flag!=2){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the operator's private SSH key." RESET_DISPLAY "\n");
                 return -11;
             }
         }
