@@ -95,7 +95,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             printf(FATAL_RED_BOLD "[ FATAL: ] FILE I/O error when copying registry." RESET_DISPLAY "\n");
             return -3;
         }
-        snprintf(registry_copy,CMDLINE_LENGTH-1,"%s.copy",ALL_CLUSTER_REGISTRY);
+        snprintf(registry_copy,FILENAME_LENGTH-1,"%s.copy",ALL_CLUSTER_REGISTRY);
         FILE* file_p=fopen(registry_copy,"r");
         if(file_p==NULL){
             printf(FATAL_RED_BOLD "[ FATAL: ] FILE I/O error when opening copied registry." RESET_DISPLAY "\n");
