@@ -1515,14 +1515,24 @@ int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile){
 }
 
 int encrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile){
-    char privkey_file[FILENAME_LENGTH]="";
+    char privkey_file_decrypted[FILENAME_LENGTH]="";
+    char privkey_file_encrypted[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
     char md5sum[64]="";
     int run_flag;
     if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -1;
     }
-    snprintf(privkey_file,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,privkey_file,md5sum);
+    snprintf(privkey_file_decrypted,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
+    snprintf(privkey_file_encrypted,511,"%s%snow-cluster-login.tmp",sshkey_folder,PATH_SLASH);
+    if(file_exist_or_not(privkey_file_decrypted)==0){
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,privkey_file_encrypted,SYSTEM_CMD_ERR_REDIRECT_NULL);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            return -3;
+        }
+    }
+    run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,privkey_file_decrypted,md5sum);
     if(run_flag!=0){
         return 1;
     }
