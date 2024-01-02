@@ -859,9 +859,12 @@ int decrypt_files(char* workdir, char* crypto_key_filename){
     return 0;
 }
 
-//return -1: encrypt failed
-//return 1: delete failed
-//return 0: normal exit
+/* 
+ * return -1: source file not exist
+ * return  1: encrypt failed
+ * return  3: delete failed
+ * return  0: normal exit 
+ */
 int encrypt_and_delete(char* now_crypto_exec, char* filename, char* md5sum){
     char cmdline[CMDLINE_LENGTH]="";
     int run_flag;
@@ -869,19 +872,19 @@ int encrypt_and_delete(char* now_crypto_exec, char* filename, char* md5sum){
         snprintf(cmdline,2047,"%s encrypt %s %s.tmp %s %s",now_crypto_exec,filename,filename,md5sum,SYSTEM_CMD_REDIRECT);
         run_flag=system(cmdline);
         if(run_flag!=0){
-            return -1;
+            return 1;
         }
         snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT);
         run_flag=system(cmdline);
         if(run_flag!=0){
-            return 1;
+            return 3;
         }
         else{
             return 0;
         }
     }
     else{
-        return 0;
+        return -1;
     }
 }
 
