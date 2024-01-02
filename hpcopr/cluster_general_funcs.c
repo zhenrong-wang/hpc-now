@@ -1477,6 +1477,7 @@ int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile){
     char cmdline[CMDLINE_LENGTH]="";
     char privkey_file_encrypted[FILENAME_LENGTH]="";
     char privkey_file_decrypted[FILENAME_LENGTH]="";
+    char privkey_file_decrypted2[FILENAME_LENGTH]="";
     char pubkey_file[FILENAME_LENGTH]="";
     char md5sum[64]="";
     int run_flag;
@@ -1488,20 +1489,14 @@ int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile){
     }
     snprintf(privkey_file_encrypted,511,"%s%snow-cluster-login.tmp",sshkey_folder,PATH_SLASH);
     snprintf(privkey_file_decrypted,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
+    snprintf(privkey_file_decrypted2,511,"%s%snow-cluster-login.dec",sshkey_folder,PATH_SLASH);
     snprintf(pubkey_file,511,"%s%snow-cluster-login.pub",sshkey_folder,PATH_SLASH);
-    if(file_exist_or_not(pubkey_file)==0){
-        if(file_exist_or_not(privkey_file_encrypted)==0){
-            snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,privkey_file_decrypted,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            return 0; // The SSH key pair exists, delete the decrypted one(if exists)
-        }
-        if(file_exist_or_not(privkey_file_decrypted)==0){
-            run_flag=encrypt_opr_privkey(sshkey_folder,crypto_keyfile);
-            if(run_flag==0){
-                return 0;
-            }
-        }
-    } // If pubkey file found, and encrypt failed, then generate a new key pair
+    if(file_exist_or_not(pubkey_file)==0&&file_exist_or_not(privkey_file_encrypted)==0){
+        snprintf(cmdline,2047,"%s %s %s %s",DELETE_FILE_CMD,privkey_file_decrypted,privkey_file_decrypted2,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        return 0; // The SSH key pair exists, force delete the decrypted one(if exists)
+    }
+    // Generate a new key pair
     if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -3; //Failed to get the crypto key
     }
