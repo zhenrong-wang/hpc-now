@@ -267,7 +267,7 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
     if(file_exist_or_not(user_registry_file)!=0){
         return -1;
     }
-    if(username_check_add(user_registry_file,username)!=0){
+    if(username_check_add(workdir,username)!=0){
         delete_decrypted_user_passwords(workdir);
         return -3;
     }

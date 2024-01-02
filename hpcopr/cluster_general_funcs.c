@@ -2828,6 +2828,9 @@ int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir)
 }
 
 int username_check(char* user_registry, char* username_input){
+    if(file_exist_or_not(user_registry)!=0){
+        return -5;
+    }
     if(strlen(username_input)<USERNAME_LENGTH_MIN||strlen(username_input)>USERNAME_LENGTH_MAX){
         return -3;
     }
@@ -2854,16 +2857,22 @@ int username_check(char* user_registry, char* username_input){
         }
     }
     snprintf(username_ext,127,"username: %s ",username_input);
-    if(find_multi_nkeys(user_registry,LINE_LENGTH_SHORT,username_ext,"","","","")!=0){
+    if(find_multi_nkeys(user_registry,LINE_LENGTH_SHORT,username_ext,"","","","")>0){
         return 7;
     }
     return 0;
 }
 
-int username_check_add(char* user_registry, char* username_input){
-    if(file_exist_or_not(user_registry)!=0){
-        return -1;
-    }
+
+/*
+ * Return     0: Username can be added
+ * Return Non-0: User name cannot be added, and print out the reason
+ */
+int username_check_add(char* workdir, char* username_input){
+    char vaultdir[DIR_LENGTH]="";
+    char user_registry[FILENAME_LENGTH]="";
+    create_and_get_vaultdir(workdir,vaultdir);
+    snprintf(user_registry,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     int check_flag=username_check(user_registry,username_input);
     if(check_flag!=0){
         if(check_flag==-3){
@@ -2878,6 +2887,10 @@ int username_check_add(char* user_registry, char* username_input){
             printf(FATAL_RED_BOLD "[ FATAL: ] Illegal character(s) found, only A-Z | a-z | - are valid." RESET_DISPLAY "\n");
             return -3;
         }
+        else if(check_flag==-5){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the user registry." RESET_DISPLAY "\n");
+            return -3;
+        }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Username " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " duplicated." RESET_DISPLAY "\n",username_input);
             return -3;
@@ -2888,10 +2901,8 @@ int username_check_add(char* user_registry, char* username_input){
         return 0;
     }
 }
+
 int username_check_select(char* user_registry, char* username_input){
-    if(file_exist_or_not(user_registry)!=0){
-        return -1;
-    }
     if(username_check(user_registry,username_input)!=7){
         printf(FATAL_RED_BOLD "[ FATAL: ] Username " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is not valid." RESET_DISPLAY "\n",username_input);
         return -3;

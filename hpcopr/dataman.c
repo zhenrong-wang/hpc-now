@@ -328,7 +328,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
             snprintf(cmdline,2047,"%s rm -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s",OBSUTIL_EXEC,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_remote_path,real_rflag,real_fflag);
         }
         else{
-            snprintf(cmdline,2047,"%s ls -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s",OBSUTIL_EXEC,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_remote_path,real_rflag);
+            snprintf(cmdline,2047,"%s ls -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s",OBSUTIL_EXEC,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_remote_path);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
