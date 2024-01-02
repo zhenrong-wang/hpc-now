@@ -1149,12 +1149,21 @@ int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primar
     }
     int j;
     while(fngetline(file_p,single_line,linelen_max)!=1){
+        //printf("%d,,%d,,%d,,\n",contain_or_nnot(single_line,findkey_primary1),contain_or_nnot(single_line,findkey_primary2),contain_or_nnot(single_line,findkey_primary3));
         if(contain_or_nnot(single_line,findkey_primary1)>0&&contain_or_nnot(single_line,findkey_primary2)>0&&contain_or_nnot(single_line,findkey_primary3)>0){
+            if(contain_or_nnot(single_line,findkey1)>0&&contain_or_nnot(single_line,findkey2)>0&&contain_or_nnot(single_line,findkey3)>0){
+                get_seq_nstring(single_line,split_ch,string_seq_num,get_str,get_strlen_max);
+                free(single_line);
+                fclose(file_p);
+                return 0;
+            }
             break;
         }
     }
     j=0;
-    while(fngetline(file_p,single_line,linelen_max)!=1&&j<plus_line_num){
+    while(!feof(file_p)&&j<plus_line_num){
+        fngetline(file_p,single_line,linelen_max);
+        j++;
         if(contain_or_nnot(single_line,findkey1)>0&&contain_or_nnot(single_line,findkey2)>0&&contain_or_nnot(single_line,findkey3)>0){
             get_seq_nstring(single_line,split_ch,string_seq_num,get_str,get_strlen_max);
             free(single_line);
