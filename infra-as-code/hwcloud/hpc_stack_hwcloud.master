@@ -64,13 +64,11 @@ systemctl restart sshd
 echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
 yum -y install at
 systemctl start atd && systemctl enable atd
-echo "${var.shared_storage}" > /tmp/shared_storage.tmp
-block_size=`cat /tmp/shared_storage.tmp`G
-block_name=`lsblk | grep $block_size | awk '{print $1}'`
+block_name=`lsblk | grep -v sda | tail -n 1 | awk '{print $1}'`
 while [ -z $block_name ]
 do
   sleep 1
-  block_name=`lsblk | grep $block_size | awk '{print $1}'`
+  block_name=`lsblk | grep -v sda | tail -n 1 | awk '{print $1}'`
 done
 mkfs -t ext4 /dev/$block_name
 mkdir -p /mnt/sdb
