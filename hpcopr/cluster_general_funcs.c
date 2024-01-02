@@ -1530,7 +1530,7 @@ int encrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile){
     snprintf(privkey_file_decrypted,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     snprintf(privkey_file_encrypted,511,"%s%snow-cluster-login.tmp",sshkey_folder,PATH_SLASH);
     if(file_exist_or_not(privkey_file_decrypted)==0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,privkey_file_encrypted,SYSTEM_CMD_ERR_REDIRECT_NULL);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,privkey_file_encrypted,SYSTEM_CMD_REDIRECT_NULL);
         run_flag=system(cmdline);
         if(run_flag!=0){
             return -3;
