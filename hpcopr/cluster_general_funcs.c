@@ -1451,7 +1451,7 @@ int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile){
         return 1; //Failed to generate a ssh keypair, delete any files generated and return 1
     }
     snprintf(privkey_file_decrypted,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,privkey_file_encrypted,md5sum); //Encrypt the private key.
+    run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,privkey_file_decrypted,md5sum); //Encrypt the private key.
     if(run_flag!=0){
         snprintf(cmdline,2047,"%s %s%snow-cluster-login* %s",DELETE_FILE_CMD,sshkey_folder,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline); 
