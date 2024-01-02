@@ -90,19 +90,19 @@ do
   block_name=`lsblk | grep -v sda | tail -n 1 | awk '{print $1}'`
 done
 mkfs -t ext4 /dev/$block_name
-mkdir -p /mnt/sdb
+mkdir -p /mnt/shared
 block_id=`blkid /dev/$block_name | awk -F"\"" '{print $2}'`
-echo -e "UUID=$block_id /mnt/sdb                ext4    defaults        0 2" >> /etc/fstab
+echo -e "UUID=$block_id /mnt/shared                ext4    defaults        0 2" >> /etc/fstab
 mkdir -p /usr/hpc-now/
 mount -a
-mkdir -p /mnt/sdb/hpc_apps
-mkdir -p /mnt/sdb/hpc_data
+mkdir -p /mnt/shared/hpc_apps
+mkdir -p /mnt/shared/hpc_data
 rm -rf /hpc_apps && rm -rf /hpc_data
-ln -s /mnt/sdb/hpc_apps /hpc_apps
-ln -s /mnt/sdb/hpc_data /hpc_data
+ln -s /mnt/shared/hpc_apps /hpc_apps
+ln -s /mnt/shared/hpc_data /hpc_data
 yum -y install rpcbind nfs-utils
-echo -e "/mnt/sdb/hpc_apps/ 10.0.0.0/16(rw,no_root_squash,no_all_squash,sync)" >> /etc/exports
-echo -e "/mnt/sdb/hpc_data/ 10.0.0.0/16(rw,no_root_squash,no_all_squash,sync)" >> /etc/exports
+echo -e "/mnt/shared/hpc_apps/ 10.0.0.0/16(rw,no_root_squash,no_all_squash,sync)" >> /etc/exports
+echo -e "/mnt/shared/hpc_data/ 10.0.0.0/16(rw,no_root_squash,no_all_squash,sync)" >> /etc/exports
 systemctl start rpcbind
 systemctl start nfs-server
 systemctl enable rpcbind
