@@ -1026,7 +1026,7 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
     snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,user_passwords_decrypted,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     snprintf(user_ssh_privkey_encrypted,511,"%s%s.%s%sroot.key.tmp",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH);
-    snprintf(user_ssh_privkey_decrypted,511,"%s%s.%s%s%s.root.key.dec",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH);
+    snprintf(user_ssh_privkey_decrypted,511,"%s%s.%s%sroot.key.dec",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH);
     if(strcmp(option,"encrypt")==0){
         encrypt_and_delete_general(NOW_CRYPTO_EXEC,user_ssh_privkey_decrypted,user_ssh_privkey_encrypted,md5sum);
     }
@@ -1050,7 +1050,6 @@ int encrypt_decrypt_opr_privkey(char* sshkey_folder, char* option, char* crypto_
     }
     char opr_privkey_encrypted[FILENAME_LENGTH]="";
     char opr_privkey_decrypted[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     snprintf(opr_privkey_encrypted,511,"%s%snow-cluster-login.tmp",sshkey_folder,PATH_SLASH);
     /* The encrypted file is supposed to be there. If the encrypted file does not exist, return 0 directly. */
     if(file_exist_or_not(opr_privkey_encrypted)!=0){

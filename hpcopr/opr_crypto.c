@@ -19,8 +19,7 @@
  * 
  * When specifying 'all', return values: 
  *   0 - normal
- *  -1 - Empty registry and decrypted/encrypted ssh key
- * -11 - Empty registry and failed to decrypt/encrypt ssh key
+ *  -7 - Empty registry and failed to decrypt/encrypt ssh key
  *  -5 - Locked clusters found
  *  -3 - Failed to copy/open registry, not quite possible
  * 20+ - Failed to decrypt/encrypt some clusters
@@ -51,7 +50,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
     char registry_line_buffer[LINE_LENGTH_SHORT]="";
     char registry_copy[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    int run_flag,flag=0;
+    int flag=0;
     int i=1;
     if(strcmp(option,"decrypt")==0){
         if(strcmp(cluster_list,"all")==0){
@@ -70,6 +69,13 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
     if(flag==1){
         return 3;
     }
+    /*
+     * If the option is "all":
+     * return  -5: Some clusters locked
+     * return  -7: Opr ssh private key failed 
+     * return  -3: FILE I/O
+     * return 20+: Some clusters failed
+     */
     if(strcmp(cluster_list,"all")==0){
         if(check_pslock_all()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Locked (operation-in-progress) cluster(s) found, exit." RESET_DISPLAY "\n");
@@ -77,7 +83,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         }
         if(encrypt_decrypt_opr_privkey(SSHKEY_DIR,option,CRYPTO_KEY_FILE)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to %s the operator's private SSH key." RESET_DISPLAY "\n",option);
-            return -11;
+            return -7;
         }
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.copy %s",COPY_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
