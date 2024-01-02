@@ -149,7 +149,7 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
     get_state_nvalue(workdir,"master_public_ip:",remote_address,32);
     cluster_role_detect(workdir,cluster_role,cluster_role_ext);
     if(strcmp(username,"root")==0&&strcmp(cluster_role,"opr")==0){
-        if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE)!=0){
+        if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE,0)!=0){
             return -5;
         }
         snprintf(private_key,511,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
@@ -365,7 +365,7 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     if(get_state_nvalue(workdir,"master_public_ip:",remote_address,32)!=0){
         return -7;
     }
-    if(decrypt_opr_privkey(sshkey_folder,CRYPTO_KEY_FILE)!=0){
+    if(decrypt_opr_privkey(sshkey_folder,CRYPTO_KEY_FILE,0)!=0){
         return -5;
     }
     snprintf(private_key,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
@@ -399,7 +399,7 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char
     }
     cluster_role_detect(workdir,cluster_role,cluster_role_ext);
     if(strcmp(username,"root")==0&&strcmp(cluster_role,"opr")==0){
-        if(decrypt_opr_privkey(sshkey_folder,CRYPTO_KEY_FILE)!=0){
+        if(decrypt_opr_privkey(sshkey_folder,CRYPTO_KEY_FILE,0)!=0){
             return -3;
         }
         snprintf(private_key,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
@@ -1491,7 +1491,11 @@ int get_opr_pubkey(char* sshkey_folder, char* pubkey, unsigned int length){
     return 0;
 }
 
-int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile){
+/* 
+ * chmod_flag =0: chmod (for hpcopr)
+ * chmod_flag!=0: not chmod (for installer) 
+ */
+int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile, int chmod_flag){
     char privkey_file_encrypted[FILENAME_LENGTH]="";
     char privkey_file[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -1506,7 +1510,7 @@ int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile){
     if(run_flag!=0){
         return 1;
     }
-    if(chmod_ssh_privkey(privkey_file)!=0){
+    if(chmod_flag==0&&chmod_ssh_privkey(privkey_file)!=0){
         snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,privkey_file,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 1;
@@ -2410,7 +2414,7 @@ int cluster_ssh(char* workdir, char* username, char* role_flag, char* sshkey_dir
         return -7;
     }
     if(strcmp(role_flag,"opr")==0){
-        if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE)!=0){
+        if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE,0)!=0){
             return -5;
         }
         snprintf(private_sshkey,511,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);

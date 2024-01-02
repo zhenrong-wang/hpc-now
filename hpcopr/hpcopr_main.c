@@ -557,11 +557,11 @@ int main(int argc, char* argv[]){
 
     if(strcmp(final_command,"decrypt")==0||strcmp(final_command,"encrypt")==0){
         if(cmd_flag_check(argc,argv,"--all")==0){
-            run_flag=encrypt_decrypt_clusters("all",final_command,batch_flag);
+            run_flag=encrypt_decrypt_clusters("all",final_command,1,batch_flag);
         }
         else{
             if(cmd_keyword_ncheck(argc,argv,"-c",string_temp,256)==0){
-                run_flag=encrypt_decrypt_clusters(string_temp,final_command,batch_flag);
+                run_flag=encrypt_decrypt_clusters(string_temp,final_command,1,batch_flag);
             }
             else{
                 if(batch_flag==0){
@@ -576,7 +576,7 @@ int main(int argc, char* argv[]){
                 fflush(stdin);
                 scanf("%255s",string_temp);
                 getchar();
-                run_flag=encrypt_decrypt_clusters(string_temp,final_command,batch_flag);
+                run_flag=encrypt_decrypt_clusters(string_temp,final_command,1,batch_flag);
             }
         }
         if(run_flag!=0){
@@ -665,7 +665,7 @@ int main(int argc, char* argv[]){
     //Automatically encrypt the decrypted files for a specific cluster.
     if(decrypt_flag==1){
         printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is decrypted." RESET_DISPLAY "\n",cluster_name);
-        encrypt_decrypt_clusters(cluster_name,"encrypt",0); //This operation is automatic. Use 0 as the batch flag.
+        encrypt_decrypt_clusters(cluster_name,"encrypt",1,0); //This operation is automatic. Use 0 as the batch flag.
     }
     
     if(strcmp(final_command,"new-cluster")==0){

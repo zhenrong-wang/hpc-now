@@ -35,7 +35,7 @@ int generate_sshkey(char* sshkey_folder, char* pubkey); //This is deprecated!
 
 int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile);
 int get_opr_pubkey(char* sshkey_folder, char* pubkey, unsigned int length);
-int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile);
+int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile, int chmod_flag);
 int encrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile);
 int decrypt_user_privkey(char* ssh_privkey_encrypted, char* crypto_keyfile);
 
