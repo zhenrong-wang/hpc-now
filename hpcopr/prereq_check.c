@@ -1302,7 +1302,9 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
                 else{
                     printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " The specified cluster name " WARN_YELLO_BOLD "%s" RESET_DISPLAY " is invalid. Please choose one from the list:\n",temp_cluster_name);
                 }
-                list_all_cluster_names(1);
+                if(list_all_cluster_names(1)<0){
+                    return -3;
+                }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
                 scanf("%31s",temp_cluster_name);
