@@ -639,12 +639,12 @@ int set_opr_password(char* opr_password){
     system("icacls c:\\programdata\\hpc-now\\* /grant Administrators:F /t > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
 #endif
-    run_flag=encrypt_decrypt_clusters("all","decrypt",1,0);
+    run_flag=encrypt_decrypt_clusters("all","decrypt",0);
     if(run_flag!=0&&run_flag!=-1){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the current files." RESET_DISPLAY "\n");
         if(run_flag>20){
             printf(WARN_YELLO_BOLD "\n[ -WARN- ] Rolling back with previous crypto password ..." RESET_DISPLAY "\n");
-            encrypt_decrypt_clusters("all","encrypt",0,0);
+            encrypt_decrypt_clusters("all","encrypt",0);
         }
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Operation failed and password unchanged." RESET_DISPLAY "\n");
         restore_perm_windows();
@@ -680,7 +680,7 @@ int set_opr_password(char* opr_password){
     system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
 #endif
     printf(GENERAL_BOLD "\n[ STEP 2 ] Encrypting files with the new crypto password..." RESET_DISPLAY "\n");
-    run_flag=encrypt_decrypt_clusters("all","encrypt",0,0);
+    run_flag=encrypt_decrypt_clusters("all","encrypt",0);
     if(run_flag!=0&&run_flag!=-1&&run_flag!=-11){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt files with new crypto key file." RESET_DISPLAY "\n");
         restore_perm_windows();

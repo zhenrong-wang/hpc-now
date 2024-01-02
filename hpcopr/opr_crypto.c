@@ -36,39 +36,22 @@
  *  0  - normal
  * 20+ - Failed to decrypt/encrypt some clusters
  */
-int encrypt_decrypt_clusters(char* cluster_list, char* option, int chmod_flag, int batch_flag_local){
+int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_local){
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify an option: encrypt or decrypt." RESET_DISPLAY "\n");
         return 1;
     }
     int final_flag=0;
-    if(file_empty_or_not(ALL_CLUSTER_REGISTRY)<1){
-        printf(GENERAL_BOLD "[ -INFO- ] The registry is empty, will not encrypt/decrypt clusters." RESET_DISPLAY "\n");
-        if(strcmp(cluster_list,"all")==0){
-            if(strcmp(option,"decrypt")==0){
-                if(decrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE,chmod_flag)!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt the operator's private SSH key." RESET_DISPLAY "\n");
-                    final_flag++;
-                }
-            }
-            else{
-                if(encrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE)!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to encrypt the operator's private SSH key." RESET_DISPLAY "\n");
-                    final_flag++;
-                }
-            }
-        }
-        if(final_flag==0){
-            return -1;
-        }
-        return -11;
+    if(file_empty_or_not(ALL_CLUSTER_REGISTRY)<1&&strcmp(cluster_list,"all")!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The registry is empty, will not encrypt/decrypt clusters." RESET_DISPLAY "\n");
+        return -1;
     }
     char cluster_name_temp[32]=""; //Here we have to use a wider array.
     char cluster_workdir_temp[DIR_LENGTH]="";
     char registry_line_buffer[LINE_LENGTH_SHORT]="";
     char registry_copy[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    int flag;
+    int flag=0;
     int i=1;
     if(strcmp(option,"decrypt")==0){
         if(strcmp(cluster_list,"all")==0){
@@ -77,18 +60,32 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int chmod_flag, i
         else{
             printf(WARN_YELLO_BOLD "|*         VERY RISKY! Decrypting files of cluster(s) " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " !" RESET_DISPLAY "\n",cluster_list);
         }
+        flag=prompt_to_confirm("ARE YOUR SURE TO CONTINUE?",CONFIRM_STRING,batch_flag_local);
     }
     else{
         printf(WARN_YELLO_BOLD "|*         Encrypting the cluster's sensitive files with now-crypto-aes." RESET_DISPLAY "\n");
+        flag=prompt_to_confirm("ARE YOUR SURE TO CONTINUE?",CONFIRM_STRING_QUICK,batch_flag_local);
     }
-    flag=prompt_to_confirm("ARE YOUR SURE TO CONTINUE?",CONFIRM_STRING,batch_flag_local);
+    /* If user denied, exit*/
     if(flag==1){
         return 3;
     }
     if(strcmp(cluster_list,"all")==0){
-        if(check_pslock_all()!=0){      
+        if(check_pslock_all()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Locked (operation-in-progress) cluster(s) found, exit." RESET_DISPLAY "\n");
             return -5;
+        }
+        if(strcmp(option,"decrypt")==0){ /* decrypt/encrypt the operator's private SSH key. That is SSHKEY_DIR/now-cluster-login*/
+            if(decrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE,1)!=0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt the operator's private SSH key." RESET_DISPLAY "\n");
+                return -11;
+            }
+        }
+        else{
+            if(encrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE)!=0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to encrypt the operator's private SSH key." RESET_DISPLAY "\n");
+                return -11;
+            }
         }
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.copy %s",COPY_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
@@ -139,19 +136,6 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int chmod_flag, i
         }
         else{
             printf(GENERAL_BOLD "[ -DONE- ] Cluster(s) %sion" RESET_DISPLAY " finished successfully.\n",option);
-        }
-        // Now decrypt/encrypt the operator's private SSH key. That is SSHKEY_DIR/now-cluster-login
-        if(strcmp(option,"decrypt")==0){
-            if(decrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE,chmod_flag)!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to decrypt the operator's private SSH key." RESET_DISPLAY "\n");
-                final_flag++;
-            }
-        }
-        else{
-            if(encrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE)!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to encrypt the operator's private SSH key." RESET_DISPLAY "\n");
-                final_flag++;
-            }
         }
         if(final_flag!=0){
             return 20+final_flag;

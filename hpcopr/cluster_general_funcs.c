@@ -1492,8 +1492,8 @@ int get_opr_pubkey(char* sshkey_folder, char* pubkey, unsigned int length){
 }
 
 /* 
- * chmod_flag =0: chmod (for hpcopr)
- * chmod_flag!=0: not chmod (for installer) 
+ * chmod_flag =0: chmod (for hpcopr remote exec)
+ * chmod_flag!=0: not chmod (for plain decrypt/encrypt) 
  */
 int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile, int chmod_flag){
     char privkey_file_encrypted[FILENAME_LENGTH]="";
@@ -1502,18 +1502,19 @@ int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile, int chmod_fla
     char md5sum[64]="";
     int run_flag;
     if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
-        return -1;
+        return -1; /* Failed to get the md5sum, which is not quite possible */
     }
     snprintf(privkey_file_encrypted,511,"%s%snow-cluster-login.tmp",sshkey_folder,PATH_SLASH);
     snprintf(privkey_file,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     run_flag=decrypt_single_file(NOW_CRYPTO_EXEC,privkey_file_encrypted,md5sum);
     if(run_flag!=0){
-        return 1;
+        return 1; /* Failed to decrypt the file, exit immediately. */
     }
+    /* If chmod is required, then run the function below to activate the deceypted SSH private key. */
     if(chmod_flag==0&&chmod_ssh_privkey(privkey_file)!=0){
         snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,privkey_file,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        return 1;
+        return 3; /* Failed to activate the SSH private key. */
     }
     return 0;
 }
@@ -1525,7 +1526,7 @@ int encrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile){
     char md5sum[64]="";
     int run_flag;
     if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
-        return -1;
+        return -1; /* Failed to get the md5sum, which is not quite possible */
     }
     snprintf(privkey_file_decrypted,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     snprintf(privkey_file_encrypted,511,"%s%snow-cluster-login.tmp",sshkey_folder,PATH_SLASH);
@@ -1533,12 +1534,15 @@ int encrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,privkey_file_encrypted,SYSTEM_CMD_REDIRECT_NULL);
         run_flag=system(cmdline);
         if(run_flag!=0){
-            return -3;
+            return -3; /* Failed to delete the encrypted file */
         }
+    }
+    else{
+        return -7; /* Failed to open the decrypted file */
     }
     run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,privkey_file_decrypted,md5sum);
     if(run_flag>0){
-        return 1;
+        return 1; /* Failed to encrypt and delete */
     }
     return 0;
 }
