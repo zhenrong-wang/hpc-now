@@ -3260,7 +3260,7 @@ int list_all_cluster_names(int header_flag){
     if(file_empty_or_not(ALL_CLUSTER_REGISTRY)==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The registry is empty. Please create one to operate.\n");
         fclose(file_p);
-        return 1;
+        return -1;
     }
     if(header_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " List of all the clusters:\n\n");
