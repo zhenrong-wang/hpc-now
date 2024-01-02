@@ -1278,7 +1278,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
                 snprintf(string_temp,127,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
             }
-            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been deleted.\n");
+            printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been shut down.\n");
             return 0;
         }
     }
