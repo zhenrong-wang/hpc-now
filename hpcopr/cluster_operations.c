@@ -1762,7 +1762,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a new volume larger than the previous volume %d." RESET_DISPLAY "\n",prev_volume_num);
         return 3;
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Expanding the volume from %d to %d GB, this operation is NOT reversible!\n",prev_volume_num,new_volume_num);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Volume from %d to %d GB, this is NOT reversible!\n",prev_volume_num,new_volume_num);
     create_and_get_stackdir(workdir,stackdir);
     decrypt_files(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
