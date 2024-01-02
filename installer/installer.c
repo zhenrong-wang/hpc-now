@@ -640,7 +640,7 @@ int set_opr_password(char* opr_password){
     system("icacls c:\\programdata\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
 #endif
     run_flag=encrypt_decrypt_clusters("all","decrypt",1,0);
-    if(run_flag!=0&&run_flag!=-1&&run_flag!=-11){
+    if(run_flag!=0&&run_flag!=-1){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the current files." RESET_DISPLAY "\n");
         if(run_flag>20){
             printf(WARN_YELLO_BOLD "\n[ -WARN- ] Rolling back with previous crypto password ..." RESET_DISPLAY "\n");
