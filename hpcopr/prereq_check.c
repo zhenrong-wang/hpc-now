@@ -820,10 +820,13 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     if(file_exist_or_not(TF_RUNNING_CONFIG)!=0||repair_flag==1){
         if(repair_flag==1){
-            printf("|        . Setting TF running configurations ...\n");
+            printf("|        . Resetting TF running configurations ...\n");
         }
         if(reset_tf_running()!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to create tf_running_config file." RESET_DISPLAY "\n");
+        }
+        if(repair_flag==1){
+            printf("|        v TF running configurations reset.\n");
         }
     }
     if(repair_flag==1){
