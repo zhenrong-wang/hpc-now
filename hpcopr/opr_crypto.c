@@ -75,19 +75,9 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             printf(FATAL_RED_BOLD "[ FATAL: ] Locked (operation-in-progress) cluster(s) found, exit." RESET_DISPLAY "\n");
             return -5;
         }
-        if(strcmp(option,"decrypt")==0){ /* decrypt/encrypt the operator's private SSH key. That is SSHKEY_DIR/now-cluster-login*/
-            run_flag=decrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE,1);
-            if(run_flag!=0&&run_flag!=2){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the operator's private SSH key." RESET_DISPLAY "\n");
-                return -11;
-            }
-        }
-        else{
-            run_flag=encrypt_opr_privkey(SSHKEY_DIR,CRYPTO_KEY_FILE);
-            if(run_flag!=0&&run_flag!=2){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the operator's private SSH key." RESET_DISPLAY "\n");
-                return -11;
-            }
+        if(encrypt_decrypt_opr_privkey(SSHKEY_DIR,option,CRYPTO_KEY_FILE)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to %s the operator's private SSH key." RESET_DISPLAY "\n",option);
+            return -11;
         }
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.copy %s",COPY_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){

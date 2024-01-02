@@ -580,7 +580,7 @@ int main(int argc, char* argv[]){
             }
         }
         if(run_flag!=0){
-            write_operation_log("NULL",operation_log,argc,argv,"OPERATION_SUCCEEDED",24);
+            write_operation_log("NULL",operation_log,argc,argv,"ENCRYPTION/DECRYPTION_FAILED",24);
             check_and_cleanup("");
             return 24;
         }

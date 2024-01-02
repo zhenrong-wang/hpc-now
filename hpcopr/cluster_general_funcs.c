@@ -149,7 +149,7 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
     get_state_nvalue(workdir,"master_public_ip:",remote_address,32);
     cluster_role_detect(workdir,cluster_role,cluster_role_ext);
     if(strcmp(username,"root")==0&&strcmp(cluster_role,"opr")==0){
-        if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE,0)!=0){
+        if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE)!=0){
             return -5;
         }
         snprintf(private_key,511,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
@@ -365,7 +365,7 @@ int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_m
     if(get_state_nvalue(workdir,"master_public_ip:",remote_address,32)!=0){
         return -7;
     }
-    if(decrypt_opr_privkey(sshkey_folder,CRYPTO_KEY_FILE,0)!=0){
+    if(decrypt_opr_privkey(sshkey_folder,CRYPTO_KEY_FILE)!=0){
         return -5;
     }
     snprintf(private_key,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
@@ -399,7 +399,7 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char
     }
     cluster_role_detect(workdir,cluster_role,cluster_role_ext);
     if(strcmp(username,"root")==0&&strcmp(cluster_role,"opr")==0){
-        if(decrypt_opr_privkey(sshkey_folder,CRYPTO_KEY_FILE,0)!=0){
+        if(decrypt_opr_privkey(sshkey_folder,CRYPTO_KEY_FILE)!=0){
             return -3;
         }
         snprintf(private_key,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
@@ -888,11 +888,37 @@ int encrypt_and_delete(char* now_crypto_exec, char* filename, char* md5sum){
     }
 }
 
-// Encrypt and delete all the *potentially* decrypted sensitive files.
-// Including those in /stack, and /vaultdir
-//return -1: Folder Error
-//return -3: Failed to get the crypto key md5 string
-//return 0: deleted done
+int encrypt_and_delete_general(char* now_crypto_exec, char* source_file, char* target_file, char* md5sum){
+    char cmdline[CMDLINE_LENGTH]="";
+    int run_flag;
+    if(file_exist_or_not(source_file)==0){
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s %s %s",now_crypto_exec,source_file,target_file,md5sum,SYSTEM_CMD_REDIRECT);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            return -3;
+        }
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,source_file,SYSTEM_CMD_REDIRECT);
+        run_flag=system(cmdline);
+        if(run_flag!=0){
+            return -5;
+        }
+        else{
+            return 0;
+        }
+    }
+    else{
+        return -1;
+    }
+}
+
+/*
+ * Encrypt and delete all the *potentially* decrypted sensitive files.
+ * Including those in /stack, and /vaultdir
+ * CAUTION: USER SSH PRIVATE KEYS and OPR SSH PRIVATE KEY ARE NOT INCLUDED
+ * return -1: Folder Error
+ * return -3: Failed to get the crypto key md5 string
+ * return  0: deleted done
+ */
 int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     char filename_temp[FILENAME_LENGTH]="";
     char md5sum[33]="";
@@ -955,9 +981,11 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
     char workdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char user_passwords[FILENAME_LENGTH]="";
+    char user_passwords_decrypted[FILENAME_LENGTH]="";
     char user_line[LINE_LENGTH_TINY];
     char user_name_temp[32]="";
-    char user_ssh_privkey[FILENAME_LENGTH]="";
+    char user_ssh_privkey_encrypted[FILENAME_LENGTH]="";
+    char user_ssh_privkey_decrypted[FILENAME_LENGTH]="";
     char md5sum[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
@@ -975,36 +1003,69 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
         if(file_exist_or_not(user_passwords)!=0){
             return 0; //The cluster is empty.
         }
-        decrypt_single_file(NOW_CRYPTO_EXEC,user_passwords,md5sum);
+        snprintf(user_passwords_decrypted,511,"%s%suser_passwords.txt.dec",vaultdir,PATH_SLASH); //Decrypted user registry
+        decrypt_single_file_general(NOW_CRYPTO_EXEC,user_passwords,user_passwords_decrypted,md5sum);
     }
-    snprintf(user_passwords,511,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    FILE* file_p=fopen(user_passwords,"r");
+    FILE* file_p=fopen(user_passwords_decrypted,"r");
     if(file_p==NULL){
         return -5; //Failed to decrypt the user registry
     }
     while(!feof(file_p)){
         fngetline(file_p,user_line,127);
         get_seq_nstring(user_line,' ',2,user_name_temp,32);
+        snprintf(user_ssh_privkey_encrypted,511,"%s%s.%s%s%s.key.tmp",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,user_name_temp);
+        snprintf(user_ssh_privkey_decrypted,511,"%s%s.%s%s%s.key.dec",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,user_name_temp);
         if(strcmp(option,"encrypt")==0){
-            snprintf(user_ssh_privkey,511,"%s%s.%s%s%s.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,user_name_temp);
-            encrypt_and_delete(NOW_CRYPTO_EXEC,user_ssh_privkey,md5sum);
+            encrypt_and_delete_general(NOW_CRYPTO_EXEC,user_ssh_privkey_decrypted,user_ssh_privkey_encrypted,md5sum);
         }
         else{
-            snprintf(user_ssh_privkey,511,"%s%s.%s%s%s.key.tmp",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH,user_name_temp);
-            decrypt_single_file(NOW_CRYPTO_EXEC,user_ssh_privkey,md5sum);
+            decrypt_single_file_general(NOW_CRYPTO_EXEC,user_ssh_privkey_encrypted,user_ssh_privkey_decrypted,md5sum);
         }
     }
     fclose(file_p);
+    snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,user_passwords_decrypted,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    snprintf(user_ssh_privkey_encrypted,511,"%s%s.%s%sroot.key.tmp",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH);
+    snprintf(user_ssh_privkey_decrypted,511,"%s%s.%s%s%s.root.key.dec",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH);
     if(strcmp(option,"encrypt")==0){
-        snprintf(user_ssh_privkey,511,"%s%s.%s%sroot.key",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH);
-        encrypt_and_delete(NOW_CRYPTO_EXEC,user_ssh_privkey,md5sum);
+        encrypt_and_delete_general(NOW_CRYPTO_EXEC,user_ssh_privkey_decrypted,user_ssh_privkey_encrypted,md5sum);
     }
     else{
-        snprintf(user_ssh_privkey,511,"%s%s.%s%sroot.key.tmp",SSHKEY_DIR,PATH_SLASH,cluster_name,PATH_SLASH);
-        decrypt_single_file(NOW_CRYPTO_EXEC,user_ssh_privkey,md5sum);
+        decrypt_single_file_general(NOW_CRYPTO_EXEC,user_ssh_privkey_encrypted,user_ssh_privkey_decrypted,md5sum);
     }
-    snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,user_passwords,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    return 0;
+}
+
+/*
+ * Only for decrypt --all or encrypt --all command
+ * The return value of 
+ */
+int encrypt_decrypt_opr_privkey(char* sshkey_folder, char* option, char* crypto_keyfile){
+    if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
+        return -5;
+    }
+    char md5sum[64]="";
+    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
+        return -3;
+    }
+    char opr_privkey_encrypted[FILENAME_LENGTH]="";
+    char opr_privkey_decrypted[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    snprintf(opr_privkey_encrypted,511,"%s%snow-cluster-login.tmp",sshkey_folder,PATH_SLASH);
+    /* The encrypted file is supposed to be there. If the encrypted file does not exist, return 0 directly. */
+    if(file_exist_or_not(opr_privkey_encrypted)!=0){
+        return 0; 
+    }
+    snprintf(opr_privkey_decrypted,511,"%s%snow-cluster-login.dec",sshkey_folder,PATH_SLASH);
+    if(strcmp(option,"encrypt")==0){
+        if(file_exist_or_not(opr_privkey_decrypted)!=0){
+            return 0; /* If the decrypted file does not exist, return 0 directly. */
+        }
+        encrypt_and_delete_general(NOW_CRYPTO_EXEC,opr_privkey_decrypted,opr_privkey_encrypted,md5sum);
+    }
+    else{
+        decrypt_single_file_general(NOW_CRYPTO_EXEC,opr_privkey_encrypted,opr_privkey_decrypted,md5sum);
+    }
     return 0;
 }
 
@@ -1495,7 +1556,7 @@ int get_opr_pubkey(char* sshkey_folder, char* pubkey, unsigned int length){
  * chmod_flag =0: chmod (for hpcopr remote exec)
  * chmod_flag!=0: not chmod (for plain decrypt/encrypt) 
  */
-int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile, int chmod_flag){
+int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile){
     char privkey_file_encrypted[FILENAME_LENGTH]="";
     char privkey_file[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -1513,8 +1574,7 @@ int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile, int chmod_fla
     if(run_flag!=0){
         return 1; /* Failed to decrypt the file, exit immediately. */
     }
-    /* If chmod is required, then run the function below to activate the deceypted SSH private key. */
-    if(chmod_flag==0&&chmod_ssh_privkey(privkey_file)!=0){
+    if(chmod_ssh_privkey(privkey_file)!=0){
         snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,privkey_file,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return 3; /* Failed to activate the SSH private key. */
@@ -2419,7 +2479,7 @@ int cluster_ssh(char* workdir, char* username, char* role_flag, char* sshkey_dir
         return -7;
     }
     if(strcmp(role_flag,"opr")==0){
-        if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE,0)!=0){
+        if(decrypt_opr_privkey(sshkey_dir,CRYPTO_KEY_FILE)!=0){
             return -5;
         }
         snprintf(private_sshkey,511,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
