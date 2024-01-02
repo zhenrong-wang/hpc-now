@@ -3258,7 +3258,7 @@ int list_all_cluster_names(int header_flag){
         return -1;
     }
     if(file_empty_or_not(ALL_CLUSTER_REGISTRY)==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The registry is empty. Please create one to operate.\n");
+        printf(WARN_YELLO_BOLD "[ -INFO- ] The registry is empty. Please create one to operate." RESET_DISPLAY "\n");
         fclose(file_p);
         return -3;
     }
