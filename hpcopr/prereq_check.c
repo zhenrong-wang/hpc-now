@@ -818,7 +818,14 @@ int check_and_install_prerequisitions(int repair_flag){
             return 5;
         }
     }
-
+    if(file_exist_or_not(TF_RUNNING_CONFIG)!=0||repair_flag==1){
+        if(repair_flag==1){
+            printf("|        . Setting TF running configurations ...\n");
+        }
+        if(reset_tf_running()!=0){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to create tf_running_config file." RESET_DISPLAY "\n");
+        }
+    }
     if(repair_flag==1){
         printf( RESET_DISPLAY "|        v Location configuration has been repaired.\n");
         printf("|        . Checking and repairing the versions and md5sums ...\n");
@@ -827,10 +834,6 @@ int check_and_install_prerequisitions(int repair_flag){
             return 7;
         }
         printf( RESET_DISPLAY "|        v Versions and md5sums been repaired.\n");
-        printf("|        . Setting TF running configurations ...\n");
-        if(reset_tf_running()!=0){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to create tf_running_config file." RESET_DISPLAY "\n");
-        }
         printf("|        . Checking and repairing the key directories and files ...\n");
     }
     flag=get_vers_md5_vars();
