@@ -1505,6 +1505,9 @@ int decrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile, int chmod_fla
         return -1; /* Failed to get the md5sum, which is not quite possible */
     }
     snprintf(privkey_file_encrypted,511,"%s%snow-cluster-login.tmp",sshkey_folder,PATH_SLASH);
+    if(file_exist_or_not(privkey_file_encrypted)!=0){
+        return 2;
+    }
     snprintf(privkey_file,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     run_flag=decrypt_single_file(NOW_CRYPTO_EXEC,privkey_file_encrypted,md5sum);
     if(run_flag!=0){
