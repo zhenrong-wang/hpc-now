@@ -1455,7 +1455,7 @@ int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile){
     }
     snprintf(privkey_file_decrypted,511,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,privkey_file_decrypted,md5sum); //Encrypt the private key.
-    if(run_flag!=0){
+    if(run_flag>0){
         snprintf(cmdline,2047,"%s %s%snow-cluster-login* %s",DELETE_FILE_CMD,sshkey_folder,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline); 
         return 3; //Failed to encrypt. delete any files generated and return 3;
@@ -1533,7 +1533,7 @@ int encrypt_opr_privkey(char* sshkey_folder, char* crypto_keyfile){
         }
     }
     run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,privkey_file_decrypted,md5sum);
-    if(run_flag!=0){
+    if(run_flag>0){
         return 1;
     }
     return 0;
@@ -2731,7 +2731,7 @@ int encrypt_and_delete_user_passwords(char* workdir, char* crypto_keyfile){
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     int run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
-    if(run_flag!=0){
+    if(run_flag>0){
         return 1;
     }
     return 0;
