@@ -891,8 +891,8 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s decrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp,filename_temp2,md5sum,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        global_replace(filename_temp2,access_key_prev,access_key);
-        global_replace(filename_temp2,secret_key_prev,secret_key);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,access_key_prev,access_key);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,secret_key_prev,secret_key);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp2,filename_temp,md5sum,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
@@ -1152,9 +1152,9 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         system(cmdline);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1+current_node_num);
         snprintf(string_temp,127,"compute%d",i+1+current_node_num);
-        global_replace(filename_temp,"compute1",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"compute1",string_temp);
         snprintf(string_temp,127,"comp%d",i+1+current_node_num);
-        global_replace(filename_temp,"comp1",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"comp1",string_temp);
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
@@ -1530,7 +1530,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
             snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
             system(cmdline);
-            global_replace(filename_temp,prev_config,new_config);
+            global_nreplace(filename_temp,LINE_LENGTH_SMALL,prev_config,new_config);
         }
     }
     else{
@@ -1554,10 +1554,9 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 global_replace(filename_temp2,prev_config,new_config);
             }
             cpu_core_num=get_cpu_num(new_config)/2;
-            //printf("%s --- %s --- %s --- %s --- %d --- %d\n",prev_config,new_config,prev_htflag,htflag,config_diff_flag,ht_diff_flag);
             if(ht_diff_flag!=0){
-                delete_lines_by_kwd(filename_temp2,"cpu_core_count =",1);
-                delete_lines_by_kwd(filename_temp2,"cpu_threads_per_core =",1);
+                delete_nlines_by_kwd(filename_temp2,LINE_LENGTH_SMALL,"cpu_core_count =",1);
+                delete_nlines_by_kwd(filename_temp2,LINE_LENGTH_SMALL,"cpu_threads_per_core =",1);
                 snprintf(string_temp2,63,"cpu_core_count = %d",cpu_core_num);
                 insert_lines(filename_temp2,"#INSERT_HT_HERE",string_temp2);
                 if(strcmp(prev_htflag,"ON")==0){
@@ -1569,8 +1568,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
                 reinit_flag=1;
             }
             else{
-                delete_lines_by_kwd(filename_temp2,"cpu_core_count =",1);
-                delete_lines_by_kwd(filename_temp2,"cpu_threads_per_core =",1);
+                delete_nlines_by_kwd(filename_temp2,LINE_LENGTH_SMALL,"cpu_core_count =",1);
+                delete_nlines_by_kwd(filename_temp2,LINE_LENGTH_SMALL,"cpu_threads_per_core =",1);
                 if(strcmp(prev_htflag,"OFF")==0){
                     insert_lines(filename_temp2,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
                     snprintf(string_temp2,63,"cpu_core_count = %d",cpu_core_num);
@@ -1697,7 +1696,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    global_replace(filename_temp,prev_config,new_config);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,prev_config,new_config);
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.bak %s %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);

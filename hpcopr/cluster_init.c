@@ -911,6 +911,11 @@ void node_user_num_fix(int* node_num, int* hpc_user_num){
     }
 }
 
+/*
+ * condition_flag=1: empty stackdir
+ * condition_flag=2: empty stackdir && confdir
+ * condition_flag=3: empty stackdir, confdir and vaultdir
+ */
 void clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int condition_flag){
     char cmdline[CMDLINE_LENGTH]="";
     if(condition_flag==1){
@@ -1112,41 +1117,41 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_VPC_NAME",string_temp);
     snprintf(string_temp,127,"subnet-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_SUBNET_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_SUBNET_NAME",string_temp);
     snprintf(string_temp,127,"pubnet-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_PUB_SUBNET_NAME",string_temp);
-    global_replace(filename_temp,"BLANK_ACCESS_KEY_ID",access_key);
-    global_replace(filename_temp,"BLANK_SECRET_KEY",secret_key);
-    global_replace(filename_temp,"BUCKET_ACCESS_POLICY",randstr);
-    global_replace(filename_temp,"BUCKET_USER_ID",randstr);
-    global_replace(filename_temp,"BUCKET_ID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_PUB_SUBNET_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_ACCESS_KEY_ID",access_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_SECRET_KEY",secret_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_ACCESS_POLICY",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_USER_ID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_ID",randstr);
     snprintf(string_temp,127,"%s-public",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_PUBLIC",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_PUBLIC",string_temp);
     snprintf(string_temp,127,"%s-natgw",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_NATGW",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_NATGW",string_temp);
     snprintf(string_temp,127,"%s-intra",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_INTRA",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_INTRA",string_temp);
     snprintf(string_temp,127,"%s-mysql",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_MYSQL",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_MYSQL",string_temp);
     snprintf(string_temp,127,"%s-nag",randstr);
-    global_replace(filename_temp,"NAS_ACCESS_GROUP",string_temp);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",init_info.region_id);
-    global_replace(filename_temp,"RG_NAME",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"NAS_ACCESS_GROUP",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_REGION_ID",init_info.region_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_NAME",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
     snprintf(string_temp,127,"%d",init_info.node_num);
-    global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NODE_NUM",string_temp);
     snprintf(string_temp,127,"%d",init_info.hpc_user_num);
-    global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",init_info.master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_info.master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_info.compute_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
-    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_USER_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTERINI",init_info.master_init_param);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTER_PASSWD",init_info.master_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_COMPUTE_PASSWD",init_info.compute_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
     if(strcmp(region_flag,"global_regions")==0){
-        delete_lines_by_kwd(filename_temp,"DELETE_FOR_CN_REGIONS",1);
+        delete_nlines_by_kwd(filename_temp,LINE_LENGTH_SMALL,"DELETE_FOR_CN_REGIONS",1);
     }
     file_p=fopen(filename_temp,"a");
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
@@ -1161,55 +1166,56 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     fclose(file_p_2);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    global_replace(filename_temp,"MASTER_INST",init_info.master_inst);
-    insert_lines(filename_temp,"#INSERT_AMI_HERE",os_image);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"RG_NAME",unique_cluster_id);
-    global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_INST",init_info.master_inst);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"#INSERT_AMI_HERE",os_image);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_NAME",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"PUBLIC_KEY",pubkey);
     for(i=0;i<init_info.hpc_user_num;i++){
         snprintf(line_temp,LINE_LENGTH-1,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
-        insert_lines(filename_temp,"master_private_ip",line_temp);
+        insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    global_replace(filename_temp,"COMPUTE_INST",init_info.compute_inst);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    insert_lines(filename_temp,"#INSERT_AMI_HERE",os_image);
-    global_replace(filename_temp,"RG_NAME",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_INST",init_info.compute_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"#INSERT_AMI_HERE",os_image);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_NAME",unique_cluster_id);
     if(threads==1){ //Hyperthreading off
         snprintf(string_temp,127,"cpu_core_count = %d",cpu_core_num);
-        insert_lines(filename_temp,"#INSERT_HT_HERE",string_temp);
-        insert_lines(filename_temp,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
+        insert_nlines(filename_temp,LINE_LENGTH_SMALL,"#INSERT_HT_HERE",string_temp);
+        insert_nlines(filename_temp,LINE_LENGTH_SMALL,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"mount",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"mount",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    insert_lines(filename_temp,"#INSERT_AMI_HERE",db_os_image);
-    global_replace(filename_temp,"RG_NAME",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"#INSERT_AMI_HERE",db_os_image);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_NAME",unique_cluster_id);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    insert_lines(filename_temp,"#INSERT_AMI_HERE",nat_os_image);
-    global_replace(filename_temp,"RG_NAME",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"#INSERT_AMI_HERE",nat_os_image);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_NAME",unique_cluster_id);
     for(i=0;i<init_info.node_num;i++){
         snprintf(cmdline,2047,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
         snprintf(string_temp,127,"comp%d",i+1);
-        global_replace(filename_temp,"NUMBER",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"NUMBER",string_temp);
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,3);
         return 5;
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1229,9 +1235,9 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     system(cmdline);
     getstate(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);
-    find_and_get(filename_temp,"aws_iam_access_key","","",15,"\"id\":","","",'\"',4,bucket_ak);
-    find_and_get(filename_temp,"aws_iam_access_key","","",15,"\"secret\":","","",'\"',4,bucket_sk);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id,32);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"aws_iam_access_key","","",15,"\"id\":","","",'\"',4,bucket_ak,256);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"aws_iam_access_key","","",15,"\"secret\":","","",'\"',4,bucket_sk,256);
     if(strcmp(region_flag,"global_regions")==0){
         printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",AWS_SLEEP_TIME_GLOBAL);
         for(i=0;i<AWS_SLEEP_TIME_GLOBAL;i++){
@@ -1280,11 +1286,11 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     compute_vcpu=get_cpu_num(init_info.compute_inst);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
     reset_nstring(string_temp,128);
-    find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     database_vcpu=get_cpu_num(string_temp);
     reset_nstring(string_temp,128);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     natgw_vcpu=get_cpu_num(string_temp);
     reset_nstring(string_temp,128);
     if(*(init_info.master_inst+0)=='a'){
@@ -1399,7 +1405,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
         strcpy(NAS_Zone,init_info.zone_id);
     }
     else{
-        find_and_get(filename_temp,init_info.region_id,"","",1,init_info.region_id,"","",' ',1,NAS_Zone);
+        find_and_nget(filename_temp,LINE_LENGTH_SHORT,init_info.region_id,"","",1,init_info.region_id,"","",' ',1,NAS_Zone,64);
     }
     if(contain_or_not(init_info.zone_id,init_info.region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
@@ -1442,40 +1448,40 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_VPC_NAME",string_temp);
     snprintf(string_temp,127,"subnet-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_SUBNET_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_SUBNET_NAME",string_temp);
     snprintf(string_temp,127,"pubnet-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_PUB_SUBNET_NAME",string_temp);
-    global_replace(filename_temp,"CFSID",unique_cluster_id);
-    global_replace(filename_temp,"BLANK_ACCESS_KEY_ID",access_key);
-    global_replace(filename_temp,"BLANK_SECRET_KEY",secret_key);
-    global_replace(filename_temp,"BUCKET_ACCESS_POLICY",randstr);
-    global_replace(filename_temp,"BUCKET_USER_ID",randstr);
-    global_replace(filename_temp,"BUCKET_ID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_PUB_SUBNET_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CFSID",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_ACCESS_KEY_ID",access_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_SECRET_KEY",secret_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_ACCESS_POLICY",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_USER_ID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_ID",randstr);
     snprintf(string_temp,127,"%s-public",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_PUBLIC",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_PUBLIC",string_temp);
     snprintf(string_temp,127,"%s-intra",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_INTRA",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_INTRA",string_temp);
     snprintf(string_temp,127,"%s-mysql",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_MYSQL",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_MYSQL",string_temp);
     snprintf(string_temp,127,"%s-natgw",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_NATGW",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_NATGW",string_temp);
     snprintf(string_temp,127,"%s-nag",randstr);
-    global_replace(filename_temp,"NAS_ACCESS_GROUP",string_temp);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",init_info.region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    global_replace(filename_temp,"DEFAULT_NAS_ZONE",NAS_Zone);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"NAS_ACCESS_GROUP",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_REGION_ID",init_info.region_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NAS_ZONE",NAS_Zone);
     snprintf(string_temp,127,"%d",init_info.node_num);
-    global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NODE_NUM",string_temp);
     snprintf(string_temp,127,"%d",init_info.hpc_user_num);
-    global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",init_info.master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_info.master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_info.compute_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
-    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_USER_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTERINI",init_info.master_init_param);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTER_PASSWD",init_info.master_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_COMPUTE_PASSWD",init_info.compute_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
 
     file_p=fopen(filename_temp,"a");
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
@@ -1490,64 +1496,65 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     fclose(file_p_2);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    global_replace(filename_temp,"MASTER_INST",init_info.master_inst);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_INST",init_info.master_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
     snprintf(string_temp,127,"%d",init_info.master_bandwidth);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_BANDWIDTH",string_temp);
     if(strcmp(init_info.os_image_raw,"centos7")==0||strcmp(init_info.os_image_raw,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",init_info.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_info.os_image_raw);
     }
     else{
         snprintf(string_temp,127,"\"%s\"",init_info.os_image_raw);
-        global_replace(filename_temp,"data.tencentcloud_images.OS_IMAGE.images.0.image_id",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"data.tencentcloud_images.OS_IMAGE.images.0.image_id",string_temp);
     }
-    global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"PUBLIC_KEY",pubkey);
     for(i=0;i<init_info.hpc_user_num;i++){
         snprintf(line_temp,LINE_LENGTH-1,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
-        insert_lines(filename_temp,"master_private_ip",line_temp);
+        insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    global_replace(filename_temp,"COMPUTE_INST",init_info.compute_inst);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_INST",init_info.compute_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
     if(strcmp(init_info.os_image_raw,"centos7")==0||strcmp(init_info.os_image_raw,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",init_info.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_info.os_image_raw);
     }
     else{
         snprintf(string_temp,127,"\"%s\"",init_info.os_image_raw);
-        global_replace(filename_temp,"data.tencentcloud_images.OS_IMAGE.images.0.image_id",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"data.tencentcloud_images.OS_IMAGE.images.0.image_id",string_temp);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"mount",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"mount",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
     snprintf(string_temp,127,"%d",init_info.master_bandwidth);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_BANDWIDTH",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
 
     for(i=0;i<init_info.node_num;i++){
         snprintf(cmdline,2047,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
-        global_replace(filename_temp,"RUNNING_FLAG","true");
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RUNNING_FLAG","true");
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,3);
         return 5;
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1567,9 +1574,9 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     system(cmdline);
     getstate(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);
-    find_and_get(filename_temp,"secret_id","","",1,"secret_id","","",'\"',4,bucket_ak);
-    find_and_get(filename_temp,"secret_key","","",1,"secret_key","","",'\"',4,bucket_sk);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id,32);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"secret_id","","",1,"secret_id","","",'\"',4,bucket_ak,256);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"secret_key","","",1,"secret_key","","",'\"',4,bucket_sk,256);
     printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",QCLOUD_SLEEP_TIME);
     for(i=0;i<QCLOUD_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",QCLOUD_SLEEP_TIME-i);
@@ -1607,11 +1614,11 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     compute_vcpu=get_cpu_num(init_info.compute_inst);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
     reset_nstring(string_temp,128);
-    find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     database_vcpu=get_cpu_num(string_temp);
     reset_nstring(string_temp,128);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     natgw_vcpu=get_cpu_num(string_temp);
     reset_nstring(string_temp,128);
     if(*(init_info.master_inst+0)=='a'){
@@ -1726,7 +1733,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
         strcpy(NAS_Zone,init_info.zone_id);
     }
     else{
-        find_and_get(filename_temp,init_info.region_id,"","",1,init_info.region_id,"","",' ',1,NAS_Zone);
+        find_and_nget(filename_temp,LINE_LENGTH_SHORT,init_info.region_id,"","",1,init_info.region_id,"","",' ',1,NAS_Zone,64);
     }
     if(contain_or_not(init_info.zone_id,init_info.region_id)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
@@ -1769,35 +1776,35 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
-    global_replace(filename_temp,"BLANK_ACCESS_KEY_ID",access_key);
-    global_replace(filename_temp,"BLANK_SECRET_KEY",secret_key);
-    global_replace(filename_temp,"BUCKET_ACCESS_POLICY",randstr);
-    global_replace(filename_temp,"BUCKET_USER_ID",randstr);
-    global_replace(filename_temp,"BUCKET_ID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_VPC_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_ACCESS_KEY_ID",access_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_SECRET_KEY",secret_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_ACCESS_POLICY",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_USER_ID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_ID",randstr);
     snprintf(string_temp,127,"%s-public",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_PUBLIC",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_PUBLIC",string_temp);
     snprintf(string_temp,127,"%s-intra",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_INTRA",string_temp);
-    global_replace(filename_temp,"RG_NAME",unique_cluster_id);
-    global_replace(filename_temp,"RG_DISPLAY_NAME",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_INTRA",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_NAME",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_DISPLAY_NAME",unique_cluster_id);
     snprintf(string_temp,127,"%s-mysql",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_MYSQL",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_MYSQL",string_temp);
     snprintf(string_temp,127,"%s-nag",randstr);
-    global_replace(filename_temp,"NAS_ACCESS_GROUP",string_temp);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",init_info.region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    global_replace(filename_temp,"DEFAULT_NAS_ZONE",NAS_Zone);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"NAS_ACCESS_GROUP",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_REGION_ID",init_info.region_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NAS_ZONE",NAS_Zone);
     snprintf(string_temp,127,"%d",init_info.node_num);
-    global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NODE_NUM",string_temp);
     snprintf(string_temp,127,"%d",init_info.hpc_user_num);
-    global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",init_info.master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_info.master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_info.compute_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
-    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_USER_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTERINI",init_info.master_init_param);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTER_PASSWD",init_info.master_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_COMPUTE_PASSWD",init_info.compute_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
     file_p=fopen(filename_temp,"a");
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
@@ -1811,61 +1818,62 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     fclose(file_p_2);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    global_replace(filename_temp,"RG_DISPLAY_NAME",unique_cluster_id);
-    global_replace(filename_temp,"MASTER_INST",init_info.master_inst);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_DISPLAY_NAME",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_INST",init_info.master_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
     snprintf(string_temp,127,"%d",init_info.master_bandwidth);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_BANDWIDTH",string_temp);
     if(strcmp(init_info.os_image_raw,"centos7")==0||strcmp(init_info.os_image_raw,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",init_info.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_info.os_image_raw);
     }
     else{
-        global_replace(filename_temp,"${data.alicloud_images.OS_IMAGE.images.0.id}",init_info.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"${data.alicloud_images.OS_IMAGE.images.0.id}",init_info.os_image_raw);
     }
-    global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"PUBLIC_KEY",pubkey);
     for(i=0;i<init_info.hpc_user_num;i++){
         snprintf(line_temp,LINE_LENGTH-1,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
-        insert_lines(filename_temp,"master_private_ip",line_temp);
+        insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    global_replace(filename_temp,"RG_DISPLAY_NAME",unique_cluster_id);
-    global_replace(filename_temp,"COMPUTE_INST",init_info.compute_inst);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_DISPLAY_NAME",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_INST",init_info.compute_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
     if(strcmp(init_info.os_image_raw,"centos7")==0||strcmp(init_info.os_image_raw,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",init_info.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_info.os_image_raw);
     }
     else{
-        global_replace(filename_temp,"${data.alicloud_images.OS_IMAGE.images.0.id}",init_info.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"${data.alicloud_images.OS_IMAGE.images.0.id}",init_info.os_image_raw);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"mount",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"mount",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
-    global_replace(filename_temp,"RG_DISPLAY_NAME",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_DISPLAY_NAME",unique_cluster_id);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_info.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_info.zone_id);
     snprintf(string_temp,127,"%d",init_info.master_bandwidth);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
-    global_replace(filename_temp,"RG_DISPLAY_NAME",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_BANDWIDTH",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_DISPLAY_NAME",unique_cluster_id);
 
     for(i=0;i<init_info.node_num;i++){
         snprintf(cmdline,2047,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,3);
         return 5;
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1892,10 +1900,10 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id,32);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_secrets.txt",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"AccessKeyId","","",1,"AccessKeyId","","",'\"',4,bucket_ak);
-    find_and_get(filename_temp,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeyId","","",1,"AccessKeyId","","",'\"',4,bucket_ak,256);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk,256);
     snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     get_state_nvalue(workdir,"master_public_ip:",master_address,32);
@@ -1928,11 +1936,11 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     compute_vcpu=get_cpu_num(init_info.compute_inst);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
     reset_nstring(string_temp,128);
-    find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     database_vcpu=get_cpu_num(string_temp);
     reset_nstring(string_temp,128);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"instance_type","","",1,"instance_type","","",'.',3,string_temp);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     natgw_vcpu=get_cpu_num(string_temp);
     reset_nstring(string_temp,128);
     if(*(init_info.master_inst+0)=='a'){
@@ -2119,40 +2127,40 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     hw_vm_series(init_conf.region_id,intel_generation,tiny_series_name,&amd_flavor_flag);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_VPC_NAME",string_temp);
     snprintf(string_temp,127,"subnet-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_SUBNET_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_SUBNET_NAME",string_temp);
     snprintf(string_temp,127,"pubnet-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_PUB_SUBNET_NAME",string_temp);
-    global_replace(filename_temp,"BLANK_ACCESS_KEY_ID",access_key);
-    global_replace(filename_temp,"BLANK_SECRET_KEY",secret_key);
-    global_replace(filename_temp,"BUCKET_USER_ID",randstr);
-    global_replace(filename_temp,"BUCKET_ID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_PUB_SUBNET_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_ACCESS_KEY_ID",access_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_SECRET_KEY",secret_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_USER_ID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_ID",randstr);
     snprintf(string_temp,127,"%s-public",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_PUBLIC",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_PUBLIC",string_temp);
     snprintf(string_temp,127,"%s-intra",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_INTRA",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_INTRA",string_temp);
     snprintf(string_temp,127,"%s-mysql",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_MYSQL",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_MYSQL",string_temp);
     snprintf(string_temp,127,"%s-natgw",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_NATGW",string_temp);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_NATGW",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
     snprintf(string_temp,127,"%d",init_conf.node_num);
-    global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NODE_NUM",string_temp);
     snprintf(string_temp,127,"%d",init_conf.hpc_user_num);
-    global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_USER_NUM",string_temp);
     snprintf(string_temp,127,"%d",init_conf.hpc_nfs_volume);
-    global_replace(filename_temp,"DEFAULT_STORAGE_VOLUME",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",init_conf.master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
-    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    global_replace(filename_temp,"INTEL_GENERATION",intel_generation);
-    global_replace(filename_temp,"TINY_SERIE_NAME",tiny_series_name);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_STORAGE_VOLUME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTERINI",init_conf.master_init_param);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"INTEL_GENERATION",intel_generation);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"TINY_SERIE_NAME",tiny_series_name);
 
     file_p=fopen(filename_temp,"a");
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
@@ -2167,68 +2175,69 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     fclose(file_p_2);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
-    global_replace(filename_temp,"MASTER_INST",init_conf.master_inst);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_INST",init_conf.master_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
     snprintf(string_temp,127,"%d",init_conf.master_bandwidth);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_BANDWIDTH",string_temp);
     if(strcmp(init_conf.os_image_raw,"rocky9")==0||strcmp(init_conf.os_image_raw,"euleros")==0||strcmp(init_conf.os_image_raw,"centos7")==0){
-        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
         snprintf(string_temp,127,"\"%s\"",init_conf.os_image_raw);
-        global_replace(filename_temp,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);
     }
     
-    global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"PUBLIC_KEY",pubkey);
     for(i=0;i<init_conf.hpc_user_num;i++){
         snprintf(line_temp,LINE_LENGTH-1,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
-        insert_lines(filename_temp,"master_private_ip",line_temp);
+        insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
-    global_replace(filename_temp,"COMPUTE_INST",init_conf.compute_inst);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_INST",init_conf.compute_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
     if(strcmp(init_conf.os_image_raw,"rocky9")==0||strcmp(init_conf.os_image_raw,"euleros")==0||strcmp(init_conf.os_image_raw,"centos7")==0){
-        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
         snprintf(string_temp,127,"\"%s\"",init_conf.os_image_raw);
-        global_replace(filename_temp,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"data.huaweicloud_images_images.OS_IMAGE.images[0].id",string_temp);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"mount",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"mount",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
     snprintf(string_temp,127,"%d",init_conf.master_bandwidth);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_BANDWIDTH",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
 
     for(i=0;i<init_conf.node_num;i++){
         snprintf(cmdline,2047,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
-        global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
     }
 
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,3);
         return 5;
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -2248,9 +2257,9 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     system(cmdline);
     getstate(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id);
-    find_and_get(filename_temp,"access_key","","",20,"\"id\":","","",'\"',4,bucket_ak);
-    find_and_get(filename_temp,"access_key","","",20,"\"secret\":","","",'\"',4,bucket_sk);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id,32);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"access_key","","",20,"\"id\":","","",'\"',4,bucket_ak,256);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"access_key","","",20,"\"secret\":","","",'\"',4,bucket_sk,256);
     printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
@@ -2445,45 +2454,45 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_VPC_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_VPC_NAME",string_temp);
     snprintf(string_temp,127,"subnet-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_SUBNET_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_SUBNET_NAME",string_temp);
     snprintf(string_temp,127,"pubnet-%s",unique_cluster_id);
-    global_replace(filename_temp,"DEFAULT_PUB_SUBNET_NAME",string_temp);
-    global_replace(filename_temp,"BLANK_ACCESS_KEY_ID",access_key);
-    global_replace(filename_temp,"BLANK_SECRET_KEY",secret_key);
-    global_replace(filename_temp,"BUCKET_USER_ID",randstr);
-    global_replace(filename_temp,"BUCKET_ID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_PUB_SUBNET_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_ACCESS_KEY_ID",access_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_SECRET_KEY",secret_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_USER_ID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_ID",randstr);
     snprintf(string_temp,127,"%s-public",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_PUBLIC",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_PUBLIC",string_temp);
     snprintf(string_temp,127,"%s-intra",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_INTRA",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_INTRA",string_temp);
     snprintf(string_temp,127,"%s-mysql",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_MYSQL",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_MYSQL",string_temp);
     snprintf(string_temp,127,"%s-natgw",randstr);
-    global_replace(filename_temp,"SECURITY_GROUP_NATGW",string_temp);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_NATGW",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
     if(strcmp(init_conf.region_id,"gz")==0){
-        global_replace(filename_temp,"DEFAULT_NAS_ZONE","zoneC");
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NAS_ZONE","zoneC");
     }
     else{
-        global_replace(filename_temp,"DEFAULT_NAS_ZONE","zoneA");
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NAS_ZONE","zoneA");
     }
-    global_replace(filename_temp,"NFSID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"NFSID",randstr);
     snprintf(string_temp,127,"%d",init_conf.node_num);
-    global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NODE_NUM",string_temp);
     snprintf(string_temp,127,"%d",init_conf.hpc_user_num);
-    global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",init_conf.master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
-    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_USER_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTERINI",init_conf.master_init_param);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
     snprintf(string_temp,127,"%d",init_conf.master_bandwidth);
-    global_replace(filename_temp,"MASTER_BANDWIDTH",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_BANDWIDTH",string_temp);
 
     file_p=fopen(filename_temp,"a");
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
@@ -2498,62 +2507,63 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     fclose(file_p_2);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
-    global_replace(filename_temp,"MASTER_INST",init_conf.master_inst);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_INST",init_conf.master_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
     if(strcmp(init_conf.os_image_raw,"centos7")==0||strcmp(init_conf.os_image_raw,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
         snprintf(string_temp,127,"\"%s\"",init_conf.os_image_raw);
-        global_replace(filename_temp,"data.baiducloud_images.OS_IMAGE.images[0].id",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"data.baiducloud_images.OS_IMAGE.images[0].id",string_temp);
     }
-    global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"PUBLIC_KEY",pubkey);
     for(i=0;i<init_conf.hpc_user_num;i++){
         snprintf(line_temp,LINE_LENGTH-1,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
-        insert_lines(filename_temp,"master_private_ip",line_temp);
+        insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
-    global_replace(filename_temp,"COMPUTE_INST",init_conf.compute_inst);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_INST",init_conf.compute_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
     if(strcmp(init_conf.os_image_raw,"centos7")==0||strcmp(init_conf.os_image_raw,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
         snprintf(string_temp,127,"\"%s\"",init_conf.os_image_raw);
-        global_replace(filename_temp,"data.baiducloud_images.OS_IMAGE.images[0].id",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"data.baiducloud_images.OS_IMAGE.images[0].id",string_temp);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"mount",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"mount",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    global_replace(filename_temp,"DB_INST",db_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DB_INST",db_inst);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
-    global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
-    global_replace(filename_temp,"NATGW_INST",natgw_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"NATGW_INST",natgw_inst);
 
     for(i=0;i<init_conf.node_num;i++){
         snprintf(cmdline,2047,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
-        global_replace(filename_temp,"RESOURCETAG",unique_cluster_id);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,3);
         return 5;
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -2573,10 +2583,10 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     system(cmdline);
     getstate(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"bucket\":","","",1,"\"bucket\":","","",'\"',4,bucket_id); 
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\":","","",1,"\"bucket\":","","",'\"',4,bucket_id,32); 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%saccess-key.txt",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"AccessKeyId","","",1,"AccessKeyId","","",'\"',4,bucket_ak);
-    find_and_get(filename_temp,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeyId","","",1,"AccessKeyId","","",'\"',4,bucket_ak,256);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk,256);
     snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
@@ -2616,11 +2626,11 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     compute_vcpu=get_cpu_num(init_conf.compute_inst);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
     reset_nstring(string_temp,128);
-    find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,string_temp);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_spec","","",1,"instance_spec","","",'.',3,string_temp,128);
     database_vcpu=get_cpu_num(string_temp);
     reset_nstring(string_temp,128);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"instance_spec","","",1,"instance_spec","","",'.',3,string_temp);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_spec","","",1,"instance_spec","","",'.',3,string_temp,128);
     natgw_vcpu=get_cpu_num(string_temp);
     reset_nstring(string_temp,128);
     if(*(init_conf.master_inst+0)=='a'){
@@ -2775,26 +2785,26 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     }
     generate_random_string(random_storage_account);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"BLANK_CLIENT_ID",access_key);
-    global_replace(filename_temp,"BLANK_SECRET_KEY",secret_key);
-    global_replace(filename_temp,"DEFAULT_TENANT_ID",tenant_id);
-    global_replace(filename_temp,"DEFAULT_SUBCRIPTION_ID",subscription_id);
-    global_replace(filename_temp,"ENVIRONMENT_OPTION",az_environment);
-    global_replace(filename_temp,"RANDOM_STRING",randstr);
-    global_replace(filename_temp,"RANDOM_STORAGE_ACCOUNT",random_storage_account);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_CLIENT_ID",access_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_SECRET_KEY",secret_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_TENANT_ID",tenant_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_SUBCRIPTION_ID",subscription_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"ENVIRONMENT_OPTION",az_environment);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STORAGE_ACCOUNT",random_storage_account);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_REGION_ID",init_conf.region_id);
     snprintf(string_temp,127,"%d",init_conf.node_num);
-    global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NODE_NUM",string_temp);
     snprintf(string_temp,127,"%d",init_conf.hpc_user_num);
-    global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",init_conf.master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_USER_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTERINI",init_conf.master_init_param);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
     snprintf(string_temp,127,"%d",init_conf.hpc_nfs_volume);
-    global_replace(filename_temp,"DEFAULT_STORAGE_VOLUME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_STORAGE_VOLUME",string_temp);
 
     file_p=fopen(filename_temp,"a");
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
@@ -2809,41 +2819,42 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     fclose(file_p_2);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"RANDOM_STRING",randstr);
-    global_replace(filename_temp,"MASTER_INST",init_conf.master_inst);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_INST",init_conf.master_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"PUBLIC_KEY",pubkey);
     for(i=0;i<init_conf.hpc_user_num;i++){
         snprintf(line_temp,LINE_LENGTH-1,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
-        insert_lines(filename_temp,"master_private_ip",line_temp);
+        insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"RANDOM_STRING",randstr);
-    global_replace(filename_temp,"COMPUTE_INST",init_conf.compute_inst);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_INST",init_conf.compute_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"mount",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"mount",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
 
     for(i=0;i<init_conf.node_num;i++){
         snprintf(cmdline,2047,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,3);
         return 5;
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -2864,9 +2875,9 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
 
     getstate(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"type\": \"azurerm_storage_container\",","","",20,"\"id\": \"","","",'\"',4,bucket_id);
-    find_and_get(filename_temp,"\"type\": \"azuread_application\",","","",20,"\"application_id\":","","",'\"',4,bucket_ak);
-    find_and_get(filename_temp,"\"type\": \"azuread_application_password\",","","",20,"\"value\":","","",'\"',4,bucket_sk);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"type\": \"azurerm_storage_container\",","","",20,"\"id\": \"","","",'\"',4,bucket_id,128);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"type\": \"azuread_application\",","","",20,"\"application_id\":","","",'\"',4,bucket_ak,256);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"type\": \"azuread_application_password\",","","",20,"\"value\":","","",'\"',4,bucket_sk,256);
     
     printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",2*GENERAL_SLEEP_TIME);
     for(i=0;i<2*GENERAL_SLEEP_TIME;i++){
@@ -3058,25 +3069,25 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(keyfile_path,FILENAME_LENGTH-1,"%s%s.key.json",vaultdir,PATH_SLASH);
     windows_path_to_string(keyfile_path,keyfile_path_ext);
-    global_replace(filename_temp,"BLANK_CREDENTIAL_PATH",keyfile_path_ext);
-    find_and_get(keyfile_path,"\"project_id\":","","",1,"\"project_id\":","","",'\"',4,gcp_project_id);
-    global_replace(filename_temp,"BLANK_PROJECT",gcp_project_id);
-    global_replace(filename_temp,"DEFAULT_REGION_ID",init_conf.region_id);
-    global_replace(filename_temp,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_CREDENTIAL_PATH",keyfile_path_ext);
+    find_and_nget(keyfile_path,LINE_LENGTH_SHORT,"\"project_id\":","","",1,"\"project_id\":","","",'\"',4,gcp_project_id,128);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_PROJECT",gcp_project_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
     snprintf(string_temp,127,"%d",init_conf.node_num);
-    global_replace(filename_temp,"DEFAULT_NODE_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NODE_NUM",string_temp);
     snprintf(string_temp,127,"%d",init_conf.hpc_user_num);
-    global_replace(filename_temp,"DEFAULT_USER_NUM",string_temp);
-    global_replace(filename_temp,"DEFAULT_MASTERINI",init_conf.master_init_param);
-    global_replace(filename_temp,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
-    global_replace(filename_temp,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
-    global_replace(filename_temp,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
-    global_replace(filename_temp,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_USER_NUM",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTERINI",init_conf.master_init_param);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
     snprintf(string_temp,127,"%d",init_conf.hpc_nfs_volume);
-    global_replace(filename_temp,"DEFAULT_STORAGE_VOLUME",string_temp);
-    global_replace(filename_temp,"RANDOM_STRING",randstr);
-    global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_STORAGE_VOLUME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCE_LABEL",unique_cluster_id);
 
     file_p=fopen(filename_temp,"a");
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
@@ -3091,60 +3102,61 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     fclose(file_p_2);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"MASTER_INST",init_conf.master_inst);
-    global_replace(filename_temp,"RANDOM_STRING",randstr);
-    global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_INST",init_conf.master_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCE_LABEL",unique_cluster_id);
     if(strcmp(init_conf.os_image_raw,"centos7")==0||strcmp(init_conf.os_image_raw,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
         snprintf(string_temp,127,"\"%s\"",init_conf.os_image_raw);
-        global_replace(filename_temp,"data.google_compute_image.OS_IMAGE.self_link",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"data.google_compute_image.OS_IMAGE.self_link",string_temp);
     }
-    global_replace(filename_temp,"PUBLIC_KEY",pubkey);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"PUBLIC_KEY",pubkey);
     for(i=0;i<init_conf.hpc_user_num;i++){
         snprintf(line_temp,LINE_LENGTH-1,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
-        insert_lines(filename_temp,"master_private_ip",line_temp);
+        insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
-    insert_lines(filename_temp,"master_private_ip",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"CLOUD_FLAG",cloud_flag);
-    global_replace(filename_temp,"COMPUTE_INST",init_conf.compute_inst);
-    global_replace(filename_temp,"RANDOM_STRING",randstr);
-    global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_INST",init_conf.compute_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCE_LABEL",unique_cluster_id);
     if(strcmp(init_conf.os_image_raw,"centos7")==0||strcmp(init_conf.os_image_raw,"centoss9")==0){
-        global_replace(filename_temp,"OS_IMAGE",init_conf.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_conf.os_image_raw);
     }
     else{
         snprintf(string_temp,127,"\"%s\"",init_conf.os_image_raw);
-        global_replace(filename_temp,"data.google_compute_image.OS_IMAGE.self_link",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"data.google_compute_image.OS_IMAGE.self_link",string_temp);
     }
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
-    insert_lines(filename_temp,"mount",line_temp);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"mount",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"RANDOM_STRING",randstr);
-    global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCE_LABEL",unique_cluster_id);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_replace(filename_temp,"RANDOM_STRING",randstr);
-    global_replace(filename_temp,"RESOURCE_LABEL",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCE_LABEL",unique_cluster_id);
 
     for(i=0;i<init_conf.node_num;i++){
         snprintf(cmdline,2047,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_replace(filename_temp,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
         gcp_credential_convert(workdir,"delete",0);
+        clear_if_failed(stackdir,confdir,vaultdir,3);
         return 5;
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -3173,8 +3185,8 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
-    find_and_get(filename_temp,"\"name\": \"hpc_storage\",","","",40,"\"self_link\":","","",'\"',4,bucket_selflink);
-    find_and_get(filename_temp,"\"name\": \"hpc_storage_key\",","","",20,"\"private_key\":","","",'\"',4,bucket_private_key);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"\"name\": \"hpc_storage\",","","",40,"\"self_link\":","","",'\"',4,bucket_selflink,128);
+    find_and_nget(filename_temp,LINE_LENGTH_EXT,"\"name\": \"hpc_storage_key\",","","",20,"\"private_key\":","","",'\"',4,bucket_private_key,5120);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_key.txt",vaultdir,PATH_SLASH);
     base64decode(bucket_private_key,filename_temp);

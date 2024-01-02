@@ -559,10 +559,10 @@ int display_cloud_info(char* workdir){
     else{
         gcp_credential_convert(workdir,"decrypt",0);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.key.json",vaultdir,PATH_SLASH);
-        find_and_get(filename_temp,"\"project_id\":","","",1,"\"project_id\":","","",'\"',4,gcp_project_id);
-        find_and_get(filename_temp,"\"client_email\":","","",1,"\"client_email\":","","",'\"',4,gcp_client_email);
-        find_and_get(filename_temp,"\"client_id\":","","",1,"\"client_id\":","","",'\"',4,gcp_client_id);
-        find_and_get(filename_temp,"\"private_key_id\":","","",1,"\"private_key_id\":","","",'\"',4,cloud_ak);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"project_id\":","","",1,"\"project_id\":","","",'\"',4,gcp_project_id,128);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"client_email\":","","",1,"\"client_email\":","","",'\"',4,gcp_client_email,128);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"client_id\":","","",1,"\"client_id\":","","",'\"',4,gcp_client_id,128);
+        find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"private_key_id\":","","",1,"\"private_key_id\":","","",'\"',4,cloud_ak,128);
         gcp_credential_convert(workdir,"encrypt",0);
     }
     printf("\nCloud Vendor    : %s ",cloud_flag);
@@ -661,7 +661,6 @@ int get_cpu_num(const char* vm_model){
     }
     for(i=1;i<c_index;i++){
         cpu_num=cpu_num*10+(*(vm_model+i)-'0');
-        //cpu_num+=(*(vm_model+i)-'0')*pow(10,c_index-i-1);
     }
     return cpu_num;
 }
@@ -1158,30 +1157,30 @@ int getstate(char* workdir, char* crypto_filename){
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_D")==0){
-        find_and_get(master_tf,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp);
+        find_and_nget(master_tf,LINE_LENGTH_SMALL,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,master_config,16);
-        find_and_get(compute_template,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp);
+        find_and_nget(compute_template,LINE_LENGTH_SHORT,"flavor_id = \"$","","",1,"flavor_id = \"$","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,compute_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
-        find_and_get(master_tf,"instance_spec","","",1,"instance_spec","","",'.',3,master_config);
-        find_and_get(compute_template,"instance_spec","","",1,"instance_spec","","",'.',3,compute_config);
+        find_and_nget(master_tf,LINE_LENGTH_SMALL,"instance_spec","","",1,"instance_spec","","",'.',3,master_config,16);
+        find_and_nget(compute_template,LINE_LENGTH_SMALL,"instance_spec","","",1,"instance_spec","","",'.',3,compute_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        find_and_get(master_tf,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        find_and_nget(master_tf,LINE_LENGTH_SMALL,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,master_config,16);
-        find_and_get(compute_template,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp);
+        find_and_nget(compute_template,LINE_LENGTH_SMALL,"size = \"$","","",1,"size = \"$","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,compute_config,16);
     }
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
-        find_and_get(master_tf,"machine_type","","",1,"machine_type","","",'.',2,string_temp);
+        find_and_nget(master_tf,LINE_LENGTH_SMALL,"machine_type","","",1,"machine_type","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,master_config,16);
-        find_and_get(compute_template,"machine_type","","",1,"machine_type","","",'.',2,string_temp);
+        find_and_nget(compute_template,LINE_LENGTH_SMALL,"machine_type","","",1,"machine_type","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,compute_config,16);
     }
     else{
-        find_and_get(master_tf,"instance_type","","",1,"instance_type","","",'.',3,master_config);
-        find_and_get(compute_template,"instance_type","","",1,"instance_type","","",'.',3,compute_config);
+        find_and_nget(master_tf,LINE_LENGTH_SMALL,"instance_type","","",1,"instance_type","","",'.',3,master_config,16);
+        find_and_nget(compute_template,LINE_LENGTH_SMALL,"instance_type","","",1,"instance_type","","",'.',3,compute_config,16);
     }
     if(find_multi_nkeys(compute_template,LINE_LENGTH_SMALL,"cpu_threads_per_core = 1","","","","")!=0){
         strcpy(ht_flag,"OFF");
@@ -1199,35 +1198,35 @@ int getstate(char* workdir, char* crypto_filename){
     fprintf(file_p_statefile,"---GENERATED AND MAINTAINED BY HPC-NOW SERVICES INTERNALLY---\n");
     fprintf(file_p_statefile,"master_config: %s\ncompute_config: %s\nht_flag: %s\ncompute_node_cores: %d\n",master_config,compute_config,ht_flag,compute_cores);
     if(strcmp(cloud_flag,"CLOUD_A")==0||strcmp(cloud_flag,"CLOUD_B")==0){
-        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH,"\"instance_name\": \"compute","","","","");
-        find_and_get(tfstate,"\"instance_name\": \"master","","",50,"public_ip","","",'\"',4,string_temp);
+        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH_SHORT,"\"instance_name\": \"compute","","","","");
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"instance_name\": \"master","","",50,"public_ip","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
-        find_and_get(tfstate,"\"instance_name\": \"master","","",50,"private_ip","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"instance_name\": \"master","","",50,"private_ip","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
         fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
         if(strcmp(cloud_flag,"CLOUD_B")==0){
-            find_and_get(tfstate,"\"instance_name\": \"master","","",50,"instance_status","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"instance_name\": \"master","","",50,"instance_status","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"master_status: %s\n",string_temp);
-            find_and_get(tfstate,"\"instance_name\": \"database","","",50,"instance_status","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"instance_name\": \"database","","",50,"instance_status","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"database_status: %s\n",string_temp);
         }
         else{
-            find_and_get(tfstate,"\"instance_name\": \"master","","",90,"\"status\":","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"instance_name\": \"master","","",90,"\"status\":","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"master_status: %s\n",string_temp);
-            find_and_get(tfstate,"\"instance_name\": \"database","","",90,"\"status\":","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"instance_name\": \"database","","",90,"\"status\":","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"database_status: %s\n",string_temp);
         }
         for(i=0;i<node_num_gs;i++){
             snprintf(string_temp2,63,"\"instance_name\": \"compute%d",i+1);
-            find_and_get(tfstate,string_temp2,"","",50,"private_ip","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",50,"private_ip","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
             fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
             if(strcmp(cloud_flag,"CLOUD_B")==0){
-                find_and_get(tfstate,string_temp2,"","",30,"instance_status","","",'\"',4,string_temp);
+                find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",30,"instance_status","","",'\"',4,string_temp,64);
                 fprintf(file_p_statefile,"compute%d_status: %s\n",i+1,string_temp);
             }
             else{
-                find_and_get(tfstate,string_temp2,"","",90,"\"status\":","","",'\"',4,string_temp);
+                find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",90,"\"status\":","","",'\"',4,string_temp,64);
                 fprintf(file_p_statefile,"compute%d_status: %s\n",i+1,string_temp);
             }
             if(strcmp(string_temp,"RUNNING")==0||strcmp(string_temp,"running")==0||strcmp(string_temp,"Running")==0){
@@ -1236,23 +1235,23 @@ int getstate(char* workdir, char* crypto_filename){
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH,"\"name\": \"compute","","","","");
-        find_and_get(tfstate,"\"name\": \"master","","",90,"\"public_ip\"","","",'\"',4,string_temp);
+        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH_SHORT,"\"name\": \"compute","","","","");
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master","","",90,"\"public_ip\"","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
-        find_and_get(tfstate,"\"name\": \"master","","",90,"\"private_ip\"","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master","","",90,"\"private_ip\"","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
         fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
-        find_and_get(tfstate,"\"name\": \"m_state","","",30,"\"state\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"m_state","","",30,"\"state\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_status: %s\n",string_temp);
-        find_and_get(tfstate,"\"name\": \"db_state","","",30,"\"state\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"db_state","","",30,"\"state\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"database_status: %s\n",string_temp);
         for(i=0;i<node_num_gs;i++){
             snprintf(string_temp2,63,"\"name\": \"compute%d",i+1);
-            find_and_get(tfstate,string_temp2,"","",90,"private_ip","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",90,"private_ip","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
             fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
             snprintf(string_temp2,63,"\"name\": \"comp%d",i+1);
-            find_and_get(tfstate,string_temp2,"","",30,"\"state\":","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",30,"\"state\":","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"compute%d_status: %s\n",i+1,string_temp);
             if(strcmp(string_temp,"RUNNING")==0||strcmp(string_temp,"running")==0||strcmp(string_temp,"Running")==0){
                 node_num_on_gs++;
@@ -1260,20 +1259,20 @@ int getstate(char* workdir, char* crypto_filename){
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
-        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH,"\"type\": \"huaweicloud_compute_instance\",","","","","")-3;
-        find_and_get(tfstate,"\"name\": \"master_eip\",","","",20,"\"address\":","","",'\"',4,string_temp);
+        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH_SHORT,"\"type\": \"huaweicloud_compute_instance\",","","","","")-3;
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master_eip\",","","",20,"\"address\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
-        find_and_get(tfstate,"\"name\": \"master\",","","",20,"\"access_ip_v4\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master\",","","",20,"\"access_ip_v4\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
         fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
-        find_and_get(tfstate,"\"name\": \"master\",","","",50,"\"power_action\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master\",","","",50,"\"power_action\":","","",'\"',4,string_temp,64);
         if(strcmp(string_temp,"ON")==0){
             fprintf(file_p_statefile,"master_status: Running\n");
         }
         else{
             fprintf(file_p_statefile,"master_status: Stopped\n");
         } 
-        find_and_get(tfstate,"\"name\": \"database\",","","",50,"\"power_action\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"database\",","","",50,"\"power_action\":","","",'\"',4,string_temp,64);
         if(strcmp(string_temp,"ON")==0){
             fprintf(file_p_statefile,"database_status: Running\n");
         }
@@ -1282,10 +1281,10 @@ int getstate(char* workdir, char* crypto_filename){
         }
         for(i=0;i<node_num_gs;i++){
             snprintf(string_temp2,63,"\"name\": \"compute%d\",",i+1);
-            find_and_get(tfstate,string_temp2,"","",50,"\"access_ip_v4\":","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",50,"\"access_ip_v4\":","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
             fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
-            find_and_get(tfstate,string_temp2,"","",50,"\"power_action\":","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",50,"\"power_action\":","","",'\"',4,string_temp,64);
             if(strcmp(string_temp,"ON")==0){
                 fprintf(file_p_statefile,"compute%d_status: Running\n",i+1);
                 node_num_on_gs++;
@@ -1294,28 +1293,28 @@ int getstate(char* workdir, char* crypto_filename){
                 fprintf(file_p_statefile,"compute%d_status: Stopped\n",i+1);
             }
         }
-        find_and_get(tfstate,"\"type\": \"huaweicloud_evs_volume\",","","",50,"\"size\":","","",'\"',3,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"type\": \"huaweicloud_evs_volume\",","","",50,"\"size\":","","",'\"',3,string_temp,64);
         get_seq_nstring(string_temp,' ',2,string_temp2,64);
         get_seq_nstring(string_temp2,',',1,string_temp,64);
         fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
-        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH,"\"type\": \"baiducloud_instance\",","","","","")-3;
-        find_and_get(tfstate,"\"name\": \"master_eip\",","","",20,"\"eip\":","","",'\"',4,string_temp);
+        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH_SHORT,"\"type\": \"baiducloud_instance\",","","","","")-3;
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master_eip\",","","",20,"\"eip\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
-        find_and_get(tfstate,"\"name\": \"master\",","","",50,"\"internal_ip\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master\",","","",50,"\"internal_ip\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
         fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
-        find_and_get(tfstate,"\"name\": \"master\",","","",100,"\"status\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master\",","","",100,"\"status\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_status: %s\n",string_temp);
-        find_and_get(tfstate,"\"name\": \"database\",","","",100,"\"status\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"database\",","","",100,"\"status\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"database_status: %s\n",string_temp);
         for(i=0;i<node_num_gs;i++){
             snprintf(string_temp2,63,"\"name\": \"compute%d\",",i+1);
-            find_and_get(tfstate,string_temp2,"","",50,"\"internal_ip\":","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",50,"\"internal_ip\":","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
             fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
-            find_and_get(tfstate,string_temp2,"","",100,"\"status\":","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",100,"\"status\":","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"compute%d_status: %s\n",i+1,string_temp);
             if(strcmp(string_temp,"Running")==0){
                 node_num_on_gs++;
@@ -1323,41 +1322,41 @@ int getstate(char* workdir, char* crypto_filename){
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH,"\"azurerm_linux_virtual_machine\"","","","","")-3;
-        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"public_ip_address\":","","",'\"',4,string_temp);
+        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH_SHORT,"\"azurerm_linux_virtual_machine\"","","","","")-3;
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master\",","","",80,"\"public_ip_address\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
-        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"private_ip_address\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master\",","","",80,"\"private_ip_address\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
         fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
         fprintf(file_p_statefile,"master_status: Running\ndatabase_status: Running\n");
         for(i=0;i<node_num_gs;i++){
             snprintf(string_temp2,63,"\"name\": \"compute%d\",",i+1);
-            find_and_get(tfstate,string_temp2,"","",80,"\"private_ip_address\":","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",80,"\"private_ip_address\":","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
             fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
             fprintf(file_p_statefile,"compute%d_status: Running\n",i+1);
             node_num_on_gs++;
         }
-        find_and_get(tfstate,"\"name\": \"shared_volume\",","","",50,"\"disk_size_gb\":","","",'\"',3,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"shared_volume\",","","",50,"\"disk_size_gb\":","","",'\"',3,string_temp,64);
         get_seq_nstring(string_temp,' ',2,string_temp2,64);
         get_seq_nstring(string_temp2,',',1,string_temp,64);
         fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
     }
     else{
-        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH,"\"google_compute_instance\"","","","","")-3;
-        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"nat_ip\":","","",'\"',4,string_temp);
+        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH_SHORT,"\"google_compute_instance\"","","","","")-3;
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master\",","","",80,"\"nat_ip\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
-        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"network_ip\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master\",","","",80,"\"network_ip\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
         fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
-        find_and_get(tfstate,"\"name\": \"master\",","","",80,"\"current_status\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master\",","","",80,"\"current_status\":","","",'\"',4,string_temp,64);
         if(strcmp(string_temp,"TERMINATED")==0){
             fprintf(file_p_statefile,"master_status: STOPPED\n");
         }
         else{
             fprintf(file_p_statefile,"master_status: RUNNING\n");
         }
-        find_and_get(tfstate,"\"name\": \"database\",","","",80,"\"current_status\":","","",'\"',4,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"database\",","","",80,"\"current_status\":","","",'\"',4,string_temp,64);
         if(strcmp(string_temp,"TERMINATED")==0){
             fprintf(file_p_statefile,"database_status: STOPPED\n");
         }
@@ -1366,10 +1365,10 @@ int getstate(char* workdir, char* crypto_filename){
         }
         for(i=0;i<node_num_gs;i++){
             snprintf(string_temp2,63,"\"name\": \"compute%d\",",i+1);
-            find_and_get(tfstate,string_temp2,"","",80,"\"network_ip\":","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",80,"\"network_ip\":","","",'\"',4,string_temp,64);
             fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
             fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
-            find_and_get(tfstate,string_temp2,"","",80,"\"current_status\":","","",'\"',4,string_temp);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",80,"\"current_status\":","","",'\"',4,string_temp,64);
             if(strcmp(string_temp,"TERMINATED")==0){
                 fprintf(file_p_statefile,"compute%d_status: STOPPED\n",i+1);
             }
@@ -1378,7 +1377,7 @@ int getstate(char* workdir, char* crypto_filename){
                 node_num_on_gs++;
             }
         }
-        find_and_get(tfstate,"\"name\": \"shared_volume\",","","",30,"\"size\":","","",'\"',3,string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"shared_volume\",","","",30,"\"size\":","","",'\"',3,string_temp,64);
         get_seq_nstring(string_temp,' ',2,string_temp2,64);
         get_seq_nstring(string_temp2,',',1,string_temp,64);
         fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
@@ -1575,7 +1574,7 @@ int update_cluster_summary(char* workdir, char* crypto_keyfile){
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    find_and_get(filename_temp,"Master","Node","IP:",1,"Master","Node","IP:",' ',4,master_address_prev);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"Master","Node","IP:",1,"Master","Node","IP:",' ',4,master_address_prev,32);
     get_state_nvalue(workdir,"master_public_ip:",master_address,32);
     if(strcmp(master_address,master_address_prev)!=0){
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
@@ -2023,8 +2022,8 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     fngetline(file_p,randstr,30);
     fclose(file_p);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
-    find_and_get(filename_temp,"CLUSTER_ID","","",1,"CLUSTER_ID","","",' ',3,cluster_id);
-    find_and_get(filename_temp,"REGION_ID","","",1,"REGION_ID","","",' ',3,cloud_region);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"CLUSTER_ID","","",1,"CLUSTER_ID","","",' ',3,cluster_id,30);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"REGION_ID","","",1,"REGION_ID","","",' ',3,cloud_region,16);
     snprintf(unique_cluster_id,63,"%s-%s",cluster_id,randstr);
     get_state_nvalue(workdir,"master_config:",master_config,16);
     get_state_nvalue(workdir,"compute_config:",compute_config,16);
@@ -2070,8 +2069,8 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
         return -1;
     }
     else if(strcmp(option,"stop")==0){
-        find_and_get(usage_file,unique_cluster_id,node_name,"NULL",1,unique_cluster_id,node_name,"NULL",',',5,prev_date);
-        find_and_get(usage_file,unique_cluster_id,node_name,"NULL",1,unique_cluster_id,node_name,"NULL",',',6,prev_time);
+        find_and_nget(usage_file,LINE_LENGTH_SMALL,unique_cluster_id,node_name,"NULL",1,unique_cluster_id,node_name,"NULL",',',5,prev_date,32);
+        find_and_nget(usage_file,LINE_LENGTH_SMALL,unique_cluster_id,node_name,"NULL",1,unique_cluster_id,node_name,"NULL",',',6,prev_time,32);
         find_and_nreplace(usage_file,LINE_LENGTH_SHORT,unique_cluster_id,node_name,"NULL","","","RUNNING_DATE",current_date);
         find_and_nreplace(usage_file,LINE_LENGTH_SHORT,unique_cluster_id,node_name,"NULL","","","RUNNING_TIME",current_time);
         running_hours=calc_running_hours(prev_date,prev_time,current_date,current_time);
@@ -2207,7 +2206,7 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
             printf(WARN_YELLO_BOLD "[ -WARN- ] You are not an operator or administrator." RESET_DISPLAY "\n");
         }
         else{
-            find_and_get(filename_temp,"Master Node Root Password:","","",1,"Master Node Root Password:","","",':',2,password);
+            find_and_nget(filename_temp,LINE_LENGTH_SHORT,"Master Node Root Password:","","",1,"Master Node Root Password:","","",':',2,password,32);
             printf(FATAL_RED_BOLD "| Root Password:" RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " ! DO NOT DISCLOSE TO ANYONE !\n" RESET_DISPLAY,password);
         }
     }
@@ -2477,6 +2476,11 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag){
     return 0;
 }
 
+
+/* 
+ * This function is deprecated
+ * Please use get_bucket_ninfo() for security
+ */
 int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, char* region_id, char* bucket_ak, char* bucket_sk){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -3018,8 +3022,8 @@ int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords){
     char user_name_temp[64]="";
     char user_passwd_temp[64]="";
     char user_status_temp[16]="";
-    file_trunc_by_kwds(base_tf,"","user1_passwd",1);
-    delete_lines_by_kwd(master_tf,"username:",1);
+    file_ntrunc_by_kwds(base_tf,LINE_LENGTH_SMALL,"","user1_passwd",1);
+    delete_nlines_by_kwd(master_tf,LINE_LENGTH_SMALL,"username:",1);
     file_p=fopen(user_passwords,"r");
     file_p_base=fopen(base_tf,"a");
     while(!feof(file_p)){
@@ -3292,10 +3296,10 @@ int modify_payment_single_line(char* filename_temp, char* modify_flag, char* lin
         return 1;
     }
     if(strcmp(modify_flag,"add")==0){
-        insert_lines(filename_temp,"user_data",line_buffer);
+        insert_nlines(filename_temp,LINE_LENGTH_SMALL,"user_data",line_buffer);
     }
     else{
-        delete_lines_by_kwd(filename_temp,line_buffer,1);
+        delete_nlines_by_kwd(filename_temp,LINE_LENGTH_SHORT,line_buffer,1);
     }
     return 0;
 }
@@ -3495,7 +3499,7 @@ int password_to_clipboard(char* cluster_workdir, char* username){
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
         decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-        find_and_get(filename_temp,"Master Node Root Password:","","",1,"Master Node Root Password:","","",' ',5,password_string);
+        find_and_nget(filename_temp,LINE_LENGTH_SHORT,"Master Node Root Password:","","",1,"Master Node Root Password:","","",' ',5,password_string,64);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
     }
@@ -3503,7 +3507,7 @@ int password_to_clipboard(char* cluster_workdir, char* username){
         decrypt_user_passwords(cluster_workdir,CRYPTO_KEY_FILE);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
         snprintf(username_ext,63,"username: %s ",username);
-        find_and_get(filename_temp,username_ext,"","",1,username_ext,"","",' ',3,password_string);
+        find_and_nget(filename_temp,LINE_LENGTH_SHORT,username_ext,"","",1,username_ext,"","",' ',3,password_string,64);
         delete_decrypted_user_passwords(cluster_workdir);
     }
     if(strlen(password_string)==0){

@@ -597,7 +597,7 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
 #endif
     }
     else if(strcmp(cloud_name,"baiducloud")==0){
-        strcpy(provider_prefix,"baiubce");
+        strcpy(provider_prefix,"baidubce");
 #ifdef _WIN32
         strcpy(provider_exec_suffix,".exe");
 #endif
