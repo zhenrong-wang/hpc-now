@@ -458,11 +458,11 @@ Also, please feel free to mailto:
 
 The hpc-now service manages 2 top-level directories and several subdirectories on your device and OS. Here is the architecture:
 
-  +- **BINARY_ROOT/** - **Windows: C:\\hpc-now\\** | **GNU/Linux: /home/hpc-now/** | **macOS(Darwin) /Users/hpc-now/**
-     +- **hpcopr** executable
-     +- **utils/**
-        +- **now-crypto-aes** executable
-        +- **terraform/tofu** executable
+  +- **BINARY_ROOT/** - **Windows: C:\\hpc-now\\** | **GNU/Linux: /home/hpc-now/** | **macOS(Darwin) /Users/hpc-now/**\
+     +- **hpcopr** executable\
+     +- **utils/**\
+        +- **now-crypto-aes** executable\
+        +- **terraform/tofu** executable\
         +- cloud utilities
   +- **RUNNING_ROOT/** - **Windows: C:\\ProgramData\\hpc-now\\** | **GNU/Linux: /usr/.hpc-now/** | **macOS(Darwin) /Applications/.hpc-now/**
      +- log_trashbin.txt
@@ -493,5 +493,4 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
            +- conf/
            +- vault/
      +- **mon_data/** - *Monitoring data of all clusters*
-
 *All the directories and files except the .now_crypto_seed.lock are set to be readable, writable, and executable only by the system user hpc-now.*
