@@ -23,20 +23,36 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
     char logfile_temp[FILENAME_LENGTH]="";
     int run_flag;
     if(file_exist_or_not(logfile)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the specified log. Either you haven't init your first\n");
-        printf("|          cluster, or there are internal errors. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the specified log." RESET_DISPLAY "\n");
         return -1;
     }
-    snprintf(logfile_temp,FILENAME_LENGTH-1,"%s.temp",logfile);
+    if(strcmp(logfile,USAGE_LOG_FILE)==0){
+        snprintf(logfile_temp,FILENAME_LENGTH-1,"%s%s.tmp%susage.log.temp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
+    }
+    else if(strcmp(logfile,OPERATION_LOG_FILE)==0){
+        snprintf(logfile_temp,FILENAME_LENGTH-1,"%s%s.tmp%shistory.log.temp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
+    }
+    else if(strcmp(logfile,SYSTEM_CMD_ERROR_LOG)==0){
+        snprintf(logfile_temp,FILENAME_LENGTH-1,"%s%s.tmp%ssyserr.log.temp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
+    }
+    else{
+        snprintf(logfile_temp,FILENAME_LENGTH-1,"%s%s.tmp%srandom.log.temp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
+    }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,logfile,logfile_temp,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(system(cmdline)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the specified log." RESET_DISPLAY "\n");
+        return -1;
+    }
     if(strcmp(view_option,"read")==0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"more %s",logfile_temp);
     }
     else{
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s",CAT_FILE_CMD,logfile_temp);
     }
-    system(cmdline);
+    if(system(cmdline)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the specified log." RESET_DISPLAY "\n");
+        return -1;
+    }
     if(strlen(export_dest)==0){
         printf(GENERAL_BOLD "\n[ -DONE- ]" RESET_DISPLAY " You can also export the latest logs to a file.\n");
         printf("|          Example: " HIGH_GREEN_BOLD "hpcopr history -d history.csv" RESET_DISPLAY " .\n");
