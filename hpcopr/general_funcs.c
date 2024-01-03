@@ -390,7 +390,7 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     char cmdline[CMDLINE_LENGTH]="";
     int i,j,k,line_length;
 
-    snprintf(filename_temp,511,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
     file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -435,7 +435,7 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     }
     fclose(file_p);
     fclose(file_p_tmp);
-    snprintf(cmdline,2047,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
 }
@@ -457,7 +457,7 @@ int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string,
         return -3;
     }
     char filename_temp[FILENAME_LENGTH]="";
-    snprintf(filename_temp,511,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -508,7 +508,7 @@ int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string,
     free(new_line);
     fclose(file_p);
     fclose(file_p_tmp);
-    snprintf(cmdline,2047,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
 }
@@ -619,7 +619,7 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     char cmdline[CMDLINE_LENGTH]="";
     char single_line[LINE_LENGTH]="";
     char new_single_line[LINE_LENGTH]="";
-    snprintf(filename_temp,511,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
     int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
     FILE* file_temp_p=fopen(filename_temp,"w+");
     if(file_temp_p==NULL){
@@ -672,7 +672,7 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     fprintf(file_temp_p,"%s",single_line);
     fclose(file_p);
     fclose(file_temp_p);
-    snprintf(cmdline,2047,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return replace_count;
 }
@@ -689,7 +689,7 @@ int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, 
     }
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    snprintf(filename_temp,511,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
     FILE* file_temp_p=fopen(filename_temp,"w+");
     if(file_temp_p==NULL){
         fclose(file_p);
@@ -729,7 +729,7 @@ int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, 
     fclose(file_p);
     fclose(file_temp_p);
     free(single_line);
-    snprintf(cmdline,2047,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return replace_count;
 }
@@ -1216,14 +1216,14 @@ int file_empty_or_not(char* filename){
 int folder_exist_or_not(char* foldername){
     char filename[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    snprintf(filename,511,"%s%stestfile.txt",foldername,PATH_SLASH);
+    snprintf(filename,FILENAME_LENGTH-1,"%s%stestfile.txt",foldername,PATH_SLASH);
     FILE* test_file=fopen(filename,"w+");
     if(test_file==NULL){
         return 1;
     }
     else{
         fclose(test_file);
-        snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
         return 0;
     }
@@ -1406,7 +1406,7 @@ int insert_lines(char* filename, char* keyword, char* insert_string){
         }
     }
     fseek(file_p,0,SEEK_SET);
-    snprintf(filename_temp,511,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
     file_p_2=fopen(filename_temp,"w+");
     if(file_p_2==NULL){
         fclose(file_p);
@@ -1422,7 +1422,7 @@ int insert_lines(char* filename, char* keyword, char* insert_string){
     }
     fclose(file_p);
     fclose(file_p_2);
-    snprintf(cmdline,2047,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
 }
@@ -1461,7 +1461,7 @@ int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char*
         return 1;
     }
     fseek(file_p,0,SEEK_SET);
-    snprintf(filename_temp,511,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
     file_p_2=fopen(filename_temp,"w+");
     if(file_p_2==NULL){
         fclose(file_p);
@@ -1479,7 +1479,7 @@ int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char*
     fclose(file_p);
     fclose(file_p_2);
     free(single_line);
-    snprintf(cmdline,2047,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
 }
@@ -1698,7 +1698,7 @@ int file_creation_test(char* filename){
         return 3;
     }
     fclose(file_p);
-    snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     return 0;
 }
@@ -1795,7 +1795,7 @@ int file_cr_clean(char* filename){
     char filename_temp[FILENAME_LENGTH]="";
     int ch;
     char cmdline[CMDLINE_LENGTH]="";
-    snprintf(filename_temp,511,"%s.cr.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.cr.tmp",filename);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -1817,7 +1817,7 @@ int file_cr_clean(char* filename){
     }while(!feof(file_p));
     fclose(file_p);
     fclose(file_p_tmp);
-    snprintf(cmdline,2047,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
 #endif
     return 0;
@@ -1841,7 +1841,7 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
     int contain_start_flag;
     int contain_end_flag;
     char cmdline[CMDLINE_LENGTH]="";
-    snprintf(filename_temp,511,"%s.trunc.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.trunc.tmp",filename);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -1886,7 +1886,7 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
-        snprintf(cmdline,2047,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
     }
     return 0;
@@ -1907,7 +1907,7 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
         return -1;
     }
     char filename_temp[FILENAME_LENGTH]="";
-    snprintf(filename_temp,511,"%s.trunc.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.trunc.tmp",filename);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -1963,7 +1963,7 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
-        snprintf(cmdline,2047,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
     }
     return 0;
@@ -1983,7 +1983,7 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char line_buffer[LINE_LENGTH]="";
     int getline_flag=0;
-    snprintf(filename_temp,511,"%s.del.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.del.tmp",filename);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -2001,7 +2001,7 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
-        snprintf(cmdline,2047,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
     }
     return 0;
@@ -2020,7 +2020,7 @@ int delete_nlines_by_kwd(char* filename, unsigned int linelen_max, char* key, in
     }
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    snprintf(filename_temp,511,"%s.del.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.del.tmp",filename);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -2046,7 +2046,7 @@ int delete_nlines_by_kwd(char* filename, unsigned int linelen_max, char* key, in
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
-        snprintf(cmdline,2047,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
     }
     return 0;
@@ -2065,11 +2065,11 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     char buffer[256]="";
 #endif
 #ifdef __APPLE__
-    snprintf(cmdline,2047,"md5 '%s' | awk '{print $NF}' > /tmp/md5.txt.tmp",crypto_key_filename);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"md5 '%s' | awk '{print $NF}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif __linux__
-    snprintf(cmdline,2047,"md5sum '%s' | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"md5sum '%s' | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif _WIN32
-    snprintf(cmdline,2047,"certutil -hashfile \"%s\" md5 > c:\\programdata\\md5.txt.tmp",crypto_key_filename);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"certutil -hashfile \"%s\" md5 > c:\\programdata\\md5.txt.tmp",crypto_key_filename);
 #endif
     if(system(cmdline)!=0){
         return -1;
@@ -2088,9 +2088,9 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     fgetline(md5_tmp,md5sum);
     fclose(md5_tmp);
 #ifdef _WIN32
-    snprintf(cmdline,2047,"del /f /q c:\\programdata\\md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"del /f /q c:\\programdata\\md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
 #else
-    snprintf(cmdline,2047,"rm -rf /tmp/md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"rm -rf /tmp/md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
 #endif
     system(cmdline);
     return 0;
@@ -2126,7 +2126,7 @@ int password_hash(char* password, char md5_hash[], int md5_length){
     generate_random_string(string_temp);
     FILE* file_p=NULL;
 #ifdef _WIN32
-    snprintf(filename_temp,511,"c:\\programdata\\%s.tmp",string_temp);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"c:\\programdata\\%s.tmp",string_temp);
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
         strcpy(md5_hash,"");
@@ -2135,7 +2135,7 @@ int password_hash(char* password, char md5_hash[], int md5_length){
     fprintf(file_p,"%s\n",password);
     fclose(file_p);
 #else
-    snprintf(filename_temp,511,"/tmp/%s.tmp",string_temp);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"/tmp/%s.tmp",string_temp);
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
         strcpy(md5_hash,"");
@@ -2146,7 +2146,7 @@ int password_hash(char* password, char md5_hash[], int md5_length){
 #endif
     //get_crypto_key(filename_temp,md5_hash);
     run_flag=get_nmd5sum(filename_temp,md5_hash,md5_length);
-    snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     if(run_flag==0){
         return 0;
@@ -2203,24 +2203,24 @@ int base64decode_deprecated(char* encoded_string, char* export_path){
     if(file_creation_test(export_path)!=0){
         return 1;
     }
-    char cmdline[CMDLINE_LENGTH_EXT]=""; // Stack Overflow will occur if the encoded string exceeds 4096
+    char cmdline[CMDLINE_LENGTH]=""; // Stack Overflow will occur if the encoded string exceeds 4096
     int run_flag;
 #ifdef _WIN32
     char filename_temp[FILENAME_LENGTH]="";
     FILE* file_p=NULL;
-    snprintf(filename_temp,511,"%s%sbase64_convert.tmp",DESTROYED_DIR,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbase64_convert.tmp",DESTROYED_DIR,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
         return 3;
     }
     fprintf(file_p,"%s",encoded_string);
     fclose(file_p);
-    snprintf(cmdline,2047,"certutil -decode %s %s %s",filename_temp,export_path,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"certutil -decode %s %s %s",filename_temp,export_path,SYSTEM_CMD_REDIRECT_NULL);
     run_flag=system(cmdline);
-    snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
 #else
-    snprintf(cmdline,2047,"echo \"%s\" | base64 -d > %s 2>/dev/null",encoded_string,export_path);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"echo \"%s\" | base64 -d > %s 2>/dev/null",encoded_string,export_path);
     run_flag=system(cmdline);
 #endif
     if(run_flag!=0){

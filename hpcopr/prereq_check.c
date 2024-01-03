@@ -69,9 +69,9 @@ extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
 int check_internet(void){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    snprintf(cmdline,2047,"ping -n 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"ping -n 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #else
-    snprintf(cmdline,2047,"ping -c 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"ping -c 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #endif
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please either check your DNS\n");
@@ -89,15 +89,15 @@ int check_internet(void){
 int check_internet_google(void){
     char cmdline[CMDLINE_LENGTH]="";
     char google_connectivity_flag[FILENAME_LENGTH];
-    snprintf(google_connectivity_flag,511,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
+    snprintf(google_connectivity_flag,FILENAME_LENGTH-1,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
     FILE* file_p=fopen(google_connectivity_flag,"w+");
     if(file_p==NULL){
         return -1;
     }
 #ifdef _WIN32
-    snprintf(cmdline,2047,"ping -n 1 api.google.com %s",SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"ping -n 1 api.google.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #else
-    snprintf(cmdline,2047,"ping -c 1 api.google.com %s",SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"ping -c 1 api.google.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #endif
     if(system(cmdline)!=0){
         fprintf(file_p,"api.google.com_connectivity_check: FAILED\n");
@@ -113,7 +113,7 @@ int get_google_connectivity(void){
     char google_connectivity_flag[FILENAME_LENGTH]="";
     char line_buffer[LINE_LENGTH_TINY]="";
     char connectivity_status[16]="";
-    snprintf(google_connectivity_flag,511,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
+    snprintf(google_connectivity_flag,FILENAME_LENGTH-1,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
     FILE* file_p=fopen(google_connectivity_flag,"r");
     if(file_p==NULL){
         return -1;
@@ -193,15 +193,15 @@ int install_bucket_clis(int silent_flag){
     if(silent_flag!=0){
         printf(RESET_DISPLAY GENERAL_BOLD "|        . Checking & installing the dataman components: 1/7 ..." RESET_DISPLAY "\n");
     }
-    snprintf(filename_temp,511,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
-    snprintf(filename_temp_zip,511,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         printf("|          Dataman component 1 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
-            snprintf(cmdline,2047,"curl %s -o %s",URL_OSSUTIL,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_OSSUTIL,filename_temp_zip);
 #else
-            snprintf(cmdline,2047,"curl %s -o '%s'",URL_OSSUTIL,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_OSSUTIL,filename_temp_zip);
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
@@ -212,26 +212,26 @@ int install_bucket_clis(int silent_flag){
             }
         }
 #ifdef _WIN32
-        snprintf(cmdline,2047,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
-        snprintf(cmdline,2047,"%s %s%sossutil-v1.7.16-windows-amd64%sossutil64.exe %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sossutil-v1.7.16-windows-amd64%sossutil64.exe %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
 #elif __linux__   
-        snprintf(cmdline,2047,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
-        snprintf(cmdline,2047,"%s %s%sossutil-v1.7.16-linux-amd64%sossutil64 %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sossutil-v1.7.16-linux-amd64%sossutil64 %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,2047,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
 #elif __APPLE__
-        snprintf(cmdline,2047,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
-        snprintf(cmdline,2047,"%s %s%sossutil-v1.7.16-mac-amd64%sossutilmac64 %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sossutil-v1.7.16-mac-amd64%sossutilmac64 %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,2047,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
 #endif
-        snprintf(cmdline,2047,"%s %s%sossutil-v1.* %s",DELETE_FOLDER_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sossutil-v1.* %s",DELETE_FOLDER_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);  
     }
     if(silent_flag!=0){
@@ -242,10 +242,10 @@ coscli:
     if(silent_flag!=0){
         printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 2/7 ..." RESET_DISPLAY "\n");
     }
-    snprintf(filename_temp,511,"%s%scoscli.exe",NOW_BINARY_DIR,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scoscli.exe",NOW_BINARY_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         printf("|          Dataman component 2 not found. Downloading and installing ..." GREY_LIGHT "\n");
-        snprintf(cmdline,2047,"curl %s -o %s",URL_COSCLI,filename_temp);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_COSCLI,filename_temp);
         if(system(cmdline)!=0){
             if(silent_flag!=0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/7." RESET_DISPLAY "\n");
@@ -254,7 +254,7 @@ coscli:
             goto awscli;
         }
 #ifndef _WIN32
-        snprintf(cmdline,2047,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
 #endif
     }
@@ -266,15 +266,15 @@ awscli:
     if(silent_flag!=0){
         printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 3/7 ..." RESET_DISPLAY "\n");
     }
-    snprintf(filename_temp,511,"%s%saws",NOW_BINARY_DIR,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%saws",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef __linux__
-    snprintf(filename_temp_zip,511,"%s%sawscliv2.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sawscliv2.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         printf("|          Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
-        snprintf(cmdline,2047,"%s %s%saws* %s",DELETE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%saws* %s",DELETE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         if(file_exist_or_not(filename_temp_zip)!=0){
-            snprintf(cmdline,2047,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
                     printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/7." RESET_DISPLAY "\n");
@@ -283,18 +283,18 @@ awscli:
                 goto obsutil;
             }
         }
-        snprintf(cmdline,2047,"unzip -q -o '%s' -d /tmp",filename_temp_zip);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -q -o '%s' -d /tmp",filename_temp_zip);
         system(cmdline);
-        snprintf(cmdline,2047,"/tmp/aws/install -i %s%sawscli -b %s %s",NOW_BINARY_DIR,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"/tmp/aws/install -i %s%sawscli -b %s %s",NOW_BINARY_DIR,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         printf(RESET_DISPLAY);
     }
 #elif __APPLE__
-    snprintf(filename_temp_zip,511,"%s%sAWSCLIV2.pkg",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sAWSCLIV2.pkg",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         printf("|          Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
-            snprintf(cmdline,2047,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
                     printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/7." RESET_DISPLAY "\n");
@@ -319,7 +319,7 @@ awscli:
             fprintf(file_p,"      <string>/Applications/</string>\n      <key>choiceIdentifier</key>\n      <string>default</string>\n");
             fprintf(file_p,"    </dict>\n  </array>\n</plist>\n");
             fclose(file_p);
-            snprintf(cmdline,2047,"installer -pkg '%s' -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml %s &",filename_temp_zip,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"installer -pkg '%s' -target CurrentUserHomeDirectory -applyChoiceChangesXML /tmp/choices.xml %s &",filename_temp_zip,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             int i=0;
             while(file_exist_or_not("/Applications/aws-cli/aws")!=0||file_exist_or_not("/Applications/aws-cli/aws_completer")!=0){
@@ -335,11 +335,11 @@ awscli:
             }
             printf("\n");
         }
-        snprintf(cmdline,2047,"/bin/cp -r /Applications/aws-cli %s",NOW_BINARY_DIR);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"/bin/cp -r /Applications/aws-cli %s",NOW_BINARY_DIR);
         system(cmdline);
-        snprintf(cmdline,2047,"ln -s %s%saws-cli%saws %s%saws %s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"ln -s %s%saws-cli%saws %s%saws %s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,2047,"ln -s %s%saws-cli%saws_completer %s%saws_completer %s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"ln -s %s%saws-cli%saws_completer %s%saws_completer %s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         printf(RESET_DISPLAY);
     }
@@ -360,19 +360,19 @@ obsutil:
     if(silent_flag!=0){
         printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 4/7 ..." RESET_DISPLAY "\n");
     }
-    snprintf(filename_temp,511,"%s%sobsutil.exe",NOW_BINARY_DIR,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sobsutil.exe",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef _WIN32
-    snprintf(filename_temp_zip,511,"%s%sobsutil_amd64.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sobsutil_amd64.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #else
-    snprintf(filename_temp_zip,511,"%s%sobsutil_amd64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sobsutil_amd64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
         printf("|          Dataman component 4 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
-            snprintf(cmdline,2047,"curl %s -o %s",URL_OBSUTIL,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_OBSUTIL,filename_temp_zip);
 #else
-            snprintf(cmdline,2047,"curl %s -o '%s'",URL_OBSUTIL,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_OBSUTIL,filename_temp_zip);
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
@@ -383,21 +383,21 @@ obsutil:
             }
         }
 #ifdef __APPLE__
-        snprintf(cmdline,2047,"tar zxf '%s' -C %s",filename_temp_zip,NOW_BINARY_DIR);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf '%s' -C %s",filename_temp_zip,NOW_BINARY_DIR);
 #else
-        snprintf(cmdline,2047,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
 #endif
         system(cmdline);
 #ifndef _WIN32
-        snprintf(cmdline,2047,"chmod -R 711 %s%sobsutil_* %s",NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod -R 711 %s%sobsutil_* %s",NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
 #endif
-        snprintf(cmdline,2047,"%s %s%sobsutil_%s_amd64_* %s%sobsutil %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,FILENAME_SUFFIX_FULL,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sobsutil_%s_amd64_* %s%sobsutil %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,FILENAME_SUFFIX_FULL,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
 #ifdef _WIN32
-        snprintf(cmdline,2047,"%s %s%sobsutil%sobsutil.exe %s%sobsutil.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sobsutil%sobsutil.exe %s%sobsutil.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
 #else
-        snprintf(cmdline,2047,"%s %s%sobsutil%sobsutil %s%sobsutil.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sobsutil%sobsutil %s%sobsutil.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
 #endif
         system(cmdline);
     }
@@ -408,21 +408,21 @@ bcecmd:
     if(silent_flag!=0){
         printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 5/7 ..." RESET_DISPLAY "\n");
     }
-    snprintf(filename_temp,511,"%s%sbcecmd.exe",NOW_BINARY_DIR,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbcecmd.exe",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef _WIN32
-    snprintf(filename_temp_zip,511,"%s%swindows-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%swindows-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #elif __linux__
-    snprintf(filename_temp_zip,511,"%s%slinux-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%slinux-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #elif __APPLE__
-    snprintf(filename_temp_zip,511,"%s%smac-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%smac-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
         printf("|          Dataman component 5 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
-            snprintf(cmdline,2047,"curl %s -o %s",URL_BCECMD,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_BCECMD,filename_temp_zip);
 #else
-            snprintf(cmdline,2047,"curl %s -o '%s'",URL_BCECMD,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_BCECMD,filename_temp_zip);
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
@@ -433,23 +433,23 @@ bcecmd:
             }
         }
 #ifdef _WIN32
-        snprintf(cmdline,2047,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
-        snprintf(cmdline,2047,"%s %s%swindows-bcecmd-0.4.1%sbcecmd.exe %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%swindows-bcecmd-0.4.1%sbcecmd.exe %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
 #elif __linux__
-        snprintf(cmdline,2047,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,2047,"%s %s%slinux-bcecmd-0.4.1%sbcecmd %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%slinux-bcecmd-0.4.1%sbcecmd %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,2047,"chmod +x %s",filename_temp);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",filename_temp);
         system(cmdline);
 #elif __APPLE__
-        snprintf(cmdline,2047,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,2047,"%s %s%smac-bcecmd-0.4.1%sbcecmd %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%smac-bcecmd-0.4.1%sbcecmd %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,2047,"chmod +x %s",filename_temp);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",filename_temp);
         system(cmdline);
 #endif
     }
@@ -460,21 +460,21 @@ azcopy:
     if(silent_flag!=0){
         printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 6/7 ..." RESET_DISPLAY "\n");
     }
-    snprintf(filename_temp,511,"%s%sazcopy.exe",NOW_BINARY_DIR,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sazcopy.exe",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef _WIN32
-    snprintf(filename_temp_zip,511,"%s%sazcopy_windows_amd64_10.20.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_windows_amd64_10.20.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #elif __linux__
-    snprintf(filename_temp_zip,511,"%s%sazcopy_linux_amd64_10.20.1.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_linux_amd64_10.20.1.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
 #elif __APPLE__
-    snprintf(filename_temp_zip,511,"%s%sazcopy_darwin_amd64_10.20.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_darwin_amd64_10.20.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
         printf("|          Dataman component 6 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
-            snprintf(cmdline,2047,"curl %s -o %s",URL_AZCOPY,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_AZCOPY,filename_temp_zip);
 #else
-            snprintf(cmdline,2047,"curl %s -o '%s'",URL_AZCOPY,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AZCOPY,filename_temp_zip);
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
@@ -485,23 +485,23 @@ azcopy:
             }
         }
 #ifdef _WIN32
-        snprintf(cmdline,2047,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
-        snprintf(cmdline,2047,"%s %s%sazcopy_windows_amd64_10.20.1%sazcopy.exe %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sazcopy_windows_amd64_10.20.1%sazcopy.exe %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
 #elif __linux__
-        snprintf(cmdline,2047,"tar zxf '%s' -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf '%s' -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,2047,"%s %s%sazcopy_linux_amd64_10.20.1%sazcopy %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sazcopy_linux_amd64_10.20.1%sazcopy %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,2047,"chmod +x %s",filename_temp);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",filename_temp);
         system(cmdline);
 #elif __APPLE__
-        snprintf(cmdline,2047,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,2047,"%s %s%sazcopy_darwin_amd64_10.20.1%sazcopy %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sazcopy_darwin_amd64_10.20.1%sazcopy %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,2047,"chmod +x %s",filename_temp);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",filename_temp);
         system(cmdline);
 #endif
     }
@@ -518,21 +518,21 @@ gcloud_cli:
         }
         goto end_return;
     }
-    snprintf(filename_temp,511,"%s%sgoogle-cloud-sdk%sbin%sgcloud",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sgoogle-cloud-sdk%sbin%sgcloud",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,PATH_SLASH);
 #ifdef _WIN32
-    snprintf(filename_temp_zip,511,"%s%sgoogle-cloud-sdk-449.0.0-windows-x86_64-bundled-python.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sgoogle-cloud-sdk-449.0.0-windows-x86_64-bundled-python.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #elif __linux__
-    snprintf(filename_temp_zip,511,"%s%sgoogle-cloud-cli-449.0.0-linux-x86_64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sgoogle-cloud-cli-449.0.0-linux-x86_64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
 #elif __APPLE__
-    snprintf(filename_temp_zip,511,"%s%sgoogle-cloud-cli-449.0.0-darwin-x86_64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sgoogle-cloud-cli-449.0.0-darwin-x86_64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
         printf("|          Dataman component 7 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
-            snprintf(cmdline,2047,"curl %s -o %s",URL_GCLOUD,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_GCLOUD,filename_temp_zip);
 #else
-            snprintf(cmdline,2047,"curl %s -o '%s'",URL_GCLOUD,filename_temp_zip);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_GCLOUD,filename_temp_zip);
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
@@ -543,10 +543,10 @@ gcloud_cli:
             }
         }
 #ifdef _WIN32
-        snprintf(cmdline,2047,"tar xf %s -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar xf %s -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
 #else
-        snprintf(cmdline,2047,"tar zxf '%s' -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf '%s' -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
 #endif
     }
@@ -612,18 +612,18 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
         return 1;
     }
 
-    snprintf(provider_zip,511,"%s%sterraform-provider-%s_%s_%s_amd64.zip",TF_LOCAL_PLUGINS,PATH_SLASH,cloud_name,provider_version,FILENAME_SUFFIX_FULL);
-    snprintf(provider_dir_tf,447,"%s%sregistry.terraform.io%s%s%s%s%s%s%s%s_amd64%s",plugin_root_path,PATH_SLASH,PATH_SLASH,provider_prefix,PATH_SLASH,cloud_name,PATH_SLASH,provider_version,PATH_SLASH,FILENAME_SUFFIX_FULL,PATH_SLASH);
-    snprintf(provider_dir_tofu,447,"%s%sregistry.opentofu.org%s%s%s%s%s%s%s%s_amd64%s",plugin_root_path,PATH_SLASH,PATH_SLASH,provider_prefix,PATH_SLASH,cloud_name,PATH_SLASH,provider_version,PATH_SLASH,FILENAME_SUFFIX_FULL,PATH_SLASH);
-    snprintf(provider_exec_tf,511,"%s%sterraform-provider-%s_v%s%s",provider_dir_tf,PATH_SLASH,cloud_name,provider_version,provider_exec_suffix);
-    snprintf(provider_exec_tofu,511,"%s%sterraform-provider-%s_v%s%s",provider_dir_tofu,PATH_SLASH,cloud_name,provider_version,provider_exec_suffix);
+    snprintf(provider_zip,FILENAME_LENGTH-1,"%s%sterraform-provider-%s_%s_%s_amd64.zip",TF_LOCAL_PLUGINS,PATH_SLASH,cloud_name,provider_version,FILENAME_SUFFIX_FULL);
+    snprintf(provider_dir_tf,DIR_LENGTH_EXT-1,"%s%sregistry.terraform.io%s%s%s%s%s%s%s%s_amd64%s",plugin_root_path,PATH_SLASH,PATH_SLASH,provider_prefix,PATH_SLASH,cloud_name,PATH_SLASH,provider_version,PATH_SLASH,FILENAME_SUFFIX_FULL,PATH_SLASH);
+    snprintf(provider_dir_tofu,DIR_LENGTH_EXT-1,"%s%sregistry.opentofu.org%s%s%s%s%s%s%s%s_amd64%s",plugin_root_path,PATH_SLASH,PATH_SLASH,provider_prefix,PATH_SLASH,cloud_name,PATH_SLASH,provider_version,PATH_SLASH,FILENAME_SUFFIX_FULL,PATH_SLASH);
+    snprintf(provider_exec_tf,FILENAME_LENGTH-1,"%s%sterraform-provider-%s_v%s%s",provider_dir_tf,PATH_SLASH,cloud_name,provider_version,provider_exec_suffix);
+    snprintf(provider_exec_tofu,FILENAME_LENGTH-1,"%s%sterraform-provider-%s_v%s%s",provider_dir_tofu,PATH_SLASH,cloud_name,provider_version,provider_exec_suffix);
 
     if(folder_exist_or_not(provider_dir_tf)!=0){
-        snprintf(cmdline,2047,"%s \"%s\" %s",MKDIR_CMD,provider_dir_tf,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,provider_dir_tf,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     if(folder_exist_or_not(provider_dir_tofu)!=0){
-        snprintf(cmdline,2047,"%s \"%s\" %s",MKDIR_CMD,provider_dir_tofu,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,provider_dir_tofu,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 
@@ -636,20 +636,20 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
         if(file_check_flag==1){
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
-                snprintf(cmdline,2047,"copy /y %s\\tf-win\\terraform-provider-%s_%s_windows_amd64.zip %s",url_tf_root_var,cloud_name,provider_version,provider_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"copy /y %s\\tf-win\\terraform-provider-%s_%s_windows_amd64.zip %s",url_tf_root_var,cloud_name,provider_version,provider_zip);
 #elif __linux__
-                snprintf(cmdline,2047,"/bin/cp %s/tf-linux/terraform-provider-%s_%s_linux_amd64.zip '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"/bin/cp %s/tf-linux/terraform-provider-%s_%s_linux_amd64.zip '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
 #elif __APPLE__
-                snprintf(cmdline,2047,"/bin/cp %s/tf-darwin/terraform-provider-%s_%s_darwin_amd64.zip '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"/bin/cp %s/tf-darwin/terraform-provider-%s_%s_darwin_amd64.zip '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
 #endif
             }
             else{
 #ifdef _WIN32
-                snprintf(cmdline,2047,"curl %stf-win/terraform-provider-%s_%s_windows_amd64.zip -o %s",url_tf_root_var,cloud_name,provider_version,provider_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf-win/terraform-provider-%s_%s_windows_amd64.zip -o %s",url_tf_root_var,cloud_name,provider_version,provider_zip);
 #elif __linux__
-                snprintf(cmdline,2047,"curl %stf-linux/terraform-provider-%s_%s_linux_amd64.zip -o '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf-linux/terraform-provider-%s_%s_linux_amd64.zip -o '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
 #elif __APPLE__
-                snprintf(cmdline,2047,"curl %stf-darwin/terraform-provider-%s_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf-darwin/terraform-provider-%s_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,cloud_name,provider_version,provider_zip);
 #endif
             }
             run_flag=system(cmdline);
@@ -660,9 +660,9 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
         }
         if(file_check_flag_tf==1){
 #ifdef _WIN32
-            snprintf(cmdline,2047,"tar zxf %s -C %s %s",provider_zip,provider_dir_tf,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s %s",provider_zip,provider_dir_tf,SYSTEM_CMD_REDIRECT);
 #else
-            snprintf(cmdline,2047,"unzip -o -q '%s' -d '%s' %s",provider_zip,provider_dir_tf,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d '%s' %s",provider_zip,provider_dir_tf,SYSTEM_CMD_REDIRECT);
 #endif
             run_flag=system(cmdline);
             if(run_flag!=0){
@@ -672,9 +672,9 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
         }
         if(file_check_flag_tofu==1){
 #ifdef _WIN32
-            snprintf(cmdline,2047,"tar zxf %s -C %s %s",provider_zip,provider_dir_tofu,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s %s",provider_zip,provider_dir_tofu,SYSTEM_CMD_REDIRECT);
 #else
-            snprintf(cmdline,2047,"unzip -o -q '%s' -d '%s' %s",provider_zip,provider_dir_tofu,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d '%s' %s",provider_zip,provider_dir_tofu,SYSTEM_CMD_REDIRECT);
 #endif
             run_flag=system(cmdline);
             if(run_flag!=0){
@@ -709,12 +709,12 @@ int check_and_install_prerequisitions(int repair_flag){
     file_p=fopen("c:\\programdata\\appdata.txt.tmp","r");
     fscanf(file_p,"%127s",appdata_dir);
     fclose(file_p);
-    snprintf(cmdline,2047,"del /f /s /q c:\\programdata\\appdata.txt.tmp %s",SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"del /f /s /q c:\\programdata\\appdata.txt.tmp %s",SYSTEM_CMD_REDIRECT);
     system(cmdline);
     get_seq_nstring(appdata_dir,'\\',3,home_path,64);
     snprintf(dotssh_dir,127,"c:\\users\\%s\\.ssh",home_path);
     if(folder_exist_or_not(TF_LOCAL_PLUGINS)!=0){
-        snprintf(cmdline,2047,"%s %s %s",MKDIR_CMD,TF_LOCAL_PLUGINS,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,TF_LOCAL_PLUGINS,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 #endif
@@ -735,7 +735,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create SSHkey for this installation. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
-    snprintf(cmdline,2047,"%s %s%sworkdir %s",MKDIR_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sworkdir %s",MKDIR_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
 
     if(repair_flag==1){
@@ -746,7 +746,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the environment for HPC-NOW services ...\n");
     }
 
-    snprintf(filename_temp,511,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0||repair_flag==1||repair_flag==2){
         printf("|        . Checking whether Google Cloud Platform (GCP) is accessible ...\n");
         check_internet_google();
@@ -858,29 +858,29 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
     if(folder_exist_or_not(DESTROYED_DIR)!=0){
-        snprintf(cmdline,2047,"%s \"%s\" %s",MKDIR_CMD,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     else{
-        snprintf(cmdline,2047,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     if(folder_exist_or_not(NOW_BINARY_DIR)!=0){
-        snprintf(cmdline,2047,"%s \"%s\" %s",MKDIR_CMD,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 #ifdef _WIN32
-    snprintf(dirname_temp,383,"%s\\terraform.d\\",appdata_dir);
-    snprintf(filename_temp_zip,511,"%s\\terraform_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,terraform_version_var);
+    snprintf(dirname_temp,DIR_LENGTH-1,"%s\\terraform.d\\",appdata_dir);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s\\terraform_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,terraform_version_var);
 #elif __linux__
-    strncpy(dirname_temp,TF_LOCAL_PLUGINS,383);
-    snprintf(filename_temp_zip,511,"%sterraform_%s_linux_amd64.zip",dirname_temp,terraform_version_var);
+    strncpy(dirname_temp,TF_LOCAL_PLUGINS,DIR_LENGTH-1);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%sterraform_%s_linux_amd64.zip",dirname_temp,terraform_version_var);
 #elif __APPLE__
-    strncpy(dirname_temp,TF_LOCAL_PLUGINS,383);
-    snprintf(filename_temp_zip,511,"%sterraform_%s_darwin_amd64.zip",dirname_temp,terraform_version_var);
+    strncpy(dirname_temp,TF_LOCAL_PLUGINS,DIR_LENGTH-1);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%sterraform_%s_darwin_amd64.zip",dirname_temp,terraform_version_var);
 #endif
     if(folder_exist_or_not(dirname_temp)!=0){
-        snprintf(cmdline,2047,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     file_check_flag=file_validity_check(TERRAFORM_EXEC,force_repair_flag,md5_tf_exec_var);
@@ -891,20 +891,20 @@ int check_and_install_prerequisitions(int repair_flag){
             printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
-                snprintf(cmdline,2047,"copy /y %s\\tf-win\\terraform_%s_windows_amd64.zip %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"copy /y %s\\tf-win\\terraform_%s_windows_amd64.zip %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __linux__
-                snprintf(cmdline,2047,"/bin/cp %s/tf-linux/terraform_%s_linux_amd64.zip '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"/bin/cp %s/tf-linux/terraform_%s_linux_amd64.zip '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __APPLE__
-                snprintf(cmdline,2047,"/bin/cp %s/tf-darwin/terraform_%s_darwin_amd64.zip '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"/bin/cp %s/tf-darwin/terraform_%s_darwin_amd64.zip '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #endif
             }
             else{
 #ifdef _WIN32
-                snprintf(cmdline,2047,"curl %stf-win/terraform_%s_windows_amd64.zip -o %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf-win/terraform_%s_windows_amd64.zip -o %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __linux__
-                snprintf(cmdline,2047,"curl %stf-linux/terraform_%s_linux_amd64.zip -o '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf-linux/terraform_%s_linux_amd64.zip -o '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #elif __APPLE__
-                snprintf(cmdline,2047,"curl %stf-darwin/terraform_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf-darwin/terraform_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,terraform_version_var,filename_temp_zip);
 #endif
             }
             flag=system(cmdline);
@@ -916,11 +916,11 @@ int check_and_install_prerequisitions(int repair_flag){
         }
 //        printf("%s,,,,,\"\n",cmdline);
 #ifdef _WIN32
-        snprintf(cmdline,2047,"tar zxf %s -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
 #elif __linux__
-        snprintf(cmdline,2047,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
-        snprintf(cmdline,2047,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
 #endif
 //        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
@@ -930,7 +930,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }        
     }
 #ifndef _WIN32
-        snprintf(cmdline,2047,"chmod +x %s",TERRAFORM_EXEC);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",TERRAFORM_EXEC);
         system(cmdline);
 #endif
     if(repair_flag==1){
@@ -938,11 +938,11 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 
 #ifdef _WIN32
-    snprintf(filename_temp_zip,511,"%s\\tofu_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,tofu_version_var);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s\\tofu_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,tofu_version_var);
 #elif __linux__
-    snprintf(filename_temp_zip,511,"%stofu_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,tofu_version_var);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%stofu_%s_linux_amd64.zip",TF_LOCAL_PLUGINS,tofu_version_var);
 #elif __APPLE__
-    snprintf(filename_temp_zip,511,"%stofu_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,tofu_version_var);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%stofu_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,tofu_version_var);
 #endif
     file_check_flag=file_validity_check(TOFU_EXEC,force_repair_flag,md5_tofu_exec_var);
     if(file_check_flag==1){
@@ -952,20 +952,20 @@ int check_and_install_prerequisitions(int repair_flag){
             printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
-                snprintf(cmdline,2047,"copy /y %s\\tf-win\\tofu_%s_windows_amd64.zip %s",url_tf_root_var,tofu_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"copy /y %s\\tf-win\\tofu_%s_windows_amd64.zip %s",url_tf_root_var,tofu_version_var,filename_temp_zip);
 #elif __linux__
-                snprintf(cmdline,2047,"/bin/cp %s/tf-linux/tofu_%s_linux_amd64.zip '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"/bin/cp %s/tf-linux/tofu_%s_linux_amd64.zip '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
 #elif __APPLE__
-                snprintf(cmdline,2047,"/bin/cp %s/tf-darwin/tofu_%s_darwin_amd64.zip '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"/bin/cp %s/tf-darwin/tofu_%s_darwin_amd64.zip '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
 #endif
             }
             else{
 #ifdef _WIN32
-                snprintf(cmdline,2047,"curl %stf-win/tofu_%s_windows_amd64.zip -o %s",url_tf_root_var,tofu_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf-win/tofu_%s_windows_amd64.zip -o %s",url_tf_root_var,tofu_version_var,filename_temp_zip);
 #elif __linux__
-                snprintf(cmdline,2047,"curl %stf-linux/tofu_%s_linux_amd64.zip -o '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf-linux/tofu_%s_linux_amd64.zip -o '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
 #elif __APPLE__
-                snprintf(cmdline,2047,"curl %stf-darwin/tofu_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf-darwin/tofu_%s_darwin_amd64.zip -o '%s'",url_tf_root_var,tofu_version_var,filename_temp_zip);
 #endif
             }
             flag=system(cmdline);
@@ -977,11 +977,11 @@ int check_and_install_prerequisitions(int repair_flag){
         }
 //        printf("%s,,,,,\"\n",cmdline);
 #ifdef _WIN32
-        snprintf(cmdline,2047,"tar zxf %s -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
 #elif __linux__
-        snprintf(cmdline,2047,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
-        snprintf(cmdline,2047,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
 #endif
 //        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
@@ -991,7 +991,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }        
     }
 #ifndef _WIN32
-        snprintf(cmdline,2047,"chmod +x %s",TOFU_EXEC);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",TOFU_EXEC);
         system(cmdline);
 #endif
     if(repair_flag==1){
@@ -1004,20 +1004,20 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         if(now_crypto_loc_flag_var==1){
 #ifdef _WIN32
-            snprintf(cmdline,2047,"copy /y %s\\now-crypto-aes-win.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"copy /y %s\\now-crypto-aes-win.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __linux__
-            snprintf(cmdline,2047,"/bin/cp %s/now-crypto-aes-lin.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"/bin/cp %s/now-crypto-aes-lin.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __APPLE__
-            snprintf(cmdline,2047,"/bin/cp %s/now-crypto-aes-dwn.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"/bin/cp %s/now-crypto-aes-dwn.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #endif
         }
         else{
 #ifdef _WIN32
-            snprintf(cmdline,2047,"curl %snow-crypto-aes-win.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %snow-crypto-aes-win.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __linux__
-            snprintf(cmdline,2047,"curl %snow-crypto-aes-lin.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %snow-crypto-aes-lin.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #elif __APPLE__
-            snprintf(cmdline,2047,"curl %snow-crypto-aes-dwn.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %snow-crypto-aes-dwn.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #endif
         }
 //        printf("%s,,,,,\"\n",cmdline);
@@ -1029,7 +1029,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
 #ifndef _WIN32
-        snprintf(cmdline,2047,"chmod +x %s",NOW_CRYPTO_EXEC);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",NOW_CRYPTO_EXEC);
         system(cmdline);
 #endif
     if(repair_flag==1){
@@ -1037,7 +1037,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 
 #ifdef _WIN32
-    snprintf(filename_temp,511,"%s\\.terraformrc",appdata_dir);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s\\.terraformrc",appdata_dir);
     if(file_exist_or_not(filename_temp)!=0){
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"privider_installation {\n");
@@ -1073,9 +1073,9 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        . Checking and repairing the TF Providers ... \n");
     }
 #ifdef _WIN32
-    snprintf(plugin_dir_root,383,"%s\\terraform.d\\plugins\\",appdata_dir);
+    snprintf(plugin_dir_root,DIR_LENGTH-1,"%s\\terraform.d\\plugins\\",appdata_dir);
 #else
-    snprintf(plugin_dir_root,383,"%s/plugins/",TF_LOCAL_PLUGINS);
+    snprintf(plugin_dir_root,DIR_LENGTH-1,"%s/plugins/",TF_LOCAL_PLUGINS);
 #endif
     if(repair_provider(plugin_dir_root,"alicloud",ali_tf_plugin_version_var,md5_ali_tf_var,md5_ali_tf_zip_var,force_repair_flag,"1/7")!=0){
         return 3;
@@ -1110,7 +1110,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(WARN_YELLO_BOLD "[ -WARN- ] IMPORTANT! The dataman component %d may not work properly." RESET_DISPLAY "\n",flag);
     }
     if(folder_exist_or_not(SSHKEY_DIR)!=0){
-        snprintf(cmdline,2047,"%s \"%s\" %s",MKDIR_CMD,SSHKEY_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,SSHKEY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     if(file_exist_or_not(USAGE_LOG_FILE)!=0){
@@ -1124,14 +1124,14 @@ int check_and_install_prerequisitions(int repair_flag){
         printf("|        . Checking and repairing the key folders and environment variables ... \n");
     }
 #ifdef _WIN32
-    snprintf(filename_temp,511,"c:\\users\\%s\\.cos.yaml",home_path);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"c:\\users\\%s\\.cos.yaml",home_path);
     if(file_exist_or_not(filename_temp)!=0){
-        snprintf(cmdline,2047,"type nul > %s",filename_temp);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"type nul > %s",filename_temp);
         system(cmdline);
     }
-    snprintf(cmdline,2047,"takeown /f %s /r /d y %s",SSHKEY_DIR,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"takeown /f %s /r /d y %s",SSHKEY_DIR,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
-    snprintf(cmdline,2047,"del /f /q %s\\known_hosts* >nul 2>&1",dotssh_dir);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"del /f /q %s\\known_hosts* >nul 2>&1",dotssh_dir);
 #elif __linux__
     if(file_exist_or_not("/home/hpc-now/.cos.yaml")!=0){
         system("echo \"\" > /home/hpc-now/.cos.yaml");
@@ -1140,7 +1140,7 @@ int check_and_install_prerequisitions(int repair_flag){
         strcpy(cmdline,"export PATH=/home/hpc-now/.bin/:$PATH >> /home/hpc-now/.bashrc");
         system(cmdline);
     }
-    snprintf(cmdline,2047,"rm -rf /home/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"rm -rf /home/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
 #elif __APPLE__
     if(file_exist_or_not("/Users/hpc-now/.cos.yaml")!=0){
         system("echo \"\" > /Users/hpc-now/.cos.yaml");
@@ -1149,11 +1149,11 @@ int check_and_install_prerequisitions(int repair_flag){
         strcpy(cmdline,"export PATH=/Users/hpc-now/.bin/:$PATH >> /Users/hpc-now/.bashrc");
         system(cmdline);
     }
-    snprintf(cmdline,2047,"rm -rf /Users/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"rm -rf /Users/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
-    snprintf(dirname_temp,383,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
-    snprintf(cmdline,2047,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(dirname_temp,DIR_LENGTH-1,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v Environment variables have been repaired.\n");

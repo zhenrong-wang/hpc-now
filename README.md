@@ -35,6 +35,9 @@
     - [**Cluster Job Management**](#cluster-job-management)
     - [**Others**](#others)
 - [**4. Contributing**](#4-contributing)
+- [**5. Appendix: HPC-NOW Directories**](#5-appendix-hpc-now-directories)
+  - [**5.1 Top-level directories:**](#51-top-level-directories)
+  - [**5.2 Sub-directories**](#52-sub-directories)
 
 # **1. Project Background**
 

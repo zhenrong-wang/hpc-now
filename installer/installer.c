@@ -136,9 +136,9 @@ int license_confirmation(void){
     char confirmation[64]="";
     printf("\n");
 #ifdef _WIN32
-    snprintf(cmdline,2047,"curl -s %s",URL_LICENSE);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %s",URL_LICENSE);
 #else
-    snprintf(cmdline,2047,"curl -s %s | more",URL_LICENSE);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %s | more",URL_LICENSE);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please read the following important information before continuing.\n");
     printf("|          You can press 'Enter' to continue reading, or press 'q' to quit reading.\n");
 #endif
@@ -255,7 +255,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
     if(system("which unzip >> /dev/null 2>&1")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Unzip not found. Install the utility 'unzip' with %s ...\n",linux_packman);
-        snprintf(cmdline1,2047,"%s install unzip -y >> /dev/null 2>&1",linux_packman);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install unzip -y >> /dev/null 2>&1",linux_packman);
         if(system(cmdline1)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install unzip. Please install it first. Exit now." RESET_DISPLAY "\n");
             return -1;
@@ -263,7 +263,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
     if(system("which curl >> /dev/null 2>&1")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Curl not found. Install the utility 'curl' with %s ...\n",linux_packman);
-        snprintf(cmdline1,2047,"%s install curl -y >> /dev/null 2>&1",linux_packman);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install curl -y >> /dev/null 2>&1",linux_packman);
         if(system(cmdline1)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install curl. Please install it first. Exit now." RESET_DISPLAY "\n");
             return -1;
@@ -273,7 +273,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("rm -rf /usr/.hpc-now/ >> /dev/null 2>&1");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");
-    strncpy(cmdline1,"useradd hpc-now -m -s /bin/bash >> /dev/null 2>&1",2047);
+    strncpy(cmdline1,"useradd hpc-now -m -s /bin/bash >> /dev/null 2>&1",CMDLINE_LENGTH-1);
     if(system(cmdline1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
@@ -347,37 +347,37 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     if(hpcopr_loc_flag==-1){
         if(strlen(hpcopr_ver)==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the latest 'hpcopr' from the default URL.\n");
-            snprintf(cmdline1,2047,"curl -s %shpcopr-%s-latest.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,HPCOPR_EXEC);
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %shpcopr-%s-latest.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,HPCOPR_EXEC);
         }
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the %s version 'hpcopr' from the default repo.\n",hpcopr_ver);
             printf(WARN_YELLO_BOLD "[ -INFO- ] MAY FAIL IF %s IS NOT A VALID VERSION CODE!\n" RESET_DISPLAY,hpcopr_ver);
-            snprintf(cmdline1,2047,"curl -s %shpcopr-%s-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,hpcopr_ver,HPCOPR_EXEC);
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %shpcopr-%s-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,hpcopr_ver,HPCOPR_EXEC);
         }
     }
     else if(hpcopr_loc_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the main program 'hpcopr' from the specified URL:\n");
         printf("|       -> %s\n",hpcopr_loc);
-        snprintf(cmdline1,2047,"curl -s %s -o %s",hpcopr_loc,HPCOPR_EXEC);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o %s",hpcopr_loc,HPCOPR_EXEC);
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the main program 'hpcopr' from local place:\n");
         printf("|       -> %s\n",hpcopr_loc);
-        snprintf(cmdline1,2047,"%s %s %s %s ",COPY_FILE_CMD,hpcopr_loc,HPCOPR_EXEC,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s %s %s %s ",COPY_FILE_CMD,hpcopr_loc,HPCOPR_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
     if(crypto_loc_flag==-1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto' from the default URL.\n");
-        snprintf(cmdline2,2047,"curl -s %snow-crypto-aes-%s.exe -o %s",DEFAULT_URL_NOW_CRYPTO,FILENAME_SUFFIX_SHORT,NOW_CRYPTO_EXEC);
+        snprintf(cmdline2,CMDLINE_LENGTH-1,"curl -s %snow-crypto-aes-%s.exe -o %s",DEFAULT_URL_NOW_CRYPTO,FILENAME_SUFFIX_SHORT,NOW_CRYPTO_EXEC);
     }
     else if(crypto_loc_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto' from the specified URL:\n");
         printf("|       -> %s\n",now_crypto_loc);
-        snprintf(cmdline2,2047,"curl -s %s -o %s",now_crypto_loc,NOW_CRYPTO_EXEC);
+        snprintf(cmdline2,CMDLINE_LENGTH-1,"curl -s %s -o %s",now_crypto_loc,NOW_CRYPTO_EXEC);
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the component 'now-crypto' from local place:\n");
         printf("|       -> %s\n",now_crypto_loc);
-        snprintf(cmdline2,2047,"%s %s %s %s",COPY_FILE_CMD,now_crypto_loc,NOW_CRYPTO_EXEC,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline2,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,now_crypto_loc,NOW_CRYPTO_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
     run_flag1=system(cmdline1);
     run_flag2=system(cmdline2);
@@ -401,7 +401,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         system("net user hpc-now /delete > nul 2>&1");
         return -1;
     }
-    snprintf(cmdline1,2047,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE",URL_LICENSE);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE",URL_LICENSE);
     system(cmdline1);
     system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
@@ -409,7 +409,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
     if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
-        snprintf(cmdline1,2047,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
         system(cmdline1);
     }
     if(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
@@ -457,19 +457,19 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         strcpy(cmdline1,"echo \"export PATH=/home/hpc-now/.bin/:$PATH\" >> /home/hpc-now/.bashrc");
         system(cmdline1);
     }
-    snprintf(cmdline1,2047,"chmod +x %s && chmod +x %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating other key running directories ...\n");
     system("mkdir -p /home/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
     system("mkdir -p /usr/.hpc-now/.now-ssh/ >> /dev/null 2>&1");
-    snprintf(cmdline1,2047,"curl -s %s -o /home/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o /home/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
     system(cmdline1);
     system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /home/hpc-now >> /dev/null 2>&1");
     system("chmod 711 /home/hpc-now >> /dev/null 2>&1");
     system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
-    snprintf(cmdline1,2047,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     if(system("grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
         system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
@@ -481,7 +481,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
     if(rdp_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Installing Remmina - the RDP client for GNU/Linux now ...\n");
-        snprintf(cmdline1,2047,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
         if(system(cmdline1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install Remmina, RDP won't work properly." RESET_DISPLAY "\n");
         }
@@ -490,7 +490,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
     }
     if(system("which xclip >> /dev/null 2>&1")==0){
-        snprintf(cmdline1,2047,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
         system(cmdline1);
     }
 linux_install_done:
@@ -529,19 +529,19 @@ linux_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Setting up environment variables for 'hpc-now' ...\n");
     strcpy(cmdline1,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
     system(cmdline1);
-    snprintf(cmdline1,2047,"chmod +x %s && chmod +x %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating other key running directories ...\n");
     system("mkdir -p /Users/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
     system("mkdir -p /Applications/.hpc-now/.now-ssh/ >> /dev/null 2>&1");
-    snprintf(cmdline1,2047,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
     system(cmdline1);
     system("mkdir -p '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chmod -R 755 '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chown -R hpc-now:hpc-now '/Library/Application Support/io.terraform' >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Users/hpc-now >> /dev/null 2>&1");
     system("chmod 711 /Users/hpc-now >> /dev/null 2>&1");
     system("chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
-    snprintf(cmdline1,2047,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the Microsoft RDP Client now ...\n");
     if(file_exist_or_not("/Applications/msrdp.app")==0){
@@ -553,7 +553,7 @@ linux_install_done:
         goto mac_install_done;
     }
     if(file_exist_or_not("/Users/Shared/rdp_for_mac.zip")!=0){
-        snprintf(cmdline1,2047,"mkdir -p /Users/Shared/ && curl %s -o /Users/Shared/rdp_for_mac.zip",URL_MSRDP_FOR_MAC);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"mkdir -p /Users/Shared/ && curl %s -o /Users/Shared/rdp_for_mac.zip",URL_MSRDP_FOR_MAC);
         if(system(cmdline1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download the package, RDP won't work properly." RESET_DISPLAY "\n");
             goto mac_install_done;
@@ -730,7 +730,7 @@ int uninstall_services(void){
         while(!feof(file_p)){
             fngetline(file_p,line_buffer,LINE_LENGTH_SHORT);
             get_seq_nstring(line_buffer,' ',2,pid,16);
-            snprintf(cmdline,2047,"taskkill /pid %s > nul 2>&1",pid);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"taskkill /pid %s > nul 2>&1",pid);
             system(cmdline);
         }
         fclose(file_p);
@@ -863,37 +863,37 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     if(hpcopr_loc_flag==-1){
         if(strlen(hpcopr_ver)==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the latest 'hpcopr' from the default URL.\n");
-            snprintf(cmdline1,2047,"curl -s %shpcopr-%s-latest.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,HPCOPR_EXEC);
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %shpcopr-%s-latest.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,HPCOPR_EXEC);
         }
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the %s version 'hpcopr' from the default repo.\n",hpcopr_ver);
             printf(WARN_YELLO_BOLD "[ -INFO- ] MAY FAIL IF %s IS NOT A VALID VERSION CODE!\n" RESET_DISPLAY,hpcopr_ver);
-            snprintf(cmdline1,2047,"curl -s %shpcopr-%s-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,hpcopr_ver,HPCOPR_EXEC);
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %shpcopr-%s-%s.exe -o %s",DEFAULT_URL_HPCOPR_LATEST,FILENAME_SUFFIX_SHORT,hpcopr_ver,HPCOPR_EXEC);
         }
     }
     else if(hpcopr_loc_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the main program 'hpcopr' from the specified URL:\n");
         printf("|       -> %s\n",hpcopr_loc);
-        snprintf(cmdline1,2047,"curl -s %s -o %s",hpcopr_loc,HPCOPR_EXEC);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o %s",hpcopr_loc,HPCOPR_EXEC);
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the main program 'hpcopr' from local place:\n");
         printf("|       -> %s\n",hpcopr_loc);
-        snprintf(cmdline1,2047,"%s %s %s %s ",COPY_FILE_CMD,hpcopr_loc,HPCOPR_EXEC,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s %s %s %s ",COPY_FILE_CMD,hpcopr_loc,HPCOPR_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
     if(crypto_loc_flag==-1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto' from the default URL.\n");
-        snprintf(cmdline2,2047,"curl -s %snow-crypto-aes-%s.exe -o %s",DEFAULT_URL_NOW_CRYPTO,FILENAME_SUFFIX_SHORT,NOW_CRYPTO_EXEC);
+        snprintf(cmdline2,CMDLINE_LENGTH-1,"curl -s %snow-crypto-aes-%s.exe -o %s",DEFAULT_URL_NOW_CRYPTO,FILENAME_SUFFIX_SHORT,NOW_CRYPTO_EXEC);
     }
     else if(crypto_loc_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the component 'now-crypto' from the specified URL:\n");
         printf("|       -> %s\n",now_crypto_loc);
-        snprintf(cmdline2,2047,"curl -s %s -o %s",now_crypto_loc,NOW_CRYPTO_EXEC);
+        snprintf(cmdline2,CMDLINE_LENGTH-1,"curl -s %s -o %s",now_crypto_loc,NOW_CRYPTO_EXEC);
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will copy the component 'now-crypto' from local place:\n");
         printf("|       -> %s\n",now_crypto_loc);
-        snprintf(cmdline2,2047,"%s %s %s %s",COPY_FILE_CMD,now_crypto_loc,NOW_CRYPTO_EXEC,SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline2,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,now_crypto_loc,NOW_CRYPTO_EXEC,SYSTEM_CMD_REDIRECT_NULL);
     }
     run_flag1=system(cmdline1);
     run_flag2=system(cmdline2);
@@ -921,7 +921,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #ifdef _WIN32
     system("mkdir c:\\hpc-now\\hpc-now.licenses > nul 2>&1");
     if(file_exist_or_not("C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE")!=0){
-        snprintf(cmdline1,2047,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE",URL_LICENSE);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE",URL_LICENSE);
         system(cmdline1);
     }
     system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
@@ -930,7 +930,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("icacls c:\\programdata\\hpc-now\\* /deny Administrators:F > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
     if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
-        snprintf(cmdline1,2047,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
         system(cmdline1);
     }
     if(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
@@ -951,7 +951,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #elif __linux__
     system("mkdir -p /home/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
     if(file_exist_or_not("/home/hpc-now/hpc-now.licenses/MIT.LICENSE")!=0){
-        snprintf(cmdline1,2047,"curl -s %s -o /home/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o /home/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
         system(cmdline1);
     }
     system("chown -R hpc-now:hpc-now /home/hpc-now >> /dev/null 2>&1");
@@ -963,10 +963,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         system("chmod -R 700 /usr/.hpc-now/ >> /dev/null 2>&1");
     }
     system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
-    snprintf(cmdline1,2047,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
-    snprintf(cmdline1,2047,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
     if(system("grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
         system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
@@ -991,7 +991,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     if(rdp_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Installing Remmina - the RDP client for GNU/Linux now ...\n");
-        snprintf(cmdline1,2047,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
         if(system(cmdline1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install Remmina, RDP won't work properly." RESET_DISPLAY "\n");
         }
@@ -1000,13 +1000,13 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
     }
     if(system("which xclip >> /dev/null 2>&1")==0){
-        snprintf(cmdline1,2047,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
         system(cmdline1);
     }
 #elif __APPLE__
     system("mkdir -p /Users/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
     if(file_exist_or_not("/Users/hpc-now/hpc-now.licenses/MIT.LICENSE")!=0){
-        snprintf(cmdline1,2047,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
         system(cmdline1);
     }
     system("chown -R hpc-now:hpc-now /Users/hpc-now >> /dev/null 2>&1");
@@ -1018,10 +1018,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         system("chmod -R 700 /Applications/.hpc-now/ >> /dev/null 2>&1");
     }
     system("chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
-    snprintf(cmdline1,2047,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     system("mkdir -p '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chmod -R 755 '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chown -R hpc-now:hpc-now '/Library/Application Support/io.terraform' >> /dev/null 2>&1");
-    snprintf(cmdline1,2047,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the Microsoft RDP Client now ...\n");
     if(file_exist_or_not("/Applications/msrdp.app")==0){
@@ -1033,7 +1033,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         goto update_done;
     }
     if(file_exist_or_not("/Users/Shared/rdp_for_mac.zip")!=0){
-        snprintf(cmdline1,2047,"mkdir -p /Users/Shared/ && curl %s -o /Users/Shared/rdp_for_mac.zip",URL_MSRDP_FOR_MAC);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"mkdir -p /Users/Shared/ && curl %s -o /Users/Shared/rdp_for_mac.zip",URL_MSRDP_FOR_MAC);
         if(system(cmdline1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download the package, RDP won't work properly." RESET_DISPLAY "\n");
             goto update_done;
@@ -1068,7 +1068,7 @@ int valid_loc_format_or_not(char* loc_string){
 
 int get_valid_verlist(void){
     char cmdline[CMDLINE_LENGTH]="";
-    snprintf(cmdline,2047,"curl -s %sverlist-0.3.x.txt",DEFAULT_URL_HPCOPR_LATEST);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %sverlist-0.3.x.txt",DEFAULT_URL_HPCOPR_LATEST);
     if(system(cmdline)!=0){
         return 1;
     }
@@ -1078,18 +1078,18 @@ int get_valid_verlist(void){
 int version_valid(char* hpcopr_ver){
     char cmdline[CMDLINE_LENGTH]="";
     char ver_ext[256]="";
-    snprintf(cmdline,2047,"curl -s %sverlist-0.3.x.txt -o verlist.tmp",DEFAULT_URL_HPCOPR_LATEST);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %sverlist-0.3.x.txt -o verlist.tmp",DEFAULT_URL_HPCOPR_LATEST);
     if(system(cmdline)!=0){
         return -1;
     }
     snprintf(ver_ext,255,"< %s >",hpcopr_ver);
     if(find_multi_nkeys("verlist.tmp",LINE_LENGTH_SHORT,ver_ext,"","","","")>0){
-        snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,"verlist.tmp",SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,"verlist.tmp",SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
         return 0;
     }
     else{
-        snprintf(cmdline,2047,"%s %s %s",DELETE_FILE_CMD,"verlist.tmp",SYSTEM_CMD_REDIRECT_NULL);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,"verlist.tmp",SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
         return 1;
     }

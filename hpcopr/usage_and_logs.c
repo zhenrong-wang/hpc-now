@@ -27,7 +27,7 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
         printf("|          cluster, or there are internal errors. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
-    snprintf(logfile_temp,"%s.temp",logfile);
+    snprintf(logfile_temp,FILENAME_LENGTH-1,"%s.temp",logfile);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,logfile,logfile_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     if(strcmp(view_option,"read")==0){

@@ -36,9 +36,9 @@ int get_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* mon_data_fi
     }
     char mon_data_dir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    snprintf(mon_data_dir,383,"%s%smon_data",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    snprintf(mon_data_dir,DIR_LENGTH-1,"%s%smon_data",HPC_NOW_ROOT_DIR,PATH_SLASH);
     if(folder_exist_or_not(mon_data_dir)!=0){
-        snprintf(cmdline,2047,"%s %s %s",MKDIR_CMD,mon_data_dir,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,mon_data_dir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     sprintf(mon_data_file,"%s%smon_data_%s.csv",mon_data_dir,PATH_SLASH,cluster_name);
@@ -206,7 +206,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the monitor data of cluster " WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD" ." RESET_DISPLAY "\n", cluster_name);
         return -5;
     }
-    snprintf(mon_data_file_temp,511,"%s%smon_data%smon_data_temp.csv",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
+    snprintf(mon_data_file_temp,FILENAME_LENGTH-1,"%s%smon_data%smon_data_temp.csv",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
     file_p_2=fopen(mon_data_file_temp,"w+");
     if(file_p_2==NULL){
         return -1;
@@ -328,10 +328,10 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
     fclose(file_p);
     fclose(file_p_2);
     if(strcmp(view_option,"print")==0){
-        snprintf(cmdline,2047,"%s %s",CAT_FILE_CMD,mon_data_file_temp);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s",CAT_FILE_CMD,mon_data_file_temp);
     }
     else{
-        snprintf(cmdline,2047,"%s %s | more",CAT_FILE_CMD,mon_data_file_temp);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s | more",CAT_FILE_CMD,mon_data_file_temp);
     }
     system(cmdline);
     if(strlen(export_dest)==0){
@@ -340,14 +340,14 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
     else{
         local_path_parser(export_dest,real_export_dest);
         if(folder_exist_or_not(real_export_dest)==0){
-            snprintf(export_file,511,"%s%smon_data_cluster_%s.csv",export_dest,PATH_SLASH,cluster_name);
-            snprintf(cmdline,2047,"%s %s %s",COPY_FILE_CMD,mon_data_file_temp,export_file);
+            snprintf(export_file,FILENAME_LENGTH-1,"%s%smon_data_cluster_%s.csv",export_dest,PATH_SLASH,cluster_name);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",COPY_FILE_CMD,mon_data_file_temp,export_file);
             system(cmdline);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported to the specified folder " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",real_export_dest);
         }
         else if(file_creation_test(real_export_dest)==0){
             strcpy(export_file,real_export_dest);
-            snprintf(cmdline,2047,"%s %s %s",COPY_FILE_CMD,mon_data_file_temp,export_file);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",COPY_FILE_CMD,mon_data_file_temp,export_file);
             system(cmdline);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported to the specified file " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",export_file);
         }

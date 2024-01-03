@@ -379,7 +379,7 @@ int main(int argc, char* argv[]){
     }
 #endif
     if(folder_exist_or_not(GENERAL_CONF_DIR)!=0){
-        snprintf(cmdline,2047,"%s %s %s",MKDIR_CMD,GENERAL_CONF_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,GENERAL_CONF_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
 
