@@ -459,39 +459,73 @@ Also, please feel free to mailto:
 The hpc-now service manages 2 top-level directories and several subdirectories on your device and OS. Here is the architecture:
 
 +- **BINARY_ROOT/** - **Windows: C:\\hpc-now\\** | **GNU/Linux: /home/hpc-now/** | **macOS(Darwin) /Users/hpc-now/**
+
    +- **hpcopr** executable
+
    +- utils/
+
       +- **now-crypto-aes** executable
+
       +- **terraform/tofu** executable
+
       +- cloud utilities
+
 +- **RUNNING_ROOT/** - **Windows: C:\\ProgramData\\hpc-now\\** | **GNU/Linux: /usr/.hpc-now/** | **macOS(Darwin) /Applications/.hpc-now/**
+
    +- log_trashbin.txt
+
    +- .now_crypto_seed.lock
+
    +- .now-cluster-usage.log
+
    +- system_command_error.log
+
    +- system_command_error.log.tmp
+
    +- .now-cluster-operation.log
+
    +- .now-cluster-operation.log.tmp
+
    +- **.tmp/** - *Temporary files*
+
    +- **.now-ssh/** - *SSH keys*
+
       +- now-cluster-login.tmp
+
       +- now-cluster-login.pub
+
       +- .CLUSTER_NAME/
+
          +- USER_PRIVATE_KEYS.tmp
+
    +- **.etc/** - *General configuration files*
+
       +- .all_clusters.dat
+
       +- current_cluster.dat
+
       +- google_check.dat
+
       +- locations.conf
+
       +- md5values.conf
+
       +- tf_running.conf
+
    +- **.destroyed/** - *Files of destroyed clusters*
+
    +- **workdir/** - *Working directories for all clusters*
+
       +- CLUSTER_NAME/
+
          +- log/
+
          +- stack/
+
          +- conf/
+
          +- vault/
+         
    +- **mon_data/** - *Monitoring data of all clusters*
 
 *All the directories and files except the .now_crypto_seed.lock are set to be readable, writable, and executable only by the system user hpc-now.*
