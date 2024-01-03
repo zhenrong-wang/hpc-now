@@ -36,7 +36,7 @@
     - [**Others**](#others)
 - [**4. Contributing**](#4-contributing)
 - [**5. Appendix: HPC-NOW Directories**](#5-appendix-hpc-now-directories)
-  - [**5.1 Top-level directories:**](#51-top-level-directories)
+  - [**5.1 Top-level directories**](#51-top-level-directories)
   - [**5.2 Sub-directories**](#52-sub-directories)
 
 # **1. Project Background**
@@ -461,7 +461,7 @@ Also, please feel free to mailto:
 
 The hpc-now service manages 2 top-level directories and several subdirectories on your device and OS. Here is the architecture:
 
-## **5.1 Top-level directories:**
+## **5.1 Top-level directories**
 
 - **BINARY_ROOT** 
     - **Microsoft Windows:** C:\\hpc-now\\
