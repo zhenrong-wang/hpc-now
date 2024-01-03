@@ -459,14 +459,14 @@ Also, please feel free to mailto:
 The hpc-now service manages 2 top-level directories and several subdirectories on your device and OS. Here is the architecture:
 
 +- **BINARY_ROOT/** - **Windows: C:\\hpc-now\\** | **GNU/Linux: /home/hpc-now/** | **macOS(Darwin) /Users/hpc-now/**\
-    +- **hpcopr** executable\
-    +- **utils/**\
+&emsp;&emsp;+- **hpcopr** executable\
+&emsp;&emsp;+- **utils/**\
         +- **now-crypto-aes** executable\
         +- **terraform/tofu** executable\
         +- cloud utilities\
 +- **RUNNING_ROOT/** - **Windows: C:\\ProgramData\\hpc-now\\** | **GNU/Linux: /usr/.hpc-now/** | **macOS(Darwin) /Applications/.hpc-now/**\
-    +- log_trashbin.txt\
-    +- .now_crypto_seed.lock\
+&emsp;&emsp;+- log_trashbin.txt\
+&emsp;&emsp;+- .now_crypto_seed.lock\
     +- .now-cluster-usage.log\
     +- system_command_error.log\
     +- system_command_error.log.tmp\
