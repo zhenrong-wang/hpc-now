@@ -20,19 +20,21 @@
 
 int view_system_logs(char* logfile, char* view_option, char* export_dest){
     char cmdline[CMDLINE_LENGTH]="";
+    char logfile_temp[FILENAME_LENGTH]="";
     int run_flag;
     if(file_exist_or_not(logfile)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the specified log. Either you haven't init your first\n");
         printf("|          cluster, or there are internal errors. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.tmp %s",COPY_FILE_CMD,logfile,logfile,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(logfile_temp,"%s.temp",logfile);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,logfile,logfile_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     if(strcmp(view_option,"read")==0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"more %s.tmp",logfile);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"more %s",logfile_temp);
     }
     else{
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.tmp",CAT_FILE_CMD,logfile);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s",CAT_FILE_CMD,logfile_temp);
     }
     system(cmdline);
     if(strlen(export_dest)==0){
@@ -40,14 +42,18 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
         printf("|          Example: " HIGH_GREEN_BOLD "hpcopr history -d history.csv" RESET_DISPLAY " .\n");
         printf("|          Example: " HIGH_GREEN_BOLD "hpcopr usage -d usage.csv" RESET_DISPLAY " .\n");
         printf("|          Example: " HIGH_GREEN_BOLD "hpcopr syserr -d syserr.txt" RESET_DISPLAY " .\n");
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,logfile_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
         return 0;
     }
     else{
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,logfile,export_dest,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,logfile_temp,export_dest,SYSTEM_CMD_REDIRECT);
         run_flag=system(cmdline);
         if(run_flag!=0){
             printf(FATAL_RED_BOLD "\n[ FATAL: ] Failed to export the log to " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " .\n",export_dest);
             printf("|          Please check the path. Exit now." RESET_DISPLAY "\n");
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,logfile_temp,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
             return 1;
         }
         else{

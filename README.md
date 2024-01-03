@@ -482,9 +482,7 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 &emsp;&emsp;+- .now_crypto_seed.lock\
 &emsp;&emsp;+- .now-cluster-usage.log\
 &emsp;&emsp;+- system_command_error.log\
-&emsp;&emsp;+- system_command_error.log.tmp\
 &emsp;&emsp;+- .now-cluster-operation.log\
-&emsp;&emsp;+- .now-cluster-operation.log.tmp\
 &emsp;&emsp;+- **.tmp/** - *Temporary files*\
 &emsp;&emsp;+- **.now-ssh/** - *SSH keys*\
 &emsp;&emsp;&emsp;&emsp;+- now-cluster-login.tmp\

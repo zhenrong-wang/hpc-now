@@ -3351,6 +3351,7 @@ int cluster_name_check(char* cluster_name){
 }
 
 int check_and_cleanup(char* prev_workdir){
+    char cmdline[CMDLINE_LENGTH]="";
     char current_workdir[DIR_LENGTH]="";
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(strlen(prev_workdir)!=0){
@@ -3365,7 +3366,6 @@ int check_and_cleanup(char* prev_workdir){
     }
 #ifdef _WIN32
     FILE* file_p=NULL;
-    char cmdline[CMDLINE_LENGTH]="";
     char appdata_dir[DIR_LENGTH]="";
     system("echo %APPDATA% > c:\\programdata\\appdata.txt.tmp");
     file_p=fopen("c:\\programdata\\appdata.txt.tmp","r");
@@ -3379,7 +3379,8 @@ int check_and_cleanup(char* prev_workdir){
     snprintf(cmdline,CMDLINE_LENGTH-1,"rd /q /s %s\\Microsoft\\Windows\\Recent\\ > nul 2>&1",appdata_dir);
     system(cmdline);
 #else
-    //Keep it here for further use. 
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    system(cmdline); 
 #endif
     print_tail();
     return 0;
