@@ -458,13 +458,26 @@ Also, please feel free to mailto:
 
 The hpc-now service manages 2 top-level directories and several subdirectories on your device and OS. Here is the architecture:
 
-+- **BINARY_ROOT/** - **Windows: C:\\hpc-now\\** | **GNU/Linux: /home/hpc-now/** | **macOS(Darwin) /Users/hpc-now/**\
+## **5.1 Top-level directories:**
+
+- **BINARY_ROOT** \
+    - **Microsoft Windows:** C:\\hpc-now\\\
+    - **GNU/Linux**: /home/hpc-now/.bin/\
+    - **macOS(Darwin)**: /Users/hpc-now/.bin/\
+- **RUNNING_ROOT**\
+    - **Microsoft Windows:** C:\\ProgramData\\hpc-now\\\
+    - **GNU/Linux**: /usr/.hpc-now/\
+    - **macOS(Darwin)**: /Applications/.hpc-now/\
+
+## **5.2 Sub-directories**
+
++- **BINARY_ROOT/**\
 &emsp;&emsp;+- **hpcopr** executable\
 &emsp;&emsp;+- **utils/**\
 &emsp;&emsp;&emsp;&emsp;+- **now-crypto-aes** executable\
 &emsp;&emsp;&emsp;&emsp;+- **terraform/tofu** executable\
 &emsp;&emsp;&emsp;&emsp;+- cloud utilities\
-+- **RUNNING_ROOT/** - **Windows: C:\\ProgramData\\hpc-now\\** | **GNU/Linux: /usr/.hpc-now/** | **macOS(Darwin) /Applications/.hpc-now/**\
++- **RUNNING_ROOT/**
 &emsp;&emsp;+- log_trashbin.txt\
 &emsp;&emsp;+- .now_crypto_seed.lock\
 &emsp;&emsp;+- .now-cluster-usage.log\
