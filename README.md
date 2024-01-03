@@ -459,10 +459,8 @@ Also, please feel free to mailto:
 The hpc-now service manages 2 top-level directories and several subdirectories on your device and OS. Here is the architecture:
 
 +- **BINARY_ROOT/** - **Windows: C:\\hpc-now\\** | **GNU/Linux: /home/hpc-now/** | **macOS(Darwin) /Users/hpc-now/**
-
-   +- **hpcopr** executable
-
-   +- utils/
+   `- **hpcopr** executable
+   `- **utils/**
 
       +- **now-crypto-aes** executable
 
