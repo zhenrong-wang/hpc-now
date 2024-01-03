@@ -480,7 +480,7 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 &emsp;&emsp;&emsp;&emsp;+- **now-crypto-aes** executable\
 &emsp;&emsp;&emsp;&emsp;+- **terraform/tofu** executable\
 &emsp;&emsp;&emsp;&emsp;+- cloud utilities\
-+- **RUNNING_ROOT/**
++- **RUNNING_ROOT/**\
 &emsp;&emsp;+- log_trashbin.txt\
 &emsp;&emsp;+- .now_crypto_seed.lock\
 &emsp;&emsp;+- .now-cluster-usage.log\
@@ -507,5 +507,4 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- conf/\
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- vault/\
 &emsp;&emsp;+- **mon_data/** - *Monitoring data of all clusters*\
-
 *All the directories and files except the .now_crypto_seed.lock are set to be readable, writable, and executable only by the system user hpc-now.*
