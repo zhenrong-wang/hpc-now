@@ -460,14 +460,14 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 
 ## **5.1 Top-level directories:**
 
-- **BINARY_ROOT** \
-    - **Microsoft Windows:** C:\\hpc-now\\\
-    - **GNU/Linux**: /home/hpc-now/.bin/\
-    - **macOS(Darwin)**: /Users/hpc-now/.bin/\
-- **RUNNING_ROOT**\
-    - **Microsoft Windows:** C:\\ProgramData\\hpc-now\\\
-    - **GNU/Linux**: /usr/.hpc-now/\
-    - **macOS(Darwin)**: /Applications/.hpc-now/\
+- **BINARY_ROOT** 
+    - **Microsoft Windows:** C:\\hpc-now\\
+    - **GNU/Linux**: /home/hpc-now/.bin/
+    - **macOS(Darwin)**: /Users/hpc-now/.bin/
+- **RUNNING_ROOT**
+    - **Microsoft Windows:** C:\\ProgramData\\hpc-now\\
+    - **GNU/Linux**: /usr/.hpc-now/
+    - **macOS(Darwin)**: /Applications/.hpc-now/
 
 ## **5.2 Sub-directories**
 
