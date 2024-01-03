@@ -1234,7 +1234,7 @@ int command_name_check(char* command_name_input, char command_prompt[], unsigned
  * return 200+: command error
  */
 int command_parser(int argc, char** argv, char command_name_prompt[], unsigned int prompt_len_max, char workdir[], unsigned int dir_len_max, char cluster_name[], unsigned int cluster_name_len_max, char user_name[], unsigned int user_name_len_max, char cluster_role[], unsigned int role_len_max, int* decrypt_flag){
-    if(prompt_len_max<32||dir_len_max<DIR_LENGTH_SHORT||cluster_name_len_max<CLUSTER_ID_LENGTH_MAX_PLUS||user_name_len_max<USERNAME_LENGTH_MAX||role_len_max<8){
+    if(prompt_len_max<32||dir_len_max<DIR_LENGTH_SHORT||cluster_name_len_max<CLUSTER_ID_LENGTH_MAX_PLUS||user_name_len_max<USERNAME_LENGTH_MAX||role_len_max<6){
         return -1;
     }
     int command_flag=0;
@@ -1278,7 +1278,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
     }
 
     char role_flag[16]="";
-    char cluster_role_ext[32]="";
+    char cluster_role_ext[16]="";
     char cu_flag[16]="";
     int tf_local_config_flag=127; //will be reset to -1~3 after get_tf_running_config()function
     char filename_temp[FILENAME_LENGTH]="";
@@ -1337,7 +1337,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
         if(get_nworkdir(workdir,dir_len_max,cluster_name)!=0){
             return -9;
         }
-        cluster_role_detect(workdir,cluster_role,cluster_role_ext);
+        cluster_role_detect(workdir,cluster_role,cluster_role_ext,role_len_max);
         if(strcmp(role_flag,"opr")==0&&strcmp(cluster_role,"opr")!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " needs the " WARN_YELLO_BOLD "operator" FATAL_RED_BOLD " to execute.\n",argv[1]);
             printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Current role: %s . Please contact the operator.\n",cluster_role);
@@ -1354,7 +1354,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
         else{
             *decrypt_flag=0;
         }
-        if(check_local_tf_config(workdir,filename_temp)==0){
+        if(check_local_tf_config(workdir,filename_temp,FILENAME_LENGTH)==0){
             tf_local_config_flag=get_tf_running(&tf_this_run,filename_temp);
         }
     }

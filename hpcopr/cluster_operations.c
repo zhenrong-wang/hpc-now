@@ -60,9 +60,9 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     int temp_cluster_name_length=0;
     char temp_cluster_name_column[LINE_LENGTH_SHORT]="";
     char temp_cluster_workdir[DIR_LENGTH]="";
-    char cloud_flag[32]="";
+    char cloud_flag[16]="";
     char cluster_role[16]="";
-    char cluster_role_ext[32]="";
+    char cluster_role_ext[16]="";
     int max_cluster_name_length=0;
     int i=0;
     int j=0;
@@ -76,8 +76,11 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             fclose(file_p);
             return 1;
         }
-        get_cloud_flag(temp_cluster_workdir,cloud_flag);
-        cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext);
+        if(get_cloud_flag(temp_cluster_workdir,cloud_flag,16)!=0){
+            fclose(file_p);
+            return 1;
+        }
+        cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext,16);
         decrypt_flag=decryption_status(temp_cluster_workdir);
         status_flag=check_pslock(temp_cluster_workdir,decrypt_flag);
         if(status_flag!=0){
@@ -109,11 +112,10 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         while(fngetline(file_p,registry_line,LINE_LENGTH_SHORT)!=1){
             if(strlen(registry_line)!=0){
                 get_seq_nstring(registry_line,' ',4,temp_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS);
-                if(get_nworkdir(temp_cluster_workdir,DIR_LENGTH,temp_cluster_name)!=0){
+                if(get_nworkdir(temp_cluster_workdir,DIR_LENGTH,temp_cluster_name)!=0||get_cloud_flag(temp_cluster_workdir,cloud_flag,16)!=0){
                     continue;
                 }
-                get_cloud_flag(temp_cluster_workdir,cloud_flag);
-                cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext);
+                cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext,16);
                 if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
                     printf(GENERAL_BOLD "| switch : <> ");
                 }
@@ -170,11 +172,10 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         return 3;
     }
     else{
-        if(get_nworkdir(temp_cluster_workdir,DIR_LENGTH,target_cluster_name)!=0){
+        if(get_nworkdir(temp_cluster_workdir,DIR_LENGTH,target_cluster_name)!=0||get_cloud_flag(temp_cluster_workdir,cloud_flag,16)!=0){
             return 3;
         }
-        get_cloud_flag(temp_cluster_workdir,cloud_flag);
-        cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext);
+        cluster_role_detect(temp_cluster_workdir,cluster_role,cluster_role_ext,16);
         if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,target_cluster_name)==0){
             printf(GENERAL_BOLD "| switch : <> ");
         }
@@ -469,7 +470,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         snprintf(new_workdir,DIR_LENGTH-1,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,input_cluster_name,PATH_SLASH);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        create_and_get_vaultdir(new_workdir,new_vaultdir);
+        create_and_get_subdir(new_workdir,"vault",new_vaultdir,DIR_LENGTH);
         if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
             return -3;
@@ -622,7 +623,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     snprintf(new_workdir,DIR_LENGTH-1,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,input_cluster_name,PATH_SLASH);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    create_and_get_vaultdir(new_workdir,new_vaultdir);
+    create_and_get_subdir(new_workdir,"vault",new_vaultdir,DIR_LENGTH);
     if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
         return -3;
@@ -686,8 +687,10 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     if(prompt_to_confirm("ARE YOU SURE ?",CONFIRM_STRING,batch_flag_local)==1){
         return 1;
     }
-    get_cloud_flag(workdir,cloud_flag_prev);
-    create_and_get_vaultdir(workdir,vaultdir);
+    if(get_cloud_flag(workdir,cloud_flag_prev,32)!=0){
+        return 3;
+    }
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     if(strcmp(cloud_flag_prev,"CLOUD_G")==0){
         if(strlen(cloud_sk)==0){
             if(batch_flag_local==0){
@@ -885,7 +888,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     system(cmdline);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    create_and_get_stackdir(workdir,stackdir);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf.tmp",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
         snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
@@ -933,8 +936,8 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
         }
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster operation started ...\n");
-    create_and_get_vaultdir(workdir,vaultdir);
-    create_and_get_stackdir(workdir,stackdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     decrypt_files(workdir,crypto_keyfile);
     snprintf(dot_terraform,FILENAME_LENGTH-1,"%s%s.terraform",stackdir,PATH_SLASH);
     if(folder_exist_or_not(dot_terraform)==0){
@@ -1007,7 +1010,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
     int del_num=0;
     char filename_temp[FILENAME_LENGTH]="";
     int compute_node_num=0;
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
@@ -1015,7 +1018,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
     }
     fscanf(file_p,"%63s",unique_cluster_id);
     fclose(file_p);
-    create_and_get_stackdir(workdir,stackdir);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
@@ -1144,7 +1147,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster operation is in progress ...\n");
-    create_and_get_stackdir(workdir,stackdir);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     current_node_num=get_compute_node_num(filename_temp,"all");
     for(i=0;i<add_number;i++){
@@ -1200,7 +1203,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     char filename_temp[FILENAME_LENGTH]="";
     char node_name[16]="";
     int compute_node_num=0;
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
@@ -1208,8 +1211,10 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     }
     fscanf(file_p,"%63s",unique_cluster_id);
     fclose(file_p);
-    create_and_get_stackdir(workdir,stackdir);
-    get_cloud_flag(workdir,cloud_flag);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
+    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
+        return -1;
+    }
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
@@ -1331,7 +1336,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     char filename_temp[FILENAME_LENGTH]="";
     int compute_node_num=0;
     int compute_node_num_on=0;
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
@@ -1339,8 +1344,10 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     }
     fscanf(file_p,"%63s",unique_cluster_id);
     fclose(file_p);
-    create_and_get_stackdir(workdir,stackdir);
-    get_cloud_flag(workdir,cloud_flag);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
+    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
+        return -1;
+    }
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
@@ -1477,12 +1484,11 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     int cpu_core_num=0;
     int reinit_flag=0;
     char cmdline[CMDLINE_LENGTH]="";
-    get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
+    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
         return -5;
     }
-    create_and_get_stackdir(workdir,stackdir);
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     compute_node_num=get_compute_node_num(filename_temp,"all");
     compute_node_down_num=get_compute_node_num(filename_temp,"down");
@@ -1649,18 +1655,16 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     char cloud_flag[16]="";
     char* sshkey_dir=SSHKEY_DIR;
     int i;
-    create_and_get_stackdir(workdir,stackdir);
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
 
     if(cluster_empty_or_not(workdir)==0){
         print_empty_cluster_info();
         return -1;
     }
-    get_cloud_flag(workdir,cloud_flag);
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
+    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
         return -5;
     }
-
     decrypt_files(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     snprintf(string_temp,63,"\"%s\"",new_config);
@@ -1743,7 +1747,9 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
     int new_volume_num;
     char cloud_flag[16]="";
     char* sshkey_dir=SSHKEY_DIR;
-    get_cloud_flag(workdir,cloud_flag);
+    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
+        return 1;
+    }
     if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return 1;
     }
@@ -1763,7 +1769,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
         return 3;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Volume from %d to %d GB, this is NOT reversible!\n",prev_volume_num,new_volume_num);
-    create_and_get_stackdir(workdir,stackdir);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     decrypt_files(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.bak %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
@@ -1805,7 +1811,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     char filename_temp[FILENAME_LENGTH]="";
     char node_name[16]="";
     int compute_node_num=0;
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
@@ -1813,8 +1819,10 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     }
     fscanf(file_p,"%63s",unique_cluster_id);
     fclose(file_p);
-    create_and_get_stackdir(workdir,stackdir);
-    get_cloud_flag(workdir,cloud_flag);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
+    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
+        return -1;
+    }
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
@@ -1886,7 +1894,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     char* sshkeydir=SSHKEY_DIR;
     char node_name[16]="";
     int compute_node_num=0;
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
@@ -1894,8 +1902,10 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     }
     fscanf(file_p,"%63s",unique_cluster_id);
     fclose(file_p);
-    create_and_get_stackdir(workdir,stackdir);
-    get_cloud_flag(workdir,cloud_flag);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
+    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
+        return -1;
+    }
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
@@ -1995,13 +2005,13 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
  */
 int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     char workdir[DIR_LENGTH]="";
-    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+    char cloud_flag[32]="";
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0||get_cloud_flag(workdir,cloud_flag,32)!=0){
         return -3;
     }
     if(cluster_empty_or_not(workdir)!=0){
         return -1;
     }
-    char cloud_flag[32]="";
     char filename_temp[FILENAME_LENGTH]="";
     char url_aws_root[LOCATION_LENGTH_EXTENDED]="";
     char url_alicloud_root[LOCATION_LENGTH_EXTENDED]="";
@@ -2014,7 +2024,7 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
 
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     if(code_loc_flag_var==1){
         snprintf(url_alicloud_root,LOCATION_LENGTH_EXTENDED-1,"%s%salicloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
         snprintf(url_qcloud_root,LOCATION_LENGTH_EXTENDED-1,"%s%sqcloud%s",url_code_root_var,PATH_SLASH,PATH_SLASH);
@@ -2033,7 +2043,6 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
         snprintf(url_azure_root,LOCATION_LENGTH_EXTENDED-1,"%sazure/",url_code_root_var);
         snprintf(url_gcp_root,LOCATION_LENGTH_EXTENDED-1,"%sgcp/",url_code_root_var);
     }
-    get_cloud_flag(workdir,cloud_flag);
     snprintf(confdir,DIR_LENGTH+15,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -2196,7 +2205,8 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     if(strcmp(option,"mc")!=0&&strcmp(option,"mcdb")!=0&&strcmp(option,"all")!=0){
         return -5;
     }
-    if(cluster_empty_or_not(workdir)==0){
+    char cloud_flag[16]="";
+    if(cluster_empty_or_not(workdir)==0||get_cloud_flag(workdir,cloud_flag,16)!=0){
         return -1;
     }
     char stackdir[DIR_LENGTH]="";
@@ -2207,7 +2217,6 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     char master_tf[FILENAME_LENGTH]="";
     char user_passwords[FILENAME_LENGTH]="";
     char* sshkey_folder=SSHKEY_DIR;
-    char cloud_flag[16]="";
     char node_name[16]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char username_temp[64]="";
@@ -2238,7 +2247,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     else{
         printf("|          * Will try to rebuild " WARN_YELLO_BOLD "all" RESET_DISPLAY " the cluster nodes.\n");
     }
-    create_and_get_stackdir(workdir,stackdir);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stmp %s && %s %s%stmp%s* %s",MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_master.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -2270,7 +2279,6 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stmp %s",DELETE_FOLDER_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     decrypt_files(workdir,crypto_keyfile);
-    get_cloud_flag(workdir,cloud_flag);
     node_file_to_running(stackdir,"master",cloud_flag);
     node_file_to_running(stackdir,"natgw",cloud_flag);
     node_file_to_running(stackdir,"database",cloud_flag);
@@ -2281,7 +2289,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
         node_file_to_running(stackdir,node_name,cloud_flag);
     }
 
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     decrypt_user_passwords(workdir,crypto_keyfile);
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     snprintf(base_tf,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
@@ -2372,7 +2380,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
 int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* crypto_keyfile, tf_exec_config* tf_run){
     char workdir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
-    char cloud_flag[32]="";
+    char cloud_flag[16]="";
     char curr_payment_method[8]="";
     char statefile[FILENAME_LENGTH]="";
     if(cluster_name_check(cluster_name)!=-127){
@@ -2383,7 +2391,10 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
         return 1;
     }
-    get_cloud_flag(workdir,cloud_flag);
+    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag." RESET_DISPLAY "\n");
+        return 1;
+    }
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] This operation is not valid for the current Cloud %s. Exit now." RESET_DISPLAY "\n",cloud_flag);
         return -5;
@@ -2391,7 +2402,7 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
     if(strcmp(new_payment_method,"od")!=0&&strcmp(new_payment_method,"month")!=0){
         return -3;
     }
-    create_and_get_stackdir(workdir,stackdir);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(statefile,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     get_state_nvalue(workdir,"payment_method:",curr_payment_method,8);
     if(strcmp(curr_payment_method,new_payment_method)==0){

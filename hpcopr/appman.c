@@ -24,10 +24,10 @@
 
 int appman_update_conf(char* workdir, const char* new_inst_loc, const char* new_repo_loc, char* sshkey_dir, char* std_redirect){
     char cluster_role[16]="";
-    char cluster_role_ext[32]="";
+    char cluster_role_ext[16]="";
     char remote_commands[CMDLINE_LENGTH]="";
     int run_flag;
-    cluster_role_detect(workdir,cluster_role,cluster_role_ext);
+    cluster_role_detect(workdir,cluster_role,cluster_role_ext,16);
     if(strcmp(cluster_role,"opr")!=0&&strcmp(cluster_role,"admin")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Only cluster operator or administrator is able to configure the app manager." RESET_DISPLAY "\n");
         return 1;

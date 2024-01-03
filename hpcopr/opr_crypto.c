@@ -251,7 +251,7 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     if(get_nworkdir(target_cluster_workdir,DIR_LENGTH,target_cluster_name)!=0){
         return -3;
     }
-    if(get_cloud_flag(target_cluster_workdir,cloud_flag)!=0||create_and_get_vaultdir(target_cluster_workdir,target_cluster_vaultdir)!=0){
+    if(get_cloud_flag(target_cluster_workdir,cloud_flag,32)!=0||create_and_get_subdir(target_cluster_workdir,"vault",target_cluster_vaultdir,DIR_LENGTH)!=0){
         return -5;
     }
     if(decryption_status(target_cluster_workdir)!=0){

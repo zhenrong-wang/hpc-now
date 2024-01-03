@@ -189,7 +189,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         if(decrypt_bcecredentials(workdir)!=0){
             return -1;
         }
-        create_and_get_vaultdir(workdir,vaultdir);
+        create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
         if(strcmp(cmd_type,"copy")==0){
             snprintf(cmdline,2047,"%s bos cp %s%s %s%s %s %s --conf-path %s",BCECMD_EXEC,bucketinfo.bucket_address,real_source_path,bucketinfo.bucket_address,real_target_path,real_rflag,real_fflag,vaultdir);
         }
@@ -213,7 +213,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         }
     }
     else{
-        create_and_get_vaultdir(workdir,vaultdir);
+        create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
         gcp_credential_convert(workdir,"decrypt",1);
         snprintf(cmdline,2047,"%s auth activate-service-account --key-file=%s%s.bucket_key.json %s",GCLOUD_CLI,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
@@ -335,7 +335,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
         if(decrypt_bcecredentials(workdir)!=0){
             return -1;
         }
-        create_and_get_vaultdir(workdir,vaultdir);
+        create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
         if(strcmp(cmd_type,"delete")==0){
             snprintf(cmdline,2047,"%s bos rm %s%s %s %s --conf-path %s",BCECMD_EXEC,binfo.bucket_address,real_remote_path,real_rflag,real_fflag,vaultdir);
         }
@@ -355,7 +355,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
         }
     }
     else{
-        create_and_get_vaultdir(workdir,vaultdir);
+        create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
         gcp_credential_convert(workdir,"decrypt",1);
         snprintf(cmdline,2047,"%s auth activate-service-account --key-file=%s%s.bucket_key.json %s",GCLOUD_CLI,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){

@@ -238,8 +238,8 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         }
     }
 
-    create_and_get_stackdir(workdir,current_stackdir);
-    create_and_get_vaultdir(workdir,current_vaultdir);
+    create_and_get_subdir(workdir,"stack",current_stackdir,DIR_LENGTH);
+    create_and_get_subdir(workdir,"vault",current_vaultdir,DIR_LENGTH);
     snprintf(current_sshdir,383,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,cluster_name);
 
     snprintf(tmp_root,383,"%s%sexport",HPC_NOW_ROOT_DIR,PATH_SLASH);
@@ -505,7 +505,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         return -7;
     }
     if(cluster_name_check(cluster_name_buffer)==-127){
-        create_and_get_vaultdir(workdir,vaultdir);
+        create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
         snprintf(filename_temp,511,"%s%s.secrets.key",vaultdir,PATH_SLASH);
         if(file_exist_or_not(filename_temp)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] You are operating the cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " . No need to import.\n" RESET_DISPLAY ,cluster_name_buffer);
@@ -571,7 +571,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum_local);
         admin_flag=1;
     }
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,511,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to import the specified cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " ." RESET_DISPLAY "\n",cluster_name_buffer);
@@ -590,7 +590,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     }
     fclose(file_p);
     delete_decrypted_files(workdir,crypto_keyfile);
-    create_and_get_stackdir(workdir,stackdir);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(filename_temp,511,"%s%scurrentstate",stackdir,PATH_SLASH);
     file_cr_clean(filename_temp);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster %s has been imported.\n\n",cluster_name_buffer);
@@ -619,7 +619,7 @@ int update_cluster_status(char* cluster_name, char* currentstate){
     if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
         return -1;
     }
-    create_and_get_stackdir(workdir,stackdir);
+    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(cmdline,2047,"%s %s %s%scurrentstate %s",COPY_FILE_CMD,currentstate,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     if(system(cmdline)==0){
         return 0;

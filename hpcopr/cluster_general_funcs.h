@@ -15,12 +15,15 @@ typedef struct{
     char bucket_sk[128];
 } bucket_info;
 
-int cluster_role_detect(char* workdir, char* cluster_role, char* cluster_role_ext);
+int cluster_role_detect(char* workdir, char cluster_role[], char cluster_role_ext[], unsigned int maxlen);
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag);
+
+int create_and_get_subdir(char* workdir, char* subdir_name, char subdir_path[], unsigned int dir_maxlen);
 int create_and_get_stackdir(char* workdir, char* stackdir);
+
 void get_latest_hosts(char* stackdir, char* hostfile_latest);
 int decrypt_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_info);
-int get_cloud_flag(char* workdir, char* cloud_flag);
+int get_cloud_flag(char* workdir, char cloud_flag[], unsigned int maxlen);
 int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option, char* recursive_flag, int silent_flag);
 
 int chmod_ssh_privkey(char* ssh_privkey);
@@ -42,7 +45,6 @@ int generate_sshkey(char* sshkey_folder, char* pubkey); //This is deprecated!
 
 int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile);
 int get_opr_pubkey(char* sshkey_folder, char* pubkey, unsigned int length);
-
 
 int create_and_get_vaultdir(char* workdir, char* vaultdir);
 int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes);
@@ -85,7 +87,7 @@ int check_pslock(char* workdir, int decrypt_flag);
 int check_pslock_all(void);
 
 int create_local_tf_config(tf_exec_config* tf_run,char* stackdir);
-int check_local_tf_config(char* workdir, char* tf_running_config_local);
+int check_local_tf_config(char* workdir, char tf_running_config_local[], unsigned int filename_maxlen);
 int delete_local_tf_config(char* stackdir);
 
 int valid_vm_config_or_not(char* workdir, char* vm_config);
@@ -113,7 +115,7 @@ int get_ucid(char* workdir, char* ucid_string);
 int get_nucid(char* workdir, char* ucid_string, unsigned int ucid_strlen_max); //Newer function
 
 int decrypt_user_passwords(char* workdir, char* crypto_keyfile);
-void delete_decrypted_user_passwords(char* workdir);
+int delete_decrypted_user_passwords(char* workdir);
 int encrypt_and_delete_user_passwords(char* workdir, char* crypto_keyfile);
 int sync_user_passwords(char* workdir, char* sshkey_dir);
 int sync_statefile(char* workdir, char* sshkey_dir);

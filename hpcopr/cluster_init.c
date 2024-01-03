@@ -209,29 +209,11 @@ int create_init_dirs(char* workdir, char* stackdir, char* vaultdir, char* logdir
     if(dirlen_max<DIR_LENGTH_SHORT){
         return -3;
     }
-    char cmdline[CMDLINE_LENGTH]="";
     if(folder_exist_or_not(workdir)==1){
         return -1;
     }
-    if(create_and_get_stackdir(workdir,stackdir)!=0){
+    if(create_and_get_subdir(workdir,"stack",stackdir,dirlen_max)!=0||create_and_get_subdir(workdir,"vault",vaultdir,dirlen_max)!=0||create_and_get_subdir(workdir,"log",logdir,dirlen_max)!=0||create_and_get_subdir(workdir,"conf",confdir,dirlen_max)!=0){
         return -1;
-    }
-    if(create_and_get_vaultdir(workdir,vaultdir)!=0){
-        return -1;
-    }
-    snprintf(logdir,dirlen_max-1,"%s%slog%s",workdir,PATH_SLASH,PATH_SLASH);
-    snprintf(confdir,dirlen_max-1,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    if(folder_exist_or_not(logdir)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,logdir,SYSTEM_CMD_REDIRECT);
-        if(system(cmdline)!=0){
-            return -1;
-        }
-    }
-    if(folder_exist_or_not(confdir)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-        if(system(cmdline)!=0){
-            return -1;
-        }
     }
     return 0;
 }
@@ -274,7 +256,7 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
         return -1;
     }
-    if(get_cloud_flag(workdir,cloud_flag)!=0){
+    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag." RESET_DISPLAY "\n");
         return -1;
     }
@@ -3065,7 +3047,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         gcp_credential_convert(workdir,"delete",0);
         return 1; // user denied.
     }
-    get_cloud_flag(workdir,cloud_flag);
+    get_cloud_flag(workdir,cloud_flag,16);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(keyfile_path,FILENAME_LENGTH-1,"%s%s.key.json",vaultdir,PATH_SLASH);
     windows_path_to_string(keyfile_path,keyfile_path_ext);

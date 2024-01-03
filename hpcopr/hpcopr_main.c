@@ -1165,7 +1165,12 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"rotate-key")==0){
-        get_cloud_flag(workdir,cloud_flag);
+        if(get_cloud_flag(workdir,cloud_flag,16)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag. Have you switched to any cluster?" RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FLAG_CHECK_FAILED",7);
+            check_and_cleanup(workdir);
+            return 7;
+        }
         cmd_keyword_ncheck(argc,argv,"--ak",cloud_ak,256);
         cmd_keyword_ncheck(argc,argv,"--sk",cloud_sk,256);
         run_flag=prompt_to_confirm_args("Echo the credentials to this window (RISKY)?",CONFIRM_STRING,batch_flag,argc,argv,"--echo");
@@ -1203,9 +1208,8 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    if(get_cloud_flag(workdir,cloud_flag)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag. Have you switched to any cluster?\n");
-        printf("|          Exit now." RESET_DISPLAY "\n");
+    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag. Have you switched to any cluster?" RESET_DISPLAY "\n");
         write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FLAG_CHECK_FAILED",7);
         check_and_cleanup(workdir);
         return 7;

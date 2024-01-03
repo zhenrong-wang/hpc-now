@@ -63,7 +63,7 @@ int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
     char username[32]="";
     char enable_flag[16]="";
     FILE* file_p=NULL;
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"r");
     while(fngetline(file_p,single_line,LINE_LENGTH_SHORT)!=1){
@@ -94,7 +94,7 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
     char user_registry_file[FILENAME_LENGTH]="";
     char remote_commands[CMDLINE_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -7;
     }
@@ -161,7 +161,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
     char vaultdir[DIR_LENGTH]="";
     char user_registry_file[FILENAME_LENGTH]="";
     char remote_commands[CMDLINE_LENGTH]="";
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(strcmp(username,"root")==0||strcmp(username,"user1")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected, cannot be enabled/disabled." RESET_DISPLAY "\n");
@@ -212,7 +212,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
     char password_ext[128]="";
     char remote_commands[CMDLINE_LENGTH]="";
 
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(strcmp(username,"root")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Modifying root user password is not allowed." RESET_DISPLAY "\n");
@@ -259,7 +259,7 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
 
     FILE* file_p=NULL;
-    create_and_get_vaultdir(workdir,vaultdir);
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -7;
     }
