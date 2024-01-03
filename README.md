@@ -461,36 +461,37 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 +- **BINARY_ROOT/** - **Windows: C:\\hpc-now\\** | **GNU/Linux: /home/hpc-now/** | **macOS(Darwin) /Users/hpc-now/**\
 &emsp;&emsp;+- **hpcopr** executable\
 &emsp;&emsp;+- **utils/**\
-        +- **now-crypto-aes** executable\
-        +- **terraform/tofu** executable\
-        +- cloud utilities\
+&emsp;&emsp;&emsp;&emsp;+- **now-crypto-aes** executable\
+&emsp;&emsp;&emsp;&emsp;+- **terraform/tofu** executable\
+&emsp;&emsp;&emsp;&emsp;+- cloud utilities\
 +- **RUNNING_ROOT/** - **Windows: C:\\ProgramData\\hpc-now\\** | **GNU/Linux: /usr/.hpc-now/** | **macOS(Darwin) /Applications/.hpc-now/**\
 &emsp;&emsp;+- log_trashbin.txt\
 &emsp;&emsp;+- .now_crypto_seed.lock\
-    +- .now-cluster-usage.log\
-    +- system_command_error.log\
-    +- system_command_error.log.tmp\
-    +- .now-cluster-operation.log\
-    +- .now-cluster-operation.log.tmp\
-    +- **.tmp/** - *Temporary files*\
-    +- **.now-ssh/** - *SSH keys*\
-        +- now-cluster-login.tmp\
-        +- now-cluster-login.pub\
-        +- .CLUSTER_NAME/\
-            +- USER_PRIVATE_KEYS.tmp\
-    +- **.etc/** - *General configuration files*\
-        +- .all_clusters.dat\
-        +- current_cluster.dat\
-        +- google_check.dat\
-        +- locations.conf\
-        +- md5values.conf\
-        +- tf_running.conf\
-    +- **.destroyed/** - *Files of destroyed clusters*\
-    +- **workdir/** - *Working directories for all clusters*\
-        +- CLUSTER_NAME/\
-            +- log/\
-            +- stack/\
-            +- conf/\
-            +- vault/\
-    +- **mon_data/** - *Monitoring data of all clusters*\
+&emsp;&emsp;+- .now-cluster-usage.log\
+&emsp;&emsp;+- system_command_error.log\
+&emsp;&emsp;+- system_command_error.log.tmp\
+&emsp;&emsp;+- .now-cluster-operation.log\
+&emsp;&emsp;+- .now-cluster-operation.log.tmp\
+&emsp;&emsp;+- **.tmp/** - *Temporary files*\
+&emsp;&emsp;+- **.now-ssh/** - *SSH keys*\
+&emsp;&emsp;&emsp;&emsp;+- now-cluster-login.tmp\
+&emsp;&emsp;&emsp;&emsp;+- now-cluster-login.pub\
+&emsp;&emsp;&emsp;&emsp;+- .CLUSTER_NAME/\
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- USER_PRIVATE_KEYS.tmp\
+&emsp;&emsp;+- **.etc/** - *General configuration files*\
+&emsp;&emsp;&emsp;&emsp;+- .all_clusters.dat\
+&emsp;&emsp;&emsp;&emsp;+- current_cluster.dat\
+&emsp;&emsp;&emsp;&emsp;+- google_check.dat\
+&emsp;&emsp;&emsp;&emsp;+- locations.conf\
+&emsp;&emsp;&emsp;&emsp;+- md5values.conf\
+&emsp;&emsp;&emsp;&emsp;+- tf_running.conf\
+&emsp;&emsp;+- **.destroyed/** - *Files of destroyed clusters*\
+&emsp;&emsp;+- **workdir/** - *Working directories for all clusters*\
+&emsp;&emsp;&emsp;&emsp;+- CLUSTER_NAME/\
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- log/\
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- stack/\
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- conf/\
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- vault/\
+&emsp;&emsp;+- **mon_data/** - *Monitoring data of all clusters*\
+
 *All the directories and files except the .now_crypto_seed.lock are set to be readable, writable, and executable only by the system user hpc-now.*
