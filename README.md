@@ -475,36 +475,36 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 ## **5.2 Sub-directories**
 
 +- **BINARY_ROOT/**\
-&emsp;&emsp;+- **hpcopr** *The hpcopr executable*\
-&emsp;&emsp;+- **utils/** *Including cryoto, terraform/tofu and cloud utilities*\
-&emsp;&emsp;&emsp;&emsp;+- **now-crypto-aes** executable\
-&emsp;&emsp;&emsp;&emsp;+- **terraform/tofu** executable\
+&emsp;&emsp;+- **hpcopr**&emsp;*The hpcopr executable*\
+&emsp;&emsp;+- **utils/**&emsp;*Including cryoto, terraform/tofu and cloud utilities*\
+&emsp;&emsp;&emsp;&emsp;+- **now-crypto-aes**\
+&emsp;&emsp;&emsp;&emsp;+- **terraform/tofu**\
 &emsp;&emsp;&emsp;&emsp;+- cloud utilities\
 +- **RUNNING_ROOT/**\
-&emsp;&emsp;+- log_trashbin.txt *The trashbin of clusters' logs*\
-&emsp;&emsp;+- .now_crypto_seed.lock *The hpcopr crypto_password*\
-&emsp;&emsp;+- .now-cluster-usage.log *The cluster usage log*\
-&emsp;&emsp;+- system_command_error.log *The system command error*\
-&emsp;&emsp;+- .now-cluster-operation.log *The hpcopr command log*\
-&emsp;&emsp;+- **.tmp/** *Temporary files*\
-&emsp;&emsp;+- **.now-ssh/** *SSH keys for connectivity with your clusters*\
-&emsp;&emsp;&emsp;&emsp;+- now-cluster-login.tmp *Encrypted operator's private key*\
-&emsp;&emsp;&emsp;&emsp;+- now-cluster-login.pub *Operator's public key*\
-&emsp;&emsp;&emsp;&emsp;+- .CLUSTER_NAME/ *Each cluster has its own directory*\
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- USER_PRIVATE_KEYS.tmp *Cluster users' encrypted private keys*\
-&emsp;&emsp;+- **.etc/** *General configuration files*\
-&emsp;&emsp;&emsp;&emsp;+- .all_clusters.dat *Cluster registry*\
-&emsp;&emsp;&emsp;&emsp;+- current_cluster.dat *Current cluster indicator*\
-&emsp;&emsp;&emsp;&emsp;+- google_check.dat *Google connectivity indicator*\
-&emsp;&emsp;&emsp;&emsp;+- locations.conf *Locations of components*\
-&emsp;&emsp;&emsp;&emsp;+- md5values.conf *MD5 valus of components*\
-&emsp;&emsp;&emsp;&emsp;+- tf_running.conf *TF running configuration*\
-&emsp;&emsp;+- **.destroyed/** *Files of destroyed clusters*\
-&emsp;&emsp;+- **workdir/** *Working directories for all clusters*\
-&emsp;&emsp;&emsp;&emsp;+- CLUSTER_NAME/*Each cluster has its own directory*\
+&emsp;&emsp;+- log_trashbin.txt&emsp;*The trashbin of clusters' logs*\
+&emsp;&emsp;+- .now_crypto_seed.lock&emsp;*The hpcopr crypto_password*\
+&emsp;&emsp;+- .now-cluster-usage.log&emsp;*The cluster usage log*\
+&emsp;&emsp;+- system_command_error.log&emsp;*The system command error*\
+&emsp;&emsp;+- .now-cluster-operation.log&emsp;*The hpcopr command log*\
+&emsp;&emsp;+- **.tmp/**&emsp;*Temporary files*\
+&emsp;&emsp;+- **.now-ssh/**&emsp;*SSH keys for connectivity with your clusters*\
+&emsp;&emsp;&emsp;&emsp;+- now-cluster-login.tmp&emsp;*Encrypted operator's private key*\
+&emsp;&emsp;&emsp;&emsp;+- now-cluster-login.pub&emsp;*Operator's public key*\
+&emsp;&emsp;&emsp;&emsp;+- .CLUSTER_NAME/&emsp;*Each cluster has its own directory*\
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- USER_PRIVATE_KEYS.tmp&emsp;*Cluster users' encrypted private keys*\
+&emsp;&emsp;+- **.etc/**&emsp;*General configuration files*\
+&emsp;&emsp;&emsp;&emsp;+- .all_clusters.dat&emsp;*Cluster registry*\
+&emsp;&emsp;&emsp;&emsp;+- current_cluster.dat&emsp;*Current cluster indicator*\
+&emsp;&emsp;&emsp;&emsp;+- google_check.dat&emsp;*Google connectivity indicator*\
+&emsp;&emsp;&emsp;&emsp;+- locations.conf&emsp;*Locations of components*\
+&emsp;&emsp;&emsp;&emsp;+- md5values.conf&emsp;*MD5 valus of components*\
+&emsp;&emsp;&emsp;&emsp;+- tf_running.conf&emsp;*TF running configuration*\
+&emsp;&emsp;+- **.destroyed/**&emsp;*Files of destroyed clusters*\
+&emsp;&emsp;+- **workdir/**&emsp;*Working directories for all clusters*\
+&emsp;&emsp;&emsp;&emsp;+- CLUSTER_NAME/&emsp;*Each cluster has its own directory*\
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- log/\
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- stack/\
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- conf/\
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- vault/\
-&emsp;&emsp;+- **mon_data/** - *Monitoring data of all clusters*\
+&emsp;&emsp;+- **mon_data/**&emsp;*Monitoring data of all clusters*\
 *All the directories and files except the .now_crypto_seed.lock are set to be readable, writable, and executable only by the system user hpc-now.*
