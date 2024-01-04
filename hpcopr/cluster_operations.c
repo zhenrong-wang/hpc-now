@@ -392,7 +392,6 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     char md5sum[33]="";
     int ak_length,sk_length;
     char* cluster_registry=ALL_CLUSTER_REGISTRY;
-    int run_flag;
 
     if(file_exist_or_not(crypto_keyfile)!=0){
         return -1;
@@ -476,8 +475,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             return -3;
         }
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
-        run_flag=system(cmdline);
-        if(run_flag!=0){
+        if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. Abort." RESET_DISPLAY "\n");
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,secret_key,SYSTEM_CMD_REDIRECT);
             system(cmdline);
@@ -629,7 +627,12 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return -3;
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(system(cmdline)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. Abort." RESET_DISPLAY "\n");
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        return 5;
+    }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     if(strcmp(cloud_flag,"CLOUD_F")==0){
@@ -671,7 +674,6 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     char cloud_flag_prev[32]="";
     char md5sum[33]="";
     FILE* file_p=NULL;
-    int run_flag;
     
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("|*         YOU ARE ROTATING THE CLOUD KEY, WHICH MAY DAMAGE THIS CLUSTER.\n");
@@ -721,8 +723,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             return -3;
         }
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
-        run_flag=system(cmdline);
-        if(run_flag!=0){
+        if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. The key keeps unchanged." RESET_DISPLAY "\n");
             printf(cmdline,"%s %s %s",DELETE_FILE_CMD,secret_key,SYSTEM_CMD_REDIRECT);
             system(cmdline);
@@ -885,7 +886,12 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         return -3;
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    if(system(cmdline)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. The key keeps unchanged." RESET_DISPLAY "\n");
+        printf(cmdline,"%s %s %s",DELETE_FILE_CMD,secret_key,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        return 5;
+    }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);

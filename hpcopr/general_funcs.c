@@ -436,7 +436,9 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     fclose(file_p);
     fclose(file_p_tmp);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(system(cmdline)!=0){
+        return -3;
+    }
     return 0;
 }
 
@@ -509,7 +511,9 @@ int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string,
     fclose(file_p);
     fclose(file_p_tmp);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(system(cmdline)!=0){
+        return -7;
+    }
     return 0;
 }
 
@@ -673,7 +677,9 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     fclose(file_p);
     fclose(file_temp_p);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(system(cmdline)!=0){
+        return -3;
+    }
     return replace_count;
 }
 
@@ -730,7 +736,9 @@ int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, 
     fclose(file_temp_p);
     free(single_line);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(system(cmdline)!=0){
+        return -3;
+    }
     return replace_count;
 }
 
@@ -1480,7 +1488,9 @@ int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char*
     fclose(file_p_2);
     free(single_line);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(system(cmdline)!=0){
+        return -7;
+    }
     return 0;
 }
 
@@ -1818,7 +1828,9 @@ int file_cr_clean(char* filename){
     fclose(file_p);
     fclose(file_p_tmp);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(system(cmdline)!=0){
+        return -3;
+    }
 #endif
     return 0;
 }
@@ -1887,7 +1899,9 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-        system(cmdline);
+        if(system(cmdline)!=0){
+            return 1;
+        }
     }
     return 0;
 }
@@ -1964,7 +1978,9 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-        system(cmdline);
+        if(system(cmdline)!=0){
+            return 1;
+        }
     }
     return 0;
 }
@@ -2002,7 +2018,9 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-        system(cmdline);
+        if(system(cmdline)!=0){
+            return 1;
+        }
     }
     return 0;
 }
@@ -2047,7 +2065,9 @@ int delete_nlines_by_kwd(char* filename, unsigned int linelen_max, char* key, in
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-        system(cmdline);
+        if(system(cmdline)!=0){
+            return 1;
+        }
     }
     return 0;
 }
@@ -2148,12 +2168,10 @@ int password_hash(char* password, char md5_hash[], int md5_length){
     run_flag=get_nmd5sum(filename_temp,md5_hash,md5_length);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
-    if(run_flag==0){
-        return 0;
-    }
-    else{
+    if(run_flag!=0){
         return 1;
     }
+    return 0;
 }
 
 int windows_path_to_string(char* input_string, char* new_string){

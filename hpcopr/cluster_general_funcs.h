@@ -28,7 +28,7 @@ int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_
 
 int chmod_ssh_privkey(char* ssh_privkey);
 int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char* sshkey_dir, char* crypto_keyfile);
-void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir);
+int delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir);
 
 /* The functions here will decrypt/encrypt with chmod. */
 int decrypt_user_privkey(char* ssh_privkey_encrypted, char* crypto_keyfile);

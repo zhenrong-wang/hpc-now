@@ -287,7 +287,8 @@ int decrypt_user_privkey(char* ssh_privkey_encrypted, char* crypto_keyfile){
 
 //Change the permision of a *decrypted* ssh private key file
 //return -1: keyfile not exist
-//return -3: Error
+//return -3: FILE I/O Error
+//return -5: Failed to change the ownership
 //return 0: Normal exit
 int chmod_ssh_privkey(char* ssh_privkey){
     if(file_exist_or_not(ssh_privkey)!=0){
@@ -323,7 +324,12 @@ int chmod_ssh_privkey(char* ssh_privkey){
         get_seq_nstring(line_seq_buffer2,':',1,group_and_user,64);
         if(strcmp(group_and_user,"hpc-now")!=0&&strlen(group_and_user)!=0){
             snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /c /t /remove %s %s",ssh_privkey,group_and_user,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            if(system(cmdline)!=0){
+                fclose(file_p);
+                snprintf(cmdline,CMDLINE_LENGTH-1,"%s c:\\programdata\\hpc-now\\perm.txt %s",DELETE_FILE_CMD,SYSTEM_CMD_REDIRECT);
+                system(cmdline);
+                return -5;
+            }
         }
     }
     fclose(file_p);
@@ -377,12 +383,12 @@ int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char
     }
 }
 
-void delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
+int delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
     char user_privkey[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     snprintf(user_privkey,FILENAME_LENGTH-1,"%s%s.%s%s%s.key*",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,cluster_name);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,user_privkey,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    return system(cmdline);
 }
 
 //return 0: succeeded
@@ -537,7 +543,6 @@ int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char
         }
     }
     run=system(cmdline);
-//    printf("\n\n%s\n\n%d\n",cmdline,run);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,private_key,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     if(run!=0){
@@ -1193,10 +1198,8 @@ int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum){
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,key_file,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
     flag=system(cmdline);
-//    printf("%s,,,,%d,,,\n",cmdline,flag);
     if(flag==0){ //If Encrypted successfully, then delete the decrypted one.
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,key_file,SYSTEM_CMD_REDIRECT);
-//        printf("%s\n",cmdline);
         return system(cmdline);
     }
     return -7;
@@ -2117,10 +2120,12 @@ int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, ch
     else{
         snprintf(cmdline,CMDLINE_LENGTH-1,"cd %s%s && %s TF_LOG=%s&&%s TF_LOG_PATH=%s%slog%stf_dbg.log && echo yes | %s %s %s -lock=false -parallelism=1000 > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,tf_run->dbg_level,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_run->tf_runner,execution_name,tf_realtime_log,tf_error_log);
     }
-    system(cmdline);
+    if(system(cmdline)!=0){
+        return -7;
+    }
     if(silent_flag!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process. TF: %s. Max Exec Time: %ds.\n",tf_run->tf_runner_type,tf_run->max_wait_time);
-        printf("|          Command: %s. Debug Level: %s. Log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr -b viewlog\n" RESET_DISPLAY,execution_name,tf_run->dbg_level);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process. TF: " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Max Exec Time: " RESET_DISPLAY HIGH_GREEN_BOLD "%d" RESET_DISPLAY WARN_YELLO_BOLD "s.\n",tf_run->tf_runner_type,tf_run->max_wait_time);
+        printf("|          Command: " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Debug Level: " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr -b viewlog\n" RESET_DISPLAY,execution_name,tf_run->dbg_level);
     }
     if(wait_for_complete(tf_realtime_log,execution_name,tf_run->max_wait_time,tf_error_log,tf_error_log_archive,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);

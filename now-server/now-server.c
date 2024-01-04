@@ -123,8 +123,12 @@ int main(int argc, char** argv){
         memset(ingress_buffer,0,sizeof(char)*BUFFER_SIZE);
         recv(connect_fd,ingress_buffer,BUFFER_SIZE,0);
         sprintf(cmdline,"hpcopr -b %s",ingress_buffer);
-        system(cmdline);
-        system("tail -n 1 /usr/.hpc-now/.now-cluster-operation.log > /tmp/now-server-output.tmp 2>&1");
+        if(system(cmdline)!=0){
+            printf("[ -WARN- ] The hpcopr reported running errors.\n");
+        }
+        if(system("tail -n 1 /usr/.hpc-now/.now-cluster-operation.log > /tmp/now-server-output.tmp 2>&1")!=0){
+            printf("[ -WARN- ] Failed to get the exec results of hpcopr.\n");
+        }
         file_p=fopen("/tmp/now-server-output.tmp","r");
         if(file_p!=NULL){
             fgets(egress_buffer,BUFFER_SIZE,file_p);

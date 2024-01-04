@@ -47,7 +47,6 @@ void unset_bucket_envs(char* cloud_flag){
     system("unset AZCOPY_TENANT_ID");
 #endif
     }
-
 }
 
 void bucket_path_check(char* path_string, char* hpc_user, char* real_path){

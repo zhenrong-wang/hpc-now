@@ -413,8 +413,7 @@ int read_license(char* option){
     if(file_exist_or_not(filename_temp)==0){
 #ifdef _WIN32
         snprintf(cmdline,CMDLINE_LENGTH-1,"notepad %s",filename_temp);
-        system(cmdline);
-        return 0;
+        return system(cmdline);
 #else
         if(strcmp(option,"print")==0){
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s",CAT_FILE_CMD,filename_temp);
@@ -422,14 +421,12 @@ int read_license(char* option){
         else{
             snprintf(cmdline,CMDLINE_LENGTH-1,"more %s",filename_temp);
         }
-        system(cmdline);
-        return 0;
+        return system(cmdline);
 #endif
     }
 #ifdef _WIN32
     snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %s",URL_LICENSE);
-    system(cmdline);
-    return 0;
+    return system(cmdline);
 #else
     if(strcmp(option,"print")==0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %s",URL_LICENSE);
@@ -437,8 +434,7 @@ int read_license(char* option){
     else{
         snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %s | more",URL_LICENSE);
     }
-    system(cmdline);
-    return 0;
+    return system(cmdline);
 #endif
 }
 
