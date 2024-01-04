@@ -3384,8 +3384,10 @@ int check_and_cleanup(char* prev_workdir){
     snprintf(cmdline,CMDLINE_LENGTH-1,"rd /q /s %s\\Microsoft\\Windows\\Recent\\ > nul 2>&1",appdata_dir);
     system(cmdline);
 #else
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline); 
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s.*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
 #endif
     print_tail();
     return 0;
