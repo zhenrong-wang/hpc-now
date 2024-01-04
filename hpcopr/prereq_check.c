@@ -1157,13 +1157,18 @@ int check_and_install_prerequisitions(int repair_flag){
     system(cmdline);
 
 /* The remmina files exposes user's password. Must be deleted.*/
-#ifdef __linux__
+#ifdef _WIN32
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*.rdp %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+#elif __linux__
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline); 
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s.*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline); 
+    system(cmdline);
+#else
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*.rdp %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
 #endif
-
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v Environment variables have been repaired.\n");
         printf("|        v SSH files have been repaired. \n");
