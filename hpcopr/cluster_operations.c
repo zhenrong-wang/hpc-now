@@ -32,7 +32,7 @@ int switch_to_cluster(char* target_cluster_name){
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_workdir[DIR_LENGTH]="";
     FILE* file_p=NULL;
-    if(cluster_name_check(target_cluster_name)!=-127){
+    if(cluster_name_check(target_cluster_name)!=-7){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is not in the registry.\n" RESET_DISPLAY, target_cluster_name);
         return 1;
     }
@@ -168,7 +168,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
         return 0;
     }
     fclose(file_p);
-    if(cluster_name_check(target_cluster_name)!=-127){
+    if(cluster_name_check(target_cluster_name)!=-7){
         return 3;
     }
     else{
@@ -213,7 +213,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
         printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
-    if(cluster_name_check(target_cluster_name)!=-127){
+    if(cluster_name_check(target_cluster_name)!=-7){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster is not in the registry. Exit now." RESET_DISPLAY "\n");
         return -3;
     }
@@ -269,7 +269,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
     char curr_payment_method[16]="";
     FILE* file_p=NULL;
     snprintf(log_trash,FILENAME_LENGTH-1,"%s%slog_trashbin.txt",HPC_NOW_ROOT_DIR,PATH_SLASH);
-    if(cluster_name_check(target_cluster_name)!=-127){
+    if(cluster_name_check(target_cluster_name)!=-7){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is not in the registry.\n" RESET_DISPLAY,target_cluster_name);
         list_all_cluster_names(1);
         return 3;
@@ -428,7 +428,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         printf(FATAL_RED_BOLD "[ FATAL: ] The cluster name cannot begin with '-'. Your input: %s" RESET_DISPLAY "\n",input_cluster_name);
         return 1;
     }
-    else if(cluster_name_check_flag==-127){
+    else if(cluster_name_check_flag==-7){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " already exists in the registry." RESET_DISPLAY "\n",input_cluster_name);
         return 1;
     }
@@ -1059,7 +1059,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
                 if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-                    return -127;
+                    return -17;
                 }
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
                 delete_decrypted_files(workdir,crypto_keyfile);
@@ -1101,7 +1101,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-            return -127;
+            return -17;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -1168,7 +1168,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-            return -127;
+            return -17;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -1267,7 +1267,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
                 if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-                    return -127;
+                    return -17;
                 }
                 delete_decrypted_files(workdir,crypto_keyfile);
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -1303,7 +1303,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-            return -127;
+            return -17;
         }        
         delete_decrypted_files(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -1407,7 +1407,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
                 if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-                    return -127;
+                    return -17;
                 }
                 delete_decrypted_files(workdir,crypto_keyfile);
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -1444,7 +1444,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-            return -127;
+            return -17;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -1596,7 +1596,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-            return -127;
+            return -17;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -1708,7 +1708,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-            return -127;
+            return -17;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -1782,7 +1782,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-            return -127;
+            return -17;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -1855,7 +1855,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-            return -127;
+            return -17;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -1945,7 +1945,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
-            return -127;
+            return -17;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
@@ -2343,7 +2343,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
         }
     }
     else{
-        return -127;
+        return -17;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
@@ -2383,7 +2383,7 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
     char cloud_flag[16]="";
     char curr_payment_method[8]="";
     char statefile[FILENAME_LENGTH]="";
-    if(cluster_name_check(cluster_name)!=-127){
+    if(cluster_name_check(cluster_name)!=-7){
         printf(FATAL_RED_BOLD "[ FATAL: ] The cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is not in the registry." RESET_DISPLAY "\n",cluster_name);
         return 1;
     }

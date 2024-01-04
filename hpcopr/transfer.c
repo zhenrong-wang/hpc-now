@@ -146,14 +146,14 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     FILE* file_p_tmp=NULL;
     FILE* file_p=NULL;
     time_t current_time_long;
-    char current_date[12]="";
-    char current_time[12]="";
+    char current_date[64]="";
+    char current_time[64]="";
     struct tm* time_p=NULL;
 
     time(&current_time_long);
     time_p=localtime(&current_time_long);
-    snprintf(current_date,11,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
-    snprintf(current_time,11,"%d-%d-%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
+    snprintf(current_date,63,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
+    snprintf(current_time,63,"%d-%d-%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
 
     if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
@@ -504,7 +504,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         system(cmdline);
         return -7;
     }
-    if(cluster_name_check(cluster_name_buffer)==-127){
+    if(cluster_name_check(cluster_name_buffer)==-7){
         create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
         if(file_exist_or_not(filename_temp)==0){

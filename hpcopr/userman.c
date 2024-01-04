@@ -155,7 +155,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
         strcpy(new_keywords_ext,"STATUS:DISABLED");
     }
     else{
-        return -127;
+        return -7;
     }
     char username_ext[128]="";
     char vaultdir[DIR_LENGTH]="";

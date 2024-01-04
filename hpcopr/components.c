@@ -241,7 +241,7 @@ int get_vers_md5_vars(void){
 int reset_vers_md5_vars(void){
     FILE* file_p=fopen(VERS_MD5_CONF_FILE,"w+");
     if(file_p==NULL){
-        return -127;
+        return -3;
     }
     char tf_md5_file[FILENAME_LENGTH]="";
     char crypto_md5_file[FILENAME_LENGTH]="";

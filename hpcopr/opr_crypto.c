@@ -98,7 +98,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         }
         while(fngetline(file_p,registry_line_buffer,LINE_LENGTH_SHORT)!=1){
             get_seq_nstring(registry_line_buffer,' ',4,cluster_name_temp,32);
-            if(cluster_name_check(cluster_name_temp)!=-127){
+            if(cluster_name_check(cluster_name_temp)!=-7){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Cluster name %s is not valid. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
                 final_flag++;
                 continue;
@@ -143,7 +143,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         }
     }
     if(contain_or_not(cluster_list,":")!=0){
-        if(cluster_name_check(cluster_list)!=-127){
+        if(cluster_name_check(cluster_list)!=-7){
             printf(FATAL_RED_BOLD "[ FATAL: ] Cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is not valid." RESET_DISPLAY "\n",cluster_list);
             return 5;
         }
@@ -176,7 +176,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         }
     }
     while(get_seq_nstring(cluster_list,':',i,cluster_name_temp,32)==0){
-        if(cluster_name_check(cluster_name_temp)!=-127){
+        if(cluster_name_check(cluster_name_temp)!=-7){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Cluster name %s is not valid. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
             final_flag++;
             i++;
@@ -245,7 +245,7 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     if(file_empty_or_not(ALL_CLUSTER_REGISTRY)<1){
         return -1;
     }
-    if(cluster_name_check(target_cluster_name)!=-127){
+    if(cluster_name_check(target_cluster_name)!=-7){
         return -3;
     }
     if(get_nworkdir(target_cluster_workdir,DIR_LENGTH,target_cluster_name)!=0){

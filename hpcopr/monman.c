@@ -168,7 +168,7 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
 }
 
 int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_list, char* start_datetime, char* end_datetime, char* interval, char* view_option, char* export_dest){
-    if(cluster_name_check(cluster_name)!=-127){
+    if(cluster_name_check(cluster_name)!=-7){
         return -3;
     }
     char cluster_mon_data_file[FILENAME_LENGTH]="";

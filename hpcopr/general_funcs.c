@@ -250,7 +250,7 @@ int fgetline(FILE* file_p, char* line_string){
         }
     }while(ch!=EOF&&ch!='\n'&&i!=LINE_LENGTH); // Be careful! This function can only handle lines <= 4096 chars. Extra chars will be ommited
     if(i==LINE_LENGTH){
-        return -127; // When returns this value, the outcome will be unpredictable.
+        return -7; // When returns this value, the outcome will be unpredictable.
     }
     *(line_string+i)='\0'; // This is very dangerous. You need to guarantee the length of line_string is long enough!
     if(ch==EOF&&i==0){

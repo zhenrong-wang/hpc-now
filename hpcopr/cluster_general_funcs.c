@@ -1813,7 +1813,7 @@ int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* e
     }
     else{
         printf(FATAL_RED_BOLD "[ FATAL: ] TF_OPTION_NOT_SUPPORTED." RESET_DISPLAY "\n");
-        return -127;
+        return -7;
     }
     while(find_multi_nkeys(tf_realtime_log,LINE_LENGTH_SMALL,findkey,"","","","")<1&&i<max_time){
         if(silent_flag!=0){
@@ -1831,7 +1831,7 @@ int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* e
                 if(silent_flag!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_ERROR." RESET_DISPLAY "\n");
                 }
-                return 127;
+                return 7;
             }
         }
     }
@@ -3134,7 +3134,7 @@ int get_cluster_name(char* cluster_name, char* cluster_workdir){
         i++;
         get_seq_nstring(cluster_workdir,path_seprator,i,dir_buffer,128);
         if(strlen(dir_buffer)==0){
-            if(cluster_name_check(dir_buffer2)==0||cluster_name_check(dir_buffer2)==-127){
+            if(cluster_name_check(dir_buffer2)==0||cluster_name_check(dir_buffer2)==-7){
                 strcpy(cluster_name,dir_buffer2);
                 return 0;
             }
@@ -3157,7 +3157,7 @@ int get_cluster_nname(char* cluster_name, unsigned int cluster_name_len_max, cha
         i++;
         get_seq_nstring(cluster_workdir,path_seprator,i,dir_buffer,128);
         if(strlen(dir_buffer)==0){
-            if(cluster_name_check(dir_buffer2)==0||cluster_name_check(dir_buffer2)==-127){
+            if(cluster_name_check(dir_buffer2)==0||cluster_name_check(dir_buffer2)==-7){
                 strncpy(cluster_name,dir_buffer2,cluster_name_len_max-1);
                 return 0;
             }
@@ -3313,7 +3313,7 @@ int current_cluster_or_not(char* current_indicator, char* cluster_name){
 // return -1: start with -, illegal
 // return -3: length not in the range, illegal
 // return -5: illegal char found
-// return -127: OK and found
+// return -7: OK and found
 // return 0: legal but not found.
 int cluster_name_check(char* cluster_name){
     char cluster_name_ext[64]="";
@@ -3343,7 +3343,7 @@ int cluster_name_check(char* cluster_name){
     }
     snprintf(cluster_name_ext,64,"< cluster name: %s >",cluster_name);
     if(find_multi_nkeys(ALL_CLUSTER_REGISTRY,LINE_LENGTH_SHORT,cluster_name_ext,"","","","")>0){
-        return -127;
+        return -7;
     }
     else{
         return 0;
