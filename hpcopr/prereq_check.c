@@ -1166,7 +1166,7 @@ int check_and_install_prerequisitions(int repair_flag){
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s.*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 #else
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*.rdp %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s /Users/Shared/.hpc-now*.rdp %s",DELETE_FILE_CMD,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 #endif
     if(repair_flag==1){
