@@ -3391,7 +3391,7 @@ int check_and_cleanup(char* prev_workdir){
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s.*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 #else
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s /Users/Shared/.hpc-now*.rdp %s",DELETE_FILE_CMD,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s /tmp/.hpc-now*.rdp %s",DELETE_FILE_CMD,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 #endif
     print_tail();
@@ -3723,7 +3723,7 @@ int generate_rdp_file(char* cluster_name, char* master_address, char* username){
 #ifdef __linux__
     snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
 #elif __APPLE__
-    snprintf(filename_rdp,FILENAME_LENGTH-1,"/Users/Shared/.hpc-now-%s-%s.rdp",cluster_name,username);
+    snprintf(filename_rdp,FILENAME_LENGTH-1,"/tmp/.hpc-now-%s-%s.rdp",cluster_name,username);
 #else
     snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
 #endif
@@ -3783,7 +3783,7 @@ int start_rdp_connection(char* cluster_workdir, char* username, int password_fla
 #ifdef __linux__
     snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
 #elif __APPLE__
-    snprintf(filename_rdp,FILENAME_LENGTH-1,"/Users/Shared/.hpc-now-%s-%s.rdp",cluster_name,username);
+    snprintf(filename_rdp,FILENAME_LENGTH-1,"/tmp/.hpc-now-%s-%s.rdp",cluster_name,username);
 #else
     snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
 #endif
