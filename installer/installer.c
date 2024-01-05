@@ -432,7 +432,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          Created the user 'hpc-now' with password: " GREY_LIGHT "%s" RESET_DISPLAY "\n",hpc_now_password);
     printf("|          Please follow the steps below:\n");
-    printf("|          1. " HIGH_GREEN_BOLD "net user hpc-now PASSWORD" RESET_DISPLAY "[optional]\n");
+    printf("|          1. " HIGH_GREEN_BOLD "net user hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY " [optional]\n");
     printf("|          2. " HIGH_GREEN_BOLD "runas /savecred /user:mymachine\\hpc-now cmd" RESET_DISPLAY "\n");
     printf("|             * You will be required to input the password.\n");
     printf("|          3. " GENERAL_BOLD "In the new CMD window" RESET_DISPLAY ", run " HIGH_GREEN_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
