@@ -430,11 +430,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
     printf("\n");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
-    printf("|          The user 'hpc-now' was created with password: " GREY_LIGHT "%s" RESET_DISPLAY "\n",hpc_now_password);
+    printf("|          Created the user 'hpc-now' with password: " GREY_LIGHT "%s" RESET_DISPLAY "\n",hpc_now_password);
     printf("|          Please follow the steps below:\n");
     printf("|          1. " GENERAL_BOLD "(optional)" RESET_DISPLAY " net user hpc-now YOUR_COMPLEX_PASSWORD\n");
     printf("|          2. " HIGH_GREEN_BOLD "runas /savecred /user:mymachine\\hpc-now cmd" RESET_DISPLAY "\n");
-    printf("|          * You will be required to input the password.\n");
+    printf("|             * You will be required to input the password.\n");
     printf("|          3. " GENERAL_BOLD "In the new CMD window" RESET_DISPLAY ", run " HIGH_GREEN_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD"[ -DONE- ] Enjoy you Cloud HPC journey! Exit now." RESET_DISPLAY "\n");
     return 0;
@@ -497,7 +497,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
 linux_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
-    printf("|          The user 'hpc-now' has been created *WITHOUT* a password.\n");
+    printf("|          Created the user 'hpc-now' " WARN_YELLO_BOLD "WITHOUT" RESET_DISPLAY " an initial password.\n");
     printf("|          Please follow the steps below:\n");
     printf(HIGH_CYAN_BOLD "|      + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("|          " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr envcheck" RESET_DISPLAY "\n");
@@ -569,7 +569,7 @@ linux_install_done:
     }
 mac_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
-    printf("|          The user 'hpc-now' has been created *WITHOUT* a password.\n");
+    printf("|          Created the user 'hpc-now' " WARN_YELLO_BOLD "WITHOUT" RESET_DISPLAY " an initial password.\n");
     printf("|          Please follow the steps below:\n");
     printf(HIGH_CYAN_BOLD "|      + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("|          " HIGH_GREEN_BOLD "cd /Applications && sudo -u hpc-now hpcopr envcheck" RESET_DISPLAY "\n");
