@@ -86,7 +86,7 @@ void print_help_installer(void){
     printf("|   " GENERAL_BOLD "Advanced Options (OPTIONAL):" RESET_DISPLAY "\n");
     printf("|     --pass PASS * Only valid for " HIGH_GREEN_BOLD "install" RESET_DISPLAY " or " HIGH_GREEN_BOLD "setpass" RESET_DISPLAY " option.\n");
     printf("|                   : Set/update the operator's password that includes 3\n");
-    printf("|                     of 4 types: " WARN_YELLO_BOLD "A-Z  a-z  0-9  " SPECIAL_PASSWORD_CHARS RESET_DISPLAY "\n");
+    printf("|                     of 4 types: " WARN_YELLO_BOLD "A-Z  a-z  0-9  %s" RESET_DISPLAY "\n",SPECIAL_PASSWORD_CHARS);
     printf("|     --hloc LOC  * Only valid for " HIGH_GREEN_BOLD "install" RESET_DISPLAY " or " HIGH_GREEN_BOLD "update" RESET_DISPLAY " option.\n");
     printf("|                   : Provide your own location of hpcopr, both URL and local\n");
     printf("|                     filesystem path are accepted. You should guarantee that\n");
@@ -181,6 +181,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     FILE* file_p=NULL;
     int run_flag1,run_flag2;
 #ifdef _WIN32
+    char hpc_now_password[PASSWORD_STRING_LENGTH]="";
     if(system("net user hpc-now > nul 2>&1")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
         printf("|          If you'd like to reinstall, please uninstall first. Reinstallation\n");
@@ -216,6 +217,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
 #endif
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking and cleaning up current environment ...\n");
 #ifdef _WIN32
+    generate_random_npasswd(hpc_now_password,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
     system("takeown /f c:\\hpc-now /r /d y > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
@@ -224,7 +226,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");   
-    strcpy(cmdline1,"net user hpc-now nowadmin2023~ /add /logonpasswordchg:yes > nul 2>&1");
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"net user hpc-now \"%s\" /add /logonpasswordchg:yes > nul 2>&1",hpc_now_password);
     if(system(cmdline1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create the user 'hpc-now' to your system.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
@@ -428,7 +430,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
     printf("\n");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
-    printf("|          The user 'hpc-now' has been created with initial password: nowadmin2023~\n");
+    printf("|          The user 'hpc-now' has been created with initial password: " GREY_LIGHT "%s" RESET_DISPLAY "\n",hpc_now_password);
     printf("|          Please follow the steps below:\n");
     printf("|          1. " HIGH_GREEN_BOLD "net user hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY "\n");
     printf("|          2. " HIGH_GREEN_BOLD "runas /savecred /user:mymachine\\hpc-now cmd" RESET_DISPLAY "\n");
@@ -582,15 +584,23 @@ mac_install_done:
 #endif
 }
 
-void restore_perm_windows(void){
+int restore_perm_windows(void){
 #ifdef _WIN32
-    system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
-    system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
-    system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1");
+    if(system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1")!=0){
+        return 1;
+    }
+    if(system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1")!=0){
+        return 1;
+    }
+    if(system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1")!=0){
+        return 1;
+    }
 #endif
+    return 0;
 }
 
 //If the opr_password is not 0, the password is valid.
+//return -5: Failed to restore permission for windows
 //return -3: Not installed
 //return -1: FILE input error
 //return 1: password invalid
@@ -646,7 +656,9 @@ int set_opr_password(char* opr_password){
             encrypt_decrypt_clusters("all","encrypt",0);
         }
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Operation failed and password unchanged." RESET_DISPLAY "\n");
-        restore_perm_windows();
+        if(restore_perm_windows()!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to restore the dir/file permissions." RESET_DISPLAY "\n");
+        }
         return 3;
     }
     generate_random_passwd(random_string);
@@ -661,7 +673,10 @@ int set_opr_password(char* opr_password){
     file_p=fopen("/Applications/.hpc-now/.now_crypto_seed.lock","w+");
 #endif
     if(file_p==NULL){
-        restore_perm_windows();
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create the now_crypto_seed.lock file." RESET_DISPLAY "\n");
+        if(restore_perm_windows()!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to restore the dir/file permissions." RESET_DISPLAY "\n");
+        }
         return -1;
     }
     fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
@@ -682,10 +697,15 @@ int set_opr_password(char* opr_password){
     run_flag=encrypt_decrypt_clusters("all","encrypt",0);
     if(run_flag!=0&&run_flag!=-1&&run_flag!=-11){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt files with new crypto key file." RESET_DISPLAY "\n");
-        restore_perm_windows();
+        if(restore_perm_windows()!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to restore the dir/file permissions." RESET_DISPLAY "\n");
+        }
         return 5;
     }
-    restore_perm_windows();
+    if(restore_perm_windows()!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to restore the dir/file permissions." RESET_DISPLAY "\n");
+        return -5;
+    }
     printf( GENERAL_BOLD "\n[ -DONE- ] The operator password has been updated." RESET_DISPLAY "\n");
     return 0;
 }

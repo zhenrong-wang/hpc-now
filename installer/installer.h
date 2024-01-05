@@ -8,7 +8,7 @@
 #ifndef INSTALLER_H
 #define INSTALLER_H
 
-#define INSTALLER_VERSION_CODE "0.3.1.0013"
+#define INSTALLER_VERSION_CODE "0.3.1.0015"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/hpcopr-0.3.x/"
 #define URL_MSRDP_FOR_MAC "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/packages/rdp_for_mac.zip"
 
@@ -20,7 +20,7 @@ int check_current_user_root(void);
 int license_confirmation(void);
 int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, char* opr_password, int crypto_loc_flag, char* now_crypto_loc, int rdp_flag);
 int uninstall_services(void);
-void restore_perm_windows(void);
+int restore_perm_windows(void);
 int set_opr_password(char* opr_password);
 int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int crypto_loc_flag, char* now_crypto_loc, int rdp_flag);
 int valid_loc_format_or_not(char* loc_string);

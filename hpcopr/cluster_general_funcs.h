@@ -120,7 +120,7 @@ int encrypt_and_delete_user_passwords(char* workdir, char* crypto_keyfile);
 int sync_user_passwords(char* workdir, char* sshkey_dir);
 int sync_statefile(char* workdir, char* sshkey_dir);
 
-int user_password_complexity_check(char* password, const char* special_chars);
+int user_password_complexity_check(char* password, char* special_chars);
 int input_user_passwd(char* password_string, int batch_flag_local);
 int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir);
 int username_check(char* user_registry, char* username_input);

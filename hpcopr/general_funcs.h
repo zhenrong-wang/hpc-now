@@ -48,8 +48,9 @@ int file_exist_or_not(char* filename);
 int file_empty_or_not(char* filename);
 int folder_exist_or_not(char* foldername);
 
+int generate_random_npasswd(char password_array[], unsigned int password_array_len, char special_chars_array[], unsigned int special_chars_array_len);
 int generate_random_passwd(char* password);
-int password_complexity_check(char* password, const char* special_chars);
+int password_complexity_check(char* password, char* special_chars);
 int generate_random_db_passwd(char* password);
 int generate_random_string(char* random_string);
 

@@ -369,6 +369,7 @@ int contain_or_nnot(char line[], char findkey[]){
     return count;
 }
 
+/* This function is deprecated by global_nreplace() */
 int global_replace(char* filename, char* orig_string, char* new_string){
     if(strcmp(orig_string,new_string)==0){
         return 1;
@@ -1239,14 +1240,14 @@ int folder_exist_or_not(char* foldername){
 
 //return 0: The password is complex enough
 //return 1: The password is not complex enough
-int password_complexity_check(char* password, const char* special_chars){
+int password_complexity_check(char* password, char* special_chars){
     int i,length=strlen(password);
     int uppercase_flag=0;
     int lowercase_flag=0;
     int number_flag=0;
     int special_ch_flag=0;
-    char ch_temp[2]="";
-
+    char ch_temp[2]={'\0','\0'};
+    
     for(i=0;i<length;i++){
         if(*(password+i)=='A'||*(password+i)=='Z'){
             uppercase_flag=1;
@@ -1268,8 +1269,7 @@ int password_complexity_check(char* password, const char* special_chars){
         }
         else{
             *(ch_temp)=*(password+i);
-            *(ch_temp+1)='\0';
-            if(contain_or_not(special_chars,ch_temp)==0){
+            if(contain_or_nnot(special_chars,ch_temp)>0){
                 special_ch_flag=1;
             }
             else{
@@ -1283,6 +1283,106 @@ int password_complexity_check(char* password, const char* special_chars){
     else{
         return 0;
     }
+}
+
+/*
+ * This function is *strict*. The password_array_len must equals to the actual length of password_password[]
+ * The actual length of the generated password is array_len-1;
+ * The minimum length is 8
+ * return -1: array length is too short
+ * return -3: special_chars_string is invalid
+ * return -5: memory allocation error
+ * return  1: max loop 
+ * return  0: good password generated
+ */
+int generate_random_npasswd(char password_array[], unsigned int password_array_len, char special_chars_array[], unsigned int special_chars_array_len){
+    if(password_array_len<9){
+        memset(password_array,'\0',password_array_len);
+        return -1;
+    }
+    if(special_chars_array_len<1){
+        memset(password_array,'\0',password_array_len);
+        return -3;
+    }
+    int i;
+    char special_ch;
+    /* The special_chars_string should not contain base chars '0'~'9' 'A'-'B' 'a'-'z' and other unprintable chars (0~32)*/
+    for(i=0;i<special_chars_array_len;i++){
+        special_ch=*(special_chars_array+i);
+        if(special_ch>32&&special_ch<48){ /* !"#$%&,()*+,-./ */
+            continue;
+        }
+        else if(special_ch>57&&special_ch<65){ /* :;<=>?@ */
+            continue;
+        }
+        else if(special_ch>90&&special_ch<97){ /* [\]^_` */
+            continue;
+        }
+        else if(special_ch>122&&special_ch<127){ /* {|}~ */
+            continue;
+        }
+        else{
+            return -3;
+        }
+    }
+    /*Added a '\0' to use the complexity check function*/
+    char* special_chars_string=(char*)malloc(sizeof(char)*(special_chars_array_len+1));
+    if(special_chars_string==NULL){
+        memset(password_array,'\0',password_array_len);
+        return -5;
+    } 
+    memcpy(special_chars_string,special_chars_array,special_chars_array_len);
+    *(special_chars_string+special_chars_array_len)='\0';
+    const char* ch_table_base="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    unsigned int seed_num;
+    int total_times,rand_num;
+    struct timeval current_time;
+    int ch_table_length=62+strlen(special_chars_string)+1;
+    char* ch_table_final=(char*)malloc(sizeof(char)*ch_table_length);
+    if(ch_table_final==NULL){
+        free(special_chars_string);
+        memset(password_array,'\0',password_array_len);
+        return -5;
+    }
+    memset(ch_table_final,'\0',ch_table_length);
+    memcpy(ch_table_final,ch_table_base,62);
+    snprintf(ch_table_final,ch_table_length-1,"%s%s",ch_table_base,special_chars_string);
+    char* password_temp=(char*)malloc(sizeof(char)*password_array_len);
+    if(password_temp==NULL){
+        free(special_chars_string);
+        free(ch_table_final);
+        memset(password_array,'\0',password_array_len);
+        return -5;
+    }
+    memset(password_temp,'\0',password_array_len);
+    for(total_times=0;total_times<16;total_times++){
+        for(i=0;i<password_array_len-1;i++){
+            GETTIMEOFDAY_FUNC(&current_time,NULL);
+            seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+            srand(seed_num);
+            rand_num=rand()%(ch_table_length-1);
+            *(password_temp+i)=*(ch_table_final+rand_num);
+            usleep(5000);
+        }
+        if(password_complexity_check(password_temp,special_chars_string)==0){
+            memcpy(password_array,password_temp,password_array_len);
+            free(special_chars_string);
+            free(ch_table_final);
+            free(password_temp);
+            return 0;
+        }
+        if(total_times!=15){
+            memset(password_temp,'\0',password_array_len);
+        }
+        else{
+            /* If max loop, then export the last loop of password, but the complexity is not guaranteed */
+            memcpy(password_array,password_temp,password_array_len);
+        }
+    }
+    free(special_chars_string);
+    free(ch_table_final);
+    free(password_temp);
+    return 1;
 }
 
 //Make sure the password[] is 20 width
@@ -1301,9 +1401,7 @@ int generate_random_passwd(char* password){
             *(password_temp+i)=*(ch_table+rand_num);
             usleep(5000);
         }
-//        printf(":::   %s \n",password_temp);
         if(password_complexity_check(password_temp,"~@&(){}[]=")==0){
-//            printf(":::   %s \n",password_temp);
             strcpy(password,password_temp);
             return 0;
         }

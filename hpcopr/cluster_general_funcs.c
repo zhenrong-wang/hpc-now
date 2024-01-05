@@ -2124,8 +2124,8 @@ int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, ch
         return -7;
     }
     if(silent_flag!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process. TF: " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Max Exec Time: " RESET_DISPLAY HIGH_GREEN_BOLD "%d" RESET_DISPLAY WARN_YELLO_BOLD "s.\n",tf_run->tf_runner_type,tf_run->max_wait_time);
-        printf("|          Command: " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Debug Level: " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Log: " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr -b viewlog\n" RESET_DISPLAY,execution_name,tf_run->dbg_level);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process. TF: " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Max Exec Time: " RESET_DISPLAY GENERAL_BOLD "%d" RESET_DISPLAY WARN_YELLO_BOLD "s.\n",tf_run->tf_runner_type,tf_run->max_wait_time);
+        printf("|          Command: " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Debug Level: " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Log: " RESET_DISPLAY GENERAL_BOLD "hpcopr -b viewlog\n" RESET_DISPLAY,execution_name,tf_run->dbg_level);
     }
     if(wait_for_complete(tf_realtime_log,execution_name,tf_run->max_wait_time,tf_error_log,tf_error_log_archive,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
@@ -2908,7 +2908,7 @@ int sync_statefile(char* workdir, char* sshkey_dir){
     return remote_copy(workdir,sshkey_dir,filename_temp,"/usr/hpc-now/currentstate","root","put","",0);
 }
 
-int user_password_complexity_check(char* password, const char* special_chars){
+int user_password_complexity_check(char* password, char* special_chars){
     if(strlen(password)==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Empty password. Length must be in the range %d - %d." RESET_DISPLAY "\n",USER_PASSWORD_LENGTH_MIN,USER_PASSWORD_LENGTH_MAX);
         return -1;

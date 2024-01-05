@@ -227,7 +227,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
         delete_decrypted_user_passwords(workdir);
         return -5;
     }
-    snprintf(remote_commands,CMDLINE_LENGTH-1,"echo \"%s\" | passwd %s --stdin",password,username);
+    snprintf(remote_commands,CMDLINE_LENGTH-1,"echo '%s' | passwd %s --stdin",password,username); /* Added '' to enclose the password string*/
     if(remote_exec_general(workdir,ssheky_dir,"root",remote_commands,"-n",0,0,"","")==0){
         snprintf(username_ext,127,"username: %s ",username);
         snprintf(password_ext,127," %s ",password);
@@ -275,7 +275,7 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
         delete_decrypted_user_passwords(workdir);
         return -5;
     }
-    snprintf(remote_commands,CMDLINE_LENGTH-1,"hpcmgr users add %s %s",username,password);
+    snprintf(remote_commands,CMDLINE_LENGTH-1,"hpcmgr users add %s '%s'",username,password); /* Added '' to enclose the password string*/
     if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
         snprintf(remote_commands,CMDLINE_LENGTH-1,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s | grep 'STATUS:ENABLED'",username);
         if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
