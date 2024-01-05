@@ -79,13 +79,13 @@ void print_help_installer(void){
     printf("|     " HIGH_GREEN_BOLD "install" RESET_DISPLAY "       : Install or repair the HPC-NOW Services on your device.\n");
     printf("|     " HIGH_GREEN_BOLD "update" RESET_DISPLAY "        : Update the hpcopr to the latest or your own version.\n");
     printf("|     " HIGH_GREEN_BOLD "uninstall" RESET_DISPLAY "     : Remove the HPC-NOW services and all relevant data.\n");
-    printf("|     " HIGH_GREEN_BOLD "setpass" RESET_DISPLAY "       : Update the operator's password.\n");
+    printf("|     " HIGH_GREEN_BOLD "setpass" RESET_DISPLAY "       : Update the operator's keystring.\n");
     printf("|     " HIGH_GREEN_BOLD "help" RESET_DISPLAY "          : Show this information.\n");
     printf("|     " HIGH_GREEN_BOLD "version" RESET_DISPLAY "       : Show the version code of this installer.\n");
     printf("|     " HIGH_GREEN_BOLD "verlist" RESET_DISPLAY "       : Show the available version list of hpcopr.\n");
     printf("|   " GENERAL_BOLD "Advanced Options (OPTIONAL):" RESET_DISPLAY "\n");
     printf("|     --pass PASS * Only valid for " HIGH_GREEN_BOLD "install" RESET_DISPLAY " or " HIGH_GREEN_BOLD "setpass" RESET_DISPLAY " option.\n");
-    printf("|                   : Set/update the operator's password that includes 3\n");
+    printf("|                   : Set/update the operator's keystring that includes 3\n");
     printf("|                     of 4 types: " WARN_YELLO_BOLD "A-Z  a-z  0-9  %s" RESET_DISPLAY "\n",SPECIAL_PASSWORD_CHARS);
     printf("|     --hloc LOC  * Only valid for " HIGH_GREEN_BOLD "install" RESET_DISPLAY " or " HIGH_GREEN_BOLD "update" RESET_DISPLAY " option.\n");
     printf("|                   : Provide your own location of hpcopr, both URL and local\n");
@@ -311,14 +311,14 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a file for encryption/decryption ...\n");
     generate_random_passwd(random_string);
     if(strlen(opr_password)==0){
-        ch=GETPASS_FUNC("[ INPUT: ] Specify a operator password (length < 20):");
+        ch=GETPASS_FUNC("[ INPUT: ] Specify an operator keystring (length < 20, without echo): ");
         strncpy(opr_passwd_temp,ch,19);
         if(strlen(ch)>19||password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
             generate_random_passwd(opr_passwd_temp);
-            printf(WARN_YELLO_BOLD "\n[ -WARN- ] The password is invalid. Generated: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
+            printf(WARN_YELLO_BOLD "\n[ -WARN- ] The keystring is invalid. Generated: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
         }
         else{
-            printf(GENERAL_BOLD "\n[ -INFO- ] Specified password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
+            printf(GENERAL_BOLD "\n[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
         }
         reset_string(ch);
     }
@@ -430,11 +430,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
     printf("\n");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
-    printf("|          The user 'hpc-now' has been created with initial password: " GREY_LIGHT "%s" RESET_DISPLAY "\n",hpc_now_password);
+    printf("|          The user 'hpc-now' was created with password: " GREY_LIGHT "%s" RESET_DISPLAY "\n",hpc_now_password);
     printf("|          Please follow the steps below:\n");
-    printf("|          1. (optional)" HIGH_GREEN_BOLD "net user hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY "\n");
+    printf("|          1. (optional) " HIGH_GREEN_BOLD "net user hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY "\n");
     printf("|          2. " HIGH_GREEN_BOLD "runas /savecred /user:mymachine\\hpc-now cmd" RESET_DISPLAY "\n");
-    printf("|          * You will be required to input the password set just now.\n");
+    printf("|          * You will be required to input the password.\n");
     printf("|          3. " GENERAL_BOLD "In the new CMD window" RESET_DISPLAY ", run " HIGH_GREEN_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD"[ -DONE- ] Enjoy you Cloud HPC journey! Exit now." RESET_DISPLAY "\n");
     return 0;
@@ -497,7 +497,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
 linux_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
-    printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
+    printf("|          The user 'hpc-now' has been created *WITHOUT* a password.\n");
     printf("|          Please follow the steps below:\n");
     printf(HIGH_CYAN_BOLD "|      + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("|          " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr envcheck" RESET_DISPLAY "\n");
@@ -569,7 +569,7 @@ linux_install_done:
     }
 mac_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
-    printf("|          The user 'hpc-now' has been created *WITHOUT* an initial password.\n");
+    printf("|          The user 'hpc-now' has been created *WITHOUT* a password.\n");
     printf("|          Please follow the steps below:\n");
     printf(HIGH_CYAN_BOLD "|      + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("|          " HIGH_GREEN_BOLD "cd /Applications && sudo -u hpc-now hpcopr envcheck" RESET_DISPLAY "\n");
@@ -627,22 +627,22 @@ int set_opr_password(char* opr_password){
     FILE* file_p=NULL;
     int run_flag;
     if(strlen(opr_password)==0){
-        ch=GETPASS_FUNC("[ INPUT: ] Specify a password (length < 20, without echo): ");
+        ch=GETPASS_FUNC("[ INPUT: ] Specify a keystring (length < 20, without echo): ");
         strncpy(opr_passwd_temp,ch,19);
         if(strlen(ch)>19||password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
-            printf(FATAL_RED_BOLD "\n[ FATAL: ] The password " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",ch);
+            printf(FATAL_RED_BOLD "\n[ FATAL: ] The keystring " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",ch);
             return 1;
         }
         else{
-            printf(GENERAL_BOLD "\n[ -INFO- ] Specified password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
+            printf(GENERAL_BOLD "\n[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
             reset_string(ch);
         }
     }
     else{
-        printf(GENERAL_BOLD "\n[ -INFO- ] Specified password: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_password);
+        printf(GENERAL_BOLD "\n[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_password);
         strncpy(opr_passwd_temp,opr_password,19);
     }
-    printf(GENERAL_BOLD "\n[ STEP 1 ] Decrypting current files with previous crypto password..." RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "\n[ STEP 1 ] Decrypting current files with previous crypto keystring..." RESET_DISPLAY "\n");
 #ifdef _WIN32
     system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
     system("takeown /f  c:\\programdata\\hpc-now /r /d y > nul 2>&1");
@@ -652,10 +652,10 @@ int set_opr_password(char* opr_password){
     run_flag=encrypt_decrypt_clusters("all","decrypt",0);
     if(run_flag!=0){
         if(run_flag>20||run_flag==-7){
-            printf(WARN_YELLO_BOLD "\n[ -WARN- ] Rolling back with previous crypto password ..." RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "\n[ -WARN- ] Rolling back with previous crypto keystring ..." RESET_DISPLAY "\n");
             encrypt_decrypt_clusters("all","encrypt",0);
         }
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] Operation failed and password unchanged." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] Operation failed and keystring unchanged." RESET_DISPLAY "\n");
         if(restore_perm_windows()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to restore the dir/file permissions." RESET_DISPLAY "\n");
         }
@@ -693,7 +693,7 @@ int set_opr_password(char* opr_password){
     system("chown -R root:root /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
     system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
 #endif
-    printf(GENERAL_BOLD "\n[ STEP 2 ] Encrypting files with the new crypto password..." RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "\n[ STEP 2 ] Encrypting files with the new crypto keystring..." RESET_DISPLAY "\n");
     run_flag=encrypt_decrypt_clusters("all","encrypt",0);
     if(run_flag!=0&&run_flag!=-1&&run_flag!=-11){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt files with new crypto key file." RESET_DISPLAY "\n");
@@ -706,7 +706,7 @@ int set_opr_password(char* opr_password){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to restore the dir/file permissions." RESET_DISPLAY "\n");
         return -5;
     }
-    printf( GENERAL_BOLD "\n[ -DONE- ] The operator password has been updated." RESET_DISPLAY "\n");
+    printf( GENERAL_BOLD "\n[ -DONE- ] The operator keystring has been updated." RESET_DISPLAY "\n");
     return 0;
 }
 
@@ -1198,13 +1198,13 @@ int main(int argc, char* argv[]){
             strcpy(opr_password,"");
         }
         else if(strlen(opr_password_arg)>19){
-            printf(WARN_YELLO_BOLD "[ -WARN- ] The password " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY WARN_YELLO_BOLD " is too long." RESET_DISPLAY "\n",opr_password_arg);
+            printf(WARN_YELLO_BOLD "[ -WARN- ] The keystring " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY WARN_YELLO_BOLD " is too long." RESET_DISPLAY "\n",opr_password_arg);
             strcpy(opr_password,"");
         }
         else{
             strncpy(opr_password,opr_password_arg,19);
             if(password_complexity_check(opr_password,SPECIAL_PASSWORD_CHARS)!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] The password " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY WARN_YELLO_BOLD " is not complex enough." RESET_DISPLAY "\n",opr_password_arg);
+                printf(WARN_YELLO_BOLD "[ -WARN- ] The keystring " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY WARN_YELLO_BOLD " is not complex enough." RESET_DISPLAY "\n",opr_password_arg);
                 strcpy(opr_password,"");
             }
         }
