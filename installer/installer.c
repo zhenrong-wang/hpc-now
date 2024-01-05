@@ -181,7 +181,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     FILE* file_p=NULL;
     int run_flag1,run_flag2;
 #ifdef _WIN32
-    char hpc_now_password[PASSWORD_STRING_LENGTH]="";
+    char hpc_now_password[15]=""; /* Windows will prompt to confirm if the password string is longer than 14*/
     if(system("net user hpc-now > nul 2>&1")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
         printf("|          If you'd like to reinstall, please uninstall first. Reinstallation\n");
@@ -217,7 +217,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
 #endif
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking and cleaning up current environment ...\n");
 #ifdef _WIN32
-    generate_random_npasswd(hpc_now_password,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
+    generate_random_npasswd(hpc_now_password,15,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
     system("icacls c:\\hpc-now /remove Administrators > nul 2>&1");
     system("takeown /f c:\\hpc-now /r /d y > nul 2>&1");
     system("icacls c:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
@@ -226,7 +226,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     system("rd /s /q c:\\hpc-now > nul 2>&1");
     system("rd /s /q c:\\programdata\\hpc-now > nul 2>&1");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");   
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"net user hpc-now \"%s\" /add /logonpasswordchg:yes > nul 2>&1",hpc_now_password);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"net user hpc-now \"%s\" /add > nul 2>&1",hpc_now_password);
     if(system(cmdline1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create the user 'hpc-now' to your system.\n");
         printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
@@ -432,7 +432,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("|          The user 'hpc-now' has been created with initial password: " GREY_LIGHT "%s" RESET_DISPLAY "\n",hpc_now_password);
     printf("|          Please follow the steps below:\n");
-    printf("|          1. " HIGH_GREEN_BOLD "net user hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY "\n");
+    printf("|          1. (optional)" HIGH_GREEN_BOLD "net user hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY "\n");
     printf("|          2. " HIGH_GREEN_BOLD "runas /savecred /user:mymachine\\hpc-now cmd" RESET_DISPLAY "\n");
     printf("|          * You will be required to input the password set just now.\n");
     printf("|          3. " GENERAL_BOLD "In the new CMD window" RESET_DISPLAY ", run " HIGH_GREEN_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
