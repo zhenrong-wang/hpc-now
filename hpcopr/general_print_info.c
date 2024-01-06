@@ -5,7 +5,6 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,12 +32,28 @@ void print_cluster_init_done(void){
     printf("|          " HIGH_CYAN_BOLD "The desktop will be ready after the init process." RESET_DISPLAY "\n");
 }
 
+void print_header(void){
+    time_t current_time_long;
+    struct tm* time_p=NULL;
+    time(&current_time_long);
+    time_p=localtime(&current_time_long);
+    printf(HIGH_GREEN_BOLD "//\\\\\\ " RESET_DISPLAY GENERAL_BOLD "HPC " RESET_DISPLAY HIGH_GREEN_BOLD "\\\\\\" RESET_DISPLAY GENERAL_BOLD " Welcome to HPC-NOW Cluster Operator! Version: %s" RESET_DISPLAY "\n",CORE_VERSION_CODE);
+    printf(HIGH_GREEN_BOLD "\\\\/// " RESET_DISPLAY GENERAL_BOLD "NOW " RESET_DISPLAY HIGH_GREEN_BOLD "/// " RESET_DISPLAY GENERAL_BOLD "%d-%d-%d %d:%d:%d" RESET_DISPLAY "\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
+    printf(GENERAL_BOLD "Copyright (c) 2024 Shanghai HPC-NOW Technologies Co., Ltd  LICENSE: MIT\n" RESET_DISPLAY "\n");
+}
+
+void print_tail(void){
+    printf("\n");
+    printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com" GENERAL_BOLD " <> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
+}
+
+
 void print_help(char* cmd_name){
     printf(GENERAL_BOLD "[ -INFO- ] Usage: hpcopr " RESET_DISPLAY GREY_LIGHT "-b" RESET_DISPLAY HIGH_GREEN_BOLD " Command " RESET_DISPLAY GENERAL_BOLD "CMD_FLAG ..." RESET_DISPLAY " [ " HIGH_CYAN_BOLD "KEY_WORD1" RESET_DISPLAY " KEY_STRING1 ] ...\n");
-    printf("|          A Global and special CMD_FLAG : " GENERAL_BOLD "-b" RESET_DISPLAY " Enter the batch execution mode\n");
-    printf("|          Global KEY_WORD and KEY_STRING: " GENERAL_BOLD "-c CLUSTER_NAME\n" RESET_DISPLAY "\n");
-    printf("|        * Advanced KEY_WORD & KEY_STRING: " GENERAL_BOLD "--dbg-level TF_DEBUG_LEVEL (Default: info)\n" RESET_DISPLAY "\n");
-    printf("|                                          " GENERAL_BOLD "--max-time  TF_MAXIMUM_WAIT_TIME (600~1200)\n" RESET_DISPLAY "\n");
+    printf("|          Global   : " GENERAL_BOLD "-b" RESET_DISPLAY "  batch execution mode\n");
+    printf("|          KEY_WORD : " GENERAL_BOLD "-c CLUSTER_NAME" RESET_DISPLAY "\n");
+    printf("|          Advanced : " GENERAL_BOLD "--dbg-level TF_DEBUG_LEVEL (Default: info)" RESET_DISPLAY "\n");
+    printf("|                     " GENERAL_BOLD "--max-time  TF_MAX_TIME    (600~1200)" RESET_DISPLAY "\n\n");
     if(strcmp(cmd_name,"all")==0){
         printf(GENERAL_BOLD "| Command Instructions\n" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "+ 0    . Get-Started:" RESET_DISPLAY "\n");
@@ -368,21 +383,6 @@ void print_help(char* cmd_name){
     }
     printf("\n");
     printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com " GENERAL_BOLD "<> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
-}
-
-void print_header(void){
-    time_t current_time_long;
-    struct tm* time_p=NULL;
-    time(&current_time_long);
-    time_p=localtime(&current_time_long);
-    printf(GENERAL_BOLD "|   /HPC->  Welcome to HPC-NOW Cluster Operator! Version: %s\n",CORE_VERSION_CODE);
-    printf("|\\\\/ ->NOW  %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd  LICENSE: MIT\n" RESET_DISPLAY "\n");
-}
-
-void print_tail(void){
-    printf("\n");
-    printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com" GENERAL_BOLD " <> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
 }
 
 void print_version(void){

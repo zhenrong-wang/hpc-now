@@ -28,7 +28,6 @@ extern char url_code_root_var[LOCATION_LENGTH];
 extern int code_loc_flag_var;
 
 int switch_to_cluster(char* target_cluster_name){
-    char* current_cluster=CURRENT_CLUSTER_INDICATOR;
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char temp_workdir[DIR_LENGTH]="";
     FILE* file_p=NULL;
@@ -42,12 +41,13 @@ int switch_to_cluster(char* target_cluster_name){
             return 3;
         }
     }
-    file_p=fopen(current_cluster,"w+");
+    file_p=fopen(CURRENT_CLUSTER_INDICATOR,"w+");
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create current cluster indicator. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
-    fprintf(file_p,"%s",target_cluster_name);
+    fprintf(file_p,"---GENERATED AND MAINTAINED BY HPC-NOW SERVICES INTERNALLY---\n");
+    fprintf(file_p,"current_cluster: < cluster name: %s >",target_cluster_name);
     fclose(file_p);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully switched to the cluster " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",target_cluster_name);
     return 0;
@@ -212,8 +212,10 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     char new_workdir[DIR_LENGTH]="";
     char new_stackdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char string_temp1[LINE_LENGTH_SHORT]="";
-    char string_temp2[LINE_LENGTH_SHORT]="";
+    char registry_line_prev[LINE_LENGTH_SHORT]="";
+    char registry_line_new[LINE_LENGTH_SHORT]="";
+    char cluster_name_ext_prev[64]="";
+    char cluster_name_ext_new[64]="";
     char prev_ssh_dir[DIR_LENGTH]="";
     char new_ssh_dir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -289,23 +291,31 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
             printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory." RESET_DISPLAY "\n");
             return -3;
         }
-    } 
-    /* If the workdir is empty, skip the /stack and /conf */
-    if(cluster_empty_or_not(new_workdir)==0){
-        goto update_registry;
     }
-    /* Update the conf file. */
-    snprintf(string_temp1,LINE_LENGTH_SHORT-1," %s ",cluster_prev_name);
-    snprintf(string_temp2,LINE_LENGTH_SHORT-1," %s ",cluster_new_name);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconf%stf_prep.conf",new_workdir,PATH_SLASH,PATH_SLASH);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.backup %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    find_and_nreplace(filename_temp,LINE_LENGTH_SHORT,"cluster_id",":","","","",string_temp1,string_temp2);
-
     get_nucid(new_workdir,ucid_short,16);
     snprintf(unique_cluster_id_prev,63,"%s-%s",cluster_prev_name,ucid_short);
     snprintf(unique_cluster_id_new,63,"%s-%s",cluster_new_name,ucid_short);
-    
+    snprintf(registry_line_prev,LINE_LENGTH_SHORT-1,"< cluster name: %s >",cluster_prev_name);
+    snprintf(registry_line_new,LINE_LENGTH_SHORT-1,"< cluster name: %s >",cluster_new_name);
+    /* If the workdir is empty, skip the /stack and /conf */
+    if(cluster_empty_or_not(new_workdir)==0){
+        global_nreplace(ALL_CLUSTER_REGISTRY,LINE_LENGTH_SMALL,registry_line_prev,registry_line_new);
+        global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_SHORT,registry_line_prev,registry_line_new);
+        goto update_usage_summary;
+    }
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.backup %s",COPY_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.backup %s",COPY_FILE_CMD,CURRENT_CLUSTER_INDICATOR,CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    global_nreplace(ALL_CLUSTER_REGISTRY,LINE_LENGTH_SMALL,registry_line_prev,registry_line_new);
+    global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_SHORT,registry_line_prev,registry_line_new);
+    snprintf(cluster_name_ext_prev,63," %s ",cluster_prev_name);
+    snprintf(cluster_name_ext_new,63," %s ",cluster_new_name);
+    /* Update the conf file. */
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconf%stf_prep.conf",new_workdir,PATH_SLASH,PATH_SLASH);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.backup %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    find_and_nreplace(filename_temp,LINE_LENGTH_SHORT,"cluster_id",":","","","",cluster_name_ext_prev,cluster_name_ext_new);
     /* Update the stack files*/
     decrypt_files(new_workdir,crypto_keyfile);
     /*printf("%s\n%s\n",unique_cluster_id_prev,unique_cluster_id_new);*/
@@ -336,24 +346,21 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
         system(cmdline);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_ssh_dir,prev_ssh_dir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.backup %s %s",MOVE_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.backup %s %s",MOVE_FILE_CMD,CURRENT_CLUSTER_INDICATOR,CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
         printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory and sshkey directory." RESET_DISPLAY "\n");
         return 1;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scompute_template",new_stackdir,PATH_SLASH);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
     delete_decrypted_files(new_workdir,crypto_keyfile);
-update_registry:
-    /* Now it's time to handle the registry */
-    snprintf(string_temp1,LINE_LENGTH_SHORT-1,"< cluster name: %s >",cluster_prev_name);
-    snprintf(string_temp2,LINE_LENGTH_SHORT-1,"< cluster name: %s >",cluster_new_name);
-    /* Replace the registry line */
-    global_nreplace(ALL_CLUSTER_REGISTRY,LINE_LENGTH_SMALL,string_temp1,string_temp2);
-    /* Replace the current indicator (if the prev name is in it)*/
-    global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_TINY,cluster_prev_name,cluster_new_name);
-
-    get_nucid(new_workdir,ucid_short,16);
-    snprintf(unique_cluster_id_prev,63,"%s-%s",cluster_prev_name,ucid_short);
-    snprintf(unique_cluster_id_new,63,"%s-%s",cluster_new_name,ucid_short);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.backup %s",DELETE_FILE_CMD,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.backup %s",DELETE_FILE_CMD,CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+update_usage_summary:
     global_nreplace(USAGE_LOG_FILE,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Renamed the cluster " GENERAL_BOLD "%s" RESET_DISPLAY " to " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_prev_name,cluster_new_name);
     return 0;

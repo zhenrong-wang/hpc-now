@@ -3237,14 +3237,14 @@ int check_reconfigure_list(char* workdir, int print_flag){
     return 0;
 }
 
-/*  
+/* 
+ * VAUTION! This function is deprecated!
  * If silent_flag=1, verbose. Will tell the user which cluster is active
  * If silent_flag=0, silent. Will print nothing
  * If silent_flag= other_number, Will only show the warning
- * 
  * Return 1: No current cluster
  * Return 0: Get current cluster and workdir
- */
+ 
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag){
     FILE* file_p=NULL;
     if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0||file_empty_or_not(CURRENT_CLUSTER_INDICATOR)==0){
@@ -3263,7 +3263,7 @@ int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int 
         get_workdir(cluster_workdir,current_cluster_name);
         return 0;
     }
-}
+}*/
 
 /*  
  * If silent_flag=1, verbose. Will tell the user which cluster is active
@@ -3280,8 +3280,18 @@ int show_current_ncluster(char* cluster_workdir, unsigned int dirlen_max, char* 
         }
         return 1;
     }
+    char line_buffer[LINE_LENGTH_SHORT]="";
+    char header[32]="";
+    int i=0;
     FILE* file_p=fopen(CURRENT_CLUSTER_INDICATOR,"r");
-    fngetline(file_p,current_cluster_name,cluster_name_len_max);
+    while(fngetline(file_p,line_buffer,LINE_LENGTH_SHORT)!=1&&i<8){
+        i++;
+        get_seq_nstring(line_buffer,':',1,header,32);
+        if(strcmp(header,"current_cluster")==0){
+            get_seq_nstring(line_buffer,' ',5,current_cluster_name,cluster_name_len_max);
+            break;
+        }
+    }
     fclose(file_p);
     if(get_nworkdir(cluster_workdir,dirlen_max,current_cluster_name)!=0){
         if(silent_flag!=0){
@@ -3297,17 +3307,26 @@ int show_current_ncluster(char* cluster_workdir, unsigned int dirlen_max, char* 
 }
 
 int current_cluster_or_not(char* current_indicator, char* cluster_name){
-    char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char line_buffer[LINE_LENGTH_SHORT]="";
+    char header[32]="";
+    char current_cluster_name[32]="";
+    int i=0;
     FILE* file_p=fopen(current_indicator,"r");
     if(file_p==NULL){
         return 1;
     }
-    fscanf(file_p,"%24s",current_cluster_name);
-    if(strcmp(current_cluster_name,cluster_name)!=0){
-        fclose(file_p);
-        return -1;
+    while(fngetline(file_p,line_buffer,LINE_LENGTH_SHORT)!=1&&i<8){
+        i++;
+        get_seq_nstring(line_buffer,':',1,header,32);
+        if(strcmp(header,"current_cluster")==0){
+            get_seq_nstring(line_buffer,' ',5,current_cluster_name,32);
+            break;
+        }
     }
     fclose(file_p);
+    if(strcmp(current_cluster_name,cluster_name)!=0){
+        return -1;
+    }
     return 0;
 }
 
@@ -3401,6 +3420,8 @@ int list_all_cluster_names(int header_flag){
     FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
     char registry_line[LINE_LENGTH_SHORT]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char header[16]="";
+    int i=0;
 //    int getline_flag=0;
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the registry. Please repair the HPC-NOW services." RESET_DISPLAY "\n");
@@ -3418,19 +3439,17 @@ int list_all_cluster_names(int header_flag){
         printf("\n");
     }
     while(fngetline(file_p,registry_line,LINE_LENGTH_SHORT)!=1){
-        if(strlen(registry_line)!=0){
-            if(file_exist_or_not(CURRENT_CLUSTER_INDICATOR)!=0){
-                printf(RESET_DISPLAY "|        : %s\n" RESET_DISPLAY,registry_line);
-            }
-            else{
-                get_seq_nstring(registry_line,' ',4,temp_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS);
-                if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
-                    printf(GENERAL_BOLD "| switch : %s\n" RESET_DISPLAY,registry_line);
-                }
-                else{
-                    printf(RESET_DISPLAY "|        : %s\n" RESET_DISPLAY,registry_line);
-                }
-            }
+        get_seq_nstring(registry_line,':',1,header,16);
+        get_seq_nstring(registry_line,' ',4,temp_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS);
+        if(strcmp(header,"< cluster name")!=0){
+            continue;
+        }
+        i++;
+        if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
+            printf(GENERAL_BOLD "| switch : (%d) %s" RESET_DISPLAY "\n",i,temp_cluster_name);
+        }
+        else{
+            printf(RESET_DISPLAY "|        : (%d) %s" RESET_DISPLAY "\n",i,temp_cluster_name);
         }
     }
     fclose(file_p);

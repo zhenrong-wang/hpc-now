@@ -776,9 +776,9 @@ int main(int argc, char* argv[]){
                 return 5;
             }
             list_all_cluster_names(1);
-            prompt_to_input_required_args("Input a new unique cluster name.",string_temp,batch_flag,argc,argv,"--cname");
+            prompt_to_input_required_args("Input a *new*, *unique*, and *valid* cluster name.",string_temp,batch_flag,argc,argv,"--cname");
         }
-        if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
+        if(prompt_to_confirm("Will rename the cluster and update all related infomation.",CONFIRM_STRING_QUICK,batch_flag)==1){
             write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
             check_and_cleanup(workdir);
             return 3;
