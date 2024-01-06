@@ -1317,10 +1317,10 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
         if(cluster_name_check(temp_cluster_name)!=-7){
             if(batch_flag!=0){
                 if(strlen(temp_cluster_name)==0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " No specified or switched cluster. Please select one from the list:\n");
+                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " No specified or switched cluster. Please select one:\n");
                 }
                 else{
-                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " The specified cluster name " WARN_YELLO_BOLD "%s" RESET_DISPLAY " is invalid. Please choose one from the list:\n",temp_cluster_name);
+                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " The specified cluster name " WARN_YELLO_BOLD "%s" RESET_DISPLAY " is invalid. Select one:\n",temp_cluster_name);
                 }
                 if(list_all_cluster_names(1)<0){
                     return -3;

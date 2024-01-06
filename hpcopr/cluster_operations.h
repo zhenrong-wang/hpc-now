@@ -10,6 +10,7 @@
 
 int switch_to_cluster(char* target_cluster_name);
 int glance_clusters(char* target_cluster_name, char* crypto_keyfile);
+int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto_keyfile, tf_exec_config* tf_run);
 int remove_cluster(char* target_cluster_name, char*crypto_keyfile, char* force_flag, tf_exec_config* tf_run);
 int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_flag, tf_exec_config* tf_run);
 int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* az_subscription, char* az_tenant, char* echo_flag, char* gcp_flag, int batch_flag_local);

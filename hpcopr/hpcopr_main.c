@@ -107,6 +107,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "switch,gen,NULL",
     "glance,gen,NULL",
     "refresh,gen,CNAME",
+    "rename,gen,CNAME",
     "export,gen,CNAME",
     "import,gen,NULL",
     "exit-current,gen,NULL",
@@ -208,6 +209,7 @@ char jobman_commands[3][COMMAND_STRING_LENGTH_MAX]={
 17 Prereq - Config Location Failed
 19 Prereq - Vers and md5 Error
 21 CLUSTER_NAME_CHECK_FAILED
+22 RENAME_FAILED
 23 INVALID_KEYPAIR
 24 DECRYPTION_ENCRYPTION_FAILED
 25 Not Operating Clusters
@@ -764,6 +766,33 @@ int main(int argc, char* argv[]){
         check_and_cleanup(workdir);
         return 0;
     }
+    
+    if(strcmp(final_command,"rename")==0){
+        if(cmd_keyword_ncheck(argc,argv,"--cname",string_temp,64)!=0){
+            if(batch_flag==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] No new name specified. Use --cname NEW_CLUSTER_NAME ." RESET_DISPLAY "\n");
+                write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
+                check_and_cleanup(workdir);
+                return 5;
+            }
+            list_all_cluster_names(1);
+            prompt_to_input_required_args("Input a new unique cluster name.",string_temp,batch_flag,argc,argv,"--cname");
+        }
+        if(confirm_to_operate_cluster(cluster_name,batch_flag)!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"USER_DENIED",3);
+            check_and_cleanup(workdir);
+            return 3;
+        }
+        run_flag=rename_cluster(cluster_name,string_temp,crypto_keyfile,&tf_this_run);
+        if(run_flag!=0){
+            write_operation_log(cluster_name,operation_log,argc,argv,"RENAME_FAILED",22);
+            check_and_cleanup(workdir);
+            return 31;
+        }
+        write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
+        check_and_cleanup(workdir);
+        return 0;
+    }
 
     if(strcmp(final_command,"refresh")==0){
         run_flag=prompt_to_confirm_args("Do force refresh?",CONFIRM_STRING,batch_flag,argc,argv,"--all");
@@ -780,7 +809,7 @@ int main(int argc, char* argv[]){
         }
         if(run_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to refresh cluster %s. Exit now.\n" RESET_DISPLAY,cluster_name);
-            write_operation_log(cluster_name,operation_log,argc,argv,"OPERATION_FAILED",31);
+            write_operation_log(cluster_name,operation_log,argc,argv,"REFRESH_FAILED",31);
             check_and_cleanup(workdir);
             return 31;
         }

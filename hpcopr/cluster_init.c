@@ -2772,7 +2772,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_TENANT_ID",tenant_id);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_SUBCRIPTION_ID",subscription_id);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"ENVIRONMENT_OPTION",az_environment);
-    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",unique_cluster_id);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STORAGE_ACCOUNT",random_storage_account);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_REGION_ID",init_conf.region_id);
     snprintf(string_temp,127,"%d",init_conf.node_num);
@@ -2801,7 +2801,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     fclose(file_p_2);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.master",stackdir,PATH_SLASH);
-    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",unique_cluster_id);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_INST",init_conf.master_inst);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"PUBLIC_KEY",pubkey);
@@ -2815,17 +2815,17 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
-    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",unique_cluster_id);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_INST",init_conf.compute_inst);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
     snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
     insert_nlines(filename_temp,LINE_LENGTH_SMALL,"mount",line_temp);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.database",stackdir,PATH_SLASH);
-    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",unique_cluster_id);
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
-    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",unique_cluster_id);
 
     for(i=0;i<init_conf.node_num;i++){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);

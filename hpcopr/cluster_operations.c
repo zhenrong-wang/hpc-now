@@ -207,6 +207,158 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
 }
 
+int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto_keyfile, tf_exec_config* tf_run){
+    char prev_workdir[DIR_LENGTH]="";
+    char new_workdir[DIR_LENGTH]="";
+    char new_stackdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char string_temp1[LINE_LENGTH_SHORT]="";
+    char string_temp2[LINE_LENGTH_SHORT]="";
+    char prev_ssh_dir[DIR_LENGTH]="";
+    char new_ssh_dir[DIR_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char unique_cluster_id_prev[64]="";
+    char unique_cluster_id_new[64]="";
+    char ucid_short[16]="";
+    int new_name_flag,node_num=0;
+    /* Make sure the new name is valid and not duplicated. This is better pre-checked*/
+    if(cluster_name_check(cluster_prev_name)!=-7){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The cluster name %s is invalid to proceed." RESET_DISPLAY "\n",cluster_prev_name);
+        return -9;
+    }
+    new_name_flag=cluster_name_check(cluster_new_name);
+    if(new_name_flag!=0){
+        if(new_name_flag==-7){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Duplicate name of %s is found in the registry." RESET_DISPLAY "\n",cluster_new_name);
+        }
+        else{
+            printf(FATAL_RED_BOLD "[ FATAL: ] The specified name %s is invalid in format." RESET_DISPLAY "\n",cluster_new_name);
+        }
+        return -9;
+    }
+    /* Get the previous working directory and new working directory */
+    if(get_nworkdir(prev_workdir,DIR_LENGTH,cluster_prev_name)!=0||get_nworkdir(new_workdir,DIR_LENGTH,cluster_new_name)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get working directories and sub-directories." RESET_DISPLAY "\n");
+        return -7;
+    }
+    /* Make sure the cluster is not locked. This is better pre-checked */
+    if(check_pslock(prev_workdir,decryption_status(prev_workdir))!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is locked and cannot be renamed." RESET_DISPLAY "\n");
+        return -5;
+    }
+    if(folder_exist_or_not(new_workdir)==0){
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        /* If the new working directory still exists, exit */
+        if(folder_exist_or_not(new_workdir)==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete invalid working directory." RESET_DISPLAY "\n");
+            return -3;
+        }
+    }
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,prev_workdir,new_workdir,SYSTEM_CMD_REDIRECT);
+    if(system(cmdline)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rename the working directory." RESET_DISPLAY "\n");
+        return -1;
+    }
+    if(create_and_get_subdir(new_workdir,"stack",new_stackdir,DIR_LENGTH)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the subdirs of new workdir." RESET_DISPLAY "\n");
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_workdir,prev_workdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        return -7;
+    }
+    snprintf(prev_ssh_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,cluster_prev_name);
+    snprintf(new_ssh_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,cluster_new_name);
+    if(folder_exist_or_not(prev_ssh_dir)==0){
+        if(folder_exist_or_not(new_ssh_dir)==0){
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,new_ssh_dir,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            /* If the new sshdir directory still exists, exit */
+            if(folder_exist_or_not(new_ssh_dir)==0){
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete invalid sshkey directory." RESET_DISPLAY "\n");
+                snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_workdir,prev_workdir,SYSTEM_CMD_REDIRECT);
+                system(cmdline);
+                printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory." RESET_DISPLAY "\n");
+                return -3;
+            }
+        }
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,prev_ssh_dir,new_ssh_dir,SYSTEM_CMD_REDIRECT);
+        if(system(cmdline)!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rename the sshkey directory." RESET_DISPLAY "\n");
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_workdir,prev_workdir,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory." RESET_DISPLAY "\n");
+            return -3;
+        }
+    } 
+    /* If the workdir is empty, skip the /stack and /conf */
+    if(cluster_empty_or_not(new_workdir)==0){
+        goto update_registry;
+    }
+    /* Update the conf file. */
+    snprintf(string_temp1,LINE_LENGTH_SHORT-1," %s ",cluster_prev_name);
+    snprintf(string_temp2,LINE_LENGTH_SHORT-1," %s ",cluster_new_name);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconf%stf_prep.conf",new_workdir,PATH_SLASH,PATH_SLASH);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.backup %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    find_and_nreplace(filename_temp,LINE_LENGTH_SHORT,"cluster_id",":","","","",string_temp1,string_temp2);
+
+    get_nucid(new_workdir,ucid_short,16);
+    snprintf(unique_cluster_id_prev,63,"%s-%s",cluster_prev_name,ucid_short);
+    snprintf(unique_cluster_id_new,63,"%s-%s",cluster_new_name,ucid_short);
+    
+    /* Update the stack files*/
+    decrypt_files(new_workdir,crypto_keyfile);
+    /*printf("%s\n%s\n",unique_cluster_id_prev,unique_cluster_id_new);*/
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",new_stackdir,PATH_SLASH);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_natgw.tf",new_stackdir,PATH_SLASH);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_database.tf",new_stackdir,PATH_SLASH);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_master.tf",new_stackdir,PATH_SLASH);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",new_stackdir,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)==0){
+        node_num=get_compute_node_num(filename_temp,"all");
+    }
+    for(int i=1;i<node_num+1;i++){
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",new_stackdir,PATH_SLASH,i);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
+    }
+    if(tf_execution(tf_run,"apply",new_workdir,crypto_keyfile,1)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to refresh the cluster's cloud resources." RESET_DISPLAY "\n");
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s*.tf %s",DELETE_FILE_CMD,new_stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconf%stf_prep.conf",new_workdir,PATH_SLASH,PATH_SLASH);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.backup %s %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_workdir,prev_workdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_ssh_dir,prev_ssh_dir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory and sshkey directory." RESET_DISPLAY "\n");
+        return 1;
+    }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scompute_template",new_stackdir,PATH_SLASH);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
+    delete_decrypted_files(new_workdir,crypto_keyfile);
+update_registry:
+    /* Now it's time to handle the registry */
+    snprintf(string_temp1,LINE_LENGTH_SHORT-1,"< cluster name: %s >",cluster_prev_name);
+    snprintf(string_temp2,LINE_LENGTH_SHORT-1,"< cluster name: %s >",cluster_new_name);
+    /* Replace the registry line */
+    global_nreplace(ALL_CLUSTER_REGISTRY,LINE_LENGTH_SMALL,string_temp1,string_temp2);
+    /* Replace the current indicator (if the prev name is in it)*/
+    global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_TINY,cluster_prev_name,cluster_new_name);
+
+    get_nucid(new_workdir,ucid_short,16);
+    snprintf(unique_cluster_id_prev,63,"%s-%s",cluster_prev_name,ucid_short);
+    snprintf(unique_cluster_id_new,63,"%s-%s",cluster_new_name,ucid_short);
+    global_nreplace(USAGE_LOG_FILE,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Renamed the cluster " GENERAL_BOLD "%s" RESET_DISPLAY " to " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_prev_name,cluster_new_name);
+    return 0;
+}
+
 int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_flag, tf_exec_config* tf_run){
     char target_cluster_workdir[DIR_LENGTH]="";
     if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
@@ -2138,7 +2290,7 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
         return 1;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%stf_prep.conf",confdir,PATH_SLASH);
-    find_and_nreplace(filename_temp,LINE_LENGTH_SHORT,"CLUSTER_ID","","","","","hpcnow",cluster_name);
+    find_and_nreplace(filename_temp,LINE_LENGTH_SHORT,"cluster_id","","","","","hpcnow",cluster_name);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Default configuration file has been downloaded.\n");
     if(strcmp(edit_flag,"edit")!=0){
         return 0;

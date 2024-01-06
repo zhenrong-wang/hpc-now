@@ -74,6 +74,11 @@ void print_help(char* cmd_name){
         printf("|   --all                 ~ Glance all the clusters.\n");
         printf("|   -c   TARGET_CLUSTER   ~ Specify a target cluster.\n");
     }
+    if(strcmp(cmd_name,"rename")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "rename" RESET_DISPLAY "      :~ Refresh a cluster without changing the resources.\n");
+        printf("|   -c      TARGET_CLUSTER ~ Specify a target cluster.\n");
+        printf("|   --cname CLUSTER_NAME   ~ Specify a new cluster name.\n");
+    }
     if(strcmp(cmd_name,"refresh")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "refresh" RESET_DISPLAY "     :~ Refresh a cluster without changing the resources.\n");
         printf("|   -c   TARGET_CLUSTER   ~ Specify a target cluster.\n");
@@ -537,7 +542,7 @@ void list_all_commands(void){
     printf(GENERAL_BOLD " 0.  GET-STARTED:" RESET_DISPLAY HIGH_GREEN_BOLD " envcheck" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 1.  Multi-Cluster Management: " RESET_DISPLAY "\n");
     printf(HIGH_GREEN_BOLD "     new-cluster  ls-clusters \n");
-    printf("     switch  glance  refresh \n");
+    printf("     switch  glance  rename  refresh \n");
     printf("     export  import  remove  exit-current " RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 2.  Global Management: " RESET_DISPLAY "\n");
     printf(HIGH_GREEN_BOLD "     help  usage  monman  history  syserr \n");

@@ -1074,13 +1074,9 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
     if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -3;
     }
-    snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH); //Decrypted user registry
-    if(file_exist_or_not(user_passwords)!=0){ //If not decrypted
+    snprintf(user_passwords_decrypted,FILENAME_LENGTH-1,"%s%suser_passwords.txt.dec",vaultdir,PATH_SLASH); //Decrypted user registry
+    if(file_exist_or_not(user_passwords_decrypted)!=0){ //If not decrypted
         snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH); //Encrypted user registry
-        if(file_exist_or_not(user_passwords)!=0){
-            return 0; //The cluster is empty.
-        }
-        snprintf(user_passwords_decrypted,FILENAME_LENGTH-1,"%s%suser_passwords.txt.dec",vaultdir,PATH_SLASH); //Decrypted user registry
         decrypt_single_file_general(NOW_CRYPTO_EXEC,user_passwords,user_passwords_decrypted,md5sum);
     }
     FILE* file_p=fopen(user_passwords_decrypted,"r");
@@ -2179,8 +2175,8 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     fngetline(file_p,randstr,30);
     fclose(file_p);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
-    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"CLUSTER_ID","","",1,"CLUSTER_ID","","",' ',3,cluster_id,30);
-    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"REGION_ID","","",1,"REGION_ID","","",' ',3,cloud_region,16);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"cluster_id","","",1,"cluster_id","","",' ',3,cluster_id,30);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"region_id","","",1,"region_id","","",' ',3,cloud_region,16);
     snprintf(unique_cluster_id,63,"%s-%s",cluster_id,randstr);
     get_state_nvalue(workdir,"master_config:",master_config,16);
     get_state_nvalue(workdir,"compute_config:",compute_config,16);
