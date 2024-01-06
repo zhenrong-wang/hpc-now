@@ -2120,8 +2120,8 @@ int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, ch
         return -7;
     }
     if(silent_flag!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process. TF: " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Max Exec Time: " RESET_DISPLAY GENERAL_BOLD "%d" RESET_DISPLAY WARN_YELLO_BOLD "s.\n",tf_run->tf_runner_type,tf_run->max_wait_time);
-        printf("|          Command: " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Debug Level: " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD ". Log: " RESET_DISPLAY GENERAL_BOLD "hpcopr -b viewlog\n" RESET_DISPLAY,execution_name,tf_run->dbg_level);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process. TF: %s. Max Exec Time: %ds.\n",tf_run->tf_runner_type,tf_run->max_wait_time);
+        printf("|          Command: %s. Debug Level: %s. Log: hpcopr -b viewlog" RESET_DISPLAY "\n",execution_name,tf_run->dbg_level);
     }
     if(wait_for_complete(tf_realtime_log,execution_name,tf_run->max_wait_time,tf_error_log,tf_error_log_archive,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);

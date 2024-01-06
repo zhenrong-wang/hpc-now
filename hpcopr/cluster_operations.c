@@ -361,6 +361,8 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.backup %s",DELETE_FILE_CMD,CURRENT_CLUSTER_INDICATOR,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 update_usage_summary:
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%smon_data%smon_data_%s.csv %s%smon_data%smon_data_%s.csv %s",MOVE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_prev_name,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_new_name,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
     global_nreplace(USAGE_LOG_FILE,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Renamed the cluster " GENERAL_BOLD "%s" RESET_DISPLAY " to " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_prev_name,cluster_new_name);
     return 0;
