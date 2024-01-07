@@ -1159,7 +1159,7 @@ int main(int argc, char* argv[]){
             return 49;
         }
         if(batch_flag!=0&&cmd_keyword_ncheck(argc,argv,"-u",user_name,32)!=0){
-            hpc_user_list(workdir,crypto_keyfile,0);
+            hpc_user_list(workdir,crypto_keyfile,0,1);
         }
         prompt_to_input_optional_args("Display credentials of a specific user? (Default: all users except root)",CONFIRM_STRING_QUICK,"Select a user from the list above.",user_name,batch_flag,argc,argv,"-u");
         run_flag=prompt_to_confirm_args("Display bucket credentials? (Default: hide)",CONFIRM_STRING,batch_flag,argc,argv,"--bkey");
@@ -1872,7 +1872,7 @@ int main(int argc, char* argv[]){
             return 36;
         }
         if(strcmp(user_cmd,"list")==0){
-            run_flag=hpc_user_list(workdir,crypto_keyfile,0);
+            run_flag=hpc_user_list(workdir,crypto_keyfile,0,0);
             if(cluster_state_flag==0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] The specified/switched cluster is not running." RESET_DISPLAY "\n");
             }
@@ -1893,7 +1893,7 @@ int main(int argc, char* argv[]){
             return 3;
         }
         //printf("\n\n %s \n\n",user_cmd);
-        hpc_user_list(workdir,crypto_keyfile,0);
+        hpc_user_list(workdir,crypto_keyfile,0,1);
         if(strcmp(user_cmd,"add")==0){
             snprintf(string_temp,255,"Input a *UNIQUE* username (A-Z | a-z | 0-9 | - , Length %d-%d",USERNAME_LENGTH_MIN,USERNAME_LENGTH_MAX);
         }

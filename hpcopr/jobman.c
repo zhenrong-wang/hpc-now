@@ -56,7 +56,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
 
     if(strcmp(user_name,"root")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The root user cannot submit jobs, please specify another user." RESET_DISPLAY "\n");
-        hpc_user_list(workdir,crypto_keyfile,0);
+        hpc_user_list(workdir,crypto_keyfile,0,1);
         return -3;
     }
     if(cmd_keyword_check(argc,argv,"--app",app_name)!=0){

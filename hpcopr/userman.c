@@ -51,7 +51,10 @@ void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_fla
     }
 }
 
-int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
+/*
+ * if the format_flag!=0, then will add a blank line 
+ */
+int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag, int format_flag){
     if(decrypt_flag==0){
         if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
             return -1;
@@ -63,6 +66,8 @@ int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
     char username[32]="";
     char enable_flag[16]="";
     FILE* file_p=NULL;
+
+    printf("\n");
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"r");
@@ -70,15 +75,18 @@ int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
         get_seq_nstring(single_line,' ',2,username,32);
         get_seq_nstring(single_line,' ',4,enable_flag,16);
         if(strcmp(enable_flag,"STATUS:ENABLED")==0){
-            printf(HIGH_GREEN_BOLD "|          +- username: %s %s" RESET_DISPLAY "\n",username,enable_flag);
+            printf(GENERAL_BOLD"|          +- username: %s %s" RESET_DISPLAY "\n",username,enable_flag);
         }
         else{
-            printf(WARN_YELLO_BOLD "|          +- username: %s %s"  RESET_DISPLAY  "\n",username,enable_flag);
+            printf(WARN_YELLO_BOLD "|          +- username: %s %s" RESET_DISPLAY "\n",username,enable_flag);
         }
     }
     fclose(file_p);
     if(decrypt_flag==0){
         delete_decrypted_user_passwords(workdir);
+    }
+    if(format_flag!=0){
+        printf("\n");
     }
     return 0;
 }
@@ -171,7 +179,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
     snprintf(username_ext,127,"username: %s ",username);
 
     if(find_multi_nkeys(user_registry_file,LINE_LENGTH_SHORT,username_ext,new_keywords,"","","")>0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The user " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is already " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY,username,new_keywords);
+        printf(GENERAL_BOLD "[ -INFO- ] The user %s is already %s. Exit now.\n" RESET_DISPLAY,username,new_keywords);
         delete_decrypted_user_passwords(workdir);
         return -5;
     }
