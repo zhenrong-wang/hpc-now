@@ -53,6 +53,7 @@ int generate_random_passwd(char* password);
 int password_complexity_check(char* password, char* special_chars);
 int generate_random_db_passwd(char* password);
 int generate_random_string(char* random_string);
+int generate_random_nstring(char random_string[], unsigned int len_max, int start_flag);
 
 char* getpass_win(char* prompt);
 

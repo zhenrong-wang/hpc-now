@@ -552,12 +552,11 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     char az_tenant_id[AKSK_LENGTH]="";
     char md5sum[33]="";
     int ak_length,sk_length;
-    char* cluster_registry=ALL_CLUSTER_REGISTRY;
 
     if(file_exist_or_not(crypto_keyfile)!=0){
         return -1;
     }
-    file_p=fopen(cluster_registry,"a+");
+    file_p=fopen(ALL_CLUSTER_REGISTRY,"a+");
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open/write to the cluster registry. Exit now." RESET_DISPLAY "\n");
         return -1;

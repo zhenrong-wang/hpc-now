@@ -18,16 +18,17 @@
 #include "userman.h"
 #include "transfer.h"
 
-int get_cluster_name_import(char* cluster_name_output, char* tmp_top_output, char* tmp_import_root, char* md5sum){
+int get_import_info(char cluster_name_output[], unsigned int name_len_max, char tmp_top_output[], unsigned int dir_len_max, char unique_id[], unsigned int id_len_max, char* tmp_import_root, char* md5sum){
+    if(name_len_max<CLUSTER_ID_LENGTH_MAX_PLUS||dir_len_max<DIR_LENGTH_SHORT||id_len_max<RANDSTR_LENGTH_PLUS){
+        return -5;
+    }
     char cluster_name_flag[FILENAME_LENGTH]="";
     char cluster_name_flag_tmp[FILENAME_LENGTH]="";
     char dir_win[DIR_LENGTH]="";
     char dir_lin[DIR_LENGTH]="";
     char dir_dwn[DIR_LENGTH]="";
     char dir_top[DIR_LENGTH_EXT]="";
-    char cluster_name_buffer[64]="";
-    char cluster_name_flag_header[128]="";
-    FILE* file_p=NULL;
+
     snprintf(dir_win,DIR_LENGTH-1,"%s%sprogramdata",tmp_import_root,PATH_SLASH);
     snprintf(dir_lin,DIR_LENGTH-1,"%s%susr",tmp_import_root,PATH_SLASH);
     snprintf(dir_dwn,DIR_LENGTH-1,"%s%sApplications",tmp_import_root,PATH_SLASH);
@@ -51,31 +52,18 @@ int get_cluster_name_import(char* cluster_name_output, char* tmp_top_output, cha
         return -5;
     }
     file_cr_clean(cluster_name_flag);
-    file_p=fopen(cluster_name_flag,"r");
-    if(file_p==NULL){
-        strcpy(cluster_name_output,"");
-        strcpy(tmp_top_output,"");
-        return -5;
+    if(find_multi_nkeys(cluster_name_flag,LINE_LENGTH_SHORT,TRANSFER_HEADER,"","","","")>0){
+        get_key_nvalue(cluster_name_flag,LINE_LENGTH_TINY,"cluster_name:",' ',cluster_name_output,name_len_max);
+        get_key_nvalue(cluster_name_flag,LINE_LENGTH_TINY,"unique_id:",' ',unique_id,id_len_max);
+        if(strlen(cluster_name_output)>0&&strlen(unique_id)>0){
+            strncpy(tmp_top_output,dir_top,dir_len_max-1);
+            return 0;
+        }
     }
-    fngetline(file_p,cluster_name_flag_header,127);
-    if(strcmp(cluster_name_flag_header,TRANSFER_HEADER)!=0){
-        strcpy(cluster_name_output,"");
-        strcpy(tmp_top_output,"");
-        fclose(file_p);
-        return -7;
-    }
-    fngetline(file_p,cluster_name_buffer,63);
-    fclose(file_p);
-    if(strlen(cluster_name_buffer)==0){
-        strcpy(cluster_name_output,"");
-        strcpy(tmp_top_output,"");
-        return 1;
-    }
-    else{
-        strcpy(cluster_name_output,cluster_name_buffer);
-        strcpy(tmp_top_output,dir_top);
-        return 0;
-    }
+    strcpy(cluster_name_output,"");
+    strcpy(tmp_top_output,"");
+    strcpy(unique_id,"");
+    return 1;
 }
 
 int user_list_check(char* cluster_name, char* user_list_read, char* user_list_final, int* user1_flag){
@@ -129,6 +117,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char filename_temp_4[FILENAME_LENGTH]="";
     char username_temp[32]="";
     char username_temp_2[32]="";
+    char unique_id[16]="";
     char* password_temp;
     char real_password[128]="";
     char real_export_file[FILENAME_LENGTH_EXT]="";
@@ -159,7 +148,10 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
         return -7;
     }
-
+    if(get_nucid(workdir,unique_id,16)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the unique cluster id." RESET_DISPLAY "\n");
+        return -7;
+    }
     if(strlen(user_list)==0){
         if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] User list specified. Use --ul USER_LIST." RESET_DISPLAY "\n");
@@ -261,7 +253,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         system(cmdline);
         return -5;
     }
-    fprintf(file_p,"%s\n%s\n",TRANSFER_HEADER,cluster_name);
+    fprintf(file_p,"%s\ncluster_name: %s\nunique_id: %s\n",TRANSFER_HEADER,cluster_name,unique_id);
     fclose(file_p);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s%s%slog %s",MKDIR_CMD,tmp_root,PATH_SLASH,cluster_name,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -425,23 +417,36 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     char real_zipfile[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp_2[FILENAME_LENGTH]="";
-    char cluster_name_buffer[128]="";
-    char tmp_top_dir[DIR_LENGTH_SHORT]="";
+    char cluster_name_buffer[32]="";
+    char cluster_name_final[32]="";
+    
+    char cluster_name_temp[32]="";
+    char cluster_workdir_temp[DIR_LENGTH]="";
+    char unique_id_temp[16]="";
+    char cluster_role_temp[16]="";
+    char cluster_role_ext_temp[16]="";
+    int comp_flag1,comp_flag2;
+    int duplicate_flag=0;
+    char rand_str_suffix[8]="";
+    int cluster_name_buffer_length=0;
+
+    char tmp_top_dir[DIR_LENGTH]="";
     char tmp_workdir[DIR_LENGTH_EXT]="";
     char username_temp[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char tmp_import_root[DIR_LENGTH]="";
-    char cluster_sshkey_dir[DIR_LENGTH];
-    char workdir[DIR_LENGTH]="";
+    char tmp_unique_id[16]="";
+
+    char imported_workdir[DIR_LENGTH]="";
+    char imported_ssh_dir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
-    char doubleconfirm[64]="";
+    char registry_line[LINE_LENGTH_SHORT]="";
     char* password_temp;
     char real_password[128]="";
     char md5sum_password[64]="";
     char md5sum_local[64]="";
     int update_flag=0;
-    FILE* file_p=NULL;
     char user_line_buffer[256]="";
     int admin_flag=0;
 
@@ -492,58 +497,107 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     snprintf(cmdline,CMDLINE_LENGTH-1,"tar -zxf %s -C %s%s",real_zipfile,tmp_import_root,PATH_SLASH);
-    if(system(cmdline)!=0||get_cluster_name_import(cluster_name_buffer,tmp_top_dir,tmp_import_root,md5sum_password)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified password " WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " may be incorrect. Please double check.\n" RESET_DISPLAY,real_password);
+    if(system(cmdline)!=0||get_import_info(cluster_name_buffer,32,tmp_top_dir,DIR_LENGTH,tmp_unique_id,16,tmp_import_root,md5sum_password)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to extract and get the import information.\n" RESET_DISPLAY);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return -5;
     }
-    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name_buffer)!=0){
+    FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r"); /* file opened */
+    if(file_p==NULL){ /* file_open failed, exit immediately */
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the cluster registry, please run " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        return -7;
+    }
+    while(fngetline(file_p,registry_line,LINE_LENGTH_SHORT)!=1){
+        if(contain_or_nnot(registry_line,"< cluster name:")<1){
+            continue;
+        }
+        get_seq_nstring(registry_line,' ',4,cluster_name_temp,32);
+        get_nworkdir(cluster_workdir_temp,DIR_LENGTH,cluster_name_temp);
+        get_nucid(cluster_workdir_temp,unique_id_temp,16);
+        comp_flag1=strcmp(tmp_unique_id,unique_id_temp);
+        comp_flag2=strcmp(cluster_name_buffer,cluster_name_temp);
+        if(comp_flag1==0){
+            cluster_role_detect(cluster_workdir_temp,cluster_role_temp,cluster_role_ext_temp,16);
+            if(strcmp(cluster_role_temp,"opr")==0){
+                duplicate_flag=5; /* Duplicate unique id and operating the cluster, exit.*/
+                break;
+            }
+            if(comp_flag2==0){
+                duplicate_flag=3; /* Duplicate unique id and cluster name, and the cluster is imported */
+                break;
+            }
+            duplicate_flag=1; /* Duplicate unique id, but not the cluster name*/
+            break;
+        }
+        if(comp_flag2==0){
+            duplicate_flag=2; /* Duplicate cluster name, but uniquie id*/
+        }
+    }
+    fclose(file_p); /* file closed */
+    if(duplicate_flag==5){
+        printf(FATAL_RED_BOLD "[ FATAL: ] You are operating the identical cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ", import abort." RESET_DISPLAY "\n",cluster_name_temp);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        return -7;
+    }
+    else if(duplicate_flag==3||duplicate_flag==1){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " has already been imported.\n",cluster_name_buffer);
+        if(prompt_to_confirm("Continue to update it? CAUTION: he cluster name will keep unchanged.",CONFIRM_STRING,batch_flag_local)==1){
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            return -9;
+        }
+        strncpy(cluster_name_final,cluster_name_temp,31);
+        update_flag=1;
+    }
+    else if(duplicate_flag==2){
+        printf(GENERAL_BOLD "[ -INFO- ] Duplicate name found. Generating a unique cluster name ..." RESET_DISPLAY "\n");
+        generate_random_nstring(rand_str_suffix,8,0); /* Generate a random string with actual length 7 and a '\0' */
+        strncpy(cluster_name_final,cluster_name_buffer,31);
+        cluster_name_buffer_length=strlen(cluster_name_buffer);
+        if(cluster_name_buffer_length<18){
+            memcpy(cluster_name_final+cluster_name_buffer_length,rand_str_suffix,8); /* Add 7 chars */
+        }
+        else{
+            memcpy(cluster_name_final+17,rand_str_suffix,8); /* Otherwise replace the last 7 chars */
+        }
+        /* If still duplicate, then exit. */
+        if(cluster_name_check(cluster_name_final)==-7){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to generate a unique cluster name, import abort." RESET_DISPLAY "\n");
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
+            system(cmdline);
+            return -7;
+        }
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Generated a unique cluster name %s." RESET_DISPLAY "\n",cluster_name_final);
+    }
+    /* After the process above, the cluster_name_final should be unique and ready to import */
+    if(get_nworkdir(imported_workdir,DIR_LENGTH,cluster_name_final)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         return -7;
     }
-    if(cluster_name_check(cluster_name_buffer)==-7){
-        create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
-        if(file_exist_or_not(filename_temp)==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] You are operating the cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " . No need to import.\n" RESET_DISPLAY ,cluster_name_buffer);
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
-            return -7;
-        }
-        else{
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " has already been imported to this environment.\n",cluster_name_buffer);
-            printf("|          Would you like to replace it? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continue.\n");
-            if(batch_flag_local==0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed." RESET_DISPLAY "\n");
-                update_flag=1;
-            }
-            else{
-                printf("[ INPUT: ] ");
-                fflush(stdin);
-                scanf("%63s",doubleconfirm);
-                getchar();
-                if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You chose to deny this operation.\n");
-                    printf("|          Nothing changed.\n");
-                    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
-                    system(cmdline);
-                    return -9;
-                }
-                else{
-                    update_flag=1;
-                }
-            }
-        }
+    /* Delete the folder to be imported (if exists. Not quite possible) */
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,imported_workdir,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    snprintf(imported_ssh_dir,DIR_LENGTH,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,cluster_name_final);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,imported_ssh_dir,SYSTEM_CMD_REDIRECT);
+    system(cmdline);
+    /* Guarantee that the target dirs don't exist */
+    if(folder_exist_or_not(imported_workdir)==0||folder_exist_or_not(imported_ssh_dir)==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a workdir and/or sshkey dir." RESET_DISPLAY "\n");
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        return -7;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,workdir,SYSTEM_CMD_REDIRECT);
+    /* Start moving files and folders*/
+    /* Moving sshkeys to the SSHKEY_DIR */
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sexport%s.%s %s%s%s %s",MOVE_FILE_CMD,tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer,SSHKEY_DIR,PATH_SLASH,cluster_name_final,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.%s %s",DELETE_FOLDER_CMD,SSHKEY_DIR,PATH_SLASH,cluster_name_buffer,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sexport%s.%s %s%s %s",MOVE_FILE_CMD,tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer,SSHKEY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    /* Decrypt current files */
     snprintf(tmp_workdir,DIR_LENGTH_EXT-1,"%s%sexport%s%s",tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%svault%sbucket_info.txt.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_password);
@@ -555,49 +609,53 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_password);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sstack%sterraform.tfstate.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_password);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s%sworkdir%s %s",MOVE_FILE_CMD,tmp_workdir,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    
+    /* Move the working directory */
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s%sworkdir%s%s %s",MOVE_FILE_CMD,tmp_workdir,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name_final,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     if(update_flag==0){
-        add_to_cluster_registry(cluster_name_buffer,"imported");
+        add_to_cluster_registry(cluster_name_final,"imported");
     }
-    
-    snprintf(cluster_sshkey_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,cluster_name_buffer);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sroot.key.tmp",cluster_sshkey_dir,PATH_SLASH);
+    /* Decrypt and re-encrypt the root ssh key */
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sroot.key.tmp",imported_ssh_dir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
         decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_password);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sroot.key",cluster_sshkey_dir,PATH_SLASH);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sroot.key",imported_ssh_dir,PATH_SLASH);
         encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum_local);
         admin_flag=1;
     }
-    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
+    create_and_get_subdir(imported_workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
+    /* Decrypt and re-encrypt the users' ssh keys */
+    file_p=fopen(filename_temp,"r"); /* file opened */
+    if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to import the specified cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " ." RESET_DISPLAY "\n",cluster_name_buffer);
         return 1;
     }
-    file_p=fopen(filename_temp,"r");
     while(!feof(file_p)){
         fngetline(file_p,user_line_buffer,255);
         get_seq_nstring(user_line_buffer,' ',2,username_temp,64);
-        snprintf(filename_temp_2,FILENAME_LENGTH-1,"%s%s%s.key.tmp",cluster_sshkey_dir,PATH_SLASH,username_temp);
+        snprintf(filename_temp_2,FILENAME_LENGTH-1,"%s%s%s.key.tmp",imported_ssh_dir,PATH_SLASH,username_temp);
         decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp_2,md5sum_password);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp_2,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(filename_temp_2,FILENAME_LENGTH-1,"%s%s%s.key",cluster_sshkey_dir,PATH_SLASH,username_temp);
+        snprintf(filename_temp_2,FILENAME_LENGTH-1,"%s%s%s.key",imported_ssh_dir,PATH_SLASH,username_temp);
         encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp_2,md5sum_local);
     }
-    fclose(file_p);
-    delete_decrypted_files(workdir,crypto_keyfile);
-    create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
+    fclose(file_p); /* file closed */
+    /* Now, encrypt and delete all the decrypted files */
+    delete_decrypted_files(imported_workdir,crypto_keyfile);
+    create_and_get_subdir(imported_workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     file_cr_clean(filename_temp);
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster %s has been imported.\n\n",cluster_name_buffer);
+    /* Now, print the import summary */
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster %s has been imported.\n\n",cluster_name_final);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Import Summary :\n");
-    printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Cluster Name   : %s\n",cluster_name_buffer);
+    printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Cluster Name   : %s\n",cluster_name_final);
     printf(GENERAL_BOLD "|         " RESET_DISPLAY " User List      : \n");
-    hpc_user_list(workdir,crypto_keyfile,0);
+    hpc_user_list(imported_workdir,crypto_keyfile,0);
     if(admin_flag==1){
         printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Admin Privilege : YES \n");
     }
@@ -605,10 +663,10 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Admin Privilege : NO \n");
     }
     printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Node Topology   : \n");
-    graph(workdir,crypto_keyfile,0);
+    graph(imported_workdir,crypto_keyfile,0);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    switch_to_cluster(cluster_name_buffer);
+    switch_to_cluster(cluster_name_final);
     return 0;
 }
 

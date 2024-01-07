@@ -66,14 +66,13 @@ int cluster_role_detect(char* workdir, char cluster_role[], char cluster_role_ex
 }
 
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag){
-    char* cluster_registry=ALL_CLUSTER_REGISTRY;
-    FILE* file_p=fopen(cluster_registry,"a+");
+    FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"a+");
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open/write to the cluster registry. Exit now." RESET_DISPLAY);
         return -1;
     }
     if(strcmp(import_flag,"imported")==0){
-        fprintf(file_p,"< cluster name: %s > <imported>\n",new_cluster_name);
+        fprintf(file_p,"< cluster name: %s > < imported >\n",new_cluster_name);
     }
     else{
         fprintf(file_p,"< cluster name: %s >\n",new_cluster_name);
@@ -3466,30 +3465,15 @@ int exit_current_cluster(void){
 }
 
 int delete_from_cluster_registry(char* deleted_cluster_name){
-    char* cluster_registry=ALL_CLUSTER_REGISTRY;
-    char deleted_cluster_name_with_prefix[LINE_LENGTH_SHORT]="";
-    char filename_temp[FILENAME_LENGTH]="";
-    char temp_line[LINE_LENGTH_SHORT]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    FILE* file_p=NULL;
-    FILE* file_p_tmp=NULL;
-    snprintf(deleted_cluster_name_with_prefix,LINE_LENGTH_SHORT-1,"< cluster name: %s >",deleted_cluster_name);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",cluster_registry);
-    file_p=fopen(cluster_registry,"r");
-    file_p_tmp=fopen(filename_temp,"w+");
-    while(!feof(file_p)){
-        fngetline(file_p,temp_line,256);
-        if(contain_or_not(temp_line,deleted_cluster_name_with_prefix)!=0&&strlen(temp_line)>0){
-            fprintf(file_p_tmp,"%s\n",temp_line);
-        }
+    char registry_line[LINE_LENGTH_SHORT]="";
+    snprintf(registry_line,LINE_LENGTH_SHORT-1,"< cluster name: %s >",deleted_cluster_name);
+    if(delete_nlines_by_kwd(ALL_CLUSTER_REGISTRY,LINE_LENGTH_SMALL,registry_line,1)!=0){
+        return 1;
     }
-    fclose(file_p);
-    fclose(file_p_tmp);
     if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,deleted_cluster_name)==0){
         exit_current_cluster();
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,cluster_registry,SYSTEM_CMD_REDIRECT);
-    return system(cmdline);
+    return 0;
 }
 
 int modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer){
@@ -3671,7 +3655,7 @@ int get_max_cluster_name_length(void){
         return 0;
     }
     while(!feof(file_p)){
-        fngetline(file_p,registry_single_line,256);
+        fngetline(file_p,registry_single_line,LINE_LENGTH_SHORT);
         get_seq_nstring(registry_single_line,' ',4,cluster_name_temp,CLUSTER_ID_LENGTH_MAX_PLUS);
         temp_length=strlen(cluster_name_temp);
         if(temp_length>max_length){
