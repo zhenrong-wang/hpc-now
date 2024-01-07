@@ -49,9 +49,9 @@ int check_internet_installer(void){
 
 void print_header_installer(void){
     printf(GENERAL_BOLD "| Welcome to the HPC-NOW Service Installer! Version: %s\n",INSTALLER_VERSION_CODE);
-    printf("| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd     LICENSE: MIT\n\n");
-    printf("| This is free software; see the source for copying conditions.  There is NO\n");
-    printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd     LICENSE: MIT\n\n");
+    printf(GENERAL_BOLD "| This is free software; see the source for copying conditions.  There is NO\n");
+    printf(GENERAL_BOLD "| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE." RESET_DISPLAY "\n\n");
 }
 
 void print_tail_installer(void){
