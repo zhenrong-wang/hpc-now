@@ -598,7 +598,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     }
     /* Start moving files and folders*/
     /* Moving sshkeys to the SSHKEY_DIR */
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sexport%s.%s %s%s%s %s",MOVE_FILE_CMD,tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer,SSHKEY_DIR,PATH_SLASH,cluster_name_final,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sexport%s.%s %s %s",MOVE_FILE_CMD,tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer,imported_ssh_dir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     /* Decrypt current files */
     snprintf(tmp_workdir,DIR_LENGTH_EXT-1,"%s%sexport%s%s",tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer);
