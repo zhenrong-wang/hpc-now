@@ -3083,7 +3083,6 @@ int username_check_select(char* workdir, char* username_input, const char* optio
         return -3;
     }
     else{
-        printf(GENERAL_BOLD "|          Selected username: %s" RESET_DISPLAY "\n",username_input);
         return 0;
     }
 }
