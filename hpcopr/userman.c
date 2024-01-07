@@ -84,11 +84,15 @@ int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag){
 }
 
 int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char* username){
+    if(strlen(username)==0){
+        return 17;
+    }
     if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
         return -1;
     }
-    if(strlen(username)==0){
-        return 17;
+    if(username_check_select(workdir,username,"delete")!=0){
+        delete_decrypted_user_passwords(workdir);
+        return -3;
     }
     char vaultdir[DIR_LENGTH]="";
     char user_registry_file[FILENAME_LENGTH]="";
@@ -96,15 +100,12 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+        delete_decrypted_user_passwords(workdir);
         return -7;
     }
     snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     if(strcmp(username,"root")==0||strcmp(username,"user1")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected and cannot be deleted." RESET_DISPLAY "\n");
-        delete_decrypted_user_passwords(workdir);
-        return -3;
-    }
-    if(username_check_select(user_registry_file,username)!=0){
         delete_decrypted_user_passwords(workdir);
         return -3;
     }
@@ -132,11 +133,15 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
 }
 
 int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, char* crypto_keyfile, char* option){
+    if(strlen(username)==0){
+        return 17;
+    }
     if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
         return -1;
     }
-    if(strlen(username)==0){
-        return 17;
+    if(username_check_select(workdir,username,option)!=0){
+        delete_decrypted_user_passwords(workdir);
+        return -3;
     }
     char prev_keywords[16]="";
     char prev_keywords_ext[16]="";
@@ -163,16 +168,8 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
     char remote_commands[CMDLINE_LENGTH]="";
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    if(strcmp(username,"root")==0||strcmp(username,"user1")==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The root user and user1 are protected, cannot be enabled/disabled." RESET_DISPLAY "\n");
-        delete_decrypted_user_passwords(workdir);
-        return -3;
-    }
-    if(username_check_select(user_registry_file,username)!=0){
-        delete_decrypted_user_passwords(workdir);
-        return -3;
-    }
-    snprintf(username_ext,127," %s ",username);
+    snprintf(username_ext,127,"username: %s ",username);
+
     if(find_multi_nkeys(user_registry_file,LINE_LENGTH_SHORT,username_ext,new_keywords,"","","")>0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The user " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is already " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY,username,new_keywords);
         delete_decrypted_user_passwords(workdir);
@@ -198,11 +195,15 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
 }
 
 int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, char* username, char* password){
+    if(strlen(username)==0||strlen(password)==0){
+        return 17;
+    }
     if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
         return -1;
     }
-    if(strlen(username)==0||strlen(password)==0){
-        return 17;
+    if(username_check_select(workdir,username,"passwd")!=0){
+        delete_decrypted_user_passwords(workdir);
+        return -3;
     }
     char vaultdir[DIR_LENGTH]="";
     char user_registry_file[FILENAME_LENGTH]="";
@@ -214,15 +215,7 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
 
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    if(strcmp(username,"root")==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Modifying root user password is not allowed." RESET_DISPLAY "\n");
-        delete_decrypted_user_passwords(workdir);
-        return -3;
-    }
-    if(username_check_select(user_registry_file,username)!=0){
-        delete_decrypted_user_passwords(workdir);
-        return -3;
-    }
+
     if(user_password_complexity_check(password,SPECIAL_PASSWORD_CHARS)!=0){
         delete_decrypted_user_passwords(workdir);
         return -5;
@@ -247,27 +240,24 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
 }
 
 int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* username, char* password){
-    if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
-        return -1;
-    }
     if(strlen(username)==0||strlen(password)==0){
         return 17;
+    }
+    if(decrypt_user_passwords(workdir,crypto_keyfile)!=0){
+        return -1;
     }
     char vaultdir[DIR_LENGTH]="";
     char user_registry_file[FILENAME_LENGTH]="";
     char remote_commands[CMDLINE_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-
     FILE* file_p=NULL;
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+        delete_decrypted_user_passwords(workdir);
         return -7;
     }
     snprintf(user_registry_file,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(user_registry_file)!=0){
-        return -1;
-    }
-    if(username_check_add_passwd(workdir,username,"add")!=0){
+    if(username_check_add(workdir,username)!=0){
         delete_decrypted_user_passwords(workdir);
         return -3;
     }

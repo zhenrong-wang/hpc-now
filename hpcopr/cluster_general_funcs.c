@@ -2980,6 +2980,14 @@ int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir)
     }
 }
 
+/*
+ * return -5: user registry not exist
+ * return -3: username length invalid
+ * return  3: start with -, illegal
+ * return  5: invalid chars found
+ * return  7: found in the registry
+ * return  0: valid but not found
+ */
 int username_check(char* user_registry, char* username_input){
     if(file_exist_or_not(user_registry)!=0){
         return -5;
@@ -3021,19 +3029,7 @@ int username_check(char* user_registry, char* username_input){
  * Return     0: Username can be added
  * Return Non-0: User name cannot be added, and print out the reason
  */
-int username_check_add_passwd(char* workdir, char* username_input, const char* option){
-    if(strcmp(option,"add")==0){
-        if(strcmp(username_input,"root")==0||strcmp(username_input,"user1")==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The user root and user1 are invalid to add." RESET_DISPLAY "\n");
-            return -3;
-        }
-    }
-    else{
-        if(strcmp(username_input,"root")==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The root password is not allowed to change." RESET_DISPLAY "\n");
-            return -3;
-        }
-    }
+int username_check_add(char* workdir, char* username_input){
     char vaultdir[DIR_LENGTH]="";
     char user_registry[FILENAME_LENGTH]="";
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
@@ -3067,13 +3063,27 @@ int username_check_add_passwd(char* workdir, char* username_input, const char* o
     }
 }
 
-int username_check_select(char* user_registry, char* username_input){
+int username_check_select(char* workdir, char* username_input, const char* option){
+    if(strcmp(username_input,"root")==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The root user is protected." RESET_DISPLAY "\n");
+        return -3;
+    }
+    if(strcmp(username_input,"user1")==0&&strcmp(option,"passwd")!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] The administator user1 is protected." RESET_DISPLAY "\n");
+        return -3;
+    }
+    
+    char vaultdir[DIR_LENGTH]="";
+    char user_registry[FILENAME_LENGTH]="";
+    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
+    snprintf(user_registry,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+
     if(username_check(user_registry,username_input)!=7){
         printf(FATAL_RED_BOLD "[ FATAL: ] Username " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is not valid." RESET_DISPLAY "\n",username_input);
         return -3;
     }
     else{
-        printf(GENERAL_BOLD "|          Slected username: %s" RESET_DISPLAY "\n",username_input);
+        printf(GENERAL_BOLD "|          Selected username: %s" RESET_DISPLAY "\n",username_input);
         return 0;
     }
 }
