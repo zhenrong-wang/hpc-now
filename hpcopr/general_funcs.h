@@ -48,11 +48,11 @@ int file_exist_or_not(char* filename);
 int file_empty_or_not(char* filename);
 int folder_exist_or_not(char* foldername);
 
-int generate_random_npasswd(char password_array[], unsigned int password_array_len, char special_chars_array[], unsigned int special_chars_array_len);
-int generate_random_passwd(char* password);
 int password_complexity_check(char* password, char* special_chars);
-int generate_random_db_passwd(char* password);
-int generate_random_string(char* random_string);
+int generate_random_passwd(char* password); /* This function is deprecated, please use generate_random_npasswd */
+int generate_random_npasswd(char password_array[], unsigned int password_array_len, char special_chars_array[], unsigned int special_chars_array_len);
+int generate_random_db_passwd(char password[], unsigned int len_max);
+int generate_random_string(char* random_string); /* This function is deprecated, please use generate_random_nstring*/
 int generate_random_nstring(char random_string[], unsigned int len_max, int start_flag);
 
 char* getpass_win(char* prompt);

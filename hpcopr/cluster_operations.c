@@ -1167,23 +1167,17 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
 
 int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local, tf_exec_config* tf_run){
     char string_temp[128]="";
-    char unique_cluster_id[64]="";
+    char unique_cluster_id[16]="";
     char stackdir[DIR_LENGTH]="";
-    char vaultdir[DIR_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char* sshkey_dir=SSHKEY_DIR;
     int i,run_flag;
     int del_num=0;
     char filename_temp[FILENAME_LENGTH]="";
     int compute_node_num=0;
-    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    FILE* file_p=fopen(filename_temp,"r");
-    if(file_p==NULL){
+    if(get_nucid(workdir,unique_cluster_id,16)!=0){
         return -1;
     }
-    fscanf(file_p,"%63s",unique_cluster_id);
-    fclose(file_p);
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
@@ -1360,23 +1354,18 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
 
 int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local, tf_exec_config* tf_run){
     char string_temp[128]="";
-    char unique_cluster_id[64]="";
+    char unique_cluster_id[16]="";
     char stackdir[DIR_LENGTH]="";
-    char vaultdir[DIR_LENGTH]="";
     char cloud_flag[16]="";
     int i;
     int down_num=0;
     char filename_temp[FILENAME_LENGTH]="";
     char node_name[16]="";
     int compute_node_num=0;
-    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    FILE* file_p=fopen(filename_temp,"r");
-    if(file_p==NULL){
+
+    if(get_nucid(workdir,unique_cluster_id,16)!=0){
         return -1;
     }
-    fscanf(file_p,"%63s",unique_cluster_id);
-    fclose(file_p);
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     if(get_cloud_flag(workdir,cloud_flag,16)!=0){
         return -1;
@@ -1491,9 +1480,8 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
 
 int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int batch_flag_local, tf_exec_config* tf_run){
     char string_temp[128]="";
-    char unique_cluster_id[64]="";
+    char unique_cluster_id[16]="";
     char stackdir[DIR_LENGTH]="";
-    char vaultdir[DIR_LENGTH]="";
     char node_name[16]="";
     char cloud_flag[16]="";
     char* sshkey_dir=SSHKEY_DIR;
@@ -1502,14 +1490,10 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     char filename_temp[FILENAME_LENGTH]="";
     int compute_node_num=0;
     int compute_node_num_on=0;
-    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    FILE* file_p=fopen(filename_temp,"r");
-    if(file_p==NULL){
+
+    if(get_nucid(workdir,unique_cluster_id,16)!=0){
         return -1;
     }
-    fscanf(file_p,"%63s",unique_cluster_id);
-    fclose(file_p);
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     if(get_cloud_flag(workdir,cloud_flag,16)!=0){
         return -1;
@@ -1969,22 +1953,16 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
 
 int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     char string_temp[128]="";
-    char unique_cluster_id[64]="";
+    char unique_cluster_id[16]="";
     char stackdir[DIR_LENGTH]="";
-    char vaultdir[DIR_LENGTH]="";
     char cloud_flag[16]="";
     int i;
     char filename_temp[FILENAME_LENGTH]="";
     char node_name[16]="";
     int compute_node_num=0;
-    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    FILE* file_p=fopen(filename_temp,"r");
-    if(file_p==NULL){
+    if(get_nucid(workdir,unique_cluster_id,16)!=0){
         return -1;
     }
-    fscanf(file_p,"%63s",unique_cluster_id);
-    fclose(file_p);
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     if(get_cloud_flag(workdir,cloud_flag,16)!=0){
         return -1;
@@ -2051,23 +2029,18 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
         return -1;
     }
     char string_temp[128]="";
-    char unique_cluster_id[64]="";
+    char unique_cluster_id[16]="";
     char stackdir[DIR_LENGTH]="";
-    char vaultdir[DIR_LENGTH]="";
     char cloud_flag[16]="";
     int i;
     char filename_temp[FILENAME_LENGTH]="";
     char* sshkeydir=SSHKEY_DIR;
     char node_name[16]="";
     int compute_node_num=0;
-    create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    FILE* file_p=fopen(filename_temp,"r");
-    if(file_p==NULL){
+
+    if(get_nucid(workdir,unique_cluster_id,16)!=0){
         return -1;
     }
-    fscanf(file_p,"%63s",unique_cluster_id);
-    fclose(file_p);
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     if(get_cloud_flag(workdir,cloud_flag,16)!=0){
         return -1;

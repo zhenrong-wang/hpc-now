@@ -1143,7 +1143,9 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
     return 1;
 }
 
+/* This function force empty the string */
 int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char get_str[], int get_strlen_max){
+    reset_nstring(get_str,get_strlen_max); /* force empty */
     if(linelen_max<1||split_ch=='\0'||string_seq_num<1||get_strlen_max<1){
         return -1;
     }
@@ -1286,9 +1288,10 @@ int password_complexity_check(char* password, char* special_chars){
 }
 
 /*
- * This function is *strict*. The password_array_len must equals to the actual length of password_password[]
+ * This function is *strict*. The password_array_len must <= the actual length of password_password[]
  * The actual length of the generated password is array_len-1;
- * The minimum length is 8
+ * The special_chars_array_len should <= actual length of special_chars_array
+ * The minimum length is 4
  * return -1: array length is too short
  * return -3: special_chars_string is invalid
  * return -5: memory allocation error
@@ -1296,12 +1299,11 @@ int password_complexity_check(char* password, char* special_chars){
  * return  0: good password generated
  */
 int generate_random_npasswd(char password_array[], unsigned int password_array_len, char special_chars_array[], unsigned int special_chars_array_len){
-    if(password_array_len<9){
-        memset(password_array,'\0',password_array_len);
+    memset(password_array,'\0',password_array_len);
+    if(password_array_len<5){
         return -1;
     }
     if(special_chars_array_len<1){
-        memset(password_array,'\0',password_array_len);
         return -3;
     }
     int i;
@@ -1328,7 +1330,6 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     /*Added a '\0' to use the complexity check function*/
     char* special_chars_string=(char*)malloc(sizeof(char)*(special_chars_array_len+1));
     if(special_chars_string==NULL){
-        memset(password_array,'\0',password_array_len);
         return -5;
     } 
     memcpy(special_chars_string,special_chars_array,special_chars_array_len);
@@ -1341,7 +1342,6 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     char* ch_table_final=(char*)malloc(sizeof(char)*ch_table_length);
     if(ch_table_final==NULL){
         free(special_chars_string);
-        memset(password_array,'\0',password_array_len);
         return -5;
     }
     memset(ch_table_final,'\0',ch_table_length);
@@ -1351,7 +1351,6 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     if(password_temp==NULL){
         free(special_chars_string);
         free(ch_table_final);
-        memset(password_array,'\0',password_array_len);
         return -5;
     }
     memset(password_temp,'\0',password_array_len);
@@ -1420,12 +1419,21 @@ int generate_random_passwd(char* password){
     return 1;
 }
 
-int generate_random_db_passwd(char* password){
+/* 
+ * Minimum length is 9 with a '\0' 
+ * It resets the password string
+ */
+int generate_random_db_passwd(char password[], unsigned int len_max){
+    if(len_max<9){
+        strcpy(password,"");
+        return -1;
+    }
+    reset_nstring(password,len_max);
     int i,rand_num;
     struct timeval current_time;
     char ch_table[62]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     unsigned int seed_num;
-    for(i=0;i<PASSWORD_LENGTH;i++){
+    for(i=0;i<len_max-1;i++){
         GETTIMEOFDAY_FUNC(&current_time,NULL);
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);

@@ -248,6 +248,7 @@
 #define CMD_KWDS_NUM 49
 
 #define SPECIAL_PASSWORD_CHARS "~@&(){}[]=,.;:!#$%+-/|\\" 
+#define SPECIAL_PASSWORD_CHARS_SHORT "~@&(){}[]="
 
 /* Usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE "https://gitee.com/zhenrong-wang/hpc-now/raw/master/COPYING"

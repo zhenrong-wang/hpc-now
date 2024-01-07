@@ -2139,10 +2139,8 @@ int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, ch
 }
 
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option){
-    char vaultdir[DIR_LENGTH]="";
-    char stackdir[DIR_LENGTH]="";
     char* usage_file=USAGE_LOG_FILE;
-    char randstr[30]="";
+    char ucid_short[16]="";
     char filename_temp[FILENAME_LENGTH]="";
     char cluster_id[30]="";
     char cloud_region[16]="";
@@ -2163,20 +2161,13 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
     char running_hours_string[16]="";
     double cpu_hours=0;
     char cpu_hours_string[16]="";
-    if(create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH)!=0||create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH)!=0||get_cloud_flag(workdir,cloud_vendor,16)!=0){
+    if(get_nucid(workdir,ucid_short,16)!=0||get_cloud_flag(workdir,cloud_vendor,16)!=0){
         return -3;
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"r");
-    if(file_p==NULL){
-        return -1;
-    }
-    fngetline(file_p,randstr,30);
-    fclose(file_p);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconf%stf_prep.conf",workdir,PATH_SLASH,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SHORT,"cluster_id","","",1,"cluster_id","","",' ',3,cluster_id,30);
     find_and_nget(filename_temp,LINE_LENGTH_SHORT,"region_id","","",1,"region_id","","",' ',3,cloud_region,16);
-    snprintf(unique_cluster_id,63,"%s-%s",cluster_id,randstr);
+    snprintf(unique_cluster_id,63,"%s-%s",cluster_id,ucid_short);
     get_state_nvalue(workdir,"master_config:",master_config,16);
     get_state_nvalue(workdir,"compute_config:",compute_config,16);
     time(&current_time_long);

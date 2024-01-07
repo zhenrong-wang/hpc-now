@@ -1063,36 +1063,29 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         strcpy(db_os_image,"ami = data.aws_ami.centos7_x86_glb.image_id");
         strcpy(nat_os_image,"ami = data.aws_ami.centos7_x86_glb.image_id");
     }
-    reset_nstring(database_root_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_root_passwd);
+    generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
     usleep(10000);
-    reset_nstring(database_acct_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||strlen(init_info.master_passwd)<8){
-        reset_nstring(init_info.master_passwd,32);
-        generate_random_passwd(init_info.master_passwd);
+    generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
+    if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_info.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||strlen(init_info.compute_passwd)<8){
-        reset_nstring(init_info.compute_passwd,32);
-        generate_random_passwd(init_info.compute_passwd);
+    if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)==1){
+    if(file_empty_or_not(filename_temp)<1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        reset_nstring(randstr,RANDSTR_LENGTH_PLUS);
-        generate_random_string(randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
+        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%10s",randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
+        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
         fclose(file_p);
     }
+    snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
@@ -1139,8 +1132,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
     for(i=0;i<init_info.hpc_user_num;i++){
-        reset_nstring(user_passwd_temp,PASSWORD_STRING_LENGTH);
-        generate_random_passwd(user_passwd_temp);
+        generate_random_npasswd(user_passwd_temp,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
         fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
@@ -1267,14 +1259,11 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     master_vcpu=get_cpu_num(init_info.master_inst);
     compute_vcpu=get_cpu_num(init_info.compute_inst);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
-    reset_nstring(string_temp,128);
     find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     database_vcpu=get_cpu_num(string_temp);
-    reset_nstring(string_temp,128);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     natgw_vcpu=get_cpu_num(string_temp);
-    reset_nstring(string_temp,128);
     if(*(init_info.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
@@ -1395,35 +1384,29 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
-    reset_nstring(database_root_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_root_passwd);
+    generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
     usleep(10000);
-    reset_nstring(database_acct_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||strlen(init_info.master_passwd)<8){
-        reset_nstring(init_info.master_passwd,32);
-        generate_random_passwd(init_info.master_passwd);
+    generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
+    if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_info.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||strlen(init_info.compute_passwd)<8){
-        reset_nstring(init_info.compute_passwd,32);
-        generate_random_passwd(init_info.compute_passwd);
+    if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)==1){
+    if(file_empty_or_not(filename_temp)<1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        reset_nstring(randstr,RANDSTR_LENGTH_PLUS);
-        generate_random_string(randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
+        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%10s",randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
+        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
         fclose(file_p);
     }
+    snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
@@ -1469,8 +1452,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
     for(i=0;i<init_info.hpc_user_num;i++){
-        reset_nstring(user_passwd_temp,PASSWORD_STRING_LENGTH);
-        generate_random_passwd(user_passwd_temp);
+        generate_random_npasswd(user_passwd_temp,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
         fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
@@ -1595,14 +1577,11 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     master_vcpu=get_cpu_num(init_info.master_inst);
     compute_vcpu=get_cpu_num(init_info.compute_inst);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
-    reset_nstring(string_temp,128);
     find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     database_vcpu=get_cpu_num(string_temp);
-    reset_nstring(string_temp,128);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     natgw_vcpu=get_cpu_num(string_temp);
-    reset_nstring(string_temp,128);
     if(*(init_info.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
@@ -1723,35 +1702,29 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
-    reset_nstring(database_root_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_root_passwd);
+    generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
     usleep(10000);
-    reset_nstring(database_acct_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||strlen(init_info.master_passwd)<8){
-        reset_nstring(init_info.master_passwd,32);
-        generate_random_passwd(init_info.master_passwd);
+    generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
+    if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_info.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||strlen(init_info.compute_passwd)<8){
-        reset_nstring(init_info.compute_passwd,32);
-        generate_random_passwd(init_info.compute_passwd);
+    if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)==1){
+    if(file_empty_or_not(filename_temp)<1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        reset_nstring(randstr,RANDSTR_LENGTH_PLUS);
-        generate_random_string(randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
+        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%10s",randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
+        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
         fclose(file_p);
     }
+    snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
@@ -1791,8 +1764,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
     for(i=0;i<init_info.hpc_user_num;i++){
-        reset_nstring(user_passwd_temp,PASSWORD_STRING_LENGTH);
-        generate_random_passwd(user_passwd_temp);
+        generate_random_npasswd(user_passwd_temp,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
         fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
@@ -1917,14 +1889,11 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     master_vcpu=get_cpu_num(init_info.master_inst);
     compute_vcpu=get_cpu_num(init_info.compute_inst);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
-    reset_nstring(string_temp,128);
     find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     database_vcpu=get_cpu_num(string_temp);
-    reset_nstring(string_temp,128);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_type","","",1,"instance_type","","",'.',3,string_temp,128);
     natgw_vcpu=get_cpu_num(string_temp);
-    reset_nstring(string_temp,128);
     if(*(init_info.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
@@ -2072,35 +2041,29 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
-    reset_nstring(database_root_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_root_passwd);
+    generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
     usleep(10000);
-    reset_nstring(database_acct_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||strlen(init_conf.master_passwd)<8){
-        reset_nstring(init_conf.master_passwd,32);
-        generate_random_passwd(init_conf.master_passwd);
+    generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
+    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_conf.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||strlen(init_conf.compute_passwd)<8){
-        reset_nstring(init_conf.compute_passwd,32);
-        generate_random_passwd(init_conf.compute_passwd);
+    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)==1){
+    if(file_empty_or_not(filename_temp)<1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        reset_nstring(randstr,RANDSTR_LENGTH_PLUS);
-        generate_random_string(randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%10s",randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
         fclose(file_p);
     }
+    snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
@@ -2148,8 +2111,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
     for(i=0;i<init_conf.hpc_user_num;i++){
-        reset_nstring(user_passwd_temp,PASSWORD_STRING_LENGTH);
-        generate_random_passwd(user_passwd_temp);
+        generate_random_npasswd(user_passwd_temp,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
         fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
@@ -2393,35 +2355,29 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
-    reset_nstring(database_root_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_root_passwd);
+    generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
     usleep(10000);
-    reset_nstring(database_acct_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||strlen(init_conf.master_passwd)<8){
-        reset_nstring(init_conf.master_passwd,32);
-        generate_random_passwd(init_conf.master_passwd);
+    generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
+    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_conf.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||strlen(init_conf.compute_passwd)<8){
-        reset_nstring(init_conf.compute_passwd,32);
-        generate_random_passwd(init_conf.compute_passwd);
+    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)==1){
+    if(file_empty_or_not(filename_temp)<1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        reset_nstring(randstr,RANDSTR_LENGTH_PLUS);
-        generate_random_string(randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%10s",randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
         fclose(file_p);
     }
+    snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
     if(strcmp(init_conf.region_id,"hk")==0){
         strcpy(db_inst,"i2c2g-hk");
         strcpy(natgw_inst,"i2c2g-hk");
@@ -2480,8 +2436,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
     for(i=0;i<init_conf.hpc_user_num;i++){
-        reset_nstring(user_passwd_temp,PASSWORD_STRING_LENGTH);
-        generate_random_passwd(user_passwd_temp);
+        generate_random_npasswd(user_passwd_temp,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
         fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
@@ -2607,14 +2562,11 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     master_vcpu=get_cpu_num(init_conf.master_inst);
     compute_vcpu=get_cpu_num(init_conf.compute_inst);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
-    reset_nstring(string_temp,128);
     find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_spec","","",1,"instance_spec","","",'.',3,string_temp,128);
     database_vcpu=get_cpu_num(string_temp);
-    reset_nstring(string_temp,128);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SHORT,"instance_spec","","",1,"instance_spec","","",'.',3,string_temp,128);
     natgw_vcpu=get_cpu_num(string_temp);
-    reset_nstring(string_temp,128);
     if(*(init_conf.master_inst+0)=='a'){
         strcpy(master_cpu_vendor,"amd64");
     }
@@ -2732,35 +2684,29 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
         return 3;
     }
     node_user_num_fix(&init_conf.node_num,&init_conf.hpc_user_num);
-    reset_nstring(database_root_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_root_passwd);
+    generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
     usleep(10000);
-    reset_nstring(database_acct_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||strlen(init_conf.master_passwd)<8){
-        reset_nstring(init_conf.master_passwd,32);
-        generate_random_passwd(init_conf.master_passwd);
+    generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
+    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_conf.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||strlen(init_conf.compute_passwd)<8){
-        reset_nstring(init_conf.compute_passwd,32);
-        generate_random_passwd(init_conf.compute_passwd);
+    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)==1){
+    if(file_empty_or_not(filename_temp)<1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        reset_nstring(randstr,RANDSTR_LENGTH_PLUS);
-        generate_random_string(randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%10s",randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
         fclose(file_p);
     }
+    snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
@@ -2792,8 +2738,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
     for(i=0;i<init_conf.hpc_user_num;i++){
-        reset_nstring(user_passwd_temp,PASSWORD_STRING_LENGTH);
-        generate_random_passwd(user_passwd_temp);
+        generate_random_npasswd(user_passwd_temp,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
         fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
@@ -3013,35 +2958,29 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         gcp_credential_convert(workdir,"delete",0);
         return 3;
     }
-    reset_nstring(database_root_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_root_passwd);
+    generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
     usleep(10000);
-    reset_nstring(database_acct_passwd,PASSWORD_STRING_LENGTH);
-    generate_random_db_passwd(database_acct_passwd);
-    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||strlen(init_conf.master_passwd)<8){
-        reset_nstring(init_conf.master_passwd,32);
-        generate_random_passwd(init_conf.master_passwd);
+    generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
+    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_conf.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||strlen(init_conf.compute_passwd)<8){
-        reset_nstring(init_conf.compute_passwd,32);
-        generate_random_passwd(init_conf.compute_passwd);
+    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)==1){
+    if(file_empty_or_not(filename_temp)<1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        reset_nstring(randstr,RANDSTR_LENGTH_PLUS);
-        generate_random_string(randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
         file_p=fopen(filename_temp,"w+");
         fprintf(file_p,"%s",randstr);
         fclose(file_p);
     }
     else{
         file_p=fopen(filename_temp,"r");
-        fscanf(file_p,"%10s",randstr);
-        snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
         fclose(file_p);
     }
+    snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         gcp_credential_convert(workdir,"delete",0);
@@ -3075,8 +3014,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p_2=fopen(user_passwords,"w+");
     for(i=0;i<init_conf.hpc_user_num;i++){
-        reset_nstring(user_passwd_temp,PASSWORD_STRING_LENGTH);
-        generate_random_passwd(user_passwd_temp);
+        generate_random_npasswd(user_passwd_temp,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
         fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
         fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
     }
