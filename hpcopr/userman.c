@@ -52,7 +52,10 @@ void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_fla
 }
 
 /*
- * if the format_flag!=0, then will add a blank line 
+ * format_flag=0:      blankline + user + blankline
+ * format_flag=1:      blankline + user
+ * format_flag=2:      user + blankline
+ * format_flag=OTHERS: user
  */
 int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag, int format_flag){
     if(decrypt_flag==0){
@@ -66,8 +69,9 @@ int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag, int for
     char username[32]="";
     char enable_flag[16]="";
     FILE* file_p=NULL;
-
-    printf("\n");
+    if(format_flag==0||format_flag==1){
+        printf("\n");
+    }
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_p=fopen(filename_temp,"r");
@@ -85,7 +89,7 @@ int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag, int for
     if(decrypt_flag==0){
         delete_decrypted_user_passwords(workdir);
     }
-    if(format_flag!=0){
+    if(format_flag==0||format_flag==2){
         printf("\n");
     }
     return 0;

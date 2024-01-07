@@ -159,7 +159,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         }
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the username(s) to be exported. i.e. " HIGH_CYAN_BOLD "user1:user2." RESET_DISPLAY "\n");
-            hpc_user_list(workdir,crypto_keyfile,0,1);
+            hpc_user_list(workdir,crypto_keyfile,0,0);
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
             scanf("%1023s",user_list_buffer);
@@ -658,7 +658,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Import Summary :\n");
     printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Cluster Name   : %s\n",cluster_name_final);
     printf(GENERAL_BOLD "|         " RESET_DISPLAY " User List      : \n");
-    hpc_user_list(imported_workdir,crypto_keyfile,0,0);
+    hpc_user_list(imported_workdir,crypto_keyfile,0,3);
     if(admin_flag==1){
         printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Admin Privilege : YES \n");
     }

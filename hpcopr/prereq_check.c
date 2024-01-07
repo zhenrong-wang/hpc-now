@@ -1380,7 +1380,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
         if(cmd_keyword_ncheck(argc,argv,"-u",string_temp,64)!=0){
             if(batch_flag!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid user name from the list below. \n");
-                hpc_user_list(workdir,CRYPTO_KEY_FILE,0,1);
+                hpc_user_list(workdir,CRYPTO_KEY_FILE,0,0);
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
                 scanf("%63s",string_temp);
@@ -1392,13 +1392,13 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
             }
             else{
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster user not specified. Use " HIGH_CYAN_BOLD "-u USER_NAME" RESET_DISPLAY " or " HIGH_CYAN_BOLD "-i" RESET_DISPLAY " (interactive).\n");
-                hpc_user_list(workdir,CRYPTO_KEY_FILE,0,0);
+                hpc_user_list(workdir,CRYPTO_KEY_FILE,0,1);
                 return -5;
             }
         }
         if(user_name_quick_check(cluster_name,string_temp,SSHKEY_DIR)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The specified user name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,string_temp);
-            hpc_user_list(workdir,CRYPTO_KEY_FILE,0,0);
+            hpc_user_list(workdir,CRYPTO_KEY_FILE,0,1);
             return -5;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the user name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",string_temp);
