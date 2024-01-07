@@ -124,7 +124,7 @@ int user_password_complexity_check(char* password, char* special_chars);
 int input_user_passwd(char* password_string, int batch_flag_local);
 int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir);
 int username_check(char* user_registry, char* username_input);
-int username_check_add(char* workdir, char* username_input);
+int username_check_add_passwd(char* workdir, char* username_input, const char* option);
 int username_check_select(char* user_registry, char* username_input);
 int delete_user_from_registry(char* user_registry_file, char* username);
 

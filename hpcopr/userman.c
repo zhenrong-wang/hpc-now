@@ -112,7 +112,7 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
     if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
         snprintf(remote_commands,CMDLINE_LENGTH-1,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s",username);
         if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the user %s from your cluster. Exit now.\n" RESET_DISPLAY,username);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the user %s from your cluster. Exit now." RESET_DISPLAY "\n",username);
             delete_decrypted_user_passwords(workdir);
             return 1;
         }

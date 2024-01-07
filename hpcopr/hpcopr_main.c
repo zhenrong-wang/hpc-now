@@ -1906,16 +1906,14 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 9;
         }
-        if(strcmp(user_cmd,"add")==0){
+        if(strcmp(user_cmd,"add")==0||strcmp(user_cmd,"passwd")==0){
             decrypt_user_passwords(workdir,crypto_keyfile);
-            if(username_check_add(workdir,user_name)!=0){
+            if(username_check_add_passwd(workdir,user_name,user_cmd)!=0){
                 delete_decrypted_user_passwords(workdir);
                 write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
                 check_and_cleanup(workdir);
                 return 9;
             }
-        }
-        if(strcmp(user_cmd,"add")==0||strcmp(user_cmd,"passwd")==0){
             if(cmd_keyword_ncheck(argc,argv,"-p",pass_word,128)!=0){
                 if(input_user_passwd(pass_word,batch_flag)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] Password not specified." RESET_DISPLAY "\n");

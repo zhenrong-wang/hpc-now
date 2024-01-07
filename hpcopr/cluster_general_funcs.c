@@ -3021,7 +3021,19 @@ int username_check(char* user_registry, char* username_input){
  * Return     0: Username can be added
  * Return Non-0: User name cannot be added, and print out the reason
  */
-int username_check_add(char* workdir, char* username_input){
+int username_check_add_passwd(char* workdir, char* username_input, const char* option){
+    if(strcmp(option,"add")==0){
+        if(strcmp(username_input,"root")==0||strcmp(username_input,"user1")==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The user root and user1 are invalid to add." RESET_DISPLAY "\n");
+            return -3;
+        }
+    }
+    else{
+        if(strcmp(username_input,"root")==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The root password is not allowed to change." RESET_DISPLAY "\n");
+            return -3;
+        }
+    }
     char vaultdir[DIR_LENGTH]="";
     char user_registry[FILENAME_LENGTH]="";
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
