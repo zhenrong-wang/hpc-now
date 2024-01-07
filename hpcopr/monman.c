@@ -341,7 +341,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
         printf(WARN_YELLO_BOLD "[ -WARN- ] No export destination path specified. Will not export." RESET_DISPLAY "\n");
     }
     else{
-        local_path_parser(export_dest,real_export_dest);
+        local_path_nparser(export_dest,real_export_dest,DIR_LENGTH_EXT);
         if(folder_exist_or_not(real_export_dest)==0){
             snprintf(export_file,FILENAME_LENGTH-1,"%s%smon_data_cluster_%s.csv",export_dest,PATH_SLASH,cluster_name);
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",COPY_FILE_CMD,mon_data_file_temp,export_file);

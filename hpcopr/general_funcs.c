@@ -1680,7 +1680,7 @@ int local_path_parser(char* path_string, char* path_final){
 }
 
 int local_path_nparser(char* path_string, char path_final[], unsigned int path_final_len_max){
-    if(path_final_len_max<1){
+    if(path_final_len_max<2){
         strcpy(path_final,"");
         return 1;
     }

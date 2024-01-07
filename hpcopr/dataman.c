@@ -129,12 +129,12 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         }
     }
     if(strcmp(cmd_type,"put")==0){
-        local_path_parser(source_path,real_source_path);
+        local_path_nparser(source_path,real_source_path,DIR_LENGTH);
         bucket_path_check(target_path,hpc_user,real_target_path);
     }
     else if(strcmp(cmd_type,"get")==0){
         bucket_path_check(source_path,hpc_user,real_source_path);
-        local_path_parser(target_path,real_target_path);
+        local_path_nparser(target_path,real_target_path,DIR_LENGTH);
     }
     else{
         bucket_path_check(source_path,hpc_user,real_source_path);
