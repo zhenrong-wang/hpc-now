@@ -1353,13 +1353,13 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
         }
         cluster_role_detect(workdir,cluster_role,cluster_role_ext,role_len_max);
         if(strcmp(role_flag,"opr")==0&&strcmp(cluster_role,"opr")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " needs the " WARN_YELLO_BOLD "operator" FATAL_RED_BOLD " to execute.\n",argv[1]);
-            printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Current role: %s . Please contact the operator.\n",cluster_role);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The command %s needs the operator to execute." RESET_DISPLAY "\n",argv[1]);
+            printf(GENERAL_BOLD "[ -INFO- ] Current role: %s. Please contact the operator." RESET_DISPLAY "\n",cluster_role);
             return 1;
         }
         else if(strcmp(role_flag,"admin")==0&&strcmp(cluster_role,"opr")!=0&&strcmp(cluster_role,"admin")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " needs the " WARN_YELLO_BOLD "operator" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "admin" FATAL_RED_BOLD " to execute.\n",argv[1]); 
-            printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Current role: %s . Please contact the operator.\n",cluster_role);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The command %s needs the operator or admin to execute." RESET_DISPLAY "\n",argv[1]); 
+            printf(GENERAL_BOLD "[ -INFO- ] Current role: %s. Please contact the operator." RESET_DISPLAY "\n",cluster_role);
             return 1;
         }
         if(decryption_status(workdir)!=0){
@@ -1386,12 +1386,12 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
                 scanf("%63s",string_temp);
                 getchar();
                 if(user_name_quick_check(cluster_name,string_temp,SSHKEY_DIR)!=0){
-                    printf(FATAL_RED_BOLD "[ FATAL: ] The input user name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,string_temp);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] The input user name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",string_temp);
                     return -5;
                 }
             }
             else{
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster user not specified. Use " HIGH_CYAN_BOLD "-u USER_NAME" RESET_DISPLAY " or " HIGH_CYAN_BOLD "-i" RESET_DISPLAY " (interactive).\n");
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster user not specified. Use " HIGH_GREEN_BOLD "-u USER_NAME" RESET_DISPLAY ".\n");
                 hpc_user_list(workdir,CRYPTO_KEY_FILE,0,1);
                 return -5;
             }
