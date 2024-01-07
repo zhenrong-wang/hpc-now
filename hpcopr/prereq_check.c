@@ -1330,17 +1330,17 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
                 scanf("%31s",temp_cluster_name);
                 getchar();
                 if(cluster_name_check(temp_cluster_name)!=-7){
-                    printf(FATAL_RED_BOLD "[ FATAL: ] The input cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,temp_cluster_name);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] The input cluster name %s is invalid.\n" RESET_DISPLAY,temp_cluster_name);
                     return -3;
                 }
                 strcpy(cluster_name_source,"input");
             }
             else{
                 if(strlen(temp_cluster_name)!=0){
-                    printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,temp_cluster_name);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is invalid.\n" RESET_DISPLAY,temp_cluster_name);
                 }
                 else{
-                    printf(FATAL_RED_BOLD "[ FATAL: ] No cluster specified or switched. Use " WARN_YELLO_BOLD "-c" FATAL_RED_BOLD " or " WARN_YELLO_BOLD "switch" FATAL_RED_BOLD " to one." RESET_DISPLAY "\n");
+                    printf(FATAL_RED_BOLD "[ FATAL: ] No cluster specified or switched. Use -c or switch to one." RESET_DISPLAY "\n");
                 }
                 list_all_cluster_names(2);
                 return -3;
@@ -1374,7 +1374,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
     }
     if(strcmp(cu_flag,"UNAME")==0){
         if(cluster_empty_or_not(workdir)==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is empty. Please init first." RESET_DISPLAY "\n",cluster_name);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster %s is empty. Please init first." RESET_DISPLAY "\n",cluster_name);
             return -7;
         }
         if(cmd_keyword_ncheck(argc,argv,"-u",string_temp,64)!=0){
@@ -1386,7 +1386,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
                 scanf("%63s",string_temp);
                 getchar();
                 if(user_name_quick_check(cluster_name,string_temp,SSHKEY_DIR)!=0){
-                    printf(FATAL_RED_BOLD "[ FATAL: ] The input user name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",string_temp);
+                    printf(FATAL_RED_BOLD "[ FATAL: ] The input user name %s is invalid." RESET_DISPLAY "\n",string_temp);
                     return -5;
                 }
             }
@@ -1397,11 +1397,11 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
             }
         }
         if(user_name_quick_check(cluster_name,string_temp,SSHKEY_DIR)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The specified user name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now.\n" RESET_DISPLAY,string_temp);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The specified user name %s is invalid." RESET_DISPLAY "\n",string_temp);
             hpc_user_list(workdir,CRYPTO_KEY_FILE,0,1);
             return -5;
         }
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the user name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",string_temp);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the user name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",string_temp);
         strncpy(user_name,string_temp,user_name_len_max-1);
     }
     
