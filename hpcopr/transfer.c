@@ -545,7 +545,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     }
     else if(duplicate_flag==3||duplicate_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " has already been imported.\n",cluster_name_buffer);
-        if(prompt_to_confirm("Continue to update it? CAUTION: he cluster name will keep unchanged.",CONFIRM_STRING,batch_flag_local)==1){
+        if(prompt_to_confirm("Continue to update it? CAUTION: The name will keep unchanged.",CONFIRM_STRING,batch_flag_local)==1){
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,tmp_import_root,SYSTEM_CMD_REDIRECT);
             system(cmdline);
             return -9;
@@ -631,6 +631,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     }
     create_and_get_subdir(imported_workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    file_cr_clean(filename_temp);
     /* Decrypt and re-encrypt the users' ssh keys */
     file_p=fopen(filename_temp,"r"); /* file opened */
     if(file_p==NULL){
@@ -648,9 +649,15 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp_2,md5sum_local);
     }
     fclose(file_p); /* file closed */
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
+    file_cr_clean(filename_temp);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
+    file_cr_clean(filename_temp);
     /* Now, encrypt and delete all the decrypted files */
     delete_decrypted_files(imported_workdir,crypto_keyfile);
     create_and_get_subdir(imported_workdir,"stack",stackdir,DIR_LENGTH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
+    file_cr_clean(filename_temp);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     file_cr_clean(filename_temp);
     /* This is important. Otherwise the cluster imported from windows will not work properly. */

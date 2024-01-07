@@ -1161,7 +1161,7 @@ int main(int argc, char* argv[]){
         if(batch_flag!=0&&cmd_keyword_ncheck(argc,argv,"-u",user_name,32)!=0){
             hpc_user_list(workdir,crypto_keyfile,0,0);
         }
-        prompt_to_input_optional_args("Display credentials of a specific user? (Default: all users except root)",CONFIRM_STRING_QUICK,"Select a user from the list above.",user_name,batch_flag,argc,argv,"-u");
+        prompt_to_input_optional_args("Display credentials of a specific user? (Default: all)",CONFIRM_STRING_QUICK,"Select a user from the list above.",user_name,batch_flag,argc,argv,"-u");
         run_flag=prompt_to_confirm_args("Display bucket credentials? (Default: hide)",CONFIRM_STRING,batch_flag,argc,argv,"--bkey");
         if(run_flag==2||run_flag==0){
             strcpy(vault_bucket_flag,"bucket");

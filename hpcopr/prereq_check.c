@@ -1346,7 +1346,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
                 return -3;
             }
         }
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " cluster name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",cluster_name_source,temp_cluster_name);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Using the " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " cluster name " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_name_source,temp_cluster_name);
         strncpy(cluster_name,temp_cluster_name,cluster_name_len_max-1);
         if(get_nworkdir(workdir,dir_len_max,cluster_name)!=0){
             return -9;

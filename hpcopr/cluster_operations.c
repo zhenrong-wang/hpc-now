@@ -224,6 +224,8 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     char cmdline[CMDLINE_LENGTH]="";
     char unique_cluster_id_prev[64]="";
     char unique_cluster_id_new[64]="";
+    char cluster_role[16]="";
+    char cluster_role_ext[16]="";
     char ucid_short[16]="";
     int new_name_flag,node_num=0;
     /* Make sure the new name is valid and not duplicated. This is better pre-checked*/
@@ -245,6 +247,10 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     if(get_nworkdir_without_last_slash(prev_workdir,DIR_LENGTH,cluster_prev_name)!=0||get_nworkdir_without_last_slash(new_workdir,DIR_LENGTH,cluster_new_name)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get working directories and sub-directories." RESET_DISPLAY "\n");
         return -7;
+    }
+    if(cluster_role_detect(prev_workdir,cluster_role,cluster_role_ext,16)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid cluster role (not opr, admin, or user)." RESET_DISPLAY "\n");
+        return 7;
     }
     /* Make sure the cluster is not locked. This is better pre-checked */
     if(check_pslock(prev_workdir,decryption_status(prev_workdir))!=0){
@@ -301,9 +307,12 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     snprintf(registry_line_prev,LINE_LENGTH_SHORT-1,"< cluster name: %s >",cluster_prev_name);
     snprintf(registry_line_new,LINE_LENGTH_SHORT-1,"< cluster name: %s >",cluster_new_name);
     /* If the workdir is empty, skip the /stack and /conf */
-    if(cluster_empty_or_not(new_workdir)==0){
+    if(cluster_empty_or_not(new_workdir)==0||strcmp(cluster_role,"opr")!=0){
         global_nreplace(ALL_CLUSTER_REGISTRY,LINE_LENGTH_SMALL,registry_line_prev,registry_line_new);
         global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_SHORT,registry_line_prev,registry_line_new);
+        if(strcmp(cluster_role,"opr")!=0){
+            goto finished_echo;
+        }
         goto update_usage_summary;
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.backup %s",COPY_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
@@ -367,6 +376,7 @@ update_usage_summary:
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%smon_data%smon_data_%s.csv %s%smon_data%smon_data_%s.csv %s",MOVE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_prev_name,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_new_name,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     global_nreplace(USAGE_LOG_FILE,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
+finished_echo:
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Renamed the cluster " GENERAL_BOLD "%s" RESET_DISPLAY " to " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_prev_name,cluster_new_name);
     return 0;
 }
