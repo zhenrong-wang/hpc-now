@@ -458,7 +458,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the *full* path of the now-cluster file.\n");
-        printf("|          E.g. " HIGH_CYAN_BOLD "~/import.now  /tmp/import.now  d:\\import.now" RESET_DISPLAY "\n")
+        printf("|          E.g. " HIGH_CYAN_BOLD "~/import.now  /tmp/import.now  d:\\import.now" RESET_DISPLAY "\n");
         printf("[ INPUT: ] ");
         fflush(stdin);
         scanf("%511s",filename_temp);
