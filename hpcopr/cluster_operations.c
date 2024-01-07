@@ -242,7 +242,7 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
         return -9;
     }
     /* Get the previous working directory and new working directory */
-    if(get_nworkdir(prev_workdir,DIR_LENGTH,cluster_prev_name)!=0||get_nworkdir(new_workdir,DIR_LENGTH,cluster_new_name)!=0){
+    if(get_nworkdir_without_last_slash(prev_workdir,DIR_LENGTH,cluster_prev_name)!=0||get_nworkdir_without_last_slash(new_workdir,DIR_LENGTH,cluster_new_name)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get working directories and sub-directories." RESET_DISPLAY "\n");
         return -7;
     }

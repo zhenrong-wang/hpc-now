@@ -3135,6 +3135,15 @@ int get_nworkdir(char* cluster_workdir, unsigned int dirlen_max, char* cluster_n
     return 0;
 }
 
+int get_nworkdir_without_last_slash(char* cluster_workdir, unsigned int dirlen_max, char* cluster_name){
+    if(strlen(cluster_name)<CLUSTER_ID_LENGTH_MIN||dirlen_max<strlen(cluster_name)+DIR_LENGTH_SHORT){
+        strcpy(cluster_workdir,"");
+        return -1;
+    }
+    snprintf(cluster_workdir,dirlen_max-1,"%s%sworkdir%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name);
+    return 0;
+}
+
 // Please make sure the cluster_name[] with width 25
 int get_cluster_name(char* cluster_name, char* cluster_workdir){
     char* path_seprator_str=PATH_SLASH;

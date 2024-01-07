@@ -130,6 +130,7 @@ int delete_user_from_registry(char* user_registry_file, char* username);
 
 void get_workdir(char* cluster_workdir, char* cluster_name);
 int get_nworkdir(char* cluster_workdir, unsigned int dirlen_max, char* cluster_name); //Newer function
+int get_nworkdir_without_last_slash(char* cluster_workdir, unsigned int dirlen_max, char* cluster_name);
 
 int get_cluster_name(char* cluster_name, char* cluster_workdir);
 int get_cluster_nname(char* cluster_name, unsigned int cluster_name_len_max, char* cluster_workdir); //Newer function
