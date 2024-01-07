@@ -51,7 +51,7 @@ resource "huaweicloud_compute_instance" "master" {
   user_data = <<EOF
 #!/bin/bash
 hostnamectl set-hostname master
-echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
+echo '${var.master_passwd}' | passwd root --stdin >> /dev/null 2>&1
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 rm -rf /root/.ssh/id_rsa.pub
 rm -rf /root/.ssh/id_rsa

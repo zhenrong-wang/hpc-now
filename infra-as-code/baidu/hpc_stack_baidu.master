@@ -30,7 +30,7 @@ resource "baiducloud_instance" "master" {
   user_data = base64encode(<<EOF
 #!/bin/bash
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
-echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
+echo '${var.master_passwd}' | passwd root --stdin >> /dev/null 2>&1
 yum -y install at
 systemctl start atd && systemctl enable atd
 mkdir -p /usr/hpc-now/

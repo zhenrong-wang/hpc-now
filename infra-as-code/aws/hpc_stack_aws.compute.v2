@@ -23,7 +23,7 @@ resource "aws_instance" "COMPUTE_NODE_N" {
 #!/bin/bash
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 hostnamectl set-hostname COMPUTE_NODE_N
-echo -e "${var.compute_passwd}" | passwd root --stdin >> /dev/null 2>&1
+echo '${var.compute_passwd}' | passwd root --stdin >> /dev/null 2>&1
 id ec2-user >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   userdel -f ec2-user

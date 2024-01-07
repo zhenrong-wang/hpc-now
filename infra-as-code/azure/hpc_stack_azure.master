@@ -69,7 +69,7 @@ resource "azurerm_linux_virtual_machine" "master" {
 userdel -f adminuser
 systemctl stop firewalld
 systemctl disable firewalld
-echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
+echo '${var.master_passwd}' | passwd root --stdin >> /dev/null 2>&1
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config

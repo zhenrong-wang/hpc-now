@@ -22,7 +22,7 @@ resource "baiducloud_instance" "COMPUTE_NODE_N" {
   user_data = base64encode(<<EOF
 #!/bin/bash
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
-echo "${var.compute_passwd}" | passwd root --stdin >> /dev/null 2>&1
+echo '${var.compute_passwd}' | passwd root --stdin >> /dev/null 2>&1
 mkdir -p /hpc_apps
 mkdir -p /hpc_data
 yum -y install nfs-utils rpcbind

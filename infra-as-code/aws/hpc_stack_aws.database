@@ -29,7 +29,7 @@ sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config
 echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
 systemctl restart sshd
 systemctl enable sshd
-echo "${var.database_root_passwd}" | passwd root --stdin >> /dev/null 2>&1
+echo '${var.database_root_passwd}' | passwd root --stdin >> /dev/null 2>&1
 for i in $(seq 1 120)
 do
   echo -e "[-WAIT---]" >> /tmp/cluster_db_init.log

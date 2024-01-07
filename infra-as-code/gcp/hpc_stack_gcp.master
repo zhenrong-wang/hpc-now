@@ -42,7 +42,7 @@ resource "google_compute_instance" "master" {
 systemctl stop firewalld
 systemctl disable firewalld
 hostnamectl set-hostname master
-echo "${var.master_passwd}" | passwd root --stdin >> /dev/null 2>&1
+echo '${var.master_passwd}' | passwd root --stdin >> /dev/null 2>&1
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config

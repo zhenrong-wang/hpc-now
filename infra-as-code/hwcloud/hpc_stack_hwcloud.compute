@@ -24,7 +24,7 @@ resource "huaweicloud_compute_instance" "COMPUTE_NODE_N" {
   user_data = <<EOF
 #!/bin/bash
 hostnamectl set-hostname COMPUTE_NODE_N
-echo "${var.compute_passwd}" | passwd root --stdin >> /dev/null 2>&1
+echo '${var.compute_passwd}' | passwd root --stdin >> /dev/null 2>&1
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 mkdir -p /mnt/shared/hpc_apps
 mkdir -p /mnt/shared/hpc_data
