@@ -650,10 +650,10 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0){
         if(strcmp(cmd_type,"rget")==0){
-            snprintf(remote_commands,CMDLINE_LENGTH-1,"obscli cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s %s",binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,CMDLINE_LENGTH-1,"obsutil cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s%s %s %s %s",binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_source_path,real_dest_path,real_rflag,real_fflag);
         }
         else{
-            snprintf(remote_commands,CMDLINE_LENGTH-1,"obscli cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s %s%s %s %s",binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,real_source_path,binfo.bucket_address,real_dest_path,real_rflag,real_fflag);
+            snprintf(remote_commands,CMDLINE_LENGTH-1,"obsutil cp -e=obs.%s.myhuaweicloud.com -i=%s -k=%s %s %s%s %s %s",binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,real_source_path,binfo.bucket_address,real_dest_path,real_rflag,real_fflag);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
