@@ -67,8 +67,10 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     int i=0;
     int j=0;
     int status_flag,decrypt_flag;
+    
+    printf("\n");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Cannot open the registry. the HPC-NOW service cannot work properly." RESET_DISPLAY "\n");
         return -1;
     }
     if(strlen(target_cluster_name)==0){
@@ -169,6 +171,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     fclose(file_p);
     if(cluster_name_check(target_cluster_name)!=-7){
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The cluster name is invalid." RESET_DISPLAY "\n");
         return 3;
     }
     else{
