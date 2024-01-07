@@ -37,9 +37,9 @@ void print_header(void){
     struct tm* time_p=NULL;
     time(&current_time_long);
     time_p=localtime(&current_time_long);
-    printf(HIGH_GREEN_BOLD "//\\\\\\ " RESET_DISPLAY GENERAL_BOLD "HPC " RESET_DISPLAY HIGH_GREEN_BOLD "+->" RESET_DISPLAY GENERAL_BOLD " Welcome to HPC-NOW Cluster Operator! Version: %s" RESET_DISPLAY "\n",CORE_VERSION_CODE);
-    printf(HIGH_GREEN_BOLD "\\\\/// " RESET_DISPLAY GENERAL_BOLD "NOW " RESET_DISPLAY HIGH_GREEN_BOLD "+->" RESET_DISPLAY GENERAL_BOLD " %d-%d-%d %d:%d:%d" RESET_DISPLAY "\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    printf(GENERAL_BOLD "Copyright (c) 2024 Shanghai HPC-NOW Technologies Co., Ltd  LICENSE: MIT\n" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "//\\\\\\ HPC +-> Welcome to HPC-NOW Cluster Operator! Version: %s" RESET_DISPLAY "\n",CORE_VERSION_CODE);
+    printf(GENERAL_BOLD "\\\\/// NOW +-> %d-%d-%d %d:%d:%d" RESET_DISPLAY "\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
+    printf(GENERAL_BOLD "Copyright (c) 2024 Shanghai HPC-NOW Technologies Co., Ltd  LICENSE: MIT" RESET_DISPLAY "\n\n");
 }
 
 void print_tail(void){
