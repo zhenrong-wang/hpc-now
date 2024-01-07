@@ -54,15 +54,15 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
     int i=1;
     if(strcmp(option,"decrypt")==0){
         if(strcmp(cluster_list,"all")==0){
-            printf(WARN_YELLO_BOLD "|*         VERY RISKY! Decrypting files of " RESET_DISPLAY GENERAL_BOLD "ALL" RESET_DISPLAY WARN_YELLO_BOLD " the clusters!" RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "|********* VERY RISKY! Decrypting files of " RESET_DISPLAY GENERAL_BOLD "ALL" RESET_DISPLAY WARN_YELLO_BOLD " the clusters!" RESET_DISPLAY "\n");
         }
         else{
-            printf(WARN_YELLO_BOLD "|*         VERY RISKY! Decrypting files of cluster(s) " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " !" RESET_DISPLAY "\n",cluster_list);
+            printf(WARN_YELLO_BOLD "|********* VERY RISKY! Decrypting files of cluster(s) " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " !" RESET_DISPLAY "\n",cluster_list);
         }
         flag=prompt_to_confirm("ARE YOUR SURE TO CONTINUE?",CONFIRM_STRING,batch_flag_local);
     }
     else{
-        printf(WARN_YELLO_BOLD "|*         Encrypting the cluster's sensitive files with now-crypto-aes." RESET_DISPLAY "\n");
+        printf(WARN_YELLO_BOLD "|********* Encrypting the cluster's sensitive files with now-crypto-aes." RESET_DISPLAY "\n");
         flag=prompt_to_confirm("ARE YOUR SURE TO CONTINUE?",CONFIRM_STRING_QUICK,batch_flag_local);
     }
     /* If user denied, exit*/
