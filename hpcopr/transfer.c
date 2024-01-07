@@ -573,6 +573,9 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         }
         printf(WARN_YELLO_BOLD "[ -WARN- ] Generated a unique cluster name %s." RESET_DISPLAY "\n",cluster_name_final);
     }
+    else{
+        strncpy(cluster_name_final,cluster_name_buffer,31);
+    }
     /* After the process above, the cluster_name_final should be unique and ready to import */
     if(get_nworkdir(imported_workdir,DIR_LENGTH,cluster_name_final)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
