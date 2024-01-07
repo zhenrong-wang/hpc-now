@@ -1436,8 +1436,8 @@ int main(int argc, char* argv[]){
             if(run_flag==3){
                 printf(FATAL_RED_BOLD "[ FATAL: ] The source and dest path must include @ prefixes." RESET_DISPLAY "\n");
             }
-            printf(WARN_YELLO_BOLD "\n[ -WARN- ] Data operation failed or canceled. Check the console output above.\n");
-            printf("|      <>  Command: %s | Cluster: %s | User: %s\n" RESET_DISPLAY,data_cmd,cluster_name,user_name);
+            printf(WARN_YELLO_BOLD "\n[ -WARN- ] Operation failed or canceled. Check the console output.\n");
+            printf("[  ****  ] Command: %s | Cluster: %s | User: %s\n" RESET_DISPLAY,data_cmd,cluster_name,user_name);
             write_operation_log(cluster_name,operation_log,argc,argv,"DATAMAN_OPERATION_FAILED",28);
             check_and_cleanup(workdir);
             return 28;
