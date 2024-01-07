@@ -463,7 +463,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         getchar();
         local_path_parser(filename_temp,filename_temp_2);
         if(strlen(filename_temp_2)==0||file_empty_or_not(filename_temp_2)<1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the now-cluster file " RESET_DISPLAY WARN_YELLO_BOLD "%s " RESET_DISPLAY FATAL_RED_BOLD ". Exit now.\n" RESET_DISPLAY ,filename_temp_2);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the now-cluster file " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ".\n" RESET_DISPLAY ,filename_temp_2);
             return -3;
         }
         else{
@@ -652,6 +652,9 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     delete_decrypted_files(imported_workdir,crypto_keyfile);
     create_and_get_subdir(imported_workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
+    file_cr_clean(filename_temp);
+    /* This is important. Otherwise the cluster imported from windows will not work properly. */
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
     file_cr_clean(filename_temp);
     /* Now, print the import summary */
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster %s has been imported.\n\n",cluster_name_final);
