@@ -1251,13 +1251,14 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 49;
         }
-        cmd_keyword_ncheck(argc,argv,"--ul",user_name_list,1024);
-        cmd_keyword_ncheck(argc,argv,"-p",pass_word,128);
-        cmd_keyword_ncheck(argc,argv,"-d",export_dest,512);
-        run_flag=prompt_to_confirm_args("Export the admin privilege? (Default: no)",CONFIRM_STRING,batch_flag,argc,argv,"--admin");
+        run_flag=prompt_to_confirm_args("Export the admin privilege (requires user1 in the list)? (Default: no)",CONFIRM_STRING,batch_flag,argc,argv,"--admin");
         if(run_flag==2||run_flag==0){
             strcpy(string_temp,"admin");
         }
+        cmd_keyword_ncheck(argc,argv,"--ul",user_name_list,1024);
+        cmd_keyword_ncheck(argc,argv,"-p",pass_word,128);
+        cmd_keyword_ncheck(argc,argv,"-d",export_dest,512);
+        
         run_flag=export_cluster(cluster_name,user_name_list,string_temp,crypto_keyfile,pass_word,export_dest,batch_flag);
         if(run_flag==0){
             write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);

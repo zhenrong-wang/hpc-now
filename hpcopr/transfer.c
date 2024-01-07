@@ -181,7 +181,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
             printf(FATAL_RED_BOLD "[ FATAL: ] The specified user list is invalid. Exit now." RESET_DISPLAY "\n");
             return -1;
         }
-        if(user1_flag==1||strcmp(admin_flag,"admin")==0){
+        if(user1_flag==1&&strcmp(admin_flag,"admin")==0){
             strcpy(real_admin_flag,"admin");
         }
         else{
