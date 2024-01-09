@@ -1360,7 +1360,7 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     }
     memset(ch_table_final,'\0',ch_table_length);
     memcpy(ch_table_final,ch_table_base,62);
-    snprintf(ch_table_final,ch_table_length-1,"%s%s",ch_table_base,special_chars_string);
+    memcpy(ch_table_final+62,special_chars_array,special_chars_array_len);
     char* password_temp=(char*)malloc(sizeof(char)*password_array_len);
     if(password_temp==NULL){
         free(special_chars_string);
