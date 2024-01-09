@@ -21,5 +21,6 @@ void print_datamgr_info(void);
 void print_appmgr_info(void);
 void print_jobmgr_info(void);
 void list_all_commands(void);
+void print_new_cluster_done(int gcp_flag);
 
 #endif

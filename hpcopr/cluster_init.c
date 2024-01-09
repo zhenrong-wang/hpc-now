@@ -218,7 +218,7 @@ int create_init_dirs(char* workdir, char* stackdir, char* vaultdir, char* logdir
     return 0;
 }
 
-int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_flag_local, char* url_code_root, int argc, char* argv[]){
+int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_local, int code_loc_flag_local, char* url_code_root, int argc, char* argv[]){
     char cloud_flag[16]="";
     char workdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH_EXT]="";
@@ -226,7 +226,6 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     char vaultdir[DIR_LENGTH_EXT]="";
     char logdir[DIR_LENGTH_EXT]="";
     char tf_prep_conf[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     char confirm[8]="";
     char cloud_name[16]="";
     FILE* file_p=NULL;
@@ -256,7 +255,7 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
         return -1;
     }
-    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
+    if(get_cloud_flag(workdir,crypto_keyfile,cloud_flag,16)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag." RESET_DISPLAY "\n");
         return -1;
     }
@@ -667,8 +666,7 @@ int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_fla
     return 0;
 
 invalid_conf:
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,tf_prep_conf,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    delete_file_or_dir(tf_prep_conf);
     return 1;
 }
 
@@ -840,8 +838,9 @@ int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info){
     return confirm_to_init_cluster(init_info->cluster_id,batch_flag_local);
 }
 
-int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bucket_sk, char* az_subscription_id, char* az_tenant_id, char* bucket_info_file, char* cloud_flag){
+int save_bucket_info(char* cloud_flag, char* bucket_info_file, char* bucket_id, char* region_id, char* bucket_ak, char* bucket_sk, char* gcp_bucket_key_file){
     FILE* file_p=fopen(bucket_info_file,"w+");
+    char gcp_key_file_line[LINE_LENGTH_MID]="";
     if(file_p==NULL){
         return -1;
     }
@@ -865,10 +864,19 @@ int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bu
         fprintf(file_p,"BUCKET: bos://%s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        fprintf(file_p,"BUCKET: %s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\nAZ_SUBSCRIPTION_ID: %s\nAZ_TENANT_ID: %s\n",bucket_id,region_id,bucket_ak,bucket_sk,az_subscription_id,az_tenant_id);
+        fprintf(file_p,"BUCKET: %s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
     }
     else{
-        fprintf(file_p,"BUCKET: gs://%s\nREGION: \"%s\"\nBUCKET_LINK: %s\n",bucket_id,region_id,bucket_ak);
+        FILE* file_p_gcp=fopen(gcp_bucket_key_file,"r");
+        if(file_p_gcp==NULL){
+            fclose(file_p);
+            return -5;
+        }
+        fprintf(file_p,"BUCKET: gs://%s\nREGION: \"%s\"\nBUCKET_LINK: %s\n\n",bucket_id,region_id,bucket_ak);
+        while(fngetline(file_p_gcp,gcp_key_file_line,LINE_LENGTH_MID)!=1){
+            fprintf(file_p,"%s\n",gcp_key_file_line);
+        }
+        fclose(file_p_gcp);
     }
     fclose(file_p);
     return 0;
@@ -940,6 +948,28 @@ void generate_tf_files(char* stackdir){
     system(cmdline);
 }
 
+int save_cluster_vaults(char* vaultdir, char* mast_passwd, char* comp_password, char* db_root_password, char* db_acct_password, char* ucid_short, char* cloud_flag, char* az_sub_id, char* az_tenant_id){
+    char cluster_vaults[FILENAME_LENGTH]="";
+    snprintf(cluster_vaults,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
+    FILE* file_p=fopen(cluster_vaults,"w+");
+    if(file_p==NULL){
+        return -1;
+    }
+    fprintf(file_p,"%s\n",INTERNAL_FILE_HEADER);
+    fprintf(file_p,"mast_root_password: %s\n",mast_passwd);
+    fprintf(file_p,"comp_root_password: %s\n",comp_password);
+    fprintf(file_p,"data_root_password: %s\n",db_root_password);
+    fprintf(file_p,"data_acct_password: %s\n",db_acct_password);
+    fprintf(file_p,"short_unique_id:    %s\n",ucid_short);
+    fprintf(file_p,"cloud_flag_code:    %s\n",ucid_short);
+    if(strlen(az_sub_id)>0&&strlen(az_tenant_id)>0){
+        fprintf(file_p,"azure_subscription_id: %s\n",az_sub_id);
+        fprintf(file_p,"azure_tenant_id:       %s\n",az_sub_id);
+    }
+    fclose(file_p);
+    return 0;
+}
+
 int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
     char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(get_cluster_nname(cluster_id_from_workdir,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
@@ -979,7 +1009,6 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
-    char master_address[32]="";
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
@@ -1072,19 +1101,8 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_empty_or_not(filename_temp)<1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-        file_p=fopen(filename_temp,"w+");
-        fprintf(file_p,"%s",randstr);
-        fclose(file_p);
-    }
-    else{
-        file_p=fopen(filename_temp,"r");
-        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
-        fclose(file_p);
-    }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
+    generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
@@ -1219,7 +1237,6 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
             fflush(stdout);
             sleep(1);
         }
-        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     }
     else{
         printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",AWS_SLEEP_TIME_CN);
@@ -1228,27 +1245,14 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
             fflush(stdout);
             sleep(1);
         }
-        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     }
-    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Sending commands and sync files ...\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,init_info.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
+    save_bucket_info(cloud_flag,filename_temp,bucket_id,init_info.region_id,bucket_ak,bucket_sk,"");
+    save_cluster_vaults(vaultdir,init_info.master_passwd,init_info.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: s3:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_info.master_passwd,bucket_id,init_info.region_id,bucket_ak,bucket_sk);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",init_info.master_passwd,init_info.compute_passwd);
-	fclose(file_p); 
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"echo %s > %s%scloud_flag.flg",cloud_flag,vaultdir,PATH_SLASH);
-        system(cmdline);
-    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -1334,7 +1338,6 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
-    char master_address[32]="";
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
@@ -1393,19 +1396,8 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_empty_or_not(filename_temp)<1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-        file_p=fopen(filename_temp,"w+");
-        fprintf(file_p,"%s",randstr);
-        fclose(file_p);
-    }
-    else{
-        file_p=fopen(filename_temp,"r");
-        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
-        fclose(file_p);
-    }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
+    generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
@@ -1547,26 +1539,13 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
         fflush(stdout);
         sleep(1);
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
-    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Sending commands and sync files ...\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,init_info.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
+    save_bucket_info(cloud_flag,filename_temp,bucket_id,init_info.region_id,bucket_ak,bucket_sk,"");
+    save_cluster_vaults(vaultdir,init_info.master_passwd,init_info.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: cos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_info.master_passwd,bucket_id,init_info.region_id,bucket_ak,bucket_sk);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",init_info.master_passwd,init_info.compute_passwd);
-	fclose(file_p);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"echo %s > %s%scloud_flag.flg",cloud_flag,vaultdir,PATH_SLASH);
-        system(cmdline);
-    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -1652,7 +1631,6 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
-    char master_address[32]="";
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
@@ -1711,19 +1689,8 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_empty_or_not(filename_temp)<1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-        file_p=fopen(filename_temp,"w+");
-        fprintf(file_p,"%s",randstr);
-        fclose(file_p);
-    }
-    else{
-        file_p=fopen(filename_temp,"r");
-        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
-        fclose(file_p);
-    }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
+    generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
@@ -1852,33 +1819,19 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
         fflush(stdout);
         sleep(1);
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id,32);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_secrets.txt",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeyId","","",1,"AccessKeyId","","",'\"',4,bucket_ak,256);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk,256);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
+    delete_file_or_dir(filename_temp);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Sending commands and sync files ...\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,init_info.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
+    save_bucket_info(cloud_flag,filename_temp,bucket_id,init_info.region_id,bucket_ak,bucket_sk,"");
+    save_cluster_vaults(vaultdir,init_info.master_passwd,init_info.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: oss:// %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_info.master_passwd,bucket_id,init_info.region_id,bucket_ak,bucket_sk);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",init_info.master_passwd,init_info.compute_passwd);
-	fclose(file_p);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"echo %s > %s%scloud_flag.flg",cloud_flag,vaultdir,PATH_SLASH);
-        system(cmdline);
-    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -1995,7 +1948,6 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
-    char master_address[32]="";
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
@@ -2050,25 +2002,13 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_empty_or_not(filename_temp)<1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-        file_p=fopen(filename_temp,"w+");
-        fprintf(file_p,"%s",randstr);
-        fclose(file_p);
-    }
-    else{
-        file_p=fopen(filename_temp,"r");
-        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
-        fclose(file_p);
-    }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
+    generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
     }
-
     hw_vm_series(init_conf.region_id,intel_generation,tiny_series_name,&amd_flavor_flag);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
@@ -2210,26 +2150,13 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
         fflush(stdout);
         sleep(1);
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
-    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Sending commands and sync files ...\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
+    save_bucket_info(cloud_flag,filename_temp,bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"");
+    save_cluster_vaults(vaultdir,init_conf.master_passwd,init_conf.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: obs: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_conf.master_passwd,bucket_id,init_conf.region_id,bucket_ak,bucket_sk);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",init_conf.master_passwd,init_conf.compute_passwd);
-	fclose(file_p);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"echo %s > %s%scloud_flag.flg",cloud_flag,vaultdir,PATH_SLASH);
-        system(cmdline);
-    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -2310,7 +2237,6 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     char bucket_id[32]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
-    char master_address[32]="";
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
@@ -2364,19 +2290,8 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_empty_or_not(filename_temp)<1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-        file_p=fopen(filename_temp,"w+");
-        fprintf(file_p,"%s",randstr);
-        fclose(file_p);
-    }
-    else{
-        file_p=fopen(filename_temp,"r");
-        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
-        fclose(file_p);
-    }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
+    generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
     if(strcmp(init_conf.region_id,"hk")==0){
         strcpy(db_inst,"i2c2g-hk");
@@ -2521,37 +2436,25 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     getstate(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\":","","",1,"\"bucket\":","","",'\"',4,bucket_id,32); 
+
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%saccess-key.txt",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeyId","","",1,"AccessKeyId","","",'\"',4,bucket_ak,256);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk,256);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    delete_file_or_dir(filename_temp);
+
     printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
         fflush(stdout);
         sleep(1);
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
-    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Sending commands and sync files ...\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"","",filename_temp,cloud_flag);
+    save_bucket_info(cloud_flag,filename_temp,bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"");
+    save_cluster_vaults(vaultdir,init_conf.master_passwd,init_conf.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: bos: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_conf.master_passwd,bucket_id,init_conf.region_id,bucket_ak,bucket_sk);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",init_conf.master_passwd,init_conf.compute_passwd);
-	fclose(file_p);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"echo %s > %s%scloud_flag.flg",cloud_flag,vaultdir,PATH_SLASH);
-        system(cmdline);
-    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -2600,11 +2503,12 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
-    generate_bceconfig(vaultdir,init_conf.region_id,bucket_ak,bucket_sk);
+    bceconfig_convert(vaultdir,"generate",init_conf.region_id,bucket_ak,bucket_sk);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scredentials",vaultdir,PATH_SLASH);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/credentials","root","put","",0);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconfig",vaultdir,PATH_SLASH);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/config","root","put","",0);
+    bceconfig_convert(vaultdir,"delete","","","");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -2644,7 +2548,6 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     char bucket_id[128]="";
     char bucket_ak[AKSK_LENGTH]="";
     char bucket_sk[AKSK_LENGTH]="";
-    char master_address[32]="";
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
@@ -2663,7 +2566,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
         return -1;
     }
-    if(get_azure_ninfo(workdir,LINE_LENGTH_SHORT,subscription_id,tenant_id,256)!=0){
+    if(get_azure_ninfo(workdir,LINE_LENGTH_SHORT,crypto_keyfile,subscription_id,tenant_id,256)!=0){
         return -1;
     }
     if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
@@ -2693,19 +2596,8 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_empty_or_not(filename_temp)<1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-        file_p=fopen(filename_temp,"w+");
-        fprintf(file_p,"%s",randstr);
-        fclose(file_p);
-    }
-    else{
-        file_p=fopen(filename_temp,"r");
-        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
-        fclose(file_p);
-    }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
+    generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
@@ -2812,27 +2704,13 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
         fflush(stdout);
         sleep(1);
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
-    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Sending commands and sync files ...\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(bucket_id,init_conf.region_id,bucket_ak,bucket_sk,subscription_id,tenant_id,filename_temp,cloud_flag);
+    save_bucket_info(cloud_flag,filename_temp,bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"");
+    save_cluster_vaults(vaultdir,init_conf.master_passwd,init_conf.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: %s\nNetDisk Region: %s\nNetDisk AccessKey ID: %s\nNetDisk Secret Key: %s\n",master_address,init_conf.master_passwd,bucket_id,init_conf.region_id,bucket_ak,bucket_sk);
-    fprintf(file_p,"Azure Subscription ID: %s\nAzure Tenant ID: %s\n",subscription_id,tenant_id);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",init_conf.master_passwd,init_conf.compute_passwd);
-	fclose(file_p);
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"echo %s > %s%scloud_flag.flg",cloud_flag,vaultdir,PATH_SLASH);
-        system(cmdline);
-    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -2902,6 +2780,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char keyfile_path[FILENAME_LENGTH]="";
     char keyfile_path_ext[FILENAME_LENGTH_EXT]="";
     char gcp_project_id[128]="";
+    char gcp_bucket_key[FILENAME_LENGTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
     char pubkey[1024]="";
@@ -2911,7 +2790,6 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
     char user_passwd_temp[PASSWORD_STRING_LENGTH]="";
     char line_temp[LINE_LENGTH]="";
-    char master_address[32]="";
     time_t current_time_long;
     struct tm* time_p=NULL;
     char current_date[12]="";
@@ -2967,29 +2845,17 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-    if(file_empty_or_not(filename_temp)<1){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
-        generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-        file_p=fopen(filename_temp,"w+");
-        fprintf(file_p,"%s",randstr);
-        fclose(file_p);
-    }
-    else{
-        file_p=fopen(filename_temp,"r");
-        fngetline(file_p,randstr,RANDSTR_LENGTH_PLUS);
-        fclose(file_p);
-    }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
+    generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         gcp_credential_convert(workdir,"delete",0);
         return 1; // user denied.
     }
-    get_cloud_flag(workdir,cloud_flag,16);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(keyfile_path,FILENAME_LENGTH-1,"%s%s.key.json",vaultdir,PATH_SLASH);
-    windows_path_to_string(keyfile_path,keyfile_path_ext);
+    windows_path_to_nstring(keyfile_path,keyfile_path_ext,DIR_LENGTH_EXT);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_CREDENTIAL_PATH",keyfile_path_ext);
     find_and_nget(keyfile_path,LINE_LENGTH_SHORT,"\"project_id\":","","",1,"\"project_id\":","","",'\"',4,gcp_project_id,128);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_PROJECT",gcp_project_id);
@@ -3103,35 +2969,20 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         fflush(stdout);
         sleep(1);
     }
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SHORT,"\"name\": \"hpc_storage\",","","",40,"\"self_link\":","","",'\"',4,bucket_selflink,128);
     find_and_nget(filename_temp,LINE_LENGTH_EXT,"\"name\": \"hpc_storage_key\",","","",20,"\"private_key\":","","",'\"',4,bucket_private_key,5120);
-
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_key.txt",vaultdir,PATH_SLASH);
-    base64decode(bucket_private_key,filename_temp);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Sending commands and sync files ...\n");
+    snprintf(gcp_bucket_key,FILENAME_LENGTH-1,"%s%sbucket_key.txt",vaultdir,PATH_SLASH);
+    base64decode(bucket_private_key,gcp_bucket_key);
     remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_key.json","root","put","",0);
-
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
-    save_bucket_info(randstr,init_conf.region_id,bucket_selflink,"","","",filename_temp,cloud_flag);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    
-    get_state_nvalue(workdir,"master_public_ip:",master_address,32);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    file_p=fopen(filename_temp,"w+");
-    fprintf(file_p,"HPC-NOW CLUSTER SUMMARY\nMaster Node IP: %s\nMaster Node Root Password: %s\n\nNetDisk Address: gs: %s\nNetDisk Region: %s\nNetDisk Self Link: %s\nNetDisk Short Link: gs://%s\n",master_address,init_conf.master_passwd,randstr,init_conf.region_id,bucket_selflink,randstr);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",database_root_passwd,database_acct_passwd);
-    fprintf(file_p,"+----------------------------------------------------------------+\n");
-    fprintf(file_p,"%s\n%s\n",init_conf.master_passwd,init_conf.compute_passwd);
-	fclose(file_p);
+    save_bucket_info(cloud_flag,filename_temp,randstr,init_conf.region_id,bucket_selflink,"",gcp_bucket_key);
+    delete_file_or_dir(gcp_bucket_key);
+    save_cluster_vaults(vaultdir,init_conf.master_passwd,init_conf.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
+    remote_copy(workdir,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0); 
     remote_exec(workdir,sshkey_folder,"connect",7);
     remote_exec(workdir,sshkey_folder,"all",8);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"echo %s > %s%scloud_flag.flg",cloud_flag,vaultdir,PATH_SLASH);
-        system(cmdline);
-    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");

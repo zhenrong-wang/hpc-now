@@ -23,7 +23,7 @@ int create_and_get_stackdir(char* workdir, char* stackdir);
 
 void get_latest_hosts(char* stackdir, char* hostfile_latest);
 int decrypt_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_info);
-int get_cloud_flag(char* workdir, char cloud_flag[], unsigned int maxlen);
+int get_cloud_flag(char* workdir, char* crypto_keyfile, char cloud_flag[], unsigned int maxlen);
 int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option, char* recursive_flag, int silent_flag);
 
 int chmod_ssh_privkey(char* ssh_privkey);
@@ -50,10 +50,10 @@ int create_and_get_vaultdir(char* workdir, char* vaultdir);
 int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes);
 int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char* commands, char* extra_options, int delay_minutes, int silent_flag, char* std_redirect, char* err_redirect);
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag);
-int display_cloud_info(char* workdir);
+int display_cloud_info(char* workdir, char* crypto_keyfile);
 
 int get_azure_info(char* workdir, char* az_subscription_id, char* az_tenant_id);
-int get_azure_ninfo(char* workdir, unsigned int linelen_max, char* az_subscription_id, char* az_tenant_id, unsigned int id_len_max); //Newer function
+int get_azure_ninfo(char* workdir, unsigned int linelen_max, char* crypto_keyfile, char* az_subscription_id, char* az_tenant_id, unsigned int id_len_max); //Newer function
 
 int get_cpu_num(const char* vm_model);
 int get_compute_node_num(char* currentstate_file, char* option);
@@ -71,7 +71,6 @@ int getstate(char* workdir, char* crypto_keyfile);
 int get_state_value(char* workdir, char* key, char* value);
 int get_state_nvalue(char* workdir, char* key, char* value, unsigned int valen_max); //Newer function
 
-int update_cluster_summary(char* workdir, char* crypto_keyfile);
 int archive_log(char* logarchive, char* logfile);
 void update_compute_template(char* stackdir, char* cloud_flag);
 int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* errorlog, char* errlog_archive, int silent_flag);
@@ -112,7 +111,7 @@ int get_bucket_ninfo(char* workdir, char* crypto_keyfile, unsigned int linelen_m
 int tail_f_for_windows(char* filename);
 
 int get_ucid(char* workdir, char* ucid_string);
-int get_nucid(char* workdir, char* ucid_string, unsigned int ucid_strlen_max); //Newer function
+int get_nucid(char* workdir, char* crypto_keyfile, char* ucid_string, unsigned int ucid_strlen_max); //Newer function
 
 int decrypt_user_passwords(char* workdir, char* crypto_keyfile);
 int delete_decrypted_user_passwords(char* workdir);
@@ -135,17 +134,21 @@ int get_nworkdir_without_last_slash(char* cluster_workdir, unsigned int dirlen_m
 int get_cluster_name(char* cluster_name, char* cluster_workdir);
 int get_cluster_nname(char* cluster_name, unsigned int cluster_name_len_max, char* cluster_workdir); //Newer function
 
-int create_cluster_registry(void);
+int check_cluster_registry(void);
+int cluster_registry_convert(char* option);
+int encrypt_decrypt_cluster_registry(char* option);
+int line_check_by_keyword(char* line, char* keyword, char split_ch, int seq_num);
 int list_all_cluster_names(int header_flag);
 int exit_current_cluster(void);
 int delete_from_cluster_registry(char* deleted_cluster_name);
 int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords);
 
 int check_reconfigure_list(char* workdir, int print_flag);
+int check_statefile(char* statefile);
 
 int modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer);
 int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag);
-int generate_bceconfig(char* vaultdir, char* region_id, char* bucket_ak, char* bucket_sk);
+int bceconfig_convert(char* vaultdir, char* option, char* region_id, char* bucket_ak, char* bucket_sk);
 int decrypt_bcecredentials(char* workdir);
 int gcp_credential_convert(char* workdir, const char* operation, int key_flag);
 

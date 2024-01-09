@@ -265,8 +265,7 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
     if(run_flag!=0){
         return 1;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    delete_file_or_dir(filename_temp);
     if(strcmp(job_info->echo_flag,"true")==0){
         printf("\n");
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You can press " WARN_YELLO_BOLD "Ctrl C" RESET_DISPLAY " to stop displaying the job output.\n");
@@ -314,8 +313,7 @@ int job_list(char* workdir, char* user_name, char* sshkey_dir){
         printf("%s\n",string_temp);
     }
     fclose(file_p);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,job_list_cache,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    delete_file_or_dir(job_list_cache);
     return 0;
 }
 

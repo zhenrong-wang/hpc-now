@@ -27,17 +27,18 @@ typedef struct {
 
 void reset_initinfo(cluster_initinfo* init_info, char* cluster_id);
 void empty_initinfo(cluster_initinfo* init_info);
-int cluster_init_conf(char* cluster_name, int batch_flag_local, int code_loc_flag_local, char* url_code_root, int argc, char* argv[]);
+int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_local, int code_loc_flag_local, char* url_code_root, int argc, char* argv[]);
 int create_init_dirs(char* workdir, char* stackdir, char* vaultdir, char* logdir, char* confdir, unsigned int dirlen_max);
 int get_static_conf_files(char* confdir, char* cloud_name, int code_loc_flag, char* url_code_root);
 int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_loc_flag, char* url_code_root);
 int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, cluster_initinfo* init_info);
 void print_read_conf_failed(int read_conf_flag);
 int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info);
-int save_bucket_info(char* bucket_id, char* region_id, char* bucket_ak, char* bucket_sk, char* az_subscription_id, char* az_tenant_id, char* bucket_info_file, char* cloud_flag);
+int save_bucket_info(char* cloud_flag, char* bucket_info_file, char* bucket_id, char* region_id, char* bucket_ak, char* bucket_sk, char* gcp_bucket_key_file);
 void node_user_num_fix(int* node_num, int* hpc_user_num);
 void clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int condition_flag);
 void generate_tf_files(char* stackdir);
+int save_cluster_vaults(char* vaultdir, char* mast_passwd, char* comp_password, char* db_root_password, char* db_acct_password, char* ucid_short, char* cloud_flag, char* az_sub_id, char* az_tenant_id);
 int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run);
 int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run);
 int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run);

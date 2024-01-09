@@ -128,8 +128,11 @@ int string_to_positive_num(char* string){
 
 /*
  * This function is more secure than get_key_value.
- * return 0: get_succeeded
- * return non-zero: not succeeded
+ * return  0: get_succeeded
+ * return -1: param error
+ * return -5: memory allocation failed
+ * return -3: file I/O error
+ * return  1: failed to get
  */
 int get_key_nvalue(char* filename, unsigned int linelen_max, char* key, char ch, char value[], unsigned int valen_max){
     if(linelen_max<1||valen_max<1||strlen(key)==0||ch=='\0'){
@@ -677,7 +680,8 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     fprintf(file_temp_p,"%s",single_line);
     fclose(file_p);
     fclose(file_temp_p);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+    delete_file_or_dir(filename);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     if(system(cmdline)!=0){
         return -3;
     }
@@ -736,7 +740,8 @@ int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, 
     fclose(file_p);
     fclose(file_temp_p);
     free(single_line);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s && %s %s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL,MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
+    delete_file_or_dir(filename);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
     if(system(cmdline)!=0){
         return -3;
     }
@@ -1205,19 +1210,16 @@ int file_exist_or_not(char* filename){
 // return >1, with contents
 int file_empty_or_not(char* filename){
     FILE* file_p=fopen(filename,"r");
-    char temp_line[LINE_LENGTH_SHORT]="";
+    char temp_line[8]="";
     int line_num=0;
     if(file_p==NULL){
         return -1;
     }
     else{
-        while(fngetline(file_p,temp_line,LINE_LENGTH_SHORT)!=1){
+        while(fngetline(file_p,temp_line,8)!=1){
             line_num++;
         }
         fclose(file_p);
-        if(strlen(temp_line)>0){
-            line_num++;
-        }
         return line_num;
     }
 }
@@ -1226,7 +1228,6 @@ int file_empty_or_not(char* filename){
 //return non-zero: not exists.
 int folder_exist_or_not(char* foldername){
     char filename[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     snprintf(filename,FILENAME_LENGTH-1,"%s%stestfile.txt",foldername,PATH_SLASH);
     FILE* test_file=fopen(filename,"w+");
     if(test_file==NULL){
@@ -1234,10 +1235,23 @@ int folder_exist_or_not(char* foldername){
     }
     else{
         fclose(test_file);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL);
-        system(cmdline);
+        delete_file_or_dir(filename);
         return 0;
     }
+}
+
+/* Delete a file or a folder(if it is a folder) *by force!!!* */
+int delete_file_or_dir(char* file_or_dir){
+    char cmdline[CMDLINE_LENGTH]="";
+    if(file_exist_or_not(file_or_dir)==0){
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,file_or_dir,SYSTEM_CMD_REDIRECT);
+        return system(cmdline);
+    }
+    if(folder_exist_or_not(file_or_dir)==0){
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,file_or_dir,SYSTEM_CMD_REDIRECT);
+        return system(cmdline);
+    }
+    return -1;
 }
 
 //return 0: The password is complex enough
@@ -1849,7 +1863,6 @@ int direct_path_ncheck(char* path_string, char* hpc_user, char* real_path, unsig
 }
 
 int file_creation_test(char* filename){
-    char cmdline[CMDLINE_LENGTH]="";
     if(strlen(filename)==0){
         return -1;
     }
@@ -1861,8 +1874,7 @@ int file_creation_test(char* filename){
         return 3;
     }
     fclose(file_p);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    delete_file_or_dir(filename);
     return 0;
 }
 
@@ -2059,6 +2071,10 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
     return 0;
 }
 
+/*
+ * If overwrite_flag =0: not overwrite
+ * If overwrite_flag!=0: overwrite
+ */
 int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_key, char* end_key, int overwrite_flag){
     if(strlen(start_key)==0&&strlen(end_key)==0){
         return -3;
@@ -2293,7 +2309,6 @@ int password_hash(char* password, char md5_hash[], int md5_length){
         return -5;
     }
     char filename_temp[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     char string_temp[16]="";
     int run_flag;
     generate_random_string(string_temp);
@@ -2319,21 +2334,24 @@ int password_hash(char* password, char md5_hash[], int md5_length){
 #endif
     //get_crypto_key(filename_temp,md5_hash);
     run_flag=get_nmd5sum(filename_temp,md5_hash,md5_length);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    delete_file_or_dir(filename_temp);
     if(run_flag!=0){
         return 1;
     }
     return 0;
 }
 
-int windows_path_to_string(char* input_string, char* new_string){
+int windows_path_to_nstring(char* input_string, char new_string[], unsigned int maxlen){
+    if(maxlen<strlen(input_string)+16){ /* MAXIMUM ADD 15 slashes */
+        strcpy(new_string,"");
+        return -1;
+    }
+    reset_nstring(new_string,maxlen);
 #ifndef _WIN32
-    strcpy(new_string,input_string);
+    strncpy(new_string,input_string,maxlen);
     return 0;
 #else
     int i,j=0;
-    char string_buffer[FILENAME_LENGTH_EXT]=""; //Caution! Stack Overflow may occur.
     char ch_curr,ch_prev,ch_next;
     int length=strlen(input_string);
     for(i=0;i<length;i++){
@@ -2350,21 +2368,20 @@ int windows_path_to_string(char* input_string, char* new_string){
         else{
             ch_next='\0';
         }
-        if(j>FILENAME_LENGTH_EXT||j==FILENAME_LENGTH_EXT){
+        if(j>maxlen-2){
             strcpy(new_string,"");
             return -1;
         }
         if(ch_curr=='\\'&&ch_prev!='\\'&&ch_next!='\\'){
-            string_buffer[j]='\\';
-            string_buffer[j+1]='\\';
+            new_string[j]='\\';
+            new_string[j+1]='\\';
             j=j+2;
         }
         else{
-            string_buffer[j]=ch_curr;
+            new_string[j]=ch_curr;
             j++;
         }
     }
-    strcpy(new_string,string_buffer);
     return 0;
 #endif
 }
@@ -2388,8 +2405,7 @@ int base64decode_deprecated(char* encoded_string, char* export_path){
     fclose(file_p);
     snprintf(cmdline,CMDLINE_LENGTH-1,"certutil -decode %s %s %s",filename_temp,export_path,SYSTEM_CMD_REDIRECT_NULL);
     run_flag=system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    delete_file_or_dir(filename_temp);
 #else
     snprintf(cmdline,CMDLINE_LENGTH-1,"echo \"%s\" | base64 -d > %s 2>/dev/null",encoded_string,export_path);
     run_flag=system(cmdline);

@@ -58,8 +58,7 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
         printf("|          Example: " HIGH_GREEN_BOLD "hpcopr history -d history.csv" RESET_DISPLAY " .\n");
         printf("|          Example: " HIGH_GREEN_BOLD "hpcopr usage -d usage.csv" RESET_DISPLAY " .\n");
         printf("|          Example: " HIGH_GREEN_BOLD "hpcopr syserr -d syserr.txt" RESET_DISPLAY " .\n");
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,logfile_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        delete_file_or_dir(logfile_temp);
         return 0;
     }
     else{
@@ -68,8 +67,7 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
         if(run_flag!=0){
             printf(FATAL_RED_BOLD "\n[ FATAL: ] Failed to export the log to " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " .\n",export_dest);
             printf("|          Please check the path. Exit now." RESET_DISPLAY "\n");
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,logfile_temp,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            delete_file_or_dir(logfile_temp);
             return 1;
         }
         else{

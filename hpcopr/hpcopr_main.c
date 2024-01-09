@@ -1182,7 +1182,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"cloud-info")==0){
-        run_flag=display_cloud_info(workdir);
+        run_flag=display_cloud_info(workdir,crypto_keyfile);
         if(run_flag!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"FAILED_TO_GET_CLOUD_INFO",4);
             check_and_cleanup(workdir);
@@ -1194,7 +1194,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"rotate-key")==0){
-        if(get_cloud_flag(workdir,cloud_flag,16)!=0){
+        if(get_cloud_flag(workdir,crypto_keyfile,cloud_flag,16)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag. Have you switched to any cluster?" RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FLAG_CHECK_FAILED",7);
             check_and_cleanup(workdir);
@@ -1237,7 +1237,7 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    if(get_cloud_flag(workdir,cloud_flag,16)!=0){
+    if(get_cloud_flag(workdir,crypto_keyfile,cloud_flag,16)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag. Have you switched to any cluster?" RESET_DISPLAY "\n");
         write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FLAG_CHECK_FAILED",7);
         check_and_cleanup(workdir);
@@ -1530,7 +1530,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 57;
         }
-        run_flag=cluster_init_conf(cluster_name,batch_flag,code_loc_flag_var,url_code_root_var,argc,argv);
+        run_flag=cluster_init_conf(cluster_name,crypto_keyfile,batch_flag,code_loc_flag_var,url_code_root_var,argc,argv);
         if(run_flag!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"INIT_CONFIG_FAILED",58);
             check_and_cleanup(workdir);

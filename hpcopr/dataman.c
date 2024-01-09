@@ -185,10 +185,10 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
-        if(decrypt_bcecredentials(workdir)!=0){
+        if(create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH)!=0){
             return -1;
         }
-        create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
+        bceconfig_convert(vaultdir,"generate",bucketinfo.bucket_address,bucketinfo.bucket_ak,bucketinfo.bucket_sk);
         if(strcmp(cmd_type,"copy")==0){
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s bos cp %s%s %s%s %s %s --conf-path %s",BCECMD_EXEC,bucketinfo.bucket_address,real_source_path,bucketinfo.bucket_address,real_target_path,real_rflag,real_fflag,vaultdir);
         }
@@ -200,7 +200,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        get_azure_ninfo(workdir,LINE_LENGTH_SHORT,az_subscription_id,az_tenant_id,128);
+        get_azure_ninfo(workdir,LINE_LENGTH_SHORT,crypto_keyfile,az_subscription_id,az_tenant_id,128);
         if(strcmp(cmd_type,"copy")==0){
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s AZCOPY_AUTO_LOGIN_TYPE=SPN&&%s AZCOPY_SPA_APPLICATION_ID=%s&&%s AZCOPY_SPA_CLIENT_SECRET=%s&&%s AZCOPY_TENANT_ID=%s&&%s cp %s%s %s%s %s %s --log-level=ERROR",SET_ENV_CMD,SET_ENV_CMD,bucketinfo.bucket_ak,SET_ENV_CMD,bucketinfo.bucket_sk,SET_ENV_CMD,az_tenant_id,AZCOPY_EXEC,bucketinfo.bucket_address,real_source_path,bucketinfo.bucket_address,real_target_path,real_rflag,real_fflag);
         }
@@ -232,8 +232,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
     if(system(cmdline)!=0){
         unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            bceconfig_convert(vaultdir,"delete","","","");
         }
         else if(strcmp(cloud_flag,"CLOUD_G")==0){
             gcp_credential_convert(workdir,"delete",1);
@@ -243,8 +242,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
     else{
         unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            bceconfig_convert(vaultdir,"delete","","","");
         }
         else if(strcmp(cloud_flag,"CLOUD_G")==0){
             gcp_credential_convert(workdir,"delete",1);
@@ -343,7 +341,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        if(get_azure_ninfo(workdir,LINE_LENGTH_SHORT,az_subscription_id,az_tenant_id,128)!=0){
+        if(get_azure_ninfo(workdir,LINE_LENGTH_SHORT,crypto_keyfile,az_subscription_id,az_tenant_id,128)!=0){
             return -1;
         }
         if(strcmp(cmd_type,"delete")==0){
@@ -665,7 +663,7 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        if(get_azure_ninfo(workdir,LINE_LENGTH_SHORT,az_subscription_id,az_tenant_id,128)!=0){
+        if(get_azure_ninfo(workdir,LINE_LENGTH_SHORT,crypto_keyfile,az_subscription_id,az_tenant_id,128)!=0){
             return -1;
         }
         if(strcmp(cmd_type,"rget")==0){

@@ -47,6 +47,7 @@ int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primar
 int file_exist_or_not(char* filename);
 int file_empty_or_not(char* filename);
 int folder_exist_or_not(char* foldername);
+int delete_file_or_dir(char* file_or_dir);
 
 int password_complexity_check(char* password, char* special_chars);
 int generate_random_passwd(char* password); /* This function is deprecated, please use generate_random_npasswd */
@@ -86,7 +87,7 @@ int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string);
 int cmd_keyword_ncheck(int argc, char** argv, char* key_word, char* kwd_string, unsigned int n);
 
 int include_string_or_not(int cmd_c, char** cmds, char* string);
-int windows_path_to_string(char* input_string, char* new_string);
+int windows_path_to_nstring(char* input_string, char new_string[], unsigned int maxlen);
 
 //Base64 decode
 int base64decode_deprecated(char* encoded_string, char* exported_path);

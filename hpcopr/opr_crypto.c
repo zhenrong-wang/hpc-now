@@ -41,15 +41,10 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
         return 1;
     }
     int final_flag=0;
-    if(file_empty_or_not(ALL_CLUSTER_REGISTRY)<1&&strcmp(cluster_list,"all")!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The registry is empty, will not encrypt/decrypt clusters." RESET_DISPLAY "\n");
-        return -1;
-    }
+    char filename_temp[FILENAME_LENGTH]="";
     char cluster_name_temp[32]=""; //Here we have to use a wider array.
     char cluster_workdir_temp[DIR_LENGTH]="";
     char registry_line_buffer[LINE_LENGTH_SHORT]="";
-    char registry_copy[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     int flag=0;
     int i=1;
     if(strcmp(option,"decrypt")==0){
@@ -85,24 +80,22 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to %s the operator's private SSH key." RESET_DISPLAY "\n",option);
             return -7;
         }
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.copy %s",COPY_FILE_CMD,ALL_CLUSTER_REGISTRY,ALL_CLUSTER_REGISTRY,SYSTEM_CMD_REDIRECT);
-        if(system(cmdline)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] FILE I/O error when copying registry." RESET_DISPLAY "\n");
+        /* Caution: The cluster registry decrypted and NOT encrypted! */
+        if(encrypt_decrypt_cluster_registry("decrypt")!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the cluster registry." RESET_DISPLAY "\n");
             return -3;
         }
-        snprintf(registry_copy,FILENAME_LENGTH-1,"%s.copy",ALL_CLUSTER_REGISTRY);
-        FILE* file_p=fopen(registry_copy,"r");
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s.dec",ALL_CLUSTER_REGISTRY);
+        FILE* file_p=fopen(filename_temp,"r");
         if(file_p==NULL){
-            printf(FATAL_RED_BOLD "[ FATAL: ] FILE I/O error when opening copied registry." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the cluster registry." RESET_DISPLAY "\n");
             return -3;
         }
         while(fngetline(file_p,registry_line_buffer,LINE_LENGTH_SHORT)!=1){
-            get_seq_nstring(registry_line_buffer,' ',4,cluster_name_temp,32);
-            if(cluster_name_check(cluster_name_temp)!=-7){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Cluster name %s is not valid. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
-                final_flag++;
+            if(line_check_by_keyword(registry_line_buffer,"< cluster name",':',1)!=0){
                 continue;
             }
+            get_seq_nstring(registry_line_buffer,' ',4,cluster_name_temp,32);
             if(get_nworkdir(cluster_workdir_temp,DIR_LENGTH,cluster_name_temp)!=0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to get workdir of %s. Skipped it." RESET_DISPLAY "\n",cluster_name_temp);
                 final_flag++;
@@ -127,13 +120,14 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             }
         }
         fclose(file_p);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,registry_copy,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
         if(final_flag!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Cluster(s) %sion finished with %d failed cluster(s)." RESET_DISPLAY "\n",option,final_flag);
         }
         else{
             printf(GENERAL_BOLD "[ -DONE- ] Cluster(s) %sion" RESET_DISPLAY " finished successfully.\n",option);
+        }
+        if(strcmp(option,"encrypt")==0){
+            encrypt_decrypt_cluster_registry("encrypt"); /* For encrypt option, will encrypt the CLUSTER_REGISTRY */
         }
         if(final_flag!=0){
             return 20+final_flag;
@@ -242,16 +236,13 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     char md5sum[64]="";
     int run_flag;
     char filename_temp[FILENAME_LENGTH]="";
-    if(file_empty_or_not(ALL_CLUSTER_REGISTRY)<1){
-        return -1;
-    }
     if(cluster_name_check(target_cluster_name)!=-7){
         return -3;
     }
     if(get_nworkdir(target_cluster_workdir,DIR_LENGTH,target_cluster_name)!=0){
         return -3;
     }
-    if(get_cloud_flag(target_cluster_workdir,cloud_flag,32)!=0||create_and_get_subdir(target_cluster_workdir,"vault",target_cluster_vaultdir,DIR_LENGTH)!=0){
+    if(get_cloud_flag(target_cluster_workdir,crypto_keyfile,cloud_flag,32)!=0||create_and_get_subdir(target_cluster_workdir,"vault",target_cluster_vaultdir,DIR_LENGTH)!=0){
         return -5;
     }
     if(decryption_status(target_cluster_workdir)!=0){
@@ -278,6 +269,8 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     }
     if(strcmp(cloud_flag,"CLOUD_E")==0){ //Decrypt the special bucket secrets
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scredentials",target_cluster_vaultdir,PATH_SLASH);
+        decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconfig",target_cluster_vaultdir,PATH_SLASH);
         decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
     }
     decrypt_cloud_secrets(now_crypto_exec,target_cluster_workdir,md5sum);

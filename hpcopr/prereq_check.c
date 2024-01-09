@@ -771,20 +771,15 @@ int check_and_install_prerequisitions(int repair_flag){
     if(repair_flag==1){
         printf("|        . Checking and repairing the registry now ...\n");
     }
-    if(file_exist_or_not(ALL_CLUSTER_REGISTRY)!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " No registry file found. Creating a blank cluster registry now ...\n");
-        file_p=fopen(ALL_CLUSTER_REGISTRY,"w+");
-        if(file_p==NULL){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open/write to the cluster registry. Exit now." RESET_DISPLAY "\n");
-            return -1;
-        }
-        fclose(file_p);
+    if(check_cluster_registry()!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to check and repair the cluster registry." RESET_DISPLAY "\n");
+        return -1;
     }
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v The registry has been repaired.\n");
         printf("|        . Checking and repairing the location configuration file now ...\n");
         if(reset_locations()!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates." RESET_DISPLAY "\n");
             return -3;
         }
         printf( RESET_DISPLAY "|        v All the locations has been reset to the default ones.\n");
