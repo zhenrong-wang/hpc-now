@@ -2069,7 +2069,12 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             }
         }
     }
-    delete_file_or_dir(statefile);
+    if(file_exist_or_not(statefile_encrypted)==0){
+        delete_file_or_dir(statefile);
+    }
+    else{
+        encrypt_and_delete(NOW_CRYPTO_EXEC,statefile,md5sum);
+    }
     printf(RESET_DISPLAY);
     return 0;
 }
@@ -2122,11 +2127,21 @@ int cluster_empty_or_not(char* workdir,char* crypto_keyfile){
     snprintf(statefile,FILENAME_LENGTH-1,"%s%scheck_state.temp",stackdir,PATH_SLASH);
     decrypt_single_file_general(NOW_CRYPTO_EXEC,statefile_encrypted,statefile,md5sum);
     if(check_statefile(statefile)==0){
-        delete_file_or_dir(statefile);
+        if(file_exist_or_not(statefile_encrypted)==0){
+            delete_file_or_dir(statefile);
+        }
+        else{
+            encrypt_and_delete_general(NOW_CRYPTO_EXEC,statefile,statefile_encrypted,md5sum);
+        }
         return 1;
     }
     else{
-        delete_file_or_dir(statefile);
+        if(file_exist_or_not(statefile_encrypted)==0){
+            delete_file_or_dir(statefile);
+        }
+        else{
+            encrypt_and_delete_general(NOW_CRYPTO_EXEC,statefile,statefile_encrypted,md5sum);
+        }
         return 0;
     }
 }
