@@ -29,7 +29,7 @@
  * Return  1: Cluster not asleep, but seems remote copy failed
  * Return  0: Remote copy succeeded
  */
-int get_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* mon_data_file){
+int get_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey_dir, char* mon_data_file){
     char workdir[DIR_LENGTH]="";
     if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
         return -1;
@@ -42,7 +42,7 @@ int get_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* mon_data_fi
         system(cmdline);
     }
     sprintf(mon_data_file,"%s%smon_data_%s.csv",mon_data_dir,PATH_SLASH,cluster_name);
-    if(cluster_asleep_or_not(workdir)==0){
+    if(cluster_asleep_or_not(workdir,crypto_keyfile)==0){
         if(file_empty_or_not(mon_data_file)<1){
             return -5;
         }
@@ -50,7 +50,7 @@ int get_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* mon_data_fi
             return -3;
         }
     }
-    remote_copy(workdir,sshkey_dir,mon_data_file,"/hpc_data/cluster_data/mon_data.csv","root","get","",0);
+    remote_copy(workdir,crypto_keyfile,sshkey_dir,mon_data_file,"/hpc_data/cluster_data/mon_data.csv","root","get","",0);
     if(file_empty_or_not(mon_data_file)<1){
         strcpy(mon_data_file,"");
         return 1;
@@ -58,7 +58,7 @@ int get_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* mon_data_fi
     return 0;
 }
 
-int update_all_mon_data(char* cluster_registry, char* sshkey_dir){
+int update_all_mon_data(char* cluster_registry, char* crypto_keyfile, char* sshkey_dir){
     char cluster_name_temp[64]="";
     char mon_data_file_temp[FILENAME_LENGTH]="";
     char registry_line[LINE_LENGTH_SHORT]="";
@@ -74,7 +74,7 @@ int update_all_mon_data(char* cluster_registry, char* sshkey_dir){
             continue;
         }
         get_seq_nstring(cluster_name_temp,' ',4,cluster_name_temp,64);
-        run_flag=get_cluster_mon_data(cluster_name_temp,sshkey_dir,mon_data_file_temp);
+        run_flag=get_cluster_mon_data(cluster_name_temp,crypto_keyfile,sshkey_dir,mon_data_file_temp);
         if(run_flag==0){
             updated++;
         }
@@ -167,7 +167,7 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
     return i;
 }
 
-int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_list, char* start_datetime, char* end_datetime, char* interval, char* view_option, char* export_dest){
+int show_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey_dir, char* node_name_list, char* start_datetime, char* end_datetime, char* interval, char* view_option, char* export_dest){
     if(cluster_name_check(cluster_name)!=-7){
         return -3;
     }
@@ -198,7 +198,7 @@ int show_cluster_mon_data(char* cluster_name, char* sshkey_dir, char* node_name_
     
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
-    int run_flag=get_cluster_mon_data(cluster_name,sshkey_dir,cluster_mon_data_file);
+    int run_flag=get_cluster_mon_data(cluster_name,crypto_keyfile,sshkey_dir,cluster_mon_data_file);
     if(run_flag==-3){
         printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster %s is not running. The data is not updated.\n" RESET_DISPLAY,cluster_name);
     }

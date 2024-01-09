@@ -83,7 +83,7 @@ void rf_flag_parser(const char* rflag, const char* fflag, char* real_rflag, char
     }
 }
 
-int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_path, char* rflag, char* fflag, char* crypto_keyfile, char* cloud_flag, char* cmd_type){
+int bucket_cp(char* workdir, char* crypto_keyfile, char* hpc_user, char* source_path, char* target_path, char* rflag, char* fflag, char* cloud_flag, char* cmd_type){
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -3;
     }
@@ -251,7 +251,7 @@ int bucket_cp(char* workdir, char* hpc_user, char* source_path, char* target_pat
     }
 }
 
-int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, char* fflag, char* crypto_keyfile, char* cloud_flag, char* cmd_type){
+int bucket_rm_ls(char* workdir, char* crypto_keyfile, char* hpc_user, char* remote_path, char* rflag, char* fflag, char* cloud_flag, char* cmd_type){
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -3;
     }
@@ -329,10 +329,8 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
-        if(decrypt_bcecredentials(workdir)!=0){
-            return -1;
-        }
         create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
+        bceconfig_convert(vaultdir,"generate",binfo.bucket_address,binfo.bucket_ak,binfo.bucket_sk);
         if(strcmp(cmd_type,"delete")==0){
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s bos rm %s%s %s %s --conf-path %s",BCECMD_EXEC,binfo.bucket_address,real_remote_path,real_rflag,real_fflag,vaultdir);
         }
@@ -369,8 +367,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
     if(system(cmdline)!=0){
         unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            bceconfig_convert(vaultdir,"delete","","","");
         }
         else if(strcmp(cloud_flag,"CLOUD_G")==0){
             gcp_credential_convert(workdir,"delete",1);
@@ -380,8 +377,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
     else{
         unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%scredentials %s",DELETE_FILE_CMD,vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            bceconfig_convert(vaultdir,"delete","","","");
         }
         else if(strcmp(cloud_flag,"CLOUD_G")==0){
             gcp_credential_convert(workdir,"delete",1);
@@ -390,7 +386,7 @@ int bucket_rm_ls(char* workdir, char* hpc_user, char* remote_path, char* rflag, 
     }
 }
 
-int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_path, char* target_path, char* recursive_flag, char* force_flag, char* cmd_type){
+int direct_cp_mv(char* workdir, char* crypto_keyfile, char* hpc_user, char* sshkey_dir, char* source_path, char* target_path, char* recursive_flag, char* force_flag, char* cmd_type){
     if(strcmp(cmd_type,"mv")!=0&&strcmp(cmd_type,"cp")!=0){
         return -1;
     }
@@ -446,7 +442,7 @@ int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_p
                     snprintf(remote_commands,CMDLINE_LENGTH-1,"mv /home/%s/%s /home/%s/%s %s &",hpc_user,real_source_path,hpc_user,real_target_path,real_rf_flag);
                 }
             }
-            run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
+            run_flag=remote_exec_general(workdir,crypto_keyfile,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
         }
         else{
             return 3;
@@ -460,13 +456,13 @@ int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_p
             else{
                 snprintf(remote_commands,CMDLINE_LENGTH-1,"/bin/cp %s %s %s &",real_source_path,real_target_path,real_rf_flag);
             }
-            run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
+            run_flag=remote_exec_general(workdir,crypto_keyfile,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
         }
         else if(path_flag1==1&&path_flag2==0){
-            run_flag=remote_copy(workdir,sshkey_dir,real_source_path,real_target_path,hpc_user,"put",real_rf_flag,1);
+            run_flag=remote_copy(workdir,crypto_keyfile,sshkey_dir,real_source_path,real_target_path,hpc_user,"put",real_rf_flag,1);
         }
         else{
-            run_flag=remote_copy(workdir,sshkey_dir,real_target_path,real_source_path,hpc_user,"get",real_rf_flag,1);
+            run_flag=remote_copy(workdir,crypto_keyfile,sshkey_dir,real_target_path,real_source_path,hpc_user,"get",real_rf_flag,1);
         }
     }
     if(run_flag!=0){
@@ -477,7 +473,7 @@ int direct_cp_mv(char* workdir, char* hpc_user, char* sshkey_dir, char* source_p
     }
 }
 
-int direct_rm_ls_mkdir(char* workdir, char* hpc_user, char* sshkey_dir, char* remote_path, char* force_flag, char* recursive_flag, char* cmd_type){
+int direct_rm_ls_mkdir(char* workdir, char* crypto_keyfile, char* hpc_user, char* sshkey_dir, char* remote_path, char* force_flag, char* recursive_flag, char* cmd_type){
     if(strcmp(cmd_type,"rm")!=0&&strcmp(cmd_type,"ls")!=0&&strcmp(cmd_type,"mkdir")!=0){
         return -1;
     }
@@ -527,7 +523,7 @@ int direct_rm_ls_mkdir(char* workdir, char* hpc_user, char* sshkey_dir, char* re
             snprintf(remote_commands,CMDLINE_LENGTH-1,"mkdir -p %s",real_remote_path);
         }
     }
-    run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
+    run_flag=remote_exec_general(workdir,crypto_keyfile,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
     if(run_flag!=0){
         return 1;
     }
@@ -536,7 +532,7 @@ int direct_rm_ls_mkdir(char* workdir, char* hpc_user, char* sshkey_dir, char* re
     }
 }
 
-int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char* remote_path, char* cmd_type){
+int direct_file_operations(char* workdir, char* crypto_keyfile, char* hpc_user, char* sshkey_dir, char* remote_path, char* cmd_type){
     if(strcmp(cmd_type,"cat")!=0&&strcmp(cmd_type,"more")!=0&&strcmp(cmd_type,"less")!=0&&strcmp(cmd_type,"tail")!=0&&strcmp(cmd_type,"vim")!=0){
         return -3;
     }
@@ -560,7 +556,7 @@ int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char
             snprintf(remote_commands,CMDLINE_LENGTH-1,"%s -f %s",cmd_type,real_remote_path);
         }
     }
-    run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
+    run_flag=remote_exec_general(workdir,crypto_keyfile,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
     if(run_flag!=0){
         return 1;
     }
@@ -569,7 +565,7 @@ int direct_file_operations(char* workdir, char* hpc_user, char* sshkey_dir, char
     }
 }
 
-int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* source_path, char* dest_path, char* rflag, char* fflag, char* cloud_flag, char* crypto_keyfile, char* cmd_type){
+int remote_bucket_cp(char* workdir, char* crypto_keyfile, char* hpc_user, char* sshkey_dir, char* source_path, char* dest_path, char* rflag, char* fflag, char* cloud_flag, char* cmd_type){
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -3;
     }
@@ -674,7 +670,7 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
         }
     }
     else{
-        remote_exec_general(workdir,sshkey_dir,hpc_user,"gcloud auth activate-service-account --key-file=/hpc_data/cluster_data/.bucket_key.json >> /dev/null 2>&1","-n",0,1,"","");
+        remote_exec_general(workdir,crypto_keyfile,sshkey_dir,hpc_user,"gcloud auth activate-service-account --key-file=/hpc_data/cluster_data/.bucket_key.json >> /dev/null 2>&1","-n",0,1,"","");
         if(strcmp(cmd_type,"rget")==0){
             snprintf(remote_commands,CMDLINE_LENGTH-1,"gcloud storage cp %s%s %s %s",binfo.bucket_address,real_source_path,real_dest_path,real_rflag);
         }
@@ -682,7 +678,7 @@ int remote_bucket_cp(char* workdir, char* hpc_user, char* sshkey_dir, char* sour
             snprintf(remote_commands,CMDLINE_LENGTH-1,"gcloud storage cp %s %s%s %s",real_source_path,binfo.bucket_address,real_dest_path,real_rflag);
         }
     }
-    run_flag=remote_exec_general(workdir,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
+    run_flag=remote_exec_general(workdir,crypto_keyfile,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
     if(run_flag!=0){
         return 1;
     }

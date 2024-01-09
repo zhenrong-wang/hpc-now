@@ -914,10 +914,10 @@ int main(int argc, char* argv[]){
         prompt_to_input_optional_args("Export to a local path?",CONFIRM_STRING_QUICK,"Specify a local path (directory or file).",destination_path,batch_flag,argc,argv,"-d");
         run_flag=prompt_to_confirm_args("Read the monitor data? (Default: Print)",CONFIRM_STRING_QUICK,batch_flag,argc,argv,"--read");
         if(run_flag==2||run_flag==0){
-            run_flag=show_cluster_mon_data(cluster_name,SSHKEY_DIR,string_temp,string_temp2,string_temp3,string_temp4,"read",destination_path);
+            run_flag=show_cluster_mon_data(cluster_name,crypto_keyfile,SSHKEY_DIR,string_temp,string_temp2,string_temp3,string_temp4,"read",destination_path);
         }
         else{
-            run_flag=show_cluster_mon_data(cluster_name,SSHKEY_DIR,string_temp,string_temp2,string_temp3,string_temp4,"print",destination_path);
+            run_flag=show_cluster_mon_data(cluster_name,crypto_keyfile,SSHKEY_DIR,string_temp,string_temp2,string_temp3,string_temp4,"print",destination_path);
         }
         if(run_flag!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"MONITOR_MANAGER_FAILED",40);
@@ -1031,7 +1031,7 @@ int main(int argc, char* argv[]){
         return 0;
     }
     
-    cluster_state_flag=cluster_asleep_or_not(workdir);
+    cluster_state_flag=cluster_asleep_or_not(workdir,crypto_keyfile);
     if(strcmp(final_command,"ssh")==0){
         if(cluster_state_flag==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to wake up the cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " first.\n" RESET_DISPLAY,cluster_name);
@@ -1043,7 +1043,7 @@ int main(int argc, char* argv[]){
         if(strcmp(user_name,"root")==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] SSH as root is VERY RISKY and *NOT* recommended !" RESET_DISPLAY "\n");
         }
-        run_flag=cluster_ssh(workdir,user_name,cluster_role,SSHKEY_DIR);
+        run_flag=cluster_ssh(workdir,crypto_keyfile,user_name,cluster_role,SSHKEY_DIR);
         if(run_flag==-1){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the ssh key. You can still try to use password to login." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"FILE_I/O_ERROR",127);
@@ -1064,10 +1064,10 @@ int main(int argc, char* argv[]){
         }
         run_flag=prompt_to_confirm_args("Copy the password to system clipboard? (Default: not copy password)",CONFIRM_STRING_QUICK,batch_flag,argc,argv,"--copypass");
         if(run_flag==2||run_flag==0){
-            run_flag=cluster_rdp(workdir,user_name,cluster_role,0);
+            run_flag=cluster_rdp(workdir,crypto_keyfile,user_name,cluster_role,0);
         }
         else{
-            run_flag=cluster_rdp(workdir,user_name,cluster_role,1);
+            run_flag=cluster_rdp(workdir,crypto_keyfile,user_name,cluster_role,1);
         }
         if(run_flag==0||run_flag==9){
             if(run_flag==9){
@@ -1109,7 +1109,7 @@ int main(int argc, char* argv[]){
             level_flag=0;
         }
         if(check_pslock(workdir,decryption_status(workdir))!=0){
-            if(cluster_empty_or_not(workdir)!=0){
+            if(cluster_empty_or_not(workdir,crypto_keyfile)!=0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] %s | * OPERATION-IN-PROGRESS * Graph NOT updated !\n" RESET_DISPLAY "\n",cluster_name);
             }
             else{
@@ -1152,7 +1152,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"vault")==0){
-        if(cluster_empty_or_not(workdir)==0){
+        if(cluster_empty_or_not(workdir,crypto_keyfile)==0){
             print_empty_cluster_info();
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_EMPTY",49);
             check_and_cleanup(workdir);
@@ -1245,7 +1245,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"export")==0){
-        if(cluster_empty_or_not(workdir)==0){
+        if(cluster_empty_or_not(workdir,crypto_keyfile)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is empty, nothing to be exported." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_EMPTY",49);
             check_and_cleanup(workdir);
@@ -1273,7 +1273,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"dataman")==0){
-        if(cluster_empty_or_not(workdir)==0){
+        if(cluster_empty_or_not(workdir,crypto_keyfile)==0){
             print_empty_cluster_info();
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_EMPTY",49);
             check_and_cleanup(workdir);
@@ -1407,25 +1407,25 @@ int main(int argc, char* argv[]){
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Data operation started ...\n\n");
         if(strcmp(data_cmd,"put")==0||strcmp(data_cmd,"get")==0||strcmp(data_cmd,"copy")==0||strcmp(data_cmd,"move")==0){
-            run_flag=bucket_cp(workdir,user_name,source_path,destination_path,recursive_flag,force_flag_string,crypto_keyfile,cloud_flag,data_cmd);
+            run_flag=bucket_cp(workdir,crypto_keyfile,user_name,source_path,destination_path,recursive_flag,force_flag_string,cloud_flag,data_cmd);
             if(strcmp(data_cmd,"move")==0&&run_flag==0){
-                run_flag=bucket_rm_ls(workdir,user_name,source_path,"recursive","",crypto_keyfile,cloud_flag,"delete");
+                run_flag=bucket_rm_ls(workdir,crypto_keyfile,user_name,source_path,"recursive","",cloud_flag,"delete");
             }
         }
         else if(strcmp(data_cmd,"list")==0||strcmp(data_cmd,"delete")==0){
-            run_flag=bucket_rm_ls(workdir,user_name,target_path,recursive_flag,force_flag_string,crypto_keyfile,cloud_flag,data_cmd);
+            run_flag=bucket_rm_ls(workdir,crypto_keyfile,user_name,target_path,recursive_flag,force_flag_string,cloud_flag,data_cmd);
         }
         else if(strcmp(data_cmd,"rm")==0||strcmp(data_cmd,"ls")==0||strcmp(data_cmd,"mkdir")==0){
-            run_flag=direct_rm_ls_mkdir(workdir,user_name,SSHKEY_DIR,target_path,force_flag_string,recursive_flag,data_cmd);
+            run_flag=direct_rm_ls_mkdir(workdir,crypto_keyfile,user_name,SSHKEY_DIR,target_path,force_flag_string,recursive_flag,data_cmd);
         }
         else if(strcmp(data_cmd,"cp")==0||strcmp(data_cmd,"mv")==0){
-            run_flag=direct_cp_mv(workdir,user_name,SSHKEY_DIR,source_path,destination_path,recursive_flag,force_flag_string,data_cmd);
+            run_flag=direct_cp_mv(workdir,crypto_keyfile,user_name,SSHKEY_DIR,source_path,destination_path,recursive_flag,force_flag_string,data_cmd);
         }
         else if(strcmp(data_cmd,"rput")==0||strcmp(data_cmd,"rget")==0){
-            run_flag=remote_bucket_cp(workdir,user_name,SSHKEY_DIR,source_path,destination_path,recursive_flag,force_flag_string,cloud_flag,crypto_keyfile,data_cmd);
+            run_flag=remote_bucket_cp(workdir,crypto_keyfile,user_name,SSHKEY_DIR,source_path,destination_path,recursive_flag,force_flag_string,cloud_flag,data_cmd);
         }
         else{
-            run_flag=direct_file_operations(workdir,user_name,SSHKEY_DIR,target_path,data_cmd);
+            run_flag=direct_file_operations(workdir,crypto_keyfile,user_name,SSHKEY_DIR,target_path,data_cmd);
         }
         if(run_flag==0){
             write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
@@ -1452,7 +1452,7 @@ int main(int argc, char* argv[]){
         return 53;
     }
     if(strcmp(final_command,"get-conf")==0){
-        if(cluster_empty_or_not(workdir)!=0){
+        if(cluster_empty_or_not(workdir,crypto_keyfile)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
             printf("|          this operation is not allowed. Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_NOT_EMPTY",51);
@@ -1488,7 +1488,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"edit-conf")==0||strcmp(final_command,"rm-conf")==0){
-        if(cluster_empty_or_not(workdir)!=0){
+        if(cluster_empty_or_not(workdir,crypto_keyfile)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
             printf("|          this operation is not allowed. Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_NOT_EMPTY",51);
@@ -1524,7 +1524,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"init")==0){
-        if(cluster_empty_or_not(workdir)!=0){
+        if(cluster_empty_or_not(workdir,crypto_keyfile)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster has already been initialized. Exit now." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"ALREADY_INITED",57);
             check_and_cleanup(workdir);
@@ -1607,7 +1607,7 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    if(cluster_empty_or_not(workdir)==0){
+    if(cluster_empty_or_not(workdir,crypto_keyfile)==0){
         print_empty_cluster_info();
         write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_EMPTY",49);
         check_and_cleanup(workdir);
@@ -1712,7 +1712,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 8;
         }
-        if(cluster_empty_or_not(workdir)==0){
+        if(cluster_empty_or_not(workdir,crypto_keyfile)==0){
             print_empty_cluster_info();
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_EMPTY",49);
             check_and_cleanup(workdir);
@@ -1737,7 +1737,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 9;
         }
-        get_state_nvalue(workdir,"shared_volume_gb:",string_temp2,16);
+        get_state_nvalue(workdir,crypto_keyfile,"shared_volume_gb:",string_temp2,16);
         if(string_to_positive_num(string_temp)<string_to_positive_num(string_temp2)){
             printf(FATAL_RED_BOLD "[ FATAL: ] The new volume %s is not larger than the previous %s." RESET_DISPLAY "\n",string_temp,string_temp2);
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
@@ -1792,7 +1792,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup("");
             return 6;
         }
-        if(cluster_full_running_or_not(workdir)==0){
+        if(cluster_full_running_or_not(workdir,crypto_keyfile)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "fully running" RESET_DISPLAY FATAL_RED_BOLD ". No need to wake up." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"RUNNING_STATE",38);
             check_and_cleanup(workdir);
@@ -1881,7 +1881,7 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return run_flag;   
         }
-        usrmgr_check_flag=usrmgr_prereq_check(workdir,user_cmd,batch_flag);
+        usrmgr_check_flag=usrmgr_prereq_check(workdir,crypto_keyfile,user_cmd,batch_flag);
         //printf("\n\n %s \n\n",user_cmd);
         if(usrmgr_check_flag==-1){
             write_operation_log(cluster_name,operation_log,argc,argv,"USERMAN_PREREQ_CHECK_FAILED",77);
@@ -1956,7 +1956,7 @@ int main(int argc, char* argv[]){
             run_flag=hpc_user_setpasswd(workdir,SSHKEY_DIR,crypto_keyfile,user_name,pass_word);
         }
         if(run_flag==0){
-            usrmgr_remote_exec(workdir,SSHKEY_DIR,usrmgr_check_flag);
+            usrmgr_remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,usrmgr_check_flag);
         }
         write_operation_log(cluster_name,operation_log,argc,argv,user_cmd,run_flag);
         check_and_cleanup(workdir);
@@ -2020,18 +2020,18 @@ int main(int argc, char* argv[]){
         cmd_keyword_ncheck(argc,argv,"--repo",repo_loc,384);
         if(strcmp(app_cmd,"store")==0){
             prompt_to_input_optional_args("Specify installation shell scripts location?",CONFIRM_STRING,"Input either an URL or a local path.",inst_loc,batch_flag,argc,argv,"--inst");
-            run_flag=app_list(workdir,"all",user_name,"",SSHKEY_DIR,"",inst_loc);
+            run_flag=app_list(workdir,crypto_keyfile,"all",user_name,"",SSHKEY_DIR,"",inst_loc);
         }
         else if(strcmp(app_cmd,"avail")==0){
-            run_flag=app_list(workdir,"installed",user_name,"",SSHKEY_DIR,"","");
+            run_flag=app_list(workdir,crypto_keyfile,"installed",user_name,"",SSHKEY_DIR,"","");
         }
         else if(strcmp(app_cmd,"check-conf")==0){
-            run_flag=appman_check_conf(workdir,user_name,SSHKEY_DIR);
+            run_flag=appman_check_conf(workdir,crypto_keyfile,user_name,SSHKEY_DIR);
         }
         else if(strcmp(app_cmd,"update-conf")==0){
             prompt_to_input_required_args("Input either an URL or a local path for installation scripts.",inst_loc,batch_flag,argc,argv,"--inst");
             prompt_to_input_required_args("Input either an URL or a local path for application sources and packages.",repo_loc,batch_flag,argc,argv,"--repo");
-            run_flag=appman_update_conf(workdir,inst_loc,repo_loc,SSHKEY_DIR,"");
+            run_flag=appman_update_conf(workdir,crypto_keyfile,inst_loc,repo_loc,SSHKEY_DIR,"");
         }
         else{
             if(cmd_keyword_ncheck(argc,argv,"--app",app_name,128)!=0){
@@ -2048,12 +2048,12 @@ int main(int argc, char* argv[]){
                 getchar();
             }
             if(strcmp(app_cmd,"check")==0){
-                run_flag=app_list(workdir,"check",user_name,app_name,SSHKEY_DIR,"","");
+                run_flag=app_list(workdir,crypto_keyfile,"check",user_name,app_name,SSHKEY_DIR,"","");
             }
             else{
                 prompt_to_input_optional_args("Specify installation shell scripts location?",CONFIRM_STRING,"Input either an URL or a local path.",inst_loc,batch_flag,argc,argv,"--inst");
                 prompt_to_input_optional_args("Specify application sources and packages location?",CONFIRM_STRING,"Input either an URL or a local path.",inst_loc,batch_flag,argc,argv,"--repo");
-                run_flag=app_operation(workdir,user_name,app_cmd,app_name,SSHKEY_DIR,inst_loc,repo_loc);
+                run_flag=app_operation(workdir,crypto_keyfile,user_name,app_cmd,app_name,SSHKEY_DIR,inst_loc,repo_loc);
             }
         }
         if(run_flag!=0){
@@ -2106,14 +2106,14 @@ int main(int argc, char* argv[]){
                 check_and_cleanup(workdir);
                 return 46;
             }
-            run_flag=job_submit(workdir,user_name,SSHKEY_DIR,&job_info);
+            run_flag=job_submit(workdir,crypto_keyfile,user_name,SSHKEY_DIR,&job_info);
         }
         else if(strcmp(job_cmd,"list")==0){
-            run_flag=job_list(workdir,user_name,SSHKEY_DIR);
+            run_flag=job_list(workdir,crypto_keyfile,user_name,SSHKEY_DIR);
         }
         else{
             if(cmd_keyword_ncheck(argc,argv,"--jid",job_id,32)!=0){
-                job_list(workdir,user_name,SSHKEY_DIR);
+                job_list(workdir,crypto_keyfile,user_name,SSHKEY_DIR);
                 if(batch_flag==0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] No jobID specified. Use --jid JOB_ID ." RESET_DISPLAY "\n");
                     write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
@@ -2125,7 +2125,7 @@ int main(int argc, char* argv[]){
                 scanf("%31s",job_id);
                 getchar();
             }
-            run_flag=job_cancel(workdir,user_name,SSHKEY_DIR,job_id,batch_flag);
+            run_flag=job_cancel(workdir,crypto_keyfile,user_name,SSHKEY_DIR,job_id,batch_flag);
         }
         if(run_flag!=0){
             write_operation_log(cluster_name,operation_log,argc,argv,"JOBMAN_FAILED",46);

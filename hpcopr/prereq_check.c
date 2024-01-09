@@ -1368,7 +1368,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
         }
     }
     if(strcmp(cu_flag,"UNAME")==0){
-        if(cluster_empty_or_not(workdir)==0){
+        if(cluster_empty_or_not(workdir,CRYPTO_KEY_FILE)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster %s is empty. Please init first." RESET_DISPLAY "\n",cluster_name);
             return -7;
         }

@@ -14,12 +14,12 @@
 #include "cluster_general_funcs.h"
 #include "userman.h"
 
-int usrmgr_prereq_check(char* workdir, char* ucmd, int batch_mode_flag){
+int usrmgr_prereq_check(char* workdir, char* crypto_keyfile, char* ucmd, int batch_mode_flag){
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -7;
     }
-    if(cluster_asleep_or_not(workdir)==0){
+    if(cluster_asleep_or_not(workdir,crypto_keyfile)==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The cluster %s is not running. Please wake up first." RESET_DISPLAY "\n",cluster_name);
         return -1;
     }
@@ -41,14 +41,19 @@ int usrmgr_prereq_check(char* workdir, char* ucmd, int batch_mode_flag){
     return 0;
 }
 
-void usrmgr_remote_exec(char* workdir, char* sshkey_folder, int prereq_check_flag){
+int usrmgr_remote_exec(char* workdir, char* crypto_keyfile, char* sshkey_folder, int prereq_check_flag){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote executing now ...\n");
-    remote_exec(workdir,sshkey_folder,"connect",1);
-    remote_exec(workdir,sshkey_folder,"all",2);
+    if(remote_exec(workdir,crypto_keyfile,sshkey_folder,"connect",1)!=0){
+        return 1;
+    }
+    if(remote_exec(workdir,crypto_keyfile,sshkey_folder,"all",2)!=0){
+        return 1;
+    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote execution commands sent.\n");
     if(prereq_check_flag!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster user has been updated with down nodes." RESET_DISPLAY "\n");
     }
+    return 0;
 }
 
 /*
@@ -122,9 +127,9 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
         return -3;
     }
     snprintf(remote_commands,CMDLINE_LENGTH-1,"echo y-e-s | hpcmgr users delete %s os",username);
-    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
+    if(remote_exec_general(workdir,crypto_keyfile,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
         snprintf(remote_commands,CMDLINE_LENGTH-1,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s",username);
-        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
+        if(remote_exec_general(workdir,crypto_keyfile,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the user %s from your cluster. Exit now." RESET_DISPLAY "\n",username);
             delete_decrypted_user_passwords(workdir);
             return 1;
@@ -193,7 +198,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
     else{
         snprintf(remote_commands,CMDLINE_LENGTH-1,"hpcmgr users delete %s",username);
     }
-    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
+    if(remote_exec_general(workdir,crypto_keyfile,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
         find_and_nreplace(user_registry_file,LINE_LENGTH_SHORT,username_ext,"","","","",prev_keywords_ext,new_keywords_ext);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully %s the user %s.\n",new_keywords,username);
         encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
@@ -233,13 +238,13 @@ int hpc_user_setpasswd(char* workdir, char* ssheky_dir, char* crypto_keyfile, ch
         return -5;
     }
     snprintf(remote_commands,CMDLINE_LENGTH-1,"echo '%s' | passwd %s --stdin",password,username); /* Added '' to enclose the password string*/
-    if(remote_exec_general(workdir,ssheky_dir,"root",remote_commands,"-n",0,0,"","")==0){
+    if(remote_exec_general(workdir,crypto_keyfile,ssheky_dir,"root",remote_commands,"-n",0,0,"","")==0){
         snprintf(username_ext,127,"username: %s ",username);
         snprintf(password_ext,127," %s ",password);
         find_and_nget(user_registry_file,LINE_LENGTH_SHORT,username_ext,"","",1,username_ext,"","",' ',3,password_prev,21);
         snprintf(password_prev_ext,127," %s ",password_prev);
         find_and_nreplace(user_registry_file,LINE_LENGTH_SHORT,username_ext,"","","","",password_prev_ext,password_ext);
-        sync_user_passwords(workdir,ssheky_dir);
+        sync_user_passwords(workdir,crypto_keyfile,ssheky_dir);
         encrypt_and_delete_user_passwords(workdir,crypto_keyfile);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully updated the password for user %s.\n",username);
         return 0;
@@ -278,9 +283,9 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
         return -5;
     }
     snprintf(remote_commands,CMDLINE_LENGTH-1,"hpcmgr users add %s '%s'",username,password); /* Added '' to enclose the password string*/
-    if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
+    if(remote_exec_general(workdir,crypto_keyfile,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
         snprintf(remote_commands,CMDLINE_LENGTH-1,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s | grep 'STATUS:ENABLED'",username);
-        if(remote_exec_general(workdir,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
+        if(remote_exec_general(workdir,crypto_keyfile,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
             printf("[ -INFO- ] Updating the local user-info registry ...\n");
             file_p=fopen(user_registry_file,"a");
             fprintf(file_p,"username: %s %s STATUS:ENABLED\n",username,password);

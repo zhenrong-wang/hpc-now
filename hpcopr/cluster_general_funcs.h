@@ -15,16 +15,21 @@ typedef struct{
     char bucket_sk[128];
 } bucket_info;
 
+typedef struct{
+    char now_crypto_exec[FILENAME_LENGTH];
+    char crypto_keyfile[FILENAME_LENGTH];
+    char sshkey_dir[DIR_LENGTH];
+    char md5sum[64];
+} global_conf;
+
 int cluster_role_detect(char* workdir, char cluster_role[], char cluster_role_ext[], unsigned int maxlen);
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag);
-
 int create_and_get_subdir(char* workdir, char* subdir_name, char subdir_path[], unsigned int dir_maxlen);
 int create_and_get_stackdir(char* workdir, char* stackdir);
 
-void get_latest_hosts(char* stackdir, char* hostfile_latest);
 int decrypt_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_info);
 int get_cloud_flag(char* workdir, char* crypto_keyfile, char cloud_flag[], unsigned int maxlen);
-int remote_copy(char* workdir, char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option, char* recursive_flag, int silent_flag);
+int remote_copy(char* workdir, char* crypto_keyfile ,char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option, char* recursive_flag, int silent_flag);
 
 int chmod_ssh_privkey(char* ssh_privkey);
 int get_user_sshkey(char* cluster_name, char* user_name, char* user_status, char* sshkey_dir, char* crypto_keyfile);
@@ -47,8 +52,8 @@ int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile);
 int get_opr_pubkey(char* sshkey_folder, char* pubkey, unsigned int length);
 
 int create_and_get_vaultdir(char* workdir, char* vaultdir);
-int remote_exec(char* workdir, char* sshkey_folder, char* exec_type, int delay_minutes);
-int remote_exec_general(char* workdir, char* sshkey_folder, char* username, char* commands, char* extra_options, int delay_minutes, int silent_flag, char* std_redirect, char* err_redirect);
+int remote_exec(char* workdir, char* crypto_keyfile, char* sshkey_folder, char* exec_type, int delay_minutes);
+int remote_exec_general(char* workdir, char* crypto_keyfile, char* sshkey_folder, char* username, char* commands, char* extra_options, int delay_minutes, int silent_flag, char* std_redirect, char* err_redirect);
 int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char* cloud_flag);
 int display_cloud_info(char* workdir, char* crypto_keyfile);
 
@@ -69,15 +74,17 @@ int decryption_status(char* workdir);
 int getstate(char* workdir, char* crypto_keyfile);
 
 int get_state_value(char* workdir, char* key, char* value);
-int get_state_nvalue(char* workdir, char* key, char* value, unsigned int valen_max); //Newer function
+int get_state_nvalue(char* workdir, char* crypto_keyfile, char* key, char* value, unsigned int valen_max); //Newer function
 
 int archive_log(char* logarchive, char* logfile);
 void update_compute_template(char* stackdir, char* cloud_flag);
 int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* errorlog, char* errlog_archive, int silent_flag);
 int graph(char* workdir, char* crypto_keyfile, int graph_level);
-int cluster_empty_or_not(char* workdir);
-int cluster_asleep_or_not(char* workdir);
-int cluster_full_running_or_not(char* workdir);
+
+int cluster_empty_or_not(char* workdir,char* crypto_keyfile);
+int cluster_asleep_or_not(char* workdir, char* crypto_keyfile);
+
+int cluster_full_running_or_not(char* workdir, char* crypto_keyfile);
 int tf_exec_config_validation(tf_exec_config* tf_run);
 int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, char* crypto_keyfile, int silent_flag);
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
@@ -100,7 +107,7 @@ int prompt_to_input_required_args(const char* prompt_string, char* reply_string,
 int prompt_to_input_optional_args(const char* prompt_confirm, const char* confirm_string, const char* prompt_string, char* reply_string, int batch_flag_local,int argc, char** argv, char* cmd_keyword);
 
 int check_down_nodes(char* workdir);
-int cluster_ssh(char* workdir, char* username, char* cluster_role, char* sshkey_dir);
+int cluster_ssh(char* workdir, char* crypto_keyfile, char* username, char* cluster_role, char* sshkey_dir);
 int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
 void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);
@@ -116,8 +123,8 @@ int get_nucid(char* workdir, char* crypto_keyfile, char* ucid_string, unsigned i
 int decrypt_user_passwords(char* workdir, char* crypto_keyfile);
 int delete_decrypted_user_passwords(char* workdir);
 int encrypt_and_delete_user_passwords(char* workdir, char* crypto_keyfile);
-int sync_user_passwords(char* workdir, char* sshkey_dir);
-int sync_statefile(char* workdir, char* sshkey_dir);
+int sync_user_passwords(char* workdir, char* crypto_keyfile, char* sshkey_dir);
+int sync_statefile(char* workdir, char* crypto_keyfile, char* sshkey_dir);
 
 int user_password_complexity_check(char* password, char* special_chars);
 int input_user_passwd(char* password_string, int batch_flag_local);
@@ -149,7 +156,6 @@ int check_statefile(char* statefile);
 int modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer);
 int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag);
 int bceconfig_convert(char* vaultdir, char* option, char* region_id, char* bucket_ak, char* bucket_sk);
-int decrypt_bcecredentials(char* workdir);
 int gcp_credential_convert(char* workdir, const char* operation, int key_flag);
 
 int show_current_cluster(char* cluster_workdir, char* current_cluster_name, int silent_flag);
@@ -160,10 +166,10 @@ int cluster_name_check(char* cluster_name);
 int check_and_cleanup(char* prev_workdir);
 int get_max_cluster_name_length(void);
 
-int password_to_clipboard(char* cluster_workdir, char* username);
+int password_to_clipboard(char* cluster_workdir, char* crypto_keyfile, char* username);
 int generate_rdp_file(char* cluster_name, char* master_address, char* username);
-int start_rdp_connection(char* cluster_workdir, char* username, int password_flag);
-int cluster_rdp(char* cluster_workdir, char* username, char* cluster_role, int password_flag);
+int start_rdp_connection(char* cluster_workdir, char* crypto_keyfile, char* username, int password_flag);
+int cluster_rdp(char* cluster_workdir, char* crypto_keyfile, char* username, char* cluster_role, int password_flag);
 
 FILE* check_regions_list_file(char* cluster_name);
 int list_cloud_regions(char* cluster_name, int format_flag);

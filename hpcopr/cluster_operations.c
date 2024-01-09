@@ -306,7 +306,7 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     if(strcmp(cluster_role,"opr")!=0){
         goto print_finished;
     }
-    if(cluster_empty_or_not(new_workdir)==0){
+    if(cluster_empty_or_not(new_workdir,crypto_keyfile)==0){
         goto update_summary;
     }
     snprintf(cluster_name_ext_prev,63," %s ",cluster_prev_name);
@@ -380,7 +380,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
         printf("[  ****  ] STATUS! PLEASE MAKE SURE THE CLUSTER IS *NOT* IN OPERATION!" RESET_DISPLAY "\n\n");
     }
     else{
-        if(cluster_empty_or_not(target_cluster_workdir)==0){
+        if(cluster_empty_or_not(target_cluster_workdir,crypto_keyfile)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster cannot be refreshed (in init progress or empty)." RESET_DISPLAY "\n");
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please run " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY " to check. Exit now.\n");
             return -5;
@@ -430,7 +430,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
         return 3;
     }
-    get_state_nvalue(cluster_workdir,"payment_method:",curr_payment_method,16);
+    get_state_nvalue(cluster_workdir,crypto_keyfile,"payment_method:",curr_payment_method,16);
     if(strcmp(curr_payment_method,"month")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
         return -1;
@@ -453,7 +453,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
         printf(WARN_YELLO_BOLD "[ -WARN- ] Removing the specified cluster *WITHOUT* state or resource check." RESET_DISPLAY "\n");
         goto destroy_cluster;
     }
-    if(cluster_empty_or_not(cluster_workdir)!=0){
+    if(cluster_empty_or_not(cluster_workdir,crypto_keyfile)!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] The specified cluster is *NOT* empty!" RESET_DISPLAY "\n");
         glance_clusters(target_cluster_name,crypto_keyfile);
         printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? It is *NOT* recoverable!" RESET_DISPLAY "\n");
@@ -983,7 +983,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     char curr_payment_method[16]="";
     int i;
     int compute_node_num=0;
-    get_state_nvalue(workdir,"payment_method:",curr_payment_method,16);
+    get_state_nvalue(workdir,crypto_keyfile,"payment_method:",curr_payment_method,16);
     if(strcmp(curr_payment_method,"month")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
         return -3;
@@ -1130,12 +1130,12 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
             getstate(workdir,crypto_keyfile);
             graph(workdir,crypto_keyfile,0);
-            get_latest_hosts(stackdir,filename_temp);
+            snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
             printf("|\n");
-            remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
-            sync_statefile(workdir,sshkey_dir);
-            remote_exec(workdir,sshkey_dir,"connect",1);
-            remote_exec(workdir,sshkey_dir,"all",2);
+            remote_copy(workdir,crypto_keyfile,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
+            sync_statefile(workdir,crypto_keyfile,sshkey_dir);
+            remote_exec(workdir,crypto_keyfile,sshkey_dir,"connect",1);
+            remote_exec(workdir,crypto_keyfile,sshkey_dir,"all",2);
             for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
                 snprintf(string_temp,127,"compute%d",i);
                 update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
@@ -1173,11 +1173,11 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
-    sync_statefile(workdir,sshkey_dir);
-    remote_exec(workdir,sshkey_dir,"connect",1);
-    remote_exec(workdir,sshkey_dir,"all",2);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
+    remote_copy(workdir,crypto_keyfile,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,sshkey_dir);
+    remote_exec(workdir,crypto_keyfile,sshkey_dir,"connect",1);
+    remote_exec(workdir,crypto_keyfile,sshkey_dir,"all",2);
     for(i=1;i<compute_node_num+1;i++){
         snprintf(string_temp,127,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
@@ -1240,11 +1240,11 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
-    sync_statefile(workdir,sshkey_dir);
-    remote_exec(workdir,sshkey_dir,"connect",7);
-    remote_exec(workdir,sshkey_dir,"all",8);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
+    remote_copy(workdir,crypto_keyfile,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,sshkey_dir);
+    remote_exec(workdir,crypto_keyfile,sshkey_dir,"connect",7);
+    remote_exec(workdir,crypto_keyfile,sshkey_dir,"all",8);
     for(i=0;i<add_number;i++){
         snprintf(string_temp,127,"compute%d",current_node_num+i+1);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"start");
@@ -1334,7 +1334,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
             getstate(workdir,crypto_keyfile);
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
-            sync_statefile(workdir,SSHKEY_DIR);
+            sync_statefile(workdir,crypto_keyfile,SSHKEY_DIR);
             delete_decrypted_files(workdir,crypto_keyfile);
             for(i=compute_node_num-down_num+1;i<compute_node_num+1;i++){
                 snprintf(string_temp,127,"compute%d",i);
@@ -1374,7 +1374,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
         snprintf(string_temp,127,"compute%d",i);
         update_usage_summary(workdir,crypto_keyfile,string_temp,"stop");
     }
-    sync_statefile(workdir,SSHKEY_DIR);
+    sync_statefile(workdir,crypto_keyfile,SSHKEY_DIR);
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been shut down.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
@@ -1469,8 +1469,8 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
             getstate(workdir,crypto_keyfile);
             graph(workdir,crypto_keyfile,0);
             printf("|\n");
-            sync_statefile(workdir,sshkey_dir);
-            remote_exec(workdir,sshkey_dir,"quick",1);
+            sync_statefile(workdir,crypto_keyfile,sshkey_dir);
+            remote_exec(workdir,crypto_keyfile,sshkey_dir,"quick",1);
             delete_decrypted_files(workdir,crypto_keyfile);
             for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
                 snprintf(string_temp,127,"compute%d",i);
@@ -1506,8 +1506,8 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    sync_statefile(workdir,sshkey_dir);
-    remote_exec(workdir,sshkey_dir,"quick",1);
+    sync_statefile(workdir,crypto_keyfile,sshkey_dir);
+    remote_exec(workdir,crypto_keyfile,sshkey_dir,"quick",1);
     delete_decrypted_files(workdir,crypto_keyfile);
     for(i=compute_node_num_on+1;i<compute_node_num+1;i++){
         snprintf(string_temp,127,"compute%d",i);
@@ -1592,7 +1592,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         }
     }
     else{
-        get_state_nvalue(workdir,"ht_flag:",prev_htflag,8);
+        get_state_nvalue(workdir,crypto_keyfile,"ht_flag:",prev_htflag,8);
         if(strcmp(htflag,"ON")!=0&&strcmp(htflag,"OFF")!=0){
             ht_diff_flag=0;
         }
@@ -1663,21 +1663,21 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    sync_statefile(workdir,sshkey_dir);
-    get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,sshkey_dir);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
+    remote_copy(workdir,crypto_keyfile,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
     if(compute_node_down_num!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Please turn on all the cluster nodes, log on to the master\n");
         printf("|          node, and run: " HIGH_GREEN_BOLD "sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY WARN_YELLO_BOLD "" RESET_DISPLAY "\n");
     }
     else{
         if(reinit_flag==0){
-            remote_exec(workdir,sshkey_dir,"connect",1);
-            remote_exec(workdir,sshkey_dir,"all",2);
+            remote_exec(workdir,crypto_keyfile,sshkey_dir,"connect",1);
+            remote_exec(workdir,crypto_keyfile,sshkey_dir,"all",2);
         }
         else{
-            remote_exec(workdir,sshkey_dir,"connect",7);
-            remote_exec(workdir,sshkey_dir,"all",8);
+            remote_exec(workdir,crypto_keyfile,sshkey_dir,"connect",7);
+            remote_exec(workdir,crypto_keyfile,sshkey_dir,"all",8);
         }
     }
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1709,8 +1709,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     int i;
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
-
-    if(cluster_empty_or_not(workdir)==0){
+    if(cluster_empty_or_not(workdir,crypto_keyfile)==0){
         print_empty_cluster_info();
         return -1;
     }
@@ -1778,11 +1777,11 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
         fflush(stdout);
         sleep(1);
     }
-    get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
-    sync_statefile(workdir,sshkey_dir);
-    remote_exec(workdir,sshkey_dir,"connect",1);
-    remote_exec(workdir,sshkey_dir,"all",2);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
+    remote_copy(workdir,crypto_keyfile,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,sshkey_dir);
+    remote_exec(workdir,crypto_keyfile,sshkey_dir,"connect",1);
+    remote_exec(workdir,crypto_keyfile,sshkey_dir,"all",2);
     delete_decrypted_files(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","start");
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The master node has been reconfigured.\n");
@@ -1804,7 +1803,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
     if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return 1;
     }
-    if(cluster_empty_or_not(workdir)==0){
+    if(cluster_empty_or_not(workdir,crypto_keyfile)==0){
         print_empty_cluster_info();
         return -1;
     }
@@ -1813,7 +1812,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a positive number as the new volume." RESET_DISPLAY "\n");
         return 3;
     }
-    get_state_nvalue(workdir,"shared_volume_gb:",prev_volume,16);
+    get_state_nvalue(workdir,crypto_keyfile,"shared_volume_gb:",prev_volume,16);
     prev_volume_num=string_to_positive_num(prev_volume);
     if(new_volume_num<prev_volume_num){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a new volume larger than the previous volume %d." RESET_DISPLAY "\n",prev_volume_num);
@@ -1841,12 +1840,12 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.bak %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    remote_exec_general(workdir,sshkey_dir,"root","resize2fs `df -TH | grep -w '/mnt/shared' | awk '{print $1}'`","-n",0,0,"","");
+    remote_exec_general(workdir,crypto_keyfile,sshkey_dir,"root","resize2fs `df -TH | grep -w '/mnt/shared' | awk '{print $1}'`","-n",0,0,"","");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    sync_statefile(workdir,sshkey_dir);
+    sync_statefile(workdir,crypto_keyfile,sshkey_dir);
     delete_decrypted_files(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The shared volume has been expanded from %d to %d GB.\n",prev_volume_num,new_volume_num);
     return 0;
@@ -1948,7 +1947,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
-    if(strcmp(option,"minimal")==0&&cluster_asleep_or_not(workdir)!=0){
+    if(strcmp(option,"minimal")==0&&cluster_asleep_or_not(workdir,crypto_keyfile)!=0){
         return 3;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
@@ -2021,15 +2020,15 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
         sleep(1);
     }
     printf("\n");
-    sync_statefile(workdir,sshkeydir);
-    remote_exec(workdir,sshkeydir,"quick",1);
+    sync_statefile(workdir,crypto_keyfile,sshkeydir);
+    remote_exec(workdir,crypto_keyfile,sshkeydir,"quick",1);
     if(strcmp(option,"all")==0){
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The cluster is in the state of " HIGH_CYAN_BOLD "full" RESET_DISPLAY " running.\n");
     }
     else{
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The cluster is in the state of " HIGH_CYAN_BOLD "minimal" RESET_DISPLAY " running.\n");
     }
-    remote_exec_general(workdir,sshkeydir,"root","systemctl restart xrdp","-n",0,0,"","");
+    remote_exec_general(workdir,crypto_keyfile,sshkeydir,"root","systemctl restart xrdp","-n",0,0,"","");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -2046,7 +2045,7 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
     if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0||get_cloud_flag(workdir,crypto_keyfile,cloud_flag,32)!=0){
         return -3;
     }
-    if(cluster_empty_or_not(workdir)!=0){
+    if(cluster_empty_or_not(workdir,crypto_keyfile)!=0){
         return -1;
     }
     char filename_temp[FILENAME_LENGTH]="";
@@ -2192,7 +2191,7 @@ int edit_configuration_file(char* cluster_name, char* crypto_keyfile, int batch_
     if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
         return -3;
     }
-    if(cluster_empty_or_not(workdir)!=0){
+    if(cluster_empty_or_not(workdir,crypto_keyfile)!=0){
         return -1;
     }
     char filename_temp[FILENAME_LENGTH]="";
@@ -2222,7 +2221,7 @@ int remove_conf(char* cluster_name){
     if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
         return -3;
     }
-    if(cluster_empty_or_not(workdir)!=0){
+    if(cluster_empty_or_not(workdir,CRYPTO_KEY_FILE)!=0){
         return -1;
     }
     char filename_temp[FILENAME_LENGTH]="";
@@ -2241,7 +2240,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
         return -5;
     }
     char cloud_flag[16]="";
-    if(cluster_empty_or_not(workdir)==0||get_cloud_flag(workdir,crypto_keyfile,cloud_flag,16)!=0){
+    if(cluster_empty_or_not(workdir,crypto_keyfile)==0||get_cloud_flag(workdir,crypto_keyfile,cloud_flag,16)!=0){
         return -1;
     }
     char stackdir[DIR_LENGTH]="";
@@ -2297,7 +2296,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_natgw.tf.tmp %s%stmp%s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    remote_exec_general(workdir,sshkey_folder,"root","/usr/hpc-now/profile_bkup_rstr.sh backup","-n",0,0,"","");
+    remote_exec_general(workdir,crypto_keyfile,sshkey_folder,"root","/usr/hpc-now/profile_bkup_rstr.sh backup","-n",0,0,"","");
     decrypt_files(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing previous nodes ...\n");
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -2380,15 +2379,15 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     else{
         return -17;
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote execution commands sent.\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remote execution commands   sent.\n");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
-    get_latest_hosts(stackdir,filename_temp);
-    remote_copy(workdir,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
-    sync_statefile(workdir,sshkey_folder);
-    remote_exec_general(workdir,sshkey_folder,"root","/usr/hpc-now/profile_bkup_rstr.sh restore","-n",0,0,"","");
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
+    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,sshkey_folder);
+    remote_exec_general(workdir,crypto_keyfile,sshkey_folder,"root","/usr/hpc-now/profile_bkup_rstr.sh restore","-n",0,0,"","");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rebuilding the cluster users now ...\n");
     file_p=fopen(user_passwords,"r");
     get_user_sshkey(cluster_name,"root","ENABLED",sshkey_folder,crypto_keyfile);
@@ -2403,8 +2402,8 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     }
     fclose(file_p);
     delete_decrypted_user_passwords(workdir);
-    remote_exec(workdir,sshkey_folder,"connect",7);
-    remote_exec(workdir,sshkey_folder,"all",8);
+    remote_exec(workdir,crypto_keyfile,sshkey_folder,"connect",7);
+    remote_exec(workdir,crypto_keyfile,sshkey_folder,"all",8);
     printf(WARN_YELLO_BOLD "[ -INFO- ] The rebuild process may need 7 minutes. Please do not operate\n");
     printf("|          this cluster during the period. Exit now." RESET_DISPLAY "\n");
     delete_decrypted_files(workdir,crypto_keyfile);
@@ -2438,7 +2437,7 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
     }
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(statefile,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
-    get_state_nvalue(workdir,"payment_method:",curr_payment_method,8);
+    get_state_nvalue(workdir,crypto_keyfile,"payment_method:",curr_payment_method,8);
     if(strcmp(curr_payment_method,new_payment_method)==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The cluster payment has already been " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD "." RESET_DISPLAY "\n",curr_payment_method);
         return 3;

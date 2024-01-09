@@ -45,14 +45,13 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     int run_flag;
     int num_temp=0;
     int i;
-
-    get_state_nvalue(workdir,"total_compute_nodes:",cluster_node_num_string,8);
-    get_state_nvalue(workdir,"compute_node_cores:",cluster_node_cores_string,8);
+    get_state_nvalue(workdir,crypto_keyfile,"total_compute_nodes:",cluster_node_num_string,8);
+    get_state_nvalue(workdir,crypto_keyfile,"compute_node_cores:",cluster_node_cores_string,8);
     cluster_node_num=string_to_positive_num(cluster_node_num_string);
     cluster_node_cores=string_to_positive_num(cluster_node_cores_string);
 
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Current cluster cores status:\n");
-    remote_exec_general(workdir,sshkey_dir,user_name,"tail -n 1 /hpc_data/cluster_data/mon_cores.dat","",0,2,"","");
+    remote_exec_general(workdir,crypto_keyfile,sshkey_dir,user_name,"tail -n 1 /hpc_data/cluster_data/mon_cores.dat","",0,2,"","");
 
     if(strcmp(user_name,"root")==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The root user cannot submit jobs, please specify another user." RESET_DISPLAY "\n");
@@ -65,14 +64,14 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify an app for this job.\n");
-        app_list(workdir,"installed",user_name,"",sshkey_dir,"","");
+        app_list(workdir,crypto_keyfile,"installed",user_name,"",sshkey_dir,"","");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
         scanf("%127s",app_name);
         getchar();
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.tmp%sapp_check.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
-    app_list(workdir,"check",user_name,app_name,sshkey_dir,filename_temp,"");
+    app_list(workdir,crypto_keyfile,"check",user_name,app_name,sshkey_dir,filename_temp,"");
     run_flag=find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,"not available","","","","");
     if(run_flag>0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified app " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",app_name);
@@ -234,7 +233,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     return 0;
 }
 
-int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_info){
+int job_submit(char* workdir, char* crypto_keyfile, char* user_name, char* sshkey_dir, jobinfo* job_info){
     char remote_commands[CMDLINE_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
@@ -259,9 +258,9 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
     fprintf(file_p,"Data Directory ::%s",job_info->job_data);
     fclose(file_p);
     snprintf(remote_filename_temp,FILENAME_LENGTH-1,"/tmp/job_submit_info_%s.tmp",user_name);
-    remote_copy(workdir,sshkey_dir,filename_temp,remote_filename_temp,user_name,"put","",0);
+    remote_copy(workdir,crypto_keyfile,sshkey_dir,filename_temp,remote_filename_temp,user_name,"put","",0);
     snprintf(remote_commands,CMDLINE_LENGTH-1,"hpcmgr submit %s",remote_filename_temp);
-    run_flag=remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,2,"","");
+    run_flag=remote_exec_general(workdir,crypto_keyfile,sshkey_dir,user_name,remote_commands,"",0,2,"","");
     if(run_flag!=0){
         return 1;
     }
@@ -277,7 +276,7 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
         printf("\n");
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s/%s_run.log",job_info->job_data,job_info->job_name);
         snprintf(remote_commands,CMDLINE_LENGTH-1,"tail -f %s",filename_temp);
-        remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,2,"","");
+        remote_exec_general(workdir,crypto_keyfile,sshkey_dir,user_name,remote_commands,"",0,2,"","");
     }
     else{
         printf("[ -DONE- ] You can now log into the cluster and view the job output.\n");
@@ -285,7 +284,7 @@ int job_submit(char* workdir, char* user_name, char* sshkey_dir, jobinfo* job_in
     return 0;
 }
 
-int job_list(char* workdir, char* user_name, char* sshkey_dir){
+int job_list(char* workdir, char* crypto_keyfile, char* user_name, char* sshkey_dir){
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char dirname_temp[DIR_LENGTH]="";
     char job_list_cache[FILENAME_LENGTH]="";
@@ -299,7 +298,7 @@ int job_list(char* workdir, char* user_name, char* sshkey_dir){
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
     snprintf(job_list_cache,FILENAME_LENGTH-1,"%s%sjob_list_%s.txt",dirname_temp,PATH_SLASH,cluster_name);
-    remote_exec_general(workdir,sshkey_dir,user_name,"sacct","",0,3,job_list_cache,NULL_STREAM);
+    remote_exec_general(workdir,crypto_keyfile,sshkey_dir,user_name,"sacct","",0,3,job_list_cache,NULL_STREAM);
     if(file_exist_or_not(job_list_cache)!=0){
         return -1;
     }
@@ -317,7 +316,7 @@ int job_list(char* workdir, char* user_name, char* sshkey_dir){
     return 0;
 }
 
-int job_cancel(char* workdir, char* user_name, char* sshkey_dir, char* job_id, int batch_flag_local){
+int job_cancel(char* workdir, char* crypto_keyfile, char* user_name, char* sshkey_dir, char* job_id, int batch_flag_local){
     char remote_commands[CMDLINE_LENGTH]="";
     char string_temp[256]="";
     if(strlen(job_id)==0){
@@ -325,12 +324,12 @@ int job_cancel(char* workdir, char* user_name, char* sshkey_dir, char* job_id, i
             printf(FATAL_RED_BOLD "[ FATAL: ] Job ID not specified. Use --jid JOB_ID ." RESET_DISPLAY "\n");
             return 17;
         }
-        job_list(workdir,user_name,SSHKEY_DIR);
+        job_list(workdir,crypto_keyfile,user_name,SSHKEY_DIR);
         prompt_to_input("Please input a jobID from the list above.",string_temp,batch_flag_local);
         snprintf(remote_commands,CMDLINE_LENGTH-1,"scancel --verbose %s",job_id);
     }
     else{
         snprintf(remote_commands,CMDLINE_LENGTH-1,"scancel --verbose %s",job_id);
     }
-    return remote_exec_general(workdir,sshkey_dir,user_name,remote_commands,"",0,3,"","");
+    return remote_exec_general(workdir,crypto_keyfile,sshkey_dir,user_name,remote_commands,"",0,3,"","");
 }
