@@ -61,6 +61,10 @@ function add_a_user() {
       ssh -n compute${i} "chown -R $1:$1 /home/$1"
     fi
   done
+  grep 'source /etc/profile' /home/$1/.bashrc
+  if [ $? -ne 0 ]; then
+    echo 'source /etc/profile' >> /home/$1/.bashrc
+  fi
 }
 
 if [ -z "$1" ]; then
