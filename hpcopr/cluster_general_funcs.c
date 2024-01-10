@@ -2559,7 +2559,7 @@ int confirm_to_operate_cluster(char* current_cluster_name, int batch_flag_local)
     }
     char confirm[64]="";
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ", which may affect\n",current_cluster_name);
-    printf("[  ****  ] the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to confirm.\n");
+    printf("[  ****  ] the " GENERAL_BOLD "resources, data, or jobs" RESET_DISPLAY ". Input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to confirm.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%63s",confirm);
