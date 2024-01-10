@@ -39,8 +39,8 @@ int check_internet_installer(void){
     strcpy(cmdline,"ping -c 1 -t 1 www.baidu.com >> /dev/null 2>&1");
 #endif
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please either check your DNS service\n");
-        printf("[  ****  ] or check your internet connectivity and retry later." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please check your DNS\n");
+        printf("[  ****  ] service or network and then retry." RESET_DISPLAY "\n");
         return 1;
     }
     return 0;
