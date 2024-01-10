@@ -81,11 +81,10 @@ int encrypt_decrypt_clusters(char* cluster_list, char* option, int batch_flag_lo
             return -7;
         }
         /* Caution: The cluster registry decrypted and NOT encrypted! */
-        if(encrypt_decrypt_cluster_registry("decrypt")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the cluster registry." RESET_DISPLAY "\n");
-            return -3;
-        }
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s.dec",ALL_CLUSTER_REGISTRY);
+        if(file_exist_or_not(filename_temp)!=0){
+            encrypt_decrypt_cluster_registry("decrypt");
+        }
         FILE* file_p=fopen(filename_temp,"r");
         if(file_p==NULL){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to decrypt the cluster registry." RESET_DISPLAY "\n");

@@ -62,6 +62,8 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     char cloud_flag[16]="";
     char cluster_role[16]="";
     char cluster_role_ext[16]="";
+    char randstr[7]="";
+    char filename_temp[FILENAME_LENGTH]="";
     int max_cluster_name_length=0;
     int i=0;
     int j=0;
@@ -101,8 +103,10 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         max_cluster_name_length=get_max_cluster_name_length();
-        cluster_registry_convert("decrypt");
-        FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
+        generate_random_nstring(randstr,7,0);
+        encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
+        FILE* file_p=fopen(filename_temp,"r");
         if(file_p==NULL){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the registry. Pleas run hpcopr repair." RESET_DISPLAY "\n");
             return -1;
@@ -158,7 +162,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             }
         }
         fclose(file_p);
-        cluster_registry_convert("delete");
+        encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete");
         if(i==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] The local cluster registry is empty." RESET_DISPLAY "\n");
             return 0;
@@ -210,6 +214,7 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     char new_workdir[DIR_LENGTH]="";
     char new_stackdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char randstr[7]="";
     char registry_line_prev[LINE_LENGTH_SHORT]="";
     char registry_line_new[LINE_LENGTH_SHORT]="";
     char cluster_name_ext_prev[64]="";
@@ -294,15 +299,34 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
             return -3;
         }
     }
-    get_nucid(new_workdir,crypto_keyfile,ucid_short,16);
-    snprintf(unique_cluster_id_prev,63,"%s-%s",cluster_prev_name,ucid_short);
-    snprintf(unique_cluster_id_new,63,"%s-%s",cluster_new_name,ucid_short);
     snprintf(registry_line_prev,LINE_LENGTH_SHORT-1,"< cluster name: %s >",cluster_prev_name);
     snprintf(registry_line_new,LINE_LENGTH_SHORT-1,"< cluster name: %s >",cluster_new_name);
     /* If the workdir is empty, skip the /stack and /conf */
-    cluster_registry_convert("decrypt");
-    global_nreplace(ALL_CLUSTER_REGISTRY,LINE_LENGTH_SMALL,registry_line_prev,registry_line_new);
+
+    generate_random_nstring(randstr,7,0);
+    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,registry_line_prev,registry_line_new);
+    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"backup_encrypt");
+
     global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_SHORT,registry_line_prev,registry_line_new);
+    /* If the cluster is empty, exit normally. */
+    if(cluster_empty_or_not(new_workdir,crypto_keyfile)==0){
+        goto print_finished;
+    }
+    /* If failed to get the ucid, Roll back and exit. */
+    if(get_nucid(new_workdir,crypto_keyfile,ucid_short,16)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rename the sshkey directory." RESET_DISPLAY "\n");
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_workdir,prev_workdir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_ssh_dir,prev_ssh_dir,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"restore_encrypt");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory." RESET_DISPLAY "\n");
+        return -3;
+    }
+    snprintf(unique_cluster_id_prev,63,"%s-%s",cluster_prev_name,ucid_short);
+    snprintf(unique_cluster_id_new,63,"%s-%s",cluster_new_name,ucid_short);
     if(strcmp(cluster_role,"opr")!=0){
         goto print_finished;
     }
@@ -343,9 +367,9 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
         system(cmdline);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_ssh_dir,prev_ssh_dir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        delete_file_or_dir(ALL_CLUSTER_REGISTRY);
         global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_SHORT,registry_line_new,registry_line_prev);
         printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory and sshkey directory." RESET_DISPLAY "\n");
+        encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"restore_encrypt");
         return 1;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scompute_template",new_stackdir,PATH_SLASH);
@@ -356,7 +380,6 @@ update_summary:
     system(cmdline);
     global_nreplace(USAGE_LOG_FILE,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
 print_finished:
-    cluster_registry_convert("encrypt");
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Renamed the cluster " GENERAL_BOLD "%s" RESET_DISPLAY " to " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_prev_name,cluster_new_name);
     return 0;
 }

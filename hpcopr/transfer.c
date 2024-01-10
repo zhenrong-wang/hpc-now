@@ -458,6 +458,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     int duplicate_flag=0;
     char rand_str_suffix[8]="";
     int cluster_name_buffer_length=0;
+    char randstr_registry[7]="";
 
     char tmp_top_dir[DIR_LENGTH]="";
     char tmp_workdir[DIR_LENGTH_EXT]="";
@@ -531,8 +532,10 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         delete_file_or_dir(tmp_import_root);
         return -5;
     }
-    cluster_registry_convert("decrypt");
-    FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r"); /* file opened */
+    generate_random_nstring(randstr_registry,7,1);
+    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr_registry,"decrypt");
+    snprintf(filename_temp,FILENAME_LENGTH,"%s.%s",ALL_CLUSTER_REGISTRY,randstr_registry);
+    FILE* file_p=fopen(filename_temp,"r"); /* file opened */
     if(file_p==NULL){ /* file_open failed, exit immediately */
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the cluster registry, please run " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr repair" RESET_DISPLAY "\n");
         delete_file_or_dir(tmp_import_root);
@@ -565,7 +568,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         }
     }
     fclose(file_p); /* file closed */
-    cluster_registry_convert("delete");
+    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr_registry,"delete");
     if(duplicate_flag==5){
         printf(FATAL_RED_BOLD "[ FATAL: ] You are operating the identical cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ", import abort." RESET_DISPLAY "\n",cluster_name_temp);
         delete_file_or_dir(tmp_import_root);

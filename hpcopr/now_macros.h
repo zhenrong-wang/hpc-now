@@ -213,6 +213,8 @@
 #define CONFIRM_STRING "y-e-s"
 #define CONFIRM_STRING_QUICK "y"
 
+#define GFUNC_FILE_SUFFIX ".gfuncs"
+
 /* Usually you don't need to modify the macros in this section.*/
 #define CMDLINE_LENGTH 2048
 #define CMDLINE_LENGTH_EXT 8192

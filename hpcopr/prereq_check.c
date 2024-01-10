@@ -856,10 +856,6 @@ int check_and_install_prerequisitions(int repair_flag){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    else{
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
     if(folder_exist_or_not(NOW_BINARY_DIR)!=0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);

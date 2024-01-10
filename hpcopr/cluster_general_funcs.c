@@ -69,10 +69,14 @@ int cluster_role_detect(char* workdir, char cluster_role[], char cluster_role_ex
 }
 
 int add_to_cluster_registry(char* new_cluster_name, char* import_flag){
-    cluster_registry_convert("decrypt");
-    FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"a+");
+    char randstr[7]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    generate_random_nstring(randstr,7,0);
+    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
+    FILE* file_p=fopen(filename_temp,"a+");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open/write to the cluster registry. Exit now." RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open/write to the cluster registry." RESET_DISPLAY);
         return -1;
     }
     if(strcmp(import_flag,"imported")==0){
@@ -82,7 +86,7 @@ int add_to_cluster_registry(char* new_cluster_name, char* import_flag){
         fprintf(file_p,"< cluster name: %s >\n",new_cluster_name);
     }
     fclose(file_p);
-    if(cluster_registry_convert("encrypt")!=0){
+    if(encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"encrypt")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the cluster registry. Exit now." RESET_DISPLAY);
         return -1;
     }
@@ -798,8 +802,12 @@ int check_pslock(char* workdir, int decrypt_flag){
 //return 1: one or more clusters are locked
 //return 0: all clusters are not locked
 int check_pslock_all(void){
-    cluster_registry_convert("decrypt");
-    FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
+    char randstr[7]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    generate_random_nstring(randstr,7,0);
+    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
+    FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
     }
@@ -818,12 +826,12 @@ int check_pslock_all(void){
         }
         if(check_pslock(cluster_workdir_temp,decryption_status(cluster_workdir_temp))!=0){
             fclose(file_p);
-            cluster_registry_convert("delete");
+            encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete");
             return 1;
         }
     }
     fclose(file_p);
-    if(cluster_registry_convert("delete")!=0){
+    if(encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the cluster registry. Exit now." RESET_DISPLAY);
         return 1;
     }
@@ -2125,9 +2133,11 @@ int secure_encrypt_and_delete(char* filename, char* crypto_keyfile){
     return 0;
 }
 
-//return 0: cluster is empty
-//return 1: not empty
-/* This function will not delete the standard statefile, aka stackdir/currentstate */
+/*
+ * return 0: cluster is empty
+ * return 1: not empty
+ * This function will not delete the standard statefile, aka stackdir/currentstate 
+ */
 int cluster_empty_or_not(char* workdir,char* crypto_keyfile){
     char statefile[FILENAME_LENGTH]="";
     char statefile_decrypted[FILENAME_LENGTH]="";
@@ -2944,8 +2954,8 @@ int get_ucid(char* workdir, char* ucid_string){
 }
 
 int get_nucid(char* workdir, char* crypto_keyfile, char* ucid_string, unsigned int ucid_strlen_max){
+    strcpy(ucid_string,"");
     if(ucid_strlen_max<11){
-        strcpy(ucid_string,"");
         return -3;
     }
     char md5sum[64]="";
@@ -2969,6 +2979,9 @@ int get_nucid(char* workdir, char* crypto_keyfile, char* ucid_string, unsigned i
     }
     snprintf(ucid_old_file,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
     FILE* file_p=fopen(ucid_old_file,"r");
+    if(file_p==NULL){
+        return 1;
+    }
     fngetline(file_p,ucid_string,ucid_strlen_max);
     fclose(file_p);
     if(strlen(ucid_string)<1){
@@ -3361,22 +3374,63 @@ int check_cluster_registry(void){
     return 0;
 }
 
-int cluster_registry_convert(char* option){
-    char md5sum[64]="";
-    if(get_nmd5sum(CRYPTO_KEY_FILE,md5sum,64)!=0){
+/* 
+ * Supported options:
+ * 1. decrypt: decrypt filename_base.tmp to filename_base.extra_str
+ * 2. encrypt: encrypt filename_base.extra_str to filename_base.tmp
+ * 3. backup_encrypt: backup filename_base.extra_str to filename_base.extra_str.backup and encrypt to filename_base.tmp
+ * 4. restore_encrypt: encrypt filename_base.extra_str.backup to filename_base.tmp and delete filename_base.extra_str
+ * 5. delete: delete filename_base.extra_str
+ * Others are illegal, do nothing and return -3;
+ */
+int encrypted_file_convert(char* filename_base, char* extra_str, char* option){
+    char file_encrypted[FILENAME_LENGTH]="";
+    char file_decrypted[FILENAME_LENGTH]="";
+    char file_dec_back[FILENAME_LENGTH]="";
+    if(strlen(filename_base)<1||strlen(extra_str)<1){
+        return -5;
+    }
+    snprintf(file_encrypted,FILENAME_LENGTH-1,"%s.tmp",filename_base);
+    snprintf(file_decrypted,FILENAME_LENGTH-1,"%s.%s",filename_base,extra_str);
+    snprintf(file_dec_back,FILENAME_LENGTH-1,"%s.%s.backup",filename_base,extra_str);
+    if(file_exist_or_not(file_encrypted)!=0){
         return -3;
     }
-    char registry_encrypted[FILENAME_LENGTH]="";
-    snprintf(registry_encrypted,FILENAME_LENGTH-1,"%s.tmp",ALL_CLUSTER_REGISTRY);
+    char md5sum[64]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    if(get_nmd5sum(CRYPTO_KEY_FILE,md5sum,64)!=0){
+        return -1;
+    }
     if(strcmp(option,"decrypt")==0){
-        decrypt_single_file(NOW_CRYPTO_EXEC,registry_encrypted,md5sum);
-        return file_exist_or_not(ALL_CLUSTER_REGISTRY);
+        decrypt_single_file_general(NOW_CRYPTO_EXEC,file_encrypted,file_decrypted,md5sum);
+        return file_exist_or_not(file_decrypted);
     }
     else if(strcmp(option,"encrypt")==0){
-        encrypt_and_delete(NOW_CRYPTO_EXEC,ALL_CLUSTER_REGISTRY,md5sum);
-        return file_exist_or_not(registry_encrypted);
+        encrypt_and_delete_general(NOW_CRYPTO_EXEC,file_decrypted,file_encrypted,md5sum);
+        return file_exist_or_not(file_decrypted);
     }
-    return delete_file_or_dir(ALL_CLUSTER_REGISTRY); 
+    else if(strcmp(option,"backup_encrypt")==0){
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,file_decrypted,file_dec_back,SYSTEM_CMD_REDIRECT_NULL);
+        system(cmdline);
+        if(file_exist_or_not(file_dec_back)!=0){
+            return 1;
+        }
+        encrypt_and_delete_general(NOW_CRYPTO_EXEC,file_decrypted,file_encrypted,md5sum);
+        return file_exist_or_not(file_encrypted);
+    }
+    else if(strcmp(option,"restore_encrypt")==0){
+        if(file_exist_or_not(file_dec_back)!=0){
+            return 1;
+        }
+        encrypt_and_delete_general(NOW_CRYPTO_EXEC,file_dec_back,file_encrypted,md5sum);
+        return file_exist_or_not(file_encrypted);
+    }
+    else if(strcmp(option,"delete")==0){
+        return delete_file_or_dir(file_decrypted);
+    }
+    else{
+        return -3;
+    }
 }
 
 int line_check_by_keyword(char* line, char* keyword, char split_ch, int seq_num){
@@ -3574,6 +3628,7 @@ int current_cluster_or_not(char* current_indicator, char* cluster_name){
  */
 int cluster_name_check(char* cluster_name){
     char cluster_name_ext[64]="";
+    char filename_temp[FILENAME_LENGTH]="";
     int i;
     if(*(cluster_name+0)=='-'){
         return -1;
@@ -3598,15 +3653,16 @@ int cluster_name_check(char* cluster_name){
             continue;
         }
     }
-    if(cluster_registry_convert("decrypt")!=0){
+    if(encrypted_file_convert(ALL_CLUSTER_REGISTRY,"general","decrypt")!=0){
         return 1;
     }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,"general");
     snprintf(cluster_name_ext,64,"< cluster name: %s >",cluster_name);
-    if(find_multi_nkeys(ALL_CLUSTER_REGISTRY,LINE_LENGTH_SHORT,cluster_name_ext,"","","","")>0){
-        cluster_registry_convert("delete");
+    if(find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,cluster_name_ext,"","","","")>0){
+        encrypted_file_convert(ALL_CLUSTER_REGISTRY,"general","delete");
         return -7;
     }
-    if(cluster_registry_convert("delete")!=0){
+    if(encrypted_file_convert(ALL_CLUSTER_REGISTRY,"general","delete")!=0){
         return 1;
     }
     return 0;
@@ -3659,8 +3715,12 @@ int check_and_cleanup(char* prev_workdir){
 //header flag=1: don't print a header and a blank line at the end
 //header flag=others: don't print a header or a blank line at the end
 int list_all_cluster_names(int header_flag){
-    cluster_registry_convert("decrypt");
-    FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
+    char filename_temp[FILENAME_LENGTH]="";
+    char randstr[7]="";
+    generate_random_nstring(randstr,7,0);
+    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
+    FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the registry. Please run hpcopr repair." RESET_DISPLAY "\n");
         return -1;
@@ -3668,7 +3728,6 @@ int list_all_cluster_names(int header_flag){
     char registry_line[LINE_LENGTH_SHORT]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     int i=0;
-//    int getline_flag=0;
     if(header_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " List of all the clusters:\n\n");
     }
@@ -3692,7 +3751,7 @@ int list_all_cluster_names(int header_flag){
     if(header_flag==1){
         printf("\n");
     }
-    if(cluster_registry_convert("delete")!=0){
+    if(encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete")!=0){
         return 1;
     }
     return 0;
@@ -3703,17 +3762,22 @@ int exit_current_cluster(void){
 }
 
 int delete_from_cluster_registry(char* deleted_cluster_name){
-    cluster_registry_convert("decrypt");
+    char randstr[7]="";
+    char filename_temp[FILENAME_LENGTH]="";
     char registry_line[LINE_LENGTH_SHORT]="";
+    generate_random_nstring(randstr,7,0);
+    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
     snprintf(registry_line,LINE_LENGTH_SHORT-1,"< cluster name: %s >",deleted_cluster_name);
-    if(delete_nlines_by_kwd(ALL_CLUSTER_REGISTRY,LINE_LENGTH_SMALL,registry_line,1)!=0){
-        cluster_registry_convert("encrypt");
+
+    if(delete_nlines_by_kwd(filename_temp,LINE_LENGTH_SMALL,registry_line,1)!=0){
+        encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"encrypt");
         return 1;
     }
     if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,deleted_cluster_name)==0){
         exit_current_cluster();
     }
-    if(cluster_registry_convert("encrypt")!=0){
+    if(encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"encrypt")!=0){
         return 1;
     }
     return 0;
@@ -3880,8 +3944,12 @@ int gcp_credential_convert(char* workdir, const char* operation, int key_flag){
 }
 
 int get_max_cluster_name_length(void){
-    cluster_registry_convert("decrypt");
-    FILE* file_p=fopen(ALL_CLUSTER_REGISTRY,"r");
+    char randstr[7]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    generate_random_nstring(randstr,7,0);
+    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
+    FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
     }
@@ -3900,7 +3968,7 @@ int get_max_cluster_name_length(void){
         }
     }
     fclose(file_p);
-    if(cluster_registry_convert("delete")!=0){
+    if(encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete")!=0){
         return -1;
     }
     return max_length;

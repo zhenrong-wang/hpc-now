@@ -393,8 +393,7 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     int i,j,k,line_length;
-
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s",filename,GFUNC_FILE_SUFFIX);
     file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -463,7 +462,7 @@ int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string,
         return -3;
     }
     char filename_temp[FILENAME_LENGTH]="";
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -627,7 +626,7 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     char cmdline[CMDLINE_LENGTH]="";
     char single_line[LINE_LENGTH]="";
     char new_single_line[LINE_LENGTH]="";
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s",filename,GFUNC_FILE_SUFFIX);
     int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
     FILE* file_temp_p=fopen(filename_temp,"w+");
     if(file_temp_p==NULL){
@@ -700,7 +699,7 @@ int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, 
     }
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_temp_p=fopen(filename_temp,"w+");
     if(file_temp_p==NULL){
         fclose(file_p);
@@ -1380,7 +1379,7 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
             /* get a char to paddle the password */
             *(password_temp+i)=*(ch_table_final+rand_num);
             /* pause to the next loop */
-            usleep(5000);
+            //usleep(5000);
         }
         if(password_complexity_check(password_temp,special_chars_string)==0){
             memcpy(password_array,password_temp,password_array_len);
@@ -1417,7 +1416,7 @@ int generate_random_passwd(char* password){
             srand(seed_num);
             rand_num=rand()%72;
             *(password_temp+i)=*(ch_table+rand_num);
-            usleep(5000);
+            //usleep(5000);
         }
         if(password_complexity_check(password_temp,"~@&(){}[]=")==0){
             strcpy(password,password_temp);
@@ -1453,7 +1452,7 @@ int generate_random_db_passwd(char password[], unsigned int len_max){
         srand(seed_num);
         rand_num=rand()%62;
         *(password+i)=*(ch_table+rand_num);
-        usleep(5000);
+        //usleep(5000);
     }
     return 0;
 }
@@ -1471,14 +1470,14 @@ int generate_random_string(char* random_string){
     srand(seed_num);
     rand_num=rand()%26; /* Start with a letter, not 0~9*/
     *(random_string+0)=*(ch_table+rand_num);
-    usleep(5000);
+    //usleep(5000);
     for(i=1;i<RANDSTR_LENGTH_PLUS-1;i++){
         GETTIMEOFDAY_FUNC(&current_time,NULL);
         seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
         srand(seed_num);
         rand_num=rand()%36;
         *(random_string+i)=*(ch_table+rand_num);
-        usleep(5000);
+        //usleep(5000);
     }
     *(random_string+RANDSTR_LENGTH_PLUS-1)='\0';
     return 0;  
@@ -1510,7 +1509,7 @@ int generate_random_nstring(char random_string[], unsigned int len_max, int star
         rand_num=rand()%36; /* Start with a letter, not 0~9*/
     }
     *(random_string+0)=*(ch_table+rand_num);
-    usleep(5000);
+    //usleep(10);
 
     for(i=1;i<len_max-1;i++){
         GETTIMEOFDAY_FUNC(&current_time,NULL);
@@ -1518,8 +1517,9 @@ int generate_random_nstring(char random_string[], unsigned int len_max, int star
         srand(seed_num);
         rand_num=rand()%36;
         *(random_string+i)=*(ch_table+rand_num);
-        usleep(5000);
+        //usleep(10);
     }
+    //printf("#%s\n",random_string);
     return 0;  
 }
 
@@ -1581,7 +1581,7 @@ int insert_lines(char* filename, char* keyword, char* insert_string){
         }
     }
     fseek(file_p,0,SEEK_SET);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s",filename,GFUNC_FILE_SUFFIX);
     file_p_2=fopen(filename_temp,"w+");
     if(file_p_2==NULL){
         fclose(file_p);
@@ -1636,7 +1636,7 @@ int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char*
         return 1;
     }
     fseek(file_p,0,SEEK_SET);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s",filename,GFUNC_FILE_SUFFIX);
     file_p_2=fopen(filename_temp,"w+");
     if(file_p_2==NULL){
         fclose(file_p);
@@ -1970,7 +1970,7 @@ int file_cr_clean(char* filename){
     char filename_temp[FILENAME_LENGTH]="";
     int ch;
     char cmdline[CMDLINE_LENGTH]="";
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.cr.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -2018,7 +2018,7 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
     int contain_start_flag;
     int contain_end_flag;
     char cmdline[CMDLINE_LENGTH]="";
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.trunc.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.trunc%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -2090,7 +2090,7 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
         return -1;
     }
     char filename_temp[FILENAME_LENGTH]="";
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.trunc.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.trunc%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -2168,7 +2168,7 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char line_buffer[LINE_LENGTH]="";
     int getline_flag=0;
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.del.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.dline%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -2207,7 +2207,7 @@ int delete_nlines_by_kwd(char* filename, unsigned int linelen_max, char* key, in
     }
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.del.tmp",filename);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.dline%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
         fclose(file_p);
@@ -2312,27 +2312,18 @@ int password_hash(char* password, char md5_hash[], int md5_length){
     char string_temp[16]="";
     int run_flag;
     generate_random_string(string_temp);
-    FILE* file_p=NULL;
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.tmp%spass%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,GFUNC_FILE_SUFFIX);
+    FILE* file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        strcpy(md5_hash,"");
+        return -1;
+    }
 #ifdef _WIN32
-    snprintf(filename_temp,FILENAME_LENGTH-1,"c:\\programdata\\%s.tmp",string_temp);
-    file_p=fopen(filename_temp,"w+");
-    if(file_p==NULL){
-        strcpy(md5_hash,"");
-        return -1;
-    }
     fprintf(file_p,"%s\n",password);
-    fclose(file_p);
 #else
-    snprintf(filename_temp,FILENAME_LENGTH-1,"/tmp/%s.tmp",string_temp);
-    file_p=fopen(filename_temp,"w+");
-    if(file_p==NULL){
-        strcpy(md5_hash,"");
-        return -1;
-    }
     fprintf(file_p,"%s\r\n",password);
-    fclose(file_p);
 #endif
-    //get_crypto_key(filename_temp,md5_hash);
+    fclose(file_p);
     run_flag=get_nmd5sum(filename_temp,md5_hash,md5_length);
     delete_file_or_dir(filename_temp);
     if(run_flag!=0){

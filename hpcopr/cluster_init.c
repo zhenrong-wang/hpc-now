@@ -920,13 +920,9 @@ void clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int conditio
     else{
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s*.tmp %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s*.tf %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sUCID_LATEST.txt %s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%suser_passwords.txt.tmp %s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
@@ -987,7 +983,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char unique_cluster_id[96]="";
+    char unique_cluster_id[64]="";
     char string_temp[128]="";
     char region_flag[16]="";
     char os_image[256]="";
@@ -1102,7 +1098,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
+    snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
@@ -1322,7 +1318,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char unique_cluster_id[96]="";
+    char unique_cluster_id[64]="";
     char string_temp[128]="";
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
@@ -1397,7 +1393,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
+    snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
@@ -1615,7 +1611,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char unique_cluster_id[96]="";
+    char unique_cluster_id[64]="";
     char string_temp[128]="";
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
@@ -1690,7 +1686,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,95,"%s-%s",init_info.cluster_id,randstr);
+    snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
@@ -1707,7 +1703,10 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_PUBLIC",string_temp);
     snprintf(string_temp,127,"%s-intra",randstr);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_INTRA",string_temp);
-    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_NAME",unique_cluster_id);
+    
+    /* CAUTION: The resource group name is immutable! */
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_NAME",randstr);
+
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_DISPLAY_NAME",unique_cluster_id);
     snprintf(string_temp,127,"%s-mysql",randstr);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_MYSQL",string_temp);
@@ -1933,7 +1932,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char unique_cluster_id[96]="";
+    char unique_cluster_id[64]="";
     char string_temp[128]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
@@ -2003,7 +2002,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+    snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
@@ -2222,7 +2221,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     char secret_key[AKSK_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char unique_cluster_id[96]="";
+    char unique_cluster_id[64]="";
     char string_temp[128]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char* sshkey_folder=SSHKEY_DIR;
@@ -2291,7 +2290,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+    snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     if(strcmp(init_conf.region_id,"hk")==0){
         strcpy(db_inst,"i2c2g-hk");
         strcpy(natgw_inst,"i2c2g-hk");
@@ -2532,7 +2531,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     char tenant_id[AKSK_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char unique_cluster_id[96]="";
+    char unique_cluster_id[64]="";
     char string_temp[128]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char random_storage_account[RANDSTR_LENGTH_PLUS]="";
@@ -2597,7 +2596,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+    snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
@@ -2774,7 +2773,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char user_passwords[FILENAME_LENGTH]="";
     char cloud_flag[16]="";
     int read_conf_flag=0;
-    char unique_cluster_id[96]="";
+    char unique_cluster_id[64]="";
     char string_temp[128]="";
     char keyfile_path[FILENAME_LENGTH]="";
     char keyfile_path_ext[FILENAME_LENGTH_EXT]="";
@@ -2846,7 +2845,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,95,"%s-%s",init_conf.cluster_id,randstr);
+    snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         gcp_credential_convert(workdir,"delete",0);
