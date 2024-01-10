@@ -766,7 +766,7 @@ int main(int argc, char* argv[]){
     
     if(strcmp(final_command,"rename")==0){
         if(check_pslock(workdir,decryption_status(workdir))!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Another process is operating this cluster, please wait and retry." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is currently locked (operation-in-progress)." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"PROCESS_LOCKED",53);
             check_and_cleanup(workdir);
             return 53;
@@ -1448,7 +1448,7 @@ int main(int argc, char* argv[]){
     }
 
     if(check_pslock(workdir,decryption_status(workdir))==1){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Another process is operating this cluster, please wait and retry." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is currently locked (operation-in-progress)." RESET_DISPLAY "\n");
         write_operation_log(cluster_name,operation_log,argc,argv,"PROCESS_LOCKED",53);
         check_and_cleanup(workdir);
         return 53;
