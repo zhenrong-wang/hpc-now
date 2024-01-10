@@ -664,7 +664,6 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
     }
     fclose(file_p);
     return 0;
-
 invalid_conf:
     delete_file_or_dir(tf_prep_conf);
     return 1;

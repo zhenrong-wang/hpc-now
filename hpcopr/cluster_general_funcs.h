@@ -152,6 +152,7 @@ int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords);
 
 int check_reconfigure_list(char* workdir, int print_flag);
 int check_statefile(char* statefile);
+int secure_encrypt_and_delete(char* filename, char* crypto_keyfile);
 
 int modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer);
 int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag);

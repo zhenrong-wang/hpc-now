@@ -259,6 +259,8 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     // Now, decrypt the /vault files.
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
     decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
+    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
     decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt.tmp",target_cluster_vaultdir,PATH_SLASH);

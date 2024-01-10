@@ -169,16 +169,17 @@ int get_cloud_flag(char* workdir, char* crypto_keyfile, char cloud_flag[], unsig
     if(create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH)!=0){
         return -1;
     }
-    snprintf(cluster_vaults,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",vaultdir,PATH_SLASH);
     snprintf(cloud_secrets,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     snprintf(old_flag_file,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(cluster_vaults)==0){ /* For all roles */
-        decrypt_single_file(NOW_CRYPTO_EXEC,cluster_vaults,md5sum);
-        snprintf(cluster_vaults_decrypted,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
+    snprintf(cluster_vaults,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",vaultdir,PATH_SLASH);
+    snprintf(cluster_vaults_decrypted,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
+    decrypt_single_file_general(NOW_CRYPTO_EXEC,cluster_vaults,cluster_vaults_decrypted,md5sum);
+    if(file_exist_or_not(cluster_vaults_decrypted)==0){
         get_key_nvalue(cluster_vaults_decrypted,LINE_LENGTH_SHORT,"cloud_flag_code:",' ',cloud_flag,maxlen);
-        delete_file_or_dir(cluster_vaults_decrypted);
+        secure_encrypt_and_delete(cluster_vaults_decrypted,crypto_keyfile);
+        goto final_check;
     }
-    else if(file_exist_or_not(cloud_secrets)==0){ /* Only valid for operators */
+    if(file_exist_or_not(cloud_secrets)==0){ /* Only valid for operators */
         snprintf(cloud_secrets_decrypted,FILENAME_LENGTH-1,"%s%sget_cloud_flag.temp",vaultdir,PATH_SLASH);
         decrypt_single_file_general(NOW_CRYPTO_EXEC,cloud_secrets,cloud_secrets_decrypted,md5sum);
         if(find_multi_nkeys(cloud_secrets_decrypted,LINE_LENGTH_SHORT,"\"googleapis.com\"","","","","")>0){
@@ -188,8 +189,9 @@ int get_cloud_flag(char* workdir, char* crypto_keyfile, char cloud_flag[], unsig
         }
         find_and_nget(cloud_secrets_decrypted,LINE_LENGTH_SMALL,"CLOUD_","","",1,"CLOUD_","","",' ',1,cloud_flag,maxlen);
         delete_file_or_dir(cloud_secrets_decrypted);
+        goto final_check;
     }
-    else if(file_exist_or_not(old_flag_file)==0){ /* For compatibility. The cloud_flag.flg file will be deprecated. */
+    if(file_exist_or_not(old_flag_file)==0){ /* For compatibility. The cloud_flag.flg file will be deprecated. */
         snprintf(old_flag_file,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
         FILE* file_p=fopen(old_flag_file,"r");
         fngetline(file_p,cloud_flag,maxlen);
@@ -198,6 +200,7 @@ int get_cloud_flag(char* workdir, char* crypto_keyfile, char cloud_flag[], unsig
     /* 
      * Here we guarantee that the cloud_flag equals to CLOUD_A ~ CLOUD_G. In the future if new vendor included, this line needs to be rewritten 
      */
+final_check:
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         memset(cloud_flag,'\0',maxlen);
         return 1;
@@ -723,7 +726,6 @@ int get_azure_ninfo(char* workdir, unsigned int linelen_max, char* crypto_keyfil
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sget_az_info.temp",vaultdir,PATH_SLASH);
     snprintf(cloud_secrets,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     snprintf(cluster_vaults,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",vaultdir,PATH_SLASH);
-    
     if(file_exist_or_not(cluster_vaults)==0){
         decrypt_single_file_general(NOW_CRYPTO_EXEC,cluster_vaults,filename_temp,md5sum);
     }
@@ -1085,8 +1087,6 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
 
     /* The /stack files */
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
-    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
@@ -1112,7 +1112,8 @@ int delete_decrypted_files(char* workdir, char* crypto_key_filename){
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i);
         encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     }
-
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
+    encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
     /* User registry */
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,md5sum);
@@ -1239,6 +1240,7 @@ int decryption_status(char* workdir){
     snprintf(secret_file,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     snprintf(user_passwords_decrypted,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     snprintf(secret_file_decrypted,FILENAME_LENGTH-1,"%s%scloud_secrets_VERY_RISKY.txt",vaultdir,PATH_SLASH);
+    /* printf("#%s\n#%s\n#%s\n",secret_file,user_passwords_decrypted,secret_file_decrypted); */
     if(file_exist_or_not(secret_file)==0){
         if(file_exist_or_not(secret_file_decrypted)==0){
             return 1;
@@ -1627,7 +1629,7 @@ int get_state_nvalue(char* workdir, char* crypto_keyfile, char* key, char* value
         decrypt_single_file_general(NOW_CRYPTO_EXEC,statefile_encrypted,statefile,md5sum);
     }
     get_key_nvalue(statefile,LINE_LENGTH_SHORT,key,' ',value,valen_max);
-    delete_file_or_dir(statefile);
+    secure_encrypt_and_delete(statefile,crypto_keyfile);
     if(strlen(value)<1){
         return 1;
     }
@@ -1947,7 +1949,9 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     }
     snprintf(statefile_encrypted,FILENAME_LENGTH-1,"%s%scurrentstate.tmp",stackdir,PATH_SLASH);
     snprintf(statefile,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
-    decrypt_single_file_general(NOW_CRYPTO_EXEC,statefile_encrypted,statefile,md5sum);
+    if(file_exist_or_not(statefile)!=0){
+        decrypt_single_file_general(NOW_CRYPTO_EXEC,statefile_encrypted,statefile,md5sum);
+    }
     decrypt_flag=decryption_status(workdir);
     if(decrypt_flag!=0){
         strcpy(decrypt_prompt,"* !DECRYPTED! *");
@@ -2069,12 +2073,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             }
         }
     }
-    if(file_exist_or_not(statefile_encrypted)==0){
-        delete_file_or_dir(statefile);
-    }
-    else{
-        encrypt_and_delete(NOW_CRYPTO_EXEC,statefile,md5sum);
-    }
+    encrypt_and_delete(NOW_CRYPTO_EXEC,statefile,md5sum);
     printf(RESET_DISPLAY);
     return 0;
 }
@@ -2101,6 +2100,20 @@ int check_statefile(char* statefile){
     return 0;
 }
 
+int secure_encrypt_and_delete(char* filename, char* crypto_keyfile){
+    char filename_enc[FILENAME_LENGTH]="";
+    char md5sum[64]="";
+    snprintf(filename_enc,FILENAME_LENGTH-1,"%s.tmp",filename);
+    if(file_exist_or_not(filename_enc)==0){
+        return delete_file_or_dir(filename);
+    }
+    get_nmd5sum(crypto_keyfile,md5sum,64);
+    if(encrypt_and_delete(NOW_CRYPTO_EXEC,filename,md5sum)!=0){
+        return 1;
+    }
+    return 0;
+}
+
 //return 0: cluster is empty
 //return 1: not empty
 int cluster_empty_or_not(char* workdir,char* crypto_keyfile){
@@ -2122,30 +2135,24 @@ int cluster_empty_or_not(char* workdir,char* crypto_keyfile){
     if(check_statefile(statefile_old)==0){
         return 1;
     }
-    delete_file_or_dir(statefile_old); /* the state file is invalid. */
+    secure_encrypt_and_delete(statefile_old,crypto_keyfile); /* the state file is invalid. */
     snprintf(statefile_encrypted,FILENAME_LENGTH-1,"%s%scurrentstate.tmp",stackdir,PATH_SLASH);
-    snprintf(statefile,FILENAME_LENGTH-1,"%s%scheck_state.temp",stackdir,PATH_SLASH);
+    snprintf(statefile,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_single_file_general(NOW_CRYPTO_EXEC,statefile_encrypted,statefile,md5sum);
     if(check_statefile(statefile)==0){
-        if(file_exist_or_not(statefile_encrypted)==0){
-            delete_file_or_dir(statefile);
-        }
-        else{
-            encrypt_and_delete_general(NOW_CRYPTO_EXEC,statefile,statefile_encrypted,md5sum);
-        }
+        secure_encrypt_and_delete(statefile,crypto_keyfile);
         return 1;
     }
     else{
-        if(file_exist_or_not(statefile_encrypted)==0){
-            delete_file_or_dir(statefile);
-        }
-        else{
-            encrypt_and_delete_general(NOW_CRYPTO_EXEC,statefile,statefile_encrypted,md5sum);
-        }
+        secure_encrypt_and_delete(statefile,crypto_keyfile);
         return 0;
     }
 }
 
+/* 
+ * return 0: asleep
+ * return non-zero: not asleep
+ */
 int cluster_asleep_or_not(char* workdir, char* crypto_keyfile){
     char master_state[32]="";
     char running_compute_nodes[8]="";
@@ -2504,11 +2511,11 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     
     /* For compatibility. The file CLUSTER_SUMMARY.txt has been deprecated since 0.3.1.0027 */
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-    delete_file_or_dir(filename_temp);
+    secure_encrypt_and_delete(filename_temp,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
-    delete_file_or_dir(filename_temp);
+    secure_encrypt_and_delete(filename_temp,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
-    delete_file_or_dir(filename_temp);
+    secure_encrypt_and_delete(filename_temp,crypto_keyfile);
     return 0;
 }
 
@@ -2792,7 +2799,7 @@ int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, c
         }
     }
     fclose(file_p);
-    delete_file_or_dir(filename_temp);
+    secure_encrypt_and_delete(filename_temp,crypto_keyfile);
     if(contain_or_not(bucket_address,"gs://")==0){
         if(i!=3){
             strcpy(bucket_address,"");
@@ -2850,7 +2857,7 @@ int get_bucket_ninfo(char* workdir, char* crypto_keyfile, unsigned int linelen_m
         get_key_nvalue(filename_temp,linelen_max,"BUCKET_LINK:",' ',bucketinfo->bucket_ak,128);
         i++;
     }
-    delete_file_or_dir(filename_temp);
+    secure_encrypt_and_delete(filename_temp,crypto_keyfile);
     if(contain_or_not(bucketinfo->bucket_address,"gs://")==0){
         if(i!=3){
             strcpy(bucketinfo->bucket_address,"");
@@ -2931,21 +2938,21 @@ int get_nucid(char* workdir, char* crypto_keyfile, char* ucid_string, unsigned i
     char ucid_old_file[FILENAME_LENGTH]="";
     char cluster_vaults[FILENAME_LENGTH]="";
     char cluster_vaults_decrypted[FILENAME_LENGTH]="";
-
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     snprintf(cluster_vaults,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",vaultdir,PATH_SLASH);
-    if(file_exist_or_not(cluster_vaults)==0){
-        decrypt_single_file(NOW_CRYPTO_EXEC,cluster_vaults,md5sum);
-        snprintf(cluster_vaults_decrypted,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
+    snprintf(cluster_vaults_decrypted,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
+    decrypt_single_file_general(NOW_CRYPTO_EXEC,cluster_vaults,cluster_vaults_decrypted,md5sum);
+    if(file_exist_or_not(cluster_vaults_decrypted)==0){
         get_key_nvalue(cluster_vaults_decrypted,LINE_LENGTH_SHORT,"short_unique_id:",' ',ucid_string,ucid_strlen_max);
-        delete_file_or_dir(cluster_vaults_decrypted);
+        secure_encrypt_and_delete(cluster_vaults_decrypted,crypto_keyfile);
+        if(strlen(ucid_string)>0){
+            return 0;
+        }
     }
-    else{
-        snprintf(ucid_old_file,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
-        FILE* file_p=fopen(ucid_old_file,"r");
-        fngetline(file_p,ucid_string,ucid_strlen_max);
-        fclose(file_p);
-    }
+    snprintf(ucid_old_file,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
+    FILE* file_p=fopen(ucid_old_file,"r");
+    fngetline(file_p,ucid_string,ucid_strlen_max);
+    fclose(file_p);
     if(strlen(ucid_string)<1){
         return 1;
     }
@@ -3081,23 +3088,8 @@ int input_user_passwd(char* password_string, int batch_flag_local){
  * Return 1 and 2: User doesn't exist
  */
 int user_name_quick_check(char* cluster_name, char* user_name, char* sshkey_dir){
-    char workdir[DIR_LENGTH]="";
-    char vaultdir[DIR_LENGTH]="";
-    char filename_temp[FILENAME_LENGTH]="";
     char user_sshkey_encrypted[FILENAME_LENGTH]="";
     char user_sshkey_decrypted[FILENAME_LENGTH]="";
-    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0||create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH)!=0){
-        return -1;
-    }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
-    if(strcmp(user_name,"root")==0){
-        if(file_exist_or_not(filename_temp)==0){
-            return 0;
-        }
-        else{
-            return 2;
-        }
-    }
     snprintf(user_sshkey_encrypted,FILENAME_LENGTH-1,"%s%s.%s%s%s.key.tmp",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,user_name);
     snprintf(user_sshkey_decrypted,FILENAME_LENGTH-1,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,user_name);
     if(file_exist_or_not(user_sshkey_encrypted)!=0&&file_exist_or_not(user_sshkey_decrypted)!=0){

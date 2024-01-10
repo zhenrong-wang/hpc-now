@@ -1867,11 +1867,10 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     if(get_cloud_flag(workdir,crypto_keyfile,cloud_flag,16)!=0){
         return -1;
     }
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
+    if(strcmp(cloud_flag,"CLOUD_F")==0){
         return -1;
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
-    if(find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,"running","","","","")==0&&find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,"Running","","","","")==0&&find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,"RUNNING","","","","")==0){
+    if(cluster_asleep_or_not(workdir,crypto_keyfile)==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
         printf("|          Command: hpcopr wakeup --all | --min . Exit now." RESET_DISPLAY "\n");
         return 1;
