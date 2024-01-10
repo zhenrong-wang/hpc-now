@@ -327,10 +327,7 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_master.tf",new_stackdir,PATH_SLASH);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",new_stackdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)==0){
-        node_num=get_compute_node_num(filename_temp,"all");
-    }
+    node_num=get_compute_node_num(new_stackdir,crypto_keyfile,"all");
     for(int i=1;i<node_num+1;i++){
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",new_stackdir,PATH_SLASH,i);
         global_nreplace(filename_temp,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
@@ -974,7 +971,6 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
 
 int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int batch_flag_local, tf_exec_config* tf_run){
     char cmdline[LINE_LENGTH]="";
-    char filename_temp[FILENAME_LENGTH]="";
     char string_temp[LINE_LENGTH_SHORT];
     char dot_terraform[FILENAME_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
@@ -1027,8 +1023,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
         }
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The whole cluster has been destroyed successfully.\n");
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Upating the usage records ...\n");
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
-        compute_node_num=get_compute_node_num(filename_temp,"all");
+        compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
         update_usage_summary(workdir,crypto_keyfile,"master","stop");
         update_usage_summary(workdir,crypto_keyfile,"database","stop");
         update_usage_summary(workdir,crypto_keyfile,"natgw","stop");
@@ -1081,11 +1076,10 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
         return -1;
     }
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     delete_decrypted_files(workdir,crypto_keyfile);
-    compute_node_num=get_compute_node_num(filename_temp,"all");
+    compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     if(compute_node_num==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing deleted. Exit now." RESET_DISPLAY "\n");
         return -1;
@@ -1210,8 +1204,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     decrypt_files(workdir,crypto_keyfile);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster operation is in progress ...\n");
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
-    current_node_num=get_compute_node_num(filename_temp,"all");
+    current_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     for(i=0;i<add_number;i++){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%scompute_template %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1+current_node_num,SYSTEM_CMD_REDIRECT);
         system(cmdline);
@@ -1261,7 +1254,6 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     char cloud_flag[16]="";
     int i;
     int down_num=0;
-    char filename_temp[FILENAME_LENGTH]="";
     char node_name[16]="";
     int compute_node_num=0;
 
@@ -1275,11 +1267,10 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     delete_decrypted_files(workdir,crypto_keyfile);
-    compute_node_num=get_compute_node_num(filename_temp,"all");
+    compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     if(compute_node_num==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing to be shutdown. Exit now." RESET_DISPLAY "\n");
         return -1;
@@ -1389,7 +1380,6 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     char* sshkey_dir=SSHKEY_DIR;
     int i;
     int on_num=0;
-    char filename_temp[FILENAME_LENGTH]="";
     int compute_node_num=0;
     int compute_node_num_on=0;
 
@@ -1403,12 +1393,11 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         return -1;
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
     delete_decrypted_files(workdir,crypto_keyfile);
-    compute_node_num=get_compute_node_num(filename_temp,"all");
-    compute_node_num_on=get_compute_node_num(filename_temp,"on");
+    compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
+    compute_node_num_on=get_compute_node_num(stackdir,crypto_keyfile,"on");
     if(compute_node_num==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing to be turned on. Exit now." RESET_DISPLAY "\n");
         return -1;
@@ -1541,9 +1530,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     }
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
-    compute_node_num=get_compute_node_num(filename_temp,"all");
-    compute_node_down_num=get_compute_node_num(filename_temp,"down");
+    compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
+    compute_node_down_num=get_compute_node_num(stackdir,crypto_keyfile,"down");
     if(compute_node_num==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no compute nodes in your cluster. Exit now." RESET_DISPLAY "\n");
         return -3;
@@ -1857,7 +1845,6 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     char stackdir[DIR_LENGTH]="";
     char cloud_flag[16]="";
     int i;
-    char filename_temp[FILENAME_LENGTH]="";
     char node_name[16]="";
     int compute_node_num=0;
     if(get_nucid(workdir,crypto_keyfile,unique_cluster_id,16)!=0){
@@ -1877,7 +1864,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     }
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
-    compute_node_num=get_compute_node_num(filename_temp,"all");
+    compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You planned to shutdown *ALL* the nodes of the current cluster.\n");
     node_file_to_stop(stackdir,"master",cloud_flag);
     node_file_to_stop(stackdir,"database",cloud_flag);
@@ -1931,11 +1918,9 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     char stackdir[DIR_LENGTH]="";
     char cloud_flag[16]="";
     int i;
-    char filename_temp[FILENAME_LENGTH]="";
     char* sshkeydir=SSHKEY_DIR;
     char node_name[16]="";
     int compute_node_num=0;
-
     if(get_nucid(workdir,crypto_keyfile,unique_cluster_id,16)!=0){
         return -1;
     }
@@ -1949,10 +1934,9 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     if(strcmp(option,"minimal")==0&&cluster_asleep_or_not(workdir,crypto_keyfile)!=0){
         return 3;
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
-    compute_node_num=get_compute_node_num(filename_temp,"all");
+    compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     if(strcmp(option,"all")==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY HIGH_CYAN_BOLD " ALL MODE:" RESET_DISPLAY " Turning on all the nodes of the current cluster.\n");
     }
@@ -2315,8 +2299,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     node_file_to_running(stackdir,"master",cloud_flag);
     node_file_to_running(stackdir,"natgw",cloud_flag);
     node_file_to_running(stackdir,"database",cloud_flag);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
-    compute_node_num=get_compute_node_num(filename_temp,"all");
+    compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     for(i=1;i<compute_node_num+1;i++){
         snprintf(node_name,15,"compute%d",i);
         node_file_to_running(stackdir,node_name,cloud_flag);
@@ -2448,18 +2431,18 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
     }
     decrypt_files(workdir,crypto_keyfile);
     if(strcmp(new_payment_method,"month")==0){
-        modify_payment_lines(stackdir,cloud_flag,"add");
+        modify_payment_lines(stackdir,crypto_keyfile,cloud_flag,"add");
     }
     else{
-        modify_payment_lines(stackdir,cloud_flag,"del");
+        modify_payment_lines(stackdir,crypto_keyfile,cloud_flag,"del");
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to switch the payment method to " WARN_YELLO_BOLD "%s" RESET_DISPLAY " .\n",new_payment_method);
         if(strcmp(new_payment_method,"month")==0){
-            modify_payment_lines(stackdir,cloud_flag,"del");
+            modify_payment_lines(stackdir,cloud_flag,crypto_keyfile,"del");
         }
         else{
-            modify_payment_lines(stackdir,cloud_flag,"add");
+            modify_payment_lines(stackdir,cloud_flag,crypto_keyfile,"add");
         }
         delete_decrypted_files(workdir,crypto_keyfile);
         return 5;

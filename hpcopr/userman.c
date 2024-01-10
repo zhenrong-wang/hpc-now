@@ -23,7 +23,7 @@ int usrmgr_prereq_check(char* workdir, char* crypto_keyfile, char* ucmd, int bat
         printf(FATAL_RED_BOLD "[ FATAL: ] The cluster %s is not running. Please wake up first." RESET_DISPLAY "\n",cluster_name);
         return -1;
     }
-    int i=check_down_nodes(workdir);
+    int i=check_down_nodes(workdir,crypto_keyfile);
     int confirm_flag=0;
     if(i!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] There are %d down nodes." RESET_DISPLAY "\n",i);

@@ -1833,7 +1833,7 @@ int main(int argc, char* argv[]){
                 check_and_cleanup(workdir);
                 return 125;
             }
-            if(strcmp(final_command,"reconfc")==0&&check_down_nodes(workdir)!=0&&strcmp(cloud_flag,"CLOUD_B")==0){
+            if(strcmp(final_command,"reconfc")==0&&check_down_nodes(workdir,crypto_keyfile)!=0&&strcmp(cloud_flag,"CLOUD_B")==0){
                 printf("|\n" WARN_YELLO_BOLD "[ -WARN- ] You need to turn on all the compute nodes first." RESET_DISPLAY "\n");
             }
             if(strcmp(final_command,"reconfm")==0&&cluster_state_flag==0){
@@ -2157,7 +2157,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"addc")==0){
-        if(check_down_nodes(workdir)!=0){
+        if(check_down_nodes(workdir,crypto_keyfile)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] You need to turn all compute node(s) on before adding new nodes." RESET_DISPLAY "\n");
             check_and_cleanup(workdir);
             return 1;
@@ -2234,7 +2234,7 @@ int main(int argc, char* argv[]){
             return 125;
         }
         if(strcmp(final_command,"reconfc")==0&&strcmp(cloud_flag,"CLOUD_B")==0){
-            if(check_down_nodes(workdir)!=0){
+            if(check_down_nodes(workdir,crypto_keyfile)!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] You need to turn all compute node(s) on before reconfiguring them." RESET_DISPLAY "\n");
                 check_and_cleanup(workdir);
                 return 1;

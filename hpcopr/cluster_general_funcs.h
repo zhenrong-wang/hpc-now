@@ -61,7 +61,7 @@ int get_azure_info(char* workdir, char* az_subscription_id, char* az_tenant_id);
 int get_azure_ninfo(char* workdir, unsigned int linelen_max, char* crypto_keyfile, char* az_subscription_id, char* az_tenant_id, unsigned int id_len_max); //Newer function
 
 int get_cpu_num(const char* vm_model);
-int get_compute_node_num(char* currentstate_file, char* option);
+int get_compute_node_num(char* stackdir, char* crypto_keyfile, char* option);
 int decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum);
 int decrypt_single_file_general(char* now_crypto_exec, char* source_file, char* target_file, char* md5sum);
 int decrypt_files(char* workdir, char* crypto_key_filename);
@@ -106,7 +106,7 @@ int prompt_to_input(const char* prompt_string, char* reply_string, int batch_fla
 int prompt_to_input_required_args(const char* prompt_string, char* reply_string, int batch_flag_local,int argc, char** argv, char* cmd_keyword);
 int prompt_to_input_optional_args(const char* prompt_confirm, const char* confirm_string, const char* prompt_string, char* reply_string, int batch_flag_local,int argc, char** argv, char* cmd_keyword);
 
-int check_down_nodes(char* workdir);
+int check_down_nodes(char* workdir, char* crypto_keyfile);
 int cluster_ssh(char* workdir, char* crypto_keyfile, char* username, char* cluster_role, char* sshkey_dir);
 int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
 void single_file_to_running(char* filename, char* cloud_flag);
@@ -155,7 +155,7 @@ int check_statefile(char* statefile);
 int secure_encrypt_and_delete(char* filename, char* crypto_keyfile);
 
 int modify_payment_single_line(char* filename_temp, char* modify_flag, char* line_buffer);
-int modify_payment_lines(char* stackdir, char* cloud_flag, char* modify_flag);
+int modify_payment_lines(char* stackdir, char* crypto_keyfile, char* cloud_flag, char* modify_flag);
 int bceconfig_convert(char* vaultdir, char* option, char* region_id, char* bucket_ak, char* bucket_sk);
 int gcp_credential_convert(char* workdir, const char* operation, int key_flag);
 
