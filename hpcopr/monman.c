@@ -274,7 +274,7 @@ int show_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Extracting the data of specified node(s):\n");
-        printf("|          " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",node_name_list);
+        printf("[  ****  ] " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",node_name_list);
         node_filter_flag=calc_str_num(node_name_list,':');
         for(i=0;i<node_filter_flag;i++){
             get_seq_nstring(node_name_list,':',i+1,node_name_list_converted[i],16);

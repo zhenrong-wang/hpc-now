@@ -179,7 +179,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     else{
         export_user_num=user_list_check(cluster_name,user_list_buffer,real_user_list,&user1_flag);
         if(export_user_num==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The specified user list is invalid. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The specified user list is invalid." RESET_DISPLAY "\n");
             return -1;
         }
         if(user1_flag==1&&strcmp(admin_flag,"admin")==0){
@@ -189,7 +189,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
             strcpy(real_admin_flag,"");
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster: %s . Exporting users below:\n",cluster_name);
-        printf(GENERAL_BOLD "|          %s\n" RESET_DISPLAY,real_user_list);
+        printf(GENERAL_BOLD "[  ****  ] %s\n" RESET_DISPLAY,real_user_list);
     }
     if(strlen(password)==0){
         if(batch_flag_local==0){
@@ -211,7 +211,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a path (folder or file) to export." RESET_DISPLAY "\n");
-        printf("|          E.g. " HIGH_CYAN_BOLD "/home/hpc-now/  D:\\hpc-now\\export.now" RESET_DISPLAY "\n");
+        printf("[  ****  ] E.g. " HIGH_CYAN_BOLD "/home/hpc-now/  D:\\hpc-now\\export.now" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
         fflush(stdin);
         scanf("%511s",filename_temp_2);
@@ -249,7 +249,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     snprintf(cluster_name_flag_tmp,FILENAME_LENGTH-1,"%s%scluster_name_flag.txt.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
     file_p=fopen(cluster_name_flag,"w+");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create cluster name flag file. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create cluster name flag file." RESET_DISPLAY "\n");
         delete_file_or_dir(tmp_root);
         return -5;
     }
@@ -380,7 +380,7 @@ next_user:
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",tmp_stackdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create cluster state flag file. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create cluster state flag file." RESET_DISPLAY "\n");
         delete_file_or_dir(tmp_root);
         delete_decrypted_files(workdir,crypto_keyfile);
         return -5;
@@ -487,7 +487,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the *full* path of the now-cluster file.\n");
-        printf("|          E.g. " HIGH_CYAN_BOLD "~/import.now  /tmp/import.now  d:\\import.now" RESET_DISPLAY "\n");
+        printf("[  ****  ] E.g. " HIGH_CYAN_BOLD "~/import.now  /tmp/import.now  d:\\import.now" RESET_DISPLAY "\n");
         printf("[ INPUT: ] ");
         fflush(stdin);
         scanf("%511s",filename_temp);

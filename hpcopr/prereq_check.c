@@ -75,8 +75,7 @@ int check_internet(void){
 #endif
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please either check your DNS\n");
-        printf("|          service or check your internet connectivity and retry later.\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf("[  ****  ] service or check your internet connectivity and retry later." RESET_DISPLAY "\n");
         return 1;
     }
     return 0;
@@ -196,7 +195,7 @@ int install_bucket_clis(int silent_flag){
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf("|          Dataman component 1 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf("[  ****  ] Dataman component 1 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_OSSUTIL,filename_temp_zip);
@@ -244,7 +243,7 @@ coscli:
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scoscli.exe",NOW_BINARY_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf("|          Dataman component 2 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf("[  ****  ] Dataman component 2 not found. Downloading and installing ..." GREY_LIGHT "\n");
         snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_COSCLI,filename_temp);
         if(system(cmdline)!=0){
             if(silent_flag!=0){
@@ -270,7 +269,7 @@ awscli:
 #ifdef __linux__
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sawscliv2.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf("|          Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf("[  ****  ] Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%saws* %s",DELETE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         if(file_exist_or_not(filename_temp_zip)!=0){
@@ -292,7 +291,7 @@ awscli:
 #elif __APPLE__
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sAWSCLIV2.pkg",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf("|          Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf("[  ****  ] Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
@@ -367,7 +366,7 @@ obsutil:
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sobsutil_amd64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        printf("|          Dataman component 4 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf("[  ****  ] Dataman component 4 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_OBSUTIL,filename_temp_zip);
@@ -417,7 +416,7 @@ bcecmd:
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%smac-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        printf("|          Dataman component 5 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf("[  ****  ] Dataman component 5 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_BCECMD,filename_temp_zip);
@@ -469,7 +468,7 @@ azcopy:
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_darwin_amd64_10.20.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        printf("|          Dataman component 6 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf("[  ****  ] Dataman component 6 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_AZCOPY,filename_temp_zip);
@@ -527,7 +526,7 @@ gcloud_cli:
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sgoogle-cloud-cli-449.0.0-darwin-x86_64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        printf("|          Dataman component 7 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf("[  ****  ] Dataman component 7 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_GCLOUD,filename_temp_zip);
@@ -631,7 +630,7 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
     file_check_flag_tofu=file_validity_check(provider_exec_tofu,force_repair_flag,md5_exec);
     if(file_check_flag_tf==1||file_check_flag_tofu==1){
         printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud provider for %s (%s) ...\n",cloud_name,seq_code);
-        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+        printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         file_check_flag=file_validity_check(provider_zip,force_repair_flag,md5_zip);
         if(file_check_flag==1){
             if(tf_loc_flag_var==1){
@@ -666,7 +665,7 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
 #endif
             run_flag=system(cmdline);
             if(run_flag!=0){
-                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file." RESET_DISPLAY "\n");
                 return 3;
             }
         }
@@ -678,7 +677,7 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
 #endif
             run_flag=system(cmdline);
             if(run_flag!=0){
-                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file. Exit now." RESET_DISPLAY "\n");
+                printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the provider file." RESET_DISPLAY "\n");
                 return 3;
             }
         }
@@ -732,7 +731,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     
     if(generate_encrypt_opr_sshkey(SSHKEY_DIR,CRYPTO_KEY_FILE)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create SSHkey for this installation. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create SSHkey for this installation." RESET_DISPLAY "\n");
         return -1;
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sworkdir %s",MKDIR_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
@@ -798,7 +797,7 @@ int check_and_install_prerequisitions(int repair_flag){
                 return 1;
             }
             if(configure_locations(0)!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure the locations. Exit now." RESET_DISPLAY "\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure the locations." RESET_DISPLAY "\n");
                 return 5;
             }
         }
@@ -828,7 +827,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf( RESET_DISPLAY "|        v Location configuration has been repaired.\n");
         printf("|        . Checking and repairing the versions and md5sums ...\n");
         if(reset_vers_md5_vars()!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums." RESET_DISPLAY "\n");
             return 7;
         }
         printf( RESET_DISPLAY "|        v Versions and md5sums been repaired.\n");
@@ -843,12 +842,12 @@ int check_and_install_prerequisitions(int repair_flag){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Versions and md5sums format incorrect. Trying to fix ...\n");
         }
         if(reset_vers_md5_vars()!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums." RESET_DISPLAY "\n");
             return 7;
         }
         if(get_vers_md5_vars()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure versions and md5sums of core components.\n");
-            printf("|          Please check the format of md5 files. Exit now." RESET_DISPLAY "\n");
+            printf("[  ****  ] Please check the format of md5 files." RESET_DISPLAY "\n");
             return 7;
         }
     }
@@ -879,7 +878,7 @@ int check_and_install_prerequisitions(int repair_flag){
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_tf_zip_var);
         if(file_check_flag==1){
             printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the Terraform binary ...\n");
-            printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+            printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
                 snprintf(cmdline,CMDLINE_LENGTH-1,"copy /y %s\\tf-win\\terraform_%s_windows_amd64.zip %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
@@ -901,7 +900,7 @@ int check_and_install_prerequisitions(int repair_flag){
             flag=system(cmdline);
             if(flag!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
+                printf("[  ****  ] info@hpc-now.com for support." RESET_DISPLAY "\n");
                 return 3;
             }
         }
@@ -916,7 +915,7 @@ int check_and_install_prerequisitions(int repair_flag){
 //        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
         if(flag!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the terraform binary file. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the terraform binary file." RESET_DISPLAY "\n");
             return 3;
         }        
     }
@@ -940,7 +939,7 @@ int check_and_install_prerequisitions(int repair_flag){
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_tofu_zip_var);
         if(file_check_flag==1){
             printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the openTofu binary ...\n");
-            printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+            printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
                 snprintf(cmdline,CMDLINE_LENGTH-1,"copy /y %s\\tf-win\\tofu_%s_windows_amd64.zip %s",url_tf_root_var,tofu_version_var,filename_temp_zip);
@@ -962,7 +961,7 @@ int check_and_install_prerequisitions(int repair_flag){
             flag=system(cmdline);
             if(flag!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-                printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
+                printf("[  ****  ] info@hpc-now.com for support." RESET_DISPLAY "\n");
                 return 3;
             }
         }
@@ -977,7 +976,7 @@ int check_and_install_prerequisitions(int repair_flag){
 //        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
         if(flag!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the openTofu binary file. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the openTofu binary file." RESET_DISPLAY "\n");
             return 3;
         }        
     }
@@ -992,7 +991,7 @@ int check_and_install_prerequisitions(int repair_flag){
     file_check_flag=file_validity_check(NOW_CRYPTO_EXEC,repair_flag,md5_now_crypto_var);
     if(file_check_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the now-crypto executable ...\n");
-        printf("|          Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+        printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
         if(now_crypto_loc_flag_var==1){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"copy /y %s\\now-crypto-aes-win.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
@@ -1015,7 +1014,7 @@ int check_and_install_prerequisitions(int repair_flag){
         flag=system(cmdline);
         if(flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
-            printf("|          info@hpc-now.com for support. Exit now." RESET_DISPLAY "\n");
+            printf("[  ****  ] info@hpc-now.com for support." RESET_DISPLAY "\n");
             return 3;
         }
     }

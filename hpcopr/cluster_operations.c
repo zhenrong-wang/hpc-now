@@ -43,7 +43,7 @@ int switch_to_cluster(char* target_cluster_name){
     }
     file_p=fopen(CURRENT_CLUSTER_INDICATOR,"w+");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create current cluster indicator. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create current cluster indicator." RESET_DISPLAY "\n");
         return -1;
     }
     fprintf(file_p,"---GENERATED AND MAINTAINED BY HPC-NOW SERVICES INTERNALLY---\n");
@@ -380,6 +380,7 @@ update_summary:
     system(cmdline);
     global_nreplace(USAGE_LOG_FILE,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
 print_finished:
+    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete_backup");
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Renamed the cluster " GENERAL_BOLD "%s" RESET_DISPLAY " to " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_prev_name,cluster_new_name);
     return 0;
 }
@@ -402,7 +403,7 @@ int refresh_cluster(char* target_cluster_name, char* crypto_keyfile, char* force
     else{
         if(cluster_empty_or_not(target_cluster_workdir,crypto_keyfile)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The cluster cannot be refreshed (in init progress or empty)." RESET_DISPLAY "\n");
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please run " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY " to check. Exit now.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please run " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY " to check.\n");
             return -5;
         }
         if(check_pslock(target_cluster_workdir,decryption_status(target_cluster_workdir))!=0){
@@ -483,7 +484,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
         getchar();
         if(strcmp(doubleconfirm,CONFIRM_STRING)==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
-            printf("|          absolutely *NOT* recoverable!" RESET_DISPLAY "\n");
+            printf("[  ****  ] absolutely *NOT* recoverable!" RESET_DISPLAY "\n");
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
             fflush(stdin);
             scanf("%63s",doubleconfirm);
@@ -500,7 +501,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster is empty. This operation will remove all the\n");
-        printf("|          related files from your system. Would you like to continue?\n");
+        printf("[  ****  ] related files from your system. Would you like to continue?\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: ");
         fflush(stdin);
         scanf("%63s",doubleconfirm);
@@ -567,7 +568,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     if(strcmp(gcp_flag,"gcp")==0){
         if(get_google_connectivity()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to " WARN_YELLO_BOLD "api.google.com" FATAL_RED_BOLD " during last check. Please run\n");
-            printf("|          the command " WARN_YELLO_BOLD "hpcopr envcheck --gcp" FATAL_RED_BOLD " to re-check and retry." RESET_DISPLAY "\n");
+            printf("[  ****  ] the command " WARN_YELLO_BOLD "hpcopr envcheck --gcp" FATAL_RED_BOLD " to re-check and retry." RESET_DISPLAY "\n");
             return 3;
         }
     }
@@ -621,7 +622,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             strncpy(gcp_key_file,cloud_sk,FILENAME_LENGTH-1);
         }
         if(find_multi_nkeys(gcp_key_file,LINE_LENGTH_SHORT,"\"project_id\":","","","","")<1||find_multi_nkeys(gcp_key_file,LINE_LENGTH_SHORT,"\"private_key\":","","","","")<1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid. Exit now." RESET_DISPLAY "\n",gcp_key_file);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid." RESET_DISPLAY "\n",gcp_key_file);
             return 3;
         }
         file_p=fopen(gcp_key_file,"a+");
@@ -673,8 +674,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         strncpy(secret_key,cloud_sk,AKSK_LENGTH-1);
     }
     if(strcmp(echo_flag,"echo")==0){
-        printf(GREY_LIGHT "\n|          Access key ID  : %s\n",access_key);
-        printf("|          Access secrets : %s\n\n" RESET_DISPLAY,secret_key);
+        printf(GREY_LIGHT "\n[  ****  ] Access key ID  : %s\n",access_key);
+        printf("[  ****  ] Access secrets : %s\n\n" RESET_DISPLAY,secret_key);
     }
     ak_length=strlen(access_key);
     sk_length=strlen(secret_key);
@@ -728,7 +729,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         fprintf(file_p,"%s\n%s\nCLOUD_F\nazure_subscription_id: %s\nazure_tenant_id: %s\n",access_key,secret_key,az_subscription_id,az_tenant_id);
     }
     else{
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs." RESET_DISPLAY "\n");
         fclose(file_p);
         delete_file_or_dir(filename_temp);
         return 5;
@@ -804,11 +805,11 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         }
         file_p=fopen(secret_key,"r");
         if(file_p==NULL){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the key file %s. Exit now." RESET_DISPLAY "\n",secret_key);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the key file %s." RESET_DISPLAY "\n",secret_key);
             return -1;
         }
         if(find_multi_nkeys(secret_key,LINE_LENGTH_SHORT,"\"project_id\":","","","","")<1||find_multi_nkeys(secret_key,LINE_LENGTH_SHORT,"\"private_key\":","","","","")<1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid. Exit now." RESET_DISPLAY "\n",secret_key);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid." RESET_DISPLAY "\n",secret_key);
             fclose(file_p);
             return -1;
         }
@@ -830,22 +831,21 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf(RESET_DISPLAY);
         }
         delete_file_or_dir(secret_key);
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally.\n");
-        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Exit now.\n");
+        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally." RESET_DISPLAY "\n");
         return 0;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%ssecret.temp.txt",HPC_NOW_ROOT_DIR,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a temporary file in your system.\n");
-        printf("|          Please check the available disk space. Exit now." RESET_DISPLAY "\n");
+        printf("[  ****  ] Please check the available disk space." RESET_DISPLAY "\n");
         return -1;
     }
     snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp2)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently there is no secrets keypair. This working directory may be\n");
-        printf("|          corrputed, which is very unusual. Please contact us via:\n");
-        printf("|          info@hpc-now.com for troubleshooting. Exit now." RESET_DISPLAY "\n");
+        printf("[  ****  ] corrputed, which is very unusual. Please contact us via:\n");
+        printf("[  ****  ] info@hpc-now.com for troubleshooting." RESET_DISPLAY "\n");
         fclose(file_p);
         return -3;
     }
@@ -869,8 +869,8 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         strcpy(secret_key,cloud_sk);
     }
     if(strcmp(echo_flag,"echo")==0){
-        printf(GREY_LIGHT "\n|          Access key ID  : %s\n",access_key);
-        printf("|          Access secrets : %s\n\n" RESET_DISPLAY,secret_key);
+        printf(GREY_LIGHT "\n[  ****  ] Access key ID  : %s\n",access_key);
+        printf("[  ****  ] Access secrets : %s\n\n" RESET_DISPLAY,secret_key);
     }
     ak_length=strlen(access_key);
     sk_length=strlen(secret_key);
@@ -879,10 +879,9 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         if(strcmp(cloud_flag_prev,cloud_flag)!=0){
             fclose(file_p);
             printf(FATAL_RED_BOLD "[ FATAL: ] The new keypair comes from a different Cloud Service Vendor.\n");
-            printf("|          Switching cloud vendors for a working directory is not permitted.\n");
-            printf("|          Current Vendor: AliCloud (HPC-NOW code: CLOUD_A).\n");
-            printf("|          Please rotate a keypair from an AliCloud account.\n");
-            printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+            printf("[  ****  ] Switching cloud vendors for a working directory is not permitted.\n");
+            printf("[  ****  ] Current Vendor: AliCloud (HPC-NOW code: CLOUD_A).\n");
+            printf("[  ****  ] Please rotate a keypair from an AliCloud account." RESET_DISPLAY "\n");
             return 3;
         }
         fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
@@ -893,10 +892,9 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         if(strcmp(cloud_flag_prev,cloud_flag)!=0){
             fclose(file_p);
             printf(FATAL_RED_BOLD "[ FATAL: ] The new keypair comes from a different Cloud Service Vendor.\n");
-            printf("|          Switching cloud vendors for a working directory is not permitted.\n");
-            printf("|          Current Vendor: TencentCloud (HPC-NOW code: CLOUD_B).\n");
-            printf("|          Please rotate a keypair from the a TencentCloud account.\n");
-            printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+            printf("[  ****  ] Switching cloud vendors for a working directory is not permitted.\n");
+            printf("[  ****  ] Current Vendor: TencentCloud (HPC-NOW code: CLOUD_B).\n");
+            printf("[  ****  ] Please rotate a keypair from the a TencentCloud account." RESET_DISPLAY "\n");
             return 3;
         }
         fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
@@ -912,16 +910,15 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         if(strcmp(cloud_flag_prev,cloud_flag)!=0){
             fclose(file_p);
             printf(FATAL_RED_BOLD "[ FATAL: ] The new keypair comes from a different Cloud Service Vendor.\n");
-            printf("|          Switching cloud vendors for a working directory is not permitted.\n");
+            printf("[  ****  ] Switching cloud vendors for a working directory is not permitted.\n");
             if(strcmp(cloud_flag_prev,"CLOUD_C")==0){
-                printf("|          Current Vendor: Amazon Web Services (HPC-NOW code: CLOUD_C).\n");
-                printf("|          Please rotate a keypair from an Amazon Web Services account.\n");
+                printf("[  ****  ] Current Vendor: Amazon Web Services (HPC-NOW code: CLOUD_C).\n");
+                printf("[  ****  ] Please rotate a keypair from an Amazon Web Services account." RESET_DISPLAY "\n");
             }
             else{
-                printf("|          Current Vendor: Huawei Cloud (HPC-NOW code: CLOUD_D).\n");
-                printf("|          Please rotate a keypair from a Huawei Cloud account.\n");
+                printf("[  ****  ] Current Vendor: Huawei Cloud (HPC-NOW code: CLOUD_D).\n");
+                printf("[  ****  ] Please rotate a keypair from a Huawei Cloud account." RESET_DISPLAY "\n");
             }
-            printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
             return 3;
         }
         fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
@@ -932,10 +929,9 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         if(strcmp(cloud_flag_prev,cloud_flag)!=0){
             fclose(file_p);
             printf(FATAL_RED_BOLD "[ FATAL: ] The new keypair comes from a different Cloud Service Vendor.\n");
-            printf("|          Switching cloud vendors for a working directory is not permitted.\n");
-            printf("|          Current Vendor: BaiduCloud (HPC-NOW code: CLOUD_E).\n");
-            printf("|          Please rotate a keypair from a BaiduCloud account.\n");
-            printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+            printf("[  ****  ] Switching cloud vendors for a working directory is not permitted.\n");
+            printf("[  ****  ] Current Vendor: BaiduCloud (HPC-NOW code: CLOUD_E).\n");
+            printf("[  ****  ] Please rotate a keypair from a BaiduCloud account." RESET_DISPLAY "\n");
             return 3;
         }
         fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
@@ -946,10 +942,9 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         if(strcmp(cloud_flag,cloud_flag_prev)!=0){
             fclose(file_p);
             printf(FATAL_RED_BOLD "[ FATAL: ] The new keypair comes from a different Cloud Service Vendor.\n");
-            printf("|          Switching cloud vendors for a working directory is not permitted.\n");
-            printf("|          Current Vendor: Azure (HPC-NOW code: CLOUD_F).\n");
-            printf("|          Please rotate a keypair from the *SAME* subscription and tenant.\n");
-            printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+            printf("[  ****  ] Switching cloud vendors for a working directory is not permitted.\n");
+            printf("[  ****  ] Current Vendor: Azure (HPC-NOW code: CLOUD_F).\n");
+            printf("[  ****  ] Please rotate a keypair from the *SAME* subscription and tenant." RESET_DISPLAY "\n");
             return 3;
         }
         printf("|       -> Current subscription ID: %s\n",az_subscription_id);
@@ -959,7 +954,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         fclose(file_p);
     }
     else{
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs." RESET_DISPLAY "\n");
         fclose(file_p);
         delete_file_or_dir(filename_temp);
         return 3;
@@ -987,8 +982,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp2,filename_temp,md5sum,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally.\n");
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Exit now.\n");
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally." RESET_DISPLAY "\n");
     return 0;
 }
 
@@ -1036,9 +1030,8 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
                 sleep(2);
                 if(tf_execution(tf_run,"destroy",workdir,crypto_keyfile,1)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to destroy your cluster. This usually caused by either TF or\n");
-                    printf("|          the providers developed and maintained by cloud service providers.\n");
-                    printf("|          You *MUST* manually destroy the remaining cloud resources of this cluster.\n");
-                    printf("|          Exit now." RESET_DISPLAY "\n");
+                    printf("[  ****  ] the providers developed and maintained by cloud service providers.\n");
+                    printf("[  ****  ] You *MUST* manually destroy the remaining cloud resources of this cluster." RESET_DISPLAY "\n");
                     delete_decrypted_files(workdir,crypto_keyfile);
                     return -1;
                 }
@@ -1104,13 +1097,13 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
     delete_decrypted_files(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     if(compute_node_num==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing deleted. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing deleted." RESET_DISPLAY "\n");
         return -1;
     }
     if(strcmp(param,"all")!=0){
         del_num=string_to_positive_num(param);
         if(del_num==0||del_num<0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'all' or a positive number. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'all' or a positive number." RESET_DISPLAY "\n");
             return 1;
         }
         if(del_num>compute_node_num){
@@ -1295,13 +1288,13 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     delete_decrypted_files(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     if(compute_node_num==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing to be shutdown. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing to be shutdown." RESET_DISPLAY "\n");
         return -1;
     }
     if(strcmp(param,"all")!=0){
         down_num=string_to_positive_num(param);
         if(down_num<0||down_num==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'all' or a positive number. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'all' or a positive number." RESET_DISPLAY "\n");
             return 1;
         }
         if(down_num>compute_node_num){
@@ -1316,7 +1309,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
                 scanf("%127s",string_temp);
                 getchar();
                 if(strcmp(string_temp,CONFIRM_STRING)!=0){
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You denied this operation. Exit now.\n");
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You denied this operation.\n");
                     return 1;
                 }
             }
@@ -1422,19 +1415,19 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     compute_node_num_on=get_compute_node_num(stackdir,crypto_keyfile,"on");
     if(compute_node_num==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing to be turned on. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, there is no compute nodes, nothing to be turned on." RESET_DISPLAY "\n");
         return -1;
     }
 
     if(compute_node_num==compute_node_num_on){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently, all the compute nodes are in the state of running.\n");
-        printf("|          No compute node needs to be turned on. Exit now." RESET_DISPLAY "\n");
+        printf("[  ****  ] No compute node needs to be turned on." RESET_DISPLAY "\n");
         return -1;
     }
     if(strcmp(param,"all")!=0){
         on_num=string_to_positive_num(param);
         if(on_num<0||on_num==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'all' or a positive number. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'all' or a positive number." RESET_DISPLAY "\n");
             return 1;
         }
         if(on_num+compute_node_num_on>compute_node_num){
@@ -1449,7 +1442,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
                 scanf("%127s",string_temp);
                 getchar();
                 if(strcmp(string_temp,CONFIRM_STRING)!=0){
-                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You denied this operation. Exit now.\n");
+                    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You denied this operation.\n");
                     return 1;
                 }
             }
@@ -1556,14 +1549,14 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     compute_node_down_num=get_compute_node_num(stackdir,crypto_keyfile,"down");
     if(compute_node_num==0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no compute nodes in your cluster. Exit now." RESET_DISPLAY "\n");
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no compute nodes in your cluster." RESET_DISPLAY "\n");
         return -3;
     }
     decrypt_files(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     snprintf(string_temp,63,"\"%s\"",new_config);
     if(find_multi_nkeys(filename_temp,LINE_LENGTH_SMALL,string_temp,"","","","")==0||find_multi_nkeys(filename_temp,LINE_LENGTH_SMALL,string_temp,"","","","")<0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid compute configuration. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid compute configuration." RESET_DISPLAY "\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
@@ -1679,7 +1672,7 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     remote_copy(workdir,crypto_keyfile,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
     if(compute_node_down_num!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Please turn on all the cluster nodes, log on to the master\n");
-        printf("|          node, and run: " HIGH_GREEN_BOLD "sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY WARN_YELLO_BOLD "" RESET_DISPLAY "\n");
+        printf("[  ****  ] node, and run: " HIGH_GREEN_BOLD "sudo hpcmgr connect && sudo hpcmgr all" RESET_DISPLAY WARN_YELLO_BOLD "" RESET_DISPLAY "\n");
     }
     else{
         if(reinit_flag==0){
@@ -1698,10 +1691,10 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The compute nodes have been reconfigured.\n");
     if(reinit_flag!=0){
-        printf(GENERAL_BOLD "|         " RESET_DISPLAY " Recreating the compute node(s), the process may need 7 minutes.\n");
+        printf(GENERAL_BOLD "[  ****  ]" RESET_DISPLAY " Recreating the compute node(s), the process may need 7 minutes.\n");
     }
     else{
-        printf(GENERAL_BOLD "|         " RESET_DISPLAY " Changing the compute node(s), the process may need 1 minute.\n");
+        printf(GENERAL_BOLD "[  ****  ]" RESET_DISPLAY " Changing the compute node(s), the process may need 1 minute.\n");
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s*bak %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
@@ -1731,7 +1724,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     snprintf(string_temp,63,"\"%s\"",new_config);
     if(find_multi_nkeys(filename_temp,LINE_LENGTH_SMALL,string_temp,"","","","")==0||find_multi_nkeys(filename_temp,LINE_LENGTH_SMALL,string_temp,"","","","")<0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid master node configuration. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid master node configuration." RESET_DISPLAY "\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return -1;
     }
@@ -1882,7 +1875,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     }
     if(cluster_asleep_or_not(workdir,crypto_keyfile)==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
-        printf("|          Command: hpcopr wakeup --all | --min . Exit now." RESET_DISPLAY "\n");
+        printf("[  ****  ] Command: hpcopr wakeup --all | --min ." RESET_DISPLAY "\n");
         return 1;
     }
     decrypt_files(workdir,crypto_keyfile);
@@ -1932,8 +1925,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
 
 int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_config* tf_run){
     if(strcmp(option,"all")!=0&&strcmp(option,"minimal")!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'minimal' or 'all' as the second parameter.\n");
-        printf("|          Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Please specify either 'minimal' or 'all' as the second parameter." RESET_DISPLAY "\n");
         return -1;
     }
     char string_temp[128]="";
@@ -2279,13 +2271,13 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     }
 
     if(strcmp(option,"mc")==0){
-        printf("|          * Will rebuild the " WARN_YELLO_BOLD "master" RESET_DISPLAY " and " WARN_YELLO_BOLD "compute" RESET_DISPLAY " nodes.\n");
+        printf("[  ****  ] * Will rebuild the " WARN_YELLO_BOLD "master" RESET_DISPLAY " and " WARN_YELLO_BOLD "compute" RESET_DISPLAY " nodes.\n");
     }
     else if(strcmp(option,"mcdb")==0){
-        printf("|          * Will rebuild the " WARN_YELLO_BOLD "master" RESET_DISPLAY ", " WARN_YELLO_BOLD "compute" RESET_DISPLAY " and " WARN_YELLO_BOLD "mariadb" RESET_DISPLAY " nodes.\n");
+        printf("[  ****  ] * Will rebuild the " WARN_YELLO_BOLD "master" RESET_DISPLAY ", " WARN_YELLO_BOLD "compute" RESET_DISPLAY " and " WARN_YELLO_BOLD "mariadb" RESET_DISPLAY " nodes.\n");
     }
     else{
-        printf("|          * Will try to rebuild " WARN_YELLO_BOLD "all" RESET_DISPLAY " the cluster nodes.\n");
+        printf("[  ****  ] * Will try to rebuild " WARN_YELLO_BOLD "all" RESET_DISPLAY " the cluster nodes.\n");
     }
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stmp %s && %s %s%stmp%s* %s",MKDIR_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT,DELETE_FILE_CMD,stackdir,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
@@ -2337,7 +2329,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
 
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully removed previous nodes. Rebuilding new nodes ...\n");
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rebuild the nodes. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rebuild the nodes." RESET_DISPLAY "\n");
         delete_decrypted_files(workdir,crypto_keyfile);
         return 5;
     }
@@ -2410,7 +2402,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     remote_exec(workdir,crypto_keyfile,sshkey_folder,"connect",7);
     remote_exec(workdir,crypto_keyfile,sshkey_folder,"all",8);
     printf(WARN_YELLO_BOLD "[ -INFO- ] The rebuild process may need 7 minutes. Please do not operate\n");
-    printf("|          this cluster during the period. Exit now." RESET_DISPLAY "\n");
+    printf("[  ****  ] this cluster during the period." RESET_DISPLAY "\n");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }
@@ -2434,7 +2426,7 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
         return 1;
     }
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] This operation is not valid for the current Cloud %s. Exit now." RESET_DISPLAY "\n",cloud_flag);
+        printf(FATAL_RED_BOLD "[ FATAL: ] This operation is not valid for the current Cloud %s." RESET_DISPLAY "\n",cloud_flag);
         return -5;
     }
     if(strcmp(new_payment_method,"od")!=0&&strcmp(new_payment_method,"month")!=0){
@@ -2450,7 +2442,7 @@ int switch_cluster_payment(char* cluster_name, char* new_payment_method, char* c
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Switching the payment method from " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " to " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",curr_payment_method,new_payment_method);
     if(strcmp(new_payment_method,"month")==0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Please switch to " HIGH_CYAN_BOLD "od" WARN_YELLO_BOLD " if you'd like to destroy or remove this cluster.\n");
-        printf("|          " HIGH_CYAN_BOLD "Automatic renewal" WARN_YELLO_BOLD " will be activated." RESET_DISPLAY "\n");
+        printf("[  ****  ] " HIGH_CYAN_BOLD "Automatic renewal" WARN_YELLO_BOLD " will be activated." RESET_DISPLAY "\n");
     }
     decrypt_files(workdir,crypto_keyfile);
     if(strcmp(new_payment_method,"month")==0){

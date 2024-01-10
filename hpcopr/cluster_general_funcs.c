@@ -87,7 +87,7 @@ int add_to_cluster_registry(char* new_cluster_name, char* import_flag){
     }
     fclose(file_p);
     if(encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"encrypt")!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the cluster registry. Exit now." RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the cluster registry." RESET_DISPLAY);
         return -1;
     }
     return 0;
@@ -593,7 +593,7 @@ int get_ak_sk(char* secret_file, char* crypto_key_file, char* ak, char* sk, char
     char cloud_flag_get[32]="";
     FILE* file_p=NULL;
     if(get_nmd5sum(crypto_key_file,md5,64)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
         return -1;
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s decrypt %s %s.dat %s %s",NOW_CRYPTO_EXEC,secret_file,secret_file,md5,SYSTEM_CMD_REDIRECT);
@@ -832,7 +832,7 @@ int check_pslock_all(void){
     }
     fclose(file_p);
     if(encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete")!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the cluster registry. Exit now." RESET_DISPLAY);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the cluster registry." RESET_DISPLAY);
         return 1;
     }
     return 0;
@@ -2558,8 +2558,8 @@ int confirm_to_operate_cluster(char* current_cluster_name, int batch_flag_local)
         return 0;
     }
     char confirm[64]="";
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster" HIGH_CYAN_BOLD " %s" RESET_DISPLAY " now, which may affect\n",current_cluster_name);
-    printf("|          the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to confirm.\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ", which may affect\n",current_cluster_name);
+    printf("[  ****  ] the " GENERAL_BOLD "resources|data|jobs" RESET_DISPLAY ". Please input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to confirm.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%63s",confirm);
@@ -3071,8 +3071,8 @@ int user_password_complexity_check(char* password, char* special_chars){
     }
     if(password_complexity_check(password,special_chars)==1){
         printf(FATAL_RED_BOLD "[ FATAL: ] The password " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",password);
-        printf("|          Must include at least 3 of 4 different types: \n");
-        printf("|          " HIGH_GREEN_BOLD "A-Z  a-z  0-9  %s" RESET_DISPLAY "\n",special_chars);
+        printf("[  ****  ] Must include at least 3 of 4 different types: \n");
+        printf("[  ****  ] " HIGH_GREEN_BOLD "A-Z  a-z  0-9  %s" RESET_DISPLAY "\n",special_chars);
         return 1;
     }
     return 0;
@@ -3088,15 +3088,15 @@ int input_user_passwd(char* password_string, int batch_flag_local){
     char password_confirm[USER_PASSWORD_LENGTH_MAX]="";
 
     printf("[ -INFO- ] Length: %d-%d. Must include at least 3 of 4 different types: \n",USER_PASSWORD_LENGTH_MIN,USER_PASSWORD_LENGTH_MAX);
-    printf("|          " HIGH_GREEN_BOLD "A-Z  a-z  0-9  %s" RESET_DISPLAY "\n",SPECIAL_PASSWORD_CHARS);
+    printf("[  ****  ] " HIGH_GREEN_BOLD "A-Z  a-z  0-9  %s" RESET_DISPLAY "\n",SPECIAL_PASSWORD_CHARS);
     snprintf(password_prompt,127,"[ INPUT: ] Type a password : ");
     password_temp=GETPASS_FUNC(password_prompt);
     if(user_password_complexity_check(password_temp,SPECIAL_PASSWORD_CHARS)!=0){
         return 1;
     }
     strcpy(password_input,password_temp);
-    strcpy(password_temp,""); 
-    password_temp=GETPASS_FUNC("|          Re-type the password : ");                            
+    strcpy(password_temp,"");
+    password_temp=GETPASS_FUNC("[  ****  ] Re-type password: ");                            
     if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password." RESET_DISPLAY "\n");
         printf(FATAL_RED_BOLD "|" RESET_DISPLAY GREY_LIGHT "          %s" RESET_DISPLAY WARN_YELLO_BOLD " !=" RESET_DISPLAY GREY_LIGHT " %s \n" RESET_DISPLAY,password_input,password_temp);
@@ -3209,7 +3209,7 @@ int username_check_add(char* workdir, char* username_input){
         }
     }
     else{
-        printf(GENERAL_BOLD "|          Using username: %s" RESET_DISPLAY "\n",username_input);
+        printf(GENERAL_BOLD "[  ****  ] Using username: %s" RESET_DISPLAY "\n",username_input);
         return 0;
     }
 }
@@ -3381,6 +3381,8 @@ int check_cluster_registry(void){
  * 3. backup_encrypt: backup filename_base.extra_str to filename_base.extra_str.backup and encrypt to filename_base.tmp
  * 4. restore_encrypt: encrypt filename_base.extra_str.backup to filename_base.tmp and delete filename_base.extra_str
  * 5. delete: delete filename_base.extra_str
+ * 6. delete_backup: delete filename_base.extra_str.backup
+ * 7. delete_all: delete filename_base.extra_str.backup filename_base.extra_str
  * Others are illegal, do nothing and return -3;
  */
 int encrypted_file_convert(char* filename_base, char* extra_str, char* option){
@@ -3427,6 +3429,14 @@ int encrypted_file_convert(char* filename_base, char* extra_str, char* option){
     }
     else if(strcmp(option,"delete")==0){
         return delete_file_or_dir(file_decrypted);
+    }
+    else if(strcmp(option,"delete_backup")==0){
+        return delete_file_or_dir(file_dec_back);
+    }
+    else if(strcmp(option,"delete_all")==0){
+        delete_file_or_dir(file_dec_back);
+        delete_file_or_dir(file_decrypted);
+        return (file_exist_or_not(file_decrypted)|file_exist_or_not(file_dec_back));
     }
     else{
         return -3;
@@ -4067,7 +4077,7 @@ int start_rdp_connection(char* cluster_workdir, char* crypto_keyfile, char* user
         }
         else{
             printf(WARN_YELLO_BOLD "|\n[ -WARN- ] VERY RISKY! The user's password has been copied to the clipboard!\n");
-            printf("|          Please empty your clipboard after pasting the password!" RESET_DISPLAY "\n");
+            printf("[  ****  ] Please empty your clipboard after pasting the password!" RESET_DISPLAY "\n");
         }
     }
     char master_address[32]="";

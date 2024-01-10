@@ -74,7 +74,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     app_list(workdir,crypto_keyfile,"check",user_name,app_name,sshkey_dir,filename_temp,"");
     run_flag=find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,"not available","","","","");
     if(run_flag>0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified app " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",app_name);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified app " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",app_name);
         return -5;
     }
     if(cmd_keyword_check(argc,argv,"--nn",node_num_string)!=0){
@@ -89,7 +89,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
     specified_node_num=string_to_positive_num(node_num_string);
     if(specified_node_num<1||specified_node_num>cluster_node_num){
-        printf("[ FATAL: ] The specified node num %s is invalid. Exit now.\n",node_num_string);
+        printf("[ FATAL: ] The specified node num %s is invalid.\n",node_num_string);
         return -5;
     }
 
@@ -105,7 +105,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     }
     specified_node_cores=string_to_positive_num(node_cores_string);
     if(specified_node_cores<1||specified_node_num>cluster_node_cores){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified threads " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " per node is invalid. Exit now." RESET_DISPLAY "\n",node_cores_string);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified threads " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " per node is invalid." RESET_DISPLAY "\n",node_cores_string);
         return -5;
     }
 
@@ -186,7 +186,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
             return 17;
         }
         printf(WARN_YELLO_BOLD "[ -WARN- ] No data directory specified. Please specify a remote path." RESET_DISPLAY "\n");
-        printf("|          *MUST* use " HIGH_CYAN_BOLD "@d/" RESET_DISPLAY " (user data) or " HIGH_CYAN_BOLD "@p/" RESET_DISPLAY " (public data) as the prefix.\n");
+        printf("[  ****  ] *MUST* use " HIGH_CYAN_BOLD "@d/" RESET_DISPLAY " (user data) or " HIGH_CYAN_BOLD "@p/" RESET_DISPLAY " (public data) as the prefix.\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
         fflush(stdin);
         scanf("%255s",job_data);
@@ -198,7 +198,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         *(string_temp+i)=*(job_data+i);
     }
     if(strcmp(string_temp,"@d/")!=0&&strcmp(string_temp,"@p/")!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified data directory " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",job_data);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified data directory " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",job_data);
         return -5;
     }
     else{
@@ -221,14 +221,14 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
     
     printf("\n");
     printf(GENERAL_BOLD "[ -INFO- ] Job Information Summary:" RESET_DISPLAY "\n");
-    printf("|          App Name       : %s\n",job_info->app_name);
-    printf("|          Job Nodes      : %d\n",job_info->node_num);
-    printf("|          Cores Per Node : %d\n",job_info->tasks_per_node);
-    printf("|          Job Name       : %s\n",job_info->job_name);
-    printf("|          Duration Hours : %d\n",job_info->duration_hours);
-    printf("|          Job Executable : %s\n",job_info->job_exec);
-    printf("|          Data Directory : %s\n",job_info->job_data);
-    printf("|          Console Output : %s\n",job_info->echo_flag);
+    printf("[  ****  ] App Name       : %s\n",job_info->app_name);
+    printf("[  ****  ] Job Nodes      : %d\n",job_info->node_num);
+    printf("[  ****  ] Cores Per Node : %d\n",job_info->tasks_per_node);
+    printf("[  ****  ] Job Name       : %s\n",job_info->job_name);
+    printf("[  ****  ] Duration Hours : %d\n",job_info->duration_hours);
+    printf("[  ****  ] Job Executable : %s\n",job_info->job_exec);
+    printf("[  ****  ] Data Directory : %s\n",job_info->job_data);
+    printf("[  ****  ] Console Output : %s\n",job_info->echo_flag);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The job will be sent to the cluster.\n\n");
     return 0;
 }

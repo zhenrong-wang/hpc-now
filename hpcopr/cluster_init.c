@@ -389,12 +389,12 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
         }
     }
     if(valid_region_or_not(cluster_name,real_region)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The region name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",real_region);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The region name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",real_region);
         goto invalid_conf;
     }
     if(strcmp(cloud_flag,"CLOUD_F")!=0){
         if(get_default_nzone(cluster_name,real_region,default_zone,64)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The regions.list file may be incorrect. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The regions.list file may be incorrect." RESET_DISPLAY "\n");
             goto invalid_conf;
         }
         if(cmd_keyword_ncheck(argc,argv,"--az",real_zone,64)!=0){
@@ -419,7 +419,7 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
             }
         }
         if(valid_region_zone_or_not(cluster_name,real_region,real_zone)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The zone name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid for region " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " . Exit now." RESET_DISPLAY "\n",real_zone,real_region);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The zone name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid for region " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " ." RESET_DISPLAY "\n",real_zone,real_region);
             goto invalid_conf;
         }
     }
@@ -490,7 +490,7 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
             getchar();
             if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
                 if(check_reconfigure_list(workdir,1)!=0){
-                    printf(FATAL_RED_BOLD "[ FATAL: ] The reconf.list file may be incorrect. Exit now." RESET_DISPLAY "\n");
+                    printf(FATAL_RED_BOLD "[ FATAL: ] The reconf.list file may be incorrect." RESET_DISPLAY "\n");
                     goto invalid_conf; 
                 }
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
@@ -507,7 +507,7 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
         }
     }
     if(valid_vm_config_or_not(workdir,real_master_inst)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The instance type " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",real_master_inst);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The instance type " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",real_master_inst);
         goto invalid_conf;
     }
     if(cmd_keyword_ncheck(argc,argv,"--ci",real_compute_inst,16)!=0){
@@ -518,7 +518,7 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
             getchar();
             if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
                 if(check_reconfigure_list(workdir,1)!=0){
-                    printf(FATAL_RED_BOLD "[ FATAL: ] The reconf.list file may be incorrect. Exit now." RESET_DISPLAY "\n");
+                    printf(FATAL_RED_BOLD "[ FATAL: ] The reconf.list file may be incorrect." RESET_DISPLAY "\n");
                     goto invalid_conf; 
                 }
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
@@ -535,7 +535,7 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
         }
     }
     if(valid_vm_config_or_not(workdir,real_compute_inst)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The instance type " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid. Exit now." RESET_DISPLAY "\n",real_compute_inst);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The instance type " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",real_compute_inst);
         goto invalid_conf;
     }
     if(cmd_keyword_ncheck(argc,argv,"--os",real_os_image,96)!=0){
@@ -805,34 +805,34 @@ int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, clust
 
 void print_read_conf_failed(int read_conf_flag){
     if(read_conf_flag==-3){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Configuration file not found." RESET_DISPLAY "\n");
     }
     else if(read_conf_flag==1){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid format for NODE_NUM and/or HPC_USER_NUM." RESET_DISPLAY "\n");
     }
     else if(read_conf_flag==2){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Invalid node configuration string." RESET_DISPLAY "\n");
     }
     else if(read_conf_flag==3){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Insufficient configuration params." RESET_DISPLAY "\n");
     }
 }
 
 int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info){
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    printf("|          Cluster ID:            %s\n",init_info->cluster_id);
-    printf("|          Region:                %s\n",init_info->region_id);
-    printf("|          Availability Zone:     %s\n",init_info->zone_id);
-    printf("|          Number of Nodes:       %d\n",init_info->node_num);
-    printf("|          Number of Users:       %d\n",init_info->hpc_user_num);
-    printf("|          Master Node Instance:  %s\n",init_info->master_inst);
-    printf("|          Compute Node Instance: %s\n",init_info->compute_inst);
-    printf("|          OS Image:              %s" RESET_DISPLAY "\n",init_info->os_image_raw);
+    printf("[  ****  ] Cluster ID:            %s\n",init_info->cluster_id);
+    printf("[  ****  ] Region:                %s\n",init_info->region_id);
+    printf("[  ****  ] Availability Zone:     %s\n",init_info->zone_id);
+    printf("[  ****  ] Number of Nodes:       %d\n",init_info->node_num);
+    printf("[  ****  ] Number of Users:       %d\n",init_info->hpc_user_num);
+    printf("[  ****  ] Master Node Instance:  %s\n",init_info->master_inst);
+    printf("[  ****  ] Compute Node Instance: %s\n",init_info->compute_inst);
+    printf("[  ****  ] OS Image:              %s" RESET_DISPLAY "\n",init_info->os_image_raw);
     if(strcmp(init_info->ht_flag,"OFF")==0){
-        printf(HIGH_GREEN_BOLD "|          Hyperthreading:        %s" RESET_DISPLAY "\n",init_info->ht_flag);
+        printf(HIGH_GREEN_BOLD "[  ****  ] Hyperthreading:        %s" RESET_DISPLAY "\n",init_info->ht_flag);
     }
     if(init_info->hpc_nfs_volume>0){
-        printf(HIGH_GREEN_BOLD "|          Shared Volume (GB):    %d" RESET_DISPLAY "\n",init_info->hpc_nfs_volume);
+        printf(HIGH_GREEN_BOLD "[  ****  ] Shared Volume (GB):    %d" RESET_DISPLAY "\n",init_info->hpc_nfs_volume);
     }
     return confirm_to_init_cluster(init_info->cluster_id,batch_flag_local);
 }
@@ -1027,7 +1027,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
     if(get_tf_templates(confdir,stackdir,"aws",code_loc_flag_var,url_code_root_var)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s)." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }    
@@ -1049,8 +1049,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         threads=2;
     }
     if(contain_or_not(init_info.zone_id,init_info.region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
@@ -1211,7 +1210,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
+            printf("[  ****  ] Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -1356,7 +1355,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
     if(get_tf_templates(confdir,stackdir,"qcloud",code_loc_flag_var,url_code_root_var)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s)." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
@@ -1377,8 +1376,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
         find_and_nget(filename_temp,LINE_LENGTH_SHORT,init_info.region_id,"","",1,init_info.region_id,"","",' ',1,NAS_Zone,64);
     }
     if(contain_or_not(init_info.zone_id,init_info.region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
@@ -1514,7 +1512,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
+            printf("[  ****  ] Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -1649,7 +1647,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
     if(get_tf_templates(confdir,stackdir,"alicloud",code_loc_flag_var,url_code_root_var)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s)." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
@@ -1670,8 +1668,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
         find_and_nget(filename_temp,LINE_LENGTH_SHORT,init_info.region_id,"","",1,init_info.region_id,"","",' ',1,NAS_Zone,64);
     }
     if(contain_or_not(init_info.zone_id,init_info.region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
@@ -1801,7 +1798,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
+            printf("[  ****  ] Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -1972,7 +1969,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
     if(get_tf_templates(confdir,stackdir,"hwcloud",code_loc_flag_var,url_code_root_var)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s)." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
@@ -1986,8 +1983,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     }
     node_user_num_fix(&init_conf.node_num,&init_conf.hpc_user_num);
     if(contain_or_not(init_conf.zone_id,init_conf.region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
@@ -2128,7 +2124,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
+            printf("[  ****  ] Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -2260,7 +2256,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
     if(get_tf_templates(confdir,stackdir,"baidu",code_loc_flag_var,url_code_root_var)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s)." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
@@ -2274,8 +2270,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     }
     node_user_num_fix(&init_conf.node_num,&init_conf.hpc_user_num);
     if(contain_or_not(init_conf.zone_id,init_conf.region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 3;
     }
@@ -2422,7 +2417,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
+            printf("[  ****  ] Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -2572,7 +2567,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
     if(get_tf_templates(confdir,stackdir,"azure",code_loc_flag_var,url_code_root_var)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s)." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         return 2;
     }
@@ -2680,7 +2675,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
+            printf("[  ****  ] Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             return 7;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
@@ -2812,7 +2807,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
     if(get_tf_templates(confdir,stackdir,"gcp",code_loc_flag_var,url_code_root_var)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s). Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s)." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,1);
         gcp_credential_convert(workdir,"delete",0);
         return 2;
@@ -2828,8 +2823,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     }
     node_user_num_fix(&init_conf.node_num,&init_conf.hpc_user_num);
     if(contain_or_not(init_conf.zone_id,init_conf.region_id)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check.\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check." RESET_DISPLAY "\n");
         clear_if_failed(stackdir,confdir,vaultdir,2);
         gcp_credential_convert(workdir,"delete",0);
         return 3;
@@ -2949,7 +2943,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
             delete_decrypted_files(workdir,crypto_keyfile);
             clear_if_failed(stackdir,confdir,vaultdir,3);
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
-            printf("|          Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
+            printf("[  ****  ] Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
             gcp_credential_convert(workdir,"delete",0);
             return 7;
         }

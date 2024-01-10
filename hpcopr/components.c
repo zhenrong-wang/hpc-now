@@ -322,7 +322,7 @@ int show_vers_md5vars(void){
     char vers_and_md5[LINE_LENGTH_SHORT]=""; //Risky!
     if(file_p==NULL){
         printf("[ -FATAL- ] Failed to open the md5 file. Please try 'hpcopr envcheck',\n");
-        printf("|           or 'hpcopr configloc'. Or run 'hpcopr repair',\n");
+        printf("[  ****  ]  or 'hpcopr configloc'. Or run 'hpcopr repair',\n");
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY "Col.1:Component  Col.2:Version  Col.3 Exec_md5  Col.4:Zip_md5\n");
@@ -505,7 +505,7 @@ int show_locations(void){
     int i;
     if(file_p==NULL){
         printf("[ -FATAL- ] Failed to open the location config. Please try 'hpcopr envcheck',\n");
-        printf("|           or 'hpcopr configloc'. Or run 'hpcopr repair',\n");
+        printf("[  ****  ]  or 'hpcopr configloc'. Or run 'hpcopr repair',\n");
         return -1;
     }
     fngetline(file_p,loc_string,LOCATION_LENGTH);
@@ -702,8 +702,8 @@ int configure_locations(int batch_flag_local){
         return 1;
     }
     printf("[ LOC1/7 ] Please specify the root location of the tf binary and providers. \n");
-    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
-    printf("|          -> %s \n",DEFAULT_URL_TF_ROOT);
+    printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
+    printf("[  ****  ] -> %s \n",DEFAULT_URL_TF_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%383s",loc_string);
@@ -718,8 +718,8 @@ int configure_locations(int batch_flag_local){
         }
     }
     printf("[ LOC2/7 ] Please specify the root location of the infra-as-code templates. \n");
-    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
-    printf("|          -> %s \n",DEFAULT_URL_CODE_ROOT);
+    printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
+    printf("[  ****  ] -> %s \n",DEFAULT_URL_CODE_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%383s",loc_string);
@@ -734,8 +734,8 @@ int configure_locations(int batch_flag_local){
         }
     }
     printf("[ LOC3/7 ] Please specify the root location of the *online* shell scripts.\n");
-    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
-    printf("|          -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
+    printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
+    printf("[  ****  ] -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%383s",loc_string);
@@ -753,8 +753,8 @@ int configure_locations(int batch_flag_local){
         }
     }
     printf("[ LOC4/7 ] Please input the root location of the now-crypto binary.\n");
-    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
-    printf("|          -> %s \n",DEFAULT_URL_NOW_CRYPTO);
+    printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
+    printf("[  ****  ] -> %s \n",DEFAULT_URL_NOW_CRYPTO);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%383s",loc_string);
@@ -769,8 +769,8 @@ int configure_locations(int batch_flag_local){
         }
     }
     printf("[ LOC5/7 ] Please specify the location of the *online* repo for utils and apps.\n");
-    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
-    printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
+    printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
+    printf("[  ****  ] -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%383s",loc_string);
@@ -789,8 +789,8 @@ int configure_locations(int batch_flag_local){
     }
 
     printf("[ LOC6/7 ] Please specify the location of the *online* repo for application install scripts.\n");
-    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
-    printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
+    printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
+    printf("[  ****  ] -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%383s",loc_string);
@@ -809,8 +809,8 @@ int configure_locations(int batch_flag_local){
     }
 
     printf("[ LOC7/7 ] Please specify the location of the *online* repo for application packages.\n");
-    printf("|          You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
-    printf("|          -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
+    printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
+    printf("[  ****  ] -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%383s",loc_string);
@@ -831,7 +831,7 @@ int configure_locations(int batch_flag_local){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Updating the location configuration file now ... \n");
     file_p=fopen(LOCATION_CONF_FILE,"w+");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create or modify the target file. Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create or modify the target file." RESET_DISPLAY "\n");
         return -1;
     }
     fprintf(file_p,"*VERY IMPORTANT*: THIS FILE IS GENERATED AND MANAGED BY THE HPC-NOW SERVICES! *DO NOT* MODIFY OR HANDLE THIS FILE MANUALLY!\n");

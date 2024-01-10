@@ -20,16 +20,16 @@
 
 void print_empty_cluster_info(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " It seems the cluster is empty. You can either:\n");
-    printf("|          a) Run 'hpcopr init' to create a *default* cluster directly .\n");
-    printf("|          b) Run 'hpcopr init' with init options. e.g. --rg region_id .\n");
-    printf("|          c) Run 'hpcopr edit-conf' -> 'hpcopr init' (not recommended).\n");
+    printf("[  ****  ] a) Run 'hpcopr init' to create a *default* cluster directly .\n");
+    printf("[  ****  ] b) Run 'hpcopr init' with init options. e.g. --rg region_id .\n");
+    printf("[  ****  ] c) Run 'hpcopr edit-conf' -> 'hpcopr init' (not recommended).\n");
 }
 
 void print_cluster_init_done(void){
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The cluster is initializing now. " WARN_YELLO_BOLD "This step needs\n");
-    printf("|          at least *7* minutes. *DO NOT* operate the cluster during \n"); 
-    printf("|          this period." RESET_DISPLAY " Use 'hpcopr ssh -u USERNAME' to log in by SSH.\n");
-    printf("|          " HIGH_CYAN_BOLD "The desktop will be ready after the init process." RESET_DISPLAY "\n");
+    printf("[  ****  ] at least *7* minutes. *DO NOT* operate the cluster during \n"); 
+    printf("[  ****  ] this period." RESET_DISPLAY " Use 'hpcopr ssh -u USERNAME' to log in by SSH.\n");
+    printf("[  ****  ] " HIGH_CYAN_BOLD "The desktop will be ready after the init process." RESET_DISPLAY "\n");
 }
 
 void print_header(void){
@@ -44,22 +44,21 @@ void print_header(void){
 
 void print_tail(void){
     printf("\n");
-    printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com" GENERAL_BOLD " <> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
+    printf(GENERAL_BOLD "+> visit:" RESET_DISPLAY " https://www.hpc-now.com    " GENERAL_BOLD "+> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
 }
 
 void print_new_cluster_done(int gcp_flag){
     if(gcp_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The key file has been encrypted and stored. " WARN_YELLO_BOLD "We recommend you\n");
-        printf("|          to delete the original key file to avoid key leakage!" RESET_DISPLAY " Now you can either:\n");
+        printf("[  ****  ] to delete the original key file to avoid key leakage!" RESET_DISPLAY " Now you can either:\n");
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The key pair has been encrypted and stored locally. You can either:\n");
+        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The key pair has been encrypted and stored locally. You can either:\n");
     }
-    printf("|          1. run 'hpcopr init' to create a default cluster. OR\n");
-    printf("|          2. run 'hpcopr get-conf' to get the default cluster configuration, and run\n");
-    printf("|             'hpcopr init' to create a customized cluster.\n");
-    printf("|          You can also switch to this cluster name and operate this cluster later.\n");
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Exit now.\n");
+    printf("[  ****  ] 1. run 'hpcopr init' to create a default cluster. OR\n");
+    printf("[  ****  ] 2. run 'hpcopr get-conf' to get the default cluster configuration, and run\n");
+    printf("[  ****  ]    'hpcopr init' to create a customized cluster.\n");
+    printf("[  ****  ] You can also switch to this cluster name and operate this cluster later.\n");
 }
 
 void print_help(char* cmd_name){
@@ -396,7 +395,7 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "repair" RESET_DISPLAY "      :~ Try to repair the hpcopr core components.\n");
     }
     printf("\n");
-    printf(GENERAL_BOLD "<> visit:" RESET_DISPLAY " https://www.hpc-now.com " GENERAL_BOLD "<> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
+    printf(GENERAL_BOLD "+> visit:" RESET_DISPLAY " https://www.hpc-now.com    " GENERAL_BOLD "+> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
 }
 
 void print_version(void){

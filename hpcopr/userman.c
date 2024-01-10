@@ -130,7 +130,7 @@ int hpc_user_delete(char* workdir, char* crypto_keyfile, char* sshkey_dir, char*
     if(remote_exec_general(workdir,crypto_keyfile,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
         snprintf(remote_commands,CMDLINE_LENGTH-1,"cat /root/.cluster_secrets/user_secrets.txt | grep -w %s",username);
         if(remote_exec_general(workdir,crypto_keyfile,sshkey_dir,"root",remote_commands,"-n",0,0,"","")==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the user %s from your cluster. Exit now." RESET_DISPLAY "\n",username);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the user %s from your cluster." RESET_DISPLAY "\n",username);
             delete_decrypted_user_passwords(workdir);
             return 1;
         }
@@ -188,7 +188,7 @@ int hpc_user_enable_disable(char* workdir, char* sshkey_dir, char* username, cha
     snprintf(username_ext,127,"username: %s ",username);
 
     if(find_multi_nkeys(user_registry_file,LINE_LENGTH_SHORT,username_ext,new_keywords,"","","")>0){
-        printf(GENERAL_BOLD "[ -INFO- ] The user %s is already %s. Exit now.\n" RESET_DISPLAY,username,new_keywords);
+        printf(GENERAL_BOLD "[ -INFO- ] The user %s is already %s.\n" RESET_DISPLAY,username,new_keywords);
         delete_decrypted_user_passwords(workdir);
         return -5;
     }
@@ -296,7 +296,7 @@ int hpc_user_add(char* workdir, char* sshkey_dir, char* crypto_keyfile, char* us
             return 0;
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to add the user %s to your cluster. Exit now.\n",username);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to add the user %s to your cluster.\n",username);
             delete_decrypted_user_passwords(workdir);
             return 1;
         }

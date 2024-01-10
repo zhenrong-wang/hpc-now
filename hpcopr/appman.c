@@ -99,7 +99,7 @@ int app_operation(char* workdir, char* crypto_keyfile, char* user_name, char* op
         return 1;
     }
     printf(GENERAL_BOLD "[ -INFO- ] App operation is in progress. Detailed info as below.\n");
-    printf("|          You can press 'ctrl C' to stop viewing the log.\n" RESET_DISPLAY "\n");
+    printf("[  ****  ] You can press 'ctrl C' to stop viewing the log.\n" RESET_DISPLAY "\n");
     snprintf(remote_commands,CMDLINE_LENGTH-1,"tail -f /hpc_apps/%s_apps/appman_%s.log",user_name,app_name);
     run_flag=remote_exec_general(workdir,crypto_keyfile,sshkey_dir,user_name,remote_commands,"-t",0,1,"","");
     if(run_flag!=0){

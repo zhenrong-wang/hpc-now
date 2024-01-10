@@ -351,31 +351,28 @@ int main(int argc, char* argv[]){
 #ifdef _WIN32
     if(folder_exist_or_not("c:\\hpc-now")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The key directory C:\\hpc-now\\ is missing. The services cannot start.\n");
-        printf("|          Please switch to Administrator and re-install the services to fix.\n");
-        printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf("[  ****  ] Please switch to Administrator and re-install the services to fix.\n");
+        printf("[  ****  ] If this issue still occurs, please contact us via info@hpc-now.com ." RESET_DISPLAY "\n");
         print_tail();
         return 119;
     }
 #elif __APPLE__
     if(folder_exist_or_not("/Applications/.hpc-now/")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The service is corrupted due to missing critical folder. Please exit\n");
-        printf("|          and run the installer with 'sudo' to reinstall it. Sample command:\n");
-        printf("|          sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
-        printf("|          sudo YOUR_INSTALLER_FULL_PATH install\n");
-        printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf("[  ****  ] and run the installer with 'sudo' to reinstall it. Sample command:\n");
+        printf("[  ****  ] sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
+        printf("[  ****  ] sudo YOUR_INSTALLER_FULL_PATH install\n");
+        printf("[  ****  ] If this issue still occurs, please contact us via info@hpc-now.com ." RESET_DISPLAY "\n");
         print_tail();
         return 119;
     }
 #elif __linux__
     if(folder_exist_or_not("/usr/.hpc-now/")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The service is corrupted due to missing critical folder. Please exit\n");
-        printf("|          and run the installer with 'sudo' to reinstall it. Sample command:\n");
-        printf("|          sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
-        printf("|          sudo YOUR_INSTALLER_FULL_PATH install\n");
-        printf("|          If this issue still occurs, please contact us via info@hpc-now.com .\n");
-        printf("[ FATAL: ] Exit now." RESET_DISPLAY "\n");
+        printf("[  ****  ] and run the installer with 'sudo' to reinstall it. Sample command:\n");
+        printf("[  ****  ] sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
+        printf("[  ****  ] sudo YOUR_INSTALLER_FULL_PATH install\n");
+        printf("[  ****  ] If this issue still occurs, please contact us via info@hpc-now.com ." RESET_DISPLAY "\n");
         print_tail();
         return 119;
     }
@@ -768,6 +765,12 @@ int main(int argc, char* argv[]){
     }
     
     if(strcmp(final_command,"rename")==0){
+        if(check_pslock(workdir,decryption_status(workdir))!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Another process is operating this cluster, please wait and retry." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"PROCESS_LOCKED",53);
+            check_and_cleanup(workdir);
+            return 53;
+        }
         if(cmd_keyword_ncheck(argc,argv,"--cname",string_temp,64)!=0){
             if(batch_flag==0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] No new name specified. Use --cname NEW_CLUSTER_NAME ." RESET_DISPLAY "\n");
@@ -808,7 +811,7 @@ int main(int argc, char* argv[]){
             run_flag=refresh_cluster(cluster_name,crypto_keyfile,"",&tf_this_run);
         }
         if(run_flag!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to refresh cluster %s. Exit now.\n" RESET_DISPLAY,cluster_name);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to refresh cluster %s.\n" RESET_DISPLAY,cluster_name);
             write_operation_log(cluster_name,operation_log,argc,argv,"REFRESH_FAILED",31);
             check_and_cleanup(workdir);
             return 31;
@@ -1327,7 +1330,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a source path for this command.\n");
                 if(strcmp(data_cmd,"put")!=0&&strcmp(data_cmd,"get")!=0&&strcmp(data_cmd,"copy")!=0&&strcmp(data_cmd,"move")!=0){
-                    printf("|          Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
+                    printf("[  ****  ] Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
@@ -1343,7 +1346,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a destination path for this command.\n");
                 if(strcmp(data_cmd,"put")!=0&&strcmp(data_cmd,"get")!=0&&strcmp(data_cmd,"copy")!=0&&strcmp(data_cmd,"move")!=0){
-                    printf("|          Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
+                    printf("[  ****  ] Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
@@ -1361,7 +1364,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a target path for this command.\n");
                 if(strcmp(data_cmd,"list")!=0&&strcmp(data_cmd,"delete")!=0){
-                    printf("|          Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
+                    printf("[  ****  ] Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
@@ -1445,8 +1448,7 @@ int main(int argc, char* argv[]){
     }
 
     if(check_pslock(workdir,decryption_status(workdir))==1){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Another process is operating this cluster, please wait and retry.\n");
-        printf("|          Exit now." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] Another process is operating this cluster, please wait and retry." RESET_DISPLAY "\n");
         write_operation_log(cluster_name,operation_log,argc,argv,"PROCESS_LOCKED",53);
         check_and_cleanup(workdir);
         return 53;
@@ -1454,7 +1456,7 @@ int main(int argc, char* argv[]){
     if(strcmp(final_command,"get-conf")==0){
         if(cluster_empty_or_not(workdir,crypto_keyfile)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
-            printf("|          this operation is not allowed. Exit now." RESET_DISPLAY "\n");
+            printf("[  ****  ] this operation is not allowed." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_NOT_EMPTY",51);
             check_and_cleanup(workdir);
             return 51;
@@ -1479,8 +1481,8 @@ int main(int argc, char* argv[]){
             return 125;
         }
         else{
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The default configuration file has been downloaded to the local place.\n");
-            printf("|          You can init directly, or edit it before init. Exit now.\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The default configuration file has been downloaded to local.\n");
+            printf("[  ****  ] You can init directly, or edit it before init.\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
             check_and_cleanup(workdir);
             return 0;
@@ -1490,7 +1492,7 @@ int main(int argc, char* argv[]){
     if(strcmp(final_command,"edit-conf")==0||strcmp(final_command,"rm-conf")==0){
         if(cluster_empty_or_not(workdir,crypto_keyfile)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
-            printf("|          this operation is not allowed. Exit now." RESET_DISPLAY "\n");
+            printf("[  ****  ] this operation is not allowed." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_NOT_EMPTY",51);
             check_and_cleanup(workdir);
             return 51;
@@ -1507,8 +1509,7 @@ int main(int argc, char* argv[]){
             run_flag=remove_conf(cluster_name);
         }
         if(run_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] No configuration file found. You can run " WARN_YELLO_BOLD "hpcopr get-conf" RESET_DISPLAY FATAL_RED_BOLD " first.\n");
-            printf("|          Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] No configuration file found. Run " WARN_YELLO_BOLD "hpcopr get-conf" RESET_DISPLAY FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"NO_CONFIG_FILE",55);
             check_and_cleanup(workdir);
             return 55;
@@ -1525,7 +1526,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(final_command,"init")==0){
         if(cluster_empty_or_not(workdir,crypto_keyfile)!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster has already been initialized. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster has already been initialized." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"ALREADY_INITED",57);
             check_and_cleanup(workdir);
             return 57;
@@ -1558,7 +1559,7 @@ int main(int argc, char* argv[]){
             run_flag=gcp_cluster_init(workdir,crypto_keyfile,batch_flag,&tf_this_run);
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider." RESET_DISPLAY "\n");
             check_and_cleanup(workdir);
             return 59;
         }
@@ -1726,7 +1727,7 @@ int main(int argc, char* argv[]){
         }
         run_flag=prompt_to_input_required_args("Please specify a positive number as the new volume",string_temp,batch_flag,argc,argv,"--vol");
         if(run_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] New volume not specified. Exit now." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] New volume not specified. Use --vol VOLUME_GB." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"TOO_FEW_PARAM",5);
             check_and_cleanup(workdir);
             return 5;
@@ -1801,7 +1802,7 @@ int main(int argc, char* argv[]){
         if(cluster_state_flag!=0){
             if(cmd_flag_check(argc,argv,"--all")!=0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "minimal running" RESET_DISPLAY FATAL_RED_BOLD ". Please try " RESET_DISPLAY "\n");
-                printf(FATAL_RED_BOLD "|          " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD " to wake up the whole cluster." RESET_DISPLAY "\n");
+                printf(FATAL_RED_BOLD "[  ****  ] " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD " to wake up the whole cluster." RESET_DISPLAY "\n");
                 write_operation_log(cluster_name,operation_log,argc,argv,"RUNNING_STATE",38);
                 check_and_cleanup(workdir);
                 return 38;
@@ -1854,7 +1855,7 @@ int main(int argc, char* argv[]){
                 return 5;
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a user manager command below:\n");
-            printf("|          list | add | delete | enable | disable | passwd \n");
+            printf("[  ****  ] list | add | delete | enable | disable | passwd \n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
             scanf("%127s",user_cmd);
@@ -1997,7 +1998,7 @@ int main(int argc, char* argv[]){
                 return 5;
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a valid command:\n");
-            printf(GENERAL_BOLD "|         " RESET_DISPLAY " store, avail, build, install, check, remove, update-conf, check-conf\n");
+            printf(GENERAL_BOLD "[  ****  ]" RESET_DISPLAY " store, avail, build, install, check, remove, update-conf, check-conf\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
             fflush(stdin);
             scanf("%127s",app_cmd);
@@ -2012,7 +2013,7 @@ int main(int argc, char* argv[]){
         }
         if(i==8){
             printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is incorrect. Valid commands:" RESET_DISPLAY "\n",app_cmd);
-            printf(GENERAL_BOLD "|         " RESET_DISPLAY " store, avail, build, install, check, remove, update-conf, check-conf\n");
+            printf(GENERAL_BOLD "[  ****  ]" RESET_DISPLAY " store, avail, build, install, check, remove, update-conf, check-conf\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
@@ -2094,7 +2095,7 @@ int main(int argc, char* argv[]){
         }
         if(i==3){
             printf(FATAL_RED_BOLD "[ FATAL: ] The command " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is incorrect. Please read the help for details." RESET_DISPLAY "\n",job_cmd);
-            printf(GENERAL_BOLD "|          " RESET_DISPLAY " submit, list, cancel\n");
+            printf(GENERAL_BOLD "[  ****  ] " RESET_DISPLAY " submit, list, cancel\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
             check_and_cleanup(workdir);
             return 9;
