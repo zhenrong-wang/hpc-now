@@ -1938,10 +1938,10 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     getstate(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     if(strcmp(option,"all")==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY HIGH_CYAN_BOLD " ALL MODE:" RESET_DISPLAY " Turning on all the nodes of the current cluster.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY HIGH_CYAN_BOLD " ALL MODE:" RESET_DISPLAY " Turning on all the nodes.\n");
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY HIGH_CYAN_BOLD " MINIMAL MODE:" RESET_DISPLAY " Turning on the management nodes of the current cluster.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY HIGH_CYAN_BOLD " MINIMAL MODE:" RESET_DISPLAY " Turning on the management nodes.\n");
     }
     node_file_to_running(stackdir,"master",cloud_flag);
     node_file_to_running(stackdir,"database",cloud_flag);
