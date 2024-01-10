@@ -2003,27 +2003,27 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         strcpy(payment_method_long,"On-Demand PostPaid");
     }
     if(graph_level==0){
-        printf(GENERAL_BOLD "|        " RESET_DISPLAY "+-" GENERAL_BOLD "Cluster name: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY " +-" GENERAL_BOLD "Cluster role: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "\n",cluster_name,cluster_role);
-        printf("|        " RESET_DISPLAY "+-" GENERAL_BOLD "Payment method: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "-" HIGH_CYAN_BOLD "%s" RESET_DISPLAY " +-" GENERAL_BOLD "Cloud flag: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY"\n",payment_method,payment_method_long,cloud_flag);
-        printf("|          +-master(%s,%s,%s)\n",master_address,master_status,master_config);
-        printf("|          +-+-db(%s)\n",db_status);
+        printf(GENERAL_BOLD "[  ****  ] " RESET_DISPLAY "+-" GENERAL_BOLD "Cluster name: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY " +-" GENERAL_BOLD "Cluster role: " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY GENERAL_BOLD "\n",cluster_name,cluster_role);
+        printf("[  ****  ] " RESET_DISPLAY "+-" GENERAL_BOLD "Payment method: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "-" HIGH_CYAN_BOLD "%s" RESET_DISPLAY " +-" GENERAL_BOLD "Cloud flag: " HIGH_CYAN_BOLD "%s" RESET_DISPLAY"\n",payment_method,payment_method_long,cloud_flag);
+        printf("[  ****  ] " GREY_LIGHT "+-" RESET_DISPLAY "+-master(%s,%s,%s)\n",master_address,master_status,master_config);
+        printf("[  ****  ] " GREY_LIGHT "+-" RESET_DISPLAY "+-+-db(%s)\n",db_status);
         for(i=0;i<node_num;i++){
             snprintf(string_temp,31,"compute%d_private_ip:",i+1);
             get_key_nvalue(statefile,LINE_LENGTH_SHORT,string_temp,' ',compute_address,32);
             snprintf(string_temp,31,"compute%d_status:",i+1);
             get_key_nvalue(statefile,LINE_LENGTH_SHORT,string_temp,' ',compute_status,16);
             if(strlen(ht_status_ext)!=0){
-                printf("|            +-+-compute%d(%s,%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config,ht_status_ext);
+                printf("[  ****  ] " GREY_LIGHT "+-+-" RESET_DISPLAY "+-+-compute%d(%s,%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config,ht_status_ext);
             }
             else{
-                printf("|            +-+-compute%d(%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config);
+                printf("[  ****  ] " GREY_LIGHT "+-+-" RESET_DISPLAY "+-+-compute%d(%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config);
             }
         }
         if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0){
-            printf("|          +-shared_storage(%s GB)\n",shared_volume);
+            printf("[  ****  ] +-shared_storage(%s GB)\n",shared_volume);
         }
         if(decrypt_flag!=0){
-            printf(FATAL_RED_BOLD "|        VERY RISKY!!! The cluster is decrypted and NOT protected!" RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ -WARN- ] VERY RISKY!!! The cluster is decrypted and NOT protected!" RESET_DISPLAY "\n");
         }
     }
     else if(graph_level==1){
