@@ -1801,7 +1801,7 @@ int main(int argc, char* argv[]){
         }
         if(cluster_state_flag!=0){
             if(cmd_flag_check(argc,argv,"--all")!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY GENERAL_BOLD "minimal running" RESET_DISPLAY FATAL_RED_BOLD ". Please try " RESET_DISPLAY "\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY GENERAL_BOLD "minimal running" RESET_DISPLAY FATAL_RED_BOLD ". Please run the command " RESET_DISPLAY "\n");
                 printf(FATAL_RED_BOLD "[  ****  ] " RESET_DISPLAY GENERAL_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD " to wake up the whole cluster." RESET_DISPLAY "\n");
                 write_operation_log(cluster_name,operation_log,argc,argv,"RUNNING_STATE",38);
                 check_and_cleanup(workdir);
