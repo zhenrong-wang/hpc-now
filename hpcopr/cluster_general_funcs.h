@@ -140,9 +140,9 @@ int get_nworkdir_without_last_slash(char* cluster_workdir, unsigned int dirlen_m
 
 int get_cluster_name(char* cluster_name, char* cluster_workdir);
 int get_cluster_nname(char* cluster_name, unsigned int cluster_name_len_max, char* cluster_workdir); //Newer function
-
+int file_convert(char* filename_base, char* extra_str, char* option);
+int registry_dec_backup(void);
 int check_cluster_registry(void);
-int encrypted_file_convert(char* filename_base, char* extra_str, char* option);
 int encrypt_decrypt_cluster_registry(char* option);
 int line_check_by_keyword(char* line, char* keyword, char split_ch, int seq_num);
 int list_all_cluster_names(int header_flag);

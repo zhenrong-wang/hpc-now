@@ -104,7 +104,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
         max_cluster_name_length=get_max_cluster_name_length();
         generate_random_nstring(randstr,7,0);
-        encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+        file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
         FILE* file_p=fopen(filename_temp,"r");
         if(file_p==NULL){
@@ -162,7 +162,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             }
         }
         fclose(file_p);
-        encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete");
+        file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete_decrypted");
         if(i==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] The local cluster registry is empty." RESET_DISPLAY "\n");
             return 0;
@@ -304,10 +304,11 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     /* If the workdir is empty, skip the /stack and /conf */
 
     generate_random_nstring(randstr,7,0);
-    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+    file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,registry_line_prev,registry_line_new);
-    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"backup_encrypt");
+    file_convert(ALL_CLUSTER_REGISTRY,randstr,"encrypt");
+    registry_dec_backup();
 
     global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_SHORT,registry_line_prev,registry_line_new);
     /* If the cluster is empty, exit normally. */
@@ -321,7 +322,12 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
         system(cmdline);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_ssh_dir,prev_ssh_dir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"restore_encrypt");
+        global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_SHORT,registry_line_new,registry_line_prev);
+        file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,registry_line_new,registry_line_prev);
+        file_convert(ALL_CLUSTER_REGISTRY,randstr,"encrypt");
+        registry_dec_backup();
         printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory." RESET_DISPLAY "\n");
         return -3;
     }
@@ -370,7 +376,11 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
         system(cmdline);
         global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_SHORT,registry_line_new,registry_line_prev);
         printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory and sshkey directory." RESET_DISPLAY "\n");
-        encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"restore_encrypt");
+        file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,registry_line_new,registry_line_prev);
+        file_convert(ALL_CLUSTER_REGISTRY,randstr,"encrypt");
+        registry_dec_backup();
         return 1;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scompute_template",new_stackdir,PATH_SLASH);
@@ -381,7 +391,7 @@ update_summary:
     system(cmdline);
     global_nreplace(USAGE_LOG_FILE,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
 print_finished:
-    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete_backup");
+    file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete_decrypted_backup");
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Renamed the cluster " GENERAL_BOLD "%s" RESET_DISPLAY " to " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",cluster_prev_name,cluster_new_name);
     return 0;
 }
@@ -1954,10 +1964,10 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     getstate(workdir,crypto_keyfile);
     compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     if(strcmp(option,"all")==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY HIGH_CYAN_BOLD " ALL MODE:" RESET_DISPLAY " Turning on all the nodes.\n");
+        printf(GENERAL_BOLD "[ -INFO- ] ALL MODE:" RESET_DISPLAY " Turning on all the nodes.\n");
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY HIGH_CYAN_BOLD " MINIMAL MODE:" RESET_DISPLAY " Turning on the management nodes.\n");
+        printf(GENERAL_BOLD "[ -INFO- ] MINIMAL MODE:" RESET_DISPLAY " Turning on the management nodes.\n");
     }
     node_file_to_running(stackdir,"master",cloud_flag);
     node_file_to_running(stackdir,"database",cloud_flag);

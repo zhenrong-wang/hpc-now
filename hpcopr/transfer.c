@@ -533,7 +533,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         return -5;
     }
     generate_random_nstring(randstr_registry,7,1);
-    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr_registry,"decrypt");
+    file_convert(ALL_CLUSTER_REGISTRY,randstr_registry,"decrypt");
     snprintf(filename_temp,FILENAME_LENGTH,"%s.%s",ALL_CLUSTER_REGISTRY,randstr_registry);
     FILE* file_p=fopen(filename_temp,"r"); /* file opened */
     if(file_p==NULL){ /* file_open failed, exit immediately */
@@ -568,7 +568,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         }
     }
     fclose(file_p); /* file closed */
-    encrypted_file_convert(ALL_CLUSTER_REGISTRY,randstr_registry,"delete");
+    file_convert(ALL_CLUSTER_REGISTRY,randstr_registry,"delete_decrypted");
     if(duplicate_flag==5){
         printf(FATAL_RED_BOLD "[ FATAL: ] You are operating the identical cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ", import abort." RESET_DISPLAY "\n",cluster_name_temp);
         delete_file_or_dir(tmp_import_root);
