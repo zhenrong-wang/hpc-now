@@ -918,7 +918,6 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf("[  ****  ] 2. The specified location (if specified) is correct.\n");
         printf("[  ****  ] 3. Your device is connected to the internet.\n");
         printf("[  ****  ] 4. Currently there is no 'hpcopr' thread(s) running.\n");
-        printf("[ FATAL: ] Please check and retry." RESET_DISPLAY "\n");
 #ifdef _WIN32
         system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
         system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
