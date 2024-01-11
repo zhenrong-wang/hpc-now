@@ -2974,6 +2974,7 @@ int get_nucid(char* workdir, char* crypto_keyfile, char* ucid_string, unsigned i
         get_key_nvalue(cluster_vaults_decrypted,LINE_LENGTH_SHORT,"short_unique_id:",' ',ucid_string,ucid_strlen_max);
         secure_encrypt_and_delete(cluster_vaults_decrypted,crypto_keyfile);
         if(strlen(ucid_string)>0){
+            //printf("%s--\n",ucid_string);
             return 0;
         }
     }
@@ -2987,6 +2988,7 @@ int get_nucid(char* workdir, char* crypto_keyfile, char* ucid_string, unsigned i
     if(strlen(ucid_string)<1){
         return 1;
     }
+    //printf("%s--\n",ucid_string);
     return 0;
 }
 

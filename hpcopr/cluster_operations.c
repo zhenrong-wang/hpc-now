@@ -124,7 +124,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 printf(GENERAL_BOLD "| switch : <> ");
             }
             else{
-                printf(RESET_DISPLAY "| :::::: : <> ");
+                printf(RESET_DISPLAY GREY_LIGHT "| :::::: : <> " RESET_DISPLAY);
             }
             temp_cluster_name_length=strlen(temp_cluster_name);
             reset_nstring(temp_cluster_name_column,32);
@@ -182,7 +182,7 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             printf(GENERAL_BOLD "| switch : <> ");
         }
         else{
-            printf(RESET_DISPLAY "| :::::: : <> ");
+            printf(RESET_DISPLAY GREY_LIGHT "| :::::: : <> " RESET_DISPLAY);
         }
         decrypt_flag=decryption_status(temp_cluster_workdir);
         status_flag=check_pslock(temp_cluster_workdir,decrypt_flag);
@@ -327,6 +327,7 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     }
     snprintf(unique_cluster_id_prev,63,"%s-%s",cluster_prev_name,ucid_short);
     snprintf(unique_cluster_id_new,63,"%s-%s",cluster_new_name,ucid_short);
+    //printf("%s\n%s\n",unique_cluster_id_prev,unique_cluster_id_new);
     if(strcmp(cluster_role,"opr")!=0){
         goto print_finished;
     }

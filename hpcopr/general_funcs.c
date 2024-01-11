@@ -1351,7 +1351,7 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     unsigned int seed_num;
     int total_times,rand_num;
     struct timeval current_time;
-    int ch_table_length=62+strlen(special_chars_string)+1;
+    int ch_table_length=62+strlen(special_chars_string);
     char* ch_table_final=(char*)malloc(sizeof(char)*ch_table_length);
     if(ch_table_final==NULL){
         free(special_chars_string);
@@ -1359,7 +1359,7 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     }
     memset(ch_table_final,'\0',ch_table_length);
     memcpy(ch_table_final,ch_table_base,62);
-    memcpy(ch_table_final+62,special_chars_array,special_chars_array_len);
+    memcpy(ch_table_final+62,special_chars_string,strlen(special_chars_string));
     char* password_temp=(char*)malloc(sizeof(char)*password_array_len);
     if(password_temp==NULL){
         free(special_chars_string);
@@ -1367,6 +1367,7 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
         return -5;
     }
     memset(password_temp,'\0',password_array_len);
+    //printf("%d  -- %d -- %s\n",ch_table_length,strlen(ch_table_final),ch_table_final);
     for(total_times=0;total_times<16;total_times++){
         for(i=0;i<password_array_len-1;i++){
             /* call gettimeofday() to get current time in usec*/
