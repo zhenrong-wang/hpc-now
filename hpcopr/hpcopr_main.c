@@ -663,7 +663,7 @@ int main(int argc, char* argv[]){
 
     //Automatically encrypt the decrypted files for a specific cluster.
     if(decrypt_flag==1){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster " RESET_DISPLAY HIGH_GREEN_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is decrypted." RESET_DISPLAY "\n",cluster_name);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is decrypted." RESET_DISPLAY "\n",cluster_name);
         encrypt_decrypt_clusters(cluster_name,crypto_keyfile,"encrypt",0); //This operation is automatic. Use 0 as the batch flag.
     }
     
@@ -748,7 +748,7 @@ int main(int argc, char* argv[]){
             return 127;
         }
         else if(run_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY HIGH_CYAN_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY GENERAL_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster." RESET_DISPLAY "\n");
             write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
             check_and_cleanup(workdir);
             return 25;
@@ -1330,7 +1330,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a source path for this command.\n");
                 if(strcmp(data_cmd,"put")!=0&&strcmp(data_cmd,"get")!=0&&strcmp(data_cmd,"copy")!=0&&strcmp(data_cmd,"move")!=0){
-                    printf("[  ****  ] Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
+                    printf("[  ****  ] Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " GENERAL_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
@@ -1346,7 +1346,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a destination path for this command.\n");
                 if(strcmp(data_cmd,"put")!=0&&strcmp(data_cmd,"get")!=0&&strcmp(data_cmd,"copy")!=0&&strcmp(data_cmd,"move")!=0){
-                    printf("[  ****  ] Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
+                    printf("[  ****  ] Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " GENERAL_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
@@ -1364,7 +1364,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a target path for this command.\n");
                 if(strcmp(data_cmd,"list")!=0&&strcmp(data_cmd,"delete")!=0){
-                    printf("[  ****  ] Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " HIGH_CYAN_BOLD "Cluster paths" RESET_DISPLAY ".\n");
+                    printf("[  ****  ] Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " GENERAL_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
@@ -1794,15 +1794,15 @@ int main(int argc, char* argv[]){
             return 6;
         }
         if(cluster_full_running_or_not(workdir,crypto_keyfile)==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "fully running" RESET_DISPLAY FATAL_RED_BOLD ". No need to wake up." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY GENERAL_BOLD "fully running" RESET_DISPLAY FATAL_RED_BOLD ". No need to wake up." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"RUNNING_STATE",38);
             check_and_cleanup(workdir);
             return 38;
         }
         if(cluster_state_flag!=0){
             if(cmd_flag_check(argc,argv,"--all")!=0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY HIGH_CYAN_BOLD "minimal running" RESET_DISPLAY FATAL_RED_BOLD ". Please try " RESET_DISPLAY "\n");
-                printf(FATAL_RED_BOLD "[  ****  ] " RESET_DISPLAY HIGH_GREEN_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD " to wake up the whole cluster." RESET_DISPLAY "\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] The cluster is already " RESET_DISPLAY GENERAL_BOLD "minimal running" RESET_DISPLAY FATAL_RED_BOLD ". Please try " RESET_DISPLAY "\n");
+                printf(FATAL_RED_BOLD "[  ****  ] " RESET_DISPLAY GENERAL_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD " to wake up the whole cluster." RESET_DISPLAY "\n");
                 write_operation_log(cluster_name,operation_log,argc,argv,"RUNNING_STATE",38);
                 check_and_cleanup(workdir);
                 return 38;
@@ -2042,7 +2042,7 @@ int main(int argc, char* argv[]){
                     check_and_cleanup(workdir);
                     return 5;
                 }
-                printf(GENERAL_BOLD "[ -INFO- ] Please specify an app name, e.g. " HIGH_CYAN_BOLD "mpich4" RESET_DISPLAY " :\n");
+                printf(GENERAL_BOLD "[ -INFO- ] Please specify an app name, e.g. " HIGH_GREEN_BOLD "mpich4" RESET_DISPLAY " :\n");
                 printf(GENERAL_BOLD "[ INPUT: ] ");
                 fflush(stdin);
                 scanf("%127s",app_name);
