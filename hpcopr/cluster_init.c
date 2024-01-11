@@ -820,19 +820,19 @@ void print_read_conf_failed(int read_conf_flag){
 
 int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info){
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    printf("[  ****  ] Cluster ID:            %s\n",init_info->cluster_id);
-    printf("[  ****  ] Region:                %s\n",init_info->region_id);
-    printf("[  ****  ] Availability Zone:     %s\n",init_info->zone_id);
-    printf("[  ****  ] Number of Nodes:       %d\n",init_info->node_num);
-    printf("[  ****  ] Number of Users:       %d\n",init_info->hpc_user_num);
-    printf("[  ****  ] Master Node Instance:  %s\n",init_info->master_inst);
-    printf("[  ****  ] Compute Node Instance: %s\n",init_info->compute_inst);
-    printf("[  ****  ] OS Image:              %s" RESET_DISPLAY "\n",init_info->os_image_raw);
+    printf("[  ****  ] Cluster Name    : %s\n",init_info->cluster_id);
+    printf("[  ****  ] Cloud Region    : %s\n",init_info->region_id);
+    printf("[  ****  ] Cloud AZ        : %s\n",init_info->zone_id);
+    printf("[  ****  ] Number of Nodes : %d\n",init_info->node_num);
+    printf("[  ****  ] Number of Users : %d\n",init_info->hpc_user_num);
+    printf("[  ****  ] Master Node     : %s\n",init_info->master_inst);
+    printf("[  ****  ] Compute Node    : %s\n",init_info->compute_inst);
+    printf("[  ****  ] OS Image        : %s" RESET_DISPLAY "\n",init_info->os_image_raw);
     if(strcmp(init_info->ht_flag,"OFF")==0){
-        printf(HIGH_GREEN_BOLD "[  ****  ] Hyperthreading:        %s" RESET_DISPLAY "\n",init_info->ht_flag);
+        printf(HIGH_GREEN_BOLD "[  ****  ] Hyperthreading  : %s" RESET_DISPLAY "\n",init_info->ht_flag);
     }
     if(init_info->hpc_nfs_volume>0){
-        printf(HIGH_GREEN_BOLD "[  ****  ] Shared Volume (GB):    %d" RESET_DISPLAY "\n",init_info->hpc_nfs_volume);
+        printf(HIGH_GREEN_BOLD "[  ****  ] NFS Volume (GB) : %d" RESET_DISPLAY "\n",init_info->hpc_nfs_volume);
     }
     return confirm_to_init_cluster(init_info->cluster_id,batch_flag_local);
 }
@@ -2552,12 +2552,15 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        /*printf("HHHHHxxx! \n");*/
         return -1;
     }
     if(get_azure_ninfo(workdir,LINE_LENGTH_SHORT,crypto_keyfile,subscription_id,tenant_id,256)!=0){
+        /*printf("HHHHHsss! \n");*/
         return -1;
     }
     if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
+        /*printf("HHHHHaaaa! \n");*/
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");

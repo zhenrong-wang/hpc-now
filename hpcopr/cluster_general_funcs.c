@@ -720,6 +720,7 @@ int get_azure_ninfo(char* workdir, unsigned int linelen_max, char* crypto_keyfil
     char vaultdir[DIR_LENGTH]="";
     char cloud_secrets[FILENAME_LENGTH]="";
     char cluster_vaults[FILENAME_LENGTH]="";
+    char az_info_old[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char md5sum[64]="";
     if(create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH)!=0){
@@ -731,18 +732,23 @@ int get_azure_ninfo(char* workdir, unsigned int linelen_max, char* crypto_keyfil
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sget_az_info.temp",vaultdir,PATH_SLASH);
     snprintf(cloud_secrets,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     snprintf(cluster_vaults,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",vaultdir,PATH_SLASH);
+    snprintf(az_info_old,FILENAME_LENGTH-1,"%s%s.az_extra.info",vaultdir,PATH_SLASH);
+
     if(file_exist_or_not(cluster_vaults)==0){
         decrypt_single_file_general(NOW_CRYPTO_EXEC,cluster_vaults,filename_temp,md5sum);
     }
     else if(file_exist_or_not(cloud_secrets)==0){
         decrypt_single_file_general(NOW_CRYPTO_EXEC,cloud_secrets,filename_temp,md5sum);
-    }
-    else{
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.az_extra.info",vaultdir,PATH_SLASH);
+        if(find_multi_nkeys(filename_temp,LINE_LENGTH_SHORT,"azure_subscription_id:","","","","")<1){
+            delete_file_or_dir(filename_temp);
+            strcpy(filename_temp,az_info_old);
+        }
     }
     get_key_nvalue(filename_temp,LINE_LENGTH_SMALL,"azure_subscription_id:",' ',az_subscription_id,id_len_max);
     get_key_nvalue(filename_temp,LINE_LENGTH_SMALL,"azure_tenant_id:",' ',az_tenant_id,id_len_max);
-    delete_file_or_dir(filename_temp);
+    if(strcmp(filename_temp,az_info_old)!=0){
+        delete_file_or_dir(filename_temp);
+    }
     if(strlen(az_subscription_id)>0&&strlen(az_tenant_id)>0){
         return 0;
     }

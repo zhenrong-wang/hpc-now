@@ -913,11 +913,11 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         if(run_flag2!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy the 'now-crypto'." RESET_DISPLAY "\n");
         }
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to update the HPC-NOW services. Please check and make sure:\n");
+        printf(FATAL_RED_BOLD "[  ****  ] Please check and make sure:\n");
         printf("[  ****  ] 1. The HPC-NOW Services have been installed previously.\n");
         printf("[  ****  ] 2. The specified location (if specified) is correct.\n");
         printf("[  ****  ] 3. Your device is connected to the internet.\n");
-        printf("[  ****  ] 4. Currently there is no 'hpcopr' thread(s) running.\n");
+        printf("[  ****  ] 4. Currently there is no 'hpcopr' thread(s) running." RESET_DISPLAY "\n");
 #ifdef _WIN32
         system("icacls c:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
         system("icacls c:\\hpc-now /deny Administrators:F > nul 2>&1");
