@@ -1087,7 +1087,6 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         strcpy(nat_os_image,"ami = data.aws_ami.centos7_x86_glb.image_id");
     }
     generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
-    usleep(10000);
     generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
     if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_info.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
@@ -1381,7 +1380,6 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
         return 3;
     }
     generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
-    usleep(10000);
     generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
     if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_info.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
@@ -1673,7 +1671,6 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
         return 3;
     }
     generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
-    usleep(10000);
     generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
     if(strcmp(init_info.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_info.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
@@ -1988,7 +1985,6 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
         return 3;
     }
     generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
-    usleep(10000);
     generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
     if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
@@ -2275,7 +2271,6 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
         return 3;
     }
     generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
-    usleep(10000);
     generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
     if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
@@ -2581,7 +2576,6 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     }
     node_user_num_fix(&init_conf.node_num,&init_conf.hpc_user_num);
     generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
-    usleep(10000);
     generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
     if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
@@ -2829,7 +2823,6 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         return 3;
     }
     generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
-    usleep(10000);
     generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
     if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
