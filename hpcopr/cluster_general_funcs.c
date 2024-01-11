@@ -156,37 +156,37 @@ int create_and_get_stackdir(char* workdir, char* stackdir){
 }
 
 int get_cloud_flag(char* workdir, char* crypto_keyfile, char cloud_flag[], unsigned int maxlen){
+    char md5sum[64]="";
+    char vaultdir[DIR_LENGTH]="";
+    char cluster_vaults_encrypted[FILENAME_LENGTH]="";
+    char cluster_vaults_decrypted[FILENAME_LENGTH]="";
+    char cloud_secrets_encrypted[FILENAME_LENGTH]="";
+    char cloud_secrets_decrypted[FILENAME_LENGTH]="";
+    char old_flag_file[FILENAME_LENGTH]="";
     if(maxlen<8){
         memset(cloud_flag,'\0',maxlen);
         return -5;
     }
     memset(cloud_flag,'\0',maxlen);
-    char md5sum[64]="";
     if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -3;
     }
-    char vaultdir[DIR_LENGTH]="";
-    char cluster_vaults[FILENAME_LENGTH]="";
-    char cluster_vaults_decrypted[FILENAME_LENGTH]="";
-    char cloud_secrets[FILENAME_LENGTH]="";
-    char cloud_secrets_decrypted[FILENAME_LENGTH]="";
-    char old_flag_file[FILENAME_LENGTH]="";
     if(create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH)!=0){
         return -1;
     }
-    snprintf(cloud_secrets,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    snprintf(cloud_secrets_encrypted,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     snprintf(old_flag_file,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
-    snprintf(cluster_vaults,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",vaultdir,PATH_SLASH);
-    snprintf(cluster_vaults_decrypted,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
-    decrypt_single_file_general(NOW_CRYPTO_EXEC,cluster_vaults,cluster_vaults_decrypted,md5sum);
-    if(file_exist_or_not(cluster_vaults_decrypted)==0){
+    snprintf(cluster_vaults_encrypted,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",vaultdir,PATH_SLASH);
+    snprintf(cluster_vaults_decrypted,FILENAME_LENGTH-1,"%s%sget_cloud_flag.temp",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(cluster_vaults_encrypted)==0){
+        decrypt_single_file_general(NOW_CRYPTO_EXEC,cluster_vaults_encrypted,cluster_vaults_decrypted,md5sum);
         get_key_nvalue(cluster_vaults_decrypted,LINE_LENGTH_SHORT,"cloud_flag_code:",' ',cloud_flag,maxlen);
-        secure_encrypt_and_delete(cluster_vaults_decrypted,crypto_keyfile);
+        delete_file_or_dir(cluster_vaults_decrypted);
         goto final_check;
     }
-    if(file_exist_or_not(cloud_secrets)==0){ /* Only valid for operators */
+    if(file_exist_or_not(cloud_secrets_encrypted)==0){ /* Only valid for operators */
         snprintf(cloud_secrets_decrypted,FILENAME_LENGTH-1,"%s%sget_cloud_flag.temp",vaultdir,PATH_SLASH);
-        decrypt_single_file_general(NOW_CRYPTO_EXEC,cloud_secrets,cloud_secrets_decrypted,md5sum);
+        decrypt_single_file_general(NOW_CRYPTO_EXEC,cloud_secrets_encrypted,cloud_secrets_decrypted,md5sum);
         if(find_multi_nkeys(cloud_secrets_decrypted,LINE_LENGTH_SHORT,"\"googleapis.com\"","","","","")>0){
             strncpy(cloud_flag,"CLOUD_G",maxlen-1);
             delete_file_or_dir(cloud_secrets_decrypted);
@@ -2400,12 +2400,29 @@ int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, c
 }
 
 int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bucket_flag, char* root_flag){
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char real_username[32]="";
+    char md5sum[64]="";
+    char vaultdir[DIR_LENGTH]="";
+    char stackdir[DIR_LENGTH]="";
+    char single_line[LINE_LENGTH_SHORT]="";
+    FILE* file_p=NULL;
+    char filename_temp[FILENAME_LENGTH]="";
+    char cluster_vaults_decrypted[FILENAME_LENGTH]="";
+    char user_passwords_decrypted[FILENAME_LENGTH]="";
+    char unique_cluster_id[32]="";
+    char username_temp[32]="";
+    char password[32]="";
+    char enable_flag[32]="";
+    char master_address[32]="";
+    char az_tenant_id[128]="";
+    char az_subscription_id[128]="";
+    bucket_info bucketinfo;
+    char cloud_flag[16]="";
     if(cluster_empty_or_not(workdir,crypto_keyfile)==0){
         print_empty_cluster_info();
         return 1;
     }
-    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    char real_username[32]="";
     if(strlen(username)>0){
         if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
@@ -2429,23 +2446,6 @@ int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bu
     if(strcmp(root_flag,"root")==0){
         rootflag=1;
     }
-    char md5sum[64]="";
-    char vaultdir[DIR_LENGTH]="";
-    char stackdir[DIR_LENGTH]="";
-    char single_line[LINE_LENGTH_SHORT]="";
-    FILE* file_p=NULL;
-    char filename_temp[FILENAME_LENGTH]="";
-    char cluster_vaults_decrypted[FILENAME_LENGTH]="";
-    char user_passwords_decrypted[FILENAME_LENGTH]="";
-    char unique_cluster_id[32]="";
-    char username_temp[32]="";
-    char password[32]="";
-    char enable_flag[32]="";
-    char master_address[32]="";
-    char az_tenant_id[128]="";
-    char az_subscription_id[128]="";
-    bucket_info bucketinfo;
-    char cloud_flag[16]="";
     if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cryoto key." RESET_DISPLAY "\n");
         return -3;
@@ -2961,25 +2961,25 @@ int get_ucid(char* workdir, char* ucid_string){
 }
 
 int get_nucid(char* workdir, char* crypto_keyfile, char* ucid_string, unsigned int ucid_strlen_max){
+    char md5sum[64]="";
+    char vaultdir[DIR_LENGTH]="";
+    char ucid_old_file[FILENAME_LENGTH]="";
+    char cluster_vaults_encrypted[FILENAME_LENGTH]="";
+    char cluster_vaults_decrypted[FILENAME_LENGTH]="";
     strcpy(ucid_string,"");
     if(ucid_strlen_max<11){
         return -3;
     }
-    char md5sum[64]="";
     if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
         return -1;
     }
-    char vaultdir[DIR_LENGTH]="";
-    char ucid_old_file[FILENAME_LENGTH]="";
-    char cluster_vaults[FILENAME_LENGTH]="";
-    char cluster_vaults_decrypted[FILENAME_LENGTH]="";
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
-    snprintf(cluster_vaults,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",vaultdir,PATH_SLASH);
-    snprintf(cluster_vaults_decrypted,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
-    decrypt_single_file_general(NOW_CRYPTO_EXEC,cluster_vaults,cluster_vaults_decrypted,md5sum);
-    if(file_exist_or_not(cluster_vaults_decrypted)==0){
+    snprintf(cluster_vaults_encrypted,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",vaultdir,PATH_SLASH);
+    snprintf(cluster_vaults_decrypted,FILENAME_LENGTH-1,"%s%sget_ucid.temp",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(cluster_vaults_encrypted)==0){
+        decrypt_single_file_general(NOW_CRYPTO_EXEC,cluster_vaults_encrypted,cluster_vaults_decrypted,md5sum);
         get_key_nvalue(cluster_vaults_decrypted,LINE_LENGTH_SHORT,"short_unique_id:",' ',ucid_string,ucid_strlen_max);
-        secure_encrypt_and_delete(cluster_vaults_decrypted,crypto_keyfile);
+        delete_file_or_dir(cluster_vaults_decrypted);
         if(strlen(ucid_string)>0){
             //printf("%s--\n",ucid_string);
             return 0;
