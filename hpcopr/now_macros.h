@@ -305,7 +305,7 @@ typedef struct
 #define FATAL_RED_BOLD "\033[1;31m"
 #define WARN_YELLO_BOLD "\033[1;33m"
 #define HIGH_GREEN_BOLD "\033[1;32m"
-#define GREEN_LIGHT "\033[2;32m"
+#define GREEN_NORMAL "\033[0;32m"
 #define HIGH_CYAN_BOLD "\033[1;36m"
 #define GREY_LIGHT "\033[2;37m"
 #define GENERAL_BOLD "\033[1m"
