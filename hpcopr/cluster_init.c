@@ -820,6 +820,7 @@ void print_read_conf_failed(int read_conf_flag){
 
 int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info){
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:" RESET_DISPLAY "\n");
+    //printf(HIGH_GREEN_BOLD "[  ****  ] Cluster Name : %s " RESET_DISPLAY GREEN_LIGHT " ~ non-configurable\n",init_info->cluster_id);
     printf(HIGH_GREEN_BOLD "[  ****  ] Cloud Region : %s " RESET_DISPLAY GREEN_LIGHT " ~ provided by cloud\n",init_info->region_id);
     printf(HIGH_GREEN_BOLD "[  ****  ] Cloud AZ     : %s " RESET_DISPLAY GREEN_LIGHT " ~ availability zone\n",init_info->zone_id);
     printf(HIGH_GREEN_BOLD "[  ****  ] Num of Nodes : %d " RESET_DISPLAY GREEN_LIGHT " ~ initial nodes created\n",init_info->node_num);
