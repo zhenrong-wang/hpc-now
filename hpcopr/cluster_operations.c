@@ -653,7 +653,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             printf(GREY_LIGHT);
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s",CAT_FILE_CMD,gcp_key_file);
             system(cmdline);
-            printf(RESET_DISPLAY);
+            printf("\n" RESET_DISPLAY );
         }
         add_to_cluster_registry(input_cluster_name,"");
         switch_to_cluster(input_cluster_name);

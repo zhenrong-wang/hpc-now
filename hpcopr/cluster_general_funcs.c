@@ -3462,7 +3462,7 @@ int file_convert(char* filename_base, char* extra_str, char* option){
     }
     if(strcmp(option,"encrypt")==0){
         encrypt_and_delete_general(NOW_CRYPTO_EXEC,file_decrypted,file_encrypted,md5sum);
-        return file_exist_or_not(file_decrypted);
+        return file_exist_or_not(file_encrypted);
     }
     if(strcmp(option,"backup_encrypt")==0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,file_decrypted,file_dec_back,SYSTEM_CMD_REDIRECT);
