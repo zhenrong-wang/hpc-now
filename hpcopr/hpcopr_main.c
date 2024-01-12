@@ -322,26 +322,26 @@ int main(int argc, char* argv[]){
 
 #ifdef _WIN32
     if(check_current_user()!=0){
-        printf(WARN_YELLO_BOLD "|    Only the system user 'hpc-now' can run hpcopr. Steps:" RESET_DISPLAY "\n");
-        printf("|    +- " GENERAL_BOLD "COMMAND MODE" RESET_DISPLAY " (pretty simple and fast):\n");
-        printf("|       1. run command " HIGH_GREEN_BOLD "runas /savecred /user:mymachine\\hpc-now cmd" RESET_DISPLAY "\n");
-        printf("|          The password of 'hpc-now' is needed for the first time.\n");
-        printf("|       2. run " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands in the " GENERAL_BOLD "new" RESET_DISPLAY " CMD Window.\n");
-        printf("|    +- " GENERAL_BOLD "DESKTOP MODE" RESET_DISPLAY " (switch the whole desktop environment):\n");
-        printf("|       1. Press " HIGH_GREEN_BOLD "Ctrl + Alt + Delete" RESET_DISPLAY "\n");
-        printf("|       2. Select the user " HIGH_GREEN_BOLD "hpc-now" RESET_DISPLAY " and log in.\n");
+        printf(WARN_YELLO_BOLD "[ FATAL: ] Only the system user 'hpc-now' can run hpcopr. Steps:" RESET_DISPLAY "\n");
+        printf("[  ****  ] +- " GENERAL_BOLD "COMMAND MODE" RESET_DISPLAY " (pretty simple and fast):\n");
+        printf("[  ****  ]    1. run command " HIGH_GREEN_BOLD "runas /savecred /user:mymachine\\hpc-now cmd" RESET_DISPLAY "\n");
+        printf("[  ****  ]       The password of 'hpc-now' is needed for the first time.\n");
+        printf("[  ****  ]    2. run " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands in the " GENERAL_BOLD "new" RESET_DISPLAY " CMD Window.\n");
+        printf("[  ****  ] +- " GENERAL_BOLD "DESKTOP MODE" RESET_DISPLAY " (switch the whole desktop environment):\n");
+        printf("[  ****  ]    1. Press " HIGH_GREEN_BOLD "Ctrl + Alt + Delete" RESET_DISPLAY "\n");
+        printf("[  ****  ]    2. Select the user " HIGH_GREEN_BOLD "hpc-now" RESET_DISPLAY " and log in.\n");
         printf(FATAL_RED_BOLD "\n[ FATAL: ] You *MUST* run hpcopr as the system user 'hpc-now'." RESET_DISPLAY "\n");
         print_tail();
         return 117;
     }
 #else
     if(check_current_user()!=0){
-        printf(WARN_YELLO_BOLD "|    Only the system user 'hpc-now' can run hpcopr. Steps:" RESET_DISPLAY "\n");
-        printf("|    +- " GENERAL_BOLD "SUDO MODE" RESET_DISPLAY " (pretty simple and fast for *sudoers*):\n");
-        printf("|       Run with the " HIGH_GREEN_BOLD "sudo -u" RESET_DISPLAY " prefix, e.g. " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr ..." RESET_DISPLAY "\n");
-        printf("|    +- " GENERAL_BOLD "USER MODE" RESET_DISPLAY " (for both *non-sudoers* and *sudoers*):" RESET_DISPLAY "\n");
-        printf("|       1. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY " (The password of 'hpc-now' is needed)\n");
-        printf("|       2. run the " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands, e.g. " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY "\n");
+        printf(WARN_YELLO_BOLD "[ FATAL: ] Only the system user 'hpc-now' can run hpcopr. Steps:" RESET_DISPLAY "\n");
+        printf("[  ****  ] +- " GENERAL_BOLD "SUDO MODE" RESET_DISPLAY " (pretty simple and fast for *sudoers*):\n");
+        printf("[  ****  ]    Run with " HIGH_GREEN_BOLD "sudo -u" RESET_DISPLAY ", e.g. " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr help" RESET_DISPLAY "\n");
+        printf("[  ****  ] +- " GENERAL_BOLD "USER MODE" RESET_DISPLAY " (for both *non-sudoers* and *sudoers*):" RESET_DISPLAY "\n");
+        printf("[  ****  ]    1. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY " (The password of 'hpc-now' is needed)\n");
+        printf("[  ****  ]    2. run the " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands, e.g. " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY "\n");
         printf(FATAL_RED_BOLD "\n[ FATAL: ] You *MUST* run hpcopr as the system user 'hpc-now'." RESET_DISPLAY "\n");
         print_tail();
         return 117;
