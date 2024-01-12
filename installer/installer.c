@@ -422,7 +422,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         }
     }
     printf("\n");
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congrats! The HPC-NOW services are ready to run!\n");
     printf("[  ****  ] Created the user 'hpc-now' with password: " GREY_LIGHT "%s" RESET_DISPLAY "\n",hpc_now_password);
     printf("[  ****  ] Please follow the steps below:\n");
     printf("[  ****  ] 1. " HIGH_GREEN_BOLD "net user hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY " [optional]\n");
@@ -561,7 +561,7 @@ linux_install_done:
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The Microsoft RDP Client has been installed.\n");
     }
 mac_install_done:
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congrats! The HPC-NOW services are ready to run!\n");
     printf("[  ****  ] Created the user 'hpc-now' " WARN_YELLO_BOLD "WITHOUT" RESET_DISPLAY " an initial password.\n");
     printf("[  ****  ] Please follow the steps below:\n");
     printf(HIGH_CYAN_BOLD "[  ****  ] + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
