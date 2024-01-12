@@ -636,24 +636,31 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid." RESET_DISPLAY "\n",gcp_key_file);
             return 3;
         }
-        file_p=fopen(gcp_key_file,"a+");
-        fprintf(file_p,"\nCLOUD_G");
-        fclose(file_p);
         snprintf(new_workdir,DIR_LENGTH-1,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,input_cluster_name,PATH_SLASH);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         create_and_get_subdir(new_workdir,"vault",new_vaultdir,DIR_LENGTH);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,gcp_key_file,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_secrets.txt",new_vaultdir,PATH_SLASH);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s  %s %s",COPY_FILE_CMD,gcp_key_file,filename_temp,SYSTEM_CMD_REDIRECT);
+        system(cmdline);
+        file_p=fopen(filename_temp,"a+");
+        if(file_p==NULL){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to copy the provided key file." RESET_DISPLAY "\n");
+            return 3;
+        }
+        fprintf(file_p,"\nCLOUD_G");
+        fclose(file_p);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. Abort." RESET_DISPLAY "\n");
-            delete_file_or_dir(gcp_key_file);
+            delete_file_or_dir(filename_temp);
             return 5;
         }
         if(strcmp(echo_flag,"echo")==0){
             printf(GREY_LIGHT);
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s",CAT_FILE_CMD,gcp_key_file);
             system(cmdline);
-            printf("\n" RESET_DISPLAY );
+            printf(RESET_DISPLAY );
         }
         add_to_cluster_registry(input_cluster_name,"");
         switch_to_cluster(input_cluster_name);
