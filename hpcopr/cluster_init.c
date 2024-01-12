@@ -819,20 +819,20 @@ void print_read_conf_failed(int read_conf_flag){
 }
 
 int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info){
-    printf(GENERAL_BOLD "[ STEP 2 ] Cluster Configuration:\n");
-    printf("[  ****  ] Cluster Name " RESET_DISPLAY ": non-configurable      " RESET_DISPLAY GENERAL_BOLD ": %s\n",init_info->cluster_id);
-    printf("[  ****  ] Cloud Region " RESET_DISPLAY ": provided by cloud     " RESET_DISPLAY GENERAL_BOLD ": %s\n",init_info->region_id);
-    printf("[  ****  ] Cloud AZ     " RESET_DISPLAY ": availability zone     " RESET_DISPLAY GENERAL_BOLD ": %s\n",init_info->zone_id);
-    printf("[  ****  ] Num of Nodes " RESET_DISPLAY ": initial nodes created " RESET_DISPLAY GENERAL_BOLD ": %d\n",init_info->node_num);
-    printf("[  ****  ] Num of Users " RESET_DISPLAY ": initial users created " RESET_DISPLAY GENERAL_BOLD ": %d\n",init_info->hpc_user_num);
-    printf("[  ****  ] Master Node  " RESET_DISPLAY ": configuration code    " RESET_DISPLAY GENERAL_BOLD ": %s\n",init_info->master_inst);
-    printf("[  ****  ] Compute Node " RESET_DISPLAY ": configuration code    " RESET_DISPLAY GENERAL_BOLD ": %s\n",init_info->compute_inst);
-    printf("[  ****  ] OS Image     " RESET_DISPLAY ": image_id or name      " RESET_DISPLAY GENERAL_BOLD ": %s" RESET_DISPLAY "\n",init_info->os_image_raw);
+    printf(GENERAL_BOLD "[ STEP 2 ] Cluster Configuration:" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "[  ****  ] Cluster Name : %s " RESET_DISPLAY "~ non-configurable\n",init_info->cluster_id);
+    printf(GENERAL_BOLD "[  ****  ] Cloud Region : %s " RESET_DISPLAY "~ provided by cloud\n",init_info->region_id);
+    printf(GENERAL_BOLD "[  ****  ] Cloud AZ     : %s " RESET_DISPLAY "~ availability zone\n",init_info->zone_id);
+    printf(GENERAL_BOLD "[  ****  ] Num of Nodes : %d " RESET_DISPLAY "~ initial nodes created\n",init_info->node_num);
+    printf(GENERAL_BOLD "[  ****  ] Num of Users : %d " RESET_DISPLAY "~ initial users created\n",init_info->hpc_user_num);
+    printf(GENERAL_BOLD "[  ****  ] Master Node  : %s " RESET_DISPLAY "~ configuration code\n",init_info->master_inst);
+    printf(GENERAL_BOLD "[  ****  ] Compute Node : %s " RESET_DISPLAY "~ configuration code\n",init_info->compute_inst);
+    printf(GENERAL_BOLD "[  ****  ] OS Image     : %s " RESET_DISPLAY "~ image_id or name" RESET_DISPLAY "\n",init_info->os_image_raw);
     if(strcmp(init_info->ht_flag,"OFF")==0){
-        printf(GENERAL_BOLD "[  ****  ] HT-status    " RESET_DISPLAY ": hyperthreading option " RESET_DISPLAY GENERAL_BOLD ": %s" RESET_DISPLAY "\n",init_info->ht_flag);
+        printf(GENERAL_BOLD "[  ****  ] HT-status    : %s " RESET_DISPLAY "~ hyperthreading option\n",init_info->ht_flag);
     }
     if(init_info->hpc_nfs_volume>0){
-        printf(GENERAL_BOLD "[  ****  ] NFS Vol(GB)  " RESET_DISPLAY ": shared volume in GB   " RESET_DISPLAY GENERAL_BOLD ": %d" RESET_DISPLAY "\n",init_info->hpc_nfs_volume);
+        printf(GENERAL_BOLD "[  ****  ] NFS Vol(GB)  : %d " RESET_DISPLAY "~ shared volume in GB\n",init_info->hpc_nfs_volume);
     }
     return confirm_to_init_cluster(init_info->cluster_id,batch_flag_local);
 }
