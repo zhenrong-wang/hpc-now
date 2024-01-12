@@ -821,18 +821,15 @@ void print_read_conf_failed(int read_conf_flag){
 int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info){
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:" RESET_DISPLAY "\n");
     //printf(HIGH_GREEN_BOLD "[  ****  ] Cluster Name : %s " RESET_DISPLAY GREEN_LIGHT " ~ non-configurable\n",init_info->cluster_id);
-    printf(HIGH_GREEN_BOLD "[  ****  ] Cloud Region : %s " RESET_DISPLAY GREEN_NORMAL "  provided by cloud\n",init_info->region_id);
-    printf(HIGH_GREEN_BOLD "[  ****  ] Cloud AZ     : %s " RESET_DISPLAY GREEN_NORMAL "  availability zone\n",init_info->zone_id);
-    printf(HIGH_GREEN_BOLD "[  ****  ] Num of Nodes : %d " RESET_DISPLAY GREEN_NORMAL "  initial nodes created\n",init_info->node_num);
-    printf(HIGH_GREEN_BOLD "[  ****  ] Num of Users : %d " RESET_DISPLAY GREEN_NORMAL "  initial users created\n",init_info->hpc_user_num);
-    printf(HIGH_GREEN_BOLD "[  ****  ] Master Node  : %s " RESET_DISPLAY GREEN_NORMAL "  configuration code\n",init_info->master_inst);
-    printf(HIGH_GREEN_BOLD "[  ****  ] Compute Node : %s " RESET_DISPLAY GREEN_NORMAL "  configuration code\n",init_info->compute_inst);
-    printf(HIGH_GREEN_BOLD "[  ****  ] OS Image     : %s " RESET_DISPLAY GREEN_NORMAL "  image_id or name" RESET_DISPLAY "\n",init_info->os_image_raw);
+    printf(HIGH_GREEN_BOLD "[  ****  ] Region & Zone    : %s & %s " RESET_DISPLAY GREEN_NORMAL "  provided by cloud\n",init_info->region_id,init_info->zone_id);
+    printf(HIGH_GREEN_BOLD "[  ****  ] Nodes  & Users   : %d & %d " RESET_DISPLAY GREEN_NORMAL "  initial to create\n",init_info->node_num,init_info->hpc_user_num);
+    printf(HIGH_GREEN_BOLD "[  ****  ] Master & Compute : %s & %s " RESET_DISPLAY GREEN_NORMAL "  vm instance code\n",init_info->master_inst,init_info->compute_inst);
+    printf(HIGH_GREEN_BOLD "[  ****  ] OS Image or name : %s " RESET_DISPLAY GREEN_NORMAL "  image_id or name" RESET_DISPLAY "\n",init_info->os_image_raw);
     if(strcmp(init_info->ht_flag,"OFF")==0){
-        printf(HIGH_GREEN_BOLD "[  ****  ] HT-status    : %s " RESET_DISPLAY GREEN_NORMAL "  hyperthreading of compute nodes\n",init_info->ht_flag);
+        printf(HIGH_GREEN_BOLD "[  ****  ] HT-status        : %s " RESET_DISPLAY GREEN_NORMAL "  hyperthreading of compute nodes\n",init_info->ht_flag);
     }
     if(init_info->hpc_nfs_volume>0){
-        printf(HIGH_GREEN_BOLD "[  ****  ] NFS Vol(GB)  : %d " RESET_DISPLAY GREEN_NORMAL "  shared NFS volume in GB" RESET_DISPLAY "\n",init_info->hpc_nfs_volume);
+        printf(HIGH_GREEN_BOLD "[  ****  ] NFS Volume(GB)   : %d " RESET_DISPLAY GREEN_NORMAL "  shared NFS volume in GB" RESET_DISPLAY "\n",init_info->hpc_nfs_volume);
     }
     return confirm_to_init_cluster(init_info->cluster_id,batch_flag_local);
 }
