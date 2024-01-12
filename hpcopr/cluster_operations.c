@@ -1855,7 +1855,7 @@ int nfs_volume_up(char* workdir, char* crypto_keyfile, char* new_volume, tf_exec
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.bak %s",DELETE_FILE_CMD,filename_temp,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    remote_exec_general(workdir,crypto_keyfile,sshkey_dir,"root","resize2fs `df -TH | grep -w '/mnt/shared' | awk '{print $1}'`","-n",0,0,"","");
+    remote_exec_general(workdir,crypto_keyfile,sshkey_dir,"root","resize2fs \\`df -TH | grep -w '/mnt/shared' | awk '{print \\$1}'\\`","-n",0,0,"","");
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the cluster operation:\n|\n");
     getstate(workdir,crypto_keyfile);
     graph(workdir,crypto_keyfile,0);

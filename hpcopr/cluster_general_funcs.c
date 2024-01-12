@@ -571,6 +571,7 @@ int remote_exec_general(char* workdir, char* crypto_keyfile, char* sshkey_folder
             }
         }
     }
+    /*printf("#%s\n",cmdline);*/
     run=system(cmdline);
     delete_file_or_dir(private_key);
     if(run!=0){
