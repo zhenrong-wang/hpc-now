@@ -819,20 +819,19 @@ void print_read_conf_failed(int read_conf_flag){
 }
 
 int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info){
-    printf(GENERAL_BOLD "[ STEP 2 ] Cluster Configuration:" RESET_DISPLAY "\n");
-    printf(GENERAL_BOLD "[  ****  ] Cluster Name : %s " RESET_DISPLAY "~ non-configurable\n",init_info->cluster_id);
-    printf(GENERAL_BOLD "[  ****  ] Cloud Region : %s " RESET_DISPLAY "~ provided by cloud\n",init_info->region_id);
-    printf(GENERAL_BOLD "[  ****  ] Cloud AZ     : %s " RESET_DISPLAY "~ availability zone\n",init_info->zone_id);
-    printf(GENERAL_BOLD "[  ****  ] Num of Nodes : %d " RESET_DISPLAY "~ initial nodes created\n",init_info->node_num);
-    printf(GENERAL_BOLD "[  ****  ] Num of Users : %d " RESET_DISPLAY "~ initial users created\n",init_info->hpc_user_num);
-    printf(GENERAL_BOLD "[  ****  ] Master Node  : %s " RESET_DISPLAY "~ configuration code\n",init_info->master_inst);
-    printf(GENERAL_BOLD "[  ****  ] Compute Node : %s " RESET_DISPLAY "~ configuration code\n",init_info->compute_inst);
-    printf(GENERAL_BOLD "[  ****  ] OS Image     : %s " RESET_DISPLAY "~ image_id or name" RESET_DISPLAY "\n",init_info->os_image_raw);
+    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:" RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD "[  ****  ] Cloud Region : %s " RESET_DISPLAY GREEN_LIGHT " ~ provided by cloud\n",init_info->region_id);
+    printf(HIGH_GREEN_BOLD "[  ****  ] Cloud AZ     : %s " RESET_DISPLAY GREEN_LIGHT " ~ availability zone\n",init_info->zone_id);
+    printf(HIGH_GREEN_BOLD "[  ****  ] Num of Nodes : %d " RESET_DISPLAY GREEN_LIGHT " ~ initial nodes created\n",init_info->node_num);
+    printf(HIGH_GREEN_BOLD "[  ****  ] Num of Users : %d " RESET_DISPLAY GREEN_LIGHT " ~ initial users created\n",init_info->hpc_user_num);
+    printf(HIGH_GREEN_BOLD "[  ****  ] Master Node  : %s " RESET_DISPLAY GREEN_LIGHT " ~ configuration code\n",init_info->master_inst);
+    printf(HIGH_GREEN_BOLD "[  ****  ] Compute Node : %s " RESET_DISPLAY GREEN_LIGHT " ~ configuration code\n",init_info->compute_inst);
+    printf(HIGH_GREEN_BOLD "[  ****  ] OS Image     : %s " RESET_DISPLAY GREEN_LIGHT " ~ image_id or name" RESET_DISPLAY "\n",init_info->os_image_raw);
     if(strcmp(init_info->ht_flag,"OFF")==0){
-        printf(GENERAL_BOLD "[  ****  ] HT-status    : %s " RESET_DISPLAY "~ hyperthreading option\n",init_info->ht_flag);
+        printf(HIGH_GREEN_BOLD "[  ****  ] HT-status    : %s " RESET_DISPLAY GREEN_LIGHT " ~ hyperthreading option\n",init_info->ht_flag);
     }
     if(init_info->hpc_nfs_volume>0){
-        printf(GENERAL_BOLD "[  ****  ] NFS Vol(GB)  : %d " RESET_DISPLAY "~ shared volume in GB\n",init_info->hpc_nfs_volume);
+        printf(HIGH_GREEN_BOLD "[  ****  ] NFS Vol(GB)  : %d " RESET_DISPLAY GREEN_LIGHT " ~ shared volume in GB" RESET_DISPLAY "\n",init_info->hpc_nfs_volume);
     }
     return confirm_to_init_cluster(init_info->cluster_id,batch_flag_local);
 }
