@@ -1708,7 +1708,8 @@ int main(int argc, char* argv[]){
 
     if(strcmp(final_command,"nfsup")==0){
         if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] This command is only applicable to CLOUD_D, CLOUD_F, and CLOUD_G." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] This command is only applicable to CLOUD_D, F, and G." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[  ****  ] Current cloud: %s." RESET_DISPLAY "\n",cloud_flag);
             write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FLAG_NOT_APPLICABLE",8);
             check_and_cleanup(workdir);
             return 8;
@@ -1979,10 +1980,10 @@ int main(int argc, char* argv[]){
 
     if(cluster_state_flag==0){
         if(strcmp(final_command,"addc")==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster not running. Use " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD " to wake it up." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster not running. Use " RESET_DISPLAY GENERAL_BOLD "hpcopr wakeup --all" RESET_DISPLAY FATAL_RED_BOLD " to wake it up." RESET_DISPLAY "\n");
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster not running. Use " RESET_DISPLAY WARN_YELLO_BOLD "hpcopr wakeup --all | --min" RESET_DISPLAY FATAL_RED_BOLD " to wake it up." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster not running. Use " RESET_DISPLAY GENERAL_BOLD "hpcopr wakeup --all | --min" RESET_DISPLAY FATAL_RED_BOLD " to wake it up." RESET_DISPLAY "\n");
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_IS_ASLEEP",43);
         check_and_cleanup(workdir);

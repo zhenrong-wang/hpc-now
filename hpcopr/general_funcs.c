@@ -1383,6 +1383,7 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
                 *(password_temp+i)=*(ch_table_final+rand_num);
                 i++;
             }
+            /* If the new char is different from the previous, then paddle, otherwise continue the loop */
             else{
                 if(*(ch_table_final+rand_num)!=*(password_temp+i-1)){
                     *(password_temp+i)=*(ch_table_final+rand_num);
@@ -1390,6 +1391,7 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
                 }
             }
         }
+        /* If the password is complex enough, then copy the password, free mem, and exit 0*/
         if(password_complexity_check(password_temp,special_chars_string)==0){
             memcpy(password_array,password_temp,password_array_len);
             free(special_chars_string);
