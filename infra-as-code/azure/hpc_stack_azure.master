@@ -83,11 +83,11 @@ cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 echo -e "\nPUBLIC_KEY" >> /root/.ssh/authorized_keys
 systemctl restart sshd
 echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
-block_name=`lsblk | grep -v sda | tail -n 1 | awk '{print $1}'`
+block_name=`lsblk | grep -v NAME | grep -v \`lsblk -P | grep -w '/' | awk '{print substr($1,7,3)}'\` | awk '{print $1}' | head -n 1`
 while [ -z $block_name ]
 do
   sleep 1
-  block_name=`lsblk | grep -v sda | tail -n 1 | awk '{print $1}'`
+  block_name=`lsblk | grep -v NAME | grep -v \`lsblk -P | grep -w '/' | awk '{print substr($1,7,3)}'\` | awk '{print $1}' | head -n 1`
 done
 mkfs -t ext4 /dev/$block_name
 mkdir -p /mnt/shared
