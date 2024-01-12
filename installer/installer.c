@@ -489,18 +489,18 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         system(cmdline1);
     }
 linux_install_done:
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
+    printf(GENERAL_BOLD "\n[ -INFO- ]" RESET_DISPLAY " Congrats! The HPC-NOW services are ready to run!\n");
     printf("[  ****  ] Created the user 'hpc-now' " WARN_YELLO_BOLD "WITHOUT" RESET_DISPLAY " an initial password.\n");
     printf("[  ****  ] Please follow the steps below:\n");
-    printf(HIGH_CYAN_BOLD "|      + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
+    printf(HIGH_CYAN_BOLD "[  ****  ] + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("[  ****  ] " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr envcheck" RESET_DISPLAY "\n");
     printf("[  ****  ] * You will be required to input the password for the current sudoer.\n");
-    printf(GENERAL_BOLD "|      + USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
-    printf("[  ****  ] 1. " HIGH_GREEN_BOLD "sudo passwd hpc-now" RESET_DISPLAY "\n");
-    printf("[  ****  ] * You will be required to set a password without echo.\n");
-    printf("[  ****  ] 2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "\n");
-    printf("[  ****  ] * You will be required to input the password set just now.\n");
-    printf("[  ****  ] 3. " HIGH_GREEN_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "[  ****  ] + USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
+    printf("[  ****  ]   1. " HIGH_GREEN_BOLD "sudo passwd hpc-now" RESET_DISPLAY "\n");
+    printf("[  ****  ]     * You will be required to set a password without echo.\n");
+    printf("[  ****  ]   2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "\n");
+    printf("[  ****  ]     * You will be required to input the password set just now.\n");
+    printf("[  ****  ]   3. " HIGH_GREEN_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD"[ -DONE- ] Enjoy you Cloud HPC journey!" RESET_DISPLAY "\n");
     return 0;
 #elif __APPLE__
@@ -564,14 +564,14 @@ mac_install_done:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Congratulations! The HPC-NOW services are ready to run!\n");
     printf("[  ****  ] Created the user 'hpc-now' " WARN_YELLO_BOLD "WITHOUT" RESET_DISPLAY " an initial password.\n");
     printf("[  ****  ] Please follow the steps below:\n");
-    printf(HIGH_CYAN_BOLD "|      + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
+    printf(HIGH_CYAN_BOLD "[  ****  ] + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("[  ****  ] " HIGH_GREEN_BOLD "cd /Applications && sudo -u hpc-now hpcopr envcheck" RESET_DISPLAY "\n");
     printf("[  ****  ] * You will be required to input the password for the current sudoer.\n");
-    printf(GENERAL_BOLD "|      + USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
-    printf("[  ****  ] 1. " HIGH_GREEN_BOLD "sudo dscl . -passwd /Users/hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY "\n");
-    printf("[  ****  ] 2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "\n");
-    printf("[  ****  ] * You will be required to input the password set just now.\n");
-    printf("[  ****  ] 3. " HIGH_GREEN_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
+    printf(GENERAL_BOLD "[  ****  ] + USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
+    printf("[  ****  ]   1. " HIGH_GREEN_BOLD "sudo dscl . -passwd /Users/hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY "\n");
+    printf("[  ****  ]   2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "\n");
+    printf("[  ****  ]     * You will be required to input the password set just now.\n");
+    printf("[  ****  ]   3. " HIGH_GREEN_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD"[ -DONE- ] Enjoy you Cloud HPC journey!" RESET_DISPLAY "\n");
     return 0;    
 #endif
