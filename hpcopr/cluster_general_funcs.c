@@ -226,60 +226,63 @@ int decrypt_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_info){
 }
 
 int remote_copy(char* workdir, char* crypto_keyfile ,char* sshkey_dir, char* local_path, char* remote_path, char* username, char* option, char* recursive_flag, int silent_flag){
+    char real_recursive_flag[4]="";
+    char privkey_base[FILENAME_LENGTH]="";
+    char privkey_decrypted[FILENAME_LENGTH_EXT]="";
+    char remote_address[32]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char cluster_role[16]="";
+    char cluster_role_ext[16]="";
+    char randstr[7]="";
+    int run_flag;
     if(strcmp(option,"put")!=0&&strcmp(option,"get")!=0){
         return -1;
     }
-    char real_recursive_flag[4]="";
+    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+        return -7;
+    }
     if(strcmp(recursive_flag,"-r")!=0){
         strcpy(real_recursive_flag,"");
     }
     else{
         strcpy(real_recursive_flag,"-r");
     }
-    char private_key[FILENAME_LENGTH]="";
-    char private_key_encrypted[FILENAME_LENGTH]="";
-    char remote_address[32]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    char cluster_role[16]="";
-    char cluster_role_ext[16]="";
-    int run_flag;
     get_state_nvalue(workdir,crypto_keyfile,"master_public_ip:",remote_address,32);
     cluster_role_detect(workdir,cluster_role,cluster_role_ext,16);
     if(strcmp(username,"root")==0&&strcmp(cluster_role,"opr")==0){
-        if(decrypt_opr_privkey(sshkey_dir,crypto_keyfile)!=0){
-            return -5;
-        }
-        snprintf(private_key,FILENAME_LENGTH-1,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
+        snprintf(privkey_base,FILENAME_LENGTH-1,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
     }
     else{
-        if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
-            return -7;
-        }
-        snprintf(private_key_encrypted,FILENAME_LENGTH-1,"%s%s.%s%s%s.key.tmp",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
-        if(decrypt_user_privkey(private_key_encrypted,crypto_keyfile)!=0){
-            return -3;
-        }
-        snprintf(private_key,FILENAME_LENGTH-1,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
+        snprintf(privkey_base,FILENAME_LENGTH-1,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
+    }
+    generate_random_nstring(randstr,7,1);
+    if(file_convert(privkey_base,randstr,"decrypt")!=0){
+        return -3;
+    }
+    snprintf(privkey_decrypted,FILENAME_LENGTH_EXT-1,"%s.%s",privkey_base,randstr);
+    if(chmod_ssh_privkey(privkey_decrypted)!=0){
+        delete_file_or_dir(privkey_decrypted);
+        return -3;
     }
     if(strcmp(option,"put")==0){
         if(silent_flag==0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"scp %s -o StrictHostKeyChecking=no -i %s %s %s@%s:%s %s",real_recursive_flag,private_key,local_path,username,remote_address,remote_path,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"scp %s -o StrictHostKeyChecking=no -i %s %s %s@%s:%s %s",real_recursive_flag,privkey_decrypted,local_path,username,remote_address,remote_path,SYSTEM_CMD_REDIRECT);
         }
         else{
-            snprintf(cmdline,CMDLINE_LENGTH-1,"scp %s -o StrictHostKeyChecking=no -i %s %s %s@%s:%s",real_recursive_flag,private_key,local_path,username,remote_address,remote_path);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"scp %s -o StrictHostKeyChecking=no -i %s %s %s@%s:%s",real_recursive_flag,privkey_decrypted,local_path,username,remote_address,remote_path);
         }
     }
     else{
         if(silent_flag==0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"scp %s -o StrictHostKeyChecking=no -i %s %s@%s:%s %s %s",real_recursive_flag,private_key,username,remote_address,remote_path,local_path,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"scp %s -o StrictHostKeyChecking=no -i %s %s@%s:%s %s %s",real_recursive_flag,privkey_decrypted,username,remote_address,remote_path,local_path,SYSTEM_CMD_REDIRECT);
         }
         else{
-            snprintf(cmdline,CMDLINE_LENGTH-1,"scp %s -o StrictHostKeyChecking=no -i %s %s@%s:%s %s",real_recursive_flag,private_key,username,remote_address,remote_path,local_path);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"scp %s -o StrictHostKeyChecking=no -i %s %s@%s:%s %s",real_recursive_flag,privkey_decrypted,username,remote_address,remote_path,local_path);
         }
     }
     run_flag=system(cmdline);
-    delete_file_or_dir(private_key);
+    delete_file_or_dir(privkey_decrypted);
     if(run_flag!=0){
         return 1;
     }
@@ -449,26 +452,34 @@ int create_and_get_vaultdir(char* workdir, char* vaultdir){
 }
 
 int remote_exec(char* workdir, char* crypto_keyfile, char* sshkey_folder, char* exec_type, int delay_minutes){
+    char cmdline[CMDLINE_LENGTH]="";
+    char opr_privkey_base[FILENAME_LENGTH]="";
+    char opr_privkey_decrypted[FILENAME_LENGTH_EXT]="";
+    char remote_address[32]="";
+    int run_flag;
+    char randstr[7]="";
     if(strcmp(exec_type,"connect")!=0&&strcmp(exec_type,"all")!=0&&strcmp(exec_type,"clear")!=0&&strcmp(exec_type,"quick")!=0){
         return -3;
     }
     if(delay_minutes<0){
         return -1;
     }
-    char cmdline[CMDLINE_LENGTH]="";
-    char private_key[FILENAME_LENGTH]="";
-    char remote_address[32]="";
-    int run_flag;
     if(get_state_nvalue(workdir,crypto_keyfile,"master_public_ip:",remote_address,32)!=0){
         return -7;
     }
-    if(decrypt_opr_privkey(sshkey_folder,crypto_keyfile)!=0){
+    generate_random_nstring(randstr,7,1);
+    snprintf(opr_privkey_base,FILENAME_LENGTH-1,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
+    if(file_convert(opr_privkey_base,randstr,"decrypt")!=0){
         return -5;
     }
-    snprintf(private_key,FILENAME_LENGTH-1,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\" %s",private_key,remote_address,exec_type,delay_minutes,SYSTEM_CMD_REDIRECT);
+    snprintf(opr_privkey_decrypted,FILENAME_LENGTH_EXT-1,"%s.%s",opr_privkey_base,randstr);
+    if(chmod_ssh_privkey(opr_privkey_decrypted)!=0){
+        delete_file_or_dir(opr_privkey_decrypted);//Delete the decrypted opr ssh private key.
+        return -5;
+    }
+    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\" %s",opr_privkey_decrypted,remote_address,exec_type,delay_minutes,SYSTEM_CMD_REDIRECT);
     run_flag=system(cmdline);
-    delete_file_or_dir(private_key);//Delete the decrypted opr ssh private key.
+    delete_file_or_dir(opr_privkey_decrypted);//Delete the decrypted opr ssh private key.
     if(run_flag!=0){
         return 1;
     }
@@ -476,17 +487,18 @@ int remote_exec(char* workdir, char* crypto_keyfile, char* sshkey_folder, char* 
 }
 
 int remote_exec_general(char* workdir, char* crypto_keyfile, char* sshkey_folder, char* username, char* commands, char* extra_options, int delay_minutes, int silent_flag, char* std_redirect, char* err_redirect){
-    if(delay_minutes<0){
-        return -1;
-    }
     int run;
     char cmdline[CMDLINE_LENGTH]="";
-    char private_key_encrypted[FILENAME_LENGTH]="";
-    char private_key[FILENAME_LENGTH]="";
+    char privkey_base[FILENAME_LENGTH]="";
+    char privkey_decrypted[FILENAME_LENGTH_EXT]="";
     char remote_address[32]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char cluster_role[16]="";
     char cluster_role_ext[16]="";
+    char randstr[7]="";
+    if(delay_minutes<0){
+        return -1;
+    }
     if(get_state_nvalue(workdir,crypto_keyfile,"master_public_ip:",remote_address,32)!=0){
         return -5;
     }
@@ -495,85 +507,87 @@ int remote_exec_general(char* workdir, char* crypto_keyfile, char* sshkey_folder
     }
     cluster_role_detect(workdir,cluster_role,cluster_role_ext,16);
     if(strcmp(username,"root")==0&&strcmp(cluster_role,"opr")==0){
-        if(decrypt_opr_privkey(sshkey_folder,crypto_keyfile)!=0){
-            return -3;
-        }
-        snprintf(private_key,FILENAME_LENGTH-1,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
+        snprintf(privkey_base,FILENAME_LENGTH,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     }
     else{
-        snprintf(private_key_encrypted,FILENAME_LENGTH-1,"%s%s.%s%s%s.key.tmp",sshkey_folder,PATH_SLASH,cluster_name,PATH_SLASH,username);
-        if(decrypt_user_privkey(private_key_encrypted,crypto_keyfile)!=0){
-            return -3;
-        }
-        snprintf(private_key,FILENAME_LENGTH-1,"%s%s.%s%s%s.key",sshkey_folder,PATH_SLASH,cluster_name,PATH_SLASH,username);
+        snprintf(privkey_base,FILENAME_LENGTH,"%s%s.%s%s%s.key",sshkey_folder,PATH_SLASH,cluster_name,PATH_SLASH,username);
+    }
+    generate_random_nstring(randstr,7,1);
+    if(file_convert(privkey_base,randstr,"decrypt")!=0){
+        return -3;
+    }
+    snprintf(privkey_decrypted,FILENAME_LENGTH_EXT-1,"%s.%s",privkey_base,randstr);
+    if(chmod_ssh_privkey(privkey_decrypted)!=0){
+        delete_file_or_dir(privkey_decrypted);//Delete the decrypted opr ssh private key.
+        return -3;
     }
     if(delay_minutes==0){
         if(silent_flag==0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",extra_options,private_key,username,remote_address,commands,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",extra_options,privkey_decrypted,username,remote_address,commands,SYSTEM_CMD_REDIRECT);
         }
         else if(silent_flag==1){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",extra_options,private_key,username,remote_address,commands);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",extra_options,privkey_decrypted,username,remote_address,commands);
         }
         else if(silent_flag==2){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",extra_options,private_key,username,remote_address,commands,SYSTEM_CMD_ERR_REDIRECT_NULL);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" %s",extra_options,privkey_decrypted,username,remote_address,commands,SYSTEM_CMD_ERR_REDIRECT_NULL);
         }
         else{
             if(strcmp(std_redirect,err_redirect)==0){
                 if(strlen(std_redirect)==0){
-                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",extra_options,private_key,username,remote_address,commands);
+                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\"",extra_options,privkey_decrypted,username,remote_address,commands);
                 }
                 else{
-                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" >%s 2>&1",extra_options,private_key,username,remote_address,commands,std_redirect);
+                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" >%s 2>&1",extra_options,privkey_decrypted,username,remote_address,commands,std_redirect);
                 }
             }
             else{
                 if(strlen(std_redirect)==0){
-                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" 2>%s",extra_options,private_key,username,remote_address,commands,err_redirect);
+                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" 2>%s",extra_options,privkey_decrypted,username,remote_address,commands,err_redirect);
                 }
                 else if(strlen(err_redirect)==0){
-                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" >%s 2>&1",extra_options,private_key,username,remote_address,commands,std_redirect);
+                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" >%s 2>&1",extra_options,privkey_decrypted,username,remote_address,commands,std_redirect);
                 }
                 else{
-                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" >%s 2>%s",extra_options,private_key,username,remote_address,commands,std_redirect,err_redirect);
+                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"%s\" >%s 2>%s",extra_options,privkey_decrypted,username,remote_address,commands,std_redirect,err_redirect);
                 }
             }
         }
     }
     else{
         if(silent_flag==0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",extra_options,private_key,username,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",extra_options,privkey_decrypted,username,remote_address,commands,delay_minutes,SYSTEM_CMD_REDIRECT);
         }
         else if(silent_flag==1){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\"",extra_options,private_key,username,remote_address,commands,delay_minutes);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\"",extra_options,privkey_decrypted,username,remote_address,commands,delay_minutes);
         }
         else if(silent_flag==2){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",extra_options,private_key,username,remote_address,commands,delay_minutes,SYSTEM_CMD_ERR_REDIRECT_NULL);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" %s",extra_options,privkey_decrypted,username,remote_address,commands,delay_minutes,SYSTEM_CMD_ERR_REDIRECT_NULL);
         }
         else{
             if(strcmp(std_redirect,err_redirect)==0){
                 if(strlen(std_redirect)==0){
-                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\"",extra_options,private_key,username,remote_address,commands,delay_minutes);
+                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\"",extra_options,privkey_decrypted,username,remote_address,commands,delay_minutes);
                 }
                 else{
-                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" >%s 2>&1",extra_options,private_key,username,remote_address,commands,delay_minutes,std_redirect);
+                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" >%s 2>&1",extra_options,privkey_decrypted,username,remote_address,commands,delay_minutes,std_redirect);
                 }
             }
             else{
                 if(strlen(std_redirect)==0){
-                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" 2>%s",extra_options,private_key,username,remote_address,commands,delay_minutes,err_redirect);
+                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" 2>%s",extra_options,privkey_decrypted,username,remote_address,commands,delay_minutes,err_redirect);
                 }
                 else if(strlen(err_redirect)==0){
-                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" >%s 2>&1",extra_options,private_key,username,remote_address,commands,delay_minutes,std_redirect);
+                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" >%s 2>&1",extra_options,privkey_decrypted,username,remote_address,commands,delay_minutes,std_redirect);
                 }
                 else{
-                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" >%s 2>%s",extra_options,private_key,username,remote_address,commands,delay_minutes,std_redirect,err_redirect);
+                    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh %s -o StrictHostKeyChecking=no -i %s %s@%s \"echo \"%s\" | at now + %d minutes\" >%s 2>%s",extra_options,privkey_decrypted,username,remote_address,commands,delay_minutes,std_redirect,err_redirect);
                 }
             }
         }
     }
     /*printf("#%s\n",cmdline);*/
     run=system(cmdline);
-    delete_file_or_dir(private_key);
+    delete_file_or_dir(privkey_decrypted);
     if(run!=0){
         return 1;
     }
@@ -2697,33 +2711,33 @@ int check_down_nodes(char* workdir, char* crypto_keyfile){
 int cluster_ssh(char* workdir, char* crypto_keyfile, char* username, char* role_flag, char* sshkey_dir){
     char master_address[64]="";
     char cmdline[CMDLINE_LENGTH]="";
-    char private_sshkey_encrypted[FILENAME_LENGTH]="";
-    char private_sshkey[FILENAME_LENGTH]="";
+    char privkey_base[FILENAME_LENGTH]="";
+    char privkey_decrypted[FILENAME_LENGTH_EXT]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char randstr[7]="";
     int run_flag;
     get_state_nvalue(workdir,crypto_keyfile,"master_public_ip:",master_address,64);
     if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -7;
     }
     if(strcmp(role_flag,"opr")==0){
-        if(decrypt_opr_privkey(sshkey_dir,crypto_keyfile)!=0){
-            return -5;
-        }
-        snprintf(private_sshkey,FILENAME_LENGTH-1,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
+        snprintf(privkey_base,FILENAME_LENGTH-1,"%s%snow-cluster-login",sshkey_dir,PATH_SLASH);
     }
     else{
-        snprintf(private_sshkey_encrypted,FILENAME_LENGTH-1,"%s%s.%s%s%s.key.tmp",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
-        if(decrypt_user_privkey(private_sshkey_encrypted,crypto_keyfile)!=0){
-            return -3;
-        }
-        snprintf(private_sshkey,FILENAME_LENGTH-1,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
+        snprintf(privkey_base,FILENAME_LENGTH-1,"%s%s.%s%s%s.key",sshkey_dir,PATH_SLASH,cluster_name,PATH_SLASH,username);
     }
-    if(file_exist_or_not(private_sshkey)!=0){
-        return -1;
+    generate_random_nstring(randstr,7,1);
+    if(file_convert(privkey_base,randstr,"decrypt")!=0){
+        return -5;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh -i %s -o StrictHostKeyChecking=no %s@%s",private_sshkey,username,master_address);
+    snprintf(privkey_decrypted,FILENAME_LENGTH_EXT-1,"%s.%s",privkey_base,randstr);
+    if(chmod_ssh_privkey(privkey_decrypted)!=0){
+        delete_file_or_dir(privkey_decrypted);
+        return -3;
+    }
+    snprintf(cmdline,CMDLINE_LENGTH-1,"ssh -i %s -o StrictHostKeyChecking=no %s@%s",privkey_decrypted,username,master_address);
     run_flag=system(cmdline);
-    delete_file_or_dir(private_sshkey);
+    delete_file_or_dir(privkey_decrypted);
     if(run_flag!=0){
         return 1;
     }
