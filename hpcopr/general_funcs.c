@@ -1371,7 +1371,6 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     GETTIMEOFDAY_FUNC(&current_time,NULL);
     /* create a random seed num using the time */
     seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
-    //printf("%d  -- %d -- %s\n",ch_table_length,strlen(ch_table_final),ch_table_final);
     for(total_times=0;total_times<16;total_times++){
         i=0;
         while(i<password_array_len-1){
