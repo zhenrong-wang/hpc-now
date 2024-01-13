@@ -1091,7 +1091,6 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
@@ -1384,7 +1383,6 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
@@ -1675,7 +1673,6 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     if(strcmp(init_info.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_info.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_info)!=0){
@@ -1989,7 +1986,6 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
@@ -2275,7 +2271,6 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     if(strcmp(init_conf.region_id,"hk")==0){
@@ -2583,7 +2578,6 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
@@ -2830,7 +2824,6 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a Unique Cluster ID now...\n");
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     if(print_conf_summary(batch_flag_local,&init_conf)!=0){
