@@ -1312,6 +1312,13 @@ int password_complexity_check(char* password, char* special_chars){
  * return  0: good password generated
  */
 int generate_random_npasswd(char password_array[], unsigned int password_array_len, char special_chars_array[], unsigned int special_chars_array_len){
+    int i;
+    char special_ch;
+    const char* ch_table_base="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    int total_times,rand_num;
+    struct timespec current_time;
+    unsigned int seed_num;
+
     memset(password_array,'\0',password_array_len);
     if(password_array_len<5){
         return -1;
@@ -1319,8 +1326,6 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     if(special_chars_array_len<1){
         return -3;
     }
-    int i;
-    char special_ch;
     /* The special_chars_string should not contain base chars '0'~'9' 'A'-'B' 'a'-'z' and other unprintable chars (0~32)*/
     for(i=0;i<special_chars_array_len;i++){
         special_ch=*(special_chars_array+i);
@@ -1347,10 +1352,6 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     } 
     memcpy(special_chars_string,special_chars_array,special_chars_array_len);
     *(special_chars_string+special_chars_array_len)='\0';
-    const char* ch_table_base="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    unsigned int seed_num;
-    int total_times,rand_num;
-    struct timeval current_time;
     int ch_table_length=62+strlen(special_chars_string);
     char* ch_table_final=(char*)malloc(sizeof(char)*ch_table_length);
     if(ch_table_final==NULL){
@@ -1371,25 +1372,15 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     for(total_times=0;total_times<16;total_times++){
         i=0;
         while(i<password_array_len-1){
-            /* call gettimeofday() to get current time in usec*/
-            GETTIMEOFDAY_FUNC(&current_time,NULL);
+            clock_gettime(CLOCK_MONOTONIC,&current_time);
             /* create a random seed num using the time */
-            seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+            seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
+            srand(seed_num+i);
             /* generate a random number as the index of the char table for password */
-            srand(seed_num);
             rand_num=rand()%ch_table_length;
             /* get a char to paddle the password */
-            if(i==0){
-                *(password_temp+i)=*(ch_table_final+rand_num);
-                i++;
-            }
-            /* If the new char is different from the previous, then paddle, otherwise continue the loop */
-            else{
-                if(*(ch_table_final+rand_num)!=*(password_temp+i-1)){
-                    *(password_temp+i)=*(ch_table_final+rand_num);
-                    i++;
-                }
-            }
+            *(password_temp+i)=*(ch_table_final+rand_num);
+            i++;
         }
         /* If the password is complex enough, then copy the password, free mem, and exit 0*/
         if(password_complexity_check(password_temp,special_chars_string)==0){
@@ -1416,15 +1407,17 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
 //Make sure the password[] is 20 width
 int generate_random_passwd(char* password){
     int i,total_times,rand_num;
-    struct timeval current_time;
+    struct timespec current_time;
+    unsigned int seed_num;
     char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
     char password_temp[PASSWORD_STRING_LENGTH]="";
-    unsigned int seed_num;
+
     for(total_times=0;total_times<16;total_times++){
         for(i=0;i<PASSWORD_LENGTH;i++){
-            GETTIMEOFDAY_FUNC(&current_time,NULL);
-            seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
-            srand(seed_num);
+            clock_gettime(CLOCK_MONOTONIC,&current_time);
+            /* create a random seed num using the time */
+            seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
+            srand(seed_num+i);
             rand_num=rand()%72;
             *(password_temp+i)=*(ch_table+rand_num);
             /*usleep(50);*/
@@ -1449,10 +1442,9 @@ int generate_random_passwd(char* password){
  */
 int generate_random_db_passwd(char password[], unsigned int len_max){
     int i,rand_num;
-    struct timeval current_time;
-    char ch_table[62]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    struct timespec current_time;
     unsigned int seed_num;
-
+    char ch_table[62]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     if(len_max<9){
         strcpy(password,"");
         return -1;
@@ -1460,20 +1452,13 @@ int generate_random_db_passwd(char password[], unsigned int len_max){
     reset_nstring(password,len_max);
     i=0;
     while(i<len_max-1){
-        GETTIMEOFDAY_FUNC(&current_time,NULL);
-        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
-        srand(seed_num);
+        clock_gettime(CLOCK_MONOTONIC,&current_time);
+        /* create a random seed num using the time */
+        seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
+        srand(seed_num+i);
         rand_num=rand()%62;
-        if(i==0){
-            *(password+i)=*(ch_table+rand_num);
-            i++;
-        }
-        else{
-            if(*(ch_table+rand_num)!=*(password+i-1)){
-                *(password+i)=*(ch_table+rand_num);
-                i++;
-            }
-        }
+        *(password+i)=*(ch_table+rand_num);
+        i++;
     }
     return 0;
 }
@@ -1483,25 +1468,26 @@ int generate_random_db_passwd(char password[], unsigned int len_max){
  */
 int generate_random_string(char* random_string){
     int i,rand_num;
-    struct timeval current_time;
     char ch_table[36]="abcdefghijklmnopqrstuvwxyz0123456789";
+    struct timespec current_time;
     unsigned int seed_num;
-    GETTIMEOFDAY_FUNC(&current_time,NULL);
-    seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+
+    clock_gettime(CLOCK_MONOTONIC,&current_time);
+    /* create a random seed num using the time */
+    seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
     srand(seed_num);
     rand_num=rand()%26; /* Start with a letter, not 0~9*/
     *(random_string+0)=*(ch_table+rand_num);
     /*usleep(50);*/
     i=1;
     while(i<RANDSTR_LENGTH_PLUS-1){
-        GETTIMEOFDAY_FUNC(&current_time,NULL);
-        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
-        srand(seed_num);
+        clock_gettime(CLOCK_MONOTONIC,&current_time);
+        /* create a random seed num using the time */
+        seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
+        srand(seed_num+i);
         rand_num=rand()%36;
-        if(*(ch_table+rand_num)!=*(random_string+i-1)){
-            *(random_string+i)=*(ch_table+rand_num);
-            i++;
-        }
+        *(random_string+i)=*(ch_table+rand_num);
+        i++;
     }
     *(random_string+RANDSTR_LENGTH_PLUS-1)='\0';
     return 0;  
@@ -1514,18 +1500,18 @@ int generate_random_string(char* random_string){
  */
 int generate_random_nstring(char random_string[], unsigned int len_max, int start_flag){
     int i,rand_num;
-    struct timeval current_time;
-    char ch_table[36]="abcdefghijklmnopqrstuvwxyz0123456789";
+    struct timespec current_time;
     unsigned int seed_num;
 
+    char ch_table[36]="abcdefghijklmnopqrstuvwxyz0123456789";
     if(len_max<2){
         strcpy(random_string,"");
         return -1;
     }
     reset_nstring(random_string,len_max);
-
-    GETTIMEOFDAY_FUNC(&current_time,NULL);
-    seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+    clock_gettime(CLOCK_MONOTONIC,&current_time);
+    /* create a random seed num using the time */
+    seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
     srand(seed_num);
     if(start_flag==0){
         rand_num=rand()%26; /* Start with a letter, not 0~9*/
@@ -1536,14 +1522,13 @@ int generate_random_nstring(char random_string[], unsigned int len_max, int star
     *(random_string+0)=*(ch_table+rand_num);
     i=1;
     while(i<len_max-1){
-        GETTIMEOFDAY_FUNC(&current_time,NULL);
-        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
-        srand(seed_num);
+        clock_gettime(CLOCK_MONOTONIC,&current_time);
+        /* create a random seed num using the time */
+        seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
+        srand(seed_num+i);
         rand_num=rand()%36;
-        if(*(ch_table+rand_num)!=*(random_string+i-1)){
-            *(random_string+i)=*(ch_table+rand_num);
-            i++;
-        }
+        *(random_string+i)=*(ch_table+rand_num);
+        i++;
     }
     /*printf("#%s\n",random_string);*/
     return 0;  

@@ -54,6 +54,7 @@ void reset_initinfo(cluster_initinfo* init_info, char* cluster_id){
 
 void empty_initinfo(cluster_initinfo* init_info){
     reset_initinfo(init_info,"");
+    strcpy(init_info->cluster_id,"");
     strcpy(init_info->master_init_param,"");
 }
 
@@ -818,10 +819,10 @@ void print_read_conf_failed(int read_conf_flag){
     }
 }
 
-int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info){
-    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration:" RESET_DISPLAY "\n");
+int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info, char* ucid_short){
+    printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration [ " RESET_DISPLAY GREEN_NORMAL "%s-%s" RESET_DISPLAY HIGH_GREEN_BOLD " ]:" RESET_DISPLAY "\n",init_info->cluster_id,ucid_short);
     //printf(HIGH_GREEN_BOLD "[  ****  ] Cluster Name : %s " RESET_DISPLAY GREEN_LIGHT " ~ non-configurable\n",init_info->cluster_id);
-    printf(HIGH_GREEN_BOLD "[  ****  ] Region & Zone    : %s & %s " RESET_DISPLAY GREEN_NORMAL "  provided by cloud\n",init_info->region_id,init_info->zone_id);
+    printf(HIGH_GREEN_BOLD "[  ****  ] Region & Zone    : %s & %s " RESET_DISPLAY GREEN_NORMAL "  cloud codes\n",init_info->region_id,init_info->zone_id);
     printf(HIGH_GREEN_BOLD "[  ****  ] Nodes  & Users   : %d & %d " RESET_DISPLAY GREEN_NORMAL "  initial to create\n",init_info->node_num,init_info->hpc_user_num);
     printf(HIGH_GREEN_BOLD "[  ****  ] Master & Compute : %s & %s " RESET_DISPLAY GREEN_NORMAL "  vm instance code\n",init_info->master_inst,init_info->compute_inst);
     printf(HIGH_GREEN_BOLD "[  ****  ] OS Image or name : %s " RESET_DISPLAY GREEN_NORMAL "  image_id or name" RESET_DISPLAY "\n",init_info->os_image_raw);
@@ -1092,11 +1093,12 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
-    if(print_conf_summary(batch_flag_local,&init_info)!=0){
+    if(print_conf_summary(batch_flag_local,&init_info,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
     }
+
+    snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_VPC_NAME",string_temp);
@@ -1384,11 +1386,12 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
         generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
-    if(print_conf_summary(batch_flag_local,&init_info)!=0){
+    if(print_conf_summary(batch_flag_local,&init_info,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
     }
+
+    snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_VPC_NAME",string_temp);
@@ -1674,11 +1677,12 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
         generate_random_npasswd(init_info.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
-    if(print_conf_summary(batch_flag_local,&init_info)!=0){
+    if(print_conf_summary(batch_flag_local,&init_info,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
     }
+
+    snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_VPC_NAME",string_temp);
@@ -1987,11 +1991,12 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
-    if(print_conf_summary(batch_flag_local,&init_conf)!=0){
+    if(print_conf_summary(batch_flag_local,&init_conf,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
     }
+
+    snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     hw_vm_series(init_conf.region_id,intel_generation,tiny_series_name,&amd_flavor_flag);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
@@ -2272,6 +2277,11 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
+    if(print_conf_summary(batch_flag_local,&init_conf,randstr)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,2);
+        return 1; // user denied.
+    }
+
     snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     if(strcmp(init_conf.region_id,"hk")==0){
         strcpy(db_inst,"i2c2g-hk");
@@ -2280,10 +2290,6 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     else{
         strcpy(db_inst,"i2c2g");
         strcpy(natgw_inst,"i2c2g");
-    }
-    if(print_conf_summary(batch_flag_local,&init_conf)!=0){
-        clear_if_failed(stackdir,confdir,vaultdir,2);
-        return 1; // user denied.
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
@@ -2579,11 +2585,12 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
-    if(print_conf_summary(batch_flag_local,&init_conf)!=0){
+    if(print_conf_summary(batch_flag_local,&init_conf,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         return 1; // user denied.
     }
+
+    snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     generate_random_string(random_storage_account);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_CLIENT_ID",access_key);
@@ -2825,12 +2832,13 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
     }
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
-    snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
-    if(print_conf_summary(batch_flag_local,&init_conf)!=0){
+    if(print_conf_summary(batch_flag_local,&init_conf,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         gcp_credential_convert(workdir,"delete",0);
         return 1; // user denied.
     }
+
+    snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
     snprintf(keyfile_path,FILENAME_LENGTH-1,"%s%s.key.json",vaultdir,PATH_SLASH);
     windows_path_to_nstring(keyfile_path,keyfile_path_ext,DIR_LENGTH_EXT);

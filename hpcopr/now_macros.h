@@ -56,7 +56,6 @@
 #define FILENAME_SUFFIX_SHORT "win"
 #define FILENAME_SUFFIX_FULL "windows"
 
-#define GETTIMEOFDAY_FUNC mingw_gettimeofday
 #define GETPASS_FUNC getpass_win
 
 // The urls below are permenant and fast to visit. Use them directly.
@@ -122,7 +121,6 @@
 #define FILENAME_SUFFIX_SHORT "lin"
 #define FILENAME_SUFFIX_FULL "linux"
 
-#define GETTIMEOFDAY_FUNC gettimeofday
 #define GETPASS_FUNC getpass
 
 // The urls below are permenant and fast to visit. Use them directly.
@@ -188,7 +186,6 @@
 #define FILENAME_SUFFIX_SHORT "dwn"
 #define FILENAME_SUFFIX_FULL "darwin"
 
-#define GETTIMEOFDAY_FUNC gettimeofday
 #define GETPASS_FUNC getpass
 
 // The urls below are permenant and fast to visit. Use them directly.

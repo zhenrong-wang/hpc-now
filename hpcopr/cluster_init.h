@@ -33,7 +33,7 @@ int get_static_conf_files(char* confdir, char* cloud_name, int code_loc_flag, ch
 int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_loc_flag, char* url_code_root);
 int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, cluster_initinfo* init_info);
 void print_read_conf_failed(int read_conf_flag);
-int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info);
+int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info, char* ucid_short);
 int save_bucket_info(char* cloud_flag, char* bucket_info_file, char* bucket_id, char* region_id, char* bucket_ak, char* bucket_sk, char* gcp_bucket_key_file);
 void node_user_num_fix(int* node_num, int* hpc_user_num);
 void clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int condition_flag);
