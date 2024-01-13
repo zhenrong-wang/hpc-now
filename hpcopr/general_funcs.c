@@ -1367,19 +1367,29 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
         return -5;
     }
     memset(password_temp,'\0',password_array_len);
-    /* call gettimeofday() to get current time in usec*/
-    GETTIMEOFDAY_FUNC(&current_time,NULL);
-    /* create a random seed num using the time */
-    seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+    //printf("%d  -- %d -- %s\n",ch_table_length,strlen(ch_table_final),ch_table_final);
     for(total_times=0;total_times<16;total_times++){
         i=0;
         while(i<password_array_len-1){
+            /* call gettimeofday() to get current time in usec*/
+            GETTIMEOFDAY_FUNC(&current_time,NULL);
+            /* create a random seed num using the time */
+            seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
             /* generate a random number as the index of the char table for password */
-            srand(seed_num+i);
+            srand(seed_num);
             rand_num=rand()%ch_table_length;
             /* get a char to paddle the password */
-            *(password_temp+i)=*(ch_table_final+rand_num);
-            i++;
+            if(i==0){
+                *(password_temp+i)=*(ch_table_final+rand_num);
+                i++;
+            }
+            /* If the new char is different from the previous, then paddle, otherwise continue the loop */
+            else{
+                if(*(ch_table_final+rand_num)!=*(password_temp+i-1)){
+                    *(password_temp+i)=*(ch_table_final+rand_num);
+                    i++;
+                }
+            }
         }
         /* If the password is complex enough, then copy the password, free mem, and exit 0*/
         if(password_complexity_check(password_temp,special_chars_string)==0){
@@ -1410,11 +1420,11 @@ int generate_random_passwd(char* password){
     char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
     char password_temp[PASSWORD_STRING_LENGTH]="";
     unsigned int seed_num;
-    GETTIMEOFDAY_FUNC(&current_time,NULL);
-    seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
     for(total_times=0;total_times<16;total_times++){
         for(i=0;i<PASSWORD_LENGTH;i++){
-            srand(seed_num+i);
+            GETTIMEOFDAY_FUNC(&current_time,NULL);
+            seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+            srand(seed_num);
             rand_num=rand()%72;
             *(password_temp+i)=*(ch_table+rand_num);
             /*usleep(50);*/
@@ -1442,19 +1452,28 @@ int generate_random_db_passwd(char password[], unsigned int len_max){
     struct timeval current_time;
     char ch_table[62]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     unsigned int seed_num;
+
     if(len_max<9){
         strcpy(password,"");
         return -1;
     }
     reset_nstring(password,len_max);
     i=0;
-    GETTIMEOFDAY_FUNC(&current_time,NULL);
-    seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
     while(i<len_max-1){
-        srand(seed_num+i);
+        GETTIMEOFDAY_FUNC(&current_time,NULL);
+        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+        srand(seed_num);
         rand_num=rand()%62;
-        *(password+i)=*(ch_table+rand_num);
-        i++;
+        if(i==0){
+            *(password+i)=*(ch_table+rand_num);
+            i++;
+        }
+        else{
+            if(*(ch_table+rand_num)!=*(password+i-1)){
+                *(password+i)=*(ch_table+rand_num);
+                i++;
+            }
+        }
     }
     return 0;
 }
@@ -1475,10 +1494,14 @@ int generate_random_string(char* random_string){
     /*usleep(50);*/
     i=1;
     while(i<RANDSTR_LENGTH_PLUS-1){
-        srand(seed_num+i);
+        GETTIMEOFDAY_FUNC(&current_time,NULL);
+        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+        srand(seed_num);
         rand_num=rand()%36;
-        *(random_string+i)=*(ch_table+rand_num);
-        i++;
+        if(*(ch_table+rand_num)!=*(random_string+i-1)){
+            *(random_string+i)=*(ch_table+rand_num);
+            i++;
+        }
     }
     *(random_string+RANDSTR_LENGTH_PLUS-1)='\0';
     return 0;  
@@ -1500,6 +1523,7 @@ int generate_random_nstring(char random_string[], unsigned int len_max, int star
         return -1;
     }
     reset_nstring(random_string,len_max);
+
     GETTIMEOFDAY_FUNC(&current_time,NULL);
     seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
     srand(seed_num);
@@ -1512,10 +1536,14 @@ int generate_random_nstring(char random_string[], unsigned int len_max, int star
     *(random_string+0)=*(ch_table+rand_num);
     i=1;
     while(i<len_max-1){
-        srand(seed_num+i);
+        GETTIMEOFDAY_FUNC(&current_time,NULL);
+        seed_num=(unsigned int)(current_time.tv_sec+current_time.tv_usec);
+        srand(seed_num);
         rand_num=rand()%36;
-        *(random_string+i)=*(ch_table+rand_num);
-        i++;
+        if(*(ch_table+rand_num)!=*(random_string+i-1)){
+            *(random_string+i)=*(ch_table+rand_num);
+            i++;
+        }
     }
     /*printf("#%s\n",random_string);*/
     return 0;  
