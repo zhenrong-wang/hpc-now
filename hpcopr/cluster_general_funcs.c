@@ -338,6 +338,9 @@ int chmod_ssh_privkey(char* ssh_privkey){
     char line_seq_buffer[256]="";
     char line_seq_buffer2[128]="";
     char line_buffer[512]="";
+    char randstr[7]="";
+    char get_perm_temp[FILENAME_LENGTH]="";
+    generate_random_nstring(randstr,7,1);
     snprintf(cmdline,CMDLINE_LENGTH-1,"takeown /f %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /c /t /inheritance:d %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
@@ -348,9 +351,10 @@ int chmod_ssh_privkey(char* ssh_privkey){
     system(cmdline);
     snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /c /t /remove:g Administrators %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
     system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s > c:\\programdata\\hpc-now\\perm.txt",ssh_privkey);
+    snprintf(get_perm_temp,FILENAME_LENGTH-1,"%s%s.tmp%skey_perm.%s.txt",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,randstr);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s > %s",ssh_privkey,get_perm_temp);
     system(cmdline);
-    file_p=fopen("c:\\programdata\\hpc-now\\perm.txt","r");
+    file_p=fopen(get_perm_temp,"r");
     if(file_p==NULL){
         return -3;
     }
@@ -360,20 +364,20 @@ int chmod_ssh_privkey(char* ssh_privkey){
         get_seq_nstring(line_seq_buffer,'\\',2,line_seq_buffer2,128);
         get_seq_nstring(line_seq_buffer2,':',1,group_and_user,64);
         if(strcmp(group_and_user,"hpc-now")!=0&&strlen(group_and_user)!=0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /c /t /remove %s %s",ssh_privkey,group_and_user,SYSTEM_CMD_REDIRECT);
+            snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /c /t /remove %s %s",ssh_privkey,group_and_user,SYSTEM_CMD_REDIRECT_NULL);
             if(system(cmdline)!=0){
                 fclose(file_p);
-                delete_file_or_dir("c:\\programdata\\hpc-now\\perm.txt");
+                delete_file_or_dir(get_perm_temp);
                 return -5;
             }
         }
     }
     fclose(file_p);
-    delete_file_or_dir("c:\\programdata\\hpc-now\\perm.txt");
+    delete_file_or_dir(get_perm_temp);
 #else
-    snprintf(cmdline,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"chmod 600 %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"chmod 600 %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
 #endif
     return 0;
