@@ -1983,7 +1983,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     char running_node_num_string[8]="";
     int max_cluster_name_length=get_max_cluster_name_length();
     int current_cluster_name_length=0;
-    int i,j;
+    int i,j,state_flag=0;
     int decrypt_flag=0;
     char decrypt_prompt[32]="";
     if(create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH)!=0||get_cluster_nname(cluster_name,32,workdir)!=0){
@@ -1996,6 +1996,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     snprintf(statefile,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     if(file_exist_or_not(statefile)!=0){
         decrypt_single_file_general(NOW_CRYPTO_EXEC,statefile_encrypted,statefile,md5sum);
+        state_flag=1;
     }
     decrypt_flag=decryption_status(workdir);
     if(decrypt_flag!=0){
@@ -2118,7 +2119,9 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
             }
         }
     }
-    encrypt_and_delete(NOW_CRYPTO_EXEC,statefile,md5sum);
+    if(state_flag==1){ /* Only if this function decrypted the statefile, then encrypt back. */
+        encrypt_and_delete(NOW_CRYPTO_EXEC,statefile,md5sum);
+    }
     printf(RESET_DISPLAY);
     return 0;
 }
