@@ -1148,15 +1148,15 @@ int check_and_install_prerequisitions(int repair_flag){
 
 /* The remmina files exposes user's password. Must be deleted.*/
 #ifdef _WIN32
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*.rdp %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*.rdp %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
 #elif __linux__
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline); 
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s.*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s.*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
 #else
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s /tmp/.hpc-now*.rdp %s",DELETE_FILE_CMD,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s /tmp/.hpc-now*.rdp %s",DELETE_FILE_CMD,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
 #endif
     if(repair_flag==1){
