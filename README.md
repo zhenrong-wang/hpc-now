@@ -493,7 +493,8 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 &emsp;&emsp;&emsp;&emsp;+- **.CLUSTER_NAME/**&emsp;&emsp;*Each cluster has its own directory*\
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- **USER_PRIVATE_KEYS.tmp**&emsp;&emsp;*Cluster users' encrypted private keys*\
 &emsp;&emsp;+- **.etc/**&emsp;&emsp;*General configuration files*\
-&emsp;&emsp;&emsp;&emsp;+- **.all_clusters.dat**&emsp;&emsp;*Cluster registry*\
+&emsp;&emsp;&emsp;&emsp;+- **.all_clusters.dat.tmp**&emsp;&emsp;*Encrypted cluster registry*\
+&emsp;&emsp;&emsp;&emsp;+- **.all_clusters.dat.dec.bak**&emsp;&emsp;*Decrypted cluster registry*\
 &emsp;&emsp;&emsp;&emsp;+- **current_cluster.dat**&emsp;&emsp;*Current cluster indicator*\
 &emsp;&emsp;&emsp;&emsp;+- **google_check.dat**&emsp;&emsp;*Google connectivity indicator*\
 &emsp;&emsp;&emsp;&emsp;+- **locations.conf**&emsp;&emsp;*Locations of components*\
