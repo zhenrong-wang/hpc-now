@@ -27,7 +27,8 @@
         "in.h": "c",
         "typeinfo": "c",
         "now_md5.h": "c",
-        "opr_crypto.h": "c"
+        "opr_crypto.h": "c",
+        "now_sha256.h": "c"
     },
     "C_Cpp.dimInactiveRegions": true
 }
