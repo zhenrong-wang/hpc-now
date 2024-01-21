@@ -830,16 +830,23 @@ int check_pslock(char* workdir, int decrypt_flag){
 int check_pslock_all(void){
     char randstr[7]="";
     char filename_temp[FILENAME_LENGTH]="";
-    generate_random_nstring(randstr,7,0);
-    file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
+    char line_buffer[LINE_LENGTH_SHORT]="";
+    char cluster_name_temp[32]="";
+    char cluster_workdir_temp[DIR_LENGTH]="";
+    int decrypt_flag=0;
+    /* Will detect the decrypted backup file by default
+     * If the decrypted backup file is absent, then decrypt a new one */
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s.dec.bak",ALL_CLUSTER_REGISTRY);
+    if(file_exist_or_not(filename_temp)!=0){
+        generate_random_nstring(randstr,7,0);
+        file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
+        decrypt_flag=1; /* Mark the decryption */
+    }
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
         return -1;
     }
-    char line_buffer[LINE_LENGTH_SHORT]="";
-    char cluster_name_temp[32]="";
-    char cluster_workdir_temp[DIR_LENGTH]="";
     while(fngetline(file_p,line_buffer,LINE_LENGTH_SHORT)!=1){
         if(line_check_by_keyword(line_buffer,"< cluster name",':',1)!=0){
             continue;
@@ -857,9 +864,9 @@ int check_pslock_all(void){
         }
     }
     fclose(file_p);
-    if(file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete_decrypted")!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the cluster registry." RESET_DISPLAY);
-        return 1;
+    /* If a decryption happened, then delete the decrypted file */
+    if(decrypt_flag==1){
+        file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete_decrypted");
     }
     return 0;
 }
