@@ -616,10 +616,10 @@ int set_opr_password(char* opr_password){
     }
 #endif
     char random_string[PASSWORD_STRING_LENGTH]="";
-    //char* ch=NULL;
     char opr_passwd_temp[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
     int run_flag;
+    /* The keystring's complexity has been checked before this function */
     if(strlen(opr_password)==0){
         getpass_stdin("[ INPUT: ] Specify a keystring (length < 20): ",opr_passwd_temp,20);
         if(password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
