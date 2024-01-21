@@ -679,11 +679,11 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your secrets key pair:\n");
-        getpass_stdin("[ INPUT: ] Access key ID : [s]",access_key,AKSK_LENGTH);
+        getpass_stdin("[ INPUT: ] Access key ID : ",access_key,AKSK_LENGTH);
         /*keypair_temp=GETPASS_FUNC("[ INPUT: ] Access key ID  : ");
         strncpy(access_key,keypair_temp,AKSK_LENGTH-1);
         reset_string(keypair_temp);*/
-        getpass_stdin("[ INPUT: ] Access secrets: [s]",secret_key,AKSK_LENGTH);
+        getpass_stdin("[ INPUT: ] Access secrets: ",secret_key,AKSK_LENGTH);
         /*keypair_temp=GETPASS_FUNC("[ INPUT: ] Access secrets : ");
         strncpy(secret_key,keypair_temp,AKSK_LENGTH-1);
         reset_string(keypair_temp);*/
@@ -875,8 +875,8 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your new secrets key pair:\n");
-        getpass_stdin("[ INPUT: ] Access key ID : [s]",access_key,AKSK_LENGTH);
-        getpass_stdin("[ INPUT: ] Access secrets: [s]",secret_key,AKSK_LENGTH);
+        getpass_stdin("[ INPUT: ] Access key ID : ",access_key,AKSK_LENGTH);
+        getpass_stdin("[ INPUT: ] Access secrets: ",secret_key,AKSK_LENGTH);
         /*keypair_temp=GETPASS_FUNC("[ INPUT: ] Access key ID  : ");
         strcpy(access_key,keypair_temp);
         reset_string(keypair_temp);

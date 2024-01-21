@@ -1558,7 +1558,7 @@ int getpass_stdin(char* prompt, char pass_string[], unsigned int pass_length){
         return -3;
     }
     if(strlen(prompt)>0){
-        printf("%s",prompt);
+        printf("%s" GENERAL_BOLD "[s]" RESET_DISPLAY ,prompt);
     }
     fflush(stdin);
 #ifdef _WIN32

@@ -196,7 +196,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a *complex* password to encrypt and export.\n");
-        getpass_stdin("[ INPUT: ] Type a password: [s]",real_password,128);
+        getpass_stdin("[ INPUT: ] Type a password: ",real_password,128);
         /*password_temp=GETPASS_FUNC("[ INPUT: ] *without echo* ");
         strcpy(real_password,password_temp);*/
     }
@@ -510,7 +510,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the password to decrypt and import.\n");
-        getpass_stdin("[ INPUT: ] Type a password: [s]",real_password,128);
+        getpass_stdin("[ INPUT: ] Type a password: ",real_password,128);
         /*password_temp=GETPASS_FUNC("[ INPUT: ] *without echo* ");
         strcpy(real_password,password_temp);*/
     }
