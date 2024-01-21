@@ -172,7 +172,6 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
-    char* ch=NULL;
     char opr_passwd_temp[PASSWORD_STRING_LENGTH]="";
 #ifdef __linux__
     char linux_packman[8]="";
@@ -304,16 +303,14 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a file for encryption/decryption ...\n");
     generate_random_passwd(random_string);
     if(strlen(opr_password)==0){
-        ch=GETPASS_FUNC("[ INPUT: ] Specify an operator keystring (length < 20, without echo): ");
-        strncpy(opr_passwd_temp,ch,19);
-        if(strlen(ch)>19||password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
+        getpass_stdin("[ INPUT: ] Specify an operator keystring (length < 20): [s]",opr_passwd_temp,20);
+        if(password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
             generate_random_passwd(opr_passwd_temp);
             printf(WARN_YELLO_BOLD "\n[ -WARN- ] The keystring is invalid. Generated: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
         }
         else{
             printf(GENERAL_BOLD "\n[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
         }
-        reset_string(ch);
     }
 #ifdef _WIN32
     file_p=fopen("c:\\programdata\\hpc-now\\now_crypto_seed.lock","w+");
@@ -615,20 +612,18 @@ int set_opr_password(char* opr_password){
     }
 #endif
     char random_string[PASSWORD_STRING_LENGTH]="";
-    char* ch=NULL;
+    //char* ch=NULL;
     char opr_passwd_temp[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
     int run_flag;
     if(strlen(opr_password)==0){
-        ch=GETPASS_FUNC("[ INPUT: ] Specify a keystring (length < 20, without echo): ");
-        strncpy(opr_passwd_temp,ch,19);
-        if(strlen(ch)>19||password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
-            printf(FATAL_RED_BOLD "\n[ FATAL: ] The keystring " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",ch);
+        getpass_stdin("[ INPUT: ] Specify a keystring (length < 20): [s]",opr_passwd_temp,20);
+        if(password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
+            printf(FATAL_RED_BOLD "\n[ FATAL: ] The keystring " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",opr_passwd_temp);
             return 1;
         }
         else{
             printf(GENERAL_BOLD "\n[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
-            reset_string(ch);
         }
     }
     else{

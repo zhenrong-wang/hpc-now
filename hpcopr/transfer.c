@@ -119,7 +119,6 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char username_temp[32]="";
     char username_temp_2[32]="";
     char unique_id[16]="";
-    char* password_temp;
     char real_password[128]="";
     char real_export_file[FILENAME_LENGTH_EXT]="";
     char real_export_folder[FILENAME_LENGTH_EXT]="";
@@ -197,8 +196,9 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a *complex* password to encrypt and export.\n");
-        password_temp=GETPASS_FUNC("[ INPUT: ] *without echo* ");
-        strcpy(real_password,password_temp);
+        getpass_stdin("[ INPUT: ] Type a password: [s]",real_password,128);
+        /*password_temp=GETPASS_FUNC("[ INPUT: ] *without echo* ");
+        strcpy(real_password,password_temp);*/
     }
     else{
         strcpy(real_password,password);
@@ -472,7 +472,6 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     char vaultdir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char registry_line[LINE_LENGTH_SHORT]="";
-    char* password_temp;
     char real_password[128]="";
     char md5sum_password[64]="";
     char md5sum_local[64]="";
@@ -511,8 +510,9 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the password to decrypt and import.\n");
-        password_temp=GETPASS_FUNC("[ INPUT: ] *without echo* ");
-        strcpy(real_password,password_temp);
+        getpass_stdin("[ INPUT: ] Type a password: [s]",real_password,128);
+        /*password_temp=GETPASS_FUNC("[ INPUT: ] *without echo* ");
+        strcpy(real_password,password_temp);*/
     }
     else{
         strcpy(real_password,password);

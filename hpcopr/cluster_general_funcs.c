@@ -3110,34 +3110,30 @@ int user_password_complexity_check(char* password, char* special_chars){
 }
 
 int input_user_passwd(char* password_string, int batch_flag_local){
+    char password_temp[32];
+    char password_input[32]="";
+    char password_confirm[USER_PASSWORD_LENGTH_MAX]="";
     if(batch_flag_local==0){
         return -1;
     }
-    char* password_temp=NULL;
-    char password_prompt[128]="";
-    char password_input[USER_PASSWORD_LENGTH_MAX]="";
-    char password_confirm[USER_PASSWORD_LENGTH_MAX]="";
-
     printf("[ -INFO- ] Length: %d-%d. Must include at least 3 of 4 different types: \n",USER_PASSWORD_LENGTH_MIN,USER_PASSWORD_LENGTH_MAX);
     printf("[  ****  ] " HIGH_GREEN_BOLD "A-Z  a-z  0-9  %s" RESET_DISPLAY "\n",SPECIAL_PASSWORD_CHARS);
-    snprintf(password_prompt,127,"[ INPUT: ] Type a password : ");
-    password_temp=GETPASS_FUNC(password_prompt);
+    getpass_stdin("[ INPUT: ] Type a password : [s]",password_temp,32);
     if(user_password_complexity_check(password_temp,SPECIAL_PASSWORD_CHARS)!=0){
         return 1;
     }
     strcpy(password_input,password_temp);
-    strcpy(password_temp,"");
-    password_temp=GETPASS_FUNC("[  ****  ] Re-type password: ");                            
+    getpass_stdin("[  ****  ] Re-type password: [s]",password_temp,32);                         
     if(strlen(password_temp)>USER_PASSWORD_LENGTH_MAX){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password." RESET_DISPLAY "\n");
-        printf(FATAL_RED_BOLD "|" RESET_DISPLAY GREY_LIGHT "          %s" RESET_DISPLAY WARN_YELLO_BOLD " !=" RESET_DISPLAY GREY_LIGHT " %s \n" RESET_DISPLAY,password_input,password_temp);
+        printf(FATAL_RED_BOLD "[  ****  ] " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY WARN_YELLO_BOLD " != " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",password_input,password_temp);
         return 1;
     }
     strcpy(password_confirm,password_temp);
     strcpy(password_temp,"");
     if(strcmp(password_input,password_confirm)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to confirm the password." RESET_DISPLAY "\n");
-        printf(FATAL_RED_BOLD "|" RESET_DISPLAY GREY_LIGHT "          %s" RESET_DISPLAY WARN_YELLO_BOLD " !=" RESET_DISPLAY GREY_LIGHT " %s \n" RESET_DISPLAY,password_input,password_confirm);
+        printf(FATAL_RED_BOLD "[  ****  ] " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY WARN_YELLO_BOLD " != " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",password_input,password_confirm);
         return 1;
     }
     strcpy(password_string,password_input);

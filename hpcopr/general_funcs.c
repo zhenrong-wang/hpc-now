@@ -5,6 +5,11 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
+#ifndef _WIN32
+#define _GNU_SOURCE 1
+#include <termios.h> /* For terminal operation of the getpass function*/
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1532,6 +1537,79 @@ int generate_random_nstring(char random_string[], unsigned int len_max, int star
     }
     /*printf("#%s\n",random_string);*/
     return 0;  
+}
+
+/* 
+ * Get a password from stdin securely (without echo)
+ * CAUTION: The pass_length includes a '\0' 
+ */
+int getpass_stdin(char* prompt, char pass_string[], unsigned int pass_length){
+    char BACKSPACE='\b';
+    char ch='\0';
+    int i=0;
+#ifndef _WIN32
+    struct termios prev,new;
+    char ENTER='\n';
+#else
+    char ENTER='\r';
+#endif
+    memset(pass_string,'\0',pass_length);
+    if(pass_length<2){ /* There should at least be one char for input*/
+        return -3;
+    }
+    if(strlen(prompt)>0){
+        printf("%s",prompt);
+    }
+    fflush(stdin);
+#ifdef _WIN32
+    while((ch=_getch())!=ENTER&&i<pass_length-1){
+        if(ch!=BACKSPACE&&ch!='\t'&&ch!=' '){
+            pass_string[i]=ch;
+            putchar('*');
+            i++;
+        }
+        else if(ch==BACKSPACE){
+            if(i==0){
+                continue;
+            }
+            else{
+                printf("\b \b");
+                i--;
+                pass_string[i]='\0';
+            }
+        }
+    }
+#else
+    if(tcgetattr(fileno(stdin),&prev)!=0){
+        return -1;
+    }
+    new=prev;
+    new.c_lflag&=~ECHO;
+    if(tcsetattr(fileno(stdin),TCSAFLUSH,&new)!=0){
+        return -1;
+    }
+    while((ch=getchar())!=ENTER&&i<pass_length-1){
+        if(ch!=BACKSPACE&&ch!='\t'&&ch!=' '){
+            pass_string[i]=ch;
+            i++;
+        }
+        else if(ch==BACKSPACE){
+            if(i==0){
+                continue;
+            }
+            else{
+                i--;
+                pass_string[i]='\0';
+            }
+        }
+    }
+    if(tcsetattr(fileno(stdin),TCSAFLUSH,&prev)!=0){
+        return -1;
+    }
+#endif
+    fflush(stdin);
+    printf("\n");
+    return 0;
 }
 
 /*

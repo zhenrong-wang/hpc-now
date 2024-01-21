@@ -56,7 +56,8 @@ int generate_random_db_passwd(char password[], unsigned int len_max);
 int generate_random_string(char* random_string); /* This function is deprecated, please use generate_random_nstring*/
 int generate_random_nstring(char random_string[], unsigned int len_max, int start_flag);
 
-char* getpass_win(char* prompt);
+char* getpass_win(char* prompt); /* This function is deprecated. Please use getpass_stdin() instead. */
+int getpass_stdin(char* prompt, char pass_string[], unsigned int pass_length); 
 
 int insert_lines(char* filename, char* keyword, char* insert_string);
 int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char* insert_string);
