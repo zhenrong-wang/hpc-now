@@ -56,7 +56,7 @@
 #define FILENAME_SUFFIX_SHORT "win"
 #define FILENAME_SUFFIX_FULL "windows"
 
-#define GETPASS_FUNC getpass_win
+/* #define GETPASS_FUNC getpass_win */
 
 // The urls below are permenant and fast to visit. Use them directly.
 #define URL_COSCLI "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-windows.exe"
@@ -121,7 +121,7 @@
 #define FILENAME_SUFFIX_SHORT "lin"
 #define FILENAME_SUFFIX_FULL "linux"
 
-#define GETPASS_FUNC getpass
+/* #define GETPASS_FUNC getpass */
 
 // The urls below are permenant and fast to visit. Use them directly.
 #define URL_COSCLI "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-linux"
@@ -186,7 +186,7 @@
 #define FILENAME_SUFFIX_SHORT "dwn"
 #define FILENAME_SUFFIX_FULL "darwin"
 
-#define GETPASS_FUNC getpass
+/* #define GETPASS_FUNC getpass */
 
 // The urls below are permenant and fast to visit. Use them directly.
 #define URL_COSCLI "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-mac"
