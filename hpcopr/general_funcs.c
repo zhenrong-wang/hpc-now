@@ -1560,6 +1560,9 @@ int getpass_stdin(char* prompt, char pass_string[], unsigned int pass_length){
     if(strlen(prompt)>0){
         printf("%s" GENERAL_BOLD "[s]" RESET_DISPLAY ,prompt);
     }
+    else{
+        printf(GENERAL_BOLD "[s]" RESET_DISPLAY ,prompt);
+    }
     fflush(stdin);
 #ifdef _WIN32
     while((ch=_getch())!=ENTER&&i<pass_length-1){
@@ -1603,9 +1606,7 @@ int getpass_stdin(char* prompt, char pass_string[], unsigned int pass_length){
             }
         }
     }
-    if(tcsetattr(fileno(stdin),TCSAFLUSH,&prev)!=0){
-        return -1;
-    }
+    tcsetattr(fileno(stdin),TCSAFLUSH,&prev);
 #endif
     fflush(stdin);
     printf("\n");

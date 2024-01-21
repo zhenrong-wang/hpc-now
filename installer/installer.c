@@ -301,11 +301,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     system("chmod -R 700 /Applications/.hpc-now >> /dev/null 2>&1");
 #endif
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a file for encryption/decryption ...\n");
-    generate_random_passwd(random_string);
+    generate_random_npasswd(random_string,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
     if(strlen(opr_password)==0){
         getpass_stdin("[ INPUT: ] Specify an operator keystring (length < 20): ",opr_passwd_temp,20);
         if(password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
-            generate_random_passwd(opr_passwd_temp);
+            generate_random_npasswd(opr_passwd_temp,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
             printf(WARN_YELLO_BOLD "\n[ -WARN- ] The keystring is invalid. Generated: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
         }
         else{
@@ -649,7 +649,7 @@ int set_opr_password(char* opr_password){
         }
         return 3;
     }
-    generate_random_passwd(random_string);
+    generate_random_npasswd(random_string,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
 #ifdef _WIN32
     system("attrib -h -s -r c:\\programdata\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
     file_p=fopen("c:\\programdata\\hpc-now\\now_crypto_seed.lock","w+");
