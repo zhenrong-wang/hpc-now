@@ -623,15 +623,15 @@ int set_opr_password(char* opr_password){
     if(strlen(opr_password)==0){
         getpass_stdin("[ INPUT: ] Specify a keystring (length < 20): ",opr_passwd_temp,20);
         if(password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
-            printf(FATAL_RED_BOLD "\n[ FATAL: ] The keystring " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",opr_passwd_temp);
+            printf(FATAL_RED_BOLD "[ FATAL: ] The keystring " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n",opr_passwd_temp);
             return 1;
         }
         else{
-            printf(GENERAL_BOLD "\n[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
+            printf(GENERAL_BOLD "[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
         }
     }
     else{
-        printf(GENERAL_BOLD "\n[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_password);
+        printf(GENERAL_BOLD "[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_password);
         strncpy(opr_passwd_temp,opr_password,19);
     }
     printf(GENERAL_BOLD "\n[ STEP 1 ] Decrypting current files with previous crypto keystring..." RESET_DISPLAY "\n");
