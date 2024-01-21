@@ -576,13 +576,17 @@ mac_install_done:
 
 int restore_perm_windows(void){
 #ifdef _WIN32
+    int cmd_flag=0;
     if(system("icacls c:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1")!=0){
-        return 1;
+        cmd_flag++;
     }
     if(system("icacls c:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1")!=0){
-        return 1;
+        cmd_flag++;
     }
     if(system("icacls c:\\programdata\\hpc-now /deny Administrators:F > nul 2>&1")!=0){
+        cmd_flag++;
+    }
+    if(cmd_flag!=0){
         return 1;
     }
 #endif
@@ -644,9 +648,7 @@ int set_opr_password(char* opr_password){
             encrypt_decrypt_clusters("all",CRYPTO_KEY_FILE,"encrypt",0);
         }
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Operation failed and keystring unchanged." RESET_DISPLAY "\n");
-        if(restore_perm_windows()!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to restore the dir/file permissions." RESET_DISPLAY "\n");
-        }
+        restore_perm_windows();
         return 3;
     }
     generate_random_npasswd(random_string,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
@@ -662,9 +664,7 @@ int set_opr_password(char* opr_password){
 #endif
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create the now_crypto_seed.lock file." RESET_DISPLAY "\n");
-        if(restore_perm_windows()!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to restore the dir/file permissions." RESET_DISPLAY "\n");
-        }
+        restore_perm_windows();
         return -1;
     }
     fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
@@ -685,15 +685,10 @@ int set_opr_password(char* opr_password){
     run_flag=encrypt_decrypt_clusters("all",CRYPTO_KEY_FILE,"encrypt",0);
     if(run_flag!=0&&run_flag!=-1&&run_flag!=-11){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt files with new crypto keystring." RESET_DISPLAY "\n");
-        if(restore_perm_windows()!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to restore the dir/file permissions." RESET_DISPLAY "\n");
-        }
+        restore_perm_windows();
         return 5;
     }
-    if(restore_perm_windows()!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to restore the dir/file permissions." RESET_DISPLAY "\n");
-        return -5;
-    }
+    restore_perm_windows();
     printf( GENERAL_BOLD "\n[ -DONE- ] The operator keystring has been updated." RESET_DISPLAY "\n");
     return 0;
 }
