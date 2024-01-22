@@ -84,10 +84,10 @@ int hpc_user_list(char* workdir, char* crypto_keyfile, int decrypt_flag, int for
         get_seq_nstring(single_line,' ',2,username,32);
         get_seq_nstring(single_line,' ',4,enable_flag,16);
         if(strcmp(enable_flag,"STATUS:ENABLED")==0){
-            printf(GENERAL_BOLD"|          +- username: %s %s" RESET_DISPLAY "\n",username,enable_flag);
+            printf("[  ****  ] " GENERAL_BOLD  "+- username: %s %s" RESET_DISPLAY "\n",username,enable_flag);
         }
         else{
-            printf(WARN_YELLO_BOLD "|          +- username: %s %s" RESET_DISPLAY "\n",username,enable_flag);
+            printf("[  ****  ] " WARN_YELLO_BOLD "+- username: %s %s" RESET_DISPLAY "\n",username,enable_flag);
         }
     }
     fclose(file_p);
