@@ -4060,7 +4060,11 @@ int get_max_cluster_name_length(void){
 
 int password_to_clipboard(char* cluster_workdir, char*crypto_keyfile, char* username){
     char cmdline[CMDLINE_LENGTH]="";
+    char cluster_summary[FILENAME_LENGTH]="";
+    char cluster_vaults[FILENAME_LENGTH]="";
+    char user_passwords[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char randstr[7]="";
     char vaultdir[DIR_LENGTH]="";
     char password_string[64]="";
     char username_ext[64]="";
@@ -4070,27 +4074,35 @@ int password_to_clipboard(char* cluster_workdir, char*crypto_keyfile, char* user
     if(create_and_get_subdir(cluster_workdir,"vault",vaultdir,DIR_LENGTH)!=0){
         return -3;
     }
+    generate_random_nstring(randstr,7,1);
     if(strcmp(username,"root")==0){
-        if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
-            return -3;
+        snprintf(cluster_vaults,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
+        file_convert(cluster_vaults,randstr,"decrypt");
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",cluster_vaults,randstr);
+        if(get_key_nvalue(filename_temp,LINE_LENGTH_TINY,"mast_root_password:",' ',password_string,64)==0){
+            file_convert(cluster_vaults,randstr,"delete_decrypted");
         }
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
-        decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
-        find_and_nget(filename_temp,LINE_LENGTH_SHORT,"Master Node Root Password:","","",1,"Master Node Root Password:","","",' ',5,password_string,64);
-        delete_file_or_dir(filename_temp);
+        /* The step below is only for compatibility */
+        else{
+            snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt.tmp",vaultdir,PATH_SLASH);
+            decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum);
+            snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
+            find_and_nget(filename_temp,LINE_LENGTH_SHORT,"Master Node Root Password:","","",1,"Master Node Root Password:","","",' ',5,password_string,64);
+            delete_file_or_dir(filename_temp);
+        }
     }
     else{
-        decrypt_user_passwords(cluster_workdir,crypto_keyfile);
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+        snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+        file_convert(user_passwords,randstr,"decrypt");
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",user_passwords,randstr);
         snprintf(username_ext,63,"username: %s ",username);
         find_and_nget(filename_temp,LINE_LENGTH_SHORT,username_ext,"","",1,username_ext,"","",' ',3,password_string,64);
-        delete_decrypted_user_passwords(cluster_workdir);
+        file_convert(user_passwords,randstr,"delete_decrypted");
     }
     if(strlen(password_string)==0){
         return -1;
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.tmp%spassword_for_rdp.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.tmp%spassword_for_rdp.%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,randstr);
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
         return 1;

@@ -1084,7 +1084,7 @@ int main(int argc, char* argv[]){
             printf(FATAL_RED_BOLD "[ FATAL: ] You do not have the privilege to connect as root." RESET_DISPLAY "\n");
         }
         else if(run_flag==1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get and copy the password of %s ." RESET_DISPLAY "\n",user_name);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get and copy the password of %s." RESET_DISPLAY "\n",user_name);
         }
         else if(run_flag==3){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cluster name." RESET_DISPLAY "\n");
