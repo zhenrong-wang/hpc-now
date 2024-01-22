@@ -20,9 +20,9 @@
 
 void print_empty_cluster_info(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " It seems the cluster is empty. You can either:\n");
-    printf("[  ****  ] a) Run 'hpcopr init' to create a *default* cluster directly .\n");
-    printf("[  ****  ] b) Run 'hpcopr init' with init options. e.g. --rg region_id .\n");
-    printf("[  ****  ] c) Run 'hpcopr edit-conf' -> 'hpcopr init' (not recommended).\n");
+    printf("[  ****  ] a) Run 'hpcopr init' to create a default cluster directly.\n");
+    printf("[  ****  ] b) Run 'hpcopr init' with init options. e.g. --rg region_id.\n");
+    printf("[  ****  ] c) Run 'hpcopr edit-conf' -> 'hpcopr init'.\n");
 }
 
 void print_cluster_init_done(void){
