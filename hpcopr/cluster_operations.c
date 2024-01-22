@@ -1319,7 +1319,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
         }
         if(down_num>compute_node_num){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified a number larger than the quantity of compute nodes.\n");
-            printf("           Do you mean shutting down *ALL* the compute nodes?\n");
+            printf("[  ****  ] Shut down *ALL* the compute nodes?\n");
             if(batch_flag_local==0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed." RESET_DISPLAY "\n");
             }
@@ -1440,8 +1440,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     }
 
     if(compute_node_num==compute_node_num_on){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Currently, all the compute nodes are in the state of running.\n");
-        printf("[  ****  ] No compute node needs to be turned on." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Currently, all the compute nodes are in the state of running." RESET_DISPLAY "\n");
         return -1;
     }
     if(strcmp(param,"all")!=0){
