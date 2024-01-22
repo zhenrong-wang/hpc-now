@@ -4060,10 +4060,9 @@ int get_max_cluster_name_length(void){
 
 int password_to_clipboard(char* cluster_workdir, char*crypto_keyfile, char* username){
     char cmdline[CMDLINE_LENGTH]="";
-    char cluster_summary[FILENAME_LENGTH]="";
     char cluster_vaults[FILENAME_LENGTH]="";
     char user_passwords[FILENAME_LENGTH]="";
-    char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH_EXT]="";
     char randstr[7]="";
     char vaultdir[DIR_LENGTH]="";
     char password_string[64]="";
@@ -4078,8 +4077,8 @@ int password_to_clipboard(char* cluster_workdir, char*crypto_keyfile, char* user
     if(strcmp(username,"root")==0){
         snprintf(cluster_vaults,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
         file_convert(cluster_vaults,randstr,"decrypt");
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",cluster_vaults,randstr);
-        if(get_key_nvalue(filename_temp,LINE_LENGTH_TINY,"mast_root_password:",' ',password_string,64)==0){
+        snprintf(filename_temp,FILENAME_LENGTH_EXT-1,"%s.%s",cluster_vaults,randstr);
+        if(get_key_nvalue(filename_temp,LINE_LENGTH_SHORT,"mast_root_password:",' ',password_string,64)==0){
             file_convert(cluster_vaults,randstr,"delete_decrypted");
         }
         /* The step below is only for compatibility */
@@ -4094,7 +4093,7 @@ int password_to_clipboard(char* cluster_workdir, char*crypto_keyfile, char* user
     else{
         snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
         file_convert(user_passwords,randstr,"decrypt");
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",user_passwords,randstr);
+        snprintf(filename_temp,FILENAME_LENGTH_EXT-1,"%s.%s",user_passwords,randstr);
         snprintf(username_ext,63,"username: %s ",username);
         find_and_nget(filename_temp,LINE_LENGTH_SHORT,username_ext,"","",1,username_ext,"","",' ',3,password_string,64);
         file_convert(user_passwords,randstr,"delete_decrypted");
