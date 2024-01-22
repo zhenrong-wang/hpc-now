@@ -349,8 +349,8 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         strcpy(default_region,"bj");
         strcpy(default_zone,"cn-bj-a");
-        strcpy(default_master_inst,"a8c16g");
-        strcpy(default_compute_inst,"a4c8g");
+        strcpy(default_master_inst,"i8c16g");
+        strcpy(default_compute_inst,"i4c8g");
         strcpy(default_os_image,"centoss9");
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
