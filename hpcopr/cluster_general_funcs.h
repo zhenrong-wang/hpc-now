@@ -102,9 +102,9 @@ int confirm_to_operate_cluster(char* current_cluster_name, int batch_flag_local)
 int confirm_to_init_cluster(char* current_cluster_name, int batch_flag_local);
 int prompt_to_confirm(const char* prompt_string, const char* confirm_string, int batch_flag_local);
 int prompt_to_confirm_args(const char* prompt_string, const char* confirm_string, int batch_flag_local, int argc, char** argv, char* cmd_flag);
-int prompt_to_input(const char* prompt_string, char* reply_string, int batch_flag_local);
-int prompt_to_input_required_args(const char* prompt_string, char* reply_string, int batch_flag_local,int argc, char** argv, char* cmd_keyword);
-int prompt_to_input_optional_args(const char* prompt_confirm, const char* confirm_string, const char* prompt_string, char* reply_string, int batch_flag_local,int argc, char** argv, char* cmd_keyword);
+int prompt_to_input(const char* prompt_string, char reply_string[], unsigned int reply_len_max, int batch_flag_local);
+int prompt_to_input_required_args(const char* prompt_string, char reply_string[], unsigned int reply_len_max, int batch_flag_local,int argc, char** argv, char* cmd_keyword);
+int prompt_to_input_optional_args(const char* prompt_confirm, const char* confirm_string, const char* prompt_string, char reply_string[], unsigned int reply_len_max, int batch_flag_local,int argc, char** argv, char* cmd_keyword);
 
 int check_down_nodes(char* workdir, char* crypto_keyfile);
 int cluster_ssh(char* workdir, char* crypto_keyfile, char* username, char* cluster_role, char* sshkey_dir);

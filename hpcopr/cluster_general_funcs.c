@@ -2669,7 +2669,8 @@ int prompt_to_confirm_args(const char* prompt_string, const char* confirm_string
  * return 1 : skipped due to batch mode
  * return 0 : user input
  */
-int prompt_to_input(const char* prompt_string, char* reply_string, int batch_flag_local){
+int prompt_to_input(const char* prompt_string, char reply_string[], unsigned int reply_len_max, int batch_flag_local){
+    int i;
     if(batch_flag_local==0){
         return 1;
     }
@@ -2678,8 +2679,12 @@ int prompt_to_input(const char* prompt_string, char* reply_string, int batch_fla
     }
     printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY "");
     fflush(stdin);
-    scanf("%511s",reply_string);
-    getchar();
+    fgets(reply_string,reply_len_max,stdin);
+    for(i=0;i<reply_len_max;i++){
+        if(reply_string[i]=='\n'||reply_string[i]=='\r'){
+            reply_string[i]='\0';
+        }
+    }
     return 0;
 }
 
@@ -2692,15 +2697,15 @@ int prompt_to_input(const char* prompt_string, char* reply_string, int batch_fla
  * return 1 : skipped due to batch mode
  * return 0 : user input
  */
-int prompt_to_input_required_args(const char* prompt_string, char* reply_string, int batch_flag_local,int argc, char** argv, char* cmd_keyword){
-    if(cmd_keyword_check(argc,argv,cmd_keyword,reply_string)==0){
+int prompt_to_input_required_args(const char* prompt_string, char reply_string[], unsigned int reply_len_max, int batch_flag_local,int argc, char** argv, char* cmd_keyword){
+    if(cmd_keyword_ncheck(argc,argv,cmd_keyword,reply_string,reply_len_max)==0){
         return 2;
     }
-    return prompt_to_input(prompt_string,reply_string,batch_flag_local);
+    return prompt_to_input(prompt_string,reply_string,reply_len_max,batch_flag_local);
 }
 
-int prompt_to_input_optional_args(const char* prompt_confirm, const char* confirm_string, const char* prompt_string, char* reply_string, int batch_flag_local,int argc, char** argv, char* cmd_keyword){
-    if(cmd_keyword_check(argc,argv,cmd_keyword,reply_string)==0){
+int prompt_to_input_optional_args(const char* prompt_confirm, const char* confirm_string, const char* prompt_string, char reply_string[], unsigned int reply_len_max, int batch_flag_local,int argc, char** argv, char* cmd_keyword){
+    if(cmd_keyword_ncheck(argc,argv,cmd_keyword,reply_string,reply_len_max)==0){
         return 2;
     }
     if(batch_flag_local==0){
@@ -2711,7 +2716,7 @@ int prompt_to_input_optional_args(const char* prompt_confirm, const char* confir
         strcpy(reply_string,"");
         return 6;
     }
-    return prompt_to_input(prompt_string,reply_string,batch_flag_local);
+    return prompt_to_input(prompt_string,reply_string,reply_len_max,batch_flag_local);
 }
 
 int check_down_nodes(char* workdir, char* crypto_keyfile){

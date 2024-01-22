@@ -318,15 +318,15 @@ int job_list(char* workdir, char* crypto_keyfile, char* user_name, char* sshkey_
 
 int job_cancel(char* workdir, char* crypto_keyfile, char* user_name, char* sshkey_dir, char* job_id, int batch_flag_local){
     char remote_commands[CMDLINE_LENGTH]="";
-    char string_temp[256]="";
+    char string_temp[16]="";
     if(strlen(job_id)==0){
         if(batch_flag_local==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Job ID not specified. Use --jid JOB_ID ." RESET_DISPLAY "\n");
             return 17;
         }
         job_list(workdir,crypto_keyfile,user_name,SSHKEY_DIR);
-        prompt_to_input("Please input a jobID from the list above.",string_temp,batch_flag_local);
-        snprintf(remote_commands,CMDLINE_LENGTH-1,"scancel --verbose %s",job_id);
+        prompt_to_input("Please input a jobID from the list above.",string_temp,16,batch_flag_local);
+        snprintf(remote_commands,CMDLINE_LENGTH-1,"scancel --verbose %s",string_temp);
     }
     else{
         snprintf(remote_commands,CMDLINE_LENGTH-1,"scancel --verbose %s",job_id);
