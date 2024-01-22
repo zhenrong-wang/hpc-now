@@ -1451,7 +1451,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
         }
         if(on_num+compute_node_num_on>compute_node_num){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You specified a number larger than the number of currently down nodes.\n");
-            printf("           Do you mean turning on *ALL* the compute nodes?\n");
+            printf("[  ****  ] Do you mean turning on *ALL* the compute nodes?\n");
             if(batch_flag_local==0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] RISKY! Cluster operation is auto-confirmed." RESET_DISPLAY "\n");
             }
