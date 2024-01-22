@@ -1440,7 +1440,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     }
 
     if(compute_node_num==compute_node_num_on){
-        printf(GENERAL_BOLD "[ -INFO- ] Currently, all the compute nodes are in the state of running." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] All the compute nodes are already in running state." RESET_DISPLAY "\n");
         return -1;
     }
     if(strcmp(param,"all")!=0){
