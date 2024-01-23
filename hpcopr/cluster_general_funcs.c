@@ -4125,8 +4125,8 @@ int password_to_clipboard(char* cluster_workdir, char*crypto_keyfile, char* user
 int generate_rdp_file(char* cluster_name, char* master_address, char* username, char* randstr){
     char filename_rdp[FILENAME_LENGTH]="";
 #ifdef __linux__
-    char cmdline[CMDLINE_LENGTH]="";
     snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username,randstr);
+    /*snprintf(filename_rdp,FILENAME_LENGTH-1,"/tmp/.hpc-now-%s-%s-%s.remmina",cluster_name,username,randstr);*/
 #elif __APPLE__
     snprintf(filename_rdp,FILENAME_LENGTH-1,"/tmp/.hpc-now-%s-%s-%s.rdp",cluster_name,username,randstr);
 #else
@@ -4145,8 +4145,6 @@ int generate_rdp_file(char* cluster_name, char* master_address, char* username, 
     fprintf(file_p,"protocal=RDP\n");
     fprintf(file_p,"disableclipboard=0\n");
     fclose(file_p);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"chmod 644 %s %s",filename_rdp,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
     return 0;
 #else
     fprintf(file_p,"full address:s:%s\n",master_address);
@@ -4189,6 +4187,7 @@ int start_rdp_connection(char* cluster_workdir, char* crypto_keyfile, char* user
     }
 #ifdef __linux__
     snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username,randstr);
+    /*snprintf(filename_rdp,FILENAME_LENGTH-1,"/tmp/.hpc-now-%s-%s-%s.remmina",cluster_name,username,randstr);*/
 #elif __APPLE__
     snprintf(filename_rdp,FILENAME_LENGTH-1,"/tmp/.hpc-now-%s-%s-%s.rdp",cluster_name,username,randstr);
 #else
