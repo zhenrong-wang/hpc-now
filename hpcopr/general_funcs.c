@@ -1248,11 +1248,11 @@ int folder_exist_or_not(char* foldername){
 int delete_file_or_dir(char* file_or_dir){
     char cmdline[CMDLINE_LENGTH]="";
     if(file_exist_or_not(file_or_dir)==0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,file_or_dir,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,file_or_dir,SYSTEM_CMD_REDIRECT_NULL);
         return system(cmdline);
     }
     if(folder_exist_or_not(file_or_dir)==0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,file_or_dir,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,file_or_dir,SYSTEM_CMD_REDIRECT_NULL);
         return system(cmdline);
     }
     return -1;
