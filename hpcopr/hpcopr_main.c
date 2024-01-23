@@ -331,7 +331,7 @@ int main(int argc, char* argv[]){
     if(check_current_user()!=0){
         printf(GENERAL_BOLD "[ -INFO- ] Only the system user 'hpc-now' can run hpcopr. Steps:" RESET_DISPLAY "\n");
         printf("[  ****  ] +- " GENERAL_BOLD "SUDO MODE" RESET_DISPLAY " (pretty simple and fast for *sudoers*):\n");
-        printf("[  ****  ]    Run with " HIGH_GREEN_BOLD "sudo -Hu" RESET_DISPLAY ", e.g. " HIGH_GREEN_BOLD "sudo -u hpc-now hpcopr help" RESET_DISPLAY "\n");
+        printf("[  ****  ]    Run with " HIGH_GREEN_BOLD "sudo -Hu" RESET_DISPLAY ", e.g. " HIGH_GREEN_BOLD "sudo -Hu hpc-now hpcopr help" RESET_DISPLAY "\n");
         printf("[  ****  ] +- " GENERAL_BOLD "USER MODE" RESET_DISPLAY " (for both *non-sudoers* and *sudoers*):" RESET_DISPLAY "\n");
         printf("[  ****  ]    1. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY " (The password of 'hpc-now' is needed)\n");
         printf("[  ****  ]    2. run the " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands, e.g. " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY "\n");
