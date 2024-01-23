@@ -1232,13 +1232,13 @@ int file_empty_or_not(char* filename){
 //return non-zero: not exists.
 int folder_exist_or_not(char* foldername){
     char filename[FILENAME_LENGTH]="";
-    snprintf(filename,FILENAME_LENGTH-1,"%s%stestfile.txt",foldername,PATH_SLASH);
-    FILE* test_file=fopen(filename,"w+");
-    if(test_file==NULL){
+    snprintf(filename,FILENAME_LENGTH-1,"%s%stestfile.temp",foldername,PATH_SLASH);
+    FILE* file_p=fopen(filename,"w+");
+    if(file_p==NULL){
         return 1;
     }
     else{
-        fclose(test_file);
+        fclose(file_p);
         delete_file_or_dir(filename);
         return 0;
     }
