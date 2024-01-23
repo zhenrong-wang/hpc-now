@@ -4063,12 +4063,11 @@ int get_max_cluster_name_length(void){
     return max_length;
 }
 
-int password_to_clipboard(char* cluster_workdir, char*crypto_keyfile, char* username){
+int password_to_clipboard(char* cluster_workdir, char*crypto_keyfile, char* username, char* randstr){
     char cmdline[CMDLINE_LENGTH]="";
     char cluster_vaults[FILENAME_LENGTH]="";
     char user_passwords[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH_EXT]="";
-    char randstr[7]="";
     char vaultdir[DIR_LENGTH]="";
     char password_string[64]="";
     char username_ext[64]="";
@@ -4078,7 +4077,6 @@ int password_to_clipboard(char* cluster_workdir, char*crypto_keyfile, char* user
     if(create_and_get_subdir(cluster_workdir,"vault",vaultdir,DIR_LENGTH)!=0){
         return -3;
     }
-    generate_random_nstring(randstr,7,1);
     if(strcmp(username,"root")==0){
         snprintf(cluster_vaults,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
         file_convert(cluster_vaults,randstr,"decrypt");
@@ -4124,14 +4122,15 @@ int password_to_clipboard(char* cluster_workdir, char*crypto_keyfile, char* user
     }
 }
 
-int generate_rdp_file(char* cluster_name, char* master_address, char* username){
+int generate_rdp_file(char* cluster_name, char* master_address, char* username, char* randstr){
     char filename_rdp[FILENAME_LENGTH]="";
 #ifdef __linux__
-    snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+    char cmdline[CMDLINE_LENGTH]="";
+    snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username,randstr);
 #elif __APPLE__
-    snprintf(filename_rdp,FILENAME_LENGTH-1,"/tmp/.hpc-now-%s-%s.rdp",cluster_name,username);
+    snprintf(filename_rdp,FILENAME_LENGTH-1,"/tmp/.hpc-now-%s-%s-%s.rdp",cluster_name,username,randstr);
 #else
-    snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+    snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username,randstr);
 #endif
     FILE* file_p=fopen(filename_rdp,"w+");
     if(file_p==NULL){
@@ -4146,6 +4145,8 @@ int generate_rdp_file(char* cluster_name, char* master_address, char* username){
     fprintf(file_p,"protocal=RDP\n");
     fprintf(file_p,"disableclipboard=0\n");
     fclose(file_p);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"chmod 644 %s %s",filename_rdp,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
     return 0;
 #else
     fprintf(file_p,"full address:s:%s\n",master_address);
@@ -4161,8 +4162,15 @@ int generate_rdp_file(char* cluster_name, char* master_address, char* username){
 }
 
 int start_rdp_connection(char* cluster_workdir, char* crypto_keyfile, char* username, int password_flag){
+    char master_address[32]="";
+    char filename_rdp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char randstr[8]="";
+    int run_flag;
+    generate_random_nstring(randstr,8,1);
     if(password_flag==0){
-        if(password_to_clipboard(cluster_workdir,crypto_keyfile,username)!=0){
+        if(password_to_clipboard(cluster_workdir,crypto_keyfile,username,randstr)!=0){
             return 1;
         }
         else{
@@ -4170,26 +4178,21 @@ int start_rdp_connection(char* cluster_workdir, char* crypto_keyfile, char* user
             printf("[  ****  ] Please empty your clipboard after pasting the password!" RESET_DISPLAY "\n");
         }
     }
-    char master_address[32]="";
-    char filename_rdp[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    int run_flag;
     if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,cluster_workdir)!=0){
         return 3;
     }
     if(get_state_nvalue(cluster_workdir,crypto_keyfile,"master_public_ip:",master_address,32)!=0){
         return 5;
     }
-    if(generate_rdp_file(cluster_name,master_address,username)!=0){
+    if(generate_rdp_file(cluster_name,master_address,username,randstr)!=0){
         return 7;
     }
 #ifdef __linux__
-    snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+    snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s-%s.remmina",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username,randstr);
 #elif __APPLE__
-    snprintf(filename_rdp,FILENAME_LENGTH-1,"/tmp/.hpc-now-%s-%s.rdp",cluster_name,username);
+    snprintf(filename_rdp,FILENAME_LENGTH-1,"/tmp/.hpc-now-%s-%s-%s.rdp",cluster_name,username,randstr);
 #else
-    snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username);
+    snprintf(filename_rdp,FILENAME_LENGTH-1,"%s%s.tmp%s%s-%s-%s.rdp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,username,randstr);
 #endif
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",RDP_EDIT_CMD,filename_rdp,SYSTEM_CMD_REDIRECT_NULL);
     run_flag=system(cmdline);
