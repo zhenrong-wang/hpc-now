@@ -262,6 +262,7 @@ SPECIAL RETURN VALUES: when the command_input is wrong.
 
 int main(int argc, char* argv[]){
     char* crypto_keyfile=CRYPTO_KEY_FILE;
+    char* operation_log=OPERATION_LOG_FILE;
     char command_name_prompt[128]="";
     char cloud_flag[16]="";
     int command_flag=0;
@@ -301,9 +302,6 @@ int main(int argc, char* argv[]){
     char inst_loc[DIR_LENGTH]="";
     char repo_loc[DIR_LENGTH]="";
     char job_id[32]="";
-    char* usage_log=USAGE_LOG_FILE;
-    char* operation_log=OPERATION_LOG_FILE;
-    char* syserror_log=SYSTEM_CMD_ERROR_LOG;
     char string_temp[256]="";
     char string_temp2[256]="";
     char string_temp3[256]="";
@@ -347,7 +345,7 @@ int main(int argc, char* argv[]){
     if(folder_exist_or_not("c:\\hpc-now")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The key directory C:\\hpc-now\\ is missing. The services cannot start.\n");
         printf("[  ****  ] Please switch to Administrator and re-install the services to fix.\n");
-        printf("[  ****  ] If this issue still occurs, please contact us via info@hpc-now.com ." RESET_DISPLAY "\n");
+        printf("[  ****  ] If this issue still occurs, please report the bug." RESET_DISPLAY "\n");
         print_tail();
         return 119;
     }
@@ -357,7 +355,7 @@ int main(int argc, char* argv[]){
         printf("[  ****  ] and run the installer with 'sudo' to reinstall it. Sample command:\n");
         printf("[  ****  ] sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
         printf("[  ****  ] sudo YOUR_INSTALLER_FULL_PATH install\n");
-        printf("[  ****  ] If this issue still occurs, please contact us via info@hpc-now.com ." RESET_DISPLAY "\n");
+        printf("[  ****  ] If this issue still occurs, please report the bug." RESET_DISPLAY "\n");
         print_tail();
         return 119;
     }
@@ -367,15 +365,16 @@ int main(int argc, char* argv[]){
         printf("[  ****  ] and run the installer with 'sudo' to reinstall it. Sample command:\n");
         printf("[  ****  ] sudo YOUR_INSTALLER_FULL_PATH uninstall\n");
         printf("[  ****  ] sudo YOUR_INSTALLER_FULL_PATH install\n");
-        printf("[  ****  ] If this issue still occurs, please contact us via info@hpc-now.com ." RESET_DISPLAY "\n");
+        printf("[  ****  ] If this issue still occurs, please report the bug." RESET_DISPLAY "\n");
         print_tail();
         return 119;
     }
 #endif
-    if(folder_exist_or_not(GENERAL_CONF_DIR)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,GENERAL_CONF_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
+    /* Create the 2 important directories: /.etc and /now_logs */
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,GENERAL_CONF_DIR,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,NOW_LOG_DIR,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
 
     command_flag=command_parser(argc,argv,command_name_prompt,128,workdir,DIR_LENGTH,cluster_name,32,user_name,32,cluster_role,16,&decrypt_flag);
     if(command_flag==-1){
@@ -836,10 +835,10 @@ int main(int argc, char* argv[]){
         prompt_to_input_optional_args("Export to local path?",CONFIRM_STRING_QUICK,"Specify a local path (directory or file).",export_dest,FILENAME_LENGTH,batch_flag,argc,argv,"-d");
         run_flag=prompt_to_confirm_args("Read the usage log? (Default: Print)",CONFIRM_STRING_QUICK,batch_flag,argc,argv,"--read");
         if(run_flag==2||run_flag==0){
-            run_flag=view_system_logs(usage_log,"read",export_dest);
+            run_flag=view_system_logs(USAGE_LOG_FILE,"read",export_dest);
         }
         else{
-            run_flag=view_system_logs(usage_log,"print",export_dest);
+            run_flag=view_system_logs(USAGE_LOG_FILE,"print",export_dest);
         }
         if(run_flag==-1){
             write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
@@ -873,10 +872,10 @@ int main(int argc, char* argv[]){
         prompt_to_input_optional_args("Export to a local path?",CONFIRM_STRING_QUICK,"Specify a local path (directory or file).",export_dest,FILENAME_LENGTH,batch_flag,argc,argv,"-d");
         run_flag=prompt_to_confirm_args("Read the system error log? (Default: Print)",CONFIRM_STRING_QUICK,batch_flag,argc,argv,"--read");
         if(run_flag==2||run_flag==0){
-            run_flag=view_system_logs(syserror_log,"read",export_dest);
+            run_flag=view_system_logs(SYSTEM_CMD_ERROR_LOG,"read",export_dest);
         }
         else{
-            run_flag=view_system_logs(syserror_log,"print",export_dest);
+            run_flag=view_system_logs(SYSTEM_CMD_ERROR_LOG,"print",export_dest);
         }
         if(run_flag==-1){
             write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);

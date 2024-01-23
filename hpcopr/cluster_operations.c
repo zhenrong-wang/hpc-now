@@ -452,7 +452,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
     char tf_archive_err_log[FILENAME_LENGTH]="";
     char curr_payment_method[16]="";
     FILE* file_p=NULL;
-    snprintf(log_trash,FILENAME_LENGTH-1,"%s%slog_trashbin.txt",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    snprintf(log_trash,FILENAME_LENGTH-1,"%s%slog_trashbin.txt",NOW_LOG_DIR,PATH_SLASH);
     if(cluster_name_check(target_cluster_name)!=-7){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is not in the registry.\n" RESET_DISPLAY,target_cluster_name);
         list_all_cluster_names(1);

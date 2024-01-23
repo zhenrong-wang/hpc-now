@@ -13,13 +13,20 @@
 #ifdef _WIN32
 #define PATH_SLASH "\\"
 #define CRYPTO_KEY_FILE "C:\\programdata\\hpc-now\\now_crypto_seed.lock" // This is a global file!
-#define USAGE_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-usage.log" //This is a global file!
-#define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now-cluster-operation.log"
-#define SYSTEM_CMD_ERROR_LOG "C:\\programdata\\hpc-now\\system_command_error.log"
-#define SYSTEM_CMD_REDIRECT ">nul 2>>C:\\programdata\\hpc-now\\system_command_error.log"
+
+#define NOW_LOG_DIR "C:\\programdata\\hpc-now\\now_logs\\"
+#define USAGE_LOG_FILE_OLD "C:\\programdata\\hpc-now\\now-cluster-usage.log"
+#define OPERATION_LOG_FILE_OLD "C:\\programdata\\hpc-now\\now-cluster-operation.log"
+#define SYSTEM_CMD_ERROR_LOG_OLD "C:\\programdata\\hpc-now\\system_command_error.log"
+#define USAGE_LOG_FILE "C:\\programdata\\hpc-now\\now_logs\\now-cluster-usage.log"
+#define OPERATION_LOG_FILE "C:\\programdata\\hpc-now\\now_logs\\now-cluster-operation.log"
+#define SYSTEM_CMD_ERROR_LOG "C:\\programdata\\hpc-now\\now_logs\\system_command_error.log"
+
+#define SYSTEM_CMD_REDIRECT ">nul 2>>C:\\programdata\\hpc-now\\now_logs\\system_command_error.log"
 #define SYSTEM_CMD_REDIRECT_NULL ">nul 2>&1"
 #define SYSTEM_CMD_ERR_REDIRECT_NULL "2>nul"
 #define NULL_STREAM "nul"
+
 #define DESTROYED_DIR "c:\\programdata\\hpc-now\\.destroyed\\"
 #define NOW_LIC_DIR "C:\\hpc-now\\hpc-now.licenses\\"
 #define SSHKEY_DIR "C:\\programdata\\hpc-now\\.now-ssh\\"
@@ -78,13 +85,19 @@
 #elif __linux__
 #define PATH_SLASH "/"
 #define CRYPTO_KEY_FILE "/usr/.hpc-now/.now_crypto_seed.lock"
-#define USAGE_LOG_FILE "/usr/.hpc-now/.now-cluster-usage.log"
-#define OPERATION_LOG_FILE "/usr/.hpc-now/.now-cluster-operation.log"
-#define SYSTEM_CMD_ERROR_LOG "/usr/.hpc-now/system_command_error.log"
-#define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/usr/.hpc-now/system_command_error.log"
+#define NOW_LOG_DIR "/usr/.hpc-now/now_logs/"
+#define USAGE_LOG_FILE_OLD "/usr/.hpc-now/.now-cluster-usage.log"
+#define OPERATION_LOG_FILE_OLD "/usr/.hpc-now/.now-cluster-operation.log"
+#define SYSTEM_CMD_ERROR_LOG_OLD "/usr/.hpc-now/system_command_error.log"
+#define USAGE_LOG_FILE "/usr/.hpc-now/now_logs/now-cluster-usage.log"
+#define OPERATION_LOG_FILE "/usr/.hpc-now/now_logs/now-cluster-operation.log"
+#define SYSTEM_CMD_ERROR_LOG "/usr/.hpc-now/now_logs/system_command_error.log"
+
+#define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/usr/.hpc-now/now_logs/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT_NULL ">>/dev/null 2>&1"
 #define SYSTEM_CMD_ERR_REDIRECT_NULL "2>/dev/null"
 #define NULL_STREAM "/dev/null"
+
 #define DESTROYED_DIR "/usr/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/home/hpc-now/hpc-now.licenses/"
 #define SSHKEY_DIR "/usr/.hpc-now/.now-ssh/"
@@ -143,13 +156,20 @@
 #elif __APPLE__
 #define PATH_SLASH "/"
 #define CRYPTO_KEY_FILE "/Applications/.hpc-now/.now_crypto_seed.lock"
-#define USAGE_LOG_FILE "/Applications/.hpc-now/.now-cluster-usage.log"
-#define OPERATION_LOG_FILE "/Applications/.hpc-now/.now-cluster-operation.log"
-#define SYSTEM_CMD_ERROR_LOG "/Applications/.hpc-now/system_command_error.log"
-#define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/Applications/.hpc-now/system_command_error.log"
+
+#define NOW_LOG_DIR "/Applications/.hpc-now/now_logs/"
+#define USAGE_LOG_FILE_OLD "/Applications/.hpc-now/.now-cluster-usage.log"
+#define OPERATION_LOG_FILE_OLD "/Applications/.hpc-now/.now-cluster-operation.log"
+#define SYSTEM_CMD_ERROR_LOG_OLD "/Applications/.hpc-now/system_command_error.log"
+#define USAGE_LOG_FILE "/Applications/.hpc-now/now_logs/now-cluster-usage.log"
+#define OPERATION_LOG_FILE "/Applications/.hpc-now/now_logs/now-cluster-operation.log"
+#define SYSTEM_CMD_ERROR_LOG "/Applications/.hpc-now/now_logs/system_command_error.log"
+
+#define SYSTEM_CMD_REDIRECT ">>/dev/null 2>>/Applications/.hpc-now/now_logs/system_command_error.log"
 #define SYSTEM_CMD_REDIRECT_NULL ">>/dev/null 2>&1"
 #define SYSTEM_CMD_ERR_REDIRECT_NULL "2>/dev/null"
 #define NULL_STREAM "/dev/null"
+
 #define DESTROYED_DIR "/Applications/.hpc-now/.destroyed/"
 #define NOW_LIC_DIR "/Users/hpc-now/hpc-now.licenses/"
 #define SSHKEY_DIR "/Applications/.hpc-now/.now-ssh/"

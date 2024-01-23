@@ -687,19 +687,51 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
 
 int check_and_install_prerequisitions(int repair_flag){
     char cmdline[CMDLINE_LENGTH]="";
-
     char filename_temp[FILENAME_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
     char filename_temp_zip[FILENAME_LENGTH]="";
-
     int flag=0;
     int gcp_flag=0;
     int file_check_flag=0;
     int force_repair_flag;
-
     FILE* file_p=NULL;
     char plugin_dir_root[DIR_LENGTH]="";
-
+    
+    /* For compatibility, move the previous logs to the now_logs dir */
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,NOW_LOG_DIR,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
+    if(file_exist_or_not(USAGE_LOG_FILE_OLD)==0){
+        if(file_exist_or_not(USAGE_LOG_FILE)!=0){
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,USAGE_LOG_FILE_OLD,USAGE_LOG_FILE,SYSTEM_CMD_REDIRECT_NULL);
+        }
+        else{
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.prev %s",MOVE_FILE_CMD,USAGE_LOG_FILE_OLD,USAGE_LOG_FILE,SYSTEM_CMD_REDIRECT_NULL);
+        }
+        system(cmdline);
+    }
+    if(file_exist_or_not(SYSTEM_CMD_ERROR_LOG_OLD)==0){
+        if(file_exist_or_not(SYSTEM_CMD_ERROR_LOG)!=0){
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,SYSTEM_CMD_ERROR_LOG_OLD,SYSTEM_CMD_ERROR_LOG,SYSTEM_CMD_REDIRECT_NULL);
+        }
+        else{
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.prev %s",MOVE_FILE_CMD,SYSTEM_CMD_ERROR_LOG_OLD,SYSTEM_CMD_ERROR_LOG,SYSTEM_CMD_REDIRECT_NULL);
+        }
+        system(cmdline);
+    }
+    if(file_exist_or_not(OPERATION_LOG_FILE_OLD)==0){
+        if(file_exist_or_not(OPERATION_LOG_FILE)!=0){
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,OPERATION_LOG_FILE_OLD,OPERATION_LOG_FILE,SYSTEM_CMD_REDIRECT_NULL);
+        }
+        else{
+            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.prev %s",MOVE_FILE_CMD,OPERATION_LOG_FILE_OLD,OPERATION_LOG_FILE,SYSTEM_CMD_REDIRECT_NULL);
+        }
+        system(cmdline);
+    }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%slog_trashbin.txt",HPC_NOW_ROOT_DIR,PATH_SLASH`);
+    if(file_exist_or_not(filename_temp)==0){
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,NOW_LOG_DIR,SYSTEM_CMD_REDIRECT_NULL);
+        system(cmdline);
+    }
 #ifdef _WIN32
     char appdata_dir[128]="";
     char home_path[64]="";
@@ -717,7 +749,6 @@ int check_and_install_prerequisitions(int repair_flag){
         system(cmdline);
     }
 #endif
-
     if(file_exist_or_not(USAGE_LOG_FILE)!=0){
         force_repair_flag=1;
     }
