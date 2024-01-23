@@ -97,4 +97,6 @@ unsigned char get_base64_index(char base64_char);
 int base64decode(char* encoded_string, char* export_path);
 int base64encode(char* plain_string, char* export_path);
 
+int reset_windows_cmd_display(void);
+
 #endif

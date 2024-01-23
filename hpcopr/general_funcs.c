@@ -2679,6 +2679,18 @@ int base64encode(char* plain_string, char* export_path){
     return 0;
 }
 
+/* 
+ * This function resets Windows display to make sure the print is good.
+ * For *nix, do nothing
+ */
+int reset_windows_cmd_display(void){
+#ifdef _WIN32
+    return system("Color");
+#else
+    return 0;
+#endif
+}
+
 /*int main(){
     base64decode("KihlbmNvZGVkX3N0cmluZytqKzIpPWVuY29kZV9jaGFyc1soKHBsYWluX3N0cmluZ1tpKjMrMV0mMHgwRik8PDIpfChwbGFpbl9zdHJpbmdbaSozKzJdPj42KV07TK==","");
     base64encode("*(encoded_string+j+2)=encode_chars[((plain_string[i*3+1]&0x0F)<<2)|(plain_string[i*3+2]>>6)];L","");

@@ -47,6 +47,7 @@ int check_internet_installer(void){
 }
 
 void print_header_installer(void){
+    reset_windows_cmd_display();
     printf(GENERAL_BOLD "| Welcome to the HPC-NOW Service Installer! Version: %s\n",INSTALLER_VERSION_CODE);
     printf(GENERAL_BOLD "| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd     LICENSE: MIT\n\n");
     printf(GENERAL_BOLD "| This is free software; see the source for copying conditions.  There is NO\n");
