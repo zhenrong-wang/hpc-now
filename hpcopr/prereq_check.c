@@ -696,7 +696,7 @@ int check_and_install_prerequisitions(int repair_flag){
     int force_repair_flag;
     FILE* file_p=NULL;
     char plugin_dir_root[DIR_LENGTH]="";
-    
+
     /* For compatibility, move the previous logs to the now_logs dir */
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,NOW_LOG_DIR,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
@@ -727,7 +727,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }
         system(cmdline);
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%slog_trashbin.txt",HPC_NOW_ROOT_DIR,PATH_SLASH`);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%slog_trashbin.txt",HPC_NOW_ROOT_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,NOW_LOG_DIR,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
