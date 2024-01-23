@@ -481,11 +481,12 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 &emsp;&emsp;&emsp;&emsp;+- **terraform/tofu**\
 &emsp;&emsp;&emsp;&emsp;+- **cloud utilities**\
 +- **RUNNING_ROOT/**\
-&emsp;&emsp;+- **log_trashbin.txt**&emsp;&emsp;*The trashbin of clusters' logs*\
 &emsp;&emsp;+- **.now_crypto_seed.lock**&emsp;&emsp;*The hpcopr crypto_password*\
-&emsp;&emsp;+- **.now-cluster-usage.log**&emsp;&emsp;*The cluster usage log*\
-&emsp;&emsp;+- **system_command_error.log**&emsp;&emsp;*The system command error*\
-&emsp;&emsp;+- **.now-cluster-operation.log**&emsp;&emsp;*The hpcopr command log*\
+&emsp;&emsp;+- **now_logs/**&emsp;&emsp;*Usages and Logs*\
+&emsp;&emsp;&emsp;&emsp;+- **log_trashbin.txt**&emsp;&emsp;*The trashbin of clusters' logs*\
+&emsp;&emsp;&emsp;&emsp;+- **.now-cluster-usage.log**&emsp;&emsp;*The cluster usage log*\
+&emsp;&emsp;&emsp;&emsp;+- **system_command_error.log**&emsp;&emsp;*The system command error*\
+&emsp;&emsp;&emsp;&emsp;+- **.now-cluster-operation.log**&emsp;&emsp;*The hpcopr command log*\
 &emsp;&emsp;+- **.tmp/**&emsp;&emsp;*Temporary files*\
 &emsp;&emsp;+- **.now-ssh/**&emsp;&emsp;*SSH keys for connectivity with your clusters*\
 &emsp;&emsp;&emsp;&emsp;+- **now-cluster-login.tmp**&emsp;&emsp;*Encrypted operator's private key*\
