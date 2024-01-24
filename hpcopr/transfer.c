@@ -429,14 +429,14 @@ next_user:
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n\n",cluster_name);
-        printf(GENERAL_BOLD "|       +- Password" RESET_DISPLAY "       : " GREY_LIGHT "%s" RESET_DISPLAY "\n",real_password);
-        printf(GENERAL_BOLD "|       +- Exported File" RESET_DISPLAY "  : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",export_filename);
-        printf(GENERAL_BOLD "|       +- User List" RESET_DISPLAY "      : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",user_list_buffer);
+        printf(GENERAL_BOLD "[  ****  ] +- Password" RESET_DISPLAY "       : " GREY_LIGHT "%s" RESET_DISPLAY "\n",real_password);
+        printf(GENERAL_BOLD "[  ****  ] +- Exported File" RESET_DISPLAY "  : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",export_filename);
+        printf(GENERAL_BOLD "[  ****  ] +- User List" RESET_DISPLAY "      : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",user_list_buffer);
         if(strcmp(real_admin_flag,"admin")==0){
-            printf(GENERAL_BOLD "|       +- Admin Privilege" RESET_DISPLAY ": " HIGH_CYAN_BOLD "YES" RESET_DISPLAY "\n");
+            printf(GENERAL_BOLD "[  ****  ] +- Admin Privilege" RESET_DISPLAY ": " HIGH_CYAN_BOLD "YES" RESET_DISPLAY "\n");
         }
         else{
-            printf(GENERAL_BOLD "|       +- Admin Privilege" RESET_DISPLAY ": " HIGH_CYAN_BOLD "NO" RESET_DISPLAY "\n");
+            printf(GENERAL_BOLD "[  ****  ] +- Admin Privilege" RESET_DISPLAY ": " HIGH_CYAN_BOLD "NO" RESET_DISPLAY "\n");
         }
         return 0;
     }
@@ -629,10 +629,14 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     snprintf(tmp_workdir,DIR_LENGTH_EXT-1,"%s%sexport%s%s",tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%svault%sbucket_info.txt.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_password);
+    /* The bucket_key.txt.tmp is deprecated. Just for compatibility */
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%svault%sbucket_key.txt.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_password);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%svault%suser_passwords.txt.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_password);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%svault%scluster_vaults.txt.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
+    decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_password);
+    /* The CLUSTER_SUMMARY.txt.tmp is deprecated. Just for compatibility */
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%svault%sCLUSTER_SUMMARY.txt.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,md5sum_password);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sstack%sterraform.tfstate.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
@@ -656,6 +660,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         admin_flag=1;
     }
     create_and_get_subdir(imported_workdir,"vault",vaultdir,DIR_LENGTH);
+    create_and_get_subdir(imported_workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
     file_cr_clean(filename_temp);
     /* Decrypt and re-encrypt the users' ssh keys */
@@ -678,13 +683,14 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     fclose(file_p); /* file closed */
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt",vaultdir,PATH_SLASH);
     file_cr_clean(filename_temp);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",vaultdir,PATH_SLASH);
+    file_cr_clean(filename_temp);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     file_cr_clean(filename_temp);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     file_cr_clean(filename_temp);
     /* Now, encrypt and delete all the decrypted files */
     delete_decrypted_files(imported_workdir,crypto_keyfile);
-    create_and_get_subdir(imported_workdir,"stack",stackdir,DIR_LENGTH);
     /* This is important. Otherwise the cluster imported from windows will not work properly. 
      * This file has been deprecated. */
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sUCID_LATEST.txt",vaultdir,PATH_SLASH);
@@ -693,20 +699,19 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
      * This file has been deprecated. */
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_flag.flg",vaultdir,PATH_SLASH);
     file_cr_clean(filename_temp);
-
     /* Now, print the import summary */
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster %s has been imported.\n\n",cluster_name_final);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Import Summary :\n");
-    printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Cluster Name   : %s\n",cluster_name_final);
-    printf(GENERAL_BOLD "|         " RESET_DISPLAY " User List      : \n");
+    printf(GENERAL_BOLD "[  ****  ] +-" RESET_DISPLAY " Cluster Name   : %s\n",cluster_name_final);
+    printf(GENERAL_BOLD "[  ****  ]" RESET_DISPLAY " User List      : \n");
     hpc_user_list(imported_workdir,crypto_keyfile,0,3);
     if(admin_flag==1){
-        printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Admin Privilege : YES \n");
+        printf(GENERAL_BOLD "[  ****  ] +-" RESET_DISPLAY " Admin Privilege : YES \n");
     }
     else{
-        printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Admin Privilege : NO \n");
+        printf(GENERAL_BOLD "[  ****  ] +-" RESET_DISPLAY " Admin Privilege : NO \n");
     }
-    printf(GENERAL_BOLD "|       +-" RESET_DISPLAY " Node Topology   : \n");
+    printf(GENERAL_BOLD "[  ****  ] +-" RESET_DISPLAY " Node Topology   : \n");
     graph(imported_workdir,crypto_keyfile,0);
     delete_file_or_dir(tmp_import_root);
     switch_to_cluster(cluster_name_final);
