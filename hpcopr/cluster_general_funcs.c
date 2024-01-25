@@ -58,7 +58,7 @@ int cluster_role_detect(char* workdir, char cluster_role[], char cluster_role_ex
         return 0;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
-    if(file_empty_or_not(filename_temp)==0){
+    if(file_exist_or_not(filename_temp)==0){
         strncpy(cluster_role,"user",maxlen-1);
         strncpy(cluster_role_ext,"user ",maxlen-1);
         return 0;
