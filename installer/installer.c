@@ -958,7 +958,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     if(system("ls -la /home | grep hpc-now | grep \"drwx--x--x\" >> /dev/null 2>&1")!=0){
         system("chmod 711 /home/hpc-now/ >> /dev/null 2>&1");
     }
-    if(system("ls -la /usr | grep .hpc-now | grep \"drwx--x--x\" >> /dev/null 2>&1")!=0){
+    if(system("ls -la /usr | grep .hpc-now | grep \"drwx--x--x\" >> /dev/null 2>&1")==0){
         system("chmod -R 700 /usr/.hpc-now/ >> /dev/null 2>&1");
     }
     system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
