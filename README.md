@@ -58,12 +58,10 @@ Currently, the HPC-NOW platform supports 7 popular cloud platforms, shown as bel
 - [Microsoft Azure](https://azure.microsoft.com/en-us/), HPC-NOW Internal Code: CLOUD_F
 - [Google Cloud Platform](https://cloud.google.com/), HPC-NOW Internal Code: CLOUD_G
 
-*How easy it is to create a cloud HPC cluster using HPC-NOW?*
-
+*DEMO: How easy it is to create a cloud HPC cluster using HPC-NOW?*
 ![cluster_init](./img/cluster_init.png)
 
-*You can easily manage multiple clusters across multiple clouds.*
-
+*Demo: You can easily manage multiple clusters across multiple clouds.*
 ![multiple_clusters](./img/multiple_clusters.png)
 
 # **2. Core Components**
@@ -80,7 +78,6 @@ In this project, we are developing several components:
 -  **scripts**    : Shell scripts to initialize the clusters, install applications, etc.
 
 The high-level architecture of this project is:
-
 ![architecture](./img/arch.png)
 
 # **3. How-To: Build, Install, Run, and Use**
@@ -225,7 +222,7 @@ In order to use and manage HPC in the cloud with HPC-NOW, please follow the work
 - Destroy the cloud cluster (**`hpcopr destroy ...`**) -->
 - Remove the cloud credentials (optional, **`hpcopr remove ...`**)
 
-*An example of an HPC-NOW cluster running Paraview*
+*DEMO: An example of an HPC-NOW cluster running Paraview*
 ![example](./img/run_paraview.png)
 
 ## **3.5 The Installer Commands**
