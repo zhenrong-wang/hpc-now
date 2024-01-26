@@ -8,6 +8,8 @@
 #ifndef NOW_MD5_H
 #define NOW_MD5_H
 
+#define FILEIO_BUFFER_SIZE 67108864 /* 64MB maximum memory buffer*/
+
 typedef unsigned char uint_8bit;
 typedef unsigned short uint_16bit;
 typedef unsigned int uint_32bit;

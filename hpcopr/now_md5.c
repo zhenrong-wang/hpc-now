@@ -8,6 +8,9 @@
 #include "now_md5.h"
 #include <stdio.h>
 #include <string.h>
+#ifndef __APPLE__
+#include <malloc.h>
+#endif
 
 uint_8bit padding[64]={
     0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -175,54 +178,99 @@ int now_md5_for_file(char* input_file, char md5sum_string[], int md5sum_len){
     uint_32bit buffer_32bit[16];
     uint_8bit md5_array[16];
     uint_8bit i;
+    
     uint_8bit read_byte=0;
     uint_64bit total_length_byte=0;
 
-    int final_flag=0;
-    state_init(state);
+    uint_32bit buffer_blocks=0;
+    uint_32bit buffer_block_length=0;
+    uint_8bit* buffer_block_ptr=NULL;
+    uint_32bit buffer_read;
 
-    while(1){
-        read_byte=fread(buffer_8bit,sizeof(uint_8bit),64,file_p);
-        total_length_byte+=read_byte; //Total length in byte (8bit)
-        if(read_byte==0){
-            if(ferror(file_p)){
-                fclose(file_p);
-                return -5;
-            }
-            memcpy(buffer_8bit,padding,64);
-            padding_length(buffer_8bit+56,(total_length_byte<<3)&0xFFFFFFFF);
-            if(final_flag==1){
-                buffer_8bit[0]=0x00;
-            }
-            assemb_buffer32(buffer_8bit,buffer_32bit);
-            now_md5_core_transform(state,buffer_32bit);
-            break;
-        }
-        else if(read_byte<56){
-            buffer_8bit[read_byte]=0x80;
-            for(i=read_byte+1;i<56;i++){
-                buffer_8bit[i]=0x00;
-            }
-            padding_length(buffer_8bit+56,(total_length_byte<<3)&0xFFFFFFFF);
-            assemb_buffer32(buffer_8bit,buffer_32bit);
-            now_md5_core_transform(state,buffer_32bit);
-            break;
-        }
-        else if(read_byte<64){
-            buffer_8bit[read_byte]=0x80;
-            for(i=read_byte+1;i<64;i++){
-                buffer_8bit[i]=0x00;
-            }
-            assemb_buffer32(buffer_8bit,buffer_32bit);
-            now_md5_core_transform(state,buffer_32bit);
-            final_flag=1;
+    int final_flag=0;
+    int break_flag;
+
+    state_init(state);
+    fseek(file_p,0L,SEEK_END);
+    total_length_byte=ftell(file_p);
+    rewind(file_p);
+    while(final_flag==0){
+        printf("%lld \n",total_length_byte);
+        if(total_length_byte>FILEIO_BUFFER_SIZE*(buffer_blocks+1)){
+            buffer_block_length=FILEIO_BUFFER_SIZE;
         }
         else{
-            assemb_buffer32(buffer_8bit,buffer_32bit);
-            now_md5_core_transform(state,buffer_32bit);
+            buffer_block_length=total_length_byte-FILEIO_BUFFER_SIZE*buffer_blocks;
+            final_flag=1;
+        }
+        buffer_blocks++;
+        buffer_block_ptr=(uint_8bit*)malloc(sizeof(uint_8bit)*buffer_block_length);
+        if(buffer_block_ptr==NULL){
+            fclose(file_p);
+            return -7;
+        }
+        /* Initialize the break_flag to 0 (not final buffer block) or 1 (final buffer block)*/
+        break_flag=final_flag; 
+        /* Read a block < = 65536 byte */
+        fread(buffer_block_ptr,sizeof(uint_8bit),buffer_block_length,file_p);
+        buffer_read=0; /* Reset buffer_read to 0*64 bytes */
+        while(buffer_read<buffer_block_length){
+            if(final_flag==0){ /* If not the final buffer block, each reay_byte is 64 */
+                read_byte=64;
+            }
+            else{
+                if(buffer_block_length-buffer_read>64){
+                    read_byte=64;
+                }
+                else{
+                    read_byte=buffer_block_length-buffer_read;
+                }
+            }
+            /* read_byte can only be [1-64] */
+            memcpy(buffer_8bit,buffer_block_ptr+buffer_read,read_byte);
+            buffer_read+=64;
+            if(read_byte<56){
+                buffer_8bit[read_byte]=0x80;
+                for(i=read_byte+1;i<56;i++){
+                    buffer_8bit[i]=0x00;
+                }
+                padding_length(buffer_8bit+56,(total_length_byte<<3)&0xFFFFFFFF);
+                assemb_buffer32(buffer_8bit,buffer_32bit);
+                now_md5_core_transform(state,buffer_32bit);
+                break_flag=3; /* Exit without an extra round. */
+                break;
+            }
+            else if(read_byte<64){
+                buffer_8bit[read_byte]=0x80;
+                for(i=read_byte+1;i<64;i++){
+                    buffer_8bit[i]=0x00;
+                }
+                assemb_buffer32(buffer_8bit,buffer_32bit);
+                now_md5_core_transform(state,buffer_32bit);
+                break_flag=5; /* Exit with an extra round. */
+                break;
+            }
+            else{
+                assemb_buffer32(buffer_8bit,buffer_32bit);
+                now_md5_core_transform(state,buffer_32bit);
+            }
+        }
+        free(buffer_block_ptr);
+        /* break_flag could be 0, 1, 3, 5 */
+        if(break_flag!=0){
+            break;
         }
     }
     fclose(file_p);
+    if(break_flag!=3){
+        memcpy(buffer_8bit,padding,64);
+        padding_length(buffer_8bit+56,(total_length_byte<<3)&0xFFFFFFFF);
+        if(break_flag==5){
+            buffer_8bit[0]=0x00;
+        }
+        assemb_buffer32(buffer_8bit,buffer_32bit);
+        now_md5_core_transform(state,buffer_32bit);
+    }
     state_to_md5array(state,md5_array);
     md5_array_to_string(md5_array,md5sum_string,md5sum_len);
     return 0;
@@ -230,7 +278,7 @@ int now_md5_for_file(char* input_file, char md5sum_string[], int md5sum_len){
 
 /*int main(int argc, char** argv){
     char md5_string[64]="";
-    now_md5_for_file("test.txt",md5_string,33);
+    now_md5_for_file("now_macros.h",md5_string,33);
     printf("%s\n",md5_string);
     return 0;
 }*/
