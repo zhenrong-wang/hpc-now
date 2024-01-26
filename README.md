@@ -58,6 +58,14 @@ Currently, the HPC-NOW platform supports 7 popular cloud platforms, shown as bel
 - [Microsoft Azure](https://azure.microsoft.com/en-us/), HPC-NOW Internal Code: CLOUD_F
 - [Google Cloud Platform](https://cloud.google.com/), HPC-NOW Internal Code: CLOUD_G
 
+*How easy it is to create a cloud HPC cluster using HPC-NOW?*
+
+![cluster_init](./img/cluster_init.png)
+
+*You can easily manage multiple clusters across multiple clouds.*
+
+![multiple_clusters](./img/multiple_clusters.png)
+
 # **2. Core Components**
 
 Thanks to [Terraform](http://www.terraform.io) and [openTofu](https://github.com/opentofu/opentofu) for making it possible to orchestrate cloud resources in a unified and simple way.
