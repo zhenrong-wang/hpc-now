@@ -592,7 +592,7 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
                 if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
                     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a number [Range: 100-32000]: ");
                     fflush(stdin);
-                    scanf("%127s",real_nfs_volume);
+                    scanf("%7s",real_nfs_volume);
                     getchar();
                     real_nfs_vol=string_to_positive_num(real_nfs_volume);
                 }
