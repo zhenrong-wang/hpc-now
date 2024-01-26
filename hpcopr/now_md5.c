@@ -7,6 +7,7 @@
 
 #include "now_md5.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #ifndef __APPLE__
 #include <malloc.h>
