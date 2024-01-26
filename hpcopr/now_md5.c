@@ -195,7 +195,7 @@ int now_md5_for_file(char* input_file, char md5sum_string[], int md5sum_len){
     total_length_byte=ftell(file_p);
     rewind(file_p);
     while(final_flag==0){
-        printf("%lld \n",total_length_byte);
+        /*printf("%lld \n",total_length_byte);*/
         if(total_length_byte>FILEIO_BUFFER_SIZE*(buffer_blocks+1)){
             buffer_block_length=FILEIO_BUFFER_SIZE;
         }
