@@ -1209,8 +1209,11 @@ int file_exist_or_not(char* filename){
     }
 }
 
-// return <1, empty
-// return >1, with contents
+/* 
+ * Risky: if the file is not plain text, this function may cause infinite loop because EOF is absent! 
+ * return <1, empty
+ * return >1, with content
+ */
 int file_empty_or_not(char* filename){
     FILE* file_p=fopen(filename,"r");
     char temp_line[8]="";
