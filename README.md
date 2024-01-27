@@ -196,7 +196,7 @@ Several extra packages (around 500 MB) will be download and installed. This proc
 
 **NOTE:** For UNIX-like OS, it is not necessary to set a password for 'hpc-now' and switch to it in the terminal. You can just run `hpcopr.exe` with `sudo -Hu hpc-now` prefix. e.g.:
 
-`sudo -Hu hpc-now hpcopr envcheck`
+`sudo -Hu hpc-now hpcopr envcheck`  *The -Hu specifies the user hpc-now and its home directory*
 
 **NOTE:** This method is only valid for **sudoers**.
 
