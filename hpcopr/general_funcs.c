@@ -1201,7 +1201,7 @@ int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primar
 //return 0: exists
 //return 1: not-exists
 int file_exist_or_not(char* filename){
-    if(access(filename,0)!=0){
+    if(access(filename,R_OK)!=0){
         return 1;
     }
     else{
