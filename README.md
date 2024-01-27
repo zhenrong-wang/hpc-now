@@ -194,9 +194,9 @@ In order to run the `hpcopr.exe`, you'll need to set a password and switch to th
 
 Several extra packages (around 500 MB) will be download and installed. This process may needs minutes (depending on your local network connectivity).
 
-**NOTE:** For UNIX-like OS, it is not necessary to set a password for 'hpc-now' and switch to it in the terminal. You can just run `hpcopr.exe` with `sudo -u hpc-now` prefix. e.g.:
+**NOTE:** For UNIX-like OS, it is not necessary to set a password for 'hpc-now' and switch to it in the terminal. You can just run `hpcopr.exe` with `sudo -Hu hpc-now` prefix. e.g.:
 
-`sudo -u hpc-now hpcopr envcheck`
+`sudo -Hu hpc-now hpcopr envcheck`
 
 **NOTE:** This method is only valid for **sudoers**.
 

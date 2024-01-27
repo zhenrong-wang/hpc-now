@@ -114,7 +114,7 @@ int check_current_user_root(void){
         printf("[  ****  ] 1. Run a CMD window with the Administrator role\n");
         printf("[  ****  ] 2. Type the full path of this installer with an option, for example\n");
         printf("[  ****  ]    C:\\Users\\ABC\\installer-win.exe install\n");
-        printf("[  ****  ] to run this installer properly." RESET_DISPLAY "\n");
+        printf("[  ****  ]    to run this installer properly." RESET_DISPLAY "\n");
         system("del /f /q /s c:\\programdata\\check.txt.tmp > nul 2>&1");
         print_tail_installer();
         return -1;    
