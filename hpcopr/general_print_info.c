@@ -410,17 +410,18 @@ void print_about(void){
     printf("| This is free software; see the source for copying conditions.  There is NO\n");
     printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
     printf("| This project is powered by many excellent free and open-source projects:\n");
-    printf("|   1. GNU/Linux: maybe the most widely used software on this planet.\n");
-    printf("|   2. Terraform: a powerful platform for cloud resource orchestration.\n");
-    printf("|   3. GNOME    : a popular and user-friendly desktop environment for GNU/Linux.\n");
-    printf("|   4. XRDP     : an open source Remote Desktop Program.\n");
-    printf("|   5. SLURM    : an open source cluster management and job scheduling system.\n");
-    printf("|   6. MUNGE    : an authentication service for creating and validating credentials.\n");
+    printf("|   1. GNU/Linux : maybe the most widely used software on this planet.\n");
+    printf("|   2. Terraform : a cloud resource orchestration platform.\n");
+    printf("|   3. OpenTofu  : an open-source cloud resource orchestration platform.\n");
+    printf("|   4. GNOME     : a popular and powerful desktop environment for GNU/Linux.\n");
+    printf("|   5. XRDP      : an open source Remote Desktop Program.\n");
+    printf("|   6. SLURM     : a cluster management and job scheduling system.\n");
+    printf("|   7. MUNGE     : authentication service for creating/validating credentials.\n");
     printf("|      ......\n");
     printf("| Therefore, we also made this software public under the MIT License.\n");
-    printf("| Please check the source code here: https://gitee.com/zhenrong-wang/hpc-now/\n");
-    printf("| If you encounter any issues about this software, please feel free to contact us\n");
-    printf("| via info@hpc-now.com or other channels.\n");
+    printf("| Check the GitHub Repository: https://github.com/zhenrong-wang/hpc-now/\n");
+    printf("| If you encounter any issues about this software, please contact us on the\n");
+    printf("| GitHub repository above, or via email: info@hpc-now.com .\n");
     printf("| Let's build this open source cloud HPC platform together!\n");
     print_tail();
 }
