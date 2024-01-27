@@ -55,6 +55,7 @@ if [ ! -z $centos_vers ] && [ $centos_vers = 7 ]; then
   ntpdate ntp.ntsc.ac.cn
 fi
 
+echo -e "\nWelcome to the HPC-NOW Cluster!\nGithub Repo: https://github.com/zhenrong-wang/hpc-now\n" > /etc/motd
 sed -i 's/#   StrictHostKeyChecking ask/StrictHostKeyChecking no/g' /etc/ssh/ssh_config
 echo -e "LogLevel QUIET" >> /etc/ssh/ssh_config
 sed -i '/ClientAliveInterval/,+0d' /etc/ssh/sshd_config
