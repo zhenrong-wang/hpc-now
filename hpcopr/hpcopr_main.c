@@ -1667,7 +1667,7 @@ int main(int argc, char* argv[]){
         }
         else{
             if(batch_flag==0){
-                printf(FATAL_RED_BOLD "[ FATAL: ] Please specify '--mc', '--mcdb', or '--all' as the second param.\n");
+                printf(FATAL_RED_BOLD "[ FATAL: ] Please specify '--mc', '--mcdb', or '--all' as the second param." RESET_DISPLAY "\n");
                 write_operation_log(cluster_name,operation_log,argc,argv,"INVALID_PARAMS",9);
                 check_and_cleanup(workdir);
                 return 9;
