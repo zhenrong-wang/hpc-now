@@ -278,7 +278,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating and configuring the running directory ...\n");
     system("mkdir -p /home/hpc-now/.bin/utils >> /dev/null 2>&1");
     system("mkdir -p /usr/.hpc-now >> /dev/null 2>&1");
-    system("chmod -R 700 /usr/.hpc-now >> /dev/null 2>&1");
+    system("chmod 700 /usr/.hpc-now >> /dev/null 2>&1");
 #elif __APPLE__
     system("rm -rf /Users/hpc-now/ >> /dev/null 2>&1");
     system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
@@ -299,7 +299,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     system("mkdir -p /Users/hpc-now >> /dev/null 2>&1");
     system("mkdir -p /Users/hpc-now/.bin/utils >> /dev/null 2>&1");
     system("mkdir -p /Applications/.hpc-now >> /dev/null 2>&1");
-    system("chmod -R 700 /Applications/.hpc-now >> /dev/null 2>&1");
+    system("chmod 700 /Applications/.hpc-now >> /dev/null 2>&1");
 #endif
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a file for encryption/decryption ...\n");
     generate_random_npasswd(random_string,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
@@ -955,12 +955,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     system("chown -R hpc-now:hpc-now /home/hpc-now >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
-    if(system("ls -la /home | grep hpc-now | grep \"drwx--x--x\" >> /dev/null 2>&1")!=0){
-        system("chmod 711 /home/hpc-now/ >> /dev/null 2>&1");
-    }
-    if(system("ls -la /usr | grep .hpc-now | grep \"drwx--x--x\" >> /dev/null 2>&1")==0){
-        system("chmod -R 700 /usr/.hpc-now/ >> /dev/null 2>&1");
-    }
+    system("chmod 711 /home/hpc-now/ >> /dev/null 2>&1");
+    system("chmod 700 /usr/.hpc-now >> /dev/null 2>&1");
     system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
     snprintf(cmdline1,CMDLINE_LENGTH-1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
@@ -1010,12 +1006,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     system("chown -R hpc-now:hpc-now /Users/hpc-now >> /dev/null 2>&1");
     system("chown -R hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
-    if(system("ls -la /Users | grep hpc-now | grep \"drwx--x--x\" >> /dev/null 2>&1")!=0){
-        system("chmod 711 /Users/hpc-now/ >> /dev/null 2>&1");
-    }
-    if(system("ls -la /Applications | grep hpc-now | grep \"drwx--x--x\" >> /dev/null 2>&1")!=0){
-        system("chmod -R 700 /Applications/.hpc-now/ >> /dev/null 2>&1");
-    }
+    system("chmod 711 /Users/hpc-now >> /dev/null 2>&1");
+    system("chmod 700 /Applications/.hpc-now >> /dev/null 2>&1");
     system("chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
     snprintf(cmdline1,CMDLINE_LENGTH-1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
