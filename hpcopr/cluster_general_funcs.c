@@ -2300,9 +2300,9 @@ int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, ch
     else{
         snprintf(cmdline,CMDLINE_LENGTH-1,"cd %s%s && %s TF_LOG=%s&&%s TF_LOG_PATH=%s%slog%stf_dbg.log && echo yes | %s %s %s -lock=false -parallelism=1000 > %s 2>%s &",stackdir,PATH_SLASH,SET_ENV_CMD,tf_run->dbg_level,SET_ENV_CMD,workdir,PATH_SLASH,PATH_SLASH,START_BG_JOB,tf_run->tf_runner,execution_name,tf_realtime_log,tf_error_log);
     }
-    signal(SIGINT,SIG_IGN);
+    /*signal(SIGINT,SIG_IGN);*/
     if(system(cmdline)!=0){
-        signal(SIGINT,SIG_DFL);
+        /*signal(SIGINT,SIG_DFL);*/
         return -7;
     }
     if(silent_flag!=0){
@@ -2316,14 +2316,14 @@ int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, ch
         if(strcmp(cloud_flag,"CLOUD_G")==0){
             gcp_credential_convert(workdir,"delete",0);
         }
-        signal(SIGINT,SIG_DFL);
+        /*signal(SIGINT,SIG_DFL);*/
         return -1;
     }
     if(strcmp(cloud_flag,"CLOUD_G")==0){
         gcp_credential_convert(workdir,"delete",0);
     }
     archive_log(tf_dbg_log_archive,tf_dbg_log);
-    signal(SIGINT,SIG_DFL);
+    /*signal(SIGINT,SIG_DFL);*/
     return 0;
 }
 
