@@ -8,6 +8,14 @@
 #include "now_sha256.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
+uint_8bit padding_sha256[64]={
+    0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+};
 
 uint_32bit k[64]={
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -33,7 +41,188 @@ void state_init_sha256(uint_32bit state[]){
 
 void padding_length_sha256(uint_8bit* ptr, uint_64bit length_64bit){
     for(uint_8bit i=0;i<8;i++){
-        *(ptr+i)=(length_64bit>>(i*8))&0xFF;
+        *(ptr+i)=(length_64bit>>(56-i*8))&0xFF;
     }
 }
 
+void generate_words(uint_32bit w_array[], uint_8bit raw_512bit[]){
+    uint_8bit j;
+    for(j=0;j<16;j++){
+        w_array[j]=(raw_512bit[4*j]<<24)|(raw_512bit[4*j+1]<<16)|(raw_512bit[4*j+2]<<8)|(raw_512bit[4*j+3]);
+    }
+    for(j=16;j<64;j++){
+        w_array[j]=sigma_small1(w_array[j-2])+w_array[j-7]+sigma_small0(w_array[j-15])+w_array[j-16];
+    }
+}
+
+void now_sha256_core(uint_32bit state[], uint_8bit raw_512bit[]){
+    uint_32bit words_array[64];
+    uint_8bit j;
+    uint_32bit a=state[0];
+    uint_32bit b=state[1];
+    uint_32bit c=state[2];
+    uint_32bit d=state[3];
+    uint_32bit e=state[4];
+    uint_32bit f=state[5];
+    uint_32bit g=state[6];
+    uint_32bit h=state[7];
+    uint_32bit T1,T2;
+    generate_words(words_array,raw_512bit);
+    for(j=0;j<64;j++){
+        T1=h+sigma_big1(e)+ch(e,f,g)+k[j]+words_array[j];
+        T2=sigma_big0(a)+maj(a,b,c);
+        h=g;
+        g=f;
+        f=e;
+        e=d+T1;
+        d=c;
+        c=b;
+        b=a;
+        a=T1+T2;
+    }
+    state[0]+=a;
+    state[1]+=b;
+    state[2]+=c;
+    state[3]+=d;
+    state[4]+=e;
+    state[5]+=f;
+    state[6]+=g;
+    state[7]+=h;
+}
+
+int state_to_sha256_string(uint_32bit state[], char sha256_string[], uint_8bit sha256_len){
+    uint_8bit i,j,k,temp;
+    if(sha256_len<65){
+        return -3;
+    }
+    memset(sha256_string,'\0',sha256_len);
+    for(i=0;i<64;i++){
+        j=i>>3;
+        k=i%8;
+        temp=(state[j]>>(28-4*k))&0x0F;
+        if(temp>9){
+            sha256_string[i]='a'+temp-10;
+        }
+        else{
+            sha256_string[i]='0'+temp-0;
+        }
+    }
+}
+
+/*void print_buffer(uint_8bit buffer_8bit[]){
+    int i,j;
+    for(i=0;i<8;i++){
+        for(j=0;j<8;j++){
+            printf("%x ",buffer_8bit[i*8+j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}*/
+
+int now_sha256_for_file(char* input_file, char sha256_string[], int sha256_len){
+    if(sha256_len<65){
+        return -3;
+    }
+    FILE* file_p=fopen(input_file,"rb");
+    if(file_p==NULL){
+        return -1;
+    }
+    uint_32bit state[8];
+    uint_8bit buffer_8bit[64];
+    uint_8bit i;
+    uint_8bit read_byte=0;
+    uint_64bit total_length_byte=0;
+    uint_32bit buffer_blocks=0;
+    uint_32bit buffer_block_length=0;
+    uint_8bit* buffer_block_ptr=NULL;
+    uint_32bit buffer_read;
+    int final_flag=0;
+    int break_flag;
+    state_init_sha256(state);
+    fseek(file_p,0L,SEEK_END);
+    total_length_byte=ftell(file_p);
+    rewind(file_p);
+    while(final_flag==0){
+        if(total_length_byte>FILEIO_BUFFER_SIZE_SHA*(buffer_blocks+1)){
+            buffer_block_length=FILEIO_BUFFER_SIZE_SHA;
+        }
+        else{
+            buffer_block_length=total_length_byte-FILEIO_BUFFER_SIZE_SHA*buffer_blocks;
+            final_flag=1;
+        }
+        buffer_blocks++;
+        buffer_block_ptr=(uint_8bit*)malloc(sizeof(uint_8bit)*buffer_block_length);
+        if(buffer_block_ptr==NULL){
+            fclose(file_p);
+            return -7;
+        }
+        /* Initialize the break_flag to 0 (not final buffer block) or 1 (final buffer block)*/
+        break_flag=final_flag; 
+        /* Read a block < = 65536 byte */
+        fread(buffer_block_ptr,sizeof(uint_8bit),buffer_block_length,file_p);
+        buffer_read=0; /* Reset buffer_read to 0*64 bytes */
+        while(buffer_read<buffer_block_length){
+            if(final_flag==0){ /* If not the final buffer block, each reay_byte is 64 */
+                read_byte=64;
+            }
+            else{
+                if(buffer_block_length-buffer_read>64){
+                    read_byte=64;
+                }
+                else{
+                    read_byte=buffer_block_length-buffer_read;
+                }
+            }
+            /* read_byte can only be [1-64] */
+            memcpy(buffer_8bit,buffer_block_ptr+buffer_read,read_byte);
+            buffer_read+=64;
+            if(read_byte<56){
+                buffer_8bit[read_byte]=0x80;
+                for(i=read_byte+1;i<56;i++){
+                    buffer_8bit[i]=0x00;
+                }
+                padding_length_sha256(buffer_8bit+56,(total_length_byte<<3)&0xFFFFFFFF);
+                now_sha256_core(state,buffer_8bit);
+                break_flag=3; /* Exit without an extra round. */
+                break;
+            }
+            else if(read_byte<64){
+                buffer_8bit[read_byte]=0x80;
+                for(i=read_byte+1;i<64;i++){
+                    buffer_8bit[i]=0x00;
+                }
+                now_sha256_core(state,buffer_8bit);
+                break_flag=5; /* Exit with an extra round. */
+                break;
+            }
+            else{
+                now_sha256_core(state,buffer_8bit);
+            }
+        }
+        free(buffer_block_ptr);
+        /* break_flag could be 0, 1, 3, 5 */
+        if(break_flag!=0){
+            break;
+        }
+    }
+    fclose(file_p);
+    if(break_flag!=3){
+        memcpy(buffer_8bit,padding_sha256,64);
+        padding_length_sha256(buffer_8bit+56,(total_length_byte<<3)&0xFFFFFFFF);
+        if(break_flag==5){
+            buffer_8bit[0]=0x00;
+        }
+        now_sha256_core(state,buffer_8bit);
+    }
+    state_to_sha256_string(state,sha256_string,sha256_len);
+    return 0;
+}
+
+/*
+int main(){
+    char a[65]="";
+    now_sha256_for_file("test.txt",a,65);
+    printf("%s\n",a);
+    return 0;
+}*/
