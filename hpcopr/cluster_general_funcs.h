@@ -62,14 +62,14 @@ int get_azure_ninfo(char* workdir, unsigned int linelen_max, char* crypto_keyfil
 
 int get_cpu_num(const char* vm_model);
 int get_compute_node_num(char* stackdir, char* crypto_keyfile, char* option);
-int decrypt_single_file(char* now_crypto_exec, char* filename, char* md5sum);
-int decrypt_single_file_general(char* now_crypto_exec, char* source_file, char* target_file, char* md5sum);
+int decrypt_single_file(char* now_crypto_exec, char* filename, char* hash_key);
+int decrypt_single_file_general(char* now_crypto_exec, char* source_file, char* target_file, char* hash_key);
 int decrypt_files(char* workdir, char* crypto_key_filename);
-int encrypt_and_delete(char* now_crypto_exec, char* filename, char* md5sum);
-int encrypt_and_delete_general(char* now_crypto_exec, char* source_file, char* target_file, char* md5sum);
+int encrypt_and_delete(char* now_crypto_exec, char* filename, char* hash_key);
+int encrypt_and_delete_general(char* now_crypto_exec, char* source_file, char* target_file, char* hash_key);
 int delete_decrypted_files(char* workdir, char* crypto_key_filename);
-int decrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum);
-int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* md5sum);
+int decrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* hash_key);
+int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* hash_key);
 int decryption_status(char* workdir);
 int getstate(char* workdir, char* crypto_keyfile);
 

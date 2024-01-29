@@ -42,14 +42,14 @@ int encrypt_decrypt_clusters(char* cluster_list, char* crypto_keyfile, char* opt
     char cluster_name_temp[32]=""; //Here we have to use a wider array.
     char cluster_workdir_temp[DIR_LENGTH]="";
     char registry_line_buffer[LINE_LENGTH_SHORT]="";
-    char md5sum[64]="";
+    char hash_key[64]="";
     int flag=0;
     int i=1;
     if(strcmp(option,"encrypt")!=0&&strcmp(option,"decrypt")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Please specify an option: encrypt or decrypt." RESET_DISPLAY "\n");
         return 1;
     }
-    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
+    if(get_file_sha_hash(crypto_keyfile,hash_key,64)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key string." RESET_DISPLAY "\n");
         return -9;
     }
@@ -131,7 +131,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* crypto_keyfile, char* opt
         if(strcmp(option,"encrypt")==0){
             snprintf(registry_encrypted,FILENAME_LENGTH-1,"%s.tmp",ALL_CLUSTER_REGISTRY);
             /* For encrypt option, will encrypt the CLUSTER_REGISTRY */
-            encrypt_and_delete_general(NOW_CRYPTO_EXEC,registry_decbackup,registry_encrypted,md5sum);
+            encrypt_and_delete_general(NOW_CRYPTO_EXEC,registry_decbackup,registry_encrypted,hash_key);
             registry_dec_backup();
         }
         if(final_flag!=0){
@@ -238,7 +238,7 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     char target_cluster_workdir[DIR_LENGTH]="";
     char target_cluster_vaultdir[DIR_LENGTH]="";
     char cloud_flag[32]="";
-    char md5sum[64]="";
+    char hash_key[64]="";
     int run_flag;
     char filename_temp[FILENAME_LENGTH]="";
     if(cluster_name_check(target_cluster_name)!=-7){
@@ -253,7 +253,7 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     if(decryption_status(target_cluster_workdir)!=0){
         return -9;
     }
-    if(get_nmd5sum(crypto_keyfile,md5sum,64)!=0){
+    if(get_file_sha_hash(crypto_keyfile,hash_key,64)!=0){
         return -7;
     }
     run_flag=encrypt_decrypt_all_user_ssh_privkeys(target_cluster_name,"decrypt",crypto_keyfile);
@@ -263,23 +263,23 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     decrypt_files(target_cluster_workdir,crypto_keyfile); //Delete the /stack files.
     // Now, decrypt the /vault files.
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
-    decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+    decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
     if(strcmp(cloud_flag,"CLOUD_G")==0){ //Decrypt the special bucket secrets
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_key.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
-        decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+        decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
     }
     if(strcmp(cloud_flag,"CLOUD_E")==0){ //Decrypt the special bucket secrets
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scredentials",target_cluster_vaultdir,PATH_SLASH);
-        decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+        decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconfig",target_cluster_vaultdir,PATH_SLASH);
-        decrypt_single_file(now_crypto_exec,filename_temp,md5sum);
+        decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
     }
-    decrypt_cloud_secrets(now_crypto_exec,target_cluster_workdir,md5sum);
+    decrypt_cloud_secrets(now_crypto_exec,target_cluster_workdir,hash_key);
     return 0;
 }

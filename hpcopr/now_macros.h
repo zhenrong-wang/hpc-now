@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0041"
+#define CORE_VERSION_CODE "0.3.1.0043"
 
 /* Define the printf ANSI colors. */
 #define FATAL_RED_BOLD   "\033[1;31m"
@@ -124,6 +124,7 @@ typedef struct{
 
 #define FILENAME_SUFFIX_SHORT    "win"
 #define FILENAME_SUFFIX_FULL     "windows"
+#define CRLF_PASSWORD_HASH       "\n"
 
 // The urls below are permenant and fast to visit. Use them directly.
 #define URL_COSCLI    "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-windows.exe"
@@ -196,6 +197,7 @@ typedef struct{
 
 #define FILENAME_SUFFIX_SHORT    "lin"
 #define FILENAME_SUFFIX_FULL     "linux"
+#define CRLF_PASSWORD_HASH       "\r\n"
 
 // The urls below are permenant and fast to visit. Use them directly.
 #define URL_COSCLI    "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-linux"
@@ -268,6 +270,7 @@ typedef struct{
 
 #define FILENAME_SUFFIX_SHORT    "dwn"
 #define FILENAME_SUFFIX_FULL     "darwin"
+#define CRLF_PASSWORD_HASH       "\r\n"
 
 // The urls below are permenant and fast to visit. Use them directly.
 #define URL_COSCLI    "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-mac"

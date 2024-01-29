@@ -568,10 +568,10 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     char gcp_key_file[FILENAME_LENGTH]="";
     char az_subscription_id[AKSK_LENGTH]="";
     char az_tenant_id[AKSK_LENGTH]="";
-    char md5sum[33]="";
+    char hash_key[33]="";
     int ak_length,sk_length;
 
-    if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
+    if(get_file_sha_hash(crypto_keyfile,hash_key,33)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
         return -3;
     }
@@ -649,7 +649,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         }
         fprintf(file_p,"\nCLOUD_G");
         fclose(file_p);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,hash_key,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. Abort." RESET_DISPLAY "\n");
             delete_file_or_dir(filename_temp);
@@ -758,7 +758,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
     system(cmdline);
     create_and_get_subdir(new_workdir,"vault",new_vaultdir,DIR_LENGTH);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,hash_key,SYSTEM_CMD_REDIRECT);
     run_flag=system(cmdline);
     delete_file_or_dir(filename_temp);
     if(run_flag!=0){
@@ -786,7 +786,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     char az_subscription_id[AKSK_LENGTH]="";
     char az_tenant_id[AKSK_LENGTH]="";
     char cloud_flag_prev[32]="";
-    char md5sum[33]="";
+    char hash_key[33]="";
     FILE* file_p=NULL;
     
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
@@ -832,11 +832,11 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             return -1;
         }
         fclose(file_p);
-        if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
+        if(get_file_sha_hash(crypto_keyfile,hash_key,33)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
             return -3;
         }
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,vaultdir,PATH_SLASH,hash_key,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. The key keeps unchanged." RESET_DISPLAY "\n");
             delete_file_or_dir(secret_key);
@@ -979,12 +979,12 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         delete_file_or_dir(filename_temp);
         return 3;
     }
-    if(get_nmd5sum(crypto_keyfile,md5sum,33)!=0){
+    if(get_file_sha_hash(crypto_keyfile,hash_key,33)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
         delete_file_or_dir(filename_temp);
         return -3;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,vaultdir,PATH_SLASH,md5sum,SYSTEM_CMD_REDIRECT);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,vaultdir,PATH_SLASH,hash_key,SYSTEM_CMD_REDIRECT);
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. The key keeps unchanged." RESET_DISPLAY "\n");
         delete_file_or_dir(secret_key);
@@ -995,11 +995,11 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf.tmp",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
         snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s decrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp,filename_temp2,md5sum,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s decrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp,filename_temp2,hash_key,SYSTEM_CMD_REDIRECT);
         system(cmdline);
         global_nreplace(filename_temp2,LINE_LENGTH_SMALL,access_key_prev,access_key);
         global_nreplace(filename_temp2,LINE_LENGTH_SMALL,secret_key_prev,secret_key);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp2,filename_temp,md5sum,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s %s %s",NOW_CRYPTO_EXEC,filename_temp2,filename_temp,hash_key,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally." RESET_DISPLAY "\n");

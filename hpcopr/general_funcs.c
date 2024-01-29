@@ -29,6 +29,7 @@
 
 #include "now_macros.h"
 #include "now_md5.h"
+#include "now_sha256.h"
 #include "general_funcs.h"
 
 char command_flags[CMD_FLAG_NUM][16]={
@@ -2382,10 +2383,10 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
 //return 1: get_md5 failed
 //return 0: get_md5 succeeded
 int get_nmd5sum(char* filename, char md5sum_string[], int md5sum_length){
+    memset(md5sum_string,'\0',md5sum_length);
     if(md5sum_length<33){
         return -3;
     }
-    memset(md5sum_string,'\0',md5sum_length);
     int run_flag=now_md5_for_file(filename,md5sum_string,md5sum_length);
     if(run_flag!=0){
         return 1;
@@ -2393,7 +2394,7 @@ int get_nmd5sum(char* filename, char md5sum_string[], int md5sum_length){
     return 0;
 }
 
-int password_hash(char* password, char md5_hash[], int md5_length){
+int password_md5_hash(char* password, char md5_hash[], int md5_length){
     if(strlen(password)==0){
         return -3;
     }
@@ -2410,13 +2411,53 @@ int password_hash(char* password, char md5_hash[], int md5_length){
         strcpy(md5_hash,"");
         return -1;
     }
-#ifdef _WIN32
-    fprintf(file_p,"%s\n",password);
-#else
-    fprintf(file_p,"%s\r\n",password);
-#endif
+    fprintf(file_p,"%s%s",password,CRLF_PASSWORD_HASH);
     fclose(file_p);
     run_flag=get_nmd5sum(filename_temp,md5_hash,md5_length);
+    delete_file_or_dir(filename_temp);
+    if(run_flag!=0){
+        return 1;
+    }
+    return 0;
+}
+
+/* Generate the SHA-256 string of the file and cut the [1-32] chars */
+int get_file_sha_hash(char* filename, char hash_string[], int hash_length){
+    char sha256[65]="";
+    strcpy(hash_string,"");
+    if(hash_length<33){
+        return -3;
+    }
+    int run_flag=now_sha256_for_file(filename,sha256,65);
+    if(run_flag!=0){
+        return 1;
+    }
+    /* Cut the 1-32 chars */
+    strncpy(hash_string,sha256,32);
+    return 0;
+}
+
+/* Generate the SHA-256 string of the file and cut the [1-32] chars */
+int password_sha_hash(char* password, char hash[], int hash_length){
+    char filename_temp[FILENAME_LENGTH]="";
+    char string_temp[16]="";
+    int run_flag;
+    strcpy(hash,"");
+    if(strlen(password)==0){
+        return -3;
+    }
+    if(hash_length<33){
+        return -5;
+    }
+    generate_random_string(string_temp);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.tmp%spass%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,GFUNC_FILE_SUFFIX);
+    FILE* file_p=fopen(filename_temp,"w+");
+    if(file_p==NULL){
+        return -1;
+    }
+    fprintf(file_p,"%s%s",password,CRLF_PASSWORD_HASH);
+    fclose(file_p);
+    run_flag=get_file_sha_hash(filename_temp,hash,hash_length);
     delete_file_or_dir(filename_temp);
     if(run_flag!=0){
         return 1;

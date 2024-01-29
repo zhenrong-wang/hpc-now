@@ -856,7 +856,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     if(system("ls -la /Applications/.hpc-now | grep .now-ssh >> /dev/null 2>&1")!=0){
         printf("[ -INFO- ] Moving previous keys to the new directory ...\n");
-        system("mv -r /Users/hpc-now/.now-ssh /Applications/.hpc-now/ >> /dev/null 2>&1");
+        system("mv /Users/hpc-now/.now-ssh /Applications/.hpc-now/ >> /dev/null 2>&1");
         system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.now-ssh >> /dev/null 2>&1");
     }
 #endif

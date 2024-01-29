@@ -107,6 +107,7 @@ int state_to_sha256_string(uint_32bit state[], char sha256_string[], uint_8bit s
             sha256_string[i]='0'+temp-0;
         }
     }
+    return 0;
 }
 
 /*void print_buffer(uint_8bit buffer_8bit[]){

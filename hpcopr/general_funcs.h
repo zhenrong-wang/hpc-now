@@ -77,9 +77,14 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
 int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag);
 int delete_nlines_by_kwd(char* filename, unsigned int linelen_max, char* key, int overwrite_flag);
 
+/* Deprecating: MD5 algorithms */
 int get_crypto_key(char* crypto_key_filename, char* md5sum);
 int get_nmd5sum(char* filename, char md5sum_string[], int md5sum_length);
-int password_hash(char* password, char md5_hash[], int md5_length);
+int password_md5_hash(char* password, char md5_hash[], int md5_length);
+
+/* SHA-256 */
+int get_file_sha_hash(char* filename, char hash_string[], int hash_length);
+int password_sha_hash(char* password, char hash[], int hash_length);
 
 int cmd_flg_or_not(char* argv);
 int cmd_key_or_not(char* argv);
