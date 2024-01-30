@@ -847,8 +847,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("icacls C:\\hpc-now\\utils\\now-crypto-aes.exe /grant Administrators:F > nul 2>&1");
     if(system("C:\\hpc-now\\hpcopr.exe version | findstr \"/C:Version: 0.3.1.00\" > nul 2>&1")==0){
         decrypt_flag=1;
-        strncpy(cmdline_enc,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr encrypt --all -b\" > C:\\programdata\\hpc-now\\enc.temp 2>&1",CMDLINE_LENGTH-1);
-        strncpy(cmdline_dec,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr decrypt --all -b\" > C:\\programdata\\hpc-now\\dec.temp 2>&1",CMDLINE_LENGTH-1);
+        strncpy(cmdline_enc,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr encrypt --all -b > C:\\programdata\\hpc-now\\enc.temp 2>&1\"",CMDLINE_LENGTH-1);
+        strncpy(cmdline_dec,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr decrypt --all -b > C:\\programdata\\hpc-now\\dec.temp 2>&1\"",CMDLINE_LENGTH-1);
     }
 #elif __linux__
     if(system("ls -la /home/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
@@ -963,7 +963,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         system(cmdline_enc);
 #ifdef _WIN32
         i=0;
-        while(system("findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\dec.temp > nul 2>&1")!=0){
+        while(system("findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\enc.temp > nul 2>&1")!=0){
             i++;
             printf("[ -WAIT- ] Decryption in progress, %d seconds passed ... \r",i);
             fflush(stdout);
@@ -972,6 +972,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #endif
     }
 #ifdef _WIN32
+    system("del /s /q C:\\programdata\\hpc-now\\enc.temp");
+    system("del /s /q C:\\programdata\\hpc-now\\dec.temp");
     system("mkdir C:\\hpc-now\\hpc-now.licenses > nul 2>&1");
     if(file_exist_or_not("C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE")!=0){
         snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE",URL_LICENSE);
