@@ -978,7 +978,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
 #ifdef _WIN32
     snprintf(cmdline1,CMDLINE_LENGTH-1,"del /s /q C:\\programdata\\hpc-now\\enc.%s.temp",randstr);
-    system(cmdlin1);
+    system(cmdline1);
     snprintf(cmdline1,CMDLINE_LENGTH-1,"del /s /q C:\\programdata\\hpc-now\\dec.%s.temp",randstr);
     system(cmdline1);
     system("mkdir C:\\hpc-now\\hpc-now.licenses > nul 2>&1");
