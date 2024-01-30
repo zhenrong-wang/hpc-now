@@ -898,6 +898,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
             fflush(stdout);
             sleep(1);
         }
+        printf("\n");
 #endif
         system(cmdline_dec);
 #ifdef _WIN32
@@ -909,6 +910,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
             fflush(stdout);
             sleep(1);
         }
+        printf("\n");
 #endif
     }
     if(hpcopr_loc_flag==-1){
@@ -970,10 +972,12 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         snprintf(cmdline1,CMDLINE_LENGTH-1,"findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\enc.%s.temp > nul 2>&1",randstr);
         while(system(cmdline1)!=0){
             i++;
-            printf("[ -WAIT- ] Decryption in progress, %d seconds passed ... \r",i);
+            printf("[ -WAIT- ] Encryption in progress, %d seconds passed ... \r",i);
             fflush(stdout);
             sleep(1);
         }
+        printf("\n");
+        sleep(1);
 #endif
     }
 #ifdef _WIN32
