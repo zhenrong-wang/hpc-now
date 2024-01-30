@@ -793,10 +793,12 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     char doubleconfirm[128]="";
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
+    char cmdline_dec[CMDLINE_LENGTH]="";
+    char cmdline_enc[CMDLINE_LENGTH]="";
 #ifdef __linux__
     char linux_packman[8]="";
 #endif
-    int run_flag1,run_flag2;
+    int run_flag1,run_flag2,decrypt_flag=0;
 #ifdef _WIN32
     if(system("net user hpc-now > nul 2>&1")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
@@ -842,6 +844,11 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("icacls C:\\hpc-now\\hpcopr.exe /grant Administrators:F > nul 2>&1");
     system("takeown /f C:\\hpc-now\\utils\\now-crypto-aes.exe /d y > nul 2>&1");
     system("icacls C:\\hpc-now\\utils\\now-crypto-aes.exe /grant Administrators:F > nul 2>&1");
+    if(system("C:\\hpc-now\\hpcopr.exe version | findstr \"Version: 0.3.1.00\" > nul 2>&1")==0){
+        decrypt_flag=1;
+        strncpy(cmdline_enc,"runas /savecreds /user:mymachine\hpc-now \"hpcopr encrypt --all -b\" > nul",CMDLINE_LENGTH-1);
+        strncpy(cmdline_dec,"runas /savecreds /user:mymachine\hpc-now \"hpcopr decrypt --all -b\" > nul",CMDLINE_LENGTH-1);
+    }
 #elif __linux__
     if(system("ls -la /home/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
         printf("[ -INFO- ] Moving previous utilities to the new directory ...\n");
@@ -852,6 +859,11 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf("[ -INFO- ] Moving previous keys to the new directory ...\n");
         system("mv /home/hpc-now/.now-ssh /usr/.hpc-now/ >> /dev/null 2>&1");
         system("chown -R hpc-now:hpc-now /usr/.hpc-now/.now-ssh >> /dev/null 2>&1");
+    }
+    if(system("hpcopr version | grep \"Version: 0.3.1.00\" >> /dev/null 2>&1")==0){
+        decrypt_flag=1;
+        strncpy(cmdline_enc,"sudo -u hpc-now hpcopr encrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
+        strncpy(cmdline_dec,"sudo -u hpc-now hpcopr decrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
     }
 #elif __APPLE__
     if(system("ls -la /Users/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
@@ -865,7 +877,17 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         system("mv /Users/hpc-now/.now-ssh /Applications/.hpc-now/ >> /dev/null 2>&1");
         system("chown -R hpc-now:hpc-now /Applications/.hpc-now/.now-ssh >> /dev/null 2>&1");
     }
+    if(system("hpcopr version | grep \"Version: 0.3.1.00\" >> /dev/null 2>&1")==0){
+        decrypt_flag=1;
+        strncpy(cmdline_enc,"sudo -u hpc-now hpcopr encrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
+        strncpy(cmdline_dec,"sudo -u hpc-now hpcopr decrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
+    }
 #endif
+    if(decrypt_flag==1){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] This update needs to re-encrypt the files." RESET_DISPLAY "\n");
+        system(cmdline_enc);
+        system(cmdline_dec);
+    }
     if(hpcopr_loc_flag==-1){
         if(strlen(hpcopr_ver)==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the latest 'hpcopr' from the default URL.\n");
@@ -917,6 +939,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf("[  ****  ] 4. Currently there is no 'hpcopr' thread(s) running." RESET_DISPLAY "\n");
         restore_perm_windows();
         return 1;
+    }
+    if(decrypt_flag==1){
+        system(cmdline_enc);
     }
 #ifdef _WIN32
     system("mkdir C:\\hpc-now\\hpc-now.licenses > nul 2>&1");
