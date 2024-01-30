@@ -887,6 +887,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf(WARN_YELLO_BOLD "[ -WARN- ] This update needs to re-encrypt the files." RESET_DISPLAY "\n");
         system(cmdline_enc);
         system(cmdline_dec);
+        sleep(3);
     }
     if(hpcopr_loc_flag==-1){
         if(strlen(hpcopr_ver)==0){
