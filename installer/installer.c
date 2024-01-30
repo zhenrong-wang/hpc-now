@@ -847,8 +847,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("icacls C:\\hpc-now\\utils\\now-crypto-aes.exe /grant Administrators:F > nul 2>&1");
     if(system("C:\\hpc-now\\hpcopr.exe version | findstr \"/C:Version: 0.3.1.00\" > nul 2>&1")==0){
         decrypt_flag=1;
-        strncpy(cmdline_enc,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr encrypt --all -b > C:\\programdata\\hpc-now\\enc.temp 2>&1\"",CMDLINE_LENGTH-1);
-        strncpy(cmdline_dec,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr decrypt --all -b > C:\\programdata\\hpc-now\\dec.temp 2>&1\"",CMDLINE_LENGTH-1);
+        strncpy(cmdline_enc,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr encrypt --all -b > C:\\programdata\\hpc-now\\enc.temp 2>&1\" > nul",CMDLINE_LENGTH-1);
+        strncpy(cmdline_dec,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr decrypt --all -b > C:\\programdata\\hpc-now\\dec.temp 2>&1\" > nul",CMDLINE_LENGTH-1);
     }
 #elif __linux__
     if(system("ls -la /home/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
