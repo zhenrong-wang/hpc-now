@@ -702,7 +702,7 @@ int set_opr_password(char* opr_password){
 
 // Forcely uninstall the HPC-NOW services
 int uninstall_services(void){
-    char doubleconfirm[128]="";
+    char doubleconfirm[16]="";
     // Double confirmation is needed.
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("[  ****  ] YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM:\n");
@@ -717,7 +717,7 @@ int uninstall_services(void){
     printf("[ -INFO- ] ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%127s",doubleconfirm);
+    scanf("%15s",doubleconfirm);
     if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You denied the operation." RESET_DISPLAY "\n");
         return 1;
@@ -790,7 +790,7 @@ int uninstall_services(void){
 }
 
 int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int crypto_loc_flag, char* now_crypto_loc, int rdp_flag){
-    char doubleconfirm[128]="";
+    char doubleconfirm[16]="";
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
     char cmdline_dec[CMDLINE_LENGTH]="";
@@ -800,7 +800,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #endif
     int run_flag1,run_flag2,decrypt_flag=0;
 #ifdef _WIN32
+    char randstr[8]="";
     int i;
+    generate_random_nstring(randstr,8,1);
     if(system("net user hpc-now > nul 2>&1")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
@@ -820,7 +822,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     printf("[ -INFO- ] ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
-    scanf("%127s",doubleconfirm);
+    scanf("%15s",doubleconfirm);
     if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You denied the operation." RESET_DISPLAY "\n");
         return 1;
@@ -847,8 +849,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("icacls C:\\hpc-now\\utils\\now-crypto-aes.exe /grant Administrators:F > nul 2>&1");
     if(system("C:\\hpc-now\\hpcopr.exe version | findstr \"/C:Version: 0.3.1.00\" > nul 2>&1")==0){
         decrypt_flag=1;
-        strncpy(cmdline_enc,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr encrypt --all -b > C:\\programdata\\hpc-now\\enc.temp 2>&1\" > nul",CMDLINE_LENGTH-1);
-        strncpy(cmdline_dec,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr decrypt --all -b > C:\\programdata\\hpc-now\\dec.temp 2>&1\" > nul",CMDLINE_LENGTH-1);
+        snprintf(cmdline_enc,CMDLINE_LENGTH-1,"runas /savecred /user:mymachine\\hpc-now \"cmd.exe /c hpcopr encrypt --all -b > C:\\programdata\\hpc-now\\enc.%s.temp 2>&1\" > nul",randstr);
+        snprintf(cmdline_dec,CMDLINE_LENGTH-1,"runas /savecred /user:mymachine\\hpc-now \"cmd.exe /c hpcopr decrypt --all -b > C:\\programdata\\hpc-now\\dec.%s.temp 2>&1\" > nul",randstr);
     }
 #elif __linux__
     if(system("ls -la /home/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
@@ -889,7 +891,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         system(cmdline_enc);
 #ifdef _WIN32
         i=0;
-        while(system("findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\enc.temp > nul 2>&1")!=0){
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\enc.%s.temp > nul 2>&1",randstr);
+        while(system(cmdline1)!=0){
             i++;
             printf("[ -WAIT- ] Encryption in progress, %d seconds passed ... \r",i);
             fflush(stdout);
@@ -899,7 +902,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         system(cmdline_dec);
 #ifdef _WIN32
         i=0;
-        while(system("findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\dec.temp > nul 2>&1")!=0){
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\dec.%s.temp > nul 2>&1",randstr);
+        while(system(cmdline1)!=0){
             i++;
             printf("[ -WAIT- ] Decryption in progress, %d seconds passed ... \r",i);
             fflush(stdout);
@@ -963,7 +967,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         system(cmdline_enc);
 #ifdef _WIN32
         i=0;
-        while(system("findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\enc.temp > nul 2>&1")!=0){
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\enc.%s.temp > nul 2>&1",randstr);
+        while(system(cmdline1)!=0){
             i++;
             printf("[ -WAIT- ] Decryption in progress, %d seconds passed ... \r",i);
             fflush(stdout);
@@ -972,8 +977,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #endif
     }
 #ifdef _WIN32
-    system("del /s /q C:\\programdata\\hpc-now\\enc.temp");
-    system("del /s /q C:\\programdata\\hpc-now\\dec.temp");
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"del /s /q C:\\programdata\\hpc-now\\enc.%s.temp",randstr);
+    system(cmdlin1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"del /s /q C:\\programdata\\hpc-now\\dec.%s.temp",randstr);
+    system(cmdline1);
     system("mkdir C:\\hpc-now\\hpc-now.licenses > nul 2>&1");
     if(file_exist_or_not("C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE")!=0){
         snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE",URL_LICENSE);
