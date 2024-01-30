@@ -977,9 +977,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #endif
     }
 #ifdef _WIN32
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"del /s /q C:\\programdata\\hpc-now\\enc.%s.temp",randstr);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"del /s /q C:\\programdata\\hpc-now\\enc.%s.temp %s",randstr,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline1);
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"del /s /q C:\\programdata\\hpc-now\\dec.%s.temp",randstr);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"del /s /q C:\\programdata\\hpc-now\\dec.%s.temp %s",randstr,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline1);
     system("mkdir C:\\hpc-now\\hpc-now.licenses > nul 2>&1");
     if(file_exist_or_not("C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE")!=0){
