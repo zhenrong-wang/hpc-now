@@ -800,6 +800,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #endif
     int run_flag1,run_flag2,decrypt_flag=0;
 #ifdef _WIN32
+    int i;
     if(system("net user hpc-now > nul 2>&1")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
@@ -844,10 +845,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("icacls C:\\hpc-now\\hpcopr.exe /grant Administrators:F > nul 2>&1");
     system("takeown /f C:\\hpc-now\\utils\\now-crypto-aes.exe /d y > nul 2>&1");
     system("icacls C:\\hpc-now\\utils\\now-crypto-aes.exe /grant Administrators:F > nul 2>&1");
-    if(system("C:\\hpc-now\\hpcopr.exe version | findstr \"Version: 0.3.1.00\" > nul 2>&1")==0){
+    if(system("C:\\hpc-now\\hpcopr.exe version | findstr \"/C:Version: 0.3.1.00\" > nul 2>&1")==0){
         decrypt_flag=1;
-        strncpy(cmdline_enc,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr encrypt --all -b\"",CMDLINE_LENGTH-1);
-        strncpy(cmdline_dec,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr decrypt --all -b\"",CMDLINE_LENGTH-1);
+        strncpy(cmdline_enc,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr encrypt --all -b\" > C:\\programdata\\hpc-now\\enc.temp 2>&1",CMDLINE_LENGTH-1);
+        strncpy(cmdline_dec,"runas /savecreds /user:mymachine\\hpc-now \"hpcopr decrypt --all -b\" > C:\\programdata\\hpc-now\\dec.temp 2>&1",CMDLINE_LENGTH-1);
     }
 #elif __linux__
     if(system("ls -la /home/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
@@ -886,8 +887,25 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     if(decrypt_flag==1){
         printf(WARN_YELLO_BOLD "[ -WARN- ] This update needs to re-encrypt the files." RESET_DISPLAY "\n");
         system(cmdline_enc);
+#ifdef _WIN32
+        i=0;
+        while(system("findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\enc.temp > nul 2>&1")!=0){
+            i++;
+            printf("[ -WAIT- ] Encryption in progress, %d seconds passed ... \r",i);
+            fflush(stdout);
+            sleep(1);
+        }
+#endif
         system(cmdline_dec);
-        sleep(3);
+#ifdef _WIN32
+        i=0;
+        while(system("findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\dec.temp > nul 2>&1")!=0){
+            i++;
+            printf("[ -WAIT- ] Decryption in progress, %d seconds passed ... \r",i);
+            fflush(stdout);
+            sleep(1);
+        }
+#endif
     }
     if(hpcopr_loc_flag==-1){
         if(strlen(hpcopr_ver)==0){
@@ -943,6 +961,15 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     if(decrypt_flag==1){
         system(cmdline_enc);
+#ifdef _WIN32
+        i=0;
+        while(system("findstr \"/C:info@hpc-now.com\" C:\\programdata\\hpc-now\\dec.temp > nul 2>&1")!=0){
+            i++;
+            printf("[ -WAIT- ] Decryption in progress, %d seconds passed ... \r",i);
+            fflush(stdout);
+            sleep(1);
+        }
+#endif
     }
 #ifdef _WIN32
     system("mkdir C:\\hpc-now\\hpc-now.licenses > nul 2>&1");
