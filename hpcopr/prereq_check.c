@@ -35,30 +35,27 @@ extern char azrm_tf_plugin_version_var[32];
 extern char azad_tf_plugin_version_var[32];
 extern char gcp_tf_plugin_version_var[32];
 
-extern char md5_tf_exec_var[64];
-extern char md5_tf_zip_var[64];
-
-extern char md5_tofu_exec_var[64]; //Added openTofu md5
-extern char md5_tofu_zip_var[64];  //Added openTofu zip md5
-
-
-extern char md5_now_crypto_var[64];
-extern char md5_ali_tf_var[64];
-extern char md5_ali_tf_zip_var[64];
-extern char md5_qcloud_tf_var[64];
-extern char md5_qcloud_tf_zip_var[64];
-extern char md5_aws_tf_var[64];
-extern char md5_aws_tf_zip_var[64];
-extern char md5_hw_tf_var[64];
-extern char md5_hw_tf_zip_var[64];
-extern char md5_bd_tf_var[64];
-extern char md5_bd_tf_zip_var[64];
-extern char md5_azrm_tf_var[64];
-extern char md5_azrm_tf_zip_var[64];
-extern char md5_azad_tf_var[64];
-extern char md5_azad_tf_zip_var[64];
-extern char md5_gcp_tf_var[64];
-extern char md5_gcp_tf_zip_var[64];
+extern char sha_tf_exec_var[64];
+extern char sha_tf_zip_var[64];
+extern char sha_tofu_exec_var[64];
+extern char sha_tofu_zip_var[64];
+extern char sha_now_crypto_var[64];
+extern char sha_ali_tf_var[64];
+extern char sha_ali_tf_zip_var[64];
+extern char sha_qcloud_tf_var[64];
+extern char sha_qcloud_tf_zip_var[64];
+extern char sha_aws_tf_var[64];
+extern char sha_aws_tf_zip_var[64];
+extern char sha_hw_tf_var[64];
+extern char sha_hw_tf_zip_var[64];
+extern char sha_bd_tf_var[64];
+extern char sha_bd_tf_zip_var[64];
+extern char sha_azrm_tf_var[64];
+extern char sha_azrm_tf_zip_var[64];
+extern char sha_azad_tf_var[64];
+extern char sha_azad_tf_zip_var[64];
+extern char sha_gcp_tf_var[64];
+extern char sha_gcp_tf_zip_var[64];
 
 extern int batch_flag;
 extern char final_command[64];
@@ -126,17 +123,17 @@ int get_google_connectivity(void){
     return 1;
 }
 
-int file_validity_check(char* filename, int repair_flag, char* target_md5){
-    char md5sum[64]="";
+int file_validity_check(char* filename, int repair_flag, char* target_sha){
+    char sha256[80]="";
     if(file_exist_or_not(filename)!=0){
         return 1;
     }
     else{
         if(repair_flag==1){
-            if(get_nmd5sum(filename,md5sum,64)!=0){
+            if(get_file_sha_hash(filename,sha256,80)!=0){
                 return -1;
             }
-            if(strcmp(md5sum,target_md5)!=0){
+            if(strcmp(sha256,target_sha)!=0){
                 return 1;
             }
             else{
@@ -556,8 +553,8 @@ end_return:
     return inst_flag;
 }
 
-int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_version, char* md5_exec, char* md5_zip, int force_repair_flag, char* seq_code){
-    if(valid_md5_or_not(md5_exec)!=0||valid_md5_or_not(md5_zip)!=0){
+int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_version, char* sha_exec, char* sha_zip, int force_repair_flag, char* seq_code){
+    if(valid_sha_or_not(sha_exec)!=0||valid_sha_or_not(sha_zip)!=0){
         return 1;
     }
 
@@ -626,12 +623,12 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
         system(cmdline);
     }
 
-    file_check_flag_tf=file_validity_check(provider_exec_tf,force_repair_flag,md5_exec);
-    file_check_flag_tofu=file_validity_check(provider_exec_tofu,force_repair_flag,md5_exec);
+    file_check_flag_tf=file_validity_check(provider_exec_tf,force_repair_flag,sha_exec);
+    file_check_flag_tofu=file_validity_check(provider_exec_tofu,force_repair_flag,sha_exec);
     if(file_check_flag_tf==1||file_check_flag_tofu==1){
         printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud provider for %s (%s) ...\n",cloud_name,seq_code);
         printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
-        file_check_flag=file_validity_check(provider_zip,force_repair_flag,md5_zip);
+        file_check_flag=file_validity_check(provider_zip,force_repair_flag,sha_zip);
         if(file_check_flag==1){
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
@@ -856,29 +853,29 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     if(repair_flag==1){
         printf( RESET_DISPLAY "|        v Location configuration has been repaired.\n");
-        printf("|        . Checking and repairing the versions and md5sums ...\n");
-        if(reset_vers_md5_vars()!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums." RESET_DISPLAY "\n");
+        printf("|        . Checking and repairing the versions and hashes ...\n");
+        if(reset_vers_sha_vars()!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and hashes." RESET_DISPLAY "\n");
             return 7;
         }
-        printf( RESET_DISPLAY "|        v Versions and md5sums been repaired.\n");
+        printf( RESET_DISPLAY "|        v Versions and hashes been repaired.\n");
         printf("|        . Checking and repairing the key directories and files ...\n");
     }
-    flag=get_vers_md5_vars();
+    flag=get_vers_sha_vars();
     if(flag!=0){
         if(flag==-1){
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Versions and md5sums not found. Trying to fix ...\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Versions and hashes not found. Trying to fix ...\n");
         }
         else{
-            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Versions and md5sums format incorrect. Trying to fix ...\n");
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Versions and hashes format incorrect. Trying to fix ...\n");
         }
-        if(reset_vers_md5_vars()!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and md5sums." RESET_DISPLAY "\n");
+        if(reset_vers_sha_vars()!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and hashes." RESET_DISPLAY "\n");
             return 7;
         }
-        if(get_vers_md5_vars()!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure versions and md5sums of core components.\n");
-            printf("[  ****  ] Please check the format of md5 files." RESET_DISPLAY "\n");
+        if(get_vers_sha_vars()!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to configure versions and hashes of core components.\n");
+            printf("[  ****  ] Please check the format of hash files." RESET_DISPLAY "\n");
             return 7;
         }
     }
@@ -904,9 +901,9 @@ int check_and_install_prerequisitions(int repair_flag){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
     }
-    file_check_flag=file_validity_check(TERRAFORM_EXEC,force_repair_flag,md5_tf_exec_var);
+    file_check_flag=file_validity_check(TERRAFORM_EXEC,force_repair_flag,sha_tf_exec_var);
     if(file_check_flag==1){
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_tf_zip_var);
+        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,sha_tf_zip_var);
         if(file_check_flag==1){
             printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the Terraform binary ...\n");
             printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
@@ -965,9 +962,9 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __APPLE__
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%stofu_%s_darwin_amd64.zip",TF_LOCAL_PLUGINS,tofu_version_var);
 #endif
-    file_check_flag=file_validity_check(TOFU_EXEC,force_repair_flag,md5_tofu_exec_var);
+    file_check_flag=file_validity_check(TOFU_EXEC,force_repair_flag,sha_tofu_exec_var);
     if(file_check_flag==1){
-        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,md5_tofu_zip_var);
+        file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,sha_tofu_zip_var);
         if(file_check_flag==1){
             printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the openTofu binary ...\n");
             printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
@@ -1019,7 +1016,7 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(RESET_DISPLAY "|        v The openTofu executable has been repaired.\n");
     }
 
-    file_check_flag=file_validity_check(NOW_CRYPTO_EXEC,repair_flag,md5_now_crypto_var);
+    file_check_flag=file_validity_check(NOW_CRYPTO_EXEC,repair_flag,sha_now_crypto_var);
     if(file_check_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the now-crypto executable ...\n");
         printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
@@ -1098,28 +1095,28 @@ int check_and_install_prerequisitions(int repair_flag){
 #else
     snprintf(plugin_dir_root,DIR_LENGTH-1,"%s/plugins/",TF_LOCAL_PLUGINS);
 #endif
-    if(repair_provider(plugin_dir_root,"alicloud",ali_tf_plugin_version_var,md5_ali_tf_var,md5_ali_tf_zip_var,force_repair_flag,"1/7")!=0){
+    if(repair_provider(plugin_dir_root,"alicloud",ali_tf_plugin_version_var,sha_ali_tf_var,sha_ali_tf_zip_var,force_repair_flag,"1/7")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"tencentcloud",qcloud_tf_plugin_version_var,md5_qcloud_tf_var,md5_qcloud_tf_zip_var,force_repair_flag,"2/7")!=0){
+    if(repair_provider(plugin_dir_root,"tencentcloud",qcloud_tf_plugin_version_var,sha_qcloud_tf_var,sha_qcloud_tf_zip_var,force_repair_flag,"2/7")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"aws",aws_tf_plugin_version_var,md5_aws_tf_var,md5_aws_tf_zip_var,force_repair_flag,"3/7")!=0){
+    if(repair_provider(plugin_dir_root,"aws",aws_tf_plugin_version_var,sha_aws_tf_var,sha_aws_tf_zip_var,force_repair_flag,"3/7")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"huaweicloud",hw_tf_plugin_version_var,md5_hw_tf_var,md5_hw_tf_zip_var,force_repair_flag,"4/7")!=0){
+    if(repair_provider(plugin_dir_root,"huaweicloud",hw_tf_plugin_version_var,sha_hw_tf_var,sha_hw_tf_zip_var,force_repair_flag,"4/7")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"baiducloud",bd_tf_plugin_version_var,md5_bd_tf_var,md5_bd_tf_zip_var,force_repair_flag,"5/7")!=0){
+    if(repair_provider(plugin_dir_root,"baiducloud",bd_tf_plugin_version_var,sha_bd_tf_var,sha_bd_tf_zip_var,force_repair_flag,"5/7")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"azuread",azad_tf_plugin_version_var,md5_azad_tf_var,md5_azad_tf_zip_var,force_repair_flag,"6a/7")!=0){
+    if(repair_provider(plugin_dir_root,"azuread",azad_tf_plugin_version_var,sha_azad_tf_var,sha_azad_tf_zip_var,force_repair_flag,"6a/7")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"azurerm",azrm_tf_plugin_version_var,md5_azrm_tf_var,md5_azrm_tf_zip_var,force_repair_flag,"6b/7")!=0){
+    if(repair_provider(plugin_dir_root,"azurerm",azrm_tf_plugin_version_var,sha_azrm_tf_var,sha_azrm_tf_zip_var,force_repair_flag,"6b/7")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"google",gcp_tf_plugin_version_var,md5_gcp_tf_var,md5_gcp_tf_zip_var,force_repair_flag,"7/7")!=0){
+    if(repair_provider(plugin_dir_root,"google",gcp_tf_plugin_version_var,sha_gcp_tf_var,sha_gcp_tf_zip_var,force_repair_flag,"7/7")!=0){
         return 3;
     }
     if(repair_flag==1){

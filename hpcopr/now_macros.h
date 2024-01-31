@@ -89,7 +89,7 @@ typedef struct{
 
 #define GENERAL_CONF_DIR            HPC_NOW_ROOT_DIR"etc\\"
 #define LOCATION_CONF_FILE          GENERAL_CONF_DIR"locations.conf"
-#define VERS_MD5_CONF_FILE          GENERAL_CONF_DIR"md5values.conf"
+#define VERS_SHA_CONF_FILE          GENERAL_CONF_DIR"components.conf"
 #define ALL_CLUSTER_REGISTRY        GENERAL_CONF_DIR"all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR   GENERAL_CONF_DIR"current_cluster.dat"
 #define TF_RUNNING_CONFIG           GENERAL_CONF_DIR"tf_running.conf"
@@ -162,7 +162,7 @@ typedef struct{
 
 #define GENERAL_CONF_DIR             HPC_NOW_ROOT_DIR".etc/"
 #define LOCATION_CONF_FILE           GENERAL_CONF_DIR"locations.conf"
-#define VERS_MD5_CONF_FILE           GENERAL_CONF_DIR"md5values.conf"
+#define VERS_SHA_CONF_FILE           GENERAL_CONF_DIR"components.conf"
 #define ALL_CLUSTER_REGISTRY         GENERAL_CONF_DIR".all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR    GENERAL_CONF_DIR"current_cluster.dat"
 #define TF_RUNNING_CONFIG            GENERAL_CONF_DIR"tf_running.conf"
@@ -235,7 +235,7 @@ typedef struct{
 
 #define GENERAL_CONF_DIR             HPC_NOW_ROOT_DIR".etc/"
 #define LOCATION_CONF_FILE           GENERAL_CONF_DIR"locations.conf"
-#define VERS_MD5_CONF_FILE           GENERAL_CONF_DIR"md5values.conf"
+#define VERS_SHA_CONF_FILE           GENERAL_CONF_DIR"components.conf"
 #define ALL_CLUSTER_REGISTRY         GENERAL_CONF_DIR".all_clusters.dat"
 #define CURRENT_CLUSTER_INDICATOR    GENERAL_CONF_DIR"current_cluster.dat"
 #define TF_RUNNING_CONFIG            GENERAL_CONF_DIR"tf_running.conf"
@@ -317,7 +317,7 @@ typedef struct{
 #define CONF_LINE_NUM             11
 #define CMD_FLAG_NUM              30
 #define CMD_KWDS_NUM              49
-#define VERS_MD5_LINES            11
+#define VERS_SHA_LINES            11
 
 /* Internal macros - usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE             "https://gitee.com/zhenrong-wang/hpc-now/raw/master/COPYING"

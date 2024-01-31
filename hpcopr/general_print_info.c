@@ -206,8 +206,8 @@ void print_help(char* cmd_name){
     if(strcmp(cmd_name,"showloc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "showloc" RESET_DISPLAY "     :~ Show the current configured locations.\n");
     }
-    if(strcmp(cmd_name,"showmd5")==0||strcmp(cmd_name,"all")==0){
-        printf("|  " HIGH_GREEN_BOLD "showmd5" RESET_DISPLAY "     :~ Show the md5sum values of core components.\n");
+    if(strcmp(cmd_name,"showhash")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "showhash" RESET_DISPLAY "    :~ Show the SHA256 hashes of core components.\n");
     }
     if(strcmp(cmd_name,"resetloc")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "resetloc" RESET_DISPLAY "    :~ Reset to the default locations.\n");
@@ -562,7 +562,7 @@ void list_all_commands(void){
     printf(GENERAL_BOLD " 2.  Global Management: " RESET_DISPLAY "\n");
     printf(HIGH_GREEN_BOLD "     help  usage  monman  history  syserr \n");
     printf("     ssh  rdp \n");
-    printf("     set-tf configloc  showloc  showmd5  resetloc \n");
+    printf("     set-tf configloc  showloc  showhash  resetloc \n");
     printf("     encrypt decrypt " RESET_DISPLAY "\n");
     printf(GENERAL_BOLD " 3.  Cluster Initialization: " RESET_DISPLAY "\n");
     printf(HIGH_GREEN_BOLD "     cloud-info  rotate-key  get-conf  edit-conf \n");

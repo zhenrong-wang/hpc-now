@@ -1102,7 +1102,7 @@ int encrypt_and_delete_general(char* now_crypto_exec, char* source_file, char* t
  * Including those in /stack, and /vaultdir
  * CAUTION: USER SSH PRIVATE KEYS and OPR SSH PRIVATE KEY ARE NOT INCLUDED
  * return -1: Folder Error
- * return -3: Failed to get the crypto key md5 string
+ * return -3: Failed to get the crypto hash string
  * return  0: deleted done
  */
 int delete_decrypted_files(char* workdir, char* crypto_key_filename){

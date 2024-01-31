@@ -33,6 +33,7 @@
 #include "transfer.h"
 #include "monman.h"
 #include "now_md5.h"
+#include "now_sha256.h"
 #include "opr_crypto.h"
 #include "appman.h"
 #include "jobman.h"
@@ -63,29 +64,27 @@ char azad_tf_plugin_version_var[32]="";
 char az_environment[16]="";
 char gcp_tf_plugin_version_var[32]="";
 
-char md5_tf_exec_var[64]="";
-char md5_tf_zip_var[64]="";
-
-char md5_tofu_exec_var[64]=""; //Added openTofu md5
-char md5_tofu_zip_var[64]="";  //Added openTofu zip md5
-
-char md5_now_crypto_var[64]="";
-char md5_ali_tf_var[64]="";
-char md5_ali_tf_zip_var[64]="";
-char md5_qcloud_tf_var[64]="";
-char md5_qcloud_tf_zip_var[64]="";
-char md5_aws_tf_var[64]="";
-char md5_aws_tf_zip_var[64]="";
-char md5_hw_tf_var[64]="";
-char md5_hw_tf_zip_var[64]="";
-char md5_bd_tf_var[64]="";
-char md5_bd_tf_zip_var[64]="";
-char md5_azrm_tf_var[64]="";
-char md5_azrm_tf_zip_var[64]="";
-char md5_azad_tf_var[64]="";
-char md5_azad_tf_zip_var[64]="";
-char md5_gcp_tf_var[64]="";
-char md5_gcp_tf_zip_var[64]="";
+char sha_tf_exec_var[80]="";
+char sha_tf_zip_var[80]="";
+char sha_tofu_exec_var[80]=""; 
+char sha_tofu_zip_var[80]="";  
+char sha_now_crypto_var[80]="";
+char sha_ali_tf_var[80]="";
+char sha_ali_tf_zip_var[80]="";
+char sha_qcloud_tf_var[80]="";
+char sha_qcloud_tf_zip_var[80]="";
+char sha_aws_tf_var[80]="";
+char sha_aws_tf_zip_var[80]="";
+char sha_hw_tf_var[80]="";
+char sha_hw_tf_zip_var[80]="";
+char sha_bd_tf_var[80]="";
+char sha_bd_tf_zip_var[80]="";
+char sha_azrm_tf_var[80]="";
+char sha_azrm_tf_zip_var[80]="";
+char sha_azad_tf_var[80]="";
+char sha_azad_tf_zip_var[80]="";
+char sha_gcp_tf_var[80]="";
+char sha_gcp_tf_zip_var[80]="";
 
 int batch_flag=1; // If batch_flag=0: Batch Mode. If batch_flag!=0: interactive mode. use the -b flag
 char final_command[64]="";
@@ -124,7 +123,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "configloc,gen,NULL",
     "showloc,gen,NULL",
     "resetloc,gen,NULL",
-    "showmd5,gen,NULL",
+    "showhash,gen,NULL",
     "rotate-key,opr,CNAME",
     "get-conf,opr,CNAME",
     "edit-conf,opr,CNAME",
@@ -206,7 +205,7 @@ char jobman_commands[3][SUBCMD_STRING_LENGTH_MAX]={
 13 Prereq - Other failed
 15 Prereq - Envcheck Failed
 17 Prereq - Config Location Failed
-19 Prereq - Vers and md5 Error
+19 Prereq - Vers and sha Error
 21 CLUSTER_NAME_CHECK_FAILED
 22 RENAME_FAILED
 23 INVALID_KEYPAIR
@@ -611,8 +610,8 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    if(strcmp(final_command,"showmd5")==0){
-        run_flag=show_vers_md5vars();
+    if(strcmp(final_command,"showhash")==0){
+        run_flag=show_vers_sha_vars();
         if(run_flag!=0){
             write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
             check_and_cleanup("");

@@ -318,7 +318,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 - `set-tf`       Set the running configurations for openTofu or terraform
 - `configloc`    Configure the locations for the terraform binaries, providers, IaC templates and shell scripts.
 - `showloc`      Show the current configured locations.
-- `showmd5`      Show the md5sum values of core components.
+- `showhash`     Show the SHA-256 values of core components.
 - `resetloc`     Reset to the default locations.
 
 ### **Cluster Initialization**
@@ -504,7 +504,7 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 &emsp;&emsp;&emsp;&emsp;+- **current_cluster.dat**&emsp;&emsp;*Current cluster indicator*\
 &emsp;&emsp;&emsp;&emsp;+- **google_check.dat**&emsp;&emsp;*Google connectivity indicator*\
 &emsp;&emsp;&emsp;&emsp;+- **locations.conf**&emsp;&emsp;*Locations of components*\
-&emsp;&emsp;&emsp;&emsp;+- **md5values.conf**&emsp;&emsp;*MD5 valus of components*\
+&emsp;&emsp;&emsp;&emsp;+- **components.conf**&emsp;&emsp;*MD5 valus of components*\
 &emsp;&emsp;&emsp;&emsp;+- **tf_running.conf**&emsp;&emsp;*TF running configuration*\
 &emsp;&emsp;+- **.destroyed/**&emsp;&emsp;*Files of destroyed clusters*\
 &emsp;&emsp;+- **workdir/**&emsp;&emsp;*Working directories for all clusters*\

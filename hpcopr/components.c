@@ -38,46 +38,44 @@ extern char azrm_tf_plugin_version_var[32];
 extern char azad_tf_plugin_version_var[32];
 extern char gcp_tf_plugin_version_var[32];
 
-extern char md5_tf_exec_var[64];
-extern char md5_tf_zip_var[64];
+extern char sha_tf_exec_var[80];
+extern char sha_tf_zip_var[80];
+extern char sha_tofu_exec_var[80]; 
+extern char sha_tofu_zip_var[80];
+extern char sha_now_crypto_var[80];
+extern char sha_ali_tf_var[80];
+extern char sha_ali_tf_zip_var[80];
+extern char sha_qcloud_tf_var[80];
+extern char sha_qcloud_tf_zip_var[80];
+extern char sha_aws_tf_var[80];
+extern char sha_aws_tf_zip_var[80];
+extern char sha_hw_tf_var[80];
+extern char sha_hw_tf_zip_var[80];
+extern char sha_bd_tf_var[80];
+extern char sha_bd_tf_zip_var[80];
+extern char sha_azrm_tf_var[80];
+extern char sha_azrm_tf_zip_var[80];
+extern char sha_azad_tf_var[80];
+extern char sha_azad_tf_zip_var[80];
+extern char sha_gcp_tf_var[80];
+extern char sha_gcp_tf_zip_var[80];
 
-extern char md5_tofu_exec_var[64]; //Added openTofu md5
-extern char md5_tofu_zip_var[64];  //Added openTofu zip md5
-
-extern char md5_now_crypto_var[64];
-extern char md5_ali_tf_var[64];
-extern char md5_ali_tf_zip_var[64];
-extern char md5_qcloud_tf_var[64];
-extern char md5_qcloud_tf_zip_var[64];
-extern char md5_aws_tf_var[64];
-extern char md5_aws_tf_zip_var[64];
-extern char md5_hw_tf_var[64];
-extern char md5_hw_tf_zip_var[64];
-extern char md5_bd_tf_var[64];
-extern char md5_bd_tf_zip_var[64];
-extern char md5_azrm_tf_var[64];
-extern char md5_azrm_tf_zip_var[64];
-extern char md5_azad_tf_var[64];
-extern char md5_azad_tf_zip_var[64];
-extern char md5_gcp_tf_var[64];
-extern char md5_gcp_tf_zip_var[64];
-
-int valid_md5_or_not(char* md5_input){
-    if(strlen(md5_input)!=32){
+int valid_sha_or_not(char* sha_input){
+    if(strlen(sha_input)!=64){
         return -1;
     }
     int i;
-    for(i=0;i<32;i++){
-        if(*(md5_input+i)=='0'||*(md5_input+i)=='9'||*(md5_input+i)=='A'||*(md5_input+i)=='Z'||*(md5_input+i)=='a'||*(md5_input+i)=='z'){
+    for(i=0;i<64;i++){
+        if(*(sha_input+i)=='0'||*(sha_input+i)=='9'||*(sha_input+i)=='A'||*(sha_input+i)=='Z'||*(sha_input+i)=='a'||*(sha_input+i)=='z'){
             continue;
         }
-        else if(*(md5_input+i)>'0'&&*(md5_input+i)<'9'){
+        else if(*(sha_input+i)>'0'&&*(sha_input+i)<'9'){
             continue;
         }
-        else if(*(md5_input+i)>'A'&&*(md5_input+i)<'Z'){
+        else if(*(sha_input+i)>'A'&&*(sha_input+i)<'Z'){
             continue;
         }
-        else if(*(md5_input+i)>'a'&&*(md5_input+i)<'z'){
+        else if(*(sha_input+i)>'a'&&*(sha_input+i)<'z'){
             continue;
         }
         else{
@@ -132,97 +130,96 @@ int valid_ver_or_not_tofu(char* version_code){
     return 0;
 }
 
-int get_vers_md5_vars(void){
-    char vers_md5_line[LINE_LENGTH_SHORT]=""; //Actually we have to rewrite the fgetline, but lets keep it like this for now
-    char header[256]="";
-    char version[256]="";
-    char exec_md5[256]="";
-    char zip_md5[256]="";
+int get_vers_sha_vars(void){
+    char vers_sha_line[LINE_LENGTH_SMALL]=""; 
+    char header[64]="";
+    char version[32]="";
+    char exec_sha[80]="";
+    char zip_sha[80]="";
     int i=0;
-    FILE* file_p=fopen(VERS_MD5_CONF_FILE,"r");
+    FILE* file_p=fopen(VERS_SHA_CONF_FILE,"r");
     if(file_p==NULL){
         return -1;
     }
     while(!feof(file_p)){
-        fngetline(file_p,vers_md5_line,LINE_LENGTH_SHORT);
-        get_seq_nstring(vers_md5_line,' ',1,header,256);
-        get_seq_nstring(vers_md5_line,' ',2,version,256);
-        get_seq_nstring(vers_md5_line,' ',3,exec_md5,256);
-        get_seq_nstring(vers_md5_line,' ',4,zip_md5,256);
-        
+        fngetline(file_p,vers_sha_line,LINE_LENGTH_SMALL);
+        get_seq_nstring(vers_sha_line,' ',1,header,64);
+        get_seq_nstring(vers_sha_line,' ',2,version,32);
+        get_seq_nstring(vers_sha_line,' ',3,exec_sha,80);
+        get_seq_nstring(vers_sha_line,' ',4,zip_sha,80);    
         if(strcmp(header,"terraform:")==0){
-            if(valid_ver_or_not(version)==0&&valid_md5_or_not(exec_md5)==0&&valid_md5_or_not(zip_md5)==0){
+            if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
                 strcpy(terraform_version_var,version);
-                strcpy(md5_tf_exec_var,exec_md5);
-                strcpy(md5_tf_zip_var,zip_md5);
+                strcpy(sha_tf_exec_var,exec_sha);
+                strcpy(sha_tf_zip_var,zip_sha);
             }
         }
         else if(strcmp(header,"tofu:")==0){
-            if(valid_ver_or_not_tofu(version)==0&&valid_md5_or_not(exec_md5)==0&&valid_md5_or_not(zip_md5)==0){
+            if(valid_ver_or_not_tofu(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
                 strcpy(tofu_version_var,version);
-                strcpy(md5_tofu_exec_var,exec_md5);
-                strcpy(md5_tofu_zip_var,zip_md5);
+                strcpy(sha_tofu_exec_var,exec_sha);
+                strcpy(sha_tofu_zip_var,zip_sha);
             }
         }
         else if(strcmp(header,"alicloud_tf:")==0){
-            if(valid_ver_or_not(version)==0&&valid_md5_or_not(exec_md5)==0&&valid_md5_or_not(zip_md5)==0){
+            if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
                 strcpy(ali_tf_plugin_version_var,version);
-                strcpy(md5_ali_tf_var,exec_md5);
-                strcpy(md5_ali_tf_zip_var,zip_md5);
+                strcpy(sha_ali_tf_var,exec_sha);
+                strcpy(sha_ali_tf_zip_var,zip_sha);
             }
         }
         else if(strcmp(header,"tencentcloud_tf:")==0){
-            if(valid_ver_or_not(version)==0&&valid_md5_or_not(exec_md5)==0&&valid_md5_or_not(zip_md5)==0){
+            if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
                 strcpy(qcloud_tf_plugin_version_var,version);
-                strcpy(md5_qcloud_tf_var,exec_md5);
-                strcpy(md5_qcloud_tf_zip_var,zip_md5);
+                strcpy(sha_qcloud_tf_var,exec_sha);
+                strcpy(sha_qcloud_tf_zip_var,zip_sha);
             }
         }
         else if(strcmp(header,"aws_tf:")==0){
-            if(valid_ver_or_not(version)==0&&valid_md5_or_not(exec_md5)==0&&valid_md5_or_not(zip_md5)==0){
+            if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
                 strcpy(aws_tf_plugin_version_var,version);
-                strcpy(md5_aws_tf_var,exec_md5);
-                strcpy(md5_aws_tf_zip_var,zip_md5);
+                strcpy(sha_aws_tf_var,exec_sha);
+                strcpy(sha_aws_tf_zip_var,zip_sha);
             }
         }
         else if(strcmp(header,"huaweicloud_tf:")==0){
-            if(valid_ver_or_not(version)==0&&valid_md5_or_not(exec_md5)==0&&valid_md5_or_not(zip_md5)==0){
+            if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
                 strcpy(hw_tf_plugin_version_var,version);
-                strcpy(md5_hw_tf_var,exec_md5);
-                strcpy(md5_hw_tf_zip_var,zip_md5);
+                strcpy(sha_hw_tf_var,exec_sha);
+                strcpy(sha_hw_tf_zip_var,zip_sha);
             }
         }
         else if(strcmp(header,"baidubce_tf:")==0){
-            if(valid_ver_or_not(version)==0&&valid_md5_or_not(exec_md5)==0&&valid_md5_or_not(zip_md5)==0){
+            if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
                 strcpy(bd_tf_plugin_version_var,version);
-                strcpy(md5_bd_tf_var,exec_md5);
-                strcpy(md5_bd_tf_zip_var,zip_md5);
+                strcpy(sha_bd_tf_var,exec_sha);
+                strcpy(sha_bd_tf_zip_var,zip_sha);
             }
         }
         else if(strcmp(header,"azurerm_tf:")==0){
-            if(valid_ver_or_not(version)==0&&valid_md5_or_not(exec_md5)==0&&valid_md5_or_not(zip_md5)==0){
+            if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
                 strcpy(azrm_tf_plugin_version_var,version);
-                strcpy(md5_azrm_tf_var,exec_md5);
-                strcpy(md5_azrm_tf_zip_var,zip_md5);
+                strcpy(sha_azrm_tf_var,exec_sha);
+                strcpy(sha_azrm_tf_zip_var,zip_sha);
             }
         }
         else if(strcmp(header,"azuread_tf:")==0){
-            if(valid_ver_or_not(version)==0&&valid_md5_or_not(exec_md5)==0&&valid_md5_or_not(zip_md5)==0){
+            if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
                 strcpy(azad_tf_plugin_version_var,version);
-                strcpy(md5_azad_tf_var,exec_md5);
-                strcpy(md5_azad_tf_zip_var,zip_md5);
+                strcpy(sha_azad_tf_var,exec_sha);
+                strcpy(sha_azad_tf_zip_var,zip_sha);
             }
         }
         else if(strcmp(header,"gcp_tf:")==0){
-            if(valid_ver_or_not(version)==0&&valid_md5_or_not(exec_md5)==0&&valid_md5_or_not(zip_md5)==0){
+            if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
                 strcpy(gcp_tf_plugin_version_var,version);
-                strcpy(md5_gcp_tf_var,exec_md5);
-                strcpy(md5_gcp_tf_zip_var,zip_md5);
+                strcpy(sha_gcp_tf_var,exec_sha);
+                strcpy(sha_gcp_tf_zip_var,zip_sha);
             }
         }
         else if(strcmp(header,"now_crypto:")==0){
-            if(valid_ver_or_not(version)==0&&valid_md5_or_not(exec_md5)==0){
-                strcpy(md5_now_crypto_var,exec_md5);
+            if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0){
+                strcpy(sha_now_crypto_var,exec_sha);
             }
         }
         else{
@@ -230,7 +227,7 @@ int get_vers_md5_vars(void){
         }
         i++;
     }
-    if(i==VERS_MD5_LINES){
+    if(i==VERS_SHA_LINES){
         return 0;
     }
     else{
@@ -238,16 +235,16 @@ int get_vers_md5_vars(void){
     }
 }
 
-int reset_vers_md5_vars(void){
-    FILE* file_p=fopen(VERS_MD5_CONF_FILE,"w+");
+int reset_vers_sha_vars(void){
+    FILE* file_p=fopen(VERS_SHA_CONF_FILE,"w+");
     if(file_p==NULL){
         return -3;
     }
-    char tf_md5_file[FILENAME_LENGTH]="";
-    char crypto_md5_file[FILENAME_LENGTH]="";
+    char tf_sha_file[FILENAME_LENGTH]="";
+    char crypto_sha_file[FILENAME_LENGTH]="";
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
-    char md5_line[LINE_LENGTH_SHORT]=""; //Risky!
+    char sha_line[LINE_LENGTH_SMALL]="";
     FILE* file_p_1=NULL;
     FILE* file_p_2=NULL;
     if(strlen(url_tf_root_var)==0||strlen(url_now_crypto_var)==0){
@@ -255,61 +252,61 @@ int reset_vers_md5_vars(void){
         return -1;
     }
     if(tf_loc_flag_var==1&&now_crypto_loc_flag_var==1){
-        snprintf(tf_md5_file,FILENAME_LENGTH-1,"%s%stf-md5-%s-v2.dat",url_tf_root_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
-        snprintf(crypto_md5_file,FILENAME_LENGTH-1,"%s%scrypto-md5-%s-v3.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
-        if(file_exist_or_not(tf_md5_file)!=0||file_exist_or_not(crypto_md5_file)!=0){
+        snprintf(tf_sha_file,FILENAME_LENGTH-1,"%s%stf-sha-%s.dat",url_tf_root_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
+        snprintf(crypto_sha_file,FILENAME_LENGTH-1,"%s%scrypto-sha-%s.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
+        if(file_exist_or_not(tf_sha_file)!=0||file_exist_or_not(crypto_sha_file)!=0){
             fclose(file_p);
             return -1;
         }
-        file_p_1=fopen(tf_md5_file,"r");
-        file_p_2=fopen(crypto_md5_file,"r");
-        while(fngetline(file_p_1,md5_line,LINE_LENGTH_SHORT)!=1){
-            fprintf(file_p,"%s\n",md5_line);
+        file_p_1=fopen(tf_sha_file,"r");
+        file_p_2=fopen(crypto_sha_file,"r");
+        while(fngetline(file_p_1,sha_line,LINE_LENGTH_SMALL)!=1){
+            fprintf(file_p,"%s\n",sha_line);
         }
         fclose(file_p_1);
-        fngetline(file_p_2,md5_line,LINE_LENGTH_SHORT);
-        fprintf(file_p,"%s\n",md5_line);
+        fngetline(file_p_2,sha_line,LINE_LENGTH_SMALL);
+        fprintf(file_p,"%s\n",sha_line);
         fclose(file_p_2);
         fclose(file_p);
     }
     else if(tf_loc_flag_var==0&&now_crypto_loc_flag_var==0){
         fclose(file_p);
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %stf-md5-%s-v2.dat >> %s",url_tf_root_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
-        snprintf(cmdline2,CMDLINE_LENGTH-1,"curl -s %scrypto-md5-%s-v3.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %stf-sha-%s.dat >> %s",url_tf_root_var,FILENAME_SUFFIX_SHORT,VERS_SHA_CONF_FILE);
+        snprintf(cmdline2,CMDLINE_LENGTH-1,"curl -s %scrypto-sha-%s.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_SHA_CONF_FILE);
         if(system(cmdline1)!=0||system(cmdline2)!=0){
             return 1;
         }
     }
     else if(tf_loc_flag_var==0&&now_crypto_loc_flag_var==1){
         fclose(file_p);
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %stf-md5-%s-v2.dat >> %s",url_tf_root_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %stf-sha-%s.dat >> %s",url_tf_root_var,FILENAME_SUFFIX_SHORT,VERS_SHA_CONF_FILE);
         if(system(cmdline1)!=0){
             return 1;
         }
-        snprintf(crypto_md5_file,FILENAME_LENGTH-1,"%s%scrypto-md5-%s-v3.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
-        if(file_exist_or_not(crypto_md5_file)!=0){
+        snprintf(crypto_sha_file,FILENAME_LENGTH-1,"%s%scrypto-sha-%s.dat",url_now_crypto_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
+        if(file_exist_or_not(crypto_sha_file)!=0){
             return -1;
         }  
-        file_p=fopen(VERS_MD5_CONF_FILE,"a");
-        file_p_2=fopen(crypto_md5_file,"r");
-        fngetline(file_p_2,md5_line,LINE_LENGTH_SHORT);
-        fprintf(file_p,"%s\n",md5_line);
+        file_p=fopen(VERS_SHA_CONF_FILE,"a");
+        file_p_2=fopen(crypto_sha_file,"r");
+        fngetline(file_p_2,sha_line,LINE_LENGTH_SMALL);
+        fprintf(file_p,"%s\n",sha_line);
         fclose(file_p_2);
         fclose(file_p);
     }
     else if(tf_loc_flag_var==1&&now_crypto_loc_flag_var==0){
-        snprintf(tf_md5_file,FILENAME_LENGTH-1,"%s%stf-md5-%s-v2.dat",url_tf_root_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
-        if(file_exist_or_not(tf_md5_file)!=0){
+        snprintf(tf_sha_file,FILENAME_LENGTH-1,"%s%stf-sha-%s.dat",url_tf_root_var,PATH_SLASH,FILENAME_SUFFIX_SHORT);
+        if(file_exist_or_not(tf_sha_file)!=0){
             fclose(file_p);
             return -1;
         }
-        file_p_1=fopen(tf_md5_file,"r");
-        while(fngetline(file_p_1,md5_line,LINE_LENGTH_SHORT)!=1){
-            fprintf(file_p,"%s\n",md5_line);
+        file_p_1=fopen(tf_sha_file,"r");
+        while(fngetline(file_p_1,sha_line,LINE_LENGTH_SMALL)!=1){
+            fprintf(file_p,"%s\n",sha_line);
         }
         fclose(file_p_1);
         fclose(file_p);
-        snprintf(cmdline2,CMDLINE_LENGTH-1,"curl -s %scrypto-md5-%s-v3.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_MD5_CONF_FILE);
+        snprintf(cmdline2,CMDLINE_LENGTH-1,"curl -s %scrypto-sha-%s.dat >> %s",url_now_crypto_var,FILENAME_SUFFIX_SHORT,VERS_SHA_CONF_FILE);
         if(system(cmdline2)!=0){
             return 1;
         }
@@ -317,17 +314,17 @@ int reset_vers_md5_vars(void){
     return 0;
 }
 
-int show_vers_md5vars(void){
-    FILE* file_p=fopen(VERS_MD5_CONF_FILE,"r");
-    char vers_and_md5[LINE_LENGTH_SHORT]=""; //Risky!
+int show_vers_sha_vars(void){
+    FILE* file_p=fopen(VERS_SHA_CONF_FILE,"r");
+    char vers_and_sha[LINE_LENGTH_SMALL]="";
     if(file_p==NULL){
-        printf("[ -FATAL- ] Failed to open the md5 file. Please try 'hpcopr envcheck',\n");
+        printf("[ -FATAL- ] Failed to open the hash file. Please try 'hpcopr envcheck',\n");
         printf("[  ****  ]  or 'hpcopr configloc'. Or run 'hpcopr repair',\n");
         return -1;
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY "Col.1:Component  Col.2:Version  Col.3 Exec_md5  Col.4:Zip_md5\n");
-    while(fngetline(file_p,vers_and_md5,LINE_LENGTH_SHORT)!=1){
-        printf("|  %s\n",vers_and_md5);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY "Col.1:Component  Col.2:Version  Col.3 Exec_sha256  Col.4:Zip_sha256\n");
+    while(fngetline(file_p,vers_and_sha,LINE_LENGTH_SMALL)!=1){
+        printf("|  %s\n",vers_and_sha);
     }
     fclose(file_p);
     return 0;
