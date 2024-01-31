@@ -1051,7 +1051,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
                 if(tf_execution(tf_run,"destroy",workdir,crypto_keyfile,1)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to destroy your cluster. This usually caused by either TF or\n");
                     printf("[  ****  ] the providers developed and maintained by cloud service providers.\n");
-                    printf("[  ****  ] You *MUST* manually destroy the remaining cloud resources of this cluster." RESET_DISPLAY "\n");
+                    printf("[  ****  ] You *MUST* manually destroy the remaining cloud resources." RESET_DISPLAY "\n");
                     delete_decrypted_files(workdir,crypto_keyfile);
                     return -1;
                 }
