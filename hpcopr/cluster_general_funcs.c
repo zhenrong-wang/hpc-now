@@ -3804,6 +3804,8 @@ int check_and_cleanup(char* prev_workdir){
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s /tmp/.hpc-now*.rdp %s",DELETE_FILE_CMD,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 #endif
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%smd5values.conf %s",DELETE_FILE_CMD,GENERAL_CONF_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
+    system(cmdline);
     print_tail();
     return 0;
 }
