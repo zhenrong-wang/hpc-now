@@ -30,11 +30,6 @@ extern char url_app_inst_root_var[LOCATION_LENGTH];
 extern char az_environment[16];
 extern int code_loc_flag_var;
 
-/*
- * 
- *
- */
-
 void reset_initinfo(cluster_initinfo* init_info, char* cluster_id){
     strcpy(init_info->cluster_id,cluster_id);
     strcpy(init_info->region_id,"");
