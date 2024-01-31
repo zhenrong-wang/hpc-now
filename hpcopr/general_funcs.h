@@ -84,6 +84,7 @@ int password_md5_hash(char* password, char md5_hash[], int md5_length);
 
 /* SHA-256 */
 int get_file_sha_hash(char* filename, char hash_string[], int hash_length);
+int get_file_sha_hash_full(char* filename, char hash_string_full[], int hash_length);
 int password_sha_hash(char* password, char hash[], int hash_length);
 
 int cmd_flg_or_not(char* argv);

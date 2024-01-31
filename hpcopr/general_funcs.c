@@ -2437,6 +2437,18 @@ int get_file_sha_hash(char* filename, char hash_string[], int hash_length){
     return 0;
 }
 
+int get_file_sha_hash_full(char* filename, char hash_string_full[], int hash_length){
+    strcpy(hash_string_full,"");
+    if(hash_length<65){
+        return -1;
+    }
+    int run_flag=now_sha256_for_file(filename,hash_string_full,hash_length);
+    if(run_flag!=0){
+        return 1;
+    }
+    return 0;
+}
+
 /* Generate the SHA-256 string of the file and cut the [1-32] chars */
 int password_sha_hash(char* password, char hash[], int hash_length){
     char filename_temp[FILENAME_LENGTH]="";

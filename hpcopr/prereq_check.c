@@ -130,10 +130,9 @@ int file_validity_check(char* filename, int repair_flag, char* target_sha){
     }
     else{
         if(repair_flag==1){
-            if(get_file_sha_hash(filename,sha256,80)!=0){
+            if(get_file_sha_hash_full(filename,sha256,80)!=0){
                 return -1;
             }
-            printf("%s\n%s\n",sha256,target_sha);
             if(strcmp(sha256,target_sha)!=0){
                 return 1;
             }
