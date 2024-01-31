@@ -322,9 +322,9 @@ int show_vers_sha_vars(void){
         printf("[  ****  ]  or 'hpcopr configloc'. Or run 'hpcopr repair',\n");
         return -1;
     }
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY "Col.1:Component  Col.2:Version  Col.3 Exec_sha256  Col.4:Zip_sha256\n");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Col.1-Component  Col.2-Version  Col.3-Exec_sha256  Col.4-Zip_sha256\n");
     while(fngetline(file_p,vers_and_sha,LINE_LENGTH_SMALL)!=1){
-        printf("|  %s\n",vers_and_sha);
+        printf("%s\n",vers_and_sha);
     }
     fclose(file_p);
     return 0;
