@@ -1209,6 +1209,13 @@ int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primar
  * return 1: not exist or open failed
  */
 int file_exist_or_not(char* filename){
+/*
+ * This function may seem strange because here we designed a different 
+ * logic for Windows. The reason is, I tried fopen, sopen, CreateFile, 
+ * and all the other methods, the performance is really bad when open
+ * the target file for the first time. I cannot figure out the reason,
+ * but that's why we made this function so complex.
+ */
 #ifdef _WIN32
     if(folder_exist_or_not(filename)==0){
         return 1;
