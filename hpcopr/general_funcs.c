@@ -1204,17 +1204,31 @@ int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primar
     return 1;
 }
 
-//return 0: exists
-//return 1: not-exists
+/* 
+ * return 0: file exists and open successfully
+ * return 1: not exist or open failed
+ */
 int file_exist_or_not(char* filename){
 #ifdef _WIN32
-    int file_handle;
+    if(folder_exist_or_not(filename)==0){
+        return 1;
+    }
+    if(access(filename,R_OK)!=0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+    /*if(access_test!=0){
+        return 1;
+    }
+    return 0;
     _sopen_s(&file_handle,filename,_O_RDONLY|O_BINARY,_SH_DENYWR,_S_IREAD);
     if(file_handle==-1){
         return 1;
     }
     _close(file_handle);
-    return 0;
+    return 0;*/
 #else
     FILE* file_p=fopen(filename,"rb");
     if(file_p==NULL){
