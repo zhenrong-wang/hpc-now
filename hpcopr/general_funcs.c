@@ -1202,12 +1202,12 @@ int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primar
 //return 0: exists
 //return 1: not-exists
 int file_exist_or_not(char* filename){
-    if(access(filename,R_OK)!=0){
+    FILE* file_p=fopen(filename,"rb");
+    if(file_p==NULL){
         return 1;
     }
-    else{
-        return 0;
-    }
+    fclose(file_p);
+    return 0;
 }
 
 /* 
@@ -1250,12 +1250,12 @@ int folder_exist_or_not(char* foldername){
 /* Delete a file or a folder(if it is a folder) *by force!!!* */
 int delete_file_or_dir(char* file_or_dir){
     char cmdline[CMDLINE_LENGTH]="";
-    if(folder_exist_or_not(file_or_dir)==0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,file_or_dir,SYSTEM_CMD_REDIRECT_NULL);
-        return system(cmdline);
-    }
     if(file_exist_or_not(file_or_dir)==0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,file_or_dir,SYSTEM_CMD_REDIRECT_NULL);
+        return system(cmdline);
+    }
+    if(folder_exist_or_not(file_or_dir)==0){
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FOLDER_CMD,file_or_dir,SYSTEM_CMD_REDIRECT_NULL);
         return system(cmdline);
     }
     return -1;
