@@ -17,7 +17,12 @@
 #include <unistd.h>
 
 #ifdef _WIN32
+#include <Windows.h>
 #include <io.h>
+#include <share.h>
+#include <fcntl.h>
+#include <sys\types.h>
+#include <sys\stat.h>
 #include <malloc.h>
 #include <conio.h> // This header is not standard! Only for mingw.
 #elif __linux__
@@ -1202,12 +1207,22 @@ int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primar
 //return 0: exists
 //return 1: not-exists
 int file_exist_or_not(char* filename){
+#ifdef _WIN32
+    int file_handle;
+    _sopen_s(&file_handle,filename,_O_RDONLY|O_BINARY,_SH_DENYWR,_S_IREAD);
+    if(file_handle==-1){
+        return 1;
+    }
+    _close(file_handle);
+    return 0;
+#else
     FILE* file_p=fopen(filename,"rb");
     if(file_p==NULL){
         return 1;
     }
     fclose(file_p);
     return 0;
+#endif
 }
 
 /* 

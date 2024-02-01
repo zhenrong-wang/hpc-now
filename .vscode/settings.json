@@ -29,7 +29,8 @@
         "now_md5.h": "c",
         "opr_crypto.h": "c",
         "now_sha256.h": "c",
-        "termios.h": "c"
+        "termios.h": "c",
+        "fcntl.h": "c"
     },
     "C_Cpp.dimInactiveRegions": true
 }
