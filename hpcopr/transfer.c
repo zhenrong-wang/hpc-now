@@ -570,7 +570,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     fclose(file_p); /* file closed */
     file_convert(ALL_CLUSTER_REGISTRY,randstr_registry,"delete_decrypted");
     if(duplicate_flag==5){
-        printf(FATAL_RED_BOLD "[ FATAL: ] You are operating the identical cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ", import abort." RESET_DISPLAY "\n",cluster_name_temp);
+        printf(FATAL_RED_BOLD "[ FATAL: ] You are operating the identical cluster " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ", abort." RESET_DISPLAY "\n",cluster_name_temp);
         delete_file_or_dir(tmp_import_root);
         return -7;
     }
@@ -703,7 +703,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The specified cluster %s has been imported.\n\n",cluster_name_final);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Import Summary :\n");
     printf(GENERAL_BOLD "[  ****  ] +-" RESET_DISPLAY " Cluster Name   : %s\n",cluster_name_final);
-    printf(GENERAL_BOLD "[  ****  ]" RESET_DISPLAY " User List      : \n");
+    printf(GENERAL_BOLD "[  ****  ] +-" RESET_DISPLAY " User List      : \n");
     hpc_user_list(imported_workdir,crypto_keyfile,0,3);
     if(admin_flag==1){
         printf(GENERAL_BOLD "[  ****  ] +-" RESET_DISPLAY " Admin Privilege : YES \n");
