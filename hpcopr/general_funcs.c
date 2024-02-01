@@ -1226,16 +1226,6 @@ int file_exist_or_not(char* filename){
     else{
         return 0;
     }
-    /*if(access_test!=0){
-        return 1;
-    }
-    return 0;
-    _sopen_s(&file_handle,filename,_O_RDONLY|O_BINARY,_SH_DENYWR,_S_IREAD);
-    if(file_handle==-1){
-        return 1;
-    }
-    _close(file_handle);
-    return 0;*/
 #else
     FILE* file_p=fopen(filename,"rb");
     if(file_p==NULL){
