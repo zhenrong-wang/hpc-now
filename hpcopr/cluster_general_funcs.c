@@ -3768,6 +3768,7 @@ int cluster_name_check(char* cluster_name){
 int check_and_cleanup(char* prev_workdir){
     char cmdline[CMDLINE_LENGTH]="";
     char current_workdir[DIR_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     if(strlen(prev_workdir)!=0){
         if(show_current_ncluster(current_workdir,DIR_LENGTH,current_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,0)==1){
@@ -3781,18 +3782,21 @@ int check_and_cleanup(char* prev_workdir){
     }
 #ifdef _WIN32
     FILE* file_p=NULL;
+    char randstr[8]="";
     char appdata_dir[DIR_LENGTH]="";
-    system("echo %APPDATA% > c:\\programdata\\appdata.txt.tmp");
-    file_p=fopen("c:\\programdata\\appdata.txt.tmp","r");
+    char dirname_temp[DIR_LENGTH_EXT]="";
+    generate_random_nstring(randstr,8,1);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"C:\\programdata\\appdata.%s.temp",randstr);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"echo %APPDATA% > %s",filename_temp);
+    system(cmdline);
+    file_p=fopen(filename_temp,"r");
     fscanf(file_p,"%383s",appdata_dir);
     fclose(file_p);
-    system("del /f /s /q c:\\programdata\\appdata.txt.tmp > nul 2>&1");
+    rm_file_or_dir(filename_temp);
     system("icacls C:\\programdata\\hpc-now\\workdir /deny Administrators:F /T > nul 2>&1");
     system("icacls C:\\programdata\\hpc-now\\etc /deny Administrators:F /T > nul 2>&1");
-    snprintf(cmdline,CMDLINE_LENGTH-1,"del /f /s /q %s\\Microsoft\\Windows\\Recent\\* > nul 2>&1",appdata_dir);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"rd /q /s %s\\Microsoft\\Windows\\Recent\\ > nul 2>&1",appdata_dir);
-    system(cmdline);
+    snprintf(dirname_temp,DIR_LENGTH_EXT-1,"%s\\Microsoft\\Windows\\Recent",appdata_dir);
+    rm_file_or_dir(dirname_temp);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*.rdp %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 #elif __linux__
@@ -3804,8 +3808,8 @@ int check_and_cleanup(char* prev_workdir){
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s /tmp/.hpc-now*.rdp %s",DELETE_FILE_CMD,SYSTEM_CMD_REDIRECT);
     system(cmdline);
 #endif
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%smd5values.conf %s",DELETE_FILE_CMD,GENERAL_CONF_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%smd5values.conf",GENERAL_CONF_DIR,PATH_SLASH);
+    rm_file_or_dir(filename_temp);
     print_tail();
     return 0;
 }
