@@ -3790,6 +3790,8 @@ int check_and_cleanup(char* prev_workdir){
     if(get_win_appdata_dir(appdata_dir,DIR_LENGTH)!=0){
         return -5;
     }
+    system("icacls C:\\programdata\\hpc-now\\workdir /remove Administrators /T > nul 2>&1");
+    system("icacls C:\\programdata\\hpc-now\\etc /remove Administrators /T > nul 2>&1");
     system("icacls C:\\programdata\\hpc-now\\workdir /deny Administrators:F /T > nul 2>&1");
     system("icacls C:\\programdata\\hpc-now\\etc /deny Administrators:F /T > nul 2>&1");
     snprintf(dirname_temp,DIR_LENGTH_EXT-1,"%s\\Microsoft\\Windows\\Recent",appdata_dir);
