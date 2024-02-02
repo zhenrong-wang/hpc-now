@@ -1396,20 +1396,30 @@ int file_empty_or_not(char* filename){
     }
 }
 
-//return 0: exists
-//return non-zero: not exists.
+/* 
+ * return 0: exists
+ * return non-zero: not exists.
+ */
 int folder_exist_or_not(char* foldername){
-    char filename[FILENAME_LENGTH]="";
-    snprintf(filename,FILENAME_LENGTH-1,"%s%stestfile.temp",foldername,PATH_SLASH);
-    FILE* file_p=fopen(filename,"w+");
-    if(file_p==NULL){
+#ifdef _WIN32
+    if(GetFileAttributes(foldername)&FILE_ATTRIBUTE_DIRECTORY){
+        if(access(foldername,6)==0){
+            return 0;
+        }
+    }
+    return 1;
+#else
+    struct stat dirstat;
+    if(stat(foldername,&dirstat)==-1){
         return 1;
     }
-    else{
-        fclose(file_p);
-        rm_file_or_dir(filename);
-        return 0;
+    if(S_ISDIR(dirstat.st_mode)){
+        if(access(foldername,6)==0){
+            return 0;
+        }
     }
+    return 1;
+#endif
 }
 
 /* Delete a file or a folder(if it is a folder) *by force!!!* */
