@@ -1433,12 +1433,10 @@ int delete_file_or_dir(char* file_or_dir){
  * This function is to replace the delete_file_or_dir function 
  */
 int rm_file_or_dir(char* file_or_dir){
-    printf("~~%s~~\n",file_or_dir);
     if(strlen(file_or_dir)<1){
         return -3;
     }
     if(file_exist_or_not(file_or_dir)==0){
-        printf("~~%s~ssssssssssssss~\n",file_or_dir);
 #ifdef _WIN32
         if(DeleteFile(file_or_dir)!=0){
             return 0;
@@ -1446,23 +1444,17 @@ int rm_file_or_dir(char* file_or_dir){
         return 1;
 #else
         if(remove(file_or_dir)==0){
-            printf("~~%s~sdddddddddddddsssssssssssss~\n",file_or_dir);
             return 0;
         }
-        printf("~~%s~sdddxxxxxddddddddddsssssssssssss~\n",file_or_dir);
         return 1;
 #endif
     }
     if(folder_exist_or_not(file_or_dir)==0){
-        printf("~~%s@@@@~~\n",file_or_dir);
         if(rm_pdir(file_or_dir)==0){
-            printf("~~%s~,,,~\n",file_or_dir);
             return 0;
         }
-        printf("~vvvv~%s~~\n",file_or_dir);
         return 1;
     }
-    printf("~ccccccccccc~%s~~\n",file_or_dir);
     return -1;
 }
 
