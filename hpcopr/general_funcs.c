@@ -2891,6 +2891,7 @@ int reset_windows_cmd_display(void){
 int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax){
     char filename_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
+    char buffer[LINE_LENGTH_SHORT]="";
     char randstr[8]="";
     memset(appdata,'\0',dir_lenmax);
     if(dir_lenmax<128){
@@ -2904,10 +2905,10 @@ int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax){
     if(file_p==NULL){
         return -1;
     }
-    fngetline(file_p,appdata,dir_lenmax);
+    fngetline(file_p,buffer,LINE_LENGTH_SHORT);
     fclose(file_p);
     rm_file_or_dir(filename_temp);
-    if(strlen(appdata)<1){
+    if(get_seq_nstring(buffer,' ',1,appdata,dir_lenmax)!=0){
         return 1;
     }
     return 0;
