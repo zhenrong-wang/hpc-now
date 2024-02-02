@@ -456,6 +456,7 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     }
     fclose(file_p);
     fclose(file_p_tmp);
+    rm_file_or_dir(filename);
     if(rename(filename_temp,filename)==0){
         return -3;
     }
@@ -529,6 +530,7 @@ int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string,
     free(new_line);
     fclose(file_p);
     fclose(file_p_tmp);
+    rm_file_or_dir(filename);
     if(rename(filename_temp,filename)!=0){
         return -7;
     }
@@ -1875,6 +1877,7 @@ int insert_lines(char* filename, char* keyword, char* insert_string){
     }
     fclose(file_p);
     fclose(file_p_2);
+    rm_file_or_dir(filename);
     if(rename(filename_temp,filename)!=0){
         return -5;
     }
@@ -1932,6 +1935,7 @@ int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char*
     fclose(file_p);
     fclose(file_p_2);
     free(single_line);
+    rm_file_or_dir(filename);
     if(rename(filename_temp,filename)!=0){
         return -7;
     }
@@ -2268,6 +2272,7 @@ int file_cr_clean(char* filename){
     }while(!feof(file_p));
     fclose(file_p);
     fclose(file_p_tmp);
+    rm_file_or_dir(filename);
     if(rename(filename_temp,filename)!=0){
         return -3;
     }
@@ -2337,6 +2342,7 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
+        rm_file_or_dir(filename);
         if(rename(filename_temp,filename)!=0){
             return 1;
         }
@@ -2418,6 +2424,7 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
+        rm_file_or_dir(filename);
         if(rename(filename_temp,filename)!=0){
             return 1;
         }
@@ -2456,6 +2463,7 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
+        rm_file_or_dir(filename);
         if(rename(filename_temp,filename)!=0){
             return 1;
         }
@@ -2501,6 +2509,7 @@ int delete_nlines_by_kwd(char* filename, unsigned int linelen_max, char* key, in
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
+        rm_file_or_dir(filename);
         if(rename(filename_temp,filename)!=0){
             return 1;
         }

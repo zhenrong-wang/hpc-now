@@ -3309,6 +3309,7 @@ int delete_user_from_registry(char* user_registry_file, char* username){
     }
     fclose(file_p);
     fclose(file_p_2);
+    rm_file_or_dir(user_registry_file);
     if(rename(filename_temp,user_registry_file)!=0){
         return 1;
     }
@@ -3467,6 +3468,7 @@ int file_convert(char* filename_base, char* extra_str, char* option){
             return system(cmdline);
         }
         else if(strcmp(option,"restore")==0){
+            rm_file_or_dir(filename_base);
             return rename(file_backup,filename_base);
         }
         else{
