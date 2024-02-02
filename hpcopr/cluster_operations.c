@@ -214,6 +214,7 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     char new_workdir[DIR_LENGTH]="";
     char new_stackdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
     char randstr[7]="";
     char registry_line_prev[LINE_LENGTH_SHORT]="";
     char registry_line_new[LINE_LENGTH_SHORT]="";
@@ -258,43 +259,38 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
         return -5;
     }
     if(folder_exist_or_not(new_workdir)==0){
-        delete_file_or_dir(new_workdir);
+        rm_file_or_dir(new_workdir);
         /* If the new working directory still exists, exit */
         if(folder_exist_or_not(new_workdir)==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete invalid working directory." RESET_DISPLAY "\n");
             return -3;
         }
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,prev_workdir,new_workdir,SYSTEM_CMD_REDIRECT);
-    if(system(cmdline)!=0){
+    if(rename(prev_workdir,new_workdir)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rename the working directory." RESET_DISPLAY "\n");
         return -1;
     }
     if(create_and_get_subdir(new_workdir,"stack",new_stackdir,DIR_LENGTH)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the subdirs of new workdir." RESET_DISPLAY "\n");
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_workdir,prev_workdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        rename(new_workdir,prev_workdir);
         return -7;
     }
     snprintf(prev_ssh_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,cluster_prev_name);
     snprintf(new_ssh_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,cluster_new_name);
     if(folder_exist_or_not(prev_ssh_dir)==0){
         if(folder_exist_or_not(new_ssh_dir)==0){
-            delete_file_or_dir(new_ssh_dir);
+            rm_file_or_dir(new_ssh_dir);
             /* If the new sshdir directory still exists, exit */
             if(folder_exist_or_not(new_ssh_dir)==0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete invalid sshkey directory." RESET_DISPLAY "\n");
-                snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_workdir,prev_workdir,SYSTEM_CMD_REDIRECT);
-                system(cmdline);
+                rename(new_workdir,prev_workdir);
                 printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory." RESET_DISPLAY "\n");
                 return -3;
             }
         }
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,prev_ssh_dir,new_ssh_dir,SYSTEM_CMD_REDIRECT);
-        if(system(cmdline)!=0){
+        if(rename(prev_ssh_dir,new_ssh_dir)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rename the sshkey directory." RESET_DISPLAY "\n");
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_workdir,prev_workdir,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            rename(new_workdir,prev_workdir);
             printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory." RESET_DISPLAY "\n");
             return -3;
         }
@@ -318,10 +314,8 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     /* If failed to get the ucid, Roll back and exit. */
     if(get_nucid(new_workdir,crypto_keyfile,ucid_short,16)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to rename the sshkey directory." RESET_DISPLAY "\n");
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_workdir,prev_workdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_ssh_dir,prev_ssh_dir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        rename(new_workdir,prev_workdir);
+        rename(new_ssh_dir,prev_ssh_dir);
         global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_SHORT,registry_line_new,registry_line_prev);
         file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
@@ -370,10 +364,8 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconf%stf_prep.conf",new_workdir,PATH_SLASH,PATH_SLASH);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s.backup %s %s",COPY_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_workdir,prev_workdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,new_ssh_dir,prev_ssh_dir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        rename(new_workdir,prev_workdir);
+        rename(new_ssh_dir,prev_ssh_dir);
         global_nreplace(CURRENT_CLUSTER_INDICATOR,LINE_LENGTH_SHORT,registry_line_new,registry_line_prev);
         printf(FATAL_RED_BOLD "[ FATAL: ] Rolled back the working directory and sshkey directory." RESET_DISPLAY "\n");
         file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
@@ -387,8 +379,9 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
     delete_decrypted_files(new_workdir,crypto_keyfile);
 update_summary:
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%smon_data%smon_data_%s.csv %s%smon_data%smon_data_%s.csv %s",MOVE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_prev_name,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_new_name,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%smon_data%smon_data_%s.csv",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_prev_name);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%smon_data%smon_data_%s.csv",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_new_name);
+    rename(filename_temp,filename_temp2);
     global_nreplace(USAGE_LOG_FILE,LINE_LENGTH_SMALL,unique_cluster_id_prev,unique_cluster_id_new);
 print_finished:
     file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete_decrypted_backup");
@@ -546,9 +539,9 @@ destroy_cluster:
 
 remove_files:
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removing all the related files ...\n");
-    delete_file_or_dir(cluster_workdir);
+    rm_file_or_dir(cluster_workdir);
     snprintf(cluster_sshdir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,target_cluster_name);
-    delete_file_or_dir(cluster_sshdir);
+    rm_file_or_dir(cluster_sshdir);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Deleting the cluster from the registry ...\n");
     delete_from_cluster_registry(target_cluster_name);
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The cluster %s has been removed completely.\n",target_cluster_name);
@@ -636,8 +629,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             return 3;
         }
         snprintf(new_workdir,DIR_LENGTH-1,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,input_cluster_name,PATH_SLASH);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        mk_pdir(new_workdir);
         create_and_get_subdir(new_workdir,"vault",new_vaultdir,DIR_LENGTH);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scloud_secrets.txt",new_vaultdir,PATH_SLASH);
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s  %s %s",COPY_FILE_CMD,gcp_key_file,filename_temp,SYSTEM_CMD_REDIRECT);
@@ -652,7 +644,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,hash_key,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. Abort." RESET_DISPLAY "\n");
-            delete_file_or_dir(filename_temp);
+            rm_file_or_dir(filename_temp);
             return 5;
         }
         if(strcmp(echo_flag,"echo")==0){
@@ -750,17 +742,16 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     else{
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs." RESET_DISPLAY "\n");
         fclose(file_p);
-        delete_file_or_dir(filename_temp);
+        rm_file_or_dir(filename_temp);
         return 5;
     }
     fclose(file_p);
     snprintf(new_workdir,DIR_LENGTH-1,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,input_cluster_name,PATH_SLASH);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,new_workdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    mk_pdir(new_workdir);
     create_and_get_subdir(new_workdir,"vault",new_vaultdir,DIR_LENGTH);
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,new_vaultdir,PATH_SLASH,hash_key,SYSTEM_CMD_REDIRECT);
     run_flag=system(cmdline);
-    delete_file_or_dir(filename_temp);
+    rm_file_or_dir(filename_temp);
     if(run_flag!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. Abort." RESET_DISPLAY "\n");
         return 5;
@@ -839,7 +830,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,secret_key,vaultdir,PATH_SLASH,hash_key,SYSTEM_CMD_REDIRECT);
         if(system(cmdline)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. The key keeps unchanged." RESET_DISPLAY "\n");
-            delete_file_or_dir(secret_key);
+            rm_file_or_dir(secret_key);
             return 5;
         }
         if(strcmp(echo_flag,"echo")==0){
@@ -848,7 +839,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             system(cmdline);
             printf(RESET_DISPLAY);
         }
-        delete_file_or_dir(secret_key);
+        rm_file_or_dir(secret_key);
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally." RESET_DISPLAY "\n");
         return 0;
     }
@@ -976,21 +967,21 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     else{
         printf(FATAL_RED_BOLD "[ FATAL: ] Invalid key pair. Please double check your inputs." RESET_DISPLAY "\n");
         fclose(file_p);
-        delete_file_or_dir(filename_temp);
+        rm_file_or_dir(filename_temp);
         return 3;
     }
     if(get_file_sha_hash(crypto_keyfile,hash_key,33)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
-        delete_file_or_dir(filename_temp);
+        rm_file_or_dir(filename_temp);
         return -3;
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",NOW_CRYPTO_EXEC,filename_temp,vaultdir,PATH_SLASH,hash_key,SYSTEM_CMD_REDIRECT);
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt the key file. The key keeps unchanged." RESET_DISPLAY "\n");
-        delete_file_or_dir(secret_key);
+        rm_file_or_dir(secret_key);
         return 5;
     }
-    delete_file_or_dir(filename_temp);
+    rm_file_or_dir(filename_temp);
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf.tmp",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
@@ -2096,9 +2087,7 @@ int get_default_conf(char* cluster_name, char* crypto_keyfile, char* edit_flag){
         snprintf(url_azure_root,LOCATION_LENGTH_EXTENDED-1,"%sazure/",url_code_root_var);
         snprintf(url_gcp_root,LOCATION_LENGTH_EXTENDED-1,"%sgcp/",url_code_root_var);
     }
-    snprintf(confdir,DIR_LENGTH+15,"%s%sconf%s",workdir,PATH_SLASH,PATH_SLASH);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,confdir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    create_and_get_subdir(workdir,"conf",confdir,DIR_LENGTH+16);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.prev %s",MOVE_FILE_CMD,filename_temp,filename_temp,SYSTEM_CMD_REDIRECT);
@@ -2247,7 +2236,7 @@ int remove_conf(char* cluster_name){
         return 1;
     }
     else{
-        delete_file_or_dir(filename_temp);
+        rm_file_or_dir(filename_temp);
         return 0;
     }
 }

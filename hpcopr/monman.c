@@ -32,14 +32,14 @@
 int get_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey_dir, char* mon_data_file){
     char workdir[DIR_LENGTH]="";
     if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
-        return -1;
+        return -7;
     }
     char mon_data_dir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     snprintf(mon_data_dir,DIR_LENGTH-1,"%s%smon_data",HPC_NOW_ROOT_DIR,PATH_SLASH);
     if(folder_exist_or_not(mon_data_dir)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,mon_data_dir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        if(mk_pdir(mon_data_dir)<0){
+            return -1;
+        }
     }
     sprintf(mon_data_file,"%s%smon_data_%s.csv",mon_data_dir,PATH_SLASH,cluster_name);
     if(cluster_asleep_or_not(workdir,crypto_keyfile)==0){

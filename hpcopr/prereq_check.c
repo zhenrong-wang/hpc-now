@@ -85,17 +85,19 @@ int check_internet(void){
 int check_internet_google(void){
     char cmdline[CMDLINE_LENGTH]="";
     char google_connectivity_flag[FILENAME_LENGTH];
+    int run_flag;
     snprintf(google_connectivity_flag,FILENAME_LENGTH-1,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
-    FILE* file_p=fopen(google_connectivity_flag,"w+");
-    if(file_p==NULL){
-        return -1;
-    }
 #ifdef _WIN32
     snprintf(cmdline,CMDLINE_LENGTH-1,"ping -n 1 api.google.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #else
     snprintf(cmdline,CMDLINE_LENGTH-1,"ping -c 1 api.google.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #endif
-    if(system(cmdline)!=0){
+    run_flag=system(cmdline);
+    FILE* file_p=fopen(google_connectivity_flag,"w+");
+    if(file_p==NULL){
+        return -1;
+    }
+    if(run_flag!=0){
         fprintf(file_p,"api.google.com_connectivity_check: FAILED\n");
         fclose(file_p);
         return 1;
@@ -148,14 +150,20 @@ int check_current_user(void){
 #ifdef _WIN32
     char current_user_full[128]="";
     char current_user[128]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char randstr[8]="";
     int i,slash=0;
-    if(system("whoami > c:\\programdata\\current_user.txt.tmp")!=0){
+    generate_random_nstring(randstr,8,1);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"C:\\programdata\\current_user.%s.temp",randstr);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"whoami > %s",filename_temp);
+    if(system(cmdline)!=0){
         return 1;
     }
-    FILE* file_p_temp=fopen("c:\\programdata\\current_user.txt.tmp","r");
+    FILE* file_p_temp=fopen(filename_temp,"r");
     fscanf(file_p_temp,"%127s",current_user_full);
     fclose(file_p_temp);
-    system("del /f /q c:\\programdata\\current_user.txt.tmp > nul 2>&1");
+    rm_file_or_dir(filename_temp);
     for(i=0;i<strlen(current_user_full);i++){
         if(*(current_user_full+i)=='\\'){
             slash=i;
@@ -227,7 +235,7 @@ int install_bucket_clis(int silent_flag){
         snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
         system(cmdline);
 #endif
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sossutil-v1.* %s",DELETE_FOLDER_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sossutil-v1.* %s",DELETE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
         system(cmdline);  
     }
     if(silent_flag!=0){
@@ -614,13 +622,8 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
     snprintf(provider_exec_tf,FILENAME_LENGTH-1,"%s%sterraform-provider-%s_v%s%s",provider_dir_tf,PATH_SLASH,cloud_name,provider_version,provider_exec_suffix);
     snprintf(provider_exec_tofu,FILENAME_LENGTH-1,"%s%sterraform-provider-%s_v%s%s",provider_dir_tofu,PATH_SLASH,cloud_name,provider_version,provider_exec_suffix);
 
-    if(folder_exist_or_not(provider_dir_tf)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,provider_dir_tf,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(provider_dir_tofu)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,provider_dir_tofu,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    if(mk_pdir(provider_dir_tf)<0||mk_pdir(provider_dir_tofu)<0){
+        return -1;
     }
 
     file_check_flag_tf=file_validity_check(provider_exec_tf,force_repair_flag,sha_exec);
@@ -685,6 +688,7 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
 int check_and_install_prerequisitions(int repair_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
     char filename_temp_zip[FILENAME_LENGTH]="";
     int flag=0;
@@ -695,39 +699,48 @@ int check_and_install_prerequisitions(int repair_flag){
     char plugin_dir_root[DIR_LENGTH]="";
 
     /* For compatibility, move the previous logs to the now_logs dir */
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,NOW_LOG_DIR,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(mk_pdir(NOW_BINARY_DIR)<0||mk_pdir(DESTROYED_DIR)<0||mk_pdir(NOW_LOG_DIR)<0||mk_pdir(SSHKEY_DIR)<0){
+        return -5;
+    }
+    snprintf(dirname_temp,DIR_LENGTH-1,"%s%sworkdir",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    if(mk_pdir(dirname_temp)<0){
+        return -5;
+    }
+    snprintf(dirname_temp,DIR_LENGTH-1,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    if(mk_pdir(dirname_temp)<0){
+        return -5;
+    }
     if(file_exist_or_not(USAGE_LOG_FILE_OLD)==0){
         if(file_exist_or_not(USAGE_LOG_FILE)!=0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,USAGE_LOG_FILE_OLD,USAGE_LOG_FILE,SYSTEM_CMD_REDIRECT_NULL);
+            rename(USAGE_LOG_FILE_OLD,USAGE_LOG_FILE);
         }
         else{
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.prev %s",MOVE_FILE_CMD,USAGE_LOG_FILE_OLD,USAGE_LOG_FILE,SYSTEM_CMD_REDIRECT_NULL);
+            snprintf(filename_temp,FILENAME_LENGTH-1,"%s.prev",USAGE_LOG_FILE);
+            rename(USAGE_LOG_FILE_OLD,filename_temp);
         }
-        system(cmdline);
     }
     if(file_exist_or_not(SYSTEM_CMD_ERROR_LOG_OLD)==0){
         if(file_exist_or_not(SYSTEM_CMD_ERROR_LOG)!=0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,SYSTEM_CMD_ERROR_LOG_OLD,SYSTEM_CMD_ERROR_LOG,SYSTEM_CMD_REDIRECT_NULL);
+            rename(SYSTEM_CMD_ERROR_LOG_OLD,SYSTEM_CMD_ERROR_LOG);
         }
         else{
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.prev %s",MOVE_FILE_CMD,SYSTEM_CMD_ERROR_LOG_OLD,SYSTEM_CMD_ERROR_LOG,SYSTEM_CMD_REDIRECT_NULL);
+            snprintf(filename_temp,FILENAME_LENGTH-1,"%s.prev",SYSTEM_CMD_ERROR_LOG);
+            rename(SYSTEM_CMD_ERROR_LOG_OLD,filename_temp);
         }
-        system(cmdline);
     }
     if(file_exist_or_not(OPERATION_LOG_FILE_OLD)==0){
         if(file_exist_or_not(OPERATION_LOG_FILE)!=0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,OPERATION_LOG_FILE_OLD,OPERATION_LOG_FILE,SYSTEM_CMD_REDIRECT_NULL);
+            rename(OPERATION_LOG_FILE_OLD,OPERATION_LOG_FILE);
         }
         else{
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s.prev %s",MOVE_FILE_CMD,OPERATION_LOG_FILE_OLD,OPERATION_LOG_FILE,SYSTEM_CMD_REDIRECT_NULL);
+            snprintf(filename_temp,FILENAME_LENGTH-1,"%s.prev",OPERATION_LOG_FILE);
+            rename(OPERATION_LOG_FILE_OLD,filename_temp);
         }
-        system(cmdline);
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%slog_trashbin.txt",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%slog_trashbin.txt",NOW_LOG_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,NOW_LOG_DIR,SYSTEM_CMD_REDIRECT_NULL);
-        system(cmdline);
+        rename(filename_temp,filename_temp2);
     }
 #ifdef _WIN32
     char appdata_dir[128]="";
@@ -741,9 +754,8 @@ int check_and_install_prerequisitions(int repair_flag){
     system(cmdline);
     get_seq_nstring(appdata_dir,'\\',3,home_path,64);
     snprintf(dotssh_dir,127,"c:\\users\\%s\\.ssh",home_path);
-    if(folder_exist_or_not(TF_LOCAL_PLUGINS)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,TF_LOCAL_PLUGINS,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    if(mk_pdir(TF_LOCAL_PLUGINS)<0){
+        return -5;
     }
 #endif
     if(file_exist_or_not(USAGE_LOG_FILE)!=0){
@@ -757,14 +769,10 @@ int check_and_install_prerequisitions(int repair_flag){
             force_repair_flag=0;
         }
     }
-    
     if(generate_encrypt_opr_sshkey(SSHKEY_DIR,CRYPTO_KEY_FILE)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create SSHkey for this installation." RESET_DISPLAY "\n");
         return -1;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sworkdir %s",MKDIR_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
-
     if(repair_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Start checking and repairing the HPC-NOW services now ... \n");
         printf("|        . Checking and repairing the registry now ...\n");
@@ -879,14 +887,6 @@ int check_and_install_prerequisitions(int repair_flag){
             return 7;
         }
     }
-    if(folder_exist_or_not(DESTROYED_DIR)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
-    if(folder_exist_or_not(NOW_BINARY_DIR)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
 #ifdef _WIN32
     snprintf(dirname_temp,DIR_LENGTH-1,"%s\\terraform.d\\",appdata_dir);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s\\terraform_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,terraform_version_var);
@@ -897,9 +897,9 @@ int check_and_install_prerequisitions(int repair_flag){
     strncpy(dirname_temp,TF_LOCAL_PLUGINS,DIR_LENGTH-1);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%sterraform_%s_darwin_amd64.zip",dirname_temp,terraform_version_var);
 #endif
-    if(folder_exist_or_not(dirname_temp)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+    if(mk_pdir(dirname_temp)<0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create directory %s." RESET_DISPLAY "\n",dirname_temp);
+        return -5;
     }
     file_check_flag=file_validity_check(TERRAFORM_EXEC,force_repair_flag,sha_tf_exec_var);
     if(file_check_flag==1){
@@ -1127,10 +1127,6 @@ int check_and_install_prerequisitions(int repair_flag){
     if(flag!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] IMPORTANT! The dataman component %d may not work properly." RESET_DISPLAY "\n",flag);
     }
-    if(folder_exist_or_not(SSHKEY_DIR)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s \"%s\" %s",MKDIR_CMD,SSHKEY_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-    }
     if(file_exist_or_not(USAGE_LOG_FILE)!=0){
         file_p=fopen(USAGE_LOG_FILE,"w+");
         fprintf(file_p,"UCID,CLOUD_VENDOR,NODE_NAME,vCPU,START_DATE,START_TIME,STOP_DATE,STOP_TIME,RUNNING_HOURS,CPUxHOURS,CPU_MODEL,CLOUD_REGION\n");
@@ -1170,10 +1166,6 @@ int check_and_install_prerequisitions(int repair_flag){
     snprintf(cmdline,CMDLINE_LENGTH-1,"rm -rf /Users/hpc-now/.ssh/known_hosts %s",SYSTEM_CMD_REDIRECT);
 #endif
     system(cmdline);
-    snprintf(dirname_temp,DIR_LENGTH-1,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
-
 /* The remmina files exposes user's password. Must be deleted.*/
 #ifdef _WIN32
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*.rdp %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);

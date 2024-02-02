@@ -202,6 +202,7 @@ char jobman_commands[3][SUBCMD_STRING_LENGTH_MAX]={
 8 CLOUD_FLAG_NOT_APPLICABLE
 9 PARAM_FORMAT_ERROR
 11 Prereq - Components Download and install failed
+12 Failed to create GENERAL_CONF_DIR & LOG_DIR
 13 Prereq - Other failed
 15 Prereq - Envcheck Failed
 17 Prereq - Config Location Failed
@@ -305,7 +306,6 @@ int main(int argc, char* argv[]){
     char string_temp2[256]="";
     char string_temp3[256]="";
     char string_temp4[8]="";
-    char cmdline[CMDLINE_LENGTH]="";
     char cluster_role[16]="";
     int cluster_state_flag=0;
     int decrypt_flag=0;
@@ -370,10 +370,12 @@ int main(int argc, char* argv[]){
     }
 #endif
     /* Create the 2 important directories: /.etc and /now_logs */
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,GENERAL_CONF_DIR,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,NOW_LOG_DIR,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(mk_pdir(GENERAL_CONF_DIR)<0){
+        return 12;
+    }
+    if(mk_pdir(NOW_LOG_DIR)<0){
+        return 12;
+    }
 
     command_flag=command_parser(argc,argv,command_name_prompt,128,workdir,DIR_LENGTH,cluster_name,32,user_name,32,cluster_role,16,&decrypt_flag);
     if(command_flag==-1){

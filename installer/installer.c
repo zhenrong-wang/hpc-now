@@ -1134,35 +1134,43 @@ int get_valid_verlist(void){
 
 int version_valid(char* hpcopr_ver){
     char cmdline[CMDLINE_LENGTH]="";
-    char ver_ext[256]="";
-    snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %sverlist-0.3.x.txt -o verlist.tmp",DEFAULT_URL_HPCOPR_LATEST);
+    char ver_ext[32]="";
+    char randstr[8]="";
+    char verlist_temp[FILENAME_LENGTH]="";
+    generate_random_nstring(randstr,8,1);
+#ifdef _WIN32
+    snprintf(verlist_temp,FILENAME_LENGTH-1,"C:\\programdata\\verlist.%s.temp",randstr);
+#else
+    snprintf(verlist_temp,FILENAME_LENGTH-1,"/tmp/verlist.%s.temp",randstr);
+#endif
+    snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %sverlist-0.3.x.txt -o %s",DEFAULT_URL_HPCOPR_LATEST,verlist_temp);
     if(system(cmdline)!=0){
         return -1;
     }
-    snprintf(ver_ext,255,"< %s >",hpcopr_ver);
-    if(find_multi_nkeys("verlist.tmp",LINE_LENGTH_SHORT,ver_ext,"","","","")>0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,"verlist.tmp",SYSTEM_CMD_REDIRECT_NULL);
-        system(cmdline);
+    snprintf(ver_ext,31,"< %s >",hpcopr_ver);
+    if(find_multi_nkeys(verlist_temp,LINE_LENGTH_SHORT,ver_ext,"","","","")>0){
+        rm_file_or_dir(verlist_temp);
         return 0;
     }
     else{
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,"verlist.tmp",SYSTEM_CMD_REDIRECT_NULL);
-        system(cmdline);
+        rm_file_or_dir(verlist_temp);
         return 1;
     }
 }
 
-//return 1: current user is not root
-//return 2: License not accepted
-//return 3: internet connection failed
-//return 4: option incorrect
-//return 5: no option
-//return 7: version list failed to get
-//return 9: uninstallation failed
-//return 11: Failed to set password
-//return 13: Failed to update
-//return 15: Failed to install
-//return 0: Normal exit
+/*
+ * return 1: current user is not root
+ * return 2: License not accepted
+ * return 3: internet connection failed
+ * return 4: option incorrect
+ * return 5: no option
+ * return 7: version list failed to get
+ * return 9: uninstallation failed
+ * return 11: Failed to set password
+ * return 13: Failed to update
+ * return 15: Failed to install
+ * return 0: Normal exit
+*/
 int main(int argc, char* argv[]){
     int run_flag=0;
     int hpcopr_loc_flag=-1;

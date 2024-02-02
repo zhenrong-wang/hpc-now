@@ -49,6 +49,10 @@ int file_empty_or_not(char* filename);
 int folder_exist_or_not(char* foldername);
 int delete_file_or_dir(char* file_or_dir);
 
+int rm_file_or_dir(char* file_or_dir);
+int mk_pdir(char* pathname);
+int rm_pdir(char* pathname);
+
 int password_complexity_check(char* password, char* special_chars);
 int generate_random_passwd(char* password); /* This function is deprecated, please use generate_random_npasswd */
 int generate_random_npasswd(char password_array[], unsigned int password_array_len, char special_chars_array[], unsigned int special_chars_array_len);

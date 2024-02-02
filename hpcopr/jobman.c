@@ -235,14 +235,14 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
 
 int job_submit(char* workdir, char* crypto_keyfile, char* user_name, char* sshkey_dir, jobinfo* job_info){
     char remote_commands[CMDLINE_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     char dirname_temp[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char remote_filename_temp[FILENAME_LENGTH]="";
     int i,run_flag=0;
     snprintf(dirname_temp,DIR_LENGTH-1,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(mk_pdir(dirname_temp)<0){
+        return -1;
+    }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sjob_submit_info.tmp",dirname_temp,PATH_SLASH);
     FILE* file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
@@ -264,7 +264,7 @@ int job_submit(char* workdir, char* crypto_keyfile, char* user_name, char* sshke
     if(run_flag!=0){
         return 1;
     }
-    delete_file_or_dir(filename_temp);
+    rm_file_or_dir(filename_temp);
     if(strcmp(job_info->echo_flag,"true")==0){
         printf("\n");
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You can press " WARN_YELLO_BOLD "Ctrl C" RESET_DISPLAY " to stop displaying the job output.\n");
@@ -290,13 +290,13 @@ int job_list(char* workdir, char* crypto_keyfile, char* user_name, char* sshkey_
     char job_list_cache[FILENAME_LENGTH]="";
     char string_temp[LINE_LENGTH_SHORT]="";
     FILE* file_p=NULL;
-    char cmdline[CMDLINE_LENGTH]="";
     if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
         return -7;
     }
     snprintf(dirname_temp,DIR_LENGTH-1,"%s%s.tmp",HPC_NOW_ROOT_DIR,PATH_SLASH);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",MKDIR_CMD,dirname_temp,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(mk_pdir(dirname_temp)<0){
+        return -5;
+    }
     snprintf(job_list_cache,FILENAME_LENGTH-1,"%s%sjob_list_%s.txt",dirname_temp,PATH_SLASH,cluster_name);
     remote_exec_general(workdir,crypto_keyfile,sshkey_dir,user_name,"sacct","",0,3,job_list_cache,NULL_STREAM);
     if(file_exist_or_not(job_list_cache)!=0){
@@ -312,7 +312,7 @@ int job_list(char* workdir, char* crypto_keyfile, char* user_name, char* sshkey_
         printf("%s\n",string_temp);
     }
     fclose(file_p);
-    delete_file_or_dir(job_list_cache);
+    rm_file_or_dir(job_list_cache);
     return 0;
 }
 

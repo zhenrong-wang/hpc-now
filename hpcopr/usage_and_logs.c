@@ -21,7 +21,6 @@
 int view_system_logs(char* logfile, char* view_option, char* export_dest){
     char cmdline[CMDLINE_LENGTH]="";
     char logfile_temp[FILENAME_LENGTH]="";
-    int run_flag;
     if(file_exist_or_not(logfile)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the specified log." RESET_DISPLAY "\n");
         return -1;
@@ -58,16 +57,14 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
         printf("[  ****  ] Example: " HIGH_GREEN_BOLD "hpcopr history -d history.csv" RESET_DISPLAY ".\n");
         printf("[  ****  ] Example: " HIGH_GREEN_BOLD "hpcopr usage -d usage.csv" RESET_DISPLAY ".\n");
         printf("[  ****  ] Example: " HIGH_GREEN_BOLD "hpcopr syserr -d syserr.txt" RESET_DISPLAY ".\n");
-        delete_file_or_dir(logfile_temp);
+        rm_file_or_dir(logfile_temp);
         return 0;
     }
     else{
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,logfile_temp,export_dest,SYSTEM_CMD_REDIRECT);
-        run_flag=system(cmdline);
-        if(run_flag!=0){
+        if(rename(logfile_temp,export_dest)!=0){
             printf(FATAL_RED_BOLD "\n[ FATAL: ] Failed to export the log to " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " .\n",export_dest);
             printf("[  ****  ] Please check the path." RESET_DISPLAY "\n");
-            delete_file_or_dir(logfile_temp);
+            rm_file_or_dir(logfile_temp);
             return 1;
         }
         else{

@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0103"
+#define CORE_VERSION_CODE "0.3.1.0105"
 
 /* Define the printf ANSI colors. */
 #define FATAL_RED_BOLD   "\033[1;31m"
@@ -293,6 +293,12 @@ typedef struct{
 #define USER_PASSWORD_LENGTH_MIN   6
 #define USER_PASSWORD_LENGTH_MAX   21
 #define CLUSTER_ID_LENGTH_MAX_PLUS 25
+/* 
+ * Caution: Generally, the DIR_LENGTH for Windows should be
+ * set to 260.
+ * But for this program, the DIR_LENGTH is very unlikely to 
+ * exceed even 128. Therefore, the DIR length here is OK.
+ */
 #define DIR_LENGTH_SHORT           256
 #define DIR_LENGTH                 384
 #define DIR_LENGTH_EXT             448

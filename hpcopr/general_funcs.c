@@ -20,6 +20,7 @@
 #include <Windows.h>
 #include <io.h>
 #include <share.h>
+#include <direct.h>
 #include <fcntl.h>
 #include <sys\types.h>
 #include <sys\stat.h>
@@ -28,8 +29,14 @@
 #elif __linux__
 #include <malloc.h>
 #include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 #elif __APPLE__
 #include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 #endif
 
 #include "now_macros.h"
@@ -403,7 +410,6 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     int length_orig=strlen(orig_string);
     char temp_string[LINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     int i,j,k,line_length;
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s",filename,GFUNC_FILE_SUFFIX);
     file_p_tmp=fopen(filename_temp,"w+");
@@ -450,8 +456,7 @@ int global_replace(char* filename, char* orig_string, char* new_string){
     }
     fclose(file_p);
     fclose(file_p_tmp);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    if(system(cmdline)!=0){
+    if(rename(filename_temp,filename)==0){
         return -3;
     }
     return 0;
@@ -480,7 +485,6 @@ int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string,
         fclose(file_p);
         return -3;
     }
-    char cmdline[CMDLINE_LENGTH]="";
     int i,j,contain_count;
     char* single_line=NULL;
     char* new_line=NULL;
@@ -525,8 +529,7 @@ int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string,
     free(new_line);
     fclose(file_p);
     fclose(file_p_tmp);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    if(system(cmdline)!=0){
+    if(rename(filename_temp,filename)!=0){
         return -7;
     }
     return 0;
@@ -635,7 +638,6 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
         return -1;
     }
     char filename_temp[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     char single_line[LINE_LENGTH]="";
     char new_single_line[LINE_LENGTH]="";
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s",filename,GFUNC_FILE_SUFFIX);
@@ -691,9 +693,8 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
     fprintf(file_temp_p,"%s",single_line);
     fclose(file_p);
     fclose(file_temp_p);
-    delete_file_or_dir(filename);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    if(system(cmdline)!=0){
+    rm_file_or_dir(filename);
+    if(rename(filename_temp,filename)!=0){
         return -3;
     }
     return replace_count;
@@ -710,7 +711,6 @@ int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, 
         return -3;
     }
     char filename_temp[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_temp_p=fopen(filename_temp,"w+");
     if(file_temp_p==NULL){
@@ -751,9 +751,8 @@ int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, 
     fclose(file_p);
     fclose(file_temp_p);
     free(single_line);
-    delete_file_or_dir(filename);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    if(system(cmdline)!=0){
+    rm_file_or_dir(filename);
+    if(rename(filename_temp,filename)!=0){
         return -3;
     }
     return replace_count;
@@ -1236,6 +1235,136 @@ int file_exist_or_not(char* filename){
 #endif
 }
 
+/*
+ * Make a *PRIVATE* directory recursively
+ * For Windows, the permission inherates from upper-level dir. 
+ * For *nix, the permission is set to 0700
+ * 
+ * return  0: create the directory successfully
+ * return  1: directory already exists
+ * return -5: illegal path
+ * return -3: memory error
+ * return -1: create failed
+ */
+int mk_pdir(char* pathname){
+    unsigned int length=strlen(pathname);
+    unsigned int i=0;
+    unsigned int exist_flag=0;
+    char* sub_path=NULL;
+    if(length<1){
+        return -5;
+    }
+    while(i<length){
+        if(*(pathname+i)!=PATH_SLASH[0]&&i!=length-1){
+            i++;
+            continue;
+        }
+        sub_path=(char*)malloc(sizeof(char)*(i+2));
+        if(sub_path==NULL){
+            return -3;
+        }
+        memset(sub_path,'\0',i+2);
+        strncpy(sub_path,pathname,i+1);
+        if(access(sub_path,0)==0){
+            exist_flag=1;
+            i++;
+            continue;
+        }
+        exist_flag=0;
+#ifdef _WIN32
+        if(mkdir(sub_path)!=0){
+            free(sub_path);
+            return -1;
+        }
+#else
+        if(mkdir(sub_path,0700)!=0){
+            free(sub_path);
+            return -1;
+        }
+#endif
+        i++;
+        free(sub_path);
+    }
+    if(exist_flag==1){
+        return 1;
+    }
+    return 0;
+}
+
+/* 
+ * This function is risky because it delete a folder recursively.
+ * Please be aware of the risk!
+ */
+int rm_pdir(char* pathname){
+    if(strlen(pathname)<1){
+        return -5;
+    }
+#ifdef _WIN32
+    HANDLE handle_find;  
+    WIN32_FIND_DATA find_data;  
+    char sub_path[MAX_PATH]=""; /* Windows max path length is 260, which is MAX_PATH*/
+    char sub_search_pattern[MAX_PATH]="";
+    int result=0;
+    snprintf(sub_path,MAX_PATH-1,"%s\\*",pathname);  
+    snprintf(sub_search_pattern,MAX_PATH-1,"%s\\*.*",pathname);  
+    handle_find=FindFirstFile(sub_search_pattern,&find_data);  
+    if(handle_find==INVALID_HANDLE_VALUE) {  
+        return -3;
+    }
+    do{  
+        if(find_data.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY){  
+            if(strcmp(find_data.cFileName,".")!=0&&strcmp(find_data.cFileName,"..")!=0){  
+                snprintf(sub_path,MAX_PATH-1,"%s\\%s",pathname,find_data.cFileName);  
+                result&=rmdir_p(sub_path);  
+            }
+        }
+        else {  
+            snprintf(sub_path,MAX_PATH-1,"%s\\%s",pathname,find_data.cFileName);  
+            result&=DeleteFile(sub_path);  
+        }  
+    }while(FindNextFile(handle_find,&find_data)!=0);  
+    FindClose(handle_find); /* Close the handle */ 
+    result&=RemoveDirectory(pathname);
+    return result;
+#else
+    DIR* dir;
+    struct dirent* entry;
+    char sub_path[DIR_LENGTH_EXT]="";
+    struct stat sub_stat;
+    dir=opendir(pathname);
+    if(dir==NULL){
+        return -3;
+    }
+    while((entry=readdir(dir))!=NULL){
+        if(strcmp(entry->d_name,".")==0||strcmp(entry->d_name,"..")==0){
+            continue;
+        }
+        snprintf(sub_path,DIR_LENGTH_EXT-1,"%s/%s",pathname,entry->d_name);
+        if(stat(sub_path,&sub_stat)==-1){
+            closedir(dir);
+            return -1;
+        }
+        if(S_ISDIR(sub_stat.st_mode)){
+            if(rm_pdir(sub_path)!=0){
+                closedir(dir);
+                return -1;
+            }
+        }
+        else{
+            if(remove(sub_path)!=0){
+                closedir(dir);
+                return -1;
+            }
+        }
+    }
+    closedir(dir);
+    if(rmdir(pathname)!=0){
+        return 1;
+    }
+    return 0;
+#endif
+}
+
 /* 
  * Risky: if the file is not plain text, this function may cause infinite loop because EOF is absent! 
  * return <1, empty
@@ -1268,7 +1397,7 @@ int folder_exist_or_not(char* foldername){
     }
     else{
         fclose(file_p);
-        delete_file_or_dir(filename);
+        rm_file_or_dir(filename);
         return 0;
     }
 }
@@ -1287,8 +1416,39 @@ int delete_file_or_dir(char* file_or_dir){
     return -1;
 }
 
-//return 0: The password is complex enough
-//return 1: The password is not complex enough
+/* 
+ * This function is to replace the delete_file_or_dir function 
+ */
+int rm_file_or_dir(char* file_or_dir){
+    if(strlen(file_or_dir)<1){
+        return -3;
+    }
+    if(file_exist_or_not(file_or_dir)==0){
+#ifdef _WIN32
+        if(DeleteFile(file_or_dir)!=0){
+            return 0;
+        }
+        return 1;
+#else
+        if(remove(file_or_dir)==0){
+            return 0;
+        }
+        return 1;
+#endif
+    }
+    if(folder_exist_or_not(file_or_dir)==0){
+        if(rm_pdir(file_or_dir)==0){
+            return 0;
+        }
+        return 1;
+    }
+    return -1;
+}
+
+/*
+ * return 0: The password is complex enough
+ * return 1: The password is not complex enough
+ */
 int password_complexity_check(char* password, char* special_chars){
     int i,length=strlen(password);
     int uppercase_flag=0;
@@ -1686,7 +1846,6 @@ int insert_lines(char* filename, char* keyword, char* insert_string){
     }
     FILE* file_p=fopen(filename,"r");
     FILE* file_p_2=NULL;
-    char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char single_line[LINE_LENGTH]="";
     int line_num=0;
@@ -1716,8 +1875,9 @@ int insert_lines(char* filename, char* keyword, char* insert_string){
     }
     fclose(file_p);
     fclose(file_p_2);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    if(rename(filename_temp,filename)!=0){
+        return -5;
+    }
     return 0;
 }
 
@@ -1731,7 +1891,6 @@ int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char*
     }
     FILE* file_p_2=NULL;
     int contain_flag=0;
-    char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char* single_line=(char*)malloc(sizeof(char)*linelen_max);
     if(single_line==NULL){
@@ -1773,8 +1932,7 @@ int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char*
     fclose(file_p);
     fclose(file_p_2);
     free(single_line);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    if(system(cmdline)!=0){
+    if(rename(filename_temp,filename)!=0){
         return -7;
     }
     return 0;
@@ -1993,7 +2151,7 @@ int file_creation_test(char* filename){
         return 3;
     }
     fclose(file_p);
-    delete_file_or_dir(filename);
+    rm_file_or_dir(filename);
     return 0;
 }
 
@@ -2088,7 +2246,6 @@ int file_cr_clean(char* filename){
     FILE* file_p=fopen(filename,"r");
     char filename_temp[FILENAME_LENGTH]="";
     int ch;
-    char cmdline[CMDLINE_LENGTH]="";
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
@@ -2111,8 +2268,7 @@ int file_cr_clean(char* filename){
     }while(!feof(file_p));
     fclose(file_p);
     fclose(file_p_tmp);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-    if(system(cmdline)!=0){
+    if(rename(filename_temp,filename)!=0){
         return -3;
     }
 #endif
@@ -2121,6 +2277,11 @@ int file_cr_clean(char* filename){
 
 /* This function is risky! It overwrites the original file*/
 int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overwrite_flag){
+    char filename_temp[FILENAME_LENGTH]="";
+    char line_buffer[LINE_LENGTH]="";
+    int start_flag=0;
+    int contain_start_flag;
+    int contain_end_flag;
     if(file_exist_or_not(filename)!=0){
         return -1;
     }
@@ -2131,12 +2292,6 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
         return 5;
     }
     FILE* file_p=fopen(filename,"r");
-    char filename_temp[FILENAME_LENGTH]="";
-    char line_buffer[LINE_LENGTH]="";
-    int start_flag=0;
-    int contain_start_flag;
-    int contain_end_flag;
-    char cmdline[CMDLINE_LENGTH]="";
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s.trunc%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
@@ -2182,8 +2337,7 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-        if(system(cmdline)!=0){
+        if(rename(filename_temp,filename)!=0){
             return 1;
         }
     }
@@ -2195,6 +2349,10 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
  * If overwrite_flag!=0: overwrite
  */
 int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_key, char* end_key, int overwrite_flag){
+    char filename_temp[FILENAME_LENGTH]="";
+    int start_flag=0;
+    int contain_start_flag;
+    int contain_end_flag;
     if(strlen(start_key)==0&&strlen(end_key)==0){
         return -3;
     }
@@ -2208,7 +2366,6 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
     if(file_p==NULL){
         return -1;
     }
-    char filename_temp[FILENAME_LENGTH]="";
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s.trunc%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
@@ -2221,10 +2378,6 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
         fclose(file_p_tmp);
         return -5;
     }
-    int start_flag=0;
-    int contain_start_flag;
-    int contain_end_flag;
-    char cmdline[CMDLINE_LENGTH]="";
     while(fngetline(file_p,line_buffer,linelen_max)!=1){
         if(strlen(start_key)==0){
             if(contain_or_nnot(line_buffer,end_key)<1){
@@ -2265,8 +2418,7 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-        if(system(cmdline)!=0){
+        if(rename(filename_temp,filename)!=0){
             return 1;
         }
     }
@@ -2276,17 +2428,16 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
 //overwrite flag =0, not replace
 //overwrite flag !=0, replace.
 int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
+    FILE* file_p=fopen(filename,"r");
+    char filename_temp[FILENAME_LENGTH]="";
+    char line_buffer[LINE_LENGTH]="";
+    int getline_flag=0;
     if(file_exist_or_not(filename)!=0){
         return -1;
     }
     if(strlen(key)==0){
         return -3;
     }
-    FILE* file_p=fopen(filename,"r");
-    char filename_temp[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    char line_buffer[LINE_LENGTH]="";
-    int getline_flag=0;
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s.dline%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
@@ -2305,8 +2456,7 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-        if(system(cmdline)!=0){
+        if(rename(filename_temp,filename)!=0){
             return 1;
         }
     }
@@ -2325,7 +2475,6 @@ int delete_nlines_by_kwd(char* filename, unsigned int linelen_max, char* key, in
         return -1;
     }
     char filename_temp[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s.dline%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
     if(file_p_tmp==NULL){
@@ -2352,8 +2501,7 @@ int delete_nlines_by_kwd(char* filename, unsigned int linelen_max, char* key, in
     fclose(file_p);
     fclose(file_p_tmp);
     if(overwrite_flag!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",MOVE_FILE_CMD,filename_temp,filename,SYSTEM_CMD_REDIRECT_NULL);
-        if(system(cmdline)!=0){
+        if(rename(filename_temp,filename)!=0){
             return 1;
         }
     }
@@ -2440,7 +2588,7 @@ int password_md5_hash(char* password, char md5_hash[], int md5_length){
     fprintf(file_p,"%s%s",password,CRLF_PASSWORD_HASH);
     fclose(file_p);
     run_flag=get_nmd5sum(filename_temp,md5_hash,md5_length);
-    delete_file_or_dir(filename_temp);
+    rm_file_or_dir(filename_temp);
     if(run_flag!=0){
         return 1;
     }
@@ -2496,7 +2644,7 @@ int password_sha_hash(char* password, char hash[], int hash_length){
     fprintf(file_p,"%s%s",password,CRLF_PASSWORD_HASH);
     fclose(file_p);
     run_flag=get_file_sha_hash(filename_temp,hash,hash_length);
-    delete_file_or_dir(filename_temp);
+    rm_file_or_dir(filename_temp);
     if(run_flag!=0){
         return 1;
     }
@@ -2546,38 +2694,6 @@ int windows_path_to_nstring(char* input_string, char new_string[], unsigned int 
     }
     return 0;
 #endif
-}
-
-// This function is deprecated!
-int base64decode_deprecated(char* encoded_string, char* export_path){
-    if(file_creation_test(export_path)!=0){
-        return 1;
-    }
-    char cmdline[CMDLINE_LENGTH]=""; // Stack Overflow will occur if the encoded string exceeds 4096
-    int run_flag;
-#ifdef _WIN32
-    char filename_temp[FILENAME_LENGTH]="";
-    FILE* file_p=NULL;
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbase64_convert.tmp",DESTROYED_DIR,PATH_SLASH);
-    file_p=fopen(filename_temp,"w+");
-    if(file_p==NULL){
-        return 3;
-    }
-    fprintf(file_p,"%s",encoded_string);
-    fclose(file_p);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"certutil -decode %s %s %s",filename_temp,export_path,SYSTEM_CMD_REDIRECT_NULL);
-    run_flag=system(cmdline);
-    delete_file_or_dir(filename_temp);
-#else
-    snprintf(cmdline,CMDLINE_LENGTH-1,"echo \"%s\" | base64 -d > %s 2>/dev/null",encoded_string,export_path);
-    run_flag=system(cmdline);
-#endif
-    if(run_flag!=0){
-        return 5;
-    }
-    else{
-        return 0;
-    }
 }
 
 //memory allocated!

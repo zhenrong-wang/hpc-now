@@ -661,7 +661,7 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
     fclose(file_p);
     return 0;
 invalid_conf:
-    delete_file_or_dir(tf_prep_conf);
+    rm_file_or_dir(tf_prep_conf);
     return 1;
 }
 
@@ -1809,7 +1809,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_secrets.txt",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeyId","","",1,"AccessKeyId","","",'\"',4,bucket_ak,256);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk,256);
-    delete_file_or_dir(filename_temp);
+    rm_file_or_dir(filename_temp);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Sending commands and sync files ...\n");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(cloud_flag,filename_temp,bucket_id,init_info.region_id,bucket_ak,bucket_sk,"");
@@ -2421,7 +2421,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%saccess-key.txt",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeyId","","",1,"AccessKeyId","","",'\"',4,bucket_ak,256);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk,256);
-    delete_file_or_dir(filename_temp);
+    rm_file_or_dir(filename_temp);
 
     printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
@@ -2959,7 +2959,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_key.json","root","put","",0);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(cloud_flag,filename_temp,randstr,init_conf.region_id,bucket_selflink,"",gcp_bucket_key);
-    delete_file_or_dir(gcp_bucket_key);
+    rm_file_or_dir(gcp_bucket_key);
     save_cluster_vaults(vaultdir,init_conf.master_passwd,init_conf.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
     remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0); 
     remote_exec(workdir,crypto_keyfile,sshkey_folder,"connect",7);
