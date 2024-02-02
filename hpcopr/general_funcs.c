@@ -300,20 +300,20 @@ int fgetline(FILE* file_p, char* line_string){
 int fngetline(FILE* file_p, char line_string[], unsigned int max_length){
     int ch='\0';
     int i=0;
+    memset(line_string,'\0',max_length);
     if(max_length<1){
         return -3;
     }
     if(file_p==NULL){
         return -1;
     }
-    memset(line_string,'\0',max_length);
     do{
         ch=fgetc(file_p);
-        if(ch!=EOF&&ch!='\n'){
+        if(ch!=EOF&&ch!='\n'&&ch!='\r'){
             *(line_string+i)=ch;
             i++;
         }
-    }while(ch!=EOF&&ch!='\n'&&i<max_length-1); //Reserve a char for '\0'
+    }while(ch!=EOF&&ch!='\n'&&ch!='\r'&&i<max_length-1); //Reserve a char for '\0'
     if(i==max_length-1){
         return 2; // When returns this value, the line is not read completely.
     }
