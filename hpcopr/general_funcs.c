@@ -1307,28 +1307,35 @@ int rm_pdir(char* pathname){
     WIN32_FIND_DATA find_data;  
     char sub_path[MAX_PATH]=""; /* Windows max path length is 260, which is MAX_PATH*/
     char sub_search_pattern[MAX_PATH]="";
-    int result=0;
     snprintf(sub_path,MAX_PATH-1,"%s\\*",pathname);  
     snprintf(sub_search_pattern,MAX_PATH-1,"%s\\*.*",pathname);  
     handle_find=FindFirstFile(sub_search_pattern,&find_data);  
     if(handle_find==INVALID_HANDLE_VALUE) {  
         return -3;
     }
-    do{  
-        if(find_data.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY){  
-            if(strcmp(find_data.cFileName,".")!=0&&strcmp(find_data.cFileName,"..")!=0){  
-                snprintf(sub_path,MAX_PATH-1,"%s\\%s",pathname,find_data.cFileName);  
-                result&=rm_pdir(sub_path);  
+    do{
+        if(find_data.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY){
+            if(strcmp(find_data.cFileName,".")!=0&&strcmp(find_data.cFileName,"..")!=0){
+                snprintf(sub_path,MAX_PATH-1,"%s\\%s",pathname,find_data.cFileName);
+                if(rm_pdir(sub_path)!=0){
+                    FindClose(handle_find);
+                    return -1;
+                }
             }
         }
-        else {  
-            snprintf(sub_path,MAX_PATH-1,"%s\\%s",pathname,find_data.cFileName);  
-            result&=DeleteFile(sub_path);  
+        else{
+            snprintf(sub_path,MAX_PATH-1,"%s\\%s",pathname,find_data.cFileName);
+            if(!DeleteFile(sub_path)){
+                FindClose(handle_find);
+                return -1;
+            }  
         }  
     }while(FindNextFile(handle_find,&find_data)!=0);  
     FindClose(handle_find); /* Close the handle */ 
-    result&=RemoveDirectory(pathname);
-    return result;
+    if(!RemoveDirectory(pathname)){
+        return 1;
+    }
+    return 0;
 #else
     DIR* dir;
     struct dirent* entry;
