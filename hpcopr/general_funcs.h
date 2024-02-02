@@ -101,12 +101,12 @@ int include_string_or_not(int cmd_c, char** cmds, char* string);
 int windows_path_to_nstring(char* input_string, char new_string[], unsigned int maxlen);
 
 //Base64 decode
-int base64decode_deprecated(char* encoded_string, char* exported_path);
 char* base64_clear_CRLF(char orig[], int length);
 unsigned char get_base64_index(char base64_char);
 int base64decode(char* encoded_string, char* export_path);
 int base64encode(char* plain_string, char* export_path);
 
 int reset_windows_cmd_display(void);
+int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax);
 
 #endif

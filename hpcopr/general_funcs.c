@@ -2525,13 +2525,13 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
 #elif __linux__
     snprintf(cmdline,CMDLINE_LENGTH-1,"md5sum '%s' | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif _WIN32
-    snprintf(cmdline,CMDLINE_LENGTH-1,"certutil -hashfile \"%s\" md5 > c:\\programdata\\md5.txt.tmp",crypto_key_filename);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"certutil -hashfile \"%s\" md5 > C:\\programdata\\md5.txt.tmp",crypto_key_filename);
 #endif
     if(system(cmdline)!=0){
         return -1;
     }
 #ifdef _WIN32
-    md5_tmp=fopen("c:\\programdata\\md5.txt.tmp","r");
+    md5_tmp=fopen("C:\\programdata\\md5.txt.tmp","r");
 #else
     md5_tmp=fopen("/tmp/md5.txt.tmp","r");
 #endif
@@ -2544,7 +2544,7 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     fgetline(md5_tmp,md5sum);
     fclose(md5_tmp);
 #ifdef _WIN32
-    snprintf(cmdline,CMDLINE_LENGTH-1,"del /f /q c:\\programdata\\md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"del /f /q C:\\programdata\\md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
 #else
     snprintf(cmdline,CMDLINE_LENGTH-1,"rm -rf /tmp/md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
 #endif
@@ -2886,6 +2886,31 @@ int reset_windows_cmd_display(void){
 #else
     return 0;
 #endif
+}
+
+int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax){
+    char filename_temp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    char randstr[8]="";
+    memset(appdata,'\0',dir_lenmax);
+    if(dir_lenmax<128){
+        return -3;
+    }
+    generate_random_nstring(randstr,8,1);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"C:\\programdata\\appdata.%s.temp",randstr);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"echo %%APPDATA%% > %s",filename_temp);
+    system(cmdline);
+    FILE* file_p=fopen(filename_temp,"r");
+    if(file_p==NULL){
+        return -1;
+    }
+    fngetline(file_p,appdata,dir_lenmax);
+    fclose(file_p);
+    rm_file_or_dir(filename_temp);
+    if(strlen(appdata)<1){
+        return 1;
+    }
+    return 0;
 }
 
 /*int main(){

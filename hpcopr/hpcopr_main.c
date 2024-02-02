@@ -341,7 +341,7 @@ int main(int argc, char* argv[]){
 #endif
 
 #ifdef _WIN32
-    if(folder_exist_or_not("c:\\hpc-now")!=0){
+    if(folder_exist_or_not("C:\\hpc-now")!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The key directory C:\\hpc-now\\ is missing. The services cannot start.\n");
         printf("[  ****  ] Please switch to Administrator and re-install the services to fix.\n");
         printf("[  ****  ] If this issue still occurs, please report the bug." RESET_DISPLAY "\n");

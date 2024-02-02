@@ -3770,6 +3770,10 @@ int check_and_cleanup(char* prev_workdir){
     char current_workdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+#ifdef _WIN32
+    char appdata_dir[DIR_LENGTH]="";
+    char dirname_temp[DIR_LENGTH_EXT]="";
+#endif
     if(strlen(prev_workdir)!=0){
         if(show_current_ncluster(current_workdir,DIR_LENGTH,current_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,0)==1){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no switched cluster." RESET_DISPLAY "\n");
@@ -3781,18 +3785,9 @@ int check_and_cleanup(char* prev_workdir){
         }
     }
 #ifdef _WIN32
-    FILE* file_p=NULL;
-    char randstr[8]="";
-    char appdata_dir[DIR_LENGTH]="";
-    char dirname_temp[DIR_LENGTH_EXT]="";
-    generate_random_nstring(randstr,8,1);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"C:\\programdata\\appdata.%s.temp",randstr);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"echo %APPDATA% > %s",filename_temp);
-    system(cmdline);
-    file_p=fopen(filename_temp,"r");
-    fscanf(file_p,"%383s",appdata_dir);
-    fclose(file_p);
-    rm_file_or_dir(filename_temp);
+    if(get_win_appdata_dir(appdata_dir,DIR_LENGTH)!=0){
+        return -5;
+    }
     system("icacls C:\\programdata\\hpc-now\\workdir /deny Administrators:F /T > nul 2>&1");
     system("icacls C:\\programdata\\hpc-now\\etc /deny Administrators:F /T > nul 2>&1");
     snprintf(dirname_temp,DIR_LENGTH_EXT-1,"%s\\Microsoft\\Windows\\Recent",appdata_dir);
