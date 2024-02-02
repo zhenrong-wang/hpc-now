@@ -22,6 +22,7 @@
 #include <share.h>
 #include <direct.h>
 #include <fcntl.h>
+#include <fileapi.h>
 #include <sys\types.h>
 #include <sys\stat.h>
 #include <malloc.h>
@@ -1267,14 +1268,14 @@ int mk_pdir(char* pathname){
         }
         memset(sub_path,'\0',i+2);
         strncpy(sub_path,pathname,i+1);
-        if(access(sub_path,0)==0){
+        if(access(sub_path,2)==0){
             exist_flag=1;
             i++;
             continue;
         }
         exist_flag=0;
 #ifdef _WIN32
-        if(mkdir(sub_path)!=0){
+        if(CreateDirectory(sub_path,NULL)==0){
             free(sub_path);
             return -1;
         }
