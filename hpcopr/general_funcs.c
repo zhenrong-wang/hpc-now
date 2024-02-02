@@ -1245,9 +1245,10 @@ int file_exist_or_not(char* filename){
  * 
  * return  0: create the directory successfully
  * return  1: directory already exists
- * return -5: illegal path
- * return -3: memory error
- * return -1: create failed
+ * return -7: illegal path
+ * return -5: memory error
+ * return -3: create failed
+ * return -1: Failed
  */
 int mk_pdir(char* pathname){
     unsigned int length=strlen(pathname);
@@ -1255,7 +1256,7 @@ int mk_pdir(char* pathname){
     unsigned int exist_flag=0;
     char* sub_path=NULL;
     if(length<1){
-        return -5;
+        return -7;
     }
     while(i<length){
         if(*(pathname+i)!=PATH_SLASH[0]&&i!=length-1){
@@ -1264,11 +1265,11 @@ int mk_pdir(char* pathname){
         }
         sub_path=(char*)malloc(sizeof(char)*(i+2));
         if(sub_path==NULL){
-            return -3;
+            return -5;
         }
         memset(sub_path,'\0',i+2);
         strncpy(sub_path,pathname,i+1);
-        if(access(sub_path,2)==0){
+        if(access(sub_path,0)==0){
             exist_flag=1;
             i++;
             continue;
@@ -1277,21 +1278,21 @@ int mk_pdir(char* pathname){
 #ifdef _WIN32
         if(CreateDirectory(sub_path,NULL)==0){
             free(sub_path);
-            return -1;
+            return -3;
         }
 #else
         if(mkdir(sub_path,0700)!=0){
             free(sub_path);
-            return -1;
+            return -3;
         }
 #endif
         i++;
         free(sub_path);
     }
-    if(exist_flag==1){
-        return 1;
+    if(folder_exist_or_not(pathname)==0){
+        return exist_flag; /* Return 0 or 1 */
     }
-    return 0;
+    return -1; /* Return < 0*/
 }
 
 /* 

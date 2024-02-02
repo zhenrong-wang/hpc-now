@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0105"
+#define CORE_VERSION_CODE "0.3.1.0107"
 
 /* Define the printf ANSI colors. */
 #define FATAL_RED_BOLD   "\033[1;31m"
