@@ -1211,31 +1211,23 @@ int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primar
  * return 1: not exist or open failed
  */
 int file_exist_or_not(char* filename){
-/*
- * This function may seem strange because here we designed a different 
- * logic for Windows. The reason is, I tried fopen, sopen, CreateFile, 
- * and all the other methods, the performance is really bad when open
- * the target file for the first time. I cannot figure out the reason,
- * but that's why we made this function so complex.
- */
 #ifdef _WIN32
-    if(folder_exist_or_not(filename)==0){
+    if(GetFileAttributes(filename)&FILE_ATTRIBUTE_DIRECTORY){
         return 1;
-    }
-    if(access(filename,R_OK)!=0){
-        return 1;
-    }
-    else{
-        return 0;
     }
 #else
-    FILE* file_p=fopen(filename,"rb");
-    if(file_p==NULL){
+    struct stat file_stat;
+    if(stat(filename,&file_stat)!=0){
         return 1;
     }
-    fclose(file_p);
-    return 0;
+    if(S_ISDIR(file_stat.st_mode)){
+        return 1;
+    }
 #endif
+    if(access(filename,4)!=0){
+        return 1;
+    }
+    return 0;
 }
 
 /*
@@ -1441,10 +1433,12 @@ int delete_file_or_dir(char* file_or_dir){
  * This function is to replace the delete_file_or_dir function 
  */
 int rm_file_or_dir(char* file_or_dir){
+    printf("~~%s~~\n",file_or_dir);
     if(strlen(file_or_dir)<1){
         return -3;
     }
     if(file_exist_or_not(file_or_dir)==0){
+        printf("~~%s~ssssssssssssss~\n",file_or_dir);
 #ifdef _WIN32
         if(DeleteFile(file_or_dir)!=0){
             return 0;
@@ -1452,17 +1446,23 @@ int rm_file_or_dir(char* file_or_dir){
         return 1;
 #else
         if(remove(file_or_dir)==0){
+            printf("~~%s~sdddddddddddddsssssssssssss~\n",file_or_dir);
             return 0;
         }
+        printf("~~%s~sdddxxxxxddddddddddsssssssssssss~\n",file_or_dir);
         return 1;
 #endif
     }
     if(folder_exist_or_not(file_or_dir)==0){
+        printf("~~%s@@@@~~\n",file_or_dir);
         if(rm_pdir(file_or_dir)==0){
+            printf("~~%s~,,,~\n",file_or_dir);
             return 0;
         }
+        printf("~vvvv~%s~~\n",file_or_dir);
         return 1;
     }
+    printf("~ccccccccccc~%s~~\n",file_or_dir);
     return -1;
 }
 

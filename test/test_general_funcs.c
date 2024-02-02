@@ -18,7 +18,11 @@
 #endif
 
 int main(int argc, char** argv){
-    FILE* file_p=fopen("test_gfuncs.txt","r");
+    if(argc<2){
+        return 1;
+    }
+    return rm_pdir(argv[1]);
+    /* FILE* file_p=fopen("test_gfuncs.txt","r");
     if(file_p==NULL){
         return 1;
     }
@@ -27,7 +31,7 @@ int main(int argc, char** argv){
     printf("FNGETLINE:\n");
     /*while(fngetline(file_p,line_buffer,128)!=1){
         printf("%s\n",line_buffer);
-    }*/
+    }
     printf("FNGETLINE_DONE\n");
     fclose(file_p);
     int contain_flag=contain_or_nnot("         \"${aws_s3_bucket.hpc_data_storage.arn}/*\"","ar");
@@ -48,7 +52,7 @@ int main(int argc, char** argv){
     insert_nlines("test_gfuncs.txt",256,"\"${aws_s3_bucket.hpc_dataglobal_replace_testarn}/*\"","***********************inserted!");
     file_trunc_by_kwds("test_gfuncs.txt","*****inserted","]",0);
     file_ntrunc_by_kwds("test_gfuncs.txt",256,"*****inserted","]",0);
-    delete_nlines_by_kwd("test_gfuncs.txt",256,"*inserted!",1);
+    delete_nlines_by_kwd("test_gfuncs.txt",256,"*inserted!",1);*/
     /*file_p=fopen("test_gfuncs.txt","r");
     if(file_p==NULL){
         return 1;
@@ -58,6 +62,6 @@ int main(int argc, char** argv){
         printf("%s\n",line_buffer);
     }
     printf("FNGETLINE_DONE_AFTER\n");
-    fclose(file_p);*/
-    return 0;
+    fclose(file_p);
+    return 0;*/
 }
