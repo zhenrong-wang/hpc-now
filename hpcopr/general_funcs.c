@@ -1315,7 +1315,7 @@ int rm_pdir(char* pathname){
         if(find_data.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY){  
             if(strcmp(find_data.cFileName,".")!=0&&strcmp(find_data.cFileName,"..")!=0){  
                 snprintf(sub_path,MAX_PATH-1,"%s\\%s",pathname,find_data.cFileName);  
-                result&=rmdir_p(sub_path);  
+                result&=rm_pdir(sub_path);  
             }
         }
         else {  
