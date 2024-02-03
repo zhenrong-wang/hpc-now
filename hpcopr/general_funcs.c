@@ -2573,15 +2573,15 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
 //overwrite flag =0, not replace
 //overwrite flag !=0, replace.
 int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
-    FILE* file_p=fopen(filename,"r");
     char filename_temp[FILENAME_LENGTH]="";
     char line_buffer[LINE_LENGTH]="";
     int getline_flag=0;
-    if(file_exist_or_not(filename)!=0){
-        return -1;
-    }
     if(strlen(key)==0){
         return -3;
+    }
+    FILE* file_p=fopen(filename,"r");
+    if(file_p==NULL){
+        return -1;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s.dline%s",filename,GFUNC_FILE_SUFFIX);
     FILE* file_p_tmp=fopen(filename_temp,"w+");
