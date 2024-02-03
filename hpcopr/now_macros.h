@@ -307,7 +307,7 @@ typedef struct{
 #define FILENAME_EXT_LENGTH        128
 #define FILENAME_BASE_FULL_LENGTH  260
 #define FILENAME_LENGTH_EXT        576
-#define FILE_IO_BLOCK              1048576 /* 1MiB buffer */
+#define FILE_IO_BLOCK              4194304 /* 4 MiB buffer */
 #define LOCATION_LENGTH            384
 #define LOCATION_LENGTH_EXTENDED   512
 

@@ -1380,6 +1380,7 @@ int cp_file(char* current_filename, char* new_filename){
     char filebase_full[FILENAME_BASE_FULL_LENGTH]="";
     char new_filename_temp[FILENAME_LENGTH]="";
     struct stat file_stat;
+    uint_8bit* buffer=NULL;
 #ifdef _WIN32
     long long filesize_byte;
     long long i;
@@ -1421,10 +1422,6 @@ int cp_file(char* current_filename, char* new_filename){
         }
 #endif
     }
-    uint_8bit* buffer=(uint_8bit*)malloc(sizeof(uint_8bit)*FILE_IO_BLOCK);
-    if(buffer==NULL){
-        return -7; /* Memory Allocation Failed. */
-    }
     /* Make sure the file can be opened and created */
     FILE* file_p_curr=fopen(current_filename,"rb");
     if(file_p_curr==NULL){
@@ -1449,9 +1446,15 @@ int cp_file(char* current_filename, char* new_filename){
         return -3; /* File I/O failed. */
     }
     for(i=0;i<filesize_byte/FILE_IO_BLOCK;i++){
+        buffer=(uint_8bit*)malloc(sizeof(uint_8bit)*FILE_IO_BLOCK);
+        if(buffer==NULL){
+            fclose(file_p_curr);
+            fclose(file_p_new);
+            return -7; /* Memory Allocation Failed. */
+        }
         if(fread(buffer,FILE_IO_BLOCK,sizeof(uint_8bit),file_p_curr)==0){
+            free(buffer);
             if(ferror(file_p_curr)){
-                free(buffer);
                 fclose(file_p_curr);
                 fclose(file_p_new);
                 return 1;
@@ -1464,6 +1467,13 @@ int cp_file(char* current_filename, char* new_filename){
             fclose(file_p_new);
             return 3; /* File write error. */
         }
+        free(buffer);
+    }
+    buffer=(uint_8bit*)malloc(sizeof(uint_8bit)*(filesize_byte%FILE_IO_BLOCK));
+    if(buffer==NULL){
+        fclose(file_p_curr);
+        fclose(file_p_new);
+        return -7; /* Memory Allocation Failed. */
     }
     if(fread(buffer,sizeof(uint_8bit),filesize_byte%FILE_IO_BLOCK,file_p_curr)==0){
         if(ferror(file_p_curr)){
