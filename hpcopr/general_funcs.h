@@ -52,6 +52,7 @@ int delete_file_or_dir(char* file_or_dir);
 int rm_file_or_dir(char* file_or_dir);
 int mk_pdir(char* pathname);
 int rm_pdir(char* pathname);
+int cp_file(char* current_filename, char* new_filename);
 
 int password_complexity_check(char* password, char* special_chars);
 int generate_random_passwd(char* password); /* This function is deprecated, please use generate_random_npasswd */

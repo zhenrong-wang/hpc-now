@@ -33,11 +33,13 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <libgen.h>
 #elif __APPLE__
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <libgen.h>
 #endif
 
 #include "now_macros.h"
@@ -1366,6 +1368,50 @@ int rm_pdir(char* pathname){
     }
     return 0;
 #endif
+}
+
+int cp_file(char* current_filename, char* new_filename){
+#ifdef _WIN32
+    char filebase_win[FILENAME_BASE_LENGTH]="";
+    char ext_win[FILENAME_EXT_LENGTH]="";
+#endif
+    char filebase_full[FILENAME_BASE_FULL_LENGTH]="";
+    char new_filename_temp[FILENAME_LENGTH]="";
+    struct stat file_stat;
+    if(file_exist_or_not(current_filename)!=0){
+        return -1;
+    }
+#ifdef _WIN32
+    _splitpath(current_filename,NULL,NULL,filebase_win,ext_win);
+    snprintf(filebase_full,FILENAME_FULL_LENGTH-1,"%s%s",filebase_win,ext_win);
+#else
+    strncpy(filebase_full,basename(current_filename),FILENAME_FULL_LENGTH-1);
+#endif
+    if(folder_exist_or_not(new_filename)==0){
+        snprintf(new_filename_temp,FILENAME_LENGTH-1,"%s%s%s",new_filename,PATH_SLASH,filebase_full);
+#ifdef _WIN32
+        if(GetFileAttributes(new_filename_temp)!=INVALID_FILE_ATTRIBUTES){
+            return -1;
+        }
+#else
+        if(stat(new_filename_temp,&file_stat)==0){
+            return -1;
+        }
+#endif
+    }
+#ifdef _WIN32
+    if(GetFileAttributes(new_filename)!=INVALID_FILE_ATTRIBUTES){
+        return -1;
+    }
+#else
+    if(stat(new_filename,&file_stat)==0){
+        return -1;
+    }
+#endif
+    FILE* file_p_curr=fopen(current_filename,"rb");
+    FILE* file_p_new=fopen(new_filename,"wb+");
+    /* WIP, to be continued. */
+    return 0;
 }
 
 /* 
