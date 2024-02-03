@@ -175,6 +175,7 @@ int show_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey
     char mon_data_file_temp[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
     char mon_data_line[LINE_LENGTH_SHORT]="";
+    char randstr[8]="";
     char start_date[32]="";
     char start_time[32]="";
     char end_date[32]="";
