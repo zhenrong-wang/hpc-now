@@ -1895,17 +1895,20 @@ void single_file_to_running(char* filename_temp, char* cloud_flag){
     }
 }
 
-void update_compute_template(char* stackdir, char* cloud_flag){
-    char cmdline[CMDLINE_LENGTH]="";
-    char filename_temp[FILENAME_LENGTH]="";
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute1.tf %s %s",COPY_FILE_CMD,stackdir,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    single_file_to_running(filename_temp,cloud_flag);
+int update_compute_template(char* stackdir, char* cloud_flag){
+    char prev_template[FILENAME_LENGTH]="";
+    char new_template[FILENAME_LENGTH]="";
+    snprintf(prev_template,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
+    snprintf(new_template,FILENAME_LENGTH-1,"%s%shpc_stack_compute1.tf",stackdir,PATH_SLASH);
+    rm_file_or_dir(prev_template);
+    if(cp_file(new_template,prev_template)!=0){
+        return 1;
+    }
+    single_file_to_running(new_template,cloud_flag);
+    return 0;
 }
 
 int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* errorlog, char* errlog_archive, int silent_flag){
-//    char cmdline[CMDLINE_LENGTH]="";
     int i=0;
     int total_minutes=0;
     char* annimation="\\|/-";
@@ -3456,7 +3459,6 @@ int file_convert(char* filename_base, char* extra_str, char* option){
     char file_decrypted[FILENAME_LENGTH]="";
     char file_dec_back[FILENAME_LENGTH]="";
     char file_backup[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     char hash_key[64]="";
     if(strlen(filename_base)<1||strlen(extra_str)<1){
         return -5;
@@ -3464,8 +3466,11 @@ int file_convert(char* filename_base, char* extra_str, char* option){
     if(strcmp(option,"backup")==0||strcmp(option,"restore")==0||strcmp(option,"delete_backup")==0){
         snprintf(file_backup,FILENAME_LENGTH-1,"%s.%s.backup",filename_base,extra_str);
         if(strcmp(option,"backup")==0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,filename_base,file_backup,SYSTEM_CMD_REDIRECT);
-            return system(cmdline);
+            rm_file_or_dir(file_backup);
+            if(cp_file(filename_base,file_backup)!=0){
+                return 1;
+            }
+            return 0;
         }
         else if(strcmp(option,"restore")==0){
             rm_file_or_dir(filename_base);
@@ -3501,8 +3506,8 @@ int file_convert(char* filename_base, char* extra_str, char* option){
         return file_exist_or_not(file_encrypted);
     }
     if(strcmp(option,"backup_encrypt")==0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,file_decrypted,file_dec_back,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        rm_file_or_dir(file_dec_back);
+        cp_file(file_decrypted,file_dec_back);
         if(file_exist_or_not(file_dec_back)!=0){
             return 1;
         }

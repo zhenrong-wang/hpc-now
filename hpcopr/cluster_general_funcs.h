@@ -77,7 +77,7 @@ int get_state_value(char* workdir, char* key, char* value);
 int get_state_nvalue(char* workdir, char* crypto_keyfile, char* key, char* value, unsigned int valen_max); //Newer function
 
 int archive_log(char* logarchive, char* logfile);
-void update_compute_template(char* stackdir, char* cloud_flag);
+int update_compute_template(char* stackdir, char* cloud_flag);
 int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* errorlog, char* errlog_archive, int silent_flag);
 int graph(char* workdir, char* crypto_keyfile, int graph_level);
 
