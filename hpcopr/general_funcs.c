@@ -1379,12 +1379,12 @@ int cp_file(char* current_filename, char* new_filename){
 #endif
     char filebase_full[FILENAME_BASE_FULL_LENGTH]="";
     char new_filename_temp[FILENAME_LENGTH]="";
-    struct stat file_stat;
     uint_8bit* buffer=NULL;
 #ifdef _WIN32
     long long filesize_byte;
     long long i;
 #else
+    struct stat file_stat;
     long int filesize_byte;
     long int i;
 #endif
