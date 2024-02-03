@@ -5,6 +5,8 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
+#define __USE_LARGEFILE64 1
+
 #ifndef _WIN32
 #define _GNU_SOURCE 1
 #include <termios.h> /* For terminal operation of the getpass function*/
@@ -1378,6 +1380,13 @@ int cp_file(char* current_filename, char* new_filename){
     char filebase_full[FILENAME_BASE_FULL_LENGTH]="";
     char new_filename_temp[FILENAME_LENGTH]="";
     struct stat file_stat;
+#ifdef _WIN32
+    long long filesize_byte;
+    long long i;
+#else
+    long int filesize_byte;
+    long int i;
+#endif
     if(file_exist_or_not(current_filename)!=0){
         return -1;
     }
@@ -1388,6 +1397,7 @@ int cp_file(char* current_filename, char* new_filename){
     strncpy(filebase_full,basename(current_filename),FILENAME_BASE_FULL_LENGTH-1);
 #endif
     if(folder_exist_or_not(new_filename)==0){
+        /* If the new_filename is a folder, it must be writable and there is no duplicate file already exists. */
         snprintf(new_filename_temp,FILENAME_LENGTH-1,"%s%s%s",new_filename,PATH_SLASH,filebase_full);
 #ifdef _WIN32
         if(GetFileAttributes(new_filename_temp)!=INVALID_FILE_ATTRIBUTES){
@@ -1399,19 +1409,79 @@ int cp_file(char* current_filename, char* new_filename){
         }
 #endif
     }
+    else{
+        /* If the new_filename is a file, it must not exist. */
 #ifdef _WIN32
-    if(GetFileAttributes(new_filename)!=INVALID_FILE_ATTRIBUTES){
-        return -1;
-    }
+        if(GetFileAttributes(new_filename)!=INVALID_FILE_ATTRIBUTES){
+            return -1;
+        }
 #else
-    if(stat(new_filename,&file_stat)==0){
-        return -1;
-    }
+        if(stat(new_filename,&file_stat)==0){
+            return -1;
+        }
 #endif
-    /*
-     * FILE* file_p_curr=fopen(current_filename,"rb");
-     * FILE* file_p_new=fopen(new_filename,"wb+");
-     * WIP, to be continued. */
+    }
+    uint_8bit* buffer=(uint_8bit*)malloc(sizeof(uint_8bit)*FILE_IO_BLOCK);
+    if(buffer==NULL){
+        return -7; /* Memory Allocation Failed. */
+    }
+    /* Make sure the file can be opened and created */
+    FILE* file_p_curr=fopen(current_filename,"rb");
+    if(file_p_curr==NULL){
+        return -5; /* File I/O failed. */
+    }
+    fseek(file_p_curr,0L,SEEK_END);
+#ifdef _WIN32
+    filesize_byte=_ftelli64(file_p_curr);
+#else
+    filesize_byte=ftello64(file_p_curr);
+#endif
+    rewind(file_p_curr);
+    FILE* file_p_new=NULL;
+    if(strlen(new_filename_temp)>0){
+        file_p_new=fopen(new_filename_temp,"wb+");
+    }
+    else{
+        file_p_new=fopen(new_filename,"wb+");
+    }
+    if(file_p_new==NULL){
+        fclose(file_p_curr);
+        return -3; /* File I/O failed. */
+    }
+    for(i=0;i<filesize_byte/FILE_IO_BLOCK;i++){
+        if(fread(buffer,FILE_IO_BLOCK,sizeof(uint_8bit),file_p_curr)==0){
+            if(ferror(file_p_curr)){
+                free(buffer);
+                fclose(file_p_curr);
+                fclose(file_p_new);
+                return 1;
+            }
+            break;
+        }
+        if(fwrite(buffer,FILE_IO_BLOCK,sizeof(uint_8bit),file_p_new)<sizeof(uint_8bit)){
+            free(buffer);
+            fclose(file_p_curr);
+            fclose(file_p_new);
+            return 3; /* File write error. */
+        }
+    }
+    if(fread(buffer,sizeof(uint_8bit),filesize_byte%FILE_IO_BLOCK,file_p_curr)==0){
+        if(ferror(file_p_curr)){
+            free(buffer);
+            fclose(file_p_curr);
+            fclose(file_p_new);
+            return 1;
+        }
+    }
+    if(fwrite(buffer,sizeof(uint_8bit),filesize_byte%FILE_IO_BLOCK,file_p_new)<filesize_byte%FILE_IO_BLOCK){
+        free(buffer);
+        fclose(file_p_curr);
+        fclose(file_p_new);
+        return 3; /* File write error. */
+    }
+    free(buffer);
+    fclose(file_p_curr);
+    fclose(file_p_new);
     return 0;
 }
 
