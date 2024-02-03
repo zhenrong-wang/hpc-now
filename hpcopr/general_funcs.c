@@ -1383,9 +1383,9 @@ int cp_file(char* current_filename, char* new_filename){
     }
 #ifdef _WIN32
     _splitpath(current_filename,NULL,NULL,filebase_win,ext_win);
-    snprintf(filebase_full,FILENAME_FULL_LENGTH-1,"%s%s",filebase_win,ext_win);
+    snprintf(filebase_full,FILENAME_BASE_FULL_LENGTH-1,"%s%s",filebase_win,ext_win);
 #else
-    strncpy(filebase_full,basename(current_filename),FILENAME_FULL_LENGTH-1);
+    strncpy(filebase_full,basename(current_filename),FILENAME_BASE_FULL_LENGTH-1);
 #endif
     if(folder_exist_or_not(new_filename)==0){
         snprintf(new_filename_temp,FILENAME_LENGTH-1,"%s%s%s",new_filename,PATH_SLASH,filebase_full);
@@ -1408,9 +1408,10 @@ int cp_file(char* current_filename, char* new_filename){
         return -1;
     }
 #endif
-    FILE* file_p_curr=fopen(current_filename,"rb");
-    FILE* file_p_new=fopen(new_filename,"wb+");
-    /* WIP, to be continued. */
+    /*
+     * FILE* file_p_curr=fopen(current_filename,"rb");
+     * FILE* file_p_new=fopen(new_filename,"wb+");
+     * WIP, to be continued. */
     return 0;
 }
 
