@@ -148,23 +148,23 @@ If everything goes well, the binaries will be built to the `build` folder.
 
     Step 3. Run the command below:
 
-    Suppose your installer version code is 0.2.1, hpcopr version code is 0.2.1, then the command should be:
+    Suppose your installer version code is 0.3.2, hpcopr version code is 0.3.2, then the command should be:
 
-    `.\installer-win-0.2.1.exe install --hloc hpcopr-win-0.2.1.exe --cloc now-crypto-win.exe`
+    `.\installer-win-0.3.2.exe install --hloc hpcopr-win-0.3.2.exe --cloc now-crypto-win.exe`
 
 - For **GNU/Linux Distros** : 
 
-    Suppose your installer version code is 0.2.1, hpcopr version code is 0.2.1, then the command should be:
+    Suppose your installer version code is 0.3.2, hpcopr version code is 0.3.2, then the command should be:
 
-    `sudo ./installer-lin-0.2.1.exe install --hloc hpcopr-lin-0.2.1.exe --cloc now-crypto-lin.exe`
+    `sudo ./installer-lin-0.3.2.exe install --hloc hpcopr-lin-0.3.2.exe --cloc now-crypto-lin.exe`
 
 - For **macOS(Darwin)**:
 
-    Suppose your installer version code is 0.2.1, hpcopr version code is 0.2.1, then the command should be:
+    Suppose your installer version code is 0.3.2, hpcopr version code is 0.3.2, then the command should be:
 
-    `sudo ./installer-dwn-0.2.1.exe install --hloc hpcopr-dwn-0.2.1.exe --cloc now-crypto-dwn.exe`
+    `sudo ./installer-dwn-0.3.2.exe install --hloc hpcopr-dwn-0.3.2.exe --cloc now-crypto-dwn.exe`
 
-**IMPORTANT**: Please replace the sample version code `0.2.1` with the real code of your own build.
+**IMPORTANT**: Please replace the sample version code `0.3.2` with the real code of your own build.
 
 **IMPORTANT**: Please keep the window open for the next step.
 
@@ -246,14 +246,14 @@ The **`installer`** is designed to manage the installation/update/removal of the
 - `update`     Update the HPC-NOW services and components.
 - `uninstall`  Uninstall the HPC-NOW services completely. **CAUTION! You must destroy/remove all the clusters managed in current device before running this command! Otherwise, out-of-manage cloud resource may occur!**
 - `help`       Read the help doc for `installer`.
-- `setpass`    Set/rotate/change/update the operator's password.
+- `setpass`    Set/rotate/change/update the operator's keystring.
 - `version`    Display the version of the `installer`, not the `hpcopr`.
 - `verlist`    List out all the available versions provided in the public repository.
 
 ### **Advanced Options(Optional)**
 
 - `--accept`    Automatically accept the MIT License terms of this software.
-- `--pass PASSWORD`  Specify the operator's crypto password.
+- `--pass KEYSTRING`  Specify the operator's crypto password.
 - `--hloc LOCATION`  The location (an URL or a valid local path) of the `hpcopr` CLI.
 - `--cloc LOCATION`  The location (an URL or a valid local path) of the `now-crypto` binary.
 - `--hver VERSION` Specify a version of the `hpcopr` CLI, default: latest version.
@@ -504,7 +504,7 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 &emsp;&emsp;&emsp;&emsp;+- **current_cluster.dat**&emsp;&emsp;*Current cluster indicator*\
 &emsp;&emsp;&emsp;&emsp;+- **google_check.dat**&emsp;&emsp;*Google connectivity indicator*\
 &emsp;&emsp;&emsp;&emsp;+- **locations.conf**&emsp;&emsp;*Locations of components*\
-&emsp;&emsp;&emsp;&emsp;+- **components.conf**&emsp;&emsp;*MD5 valus of components*\
+&emsp;&emsp;&emsp;&emsp;+- **components.conf**&emsp;&emsp;*Version and SHA of components*\
 &emsp;&emsp;&emsp;&emsp;+- **tf_running.conf**&emsp;&emsp;*TF running configuration*\
 &emsp;&emsp;+- **.destroyed/**&emsp;&emsp;*Files of destroyed clusters*\
 &emsp;&emsp;+- **workdir/**&emsp;&emsp;*Working directories for all clusters*\
