@@ -207,7 +207,8 @@ int show_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the monitor data of cluster " WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD" ." RESET_DISPLAY "\n", cluster_name);
         return -5;
     }
-    snprintf(mon_data_file_temp,FILENAME_LENGTH-1,"%s%smon_data%smon_data_temp.csv",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
+    generate_random_nstring(randstr,8,1);
+    snprintf(mon_data_file_temp,FILENAME_LENGTH-1,"%s%smon_data%smon_data_temp.%s.csv",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,randstr);
     file_p_2=fopen(mon_data_file_temp,"w+");
     if(file_p_2==NULL){
         return -1;
