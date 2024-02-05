@@ -573,16 +573,22 @@ if [ -f /root/hostfile ]; then
     echo -e "export PATH=/opt/google-cloud-sdk/bin:\$PATH" >> /etc/profile
   fi
 fi
-yum -y update
+
+if [ $cloud_flag != 'CLOUD_A' ]; then
+  yum -y update
+fi
+
 yum -y install gcc-c++ gcc-gfortran 
 yum -y install htop 
 yum -y install python3 python3-devel 
 yum -y install hostname dos2unix bash-completion
-yum -y install evince # The PDF viewer
-yum -y install eog # The image viewer
+
+if [ -f /root/hostfile ]; then
+  yum -y install evince # The PDF viewer
+  yum -y install eog # The image viewer
+fi
+
 systemctl mask firewalld
-#systemctl restart xrdp
-#systemctl enable xrdp
 
 if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete
