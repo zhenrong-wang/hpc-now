@@ -20,6 +20,7 @@ resource "alicloud_instance" "database" {
   internet_charge_type = "PayByTraffic"
   resource_group_id = "${alicloud_resource_manager_resource_group.resource_group.id}"
   status = "Running"
+  security_enhancement_strategy = "Deactive"
   user_data = <<EOF
 #!/bin/bash
 echo ${alicloud_route_entry.vsw_rt_entry.id} >> /dev/null

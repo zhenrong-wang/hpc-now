@@ -21,7 +21,8 @@ resource "alicloud_instance" "master" {
   internet_max_bandwidth_out = MASTER_BANDWIDTH
   resource_group_id = "${alicloud_resource_manager_resource_group.resource_group.id}"
   password = "${var.master_passwd}"
-  status = "Running" 
+  status = "Running"
+  security_enhancement_strategy = "Deactive"
   user_data = <<EOF
 #!/bin/bash
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG

@@ -574,10 +574,7 @@ if [ -f /root/hostfile ]; then
   fi
 fi
 
-if [ $cloud_flag != 'CLOUD_A' ]; then
-  yum -y update # AliCloud's CenOS Stream image has a serious bug. This command will corrupt the whole OS.
-fi
-
+yum -y update 
 yum -y install gcc-c++ gcc-gfortran 
 yum -y install htop 
 yum -y install python3 python3-devel 

@@ -1794,8 +1794,8 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
     remote_copy(workdir,crypto_keyfile,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
     sync_statefile(workdir,crypto_keyfile,sshkey_dir);
-    remote_exec(workdir,crypto_keyfile,sshkey_dir,"connect",1);
-    remote_exec(workdir,crypto_keyfile,sshkey_dir,"all",2);
+    remote_exec(workdir,crypto_keyfile,sshkey_dir,"quick",1);
+    /*remote_exec(workdir,crypto_keyfile,sshkey_dir,"all",2);*/
     delete_decrypted_files(workdir,crypto_keyfile);
     update_usage_summary(workdir,crypto_keyfile,"master","start");
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The master node has been reconfigured.\n");
