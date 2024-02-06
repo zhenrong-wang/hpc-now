@@ -1888,7 +1888,7 @@ void single_file_to_running(char* filename_temp, char* cloud_flag){
         global_nreplace(filename_temp,LINE_LENGTH_SMALL,"\"OFF\"","\"ON\"");
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"stop","start");
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"\"stop\"","\"start\"");
     }
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
         global_nreplace(filename_temp,LINE_LENGTH_SMALL,"TERMINATED","RUNNING");
