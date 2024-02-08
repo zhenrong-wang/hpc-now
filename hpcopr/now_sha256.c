@@ -5,10 +5,17 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
-#include "now_sha256.h"
+#ifndef __APPLE__
+#include <malloc.h>
+#endif
+#ifdef __linux__
+#include <features.h>
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "now_sha256.h"
 
 uint_8bit padding_sha256[64]={
     0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -110,17 +117,6 @@ int state_to_sha256_string(uint_32bit state[], char sha256_string[], uint_8bit s
     return 0;
 }
 
-/*void print_buffer(uint_8bit buffer_8bit[]){
-    int i,j;
-    for(i=0;i<8;i++){
-        for(j=0;j<8;j++){
-            printf("%x ",buffer_8bit[i*8+j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-}*/
-
 int now_sha256_for_file(char* input_file, char sha256_string[], int sha256_len){
     if(sha256_len<65){
         return -3;
@@ -133,7 +129,7 @@ int now_sha256_for_file(char* input_file, char sha256_string[], int sha256_len){
     uint_8bit buffer_8bit[64];
     uint_8bit i;
     uint_8bit read_byte=0;
-    uint_64bit total_length_byte=0;
+    int_64bit total_length_byte=0;
     uint_32bit buffer_blocks=0;
     uint_32bit buffer_block_length=0;
     uint_8bit* buffer_block_ptr=NULL;
@@ -142,8 +138,16 @@ int now_sha256_for_file(char* input_file, char sha256_string[], int sha256_len){
     int break_flag;
     state_init_sha256(state);
     fseek(file_p,0L,SEEK_END);
-    total_length_byte=ftell(file_p);
+#ifdef _WIN32
+    total_length_byte=_ftelli64(file_p);
+#else
+    total_length_byte=ftello(file_p);
+#endif
     rewind(file_p);
+    if(total_length_byte<0){
+        fclose(file_p);
+        return -1;
+    }
     while(final_flag==0){
         if(total_length_byte>FILEIO_BUFFER_SIZE_SHA*(buffer_blocks+1)){
             buffer_block_length=FILEIO_BUFFER_SIZE_SHA;

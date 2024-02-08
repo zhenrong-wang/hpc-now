@@ -1378,13 +1378,9 @@ int cp_file(char* current_filename, char* new_filename){
     char filebase_full[FILENAME_BASE_FULL_LENGTH]="";
     char new_filename_temp[FILENAME_LENGTH]="";
     uint_8bit* buffer=NULL;
-#ifdef _WIN32
-    long long filesize_byte;
-    long long i;
-#else
+    int_64bit i,filesize_byte;
+#ifndef _WIN32
     struct stat file_stat;
-    long int filesize_byte;
-    long int i;
 #endif
     if(file_exist_or_not(current_filename)!=0){
         return -1;
@@ -1425,15 +1421,11 @@ int cp_file(char* current_filename, char* new_filename){
     if(file_p_curr==NULL){
         return -5; /* File I/O failed. */
     }
-    fseek(file_p_curr,0L,SEEK_END);
-#ifdef _WIN32
-    filesize_byte=_ftelli64(file_p_curr);
-#elif __APPLE__
-    filesize_byte=ftello(file_p_curr);
-#else
-    filesize_byte=ftello64(file_p_curr);
-#endif
-    rewind(file_p_curr);
+    filesize_byte=get_filesize_byte(file_p_curr);
+    if(filesize_byte<0){
+        fclose(file_p_curr);
+        return -5; /* File I/O failed. */
+    }
     FILE* file_p_new=NULL;
     if(strlen(new_filename_temp)>0){
         file_p_new=fopen(new_filename_temp,"wb+");
@@ -1554,6 +1546,30 @@ int delete_file_or_dir(char* file_or_dir){
         return system(cmdline);
     }
     return -1;
+}
+
+int_64bit get_filesize_byte(FILE* file_p){
+    int_64bit current,length;
+    if(file_p==NULL){
+        return -3;
+    }
+#ifdef _WIN32
+    current=_ftelli64(file_p);
+    fseek(file_p,0L,SEEK_END);
+    length=_ftelli64(file_p);
+    _fseeki64(file_p,current,SEEK_SET);
+#elif __linux__
+    current=ftello64(file_p);
+    fseek(file_p,0L,SEEK_END);
+    length=ftello64(file_p);
+    fseeko64(file_p,current,SEEK_SET);
+#else
+    current=ftello(file_p);
+    fseek(file_p,0L,SEEK_END);
+    length=ftello(file_p);
+    fseeko(file_p,current,SEEK_SET);
+#endif
+    return length;
 }
 
 /* 

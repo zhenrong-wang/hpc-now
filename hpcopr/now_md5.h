@@ -14,6 +14,7 @@ typedef unsigned char uint_8bit;
 typedef unsigned short uint_16bit;
 typedef unsigned int uint_32bit;
 typedef unsigned long long int uint_64bit;
+typedef signed long long int int_64bit;
 
 #define rot_left(a,n) (((a)<<(n))|((a)>>(32-(n))))
 #define F(b,c,d) (((b)&(c))|((~b)&(d)))

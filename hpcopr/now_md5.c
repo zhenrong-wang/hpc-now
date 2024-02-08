@@ -5,13 +5,16 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
-#include "now_md5.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #ifndef __APPLE__
 #include <malloc.h>
 #endif
+#ifdef __linux__
+#define __USE_LARGEFILE64 1
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "now_md5.h"
 
 uint_8bit padding[64]={
     0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -179,24 +182,27 @@ int now_md5_for_file(char* input_file, char md5sum_string[], int md5sum_len){
     uint_32bit buffer_32bit[16];
     uint_8bit md5_array[16];
     uint_8bit i;
-    
     uint_8bit read_byte=0;
-    uint_64bit total_length_byte=0;
-
+    int_64bit total_length_byte=0;
     uint_32bit buffer_blocks=0;
     uint_32bit buffer_block_length=0;
     uint_8bit* buffer_block_ptr=NULL;
     uint_32bit buffer_read;
-
     int final_flag=0;
     int break_flag;
-
     state_init(state);
     fseek(file_p,0L,SEEK_END);
-    total_length_byte=ftell(file_p);
+#ifdef _WIN32
+    total_length_byte=_ftelli64(file_p);
+#else
+    total_length_byte=ftello(file_p);
+#endif
     rewind(file_p);
+    if(total_length_byte<0){
+        fclose(file_p);
+        return -1;
+    }
     while(final_flag==0){
-        /*printf("%lld \n",total_length_byte);*/
         if(total_length_byte>FILEIO_BUFFER_SIZE*(buffer_blocks+1)){
             buffer_block_length=FILEIO_BUFFER_SIZE;
         }
