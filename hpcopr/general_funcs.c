@@ -5,8 +5,6 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
-#define __USE_LARGEFILE64 1
-
 #ifndef _WIN32
 #define _GNU_SOURCE 1
 #include <termios.h> /* For terminal operation of the getpass function*/
