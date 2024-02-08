@@ -1349,14 +1349,23 @@ int rm_pdir(char* pathname){
             closedir(dir);
             return -1;
         }
-        if(S_ISDIR(sub_stat.st_mode)){
+        /* If is a softlink */
+        if(S_ISLNK(sub_stat.st_mode)){
+            if(unlink(sub_path)!=0){
+                closedir(dir);
+                return -1;
+            }
+        }
+        /* If is a directory */
+        else if(S_ISDIR(sub_stat.st_mode)){
             if(rm_pdir(sub_path)!=0){
                 closedir(dir);
                 return -1;
             }
         }
+        /* All other cases */
         else{
-            if(remove(sub_path)!=0){
+            if(unlink(sub_path)!=0){
                 closedir(dir);
                 return -1;
             }
