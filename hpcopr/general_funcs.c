@@ -1430,6 +1430,8 @@ int cp_file(char* current_filename, char* new_filename){
     fseek(file_p_curr,0L,SEEK_END);
 #ifdef _WIN32
     filesize_byte=_ftelli64(file_p_curr);
+#elif __APPLE__
+    filesize_byte=ftello(file_p_curr);
 #else
     filesize_byte=ftello64(file_p_curr);
 #endif
