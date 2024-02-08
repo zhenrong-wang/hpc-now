@@ -1345,18 +1345,18 @@ int rm_pdir(char* pathname){
             continue;
         }
         snprintf(sub_path,DIR_LENGTH_EXT-1,"%s/%s",pathname,entry->d_name);
-        if(stat(sub_path,&sub_stat)==-1){
+        if(lstat(sub_path,&sub_stat)==-1){
             closedir(dir);
             return -1;
         }
-        /* If is a softlink */
-        if(S_ISLNK(sub_stat.st_mode)){
+        /* If it is a softlink */
+        if((sub_stat.st_mode&S_IFMT)==S_IFLNK){
             if(unlink(sub_path)!=0){
                 closedir(dir);
                 return -1;
             }
         }
-        /* If is a directory */
+        /* If it is a normal directory */
         else if(S_ISDIR(sub_stat.st_mode)){
             if(rm_pdir(sub_path)!=0){
                 closedir(dir);
