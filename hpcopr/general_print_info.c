@@ -50,16 +50,15 @@ void print_tail(void){
 
 void print_new_cluster_done(int gcp_flag){
     if(gcp_flag==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The key file has been encrypted and stored. " WARN_YELLO_BOLD "We recommend you\n");
-        printf("[  ****  ] to delete the original key file to avoid key leakage!" RESET_DISPLAY " Now you can either:\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The key file has been encrypted and stored. " WARN_YELLO_BOLD "We recommend\n");
+        printf("[  ****  ] to delete the original key file." RESET_DISPLAY " Now you can:\n");
     }
     else{
-        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The key pair has been encrypted and stored locally. You can either:\n");
+        printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The keypair has been encrypted and stored. You can:\n");
     }
-    printf("[  ****  ] 1. run 'hpcopr init' to create a default cluster. OR\n");
-    printf("[  ****  ] 2. run 'hpcopr get-conf' to get the default cluster configuration, and run\n");
-    printf("[  ****  ]    'hpcopr init' to create a customized cluster.\n");
-    printf("[  ****  ] You can also switch to this cluster name and operate this cluster later.\n");
+    printf("[  ****  ] 1. Run 'hpcopr init -b' to create a default cluster. OR\n");
+    printf("[  ****  ] 2. Run 'hpcopr get-conf', edit the config, and 'hpcopr init'.\n");
+    printf("[  ****  ] You can also switch to this cluster and operate it later.\n");
 }
 
 void print_help(char* cmd_name){
