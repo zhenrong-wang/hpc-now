@@ -598,7 +598,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return 1;
     }
     else if(name_check_flag==-3){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The length of " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " of out of range %d - %d." RESET_DISPLAY "\n",input_cluster_name,CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The length of " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is out of range %d - %d." RESET_DISPLAY "\n",input_cluster_name,CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
         return 1;
     }
     else if(name_check_flag==-5){
