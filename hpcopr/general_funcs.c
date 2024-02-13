@@ -1496,23 +1496,71 @@ int cp_file(char* current_filename, char* new_filename){
     return 0;
 }
 
-int cp_dir(char* current_dirname, char* new_dirname){
-    /* To be developed */
+int batch_cp_files(char* source_dir, char* filename_string, char* target_dir){
+    int i=0,j,k;
+    char buffer[LINE_LENGTH_SHORT]="";
+    char** substr=NULL;
+
+    DIR* dir;
+    struct dirent* entry;
+    if(folder_check_general(source_dir,4)!=0){
+        return -3;
+    }
+    if(folder_check_general(target_dir,6)!=0){
+        return -3;
+    }
+    if(strlen(filename_string)<1){
+        return -1;
+    }
+    while(get_seq_nstring(filename_string,'*',i+1,buffer,LINE_LENGTH_SHORT)==0){
+        i++;
+    }
+    substr=(char**)malloc(sizeof(char*)*i);
+    if(substr==NULL){
+        return -5; /* Memory error. */
+    }
+    for(j=0;j<i;j++){
+        *(substr+j)=(char*)malloc(sizeof(char)*LINE_LENGTH_SHORT);
+        if(*(substr+j)==NULL){
+            for(k=0;k<j;k++){
+                free(*(substr+k));
+            }
+            free(substr);
+            return -5;
+        }
+        memset(*(substr+j),'\0',LINE_LENGTH_SHORT);
+        if(get_seq_nstring(filename_string,'*',j+1,*(substr+j),LINE_LENGTH_SHORT)!=0){
+            for(k=0;k<j;k++){
+                free(*(substr+k));
+            }
+            free(substr);
+            return -5;
+        }
+    }
+    dir=opendir(source_dir);
+    if(dir==NULL){
+        for(k=0;k<i;k++){
+            free(*(substr+k));
+        }
+        free(substr);
+        return -3;
+    }
+    /*while((entry=readdir(dir))!=NULL){
+        if(strcmp(entry->d_name,".")==0||strcmp(entry->d_name,"..")==0){
+            continue;
+        }
+        for(j=0;j<i;j++){
+            
+        }
+    }
+    to be developed.*/
     return 0;
 }
 
-int batch_cp(char* batch_file_names, char* target_dir){
-    /* To be developed */
+int batch_rm_files(char* target_dir, char* filename_string){
     return 0;
 }
-
-int batch_rm(char* arb_file_names){
-    /* To be developed */
-    return 0;
-}
-
-int batch_mv(char* batch_file_names, char* target_dir){
-    /* To be developed */
+int batch_mv_files(char* source_dir, char* filename_string, char* target_dir){
     return 0;
 }
 
@@ -1539,7 +1587,7 @@ int file_empty_or_not(char* filename){
 
 /* 
  * return 0: exists
- * return non-zero: not exists.
+ * return non-zero: not exists (or not writable)
  */
 int folder_exist_or_not(char* foldername){
 #ifdef _WIN32
@@ -1556,6 +1604,36 @@ int folder_exist_or_not(char* foldername){
     }
     if(S_ISDIR(dirstat.st_mode)){
         if(access(foldername,6)==0){
+            return 0;
+        }
+    }
+    return 1;
+#endif
+}
+
+/* 
+ * return 0: exists
+ * return 1: not exists (or not writable)
+ * return -1: premission code is invalid (0-exist, 2-writable, 4-readable, 6-r&W) 
+ */
+int folder_check_general(char* foldername, int rw_flag){
+    if(rw_flag!=0&&rw_flag!=2&&rw_flag!=4&&rw_flag!=6){
+        return -1;
+    }
+#ifdef _WIN32
+    if(GetFileAttributes(foldername)&FILE_ATTRIBUTE_DIRECTORY){
+        if(access(foldername,rw_flag)==0){
+            return 0;
+        }
+    }
+    return 1;
+#else
+    struct stat dirstat;
+    if(stat(foldername,&dirstat)==-1){
+        return 1;
+    }
+    if(S_ISDIR(dirstat.st_mode)){
+        if(access(foldername,rw_flag)==0){
             return 0;
         }
     }

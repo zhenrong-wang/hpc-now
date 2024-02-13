@@ -47,6 +47,7 @@ int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primar
 int file_exist_or_not(char* filename);
 int file_empty_or_not(char* filename);
 int folder_exist_or_not(char* foldername);
+int folder_check_general(char* foldername, int rw_flag);
 int delete_file_or_dir(char* file_or_dir);
 int_64bit get_filesize_byte(FILE* file_p);
 
@@ -54,10 +55,9 @@ int rm_file_or_dir(char* file_or_dir);
 int mk_pdir(char* pathname);
 int rm_pdir(char* pathname);
 int cp_file(char* current_filename, char* new_filename);
-int cp_dir(char* current_dirname, char* new_dirname);
-int batch_cp(char* batch_file_names, char* target_dir); /* Copy files to target_dir */
-int batch_rm(char* arb_file_names); /* Remove files */
-int batch_mv(char* batch_file_names, char* target_dir); /* Move files */
+int batch_cp_files(char* source_dir, char* filename_string, char* target_dir); /* Copy files to target_dir */
+int batch_rm_files(char* target_dir, char* filename_string); /* Remove files */
+int batch_mv_files(char* source_dir, char* filename_string, char* target_dir); /* Move files */
 
 int password_complexity_check(char* password, char* special_chars);
 int generate_random_passwd(char* password); /* This function is deprecated, please use generate_random_npasswd */
