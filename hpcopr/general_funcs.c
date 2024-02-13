@@ -1496,6 +1496,26 @@ int cp_file(char* current_filename, char* new_filename){
     return 0;
 }
 
+int cp_dir(char* current_dirname, char* new_dirname){
+    /* To be developed */
+    return 0;
+}
+
+int batch_cp(char* batch_file_names, char* target_dir){
+    /* To be developed */
+    return 0;
+}
+
+int batch_rm(char* arb_file_names){
+    /* To be developed */
+    return 0;
+}
+
+int batch_mv(char* batch_file_names, char* target_dir){
+    /* To be developed */
+    return 0;
+}
+
 /* 
  * Risky: if the file is not plain text, this function may cause infinite loop because EOF is absent! 
  * return <1, empty

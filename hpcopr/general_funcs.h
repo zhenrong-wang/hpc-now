@@ -54,6 +54,10 @@ int rm_file_or_dir(char* file_or_dir);
 int mk_pdir(char* pathname);
 int rm_pdir(char* pathname);
 int cp_file(char* current_filename, char* new_filename);
+int cp_dir(char* current_dirname, char* new_dirname);
+int batch_cp(char* batch_file_names, char* target_dir); /* Copy files to target_dir */
+int batch_rm(char* arb_file_names); /* Remove files */
+int batch_mv(char* batch_file_names, char* target_dir); /* Move files */
 
 int password_complexity_check(char* password, char* special_chars);
 int generate_random_passwd(char* password); /* This function is deprecated, please use generate_random_npasswd */
