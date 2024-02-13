@@ -1496,70 +1496,42 @@ int cp_file(char* current_filename, char* new_filename){
     return 0;
 }
 
-int batch_cp_files(char* source_dir, char* filename_string, char* target_dir){
-    int i=0,j,k;
-    char buffer[LINE_LENGTH_SHORT]="";
-    char** substr=NULL;
+int fuzzy_cmp(char* target_string, char* fuzzy_string){
+    /* WIP: to be developed */
+    return 0;
+}
 
+int batch_cp_files(char* source_dir, char* filename_string, char* target_dir){
     DIR* dir;
     struct dirent* entry;
     if(folder_check_general(source_dir,4)!=0){
-        return -3;
+        return -5;
     }
     if(folder_check_general(target_dir,6)!=0){
-        return -3;
+        return -5;
     }
     if(strlen(filename_string)<1){
         return -1;
     }
-    while(get_seq_nstring(filename_string,'*',i+1,buffer,LINE_LENGTH_SHORT)==0){
-        i++;
-    }
-    substr=(char**)malloc(sizeof(char*)*i);
-    if(substr==NULL){
-        return -5; /* Memory error. */
-    }
-    for(j=0;j<i;j++){
-        *(substr+j)=(char*)malloc(sizeof(char)*LINE_LENGTH_SHORT);
-        if(*(substr+j)==NULL){
-            for(k=0;k<j;k++){
-                free(*(substr+k));
-            }
-            free(substr);
-            return -5;
-        }
-        memset(*(substr+j),'\0',LINE_LENGTH_SHORT);
-        if(get_seq_nstring(filename_string,'*',j+1,*(substr+j),LINE_LENGTH_SHORT)!=0){
-            for(k=0;k<j;k++){
-                free(*(substr+k));
-            }
-            free(substr);
-            return -5;
-        }
-    }
     dir=opendir(source_dir);
     if(dir==NULL){
-        for(k=0;k<i;k++){
-            free(*(substr+k));
-        }
-        free(substr);
         return -3;
     }
-    /*while((entry=readdir(dir))!=NULL){
+    while((entry=readdir(dir))!=NULL){
         if(strcmp(entry->d_name,".")==0||strcmp(entry->d_name,"..")==0){
             continue;
         }
-        for(j=0;j<i;j++){
-            
+        if(fuzzy_cmp(entry->d_name,filename_string)==0){
+            /* WIP: to be developed */
         }
     }
-    to be developed.*/
     return 0;
 }
 
 int batch_rm_files(char* target_dir, char* filename_string){
     return 0;
 }
+
 int batch_mv_files(char* source_dir, char* filename_string, char* target_dir){
     return 0;
 }
