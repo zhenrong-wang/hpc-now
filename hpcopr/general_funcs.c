@@ -1574,12 +1574,13 @@ int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_di
         return -1;
     }
 #ifdef _WIN32
-    handle_find=FindFirstFile(source_dir,&find_data);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s\\*",source_dir);
+    handle_find=FindFirstFile(filename_temp,&find_data);
     if(handle_find==INVALID_HANDLE_VALUE){
         return -3;
     }
     do{
-        if(strcmp(find_data.cFileName,".")==0&&strcmp(find_data.cFileName,"..")==0){
+        if(strcmp(find_data.cFileName,".")==0||strcmp(find_data.cFileName,"..")==0){
             continue;
         }
         if(find_data.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY){
