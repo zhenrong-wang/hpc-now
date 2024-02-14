@@ -55,10 +55,8 @@ int rm_file_or_dir(char* file_or_dir);
 int mk_pdir(char* pathname);
 int rm_pdir(char* pathname);
 int cp_file(char* current_filename, char* new_filename);
-int fuzzy_cmp(char* target_string, char* fuzzy_string);
-int batch_cp_files(char* source_dir, char* filename_string, char* target_dir); /* Copy files to target_dir */
-int batch_rm_files(char* target_dir, char* filename_string); /* Remove files */
-int batch_mv_files(char* source_dir, char* filename_string, char* target_dir); /* Move files */
+int fuzzy_strcmp(char* target_string, char* fuzzy_string, unsigned int buf_size);
+int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_dir, char* option); 
 
 int password_complexity_check(char* password, char* special_chars);
 int generate_random_passwd(char* password); /* This function is deprecated, please use generate_random_npasswd */

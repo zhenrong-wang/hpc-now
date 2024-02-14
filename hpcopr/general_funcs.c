@@ -1298,8 +1298,8 @@ int rm_pdir(char* pathname){
         return -5;
     }
 #ifdef _WIN32
-    HANDLE handle_find;  
-    WIN32_FIND_DATA find_data;  
+    HANDLE handle_find;
+    WIN32_FIND_DATA find_data;
     char sub_path[MAX_PATH]=""; /* Windows max path length is 260, which is MAX_PATH*/
     char sub_search_pattern[MAX_PATH]="";
     snprintf(sub_path,MAX_PATH-1,"%s\\*",pathname);  
@@ -1496,23 +1496,122 @@ int cp_file(char* current_filename, char* new_filename){
     return 0;
 }
 
-int fuzzy_cmp(char* target_string, char* fuzzy_string){
-    /* WIP: to be developed */
+int fuzzy_strcmp(char* target_string, char* fuzzy_string, unsigned int buf_size){
+    size_t i=0,j=0,k,buffer_length;
+    char* buffer=NULL;
+    size_t target_str_len=strlen(target_string);
+    size_t fuzzy_str_len=strlen(fuzzy_string);
+    if(target_str_len<1||fuzzy_str_len<1||buf_size<fuzzy_str_len){
+        return -1;
+    }
+    buffer=(char*)malloc(sizeof(char)*buf_size);
+    if(buffer==NULL){
+        return -3;
+    }
+    while(i<fuzzy_str_len){
+        if(*(fuzzy_string+i)=='*'){
+            for(k=i+1;k<fuzzy_str_len&&*(fuzzy_string+k)!='*';k++){
+                *(buffer+k-i-1)=*(fuzzy_string+k);
+            }
+            buffer_length=k-i-1;
+            i=k;
+            if(buffer_length==0){
+                continue;
+            }
+            for(k=j;k<target_str_len;k++){
+                if(memcmp(target_string+k,buffer,buffer_length)==0){
+                    break;
+                }
+            }
+            if(k==target_str_len){
+                free(buffer);
+                return 1;
+            }
+            j=k+buffer_length;
+            continue;
+        }
+        if(*(fuzzy_string+i)!=*(target_string+j)){
+            free(buffer);
+            return 1;
+        }
+        i++;
+        j++;
+    }
+    free(buffer);
     return 0;
 }
 
-int batch_cp_files(char* source_dir, char* filename_string, char* target_dir){
+int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_dir, char* option){
+    char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
+#ifdef _WIN32
+    HANDLE handle_find;  
+    WIN32_FIND_DATA find_data;  
+#else
     DIR* dir;
     struct dirent* entry;
-    if(folder_check_general(source_dir,4)!=0){
-        return -5;
+    struct stat filestat;
+#endif
+    if(strcmp(option,"cp")!=0&&strcmp(option,"mv")!=0&&strcmp(option,"rm")!=0){
+        return -7;
     }
-    if(folder_check_general(target_dir,6)!=0){
-        return -5;
+    if(strcmp(option,"mv")==0||strcmp(option,"rm")==0){
+        if(folder_check_general(source_dir,6)!=0){
+            return -5;
+        }
     }
-    if(strlen(filename_string)<1){
+    else{
+        if(folder_check_general(source_dir,4)!=0){
+            return -5;
+        }
+    }
+    if(strcmp(option,"rm")!=0){
+        if(folder_check_general(target_dir,6)!=0){
+            return -5;
+        }
+    }
+    if(strlen(fuzzy_filename)<1){
         return -1;
     }
+#ifdef _WIN32
+    handle_find=FindFirstFile(source_dir,&find_data);
+    if(handle_find==INVALID_HANDLE_VALUE){
+        return -3;
+    }
+    do{
+        if(strcmp(find_data.cFileName,".")==0&&strcmp(find_data.cFileName,"..")==0){
+            continue;
+        }
+        if(find_data.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY){
+            continue; /* ONLY copy files, not folders. */
+        }
+        if(fuzzy_strcmp(find_data.cFileName,fuzzy_filename,LINE_LENGTH_SHORT)!=0){
+            continue;
+        }
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s\\%s",source_dir,find_data.cFileName);
+        if(strcmp(option,"rm")==0){
+            if(!DeleteFile(filename_temp)){
+                FindClose(handle_find);
+                return 1;
+            }
+        }
+        else if(strcmp(option,"mv")==0){
+            snprintf(filename_temp2,FILENAME_LENGTH-1,"%s\\%s",target_dir,find_data.cFileName);
+            if(rename(filename_temp,filename_temp2)!=0){
+                FindClose(handle_find);
+                return 1;
+            }
+        }
+        else{
+            if(cp_file(filename_temp,target_dir)!=0){
+                FindClose(handle_find);
+                return 1;
+            }
+        }
+    }while(FindNextFile(handle_find,&find_data)!=0);
+    FindClose(handle_find); /* Close the handle */ 
+    return 0;
+#else
     dir=opendir(source_dir);
     if(dir==NULL){
         return -3;
@@ -1521,11 +1620,36 @@ int batch_cp_files(char* source_dir, char* filename_string, char* target_dir){
         if(strcmp(entry->d_name,".")==0||strcmp(entry->d_name,"..")==0){
             continue;
         }
-        if(fuzzy_cmp(entry->d_name,filename_string)==0){
-            /* WIP: to be developed */
+        if(entry->d_type==DT_DIR){
+            continue;
+        }
+        if(fuzzy_strcmp(entry->d_name,fuzzy_filename,LINE_LENGTH_SHORT)!=0){
+            continue;
+        }
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s/%s",source_dir,entry->d_name);
+        if(strcmp(option,"rm")==0){
+            if(unlink(filename_temp)!=0){
+                closedir(dir);
+                return 1;
+            }
+        }
+        else if(strcmp(option,"mv")==0){
+            snprintf(filename_temp2,FILENAME_LENGTH-1,"%s/%s",target_dir,entry->d_name);
+            if(rename(filename_temp,filename_temp2)!=0){
+                closedir(dir);
+                return 1;
+            }
+        }
+        else{
+            if(cp_file(filename_temp,target_dir)!=0){
+                closedir(dir);
+                return 1;
+            }
         }
     }
+    closedir(dir);
     return 0;
+#endif
 }
 
 int batch_rm_files(char* target_dir, char* filename_string){
