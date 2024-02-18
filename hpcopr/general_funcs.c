@@ -1325,8 +1325,9 @@ int rm_pdir(char* pathname){
                 return -1;
             }  
         }  
-    }while(FindNextFile(handle_find,&find_data)!=0);  
-    FindClose(handle_find); /* Close the handle */ 
+    }while(FindNextFile(handle_find,&find_data)!=0);
+    FindClose(handle_find); /* Close the handle */
+    _chmod(pathname,_S_IWRITE);
     if(!RemoveDirectory(pathname)){
         return 1;
     }

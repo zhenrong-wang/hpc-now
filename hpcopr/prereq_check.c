@@ -412,7 +412,6 @@ obsutil:
             chmod(filename_temp2,S_IRWXU);
 #else
             snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sobsutil.exe",obsutil_dir,PATH_SLASH);
-            _chmod(obsutil_dir,_S_IWRITE);
 #endif
             rename(filename_temp2,filename_temp);
             rm_pdir(obsutil_dir);
