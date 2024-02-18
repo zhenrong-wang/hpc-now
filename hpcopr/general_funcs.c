@@ -1537,11 +1537,23 @@ int cp_file(char* current_filename, char* new_filename, int force_flag){
     return 0;
 }
 
+/* 
+ * Function: compare a string that contains wildcard '*' with a normal string.
+ *           E.g. 1: fuzzy_strcmp("wangzhenrong", "w*", 32) should return 0(match);
+ *           E.g. 2: fuzzy_strcmp("wangzhenrong", "*rong", 32) should return 0(match);
+ *           E.g. 3: fuzzy_strcmp("wangzhenrong", "we*rong", 32) should return non-zero(not match);
+ * 
+ * Return values: -1 - invalid string or buffer size
+ *                -3 - memory allocation failed
+ *                 1 - not match
+ *                 0 - match
+ */
 int fuzzy_strcmp(char* target_string, char* fuzzy_string){
     size_t i=0,j=0,k,buffer_length;
     char* buffer=NULL;
     size_t target_str_len=strlen(target_string);
     size_t fuzzy_str_len=strlen(fuzzy_string);
+    int memcmp_flag;
     if(target_str_len<1||fuzzy_str_len<1){
         return -1;
     }
@@ -1559,24 +1571,25 @@ int fuzzy_strcmp(char* target_string, char* fuzzy_string){
                 i=k;
                 continue;
             }
-            if(k==fuzzy_str_len){
-                buffer_length=target_str_len-j;
-            }
-            else{
-                buffer_length=k-i-1;
-            }
+            buffer_length=k-i-1;
             i=k;
-            for(k=j;k<target_str_len;k++){
+            memcmp_flag=0;
+            for(k=j;k<target_str_len-buffer_length+1;k++){
                 if(memcmp(target_string+k,buffer,buffer_length)==0){
+                    memcmp_flag=1;
                     break;
                 }
             }
-            if(k==target_str_len){
-                free(buffer);
-                return 1;
+            if(memcmp_flag==1){
+                if(i==fuzzy_str_len&&(k+buffer_length)<target_str_len){
+                    free(buffer);
+                    return 1;
+                }
+                j=k+buffer_length;
+                continue;
             }
-            j=k+buffer_length;
-            continue;
+            free(buffer);
+            return 1;    
         }
         if(*(fuzzy_string+i)!=*(target_string+j)){
             free(buffer);

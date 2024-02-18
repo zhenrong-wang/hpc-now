@@ -1000,7 +1000,6 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     char string_temp[LINE_LENGTH_SHORT];
     char dot_terraform[FILENAME_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
-    char randstr[8]="";
     char destroyed_dir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -1066,9 +1065,9 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Deleting all the related local files and folders ...\n");
     delete_decrypted_files(workdir,crypto_keyfile);
-    generate_random_nstring(randstr,8,1);
-    snprintf(destroyed_dir,DIR_LENGTH-1,"%s%s%s_%s",DESTROYED_DIR,PATH_SLASH,cluster_name,randstr);
+    snprintf(destroyed_dir,DIR_LENGTH-1,"%s%s%s",DESTROYED_DIR,PATH_SLASH,cluster_name);
     mk_pdir(destroyed_dir);
+    batch_file_operation(destroyed_dir,"*","","rm",0);
     batch_file_operation(stackdir,"*.tf","","rm",0);
     batch_file_operation(stackdir,"*.tmp",destroyed_dir,"mv",0);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
