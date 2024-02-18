@@ -1133,6 +1133,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
                 for(i=compute_node_num-del_num+1;i<compute_node_num+1;i++){
                     snprintf(string_temp,127,"hpc_stack_compute%d.tf*",i);
                     batch_file_operation(destroyed_dir,string_temp,stackdir,"mv",0);
+                    rm_pdir(destroyed_dir);
                 }
                 if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                     delete_decrypted_files(workdir,crypto_keyfile);
@@ -1158,6 +1159,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
             }
             printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been deleted.\n");
             delete_decrypted_files(workdir,crypto_keyfile);
+            rm_pdir(destroyed_dir);
             return 0;
         }
     }
@@ -1173,15 +1175,14 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
         for(i=1;i<compute_node_num+1;i++){
             snprintf(string_temp,127,"hpc_stack_compute%d.tf*",i);
             batch_file_operation(destroyed_dir,string_temp,stackdir,"mv",0);
+            rm_pdir(destroyed_dir);
         }
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
             delete_decrypted_files(workdir,crypto_keyfile);
-            batch_file_operation(destroyed_dir,"*.tf","","rm",0);
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to roll back. The cluster may be corrupted!" RESET_DISPLAY "\n");
             return -17;
         }
         delete_decrypted_files(workdir,crypto_keyfile);
-        batch_file_operation(destroyed_dir,"*.tf","","rm",0);
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has been successfully rolled back.\n");
         return -1;
     }
@@ -1200,7 +1201,7 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been deleted.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
-    batch_file_operation(destroyed_dir,"*.tf","","rm",0);
+    rm_pdir(destroyed_dir);
     return 0;
 }
 
