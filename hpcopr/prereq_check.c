@@ -1207,7 +1207,8 @@ int check_and_install_prerequisitions(int repair_flag){
     batch_file_operation("/tmp/",".hpc-now*.rdp","","rm",0);
 #endif
     batch_file_operation(NOW_BINARY_DIR,"*.md","","rm",0);
-    batch_file_operation(NOW_BINARY_DIR,"LICENSE","","rm",0);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sLICENSE",NOW_BINARY_DIR,PATH_SLASH);
+    rm_file_or_dir(filename_temp);
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v Environment variables have been repaired.\n");
         printf("|        v SSH files have been repaired. \n");

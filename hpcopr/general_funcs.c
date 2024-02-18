@@ -1871,7 +1871,7 @@ int rm_file_or_dir(char* file_or_dir){
         }
         return 1;
 #else
-        if(remove(file_or_dir)==0){
+        if(unlink(file_or_dir)==0){
             return 0;
         }
         return 1;
