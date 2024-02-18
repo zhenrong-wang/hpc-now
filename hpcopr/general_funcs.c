@@ -1302,8 +1302,7 @@ int rm_pdir(char* pathname){
     WIN32_FIND_DATA find_data;
     char sub_path[MAX_PATH]=""; /* Windows max path length is 260, which is MAX_PATH*/
     char sub_search_pattern[MAX_PATH]="";
-    snprintf(sub_path,MAX_PATH-1,"%s\\*",pathname);  
-    snprintf(sub_search_pattern,MAX_PATH-1,"%s\\*.*",pathname);  
+    snprintf(sub_search_pattern,MAX_PATH-1,"%s\\*",pathname);  
     handle_find=FindFirstFile(sub_search_pattern,&find_data);  
     if(handle_find==INVALID_HANDLE_VALUE) {  
         return -3;
@@ -1379,7 +1378,11 @@ int rm_pdir(char* pathname){
 #endif
 }
 
-int cp_file(char* current_filename, char* new_filename){
+/*
+ * force_flag  =0: force
+ * force_flag !=0: not force
+ */
+int cp_file(char* current_filename, char* new_filename, int force_flag){
 #ifdef _WIN32
     char filebase_win[FILENAME_BASE_LENGTH]="";
     char ext_win[FILENAME_EXT_LENGTH]="";
@@ -1401,15 +1404,24 @@ int cp_file(char* current_filename, char* new_filename){
     strncpy(filebase_full,basename(current_filename),FILENAME_BASE_FULL_LENGTH-1);
 #endif
     if(folder_exist_or_not(new_filename)==0){
-        /* If the new_filename is a folder, it must be writable and there is no duplicate file already exists. */
         snprintf(new_filename_temp,FILENAME_LENGTH-1,"%s%s%s",new_filename,PATH_SLASH,filebase_full);
 #ifdef _WIN32
         if(GetFileAttributes(new_filename_temp)!=INVALID_FILE_ATTRIBUTES){
-            return -1;
+            if(force_flag!=0||GetFileAttributes(foldername)&FILE_ATTRIBUTE_DIRECTORY){
+                return -1;
+            }
+            if(!DeleteFile(new_filename_temp)){
+                return -1;
+            }
         }
 #else
         if(stat(new_filename_temp,&file_stat)==0){
-            return -1;
+            if(force_flag!=0||S_ISDIR(file_stat.st_mode)){
+                return -1;
+            }
+            if(unlink(new_filename_temp)!=0){
+                return -1;
+            }
         }
 #endif
     }
@@ -1417,11 +1429,21 @@ int cp_file(char* current_filename, char* new_filename){
         /* If the new_filename is a file, it must not exist. */
 #ifdef _WIN32
         if(GetFileAttributes(new_filename)!=INVALID_FILE_ATTRIBUTES){
-            return -1;
+            if(force_flag!=0){
+                return -1;
+            }
+            if(!DeleteFile(new_filename)){
+                return -1;
+            }
         }
 #else
         if(stat(new_filename,&file_stat)==0){
-            return -1;
+            if(force_flag!=0){
+                return -1;
+            }
+            if(unlink(new_filename)!=0){
+                return -1;
+            }
         }
 #endif
     }
@@ -1541,7 +1563,69 @@ int fuzzy_strcmp(char* target_string, char* fuzzy_string, unsigned int buf_size)
     return 0;
 }
 
-int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_dir, char* option){
+/*
+ * Memory allocated here. Please free the memory after use.
+ * buffer_size should be >= 8! 
+ */
+char* get_first_fuzzy_subpath(char* pathname, char* fuzzy_name, unsigned int buffer_size){
+#ifdef _WIN32
+    HANDLE handle_find;  
+    WIN32_FIND_DATA find_data;
+    char sub_search_pattern[MAX_PATH]="";
+#else
+    DIR* dir;
+    struct dirent* entry;
+#endif
+    char* get_path=NULL;
+    if(strlen(pathname)<1||strlen(fuzzy_name)<1||buffer_size<8){
+        return NULL;
+    }
+#ifdef _WIN32
+    snprintf(sub_search_pattern,MAX_PATH-1,"%s\\*",pathname);
+    handle_find=FindFirstFile(sub_search_pattern,&find_data);  
+    if(handle_find==INVALID_HANDLE_VALUE) {  
+        return NULL;
+    }
+    do{
+        if(fuzzy_strcmp(find_data.cFileName,fuzzy_name,DIR_LENGTH)==0){
+            get_path=(char*)malloc(sizeof(char)*buffer_size);
+            if(get_path==NULL){
+                return NULL;
+            }
+            memset(get_path,'\0',buffer_size);
+            snprintf(get_path,buffer_size-1,"%s\\%s",pathname,find_data.cFileName);
+            return get_path;
+        }
+    }while(FindNextFile(handle_find,&find_data)!=0);
+    FindClose(handle_find); /* Close the handle */ 
+    return NULL;
+#else
+    dir=opendir(pathname);
+    if(dir==NULL){
+        return NULL;
+    }
+    while((entry=readdir(dir))!=NULL){
+        if(fuzzy_strcmp(entry->d_name,fuzzy_name,DIR_LENGTH)==0){
+            get_path=(char*)malloc(sizeof(char)*buffer_size);
+            if(get_path==NULL){
+                return NULL;
+            }
+            memset(get_path,'\0',buffer_size);
+            snprintf(get_path,buffer_size-1,"%s/%s",pathname,entry->d_name);
+            return get_path;
+        }
+    }
+    closedir(dir);
+    return NULL;
+#endif
+}
+
+/*
+ * force_flag  =0: force
+ * force_flag !=0: not force
+ * cp: copy | mv: move | rm: remove
+ */
+int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_dir, char* option, int force_flag){
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
 #ifdef _WIN32
@@ -1550,7 +1634,6 @@ int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_di
 #else
     DIR* dir;
     struct dirent* entry;
-    struct stat filestat;
 #endif
     if(strcmp(option,"cp")!=0&&strcmp(option,"mv")!=0&&strcmp(option,"rm")!=0){
         return -7;
@@ -1604,7 +1687,7 @@ int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_di
             }
         }
         else{
-            if(cp_file(filename_temp,target_dir)!=0){
+            if(cp_file(filename_temp,target_dir,force_flag)!=0){
                 FindClose(handle_find);
                 return 1;
             }
@@ -1642,7 +1725,7 @@ int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_di
             }
         }
         else{
-            if(cp_file(filename_temp,target_dir)!=0){
+            if(cp_file(filename_temp,target_dir,force_flag)!=0){
                 closedir(dir);
                 return 1;
             }
@@ -1653,16 +1736,9 @@ int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_di
 #endif
 }
 
-int batch_rm_files(char* target_dir, char* filename_string){
-    return 0;
-}
-
-int batch_mv_files(char* source_dir, char* filename_string, char* target_dir){
-    return 0;
-}
-
 /* 
- * Risky: if the file is not plain text, this function may cause infinite loop because EOF is absent! 
+ * Risky: if the file is not plain text, this function may cause infinite
+ *        loop because EOF is absent! 
  * return <1, empty
  * return >1, with content
  */
@@ -1738,7 +1814,10 @@ int folder_check_general(char* foldername, int rw_flag){
 #endif
 }
 
-/* Delete a file or a folder(if it is a folder) *by force!!!* */
+/* 
+ * Delete a file or a folder(if it is a folder) *by force!!!* 
+ * This function is going to be deprecated. Use rm_file_or_dir instead.
+ */
 int delete_file_or_dir(char* file_or_dir){
     char cmdline[CMDLINE_LENGTH]="";
     if(file_exist_or_not(file_or_dir)==0){

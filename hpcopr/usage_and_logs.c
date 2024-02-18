@@ -37,8 +37,7 @@ int view_system_logs(char* logfile, char* view_option, char* export_dest){
     else{
         snprintf(logfile_temp,FILENAME_LENGTH-1,"%s%s.tmp%srandom.log.temp",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,logfile,logfile_temp,SYSTEM_CMD_REDIRECT_NULL);
-    if(system(cmdline)!=0){
+    if(cp_file(logfile,logfile_temp,0)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the specified log." RESET_DISPLAY "\n");
         return -1;
     }

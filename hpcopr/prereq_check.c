@@ -9,6 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#ifndef _WIN32
+#include <sys/stat.h>
+#else
+#include <sys\stat.h>
+#endif
 
 #include "now_macros.h"
 #include "general_funcs.h"
@@ -193,6 +198,8 @@ int install_bucket_clis(int silent_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp_zip[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
+    char* dirname_temp=NULL;
     int inst_flag=0;
     if(silent_flag!=0){
         printf(RESET_DISPLAY GENERAL_BOLD "|        . Checking & installing the dataman components: 1/7 ..." RESET_DISPLAY "\n");
@@ -200,7 +207,7 @@ int install_bucket_clis(int silent_flag){
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf("[  ****  ] Dataman component 1 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Dataman component 1 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_OSSUTIL,filename_temp_zip);
@@ -218,37 +225,44 @@ int install_bucket_clis(int silent_flag){
 #ifdef _WIN32
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sossutil-v1.7.16-windows-amd64%sossutil64.exe %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sossutil-v1.7.16-windows-amd64%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
+        rename(filename_temp2,filename_temp);
 #elif __linux__   
         snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sossutil-v1.7.16-linux-amd64%sossutil64 %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
-        system(cmdline);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sossutil-v1.7.16-linux-amd64%sossutil64",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
+        rename(filename_temp2,filename_temp);
+        chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #elif __APPLE__
         snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sossutil-v1.7.16-mac-amd64%sossutilmac64 %s %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
-        system(cmdline);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sossutil-v1.7.16-mac-amd64%sossutilmac64",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
+        rename(filename_temp2,filename_temp);
+        chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sossutil-v1.* %s",DELETE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);  
+        dirname_temp=get_first_fuzzy_subpath(NOW_BINARY_DIR,"ossutil-v1.*",DIR_LENGTH);
+        if(dirname_temp!=NULL){
+            rm_pdir(dirname_temp);
+            free(dirname_temp);
+        }
+        else{
+            if(silent_flag!=0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 1/7." RESET_DISPLAY "\n");
+            }
+            inst_flag=1;
+            goto coscli;
+        }
     }
     if(silent_flag!=0){
         printf(RESET_DISPLAY "|        v Installed the dataman components: 1/7 .\n");
     }
-
 coscli:
     if(silent_flag!=0){
         printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 2/7 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scoscli.exe",NOW_BINARY_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf("[  ****  ] Dataman component 2 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Dataman component 2 not found. Downloading and installing ..." GREY_LIGHT "\n");
         snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_COSCLI,filename_temp);
         if(system(cmdline)!=0){
             if(silent_flag!=0){
@@ -258,14 +272,12 @@ coscli:
             goto awscli;
         }
 #ifndef _WIN32
-        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s %s",filename_temp,SYSTEM_CMD_REDIRECT_NULL);
-        system(cmdline);
+        chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
     }
     if(silent_flag!=0){
         printf(RESET_DISPLAY "|        v Installed the dataman components: 2/7 .\n");
     }
-
 awscli: 
     if(silent_flag!=0){
         printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 3/7 ..." RESET_DISPLAY "\n");
@@ -274,9 +286,8 @@ awscli:
 #ifdef __linux__
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sawscliv2.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf("[  ****  ] Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%saws* %s",DELETE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        printf(RESET_DISPLAY "[  ****  ] Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        batch_file_operation(NOW_BINARY_DIR,"aws*","","rm",0);
         if(file_exist_or_not(filename_temp_zip)!=0){
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
@@ -296,7 +307,7 @@ awscli:
 #elif __APPLE__
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sAWSCLIV2.pkg",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf("[  ****  ] Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
@@ -359,7 +370,6 @@ awscli:
     if(silent_flag!=0){
         printf(RESET_DISPLAY "|        v Installed the dataman components: 3/7 .\n");
     }
-
 obsutil:
     if(silent_flag!=0){
         printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 4/7 ..." RESET_DISPLAY "\n");
@@ -371,7 +381,7 @@ obsutil:
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sobsutil_amd64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        printf("[  ****  ] Dataman component 4 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Dataman component 4 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_OBSUTIL,filename_temp_zip);
@@ -392,18 +402,26 @@ obsutil:
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
 #endif
         system(cmdline);
+        char* obsutil_dir=get_first_fuzzy_subpath(NOW_BINARY_DIR,"obsutil_*_amd64_*",DIR_LENGTH);
+        if(obsutil_dir!=NULL){
 #ifndef _WIN32
-        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod -R 711 %s%sobsutil_* %s",NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-#endif
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sobsutil_%s_amd64_* %s%sobsutil %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,FILENAME_SUFFIX_FULL,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-#ifdef _WIN32
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sobsutil%sobsutil.exe %s%sobsutil.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            chmod(obsutil_dir,S_IRWXU);
+            snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sobsutil",obsutil_dir,PATH_SLASH);
+            chmod(filename_temp2,S_IRWXU);
 #else
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sobsutil%sobsutil %s%sobsutil.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sobsutil.exe",obsutil_dir,PATH_SLASH);
 #endif
-        system(cmdline);
+            rename(filename_temp2,filename_temp);
+            rm_pdir(obsutil_dir);
+            free(obsutil_dir);
+        }
+        else{
+            if(silent_flag!=0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 4/7." RESET_DISPLAY "\n");
+            }
+            inst_flag=4;
+            goto bcecmd;
+        }
     }
     if(silent_flag!=0){
         printf(RESET_DISPLAY "|        v Installed the dataman components: 4/7 .\n");
@@ -421,7 +439,7 @@ bcecmd:
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%smac-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        printf("[  ****  ] Dataman component 5 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Dataman component 5 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_BCECMD,filename_temp_zip);
@@ -439,23 +457,25 @@ bcecmd:
 #ifdef _WIN32
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%swindows-bcecmd-0.4.1%sbcecmd.exe %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        snprintf(dirname_temp,DIR_LENGTH-1,"%s%swindows-bcecmd-0.4.1%s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sbcecmd.exe",dirname_temp,PATH_SLASH);
+        rename(filename_temp2,filename_temp);
 #elif __linux__
         snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%slinux-bcecmd-0.4.1%sbcecmd %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",filename_temp);
-        system(cmdline);
+        snprintf(dirname_temp,DIR_LENGTH-1,"%s%slinux-bcecmd-0.4.1%s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sbcecmd",dirname_temp,PATH_SLASH);
+        rename(filename_temp2,filename_temp);
+        chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #elif __APPLE__
         snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%smac-bcecmd-0.4.1%sbcecmd %s%sbcecmd.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",filename_temp);
-        system(cmdline);
+        snprintf(dirname_temp,DIR_LENGTH-1,"%s%smac-bcecmd-0.4.1%s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sbcecmd",dirname_temp,PATH_SLASH);
+        rename(filename_temp2,filename_temp);
+        chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
+        rm_pdir(dirname_temp);
     }
     if(silent_flag!=0){
         printf(RESET_DISPLAY "|        v Installed the dataman components: 5/7 .\n");
@@ -473,7 +493,7 @@ azcopy:
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_darwin_amd64_10.20.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        printf("[  ****  ] Dataman component 6 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Dataman component 6 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_AZCOPY,filename_temp_zip);
@@ -491,23 +511,25 @@ azcopy:
 #ifdef _WIN32
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sazcopy_windows_amd64_10.20.1%sazcopy.exe %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        snprintf(dirname_temp,DIR_LENGTH-1,"%s%sazcopy_windows_amd64_10.20.1",NOW_BINARY_DIR,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sazcopy.exe",dirname_temp,PATH_SLASH);
+        rename(filename_temp2,filename_temp);
 #elif __linux__
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf '%s' -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sazcopy_linux_amd64_10.20.1%sazcopy %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",filename_temp);
-        system(cmdline);
+        snprintf(dirname_temp,DIR_LENGTH-1,"%s%sazcopy_linux_amd64_10.20.1",NOW_BINARY_DIR,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sazcopy",dirname_temp,PATH_SLASH);
+        rename(filename_temp2,filename_temp);
+        chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #elif __APPLE__
         snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sazcopy_darwin_amd64_10.20.1%sazcopy %s%sazcopy.exe %s",MOVE_FILE_CMD,NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,NOW_BINARY_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",filename_temp);
-        system(cmdline);
+        snprintf(dirname_temp,DIR_LENGTH-1,"%s%sazcopy_darwin_amd64_10.20.1",NOW_BINARY_DIR,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sazcopy",dirname_temp,PATH_SLASH);
+        rename(filename_temp2,filename_temp);
+        chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
+        rm_pdir(dirname_temp);
     }
     if(silent_flag!=0){
         printf(RESET_DISPLAY "|        v Installed the dataman components: 6/7 .\n");
@@ -531,7 +553,7 @@ gcloud_cli:
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sgoogle-cloud-cli-449.0.0-darwin-x86_64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        printf("[  ****  ] Dataman component 7 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Dataman component 7 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_GCLOUD,filename_temp_zip);
@@ -946,8 +968,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }        
     }
 #ifndef _WIN32
-        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",TERRAFORM_EXEC);
-        system(cmdline);
+    chmod(TERRAFORM_EXEC,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v The Terraform executable has been repaired.\n");
@@ -1007,8 +1028,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }        
     }
 #ifndef _WIN32
-        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",TOFU_EXEC);
-        system(cmdline);
+    chmod(TOFU_EXEC,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v The openTofu executable has been repaired.\n");
@@ -1045,8 +1065,7 @@ int check_and_install_prerequisitions(int repair_flag){
         }
     }
 #ifndef _WIN32
-        snprintf(cmdline,CMDLINE_LENGTH-1,"chmod +x %s",NOW_CRYPTO_EXEC);
-        system(cmdline);
+    chmod(NOW_CRYPTO_EXEC,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v The now-crypto executable has been repaired.\n");
@@ -1166,16 +1185,12 @@ int check_and_install_prerequisitions(int repair_flag){
     system(cmdline);
 /* The remmina files exposes user's password. Must be deleted.*/
 #ifdef _WIN32
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*.rdp %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    batch_file_operation(NOW_TMP_DIR,"*.rdp","","rm",0);
 #elif __linux__
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline); 
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s.*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    batch_file_operation(NOW_TMP_DIR,"*remmina*","","rm",0);
+    batch_file_operation(NOW_TMP_DIR,".*remmina*","","rm",0);
 #else
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s /tmp/.hpc-now*.rdp %s",DELETE_FILE_CMD,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    batch_file_operation("/tmp/",".hpc-now*.rdp","","rm",0);
 #endif
     if(repair_flag==1){
         printf(RESET_DISPLAY "|        v Environment variables have been repaired.\n");

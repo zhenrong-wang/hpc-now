@@ -346,22 +346,20 @@ int show_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey
         local_path_nparser(export_dest,real_export_dest,DIR_LENGTH_EXT);
         if(folder_exist_or_not(real_export_dest)==0){
             snprintf(export_file,FILENAME_LENGTH-1,"%s%smon_data_cluster_%s.csv",export_dest,PATH_SLASH,cluster_name);
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",COPY_FILE_CMD,mon_data_file_temp,export_file);
-            if(system(cmdline)==0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported to the specified folder " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",real_export_dest);
+            if(cp_file(mon_data_file_temp,export_file,0)!=0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to export to the specified folder " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",real_export_dest);
             }
             else{
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to export to the specified folder " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",real_export_dest);
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported to the specified folder " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",real_export_dest);
             }
         }
         else if(file_creation_test(real_export_dest)==0){
             strcpy(export_file,real_export_dest);
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",COPY_FILE_CMD,mon_data_file_temp,export_file);
-            if(system(cmdline)==0){
-                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported to the specified file " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",export_file);
+            if(cp_file(mon_data_file_temp,export_file,0)!=0){
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to export to the specified file " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",export_file);
             }
             else{
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to export to the specified file " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",export_file);
+                printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported to the specified file " HIGH_CYAN_BOLD "%s" RESET_DISPLAY " .\n",export_file);
             }
         }
         else{

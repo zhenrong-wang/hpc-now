@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0111"
+#define CORE_VERSION_CODE "0.3.1.0113"
 
 /* Define the printf ANSI colors. */
 #define FATAL_RED_BOLD   "\033[1;31m"
@@ -78,6 +78,7 @@ typedef signed long long int int_64bit;
 #define OPERATION_LOG_FILE_OLD       HPC_NOW_ROOT_DIR"now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG_OLD     HPC_NOW_ROOT_DIR"system_command_error.log"
 #define NOW_LOG_DIR                  HPC_NOW_ROOT_DIR"now_logs\\"
+#define NOW_TMP_DIR                  HPC_NOW_ROOT_DIR".tmp\\"
 #define USAGE_LOG_FILE               NOW_LOG_DIR"now-cluster-usage.log"
 #define OPERATION_LOG_FILE           NOW_LOG_DIR"now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG         NOW_LOG_DIR"system_command_error.log"
@@ -151,6 +152,7 @@ typedef signed long long int int_64bit;
 #define OPERATION_LOG_FILE_OLD       HPC_NOW_ROOT_DIR".now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG_OLD     HPC_NOW_ROOT_DIR"system_command_error.log"
 #define NOW_LOG_DIR                  HPC_NOW_ROOT_DIR"now_logs/"
+#define NOW_TMP_DIR                  HPC_NOW_ROOT_DIR".tmp/"
 #define USAGE_LOG_FILE               NOW_LOG_DIR"now-cluster-usage.log"
 #define OPERATION_LOG_FILE           NOW_LOG_DIR"now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG         NOW_LOG_DIR"system_command_error.log"
@@ -224,6 +226,7 @@ typedef signed long long int int_64bit;
 #define OPERATION_LOG_FILE_OLD       HPC_NOW_ROOT_DIR".now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG_OLD     HPC_NOW_ROOT_DIR"system_command_error.log"
 #define NOW_LOG_DIR                  HPC_NOW_ROOT_DIR"now_logs/"
+#define NOW_TMP_DIR                  HPC_NOW_ROOT_DIR".tmp/"
 #define USAGE_LOG_FILE               NOW_LOG_DIR"now-cluster-usage.log"
 #define OPERATION_LOG_FILE           NOW_LOG_DIR"now-cluster-operation.log"
 #define SYSTEM_CMD_ERROR_LOG         NOW_LOG_DIR"system_command_error.log"

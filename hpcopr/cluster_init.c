@@ -57,7 +57,7 @@ int get_static_conf_files(char* confdir, char* cloud_name, int code_loc_flag, ch
     char cmdline[CMDLINE_LENGTH]="";
     char url_code[DIR_LENGTH_EXT]="";
     char filename_temp[FILENAME_LENGTH]="";
-
+    char filename_temp2[FILENAME_LENGTH]="";
     if(strcmp(cloud_name,"alicloud")!=0&&strcmp(cloud_name,"aws")!=0&&strcmp(cloud_name,"azure")!=0&&strcmp(cloud_name,"baidu")&&strcmp(cloud_name,"gcp")!=0&&strcmp(cloud_name,"hwcloud")!=0&&strcmp(cloud_name,"qcloud")!=0){
         return 1;
     }
@@ -73,38 +73,47 @@ int get_static_conf_files(char* confdir, char* cloud_name, int code_loc_flag, ch
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sreconf.list",confdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         if(code_loc_flag==1){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sreconf.list %s %s",COPY_FILE_CMD,url_code,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
+            snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sreconf.list",url_code,PATH_SLASH);
+            if(cp_file(filename_temp2,filename_temp,0)!=0){
+                return 2;
+            }
         }
         else{
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %sreconf.list -o %s -s",url_code,filename_temp);
-        }
-        if(system(cmdline)!=0){
-            return 2;
+            if(system(cmdline)!=0){
+                return 2;
+            }
         }
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sregions.list",confdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         if(code_loc_flag==1){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sregions.list %s %s",COPY_FILE_CMD,url_code,PATH_SLASH,filename_temp,SYSTEM_CMD_REDIRECT);
+            snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sregions.list",url_code,PATH_SLASH);
+            if(cp_file(filename_temp2,filename_temp,0)!=0){
+                return 2;
+            }
         }
         else{
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %sregions.list -o %s -s",url_code,filename_temp);
-        }
-        if(system(cmdline)!=0){
-            return 2;
+            if(system(cmdline)!=0){
+                return 2;
+            }
         }
     }
     if(strcmp(cloud_name,"alicloud")==0||strcmp(cloud_name,"qcloud")==0){
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%snas_zones.list",confdir,PATH_SLASH);
         if(file_exist_or_not(filename_temp)!=0){
             if(code_loc_flag==1){
-                snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%snas_zones_%s.txt %s %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,filename_temp,SYSTEM_CMD_REDIRECT);
+                snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%snas_zones_%s.txt",url_code,PATH_SLASH,cloud_name);
+                if(cp_file(filename_temp2,filename_temp,0)!=0){
+                    return 2;
+                }
             }
             else{
                 snprintf(cmdline,CMDLINE_LENGTH-1,"curl %snas_zones_%s.txt -o %s -s",url_code,cloud_name,filename_temp);
-            }
-            if(system(cmdline)!=0){
-                return 2;
+                if(system(cmdline)!=0){
+                    return 2;
+                }
             }
         }
     }
@@ -113,6 +122,8 @@ int get_static_conf_files(char* confdir, char* cloud_name, int code_loc_flag, ch
 
 int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_loc_flag, char* url_code_root){
     char cmdline[CMDLINE_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char filename_new_temp[FILENAME_LENGTH]="";
     char url_code[DIR_LENGTH_EXT]="";
     char tf_conf[FILENAME_LENGTH]="";
     if(strcmp(cloud_name,"alicloud")!=0&&strcmp(cloud_name,"aws")!=0&&strcmp(cloud_name,"azure")!=0&&strcmp(cloud_name,"baidu")&&strcmp(cloud_name,"gcp")!=0&&strcmp(cloud_name,"hwcloud")!=0&&strcmp(cloud_name,"qcloud")!=0){
@@ -127,45 +138,59 @@ int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_l
     else{
         snprintf(url_code,DIR_LENGTH_EXT-1,"%s%s/",url_code_root,cloud_name);
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    batch_file_operation(stackdir,"hpc_stack*","","rm",0);
     snprintf(tf_conf,FILENAME_LENGTH-1,"%s%stf_prep.conf",confdir,PATH_SLASH);
     if(file_exist_or_not(tf_conf)==1){
         printf(GENERAL_BOLD "[ -INFO- ] IMPORTANT: No configure file found. Use the default one." RESET_DISPLAY "\n");
         if(code_loc_flag==1){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf.v2 %s %s", COPY_FILE_CMD,url_code,PATH_SLASH,tf_conf,SYSTEM_CMD_REDIRECT);
+            snprintf(filename_temp,FILENAME_LENGTH-1,"%s%stf_prep.conf.v2",url_code,PATH_SLASH);
+            if(cp_file(filename_temp,tf_conf,0)!=0){
+                return 2;
+            }
         }
         else{
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %stf_prep.conf.v2 -s -o %s", url_code,tf_conf);
+            if(system(cmdline)!=0){
+                return 2;
+            }
         }
+    }
+    if(code_loc_flag==1){
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_%s.base",url_code,PATH_SLASH,cloud_name);
+        snprintf(filename_new_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
+        if(cp_file(filename_temp,filename_new_temp,0)!=0){
+            return 2;
+        }
+    }
+    else{
+        snprintf(cmdline,CMDLINE_LENGTH-1,"curl %shpc_stack_%s.base -o %s%shpc_stack.base -s",url_code,cloud_name,stackdir,PATH_SLASH);
         if(system(cmdline)!=0){
             return 2;
         }
     }
     if(code_loc_flag==1){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_%s.base %s%shpc_stack.base %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    }
-    else{
-        snprintf(cmdline,CMDLINE_LENGTH-1,"curl %shpc_stack_%s.base -o %s%shpc_stack.base -s",url_code,cloud_name,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        return 2;
-    }
-    if(code_loc_flag==1){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_%s.master %s%shpc_stack.master %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_%s.master",url_code,PATH_SLASH,cloud_name);
+        snprintf(filename_new_temp,FILENAME_LENGTH-1,"%s%shpc_stack.master",stackdir,PATH_SLASH);
+        if(cp_file(filename_temp,filename_new_temp,0)!=0){
+            return 2;
+        }
     }
     else{
         snprintf(cmdline,CMDLINE_LENGTH-1,"curl %shpc_stack_%s.master -o %s%shpc_stack.master -s",url_code,cloud_name,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        return 2;
+        if(system(cmdline)!=0){
+            return 2;
+        }
     }
     if(code_loc_flag==1){
         if(strcmp(cloud_name,"aws")==0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_%s.compute.v2 %s%shpc_stack.compute %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_%s.compute.v2",url_code,PATH_SLASH,cloud_name);
         }
         else{
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_%s.compute %s%shpc_stack.compute %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+            snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_%s.compute",url_code,PATH_SLASH,cloud_name);
+        }
+        snprintf(filename_new_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
+        if(cp_file(filename_temp,filename_new_temp,0)!=0){
+            return 2;
         }
     }
     else{
@@ -175,27 +200,35 @@ int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_l
         else{
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %shpc_stack_%s.compute -o %s%shpc_stack.compute -s",url_code,cloud_name,stackdir,PATH_SLASH);
         }
-    }
-    if(system(cmdline)!=0){
-        return 2;
+        if(system(cmdline)!=0){
+            return 2;
+        }
     }
     if(code_loc_flag==1){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_%s.database %s%shpc_stack.database %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_%s.database",url_code,PATH_SLASH,cloud_name);
+        snprintf(filename_new_temp,FILENAME_LENGTH-1,"%s%shpc_stack.database",stackdir,PATH_SLASH);
+        if(cp_file(filename_temp,filename_new_temp,0)!=0){
+            return 2;
+        }
     }
     else{
         snprintf(cmdline,CMDLINE_LENGTH-1,"curl %shpc_stack_%s.database -o %s%shpc_stack.database -s",url_code,cloud_name,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        return 2;
+        if(system(cmdline)!=0){
+            return 2;
+        }
     }
     if(code_loc_flag==1){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_%s.natgw %s%shpc_stack.natgw %s",COPY_FILE_CMD,url_code,PATH_SLASH,cloud_name,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_%s.natgw",url_code,PATH_SLASH,cloud_name);
+        snprintf(filename_new_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
+        if(cp_file(filename_temp,filename_new_temp,0)!=0){
+            return 2;
+        }
     }
     else{
         snprintf(cmdline,CMDLINE_LENGTH-1,"curl %shpc_stack_%s.natgw -o %s%shpc_stack.natgw -s",url_code,cloud_name,stackdir,PATH_SLASH);
-    }
-    if(system(cmdline)!=0){
-        return 2;
+        if(system(cmdline)!=0){
+            return 2;
+        }
     }
     return 0;
 }
@@ -898,42 +931,75 @@ void node_user_num_fix(int* node_num, int* hpc_user_num){
  * condition_flag=2: empty stackdir && confdir
  * condition_flag=3: empty stackdir, confdir and vaultdir
  */
-void clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int condition_flag){
-    char cmdline[CMDLINE_LENGTH]="";
+int clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int condition_flag){
+    char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
+    int error_flag=0;
     if(condition_flag==1){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        if(batch_file_operation(stackdir,"*","","rm",0)!=0){
+            return 1;
+        }
+        return 0;
     }
     else if(condition_flag==2){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf %s%stf_prep.conf.failed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        if(batch_file_operation(stackdir,"*","","rm",0)!=0){
+            error_flag++;
+        }
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%stf_prep.conf",confdir,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%stf_prep.conf.failed",confdir,PATH_SLASH);
+        if(rename(filename_temp,filename_temp2)!=0){
+            error_flag++;
+        }
+        return error_flag;
     }
     else{
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s",DELETE_FILE_CMD,DESTROYED_DIR,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s %s",MOVE_FILE_CMD,vaultdir,PATH_SLASH,DESTROYED_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%stf_prep.conf %s%stf_prep.conf.destroyed %s",MOVE_FILE_CMD,confdir,PATH_SLASH,confdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        if(batch_file_operation(DESTROYED_DIR,"*","","rm",0)!=0){
+            error_flag++;
+        }
+        if(batch_file_operation(stackdir,"*",DESTROYED_DIR,"mv",0)!=0){
+            error_flag++;
+        }
+        if(batch_file_operation(vaultdir,"*",DESTROYED_DIR,"mv",0)!=0){
+            error_flag++;
+        }
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%stf_prep.conf",confdir,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%stf_prep.conf.destroyed",confdir,PATH_SLASH);
+        if(rename(filename_temp,filename_temp2)!=0){
+            error_flag++;
+        }
+        return error_flag;
     }
 }
 
-void generate_tf_files(char* stackdir){
-    char cmdline[CMDLINE_LENGTH]="";
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.base %s%shpc_stack_base.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.database %s%shpc_stack_database.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.master %s%shpc_stack_master.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.natgw %s%shpc_stack_natgw.tf %s",MOVE_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.compute %s",DELETE_FILE_CMD,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+int generate_tf_files(char* stackdir){
+    char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
+    int error_flag=0;
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
+    if(rename(filename_temp,filename_temp2)!=0){
+        error_flag++;
+    }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.database",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_database.tf",stackdir,PATH_SLASH);
+    if(rename(filename_temp,filename_temp2)!=0){
+        error_flag++;
+    }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.master",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_master.tf",stackdir,PATH_SLASH);
+    if(rename(filename_temp,filename_temp2)!=0){
+        error_flag++;
+    }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_natgw.tf",stackdir,PATH_SLASH);
+    if(rename(filename_temp,filename_temp2)!=0){
+        error_flag++;
+    }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
+    if(rm_file_or_dir(filename_temp)!=0){
+        error_flag++;
+    }
+    return error_flag;
 }
 
 int save_cluster_vaults(char* vaultdir, char* mast_passwd, char* comp_password, char* db_root_password, char* db_acct_password, char* ucid_short, char* cloud_flag, char* az_sub_id, char* az_tenant_id){
@@ -970,6 +1036,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
     char user_passwords[FILENAME_LENGTH]="";
     cluster_initinfo init_info;
     char access_key[AKSK_LENGTH]="";
@@ -1183,13 +1250,13 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     insert_nlines(filename_temp,LINE_LENGTH_SMALL,"#INSERT_AMI_HERE",nat_os_image);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_NAME",unique_cluster_id);
     for(i=0;i<init_info.node_num;i++){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        cp_file(filename_temp,filename_temp2,0);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
         snprintf(string_temp,127,"comp%d",i+1);
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"NUMBER",string_temp);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"NUMBER",string_temp);
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
@@ -1209,8 +1276,9 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         delete_decrypted_files(workdir,crypto_keyfile);
         return 9;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute1.tf",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
+    cp_file(filename_temp,filename_temp2,0);
     getstate(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id,32);
@@ -1303,6 +1371,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
     cluster_initinfo init_info;
     char user_passwords[FILENAME_LENGTH]="";
     char access_key[AKSK_LENGTH]="";
@@ -1485,12 +1554,12 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
 
     for(i=0;i<init_info.node_num;i++){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        cp_file(filename_temp,filename_temp2,0);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RUNNING_FLAG","true");
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"RUNNING_FLAG","true");
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
@@ -1510,8 +1579,9 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
         delete_decrypted_files(workdir,crypto_keyfile);
         return 9;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);   
-    system(cmdline);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute1.tf",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
+    cp_file(filename_temp,filename_temp2,0);
     getstate(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id,32);
@@ -1594,6 +1664,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
     cluster_initinfo init_info;
     char user_passwords[FILENAME_LENGTH]="";
     char access_key[AKSK_LENGTH]="";
@@ -1771,11 +1842,11 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_DISPLAY_NAME",unique_cluster_id);
 
     for(i=0;i<init_info.node_num;i++){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        cp_file(filename_temp,filename_temp2,0);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
@@ -1795,8 +1866,9 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
         delete_decrypted_files(workdir,crypto_keyfile);
         return 9;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute1.tf",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
+    cp_file(filename_temp,filename_temp2,0);
     getstate(workdir,crypto_keyfile);
     printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",ALI_SLEEP_TIME);
     for(i=0;i<ALI_SLEEP_TIME;i++){
@@ -1912,8 +1984,8 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
     cluster_initinfo init_conf;
-
     char user_passwords[FILENAME_LENGTH]="";
     char access_key[AKSK_LENGTH]="";
     char secret_key[AKSK_LENGTH]="";
@@ -2092,16 +2164,14 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     snprintf(string_temp,127,"%d",init_conf.master_bandwidth);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_BANDWIDTH",string_temp);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
-
     for(i=0;i<init_conf.node_num;i++){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        cp_file(filename_temp,filename_temp2,0);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
     }
-
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,3);
@@ -2120,8 +2190,9 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
         delete_decrypted_files(workdir,crypto_keyfile);
         return 9;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);   
-    system(cmdline);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute1.tf",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
+    cp_file(filename_temp,filename_temp2,0);
     getstate(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id,32);
@@ -2200,6 +2271,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
     cluster_initinfo init_conf;
     char user_passwords[FILENAME_LENGTH]="";
     char access_key[AKSK_LENGTH]="";
@@ -2387,12 +2459,12 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"NATGW_INST",natgw_inst);
 
     for(i=0;i<init_conf.node_num;i++){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        cp_file(filename_temp,filename_temp2,0);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
@@ -2412,8 +2484,9 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
         delete_decrypted_files(workdir,crypto_keyfile);
         return 9;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);   
-    system(cmdline);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute1.tf",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
+    cp_file(filename_temp,filename_temp2,0);
     getstate(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\":","","",1,"\"bucket\":","","",'\"',4,bucket_id,32); 
@@ -2506,6 +2579,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
     cluster_initinfo init_conf;
     char user_passwords[FILENAME_LENGTH]="";
     char access_key[AKSK_LENGTH]="";
@@ -2648,11 +2722,11 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",unique_cluster_id);
 
     for(i=0;i<init_conf.node_num;i++){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        cp_file(filename_temp,filename_temp2,0);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
@@ -2672,9 +2746,9 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
         delete_decrypted_files(workdir,crypto_keyfile);
         return 9;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);   
-    system(cmdline);
-
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute1.tf",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
+    cp_file(filename_temp,filename_temp2,0);
     getstate(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"type\": \"azurerm_storage_container\",","","",20,"\"id\": \"","","",'\"',4,bucket_id,128);
@@ -2754,6 +2828,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char cmdline[CMDLINE_LENGTH]="";
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
     cluster_initinfo init_conf;
     char user_passwords[FILENAME_LENGTH]="";
     char cloud_flag[16]="";
@@ -2912,13 +2987,12 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RANDOM_STRING",randstr);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCE_LABEL",unique_cluster_id);
-
     for(i=0;i<init_conf.node_num;i++){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack.compute %s%shpc_stack_compute%d.tf %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,i+1,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        cp_file(filename_temp,filename_temp2,0);
         snprintf(string_temp,127,"compute%d",i+1);
-        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
     }
     generate_tf_files(stackdir);
     if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
@@ -2941,8 +3015,9 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         gcp_credential_convert(workdir,"delete",0);
         return 9;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%shpc_stack_compute1.tf %s%scompute_template %s",COPY_FILE_CMD,stackdir,PATH_SLASH,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);   
-    system(cmdline);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute1.tf",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
+    cp_file(filename_temp,filename_temp2,0);
     getstate(workdir,crypto_keyfile);
     printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME*3);
     for(i=0;i<GENERAL_SLEEP_TIME*3;i++){

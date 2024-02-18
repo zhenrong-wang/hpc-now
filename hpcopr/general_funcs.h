@@ -54,9 +54,10 @@ int_64bit get_filesize_byte(FILE* file_p);
 int rm_file_or_dir(char* file_or_dir);
 int mk_pdir(char* pathname);
 int rm_pdir(char* pathname);
-int cp_file(char* current_filename, char* new_filename);
+int cp_file(char* current_filename, char* new_filename, int force_flag);
 int fuzzy_strcmp(char* target_string, char* fuzzy_string, unsigned int buf_size);
-int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_dir, char* option); 
+char* get_first_fuzzy_subpath(char* pathname, char* fuzzy_name, unsigned int buffer_size);
+int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_dir, char* option, int force_flag); 
 
 int password_complexity_check(char* password, char* special_chars);
 int generate_random_passwd(char* password); /* This function is deprecated, please use generate_random_npasswd */

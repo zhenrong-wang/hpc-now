@@ -286,15 +286,12 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     snprintf(target_file,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",tmp_vaultdir,PATH_SLASH);
     decrypt_single_file_general(NOW_CRYPTO_EXEC,source_file,target_file,hash_key_current);
     strcpy(cluster_vaults,target_file);
-
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt.tmp",current_vaultdir,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,hash_key_current);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",current_vaultdir,PATH_SLASH);
     if(strcmp(real_user_list,"all")==0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s %s",COPY_FILE_CMD,filename_temp,tmp_vaultdir,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s* %s%s %s",COPY_FILE_CMD,current_sshdir,PATH_SLASH,tmp_sshdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        cp_file(filename_temp,tmp_vaultdir,0);
+        batch_file_operation(current_sshdir,"*",tmp_sshdir,"cp",0);
     }
     else{
         snprintf(filename_temp_2,FILENAME_LENGTH-1,"%s%suser_passwords.txt",tmp_vaultdir,PATH_SLASH);
@@ -319,8 +316,7 @@ next_user:
             if(decrypt_user_privkey(filename_temp_4,crypto_keyfile)!=0){
                 continue;
             }
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s%s %s",COPY_FILE_CMD,filename_temp_3,tmp_sshdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            cp_file(filename_temp_3,tmp_sshdir,0);
             snprintf(filename_temp_3,FILENAME_LENGTH-1,"%s%s%s.key",tmp_sshdir,PATH_SLASH,username_temp);
             encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp_3,hash_key_trans);
         }while(strlen(username_temp)!=0);
@@ -341,44 +337,36 @@ next_user:
              */
             snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt.tmp",current_vaultdir,PATH_SLASH);
             if(decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,hash_key_current)==0){
-                snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sCLUSTER_SUMMARY.txt %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-                system(cmdline);
+                batch_file_operation(current_vaultdir,"CLUSTER_SUMMARY.txt",tmp_vaultdir,"cp",0);
             }
             else{
                 printf(WARN_YELLO_BOLD "[ -WARN- ] The admin file is missing. Root/Admin privilege is disabled." RESET_DISPLAY "\n");
             }
         }
         else{
-            snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s%s %s",COPY_FILE_CMD,cluster_vaults,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-            system(cmdline);
+            cp_file(cluster_vaults,tmp_vaultdir,0);
             encrypt_and_delete(NOW_CRYPTO_EXEC,cluster_vaults,hash_key_trans);
         }
         /* Decrypting and exporting the root ssh key */
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sroot.key.tmp",current_sshdir,PATH_SLASH);
         decrypt_user_privkey(filename_temp,crypto_keyfile);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sroot.key %s%s %s",COPY_FILE_CMD,current_sshdir,PATH_SLASH,tmp_sshdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        batch_file_operation(current_sshdir,"root.key",tmp_sshdir,"cp",0);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sroot.key",tmp_sshdir,PATH_SLASH);
         encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,hash_key_trans);
     }
     else{
         printf(WARN_YELLO_BOLD "[ -WARN- ] Not exporting Root/Admin privilege." RESET_DISPLAY "\n");
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s%s %s",COPY_FILE_CMD,cluster_vaults,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
+        cp_file(cluster_vaults,tmp_vaultdir,0);
         encrypt_and_delete(NOW_CRYPTO_EXEC,cluster_vaults,hash_key_trans);
     }
     
     /* The file cloud_flag.flg has been deprecated since 0.3.1.0027! */
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%scloud_flag.flg %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    batch_file_operation(current_vaultdir,"cloud_flag.flg",tmp_vaultdir,"cp",0);
     /* The file .az_extra.info has been deprecated since 0.3.1.0027! */
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.az_extra.info %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    batch_file_operation(current_vaultdir,".az_extra.info",tmp_vaultdir,"cp",0);
     /* The file UCID_LATEST.txt has been deprecated since 0.3.1.0027! */
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sUCID_LATEST.txt %s%s %s",COPY_FILE_CMD,current_vaultdir,PATH_SLASH,tmp_vaultdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%scurrentstate %s%s %s",COPY_FILE_CMD,current_stackdir,PATH_SLASH,tmp_stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    batch_file_operation(current_vaultdir,"UCID_LATEST.txt",tmp_vaultdir,"cp",0);
+    batch_file_operation(current_stackdir,"currentstate",tmp_stackdir,"cp",0);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",tmp_stackdir,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
@@ -450,7 +438,6 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     char filename_temp_2[FILENAME_LENGTH]="";
     char cluster_name_buffer[32]="";
     char cluster_name_final[32]="";
-    
     char cluster_name_temp[32]="";
     char cluster_workdir_temp[DIR_LENGTH]="";
     char unique_id_temp[16]="";
@@ -461,14 +448,12 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     char rand_str_suffix[8]="";
     int cluster_name_buffer_length=0;
     char randstr_registry[7]="";
-
     char tmp_top_dir[DIR_LENGTH]="";
     char tmp_workdir[DIR_LENGTH_EXT]="";
     char username_temp[64]="";
     char cmdline[CMDLINE_LENGTH]="";
     char tmp_import_root[DIR_LENGTH]="";
     char tmp_unique_id[16]="";
-
     char imported_workdir[DIR_LENGTH]="";
     char imported_ssh_dir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
@@ -480,6 +465,7 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     int update_flag=0;
     char user_line_buffer[256]="";
     int admin_flag=0;
+    char dirname_temp[DIR_LENGTH_EXT]="";
 
     local_path_nparser(zip_file,filename_temp,FILENAME_LENGTH);
     if(strlen(filename_temp)==0||file_empty_or_not(filename_temp)<1){
@@ -625,8 +611,8 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     }
     /* Start moving files and folders*/
     /* Moving sshkeys to the SSHKEY_DIR */
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%sexport%s.%s %s %s",MOVE_FILE_CMD,tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer,imported_ssh_dir,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    snprintf(dirname_temp,DIR_LENGTH_EXT-1,"%s%sexport%s.%s",tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer);
+    rename(dirname_temp,imported_ssh_dir);
     /* Decrypt current files */
     snprintf(tmp_workdir,DIR_LENGTH_EXT-1,"%s%sexport%s%s",tmp_top_dir,PATH_SLASH,PATH_SLASH,cluster_name_buffer);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%svault%sbucket_info.txt.tmp",tmp_workdir,PATH_SLASH,PATH_SLASH);
@@ -647,8 +633,8 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,hash_key_password);
     
     /* Move the working directory */
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s%sworkdir%s%s %s",MOVE_FILE_CMD,tmp_workdir,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name_final,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    snprintf(dirname_temp,DIR_LENGTH-1,"%s%sworkdir%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name_final);
+    rename(tmp_workdir,dirname_temp);
     if(update_flag==0){
         add_to_cluster_registry(cluster_name_final,"imported");
     }
@@ -723,14 +709,12 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
 int update_cluster_status(char* cluster_name, char* currentstate){
     char workdir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
         return -1;
     }
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s%scurrentstate %s",COPY_FILE_CMD,currentstate,stackdir,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    if(system(cmdline)==0){
-        return 0;
+    if(cp_file(currentstate,stackdir,0)!=0){
+        return 1;
     }
-    return 1;
+    return 0;
 }

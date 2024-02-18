@@ -1716,19 +1716,16 @@ int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile){
     if(get_file_sha_hash(crypto_keyfile,hash_key,64)!=0){
         return -3; //Failed to get the crypto key
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%snow-cluster-login* %s",DELETE_FILE_CMD,sshkey_folder,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline); 
+    batch_file_operation(sshkey_folder,"now-cluster-login*","","rm",0);
     snprintf(cmdline,CMDLINE_LENGTH-1,"ssh-keygen -t rsa -N \"\" -f %s%snow-cluster-login -q",sshkey_folder,PATH_SLASH);
     if(system(cmdline)!=0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%snow-cluster-login* %s",DELETE_FILE_CMD,sshkey_folder,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline); 
+        batch_file_operation(sshkey_folder,"now-cluster-login*","","rm",0);
         return 1; //Failed to generate a ssh keypair, delete any files generated and return 1
     }
     snprintf(privkey_file_decrypted,FILENAME_LENGTH-1,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
     run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,privkey_file_decrypted,hash_key); //Encrypt the private key.
     if(run_flag>0){
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%snow-cluster-login* %s",DELETE_FILE_CMD,sshkey_folder,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline); 
+        batch_file_operation(sshkey_folder,"now-cluster-login*","","rm",0);
         return 3; //Failed to encrypt. delete any files generated and return 3;
     }
     return 0;
@@ -1837,8 +1834,7 @@ int generate_sshkey(char* sshkey_folder, char* pubkey){
         return 0;
     }
     else{
-        snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%snow-cluster-login* %s",DELETE_FILE_CMD,sshkey_folder,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-        system(cmdline); 
+        batch_file_operation(sshkey_folder,"now-cluster-login*","","rm",0);
         snprintf(cmdline,CMDLINE_LENGTH-1,"ssh-keygen -t rsa -N \"\" -f %s%snow-cluster-login -q",sshkey_folder,PATH_SLASH);
         system(cmdline);
         file_p=fopen(filename_temp2,"r");
@@ -1900,8 +1896,7 @@ int update_compute_template(char* stackdir, char* cloud_flag){
     char new_template[FILENAME_LENGTH]="";
     snprintf(prev_template,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
     snprintf(new_template,FILENAME_LENGTH-1,"%s%shpc_stack_compute1.tf",stackdir,PATH_SLASH);
-    rm_file_or_dir(prev_template);
-    if(cp_file(new_template,prev_template)!=0){
+    if(cp_file(new_template,prev_template,0)!=0){
         return 1;
     }
     single_file_to_running(new_template,cloud_flag);
@@ -3466,8 +3461,7 @@ int file_convert(char* filename_base, char* extra_str, char* option){
     if(strcmp(option,"backup")==0||strcmp(option,"restore")==0||strcmp(option,"delete_backup")==0){
         snprintf(file_backup,FILENAME_LENGTH-1,"%s.%s.backup",filename_base,extra_str);
         if(strcmp(option,"backup")==0){
-            rm_file_or_dir(file_backup);
-            if(cp_file(filename_base,file_backup)!=0){
+            if(cp_file(filename_base,file_backup,0)!=0){
                 return 1;
             }
             return 0;
@@ -3506,8 +3500,7 @@ int file_convert(char* filename_base, char* extra_str, char* option){
         return file_exist_or_not(file_encrypted);
     }
     if(strcmp(option,"backup_encrypt")==0){
-        rm_file_or_dir(file_dec_back);
-        cp_file(file_decrypted,file_dec_back);
+        cp_file(file_decrypted,file_dec_back,0);
         if(file_exist_or_not(file_dec_back)!=0){
             return 1;
         }
@@ -3773,7 +3766,6 @@ int cluster_name_check(char* cluster_name){
 }
 
 int check_and_cleanup(char* prev_workdir){
-    char cmdline[CMDLINE_LENGTH]="";
     char current_workdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char current_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
@@ -3801,16 +3793,12 @@ int check_and_cleanup(char* prev_workdir){
     system("icacls C:\\programdata\\hpc-now\\etc /deny Administrators:F /T > nul 2>&1");
     snprintf(dirname_temp,DIR_LENGTH_EXT-1,"%s\\Microsoft\\Windows\\Recent",appdata_dir);
     rm_file_or_dir(dirname_temp);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*.rdp %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    batch_file_operation(NOW_TMP_DIR,"*.rdp","","rm",0);
 #elif __linux__
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline); 
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.tmp%s.*remmina* %s",DELETE_FILE_CMD,HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    batch_file_operation(NOW_TMP_DIR,"*remmina*","","rm",0);
+    batch_file_operation(NOW_TMP_DIR,".*remmina*","","rm",0);
 #else
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s /tmp/.hpc-now*.rdp %s",DELETE_FILE_CMD,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
+    batch_file_operation("/tmp/",".hpc-now*.rdp","","rm",0);
 #endif
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%smd5values.conf",GENERAL_CONF_DIR,PATH_SLASH);
     rm_file_or_dir(filename_temp);
