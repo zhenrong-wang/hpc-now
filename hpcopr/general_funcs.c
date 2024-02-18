@@ -1302,9 +1302,16 @@ int rm_pdir(char* pathname){
     WIN32_FIND_DATA find_data;
     char sub_path[MAX_PATH]=""; /* Windows max path length is 260, which is MAX_PATH*/
     char sub_search_pattern[MAX_PATH]="";
-    snprintf(sub_search_pattern,MAX_PATH-1,"%s\\*",pathname);  
-    handle_find=FindFirstFile(sub_search_pattern,&find_data);  
-    if(handle_find==INVALID_HANDLE_VALUE) {  
+
+    if(!(GetFileAttributes(pathname)&FILE_ATTRIBUTE_DIRECTORY)){
+        if(!DeleteFile(pathname)){
+            return 1;
+        }
+        return 0;
+    }
+    snprintf(sub_search_pattern,MAX_PATH-1,"%s\\*",pathname);
+    handle_find=FindFirstFile(sub_search_pattern,&find_data);
+    if(handle_find==INVALID_HANDLE_VALUE){
         return -3;
     }
     do{
@@ -1337,6 +1344,16 @@ int rm_pdir(char* pathname){
     struct dirent* entry;
     char sub_path[DIR_LENGTH_EXT]="";
     struct stat sub_stat;
+
+    if(lstat(pathname,&sub_stat)!=0){
+        return -1;
+    }
+    if(!(S_ISDIR(sub_stat.st_mode))){
+        if(unlink(pathname)!=0){
+            return 1;
+        }
+        return 0;
+    }
     dir=opendir(pathname);
     if(dir==NULL){
         return -3;
@@ -1571,7 +1588,7 @@ int fuzzy_strcmp(char* target_string, char* fuzzy_string, unsigned int buf_size)
  */
 char* get_first_fuzzy_subpath(char* pathname, char* fuzzy_name, unsigned int buffer_size){
 #ifdef _WIN32
-    HANDLE handle_find;  
+    HANDLE handle_find;
     WIN32_FIND_DATA find_data;
     char sub_search_pattern[MAX_PATH]="";
 #else
@@ -1584,8 +1601,8 @@ char* get_first_fuzzy_subpath(char* pathname, char* fuzzy_name, unsigned int buf
     }
 #ifdef _WIN32
     snprintf(sub_search_pattern,MAX_PATH-1,"%s\\*",pathname);
-    handle_find=FindFirstFile(sub_search_pattern,&find_data);  
-    if(handle_find==INVALID_HANDLE_VALUE) {  
+    handle_find=FindFirstFile(sub_search_pattern,&find_data);
+    if(handle_find==INVALID_HANDLE_VALUE){
         return NULL;
     }
     do{
@@ -1631,8 +1648,8 @@ int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_di
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
 #ifdef _WIN32
-    HANDLE handle_find;  
-    WIN32_FIND_DATA find_data;  
+    HANDLE handle_find;
+    WIN32_FIND_DATA find_data;
 #else
     DIR* dir;
     struct dirent* entry;
@@ -2125,7 +2142,7 @@ int generate_random_string(char* random_string){
         i++;
     }
     *(random_string+RANDSTR_LENGTH_PLUS-1)='\0';
-    return 0;  
+    return 0;
 }
 
 /* 
@@ -2166,7 +2183,7 @@ int generate_random_nstring(char random_string[], unsigned int len_max, int star
         i++;
     }
     /*printf("#%s\n",random_string);*/
-    return 0;  
+    return 0;
 }
 
 /* 
