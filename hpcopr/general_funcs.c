@@ -1407,7 +1407,7 @@ int cp_file(char* current_filename, char* new_filename, int force_flag){
         snprintf(new_filename_temp,FILENAME_LENGTH-1,"%s%s%s",new_filename,PATH_SLASH,filebase_full);
 #ifdef _WIN32
         if(GetFileAttributes(new_filename_temp)!=INVALID_FILE_ATTRIBUTES){
-            if(force_flag!=0||GetFileAttributes(foldername)&FILE_ATTRIBUTE_DIRECTORY){
+            if(force_flag!=0||GetFileAttributes(new_filename_temp)&FILE_ATTRIBUTE_DIRECTORY){
                 return -1;
             }
             if(!DeleteFile(new_filename_temp)){
