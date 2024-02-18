@@ -1308,13 +1308,14 @@ int rm_pdir(char* pathname){
         return -3;
     }
     do{
-        if(find_data.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY){
-            if(strcmp(find_data.cFileName,".")!=0&&strcmp(find_data.cFileName,"..")!=0){
-                snprintf(sub_path,MAX_PATH-1,"%s\\%s",pathname,find_data.cFileName);
-                if(rm_pdir(sub_path)!=0){
-                    FindClose(handle_find);
-                    return -1;
-                }
+        if(strcmp(find_data.cFileName,".")==0||strcmp(find_data.cFileName,"..")==0){
+            continue;
+        }
+        else if(find_data.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY){
+            snprintf(sub_path,MAX_PATH-1,"%s\\%s",pathname,find_data.cFileName);
+            if(rm_pdir(sub_path)!=0){
+                FindClose(handle_find);
+                return -1;
             }
         }
         else{
