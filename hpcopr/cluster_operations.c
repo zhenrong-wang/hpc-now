@@ -1000,6 +1000,8 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     char string_temp[LINE_LENGTH_SHORT];
     char dot_terraform[FILENAME_LENGTH]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    char randstr[8]="";
+    char destroyed_dir[DIR_LENGTH]="";
     char stackdir[DIR_LENGTH]="";
     char vaultdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
@@ -1064,17 +1066,19 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Deleting all the related local files and folders ...\n");
     delete_decrypted_files(workdir,crypto_keyfile);
-    batch_file_operation(DESTROYED_DIR,"*","","rm",0);
+    generate_random_nstring(randstr,8,1);
+    snprintf(destroyed_dir,DIR_LENGTH-1,"%s%s%s_%s",DESTROYED_DIR,PATH_SLASH,cluster_name,randstr);
+    mk_pdir(destroyed_dir);
     batch_file_operation(stackdir,"*.tf","","rm",0);
-    batch_file_operation(stackdir,"*.tmp",DESTROYED_DIR,"mv",0);
+    batch_file_operation(stackdir,"*.tmp",destroyed_dir,"mv",0);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scurrentstate",stackdir,PATH_SLASH);
     rm_file_or_dir(filename_temp);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
     rm_file_or_dir(filename_temp);
-    batch_file_operation(stackdir,"hostfile_latest",DESTROYED_DIR,"mv",0);
-    batch_file_operation(vaultdir,"*.tmp",DESTROYED_DIR,"mv",0);
+    batch_file_operation(stackdir,"hostfile_latest",destroyed_dir,"mv",0);
+    batch_file_operation(vaultdir,"*.tmp",destroyed_dir,"mv",0);
     batch_file_operation(vaultdir,"*.txt","","rm",0);
-    batch_file_operation(confdir,"tf_prep.conf",DESTROYED_DIR,"mv",0);
+    batch_file_operation(confdir,"tf_prep.conf",destroyed_dir,"mv",0);
     snprintf(dirname_temp,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,cluster_name);
     rm_file_or_dir(dirname_temp);
     delete_local_tf_config(stackdir);
@@ -1097,8 +1101,10 @@ int delete_compute_node(char* workdir, char* crypto_keyfile, char* param, int ba
         return -1;
     }
     generate_random_nstring(randstr,8,1);
-    snprintf(destroyed_dir,DIR_LENGTH-1,"%s%s%s_%s",DESTROYED_DIR,PATH_SLASH,unique_cluster_id,randstr);
-    mk_pdir(destroyed_dir);
+    snprintf(destroyed_dir,DIR_LENGTH-1,"%s%s%s_%s",NOW_TMP_DIR,PATH_SLASH,unique_cluster_id,randstr);
+    if(mk_pdir(destroyed_dir)!=0){
+        return -1;
+    }
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
