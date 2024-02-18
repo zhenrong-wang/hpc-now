@@ -1537,28 +1537,35 @@ int cp_file(char* current_filename, char* new_filename, int force_flag){
     return 0;
 }
 
-int fuzzy_strcmp(char* target_string, char* fuzzy_string, unsigned int buf_size){
+int fuzzy_strcmp(char* target_string, char* fuzzy_string){
     size_t i=0,j=0,k,buffer_length;
     char* buffer=NULL;
     size_t target_str_len=strlen(target_string);
     size_t fuzzy_str_len=strlen(fuzzy_string);
-    if(target_str_len<1||fuzzy_str_len<1||buf_size<fuzzy_str_len){
+    if(target_str_len<1||fuzzy_str_len<1){
         return -1;
     }
-    buffer=(char*)malloc(sizeof(char)*buf_size);
+    buffer=(char*)malloc(sizeof(char)*fuzzy_str_len);
     if(buffer==NULL){
         return -3;
     }
     while(i<fuzzy_str_len){
         if(*(fuzzy_string+i)=='*'){
+            memset(buffer,'\0',fuzzy_str_len);
             for(k=i+1;k<fuzzy_str_len&&*(fuzzy_string+k)!='*';k++){
                 *(buffer+k-i-1)=*(fuzzy_string+k);
             }
-            buffer_length=k-i-1;
-            i=k;
-            if(buffer_length==0){
+            if(strlen(buffer)==0){
+                i=k;
                 continue;
             }
+            if(k==fuzzy_str_len){
+                buffer_length=target_str_len-j;
+            }
+            else{
+                buffer_length=k-i-1;
+            }
+            i=k;
             for(k=j;k<target_str_len;k++){
                 if(memcmp(target_string+k,buffer,buffer_length)==0){
                     break;
@@ -1606,7 +1613,7 @@ char* get_first_fuzzy_subpath(char* pathname, char* fuzzy_name, unsigned int buf
         return NULL;
     }
     do{
-        if(fuzzy_strcmp(find_data.cFileName,fuzzy_name,DIR_LENGTH)==0){
+        if(fuzzy_strcmp(find_data.cFileName,fuzzy_name)==0){
             get_path=(char*)malloc(sizeof(char)*buffer_size);
             if(get_path==NULL){
                 return NULL;
@@ -1624,7 +1631,7 @@ char* get_first_fuzzy_subpath(char* pathname, char* fuzzy_name, unsigned int buf
         return NULL;
     }
     while((entry=readdir(dir))!=NULL){
-        if(fuzzy_strcmp(entry->d_name,fuzzy_name,DIR_LENGTH)==0){
+        if(fuzzy_strcmp(entry->d_name,fuzzy_name)==0){
             get_path=(char*)malloc(sizeof(char)*buffer_size);
             if(get_path==NULL){
                 return NULL;
@@ -1688,7 +1695,7 @@ int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_di
         if(find_data.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY){
             continue; /* ONLY copy files, not folders. */
         }
-        if(fuzzy_strcmp(find_data.cFileName,fuzzy_filename,LINE_LENGTH_SHORT)!=0){
+        if(fuzzy_strcmp(find_data.cFileName,fuzzy_filename)!=0){
             continue;
         }
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s\\%s",source_dir,find_data.cFileName);
@@ -1726,7 +1733,7 @@ int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_di
         if(entry->d_type==DT_DIR){
             continue;
         }
-        if(fuzzy_strcmp(entry->d_name,fuzzy_filename,LINE_LENGTH_SHORT)!=0){
+        if(fuzzy_strcmp(entry->d_name,fuzzy_filename)!=0){
             continue;
         }
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s/%s",source_dir,entry->d_name);
