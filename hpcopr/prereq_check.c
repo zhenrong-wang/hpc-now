@@ -454,6 +454,11 @@ bcecmd:
                 goto azcopy;
             }
         }
+        dirname_temp=(char*)malloc(sizeof(char)*DIR_LENGTH);
+        if(dirname_temp==NULL){
+            inst_flag=5;
+            goto azcopy;
+        }
 #ifdef _WIN32
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
@@ -476,6 +481,7 @@ bcecmd:
         chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
         rm_pdir(dirname_temp);
+        free(dirname_temp);
     }
     if(silent_flag!=0){
         printf(RESET_DISPLAY "|        v Installed the dataman components: 5/7 .\n");
@@ -508,6 +514,11 @@ azcopy:
                 goto gcloud_cli;
             }
         }
+        dirname_temp=(char*)malloc(sizeof(char)*DIR_LENGTH);
+        if(dirname_temp==NULL){
+            inst_flag=5;
+            goto gcloud_cli;
+        }
 #ifdef _WIN32
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
         system(cmdline);
@@ -530,6 +541,7 @@ azcopy:
         chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
         rm_pdir(dirname_temp);
+        free(dirname_temp);
     }
     if(silent_flag!=0){
         printf(RESET_DISPLAY "|        v Installed the dataman components: 6/7 .\n");
