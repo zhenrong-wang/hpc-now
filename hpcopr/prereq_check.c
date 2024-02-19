@@ -1288,9 +1288,6 @@ int command_name_check(char* command_name_input, char command_prompt[], unsigned
  * return 200+: command error
  */
 int command_parser(int argc, char** argv, char command_name_prompt[], unsigned int prompt_len_max, char workdir[], unsigned int dir_len_max, char cluster_name[], unsigned int cluster_name_len_max, char user_name[], unsigned int user_name_len_max, char cluster_role[], unsigned int role_len_max, int* decrypt_flag){
-    if(prompt_len_max<32||dir_len_max<DIR_LENGTH_SHORT||cluster_name_len_max<CLUSTER_ID_LENGTH_MAX_PLUS||user_name_len_max<USERNAME_LENGTH_MAX||role_len_max<6){
-        return -1;
-    }
     int command_flag=0;
     int max_time_temp=0;
     char temp_cluster_name_specified[32]="";
@@ -1300,7 +1297,15 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
     char temp_workdir[DIR_LENGTH]="";
     char string_temp[64]="";
     char cluster_name_source[16]="";
-
+    char role_flag[16]="";
+    char cluster_role_ext[16]="";
+    char cu_flag[16]="";
+    int tf_local_config_flag=127; //will be reset to -1~3 after get_tf_running_config()function
+    char filename_temp[FILENAME_LENGTH]="";
+    int run_flag;
+    if(prompt_len_max<32||dir_len_max<DIR_LENGTH_SHORT||cluster_name_len_max<CLUSTER_ID_LENGTH_MAX_PLUS||user_name_len_max<USERNAME_LENGTH_MAX||role_len_max<6){
+        return -1;
+    }
     if(argc<2){
         list_all_commands();
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a " HIGH_GREEN_BOLD "command" RESET_DISPLAY " : " HIGH_GREEN_BOLD);
@@ -1330,13 +1335,6 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
             strncpy(final_command,argv[1],63);
         }
     }
-
-    char role_flag[16]="";
-    char cluster_role_ext[16]="";
-    char cu_flag[16]="";
-    int tf_local_config_flag=127; //will be reset to -1~3 after get_tf_running_config()function
-    char filename_temp[FILENAME_LENGTH]="";
-
     command_flag=command_name_check(final_command,command_name_prompt,prompt_len_max,role_flag,cu_flag,16);
     if(command_flag!=0){
         return command_flag;
@@ -1355,15 +1353,16 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
             }
         }
         if(cluster_name_check(temp_cluster_name)!=-7){
+            run_flag=list_all_cluster_names(1);
+            if(run_flag<0||run_flag==3){
+                return -3;
+            }
             if(batch_flag!=0){
                 if(strlen(temp_cluster_name)==0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " No specified or switched cluster. Please select one:\n");
+                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " No specified or switched cluster. Select one from above.\n");
                 }
                 else{
-                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " The specified cluster name " WARN_YELLO_BOLD "%s" RESET_DISPLAY " is invalid. Select one:\n",temp_cluster_name);
-                }
-                if(list_all_cluster_names(1)<0){
-                    return -3;
+                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " The cluster name " WARN_YELLO_BOLD "%s" RESET_DISPLAY " is invalid. Select one from above.\n",temp_cluster_name);
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
@@ -1382,7 +1381,6 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
                 else{
                     printf(FATAL_RED_BOLD "[ FATAL: ] No cluster specified or switched. Use -c or switch to one." RESET_DISPLAY "\n");
                 }
-                list_all_cluster_names(2);
                 return -3;
             }
         }

@@ -3843,11 +3843,17 @@ int list_all_cluster_names(int header_flag){
         }
     }
     fclose(file_p);
+    if(i==0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] The local cluster registry is empty." RESET_DISPLAY "\n");
+    }
     if(header_flag==1){
         printf("\n");
     }
     if(file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete_decrypted")!=0){
         return 1;
+    }
+    if(i==0){
+        return 3; /* Empty cluster registry. */
     }
     return 0;
 }
