@@ -32,7 +32,8 @@
         "termios.h": "c",
         "fcntl.h": "c",
         "features.h": "c",
-        "stat.h": "c"
+        "stat.h": "c",
+        "errno.h": "c"
     },
     "C_Cpp.dimInactiveRegions": true
 }
