@@ -530,7 +530,7 @@ linux_install_done:
     snprintf(cmdline1,CMDLINE_LENGTH-1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the Microsoft RDP Client now ...\n");
-    if(file_exist_or_not("/Applications/msrdp.app")==0){
+    if(folder_exist_or_not("/Applications/msrdp.app")==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Microsoft RDP has been installed to your OS.\n");
         goto mac_install_done;
     }
