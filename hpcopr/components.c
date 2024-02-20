@@ -506,7 +506,6 @@ int show_locations(void){
         return -1;
     }
     fngetline(file_p,loc_string,LOCATION_LENGTH);
-    printf("\n");
     for(i=0;i<DEFAULT_LOCATIONS_COUNT;i++){
         fscanf(file_p,"%63s%383s",header,loc_string);
         printf("%s -> %s\n",header,loc_string);

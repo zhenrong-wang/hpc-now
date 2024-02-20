@@ -1359,11 +1359,13 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
             }
             if(batch_flag!=0){
                 if(strlen(temp_cluster_name)==0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " No specified or switched cluster. Select one from above.\n");
+                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " No specified or switched cluster. Select one.\n");
                 }
                 else{
-                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " The cluster name " WARN_YELLO_BOLD "%s" RESET_DISPLAY " is invalid. Select one from above.\n",temp_cluster_name);
+                    printf(WARN_YELLO_BOLD "[ -WARN- ]" RESET_DISPLAY " The cluster name " WARN_YELLO_BOLD "%s" RESET_DISPLAY " is invalid. Select one.\n",temp_cluster_name);
                 }
+                printf("\n");
+                list_all_cluster_names(1);
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
                 fflush(stdin);
                 scanf("%31s",temp_cluster_name);
@@ -1381,6 +1383,8 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
                 else{
                     printf(FATAL_RED_BOLD "[ FATAL: ] No cluster specified or switched. Use -c or switch to one." RESET_DISPLAY "\n");
                 }
+                printf("\n");
+                list_all_cluster_names(1);
                 return -3;
             }
         }

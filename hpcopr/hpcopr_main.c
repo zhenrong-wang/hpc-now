@@ -565,7 +565,11 @@ int main(int argc, char* argv[]){
                     return 25;
                     
                 }
-                list_all_cluster_names(1);
+                if(list_all_cluster_names(1)!=0){
+                    write_operation_log("NULL",operation_log,argc,argv,"EMPTY_REGISTRY",33);
+                    check_and_cleanup(workdir);
+                    return 33;
+                }
                 printf("[ -INFO- ] Input a list in the format " HIGH_GREEN_BOLD "cluster1:cluster2" RESET_DISPLAY " : ");
                 fflush(stdin);
                 scanf("%255s",string_temp);
@@ -704,7 +708,7 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"ls-clusters")==0){
-        run_flag=list_all_cluster_names(0);
+        run_flag=list_all_cluster_names(1);
         if(run_flag==-1){
             write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
             check_and_cleanup(workdir);
@@ -726,7 +730,11 @@ int main(int argc, char* argv[]){
         }
         else{
             if(cmd_keyword_ncheck(argc,argv,"-c",cluster_name,32)!=0&&show_current_ncluster(workdir,DIR_LENGTH,cluster_name,32,0)!=0){
-                list_all_cluster_names(1);
+                if(list_all_cluster_names(1)!=0){
+                    write_operation_log("NULL",operation_log,argc,argv,"EMPTY_REGISTRY",33);
+                    check_and_cleanup(workdir);
+                    return 33;
+                }
                 run_flag=prompt_to_input_required_args("Select a cluster name from the list above.",cluster_name,32,batch_flag,argc,argv,"-c");
                 if(run_flag!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY WARN_YELLO_BOLD "-c" RESET_DISPLAY FATAL_RED_BOLD ", or switch to a cluster." RESET_DISPLAY "\n");
@@ -773,7 +781,11 @@ int main(int argc, char* argv[]){
                 check_and_cleanup(workdir);
                 return 5;
             }
-            list_all_cluster_names(1);
+            if(list_all_cluster_names(1)!=0){
+                write_operation_log("NULL",operation_log,argc,argv,"EMPTY_REGISTRY",33);
+                check_and_cleanup(workdir);
+                return 33;
+            }
             prompt_to_input_required_args("Input a *new*, *unique*, and *valid* cluster name.",string_temp,256,batch_flag,argc,argv,"--cname");
         }
         if(prompt_to_confirm("Will rename the cluster and update all related infomation.",CONFIRM_STRING_QUICK,batch_flag)==1){
@@ -929,21 +941,29 @@ int main(int argc, char* argv[]){
 
     if(strcmp(final_command,"switch")==0){
         if(cmd_flag_check(argc,argv,"--list")==0){
-            run_flag=list_all_cluster_names(2);
+            run_flag=list_all_cluster_names(1);
             write_operation_log("NULL",operation_log,argc,argv,"SUCCEEDED",0);
             check_and_cleanup("");
             return 0;
         }
         if(cmd_keyword_ncheck(argc,argv,"-c",cluster_name,32)!=0){
             if(batch_flag==0){
-                list_all_cluster_names(1);
+                if(list_all_cluster_names(1)!=0){
+                    write_operation_log("NULL",operation_log,argc,argv,"EMPTY_REGISTRY",33);
+                    check_and_cleanup(workdir);
+                    return 33;
+                }
                 printf(FATAL_RED_BOLD "[ FATAL: ] Please specify a target cluster by " RESET_DISPLAY WARN_YELLO_BOLD "-c CLUSTER_NAME" RESET_DISPLAY FATAL_RED_BOLD " ." RESET_DISPLAY "\n");
                 write_operation_log("NULL",operation_log,argc,argv,"NOT_OPERATING_CLUSTERS",25);
                 check_and_cleanup(workdir);
                 return 25;
             }
             else{
-                list_all_cluster_names(1);
+                if(list_all_cluster_names(1)!=0){
+                    write_operation_log("NULL",operation_log,argc,argv,"EMPTY_REGISTRY",33);
+                    check_and_cleanup(workdir);
+                    return 33;
+                }
                 prompt_to_input_required_args("Select a target cluster name from the list above.",cluster_name,32,batch_flag,argc,argv,"-c");
             }
         }

@@ -145,7 +145,7 @@ int registry_dec_backup(void);
 int check_cluster_registry(void);
 int encrypt_decrypt_cluster_registry(char* option);
 int line_check_by_keyword(char* line, char* keyword, char split_ch, int seq_num);
-int list_all_cluster_names(int header_flag);
+int list_all_cluster_names(int verbosity_level);
 int exit_current_cluster(void);
 int delete_from_cluster_registry(char* deleted_cluster_name);
 int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords);

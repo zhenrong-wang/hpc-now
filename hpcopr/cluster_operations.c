@@ -446,6 +446,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
     snprintf(log_trash,FILENAME_LENGTH-1,"%s%slog_trashbin.txt",NOW_LOG_DIR,PATH_SLASH);
     if(cluster_name_check(target_cluster_name)!=-7){
         printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is not in the registry.\n" RESET_DISPLAY,target_cluster_name);
+        printf("\n");
         list_all_cluster_names(1);
         return 3;
     }

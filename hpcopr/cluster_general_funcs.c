@@ -3806,10 +3806,16 @@ int check_and_cleanup(char* prev_workdir){
     return 0;
 }
 
-//header flag=0: print a header
-//header flag=1: don't print a header and a blank line at the end
-//header flag=others: don't print a header or a blank line at the end
-int list_all_cluster_names(int header_flag){
+/*
+ * Options:
+ *   verbosity_level = 0: fully silent
+ *   verbosity_level = others : print out everything
+ * Return values: 
+ *   -1: No registry file
+ *    1: Empty registry
+ *    0: Normal exit
+ */
+int list_all_cluster_names(int verbosity_level){
     char filename_temp[FILENAME_LENGTH]="";
     char randstr[7]="";
     generate_random_nstring(randstr,7,0);
@@ -3817,24 +3823,23 @@ int list_all_cluster_names(int header_flag){
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
     FILE* file_p=fopen(filename_temp,"r");
     if(file_p==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the registry. Please run hpcopr repair." RESET_DISPLAY "\n");
+        if(verbosity_level!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the registry. Please run hpcopr repair." RESET_DISPLAY "\n");
+        }
         return -1;
     }
     char registry_line[LINE_LENGTH_SHORT]="";
     char temp_cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     int i=0;
-    if(header_flag==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " List of all the clusters:\n\n");
-    }
-    else{
-        printf("\n");
-    }
     while(fngetline(file_p,registry_line,LINE_LENGTH_SHORT)!=1){
         if(line_check_by_keyword(registry_line,"< cluster name",':',1)!=0){
             continue;
         }
-        get_seq_nstring(registry_line,' ',4,temp_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS);
         i++;
+        if(verbosity_level==0){
+            continue;
+        }
+        get_seq_nstring(registry_line,' ',4,temp_cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS);
         if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,temp_cluster_name)==0){
             printf(GENERAL_BOLD "| switch : (%d) %s" RESET_DISPLAY "\n",i,temp_cluster_name);
         }
@@ -3843,17 +3848,12 @@ int list_all_cluster_names(int header_flag){
         }
     }
     fclose(file_p);
+    file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete_decrypted");
     if(i==0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] The local cluster registry is empty." RESET_DISPLAY "\n");
-    }
-    if(header_flag==1){
-        printf("\n");
-    }
-    if(file_convert(ALL_CLUSTER_REGISTRY,randstr,"delete_decrypted")!=0){
-        return 1;
-    }
-    if(i==0){
-        return 3; /* Empty cluster registry. */
+        if(verbosity_level!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The local cluster registry is empty." RESET_DISPLAY "\n");
+        }
+        return 1; /* Empty cluster registry. */
     }
     return 0;
 }
