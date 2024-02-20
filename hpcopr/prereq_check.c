@@ -966,7 +966,6 @@ int check_and_install_prerequisitions(int repair_flag){
                 return 3;
             }
         }
-//        printf("%s,,,,,\"\n",cmdline);
 #ifdef _WIN32
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
 #elif __linux__
@@ -974,7 +973,6 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __APPLE__
         snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
 #endif
-//        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
         if(flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the terraform binary file." RESET_DISPLAY "\n");
@@ -1026,7 +1024,6 @@ int check_and_install_prerequisitions(int repair_flag){
                 return 3;
             }
         }
-//        printf("%s,,,,,\"\n",cmdline);
 #ifdef _WIN32
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
 #elif __linux__
@@ -1034,7 +1031,6 @@ int check_and_install_prerequisitions(int repair_flag){
 #elif __APPLE__
         snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
 #endif
-//        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
         if(flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to unzip the openTofu binary file." RESET_DISPLAY "\n");
@@ -1070,7 +1066,6 @@ int check_and_install_prerequisitions(int repair_flag){
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %snow-crypto-aes-dwn.exe -o %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
 #endif
         }
-//        printf("%s,,,,,\"\n",cmdline);
         flag=system(cmdline);
         if(flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy or install necessary tools. Please contact\n");
@@ -1300,7 +1295,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
     char role_flag[16]="";
     char cluster_role_ext[16]="";
     char cu_flag[16]="";
-    int tf_local_config_flag=127; //will be reset to -1~3 after get_tf_running_config()function
+    int tf_local_config_flag=127; /* will be reset to -1~3 after get_tf_running_config()function */
     char filename_temp[FILENAME_LENGTH]="";
     int run_flag;
     if(prompt_len_max<32||dir_len_max<DIR_LENGTH_SHORT||cluster_name_len_max<CLUSTER_ID_LENGTH_MAX_PLUS||user_name_len_max<USERNAME_LENGTH_MAX||role_len_max<6){
@@ -1447,10 +1442,10 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
         strncpy(user_name,string_temp,user_name_len_max-1);
     }
     
-    if(tf_local_config_flag==127){ // If not get_tf_running for local workdir
-        get_tf_running(&tf_this_run,TF_RUNNING_CONFIG); //goes to the global static one
-        // the command args have the higher priority
-        // flush any values previously get
+    if(tf_local_config_flag==127){ /* If not get_tf_running for local workdir */
+        get_tf_running(&tf_this_run,TF_RUNNING_CONFIG); /* goes to the global static one */
+        /* the command args have the higher priority
+         * flush any values previously get */
         cmd_keyword_ncheck(argc,argv,"--tf-run",string_temp,64);
         if(strcmp(string_temp,"tofu")==0){
             strcpy(tf_this_run.tf_runner,TOFU_EXEC);
@@ -1460,18 +1455,18 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
             strcpy(tf_this_run.tf_runner,TERRAFORM_EXEC);
             strcpy(tf_this_run.tf_runner_type,"terraform");
         }
-        cmd_keyword_ncheck(argc,argv,"--dbg-level",string_temp,64); //Get the global option: debug level
+        cmd_keyword_ncheck(argc,argv,"--dbg-level",string_temp,64); /* Get the global option: debug level */
         if(strcmp(string_temp,"trace")==0||strcmp(string_temp,"debug")==0||strcmp(string_temp,"info")==0||strcmp(string_temp,"warn")==0||strcmp(string_temp,"error")==0||strcmp(string_temp,"off")==0||strcmp(string_temp,"TRACE")==0||strcmp(string_temp,"DEBUG")==0||strcmp(string_temp,"INFO")==0||strcmp(string_temp,"WARN")==0||strcmp(string_temp,"ERROR")==0||strcmp(string_temp,"OFF")==0){
             strcpy(tf_this_run.dbg_level,"warn");
         }
-        cmd_keyword_ncheck(argc,argv,"--max-time",string_temp,16); //Get the global option: tf maximum execution time.
+        cmd_keyword_ncheck(argc,argv,"--max-time",string_temp,16); /* Get the global option: tf maximum execution time. */
         max_time_temp=string_to_positive_num(string_temp);
         if(max_time_temp>MAXIMUM_WAIT_TIME-1&&max_time_temp<MAXIMUM_WAIT_TIME_EXT+1){
             tf_this_run.max_wait_time=max_time_temp;
         }
     }
-    //If the tf_this_run is still invalid, throw out a serious warning.
-    //Anyway, the operations except cluster tf operations may still work.
+    /* If the tf_this_run is still invalid, throw out a serious warning.
+     * Anyway, the operations except cluster tf operations may still work. */
     if(tf_exec_config_validation(&tf_this_run)!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] ATTENTION! The tf config is not working! Please repair the hpcopr!" RESET_DISPLAY "\n");
     }

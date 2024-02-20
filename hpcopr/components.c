@@ -525,12 +525,14 @@ int reset_tf_running(void){
     return 0;
 }
 
-//return -1: file_not_exist
-//return 0: file exist and format correct
-//return 1: one config failed
-//return 2: two configs failed
-//return 3: three configs failed
-//Any failed config will be reset to the default one
+/*
+ * return -1: file_not_exist
+ * return 0: file exist and format correct
+ * return 1: one config failed
+ * return 2: two configs failed
+ * return 3: three configs failed
+ * Any failed config will be reset to the default one
+ */
 int get_tf_running(tf_exec_config* tf_config, char* tf_config_file){
     FILE* file_p=fopen(tf_config_file,"r");
     char conf_line[LINE_LENGTH_SHORT]="";

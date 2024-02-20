@@ -10,7 +10,7 @@
 
 int string_to_positive_num(char* string);
 
-void reset_string(char* orig_string); //This function is going to be deprecated
+void reset_string(char* orig_string); /* This function is going to be deprecated */
 void reset_nstring(char string[], unsigned int string_length);
 
 int get_key_value(char* filename, char* key, char ch, char* value);
@@ -40,7 +40,7 @@ int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, 
 int find_multi_keys(char* filename, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5);
 int find_multi_nkeys(char* filename, unsigned int linelen_max, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5);
 
-//int get_seq_string_general(char* line, char split_ch, int start, int end, char* get_string);
+/* int get_seq_string_general(char* line, char split_ch, int start, int end, char* get_string); */
 int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char* get_string);
 int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char get_str[], int get_strlen_max);
 
@@ -106,7 +106,7 @@ int cmd_keyword_ncheck(int argc, char** argv, char* key_word, char* kwd_string, 
 int include_string_or_not(int cmd_c, char** cmds, char* string);
 int windows_path_to_nstring(char* input_string, char new_string[], unsigned int maxlen);
 
-//Base64 decode
+/* Base64 decode */
 char* base64_clear_CRLF(char orig[], int length);
 unsigned char get_base64_index(char base64_char);
 int base64decode(char* encoded_string, char* export_path);

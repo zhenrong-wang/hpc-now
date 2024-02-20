@@ -22,13 +22,6 @@
 
 #include "installer.h"
 
-/* 
- * Borrowed the below functions from hpcopr.
- *   reset_string (from general_funcs.c)
- *   fgetline (from general_funcs.c)
- *   generate_random_passwd (from general_funcs.c)
- */
-
 int check_internet_installer(void){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
@@ -59,7 +52,7 @@ void print_tail_installer(void){
     printf(GENERAL_BOLD "+> visit:" RESET_DISPLAY " https://www.hpc-now.com    " GENERAL_BOLD "+> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
 }
 
-// Print out help info for this installer
+/* Print out help info for this installer */
 void print_help_installer(void){
 #ifdef _WIN32
     printf(GENERAL_BOLD "| USAGE: Open a Command Prompt Window as Administrator.\n");
@@ -162,13 +155,13 @@ int license_confirmation(void){
     return 0;
 }
 
-// Install HPC-NOW Services
-// If everything goes well, return 0; otherwise return non-zero value
-// 1. Check and add the dedicated user 'hpc-now'
-// 2. Create necessary directories, including /Applications/.hpc-now 
-// 3. Create the crypto key file for further encryption and decryption
-// 4. Manage the folder permissions
-
+/* Install HPC-NOW Services
+ * If everything goes well, return 0; otherwise return non-zero value
+ * 1. Check and add the dedicated user 'hpc-now'
+ * 2. Create necessary directories, including /Applications/.hpc-now 
+ * 3. Create the crypto key file for further encryption and decryption
+ * 4. Manage the folder permissions
+ */
 int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, char* opr_password, int crypto_loc_flag, char* now_crypto_loc, int rdp_flag){
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
@@ -600,14 +593,16 @@ int restore_perm_windows(void){
     return 0;
 }
 
-//If the opr_password is not 0, the password is valid.
-//return -5: Failed to restore permission for windows
-//return -3: Not installed
-//return -1: FILE input error
-//return 1: password invalid
-//return 3: failed to decrypt
-//return 5: failed to encrypt
-//return 0: normal exit
+/*
+ * If the opr_password is not 0, the password is valid.
+ * return -5: Failed to restore permission for windows
+ * return -3: Not installed
+ * return -1: FILE input error
+ * return 1: password invalid
+ * return 3: failed to decrypt
+ * return 5: failed to encrypt
+ * return 0: normal exit
+ */
 int set_opr_password(char* opr_password){
 #ifdef _WIN32
     if(system("net user hpc-now > nul 2>&1")!=0){
@@ -700,10 +695,11 @@ int set_opr_password(char* opr_password){
     return 0;
 }
 
-// Forcely uninstall the HPC-NOW services
+/*
+ * Forcely uninstall the HPC-NOW services
+ */
 int uninstall_services(void){
     char doubleconfirm[16]="";
-    // Double confirmation is needed.
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("[  ****  ] YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM:\n");
     printf("[  ****  ] 1. You have *DESTROYED* all the clusters managed by this\n");
@@ -831,7 +827,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #ifdef _WIN32
     system("icacls C:\\hpc-now /remove Administrators > nul 2>&1");
     system("icacls C:\\programdata\\hpc-now /remove Administrators > nul 2>&1");
-    if(system("dir C:\\programdata\\hpc-now | findstr .now-ssh > nul 2>&1")!=0){ // For compatibility
+    if(system("dir C:\\programdata\\hpc-now | findstr .now-ssh > nul 2>&1")!=0){ /* For compatibility */
         printf("[ -INFO- ] Moving previous keys to the new directory ...\n");
         system("takeown /f C:\\hpc-now\\.now-ssh /r /d y > nul 2>&1");
         system("move /y C:\\hpc-now\\.now-ssh C:\\programdata\\hpc-now\\ > nul 2>&1");

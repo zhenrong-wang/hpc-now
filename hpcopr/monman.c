@@ -303,7 +303,6 @@ int show_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey
         snprintf(temp_time_final,39,"%s:0",temp_time);
         datetime_to_num(temp_date,temp_time_final,&time_tm_tmp);
         time_tmp=mktime(&time_tm_tmp);
-//        printf("*******%ld**%ld***%ld,,,,,%d,,,,,%ld\n",time1,time2,time_tmp,interval_num,(time_tmp-time1)%(interval_num*60));
         if(time_tmp<time1){
             continue;
         }

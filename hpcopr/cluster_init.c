@@ -233,7 +233,7 @@ int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_l
     return 0;
 }
 
-//You must guarantee the stackdir,vaultdir,logdir,confdir is long enough with DIR_LENGTH!
+/* You must guarantee the stackdir,vaultdir,logdir,confdir is long enough with DIR_LENGTH! */
 int create_init_dirs(char* workdir, char* stackdir, char* vaultdir, char* logdir, char* confdir, unsigned int dirlen_max){
     if(dirlen_max<DIR_LENGTH_SHORT){
         return -3;
@@ -326,7 +326,7 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
         if(cmd_flag_check(argc,argv,"--force")!=0){
             if(batch_flag_local==0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Config file found (downloaded or saved). Using it now." RESET_DISPLAY "\n");
-                return 0; // If the conf file already exists, exit, unless force specified or batch mode.
+                return 0; /* If the conf file already exists, exit, unless force specified or batch mode. */
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Config file found. Input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to use it, others to abandon.\n");
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
@@ -382,7 +382,7 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
         strcpy(default_os_image,"centoss9");
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
-        strcpy(default_region,"Japan-East"); //Azure
+        strcpy(default_region,"Japan-East");
         strcpy(default_zone,"*NULL*");
         strcpy(default_master_inst,"i8c16g");
         strcpy(default_compute_inst,"i4c8g");
@@ -700,7 +700,7 @@ invalid_conf:
 
 int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, cluster_initinfo* init_info){
     if(file_exist_or_not(conf_file)!=0){
-        return -3; // If the conf file doesn't exist, exit.
+        return -3; /* If the conf file doesn't exist, exit. */
     }
     FILE* file_p=fopen(conf_file,"r");
     char conf_line_buffer[LINE_LENGTH_SHORT]="";
@@ -720,7 +720,7 @@ int get_tf_prep_conf(char* cluster_id, char* conf_file, char* reconf_list, clust
         get_seq_nstring(conf_line_buffer,' ',3,tail,64);
         if(strcmp(header,"cluster_id")==0||strcmp(header,"master_init_param")==0){
             read_conf_lines++;
-            continue; // The cluster id is immutable. Skip it.
+            continue; /* The cluster id is immutable. Skip it. */
         }
         else if(strcmp(header,"region_id")==0){
             if(*(tail+0)=='a'&&*(tail+1)=='z'&&*(tail+2)=='.'){
@@ -849,7 +849,6 @@ void print_read_conf_failed(int read_conf_flag){
 
 int print_conf_summary(int batch_flag_local, cluster_initinfo* init_info, char* ucid_short){
     printf(HIGH_GREEN_BOLD "[ STEP 2 ] Cluster Configuration [ " RESET_DISPLAY GREEN_NORMAL "%s-%s" RESET_DISPLAY HIGH_GREEN_BOLD " ]:" RESET_DISPLAY "\n",init_info->cluster_id,ucid_short);
-    //printf(HIGH_GREEN_BOLD "[  ****  ] Cluster Name : %s " RESET_DISPLAY GREEN_LIGHT " ~ non-configurable\n",init_info->cluster_id);
     printf(HIGH_GREEN_BOLD "[  ****  ] Region & Zone    : %s & %s " RESET_DISPLAY GREEN_NORMAL "  cloud codes\n",init_info->region_id,init_info->zone_id);
     printf(HIGH_GREEN_BOLD "[  ****  ] Nodes  & Users   : %d & %d " RESET_DISPLAY GREEN_NORMAL "  initial to create\n",init_info->node_num,init_info->hpc_user_num);
     printf(HIGH_GREEN_BOLD "[  ****  ] Master & Compute : %s & %s " RESET_DISPLAY GREEN_NORMAL "  vm instance code\n",init_info->master_inst,init_info->compute_inst);
@@ -1157,7 +1156,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     if(print_conf_summary(batch_flag_local,&init_info,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
-        return 1; // user denied.
+        return 1; /* user denied. */
     }
 
     snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
@@ -1232,7 +1231,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
     insert_nlines(filename_temp,LINE_LENGTH_SMALL,"#INSERT_AMI_HERE",os_image);
     global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RG_NAME",unique_cluster_id);
-    if(threads==1){ //Hyperthreading off
+    if(threads==1){ /* Hyperthreading off */
         snprintf(string_temp,127,"cpu_core_count = %d",cpu_core_num);
         insert_nlines(filename_temp,LINE_LENGTH_SMALL,"#INSERT_HT_HERE",string_temp);
         insert_nlines(filename_temp,LINE_LENGTH_SMALL,"#INSERT_HT_HERE","cpu_threads_per_core = 1");
@@ -1452,7 +1451,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     if(print_conf_summary(batch_flag_local,&init_info,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
-        return 1; // user denied.
+        return 1; /* user denied. */
     }
 
     snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
@@ -1745,7 +1744,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     if(print_conf_summary(batch_flag_local,&init_info,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
-        return 1; // user denied.
+        return 1; /* user denied. */
     }
 
     snprintf(unique_cluster_id,63,"%s-%s",init_info.cluster_id,randstr);
@@ -1946,7 +1945,7 @@ int hw_vm_series(const char* region_id, char* intel_generation, char* tiny_serie
         *amd_flag=0;
     }
     else{
-        *amd_flag=1; // No amd available
+        *amd_flag=1; /* No amd available */
     }
     if(strcmp(region_id,"cn-north-4")==0||strcmp(region_id,"cn-north-9")==0||strcmp(region_id,"cn-east-3")==0||strcmp(region_id,"cn-south-1")==0||strcmp(region_id,"cn-southwest-2")==0){
         strcpy(intel_generation,"c7");
@@ -2060,7 +2059,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     if(print_conf_summary(batch_flag_local,&init_conf,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
-        return 1; // user denied.
+        return 1; /* user denied. */
     }
 
     snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
@@ -2346,7 +2345,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     if(print_conf_summary(batch_flag_local,&init_conf,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
-        return 1; // user denied.
+        return 1; /* user denied. */
     }
 
     snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
@@ -2656,7 +2655,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
     if(print_conf_summary(batch_flag_local,&init_conf,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
-        return 1; // user denied.
+        return 1; /* user denied. */
     }
 
     snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
@@ -2905,7 +2904,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     if(print_conf_summary(batch_flag_local,&init_conf,randstr)!=0){
         clear_if_failed(stackdir,confdir,vaultdir,2);
         gcp_credential_convert(workdir,"delete",0);
-        return 1; // user denied.
+        return 1; /* user denied. */
     }
 
     snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);

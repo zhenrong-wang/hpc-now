@@ -52,7 +52,7 @@ int code_loc_flag_var=0;
 int now_crypto_loc_flag_var=0;
 
 char terraform_version_var[32]="";
-char tofu_version_var[32]=""; //Added openTofu version
+char tofu_version_var[32]=""; /* Added openTofu version */
 
 char ali_tf_plugin_version_var[32]="";
 char qcloud_tf_plugin_version_var[32]="";
@@ -86,7 +86,7 @@ char sha_azad_tf_zip_var[80]="";
 char sha_gcp_tf_var[80]="";
 char sha_gcp_tf_zip_var[80]="";
 
-int batch_flag=1; // If batch_flag=0: Batch Mode. If batch_flag!=0: interactive mode. use the -b flag
+int batch_flag=1; /* If batch_flag=0: Batch Mode. If batch_flag!=0: interactive mode. use the -b flag */
 char final_command[64]="";
 tf_exec_config tf_this_run;
 
@@ -491,7 +491,7 @@ int main(int argc, char* argv[]){
         }
         else{
             printf(WARN_YELLO_BOLD "[ -WARN- ] Will skip checking GCP connectivity if previously checked." RESET_DISPLAY "\n");
-            run_flag=check_and_install_prerequisitions(0); // Check GCP Connectivity.
+            run_flag=check_and_install_prerequisitions(0); /* Check GCP Connectivity. */
         }
         if(run_flag!=0){
             write_operation_log("NULL",operation_log,argc,argv,"ENVCHECK_FAILED",run_flag);
@@ -660,10 +660,10 @@ int main(int argc, char* argv[]){
         return 19;
     }
 
-    //Automatically encrypt the decrypted files for a specific cluster.
+    /* Automatically encrypt the decrypted files for a specific cluster. */
     if(decrypt_flag==1){
         printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is decrypted." RESET_DISPLAY "\n",cluster_name);
-        encrypt_decrypt_clusters(cluster_name,crypto_keyfile,"encrypt",0); //This operation is automatic. Use 0 as the batch flag.
+        encrypt_decrypt_clusters(cluster_name,crypto_keyfile,"encrypt",0); /* This operation is automatic. Use 0 as the batch flag. */
     }
     
     if(strcmp(final_command,"new-cluster")==0){
@@ -1899,7 +1899,6 @@ int main(int argc, char* argv[]){
             return run_flag;   
         }
         usrmgr_check_flag=usrmgr_prereq_check(workdir,crypto_keyfile,user_cmd,batch_flag);
-        //printf("\n\n %s \n\n",user_cmd);
         if(usrmgr_check_flag==-1){
             write_operation_log(cluster_name,operation_log,argc,argv,"USERMAN_PREREQ_CHECK_FAILED",77);
             check_and_cleanup(workdir);
@@ -1910,7 +1909,6 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        //printf("\n\n %s \n\n",user_cmd);
         hpc_user_list(workdir,crypto_keyfile,0,0);
         if(strcmp(user_cmd,"add")==0){
             snprintf(string_temp,255,"Input a *UNIQUE* username (A-Z | a-z | 0-9 | - , Length %d-%d",USERNAME_LENGTH_MIN,USERNAME_LENGTH_MAX);

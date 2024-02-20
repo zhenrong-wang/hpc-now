@@ -26,7 +26,7 @@
 #include <sys\types.h>
 #include <sys\stat.h>
 #include <malloc.h>
-#include <conio.h> // This header is not standard! Only for mingw.
+#include <conio.h>
 #elif __linux__
 #include <malloc.h>
 #include <sys/time.h>
@@ -48,31 +48,31 @@
 #include "general_funcs.h"
 
 char command_flags[CMD_FLAG_NUM][16]={
-    "-b", // batch mode, skip every confirmation
-    "-r", // recursive
-    "-rf", // recursive + force
-    "-f", // force
+    "-b", /* batch mode, skip every confirmation */
+    "-r", /* recursive */
+    "-rf", /* recursive + force */
+    "-f", /* force */
     "--all", 
     "--list",
     "--force",
     "--recursive",
-    "--print", // print contents
+    "--print", /* print contents */
     "--installed",
     "--verbose",
-    "--read", // read contents
+    "--read", /* read contents */
     "--edit",
-    "--std", // standard info
-    "--err", // error info
-    "--dbg", // tf dbg info
-    "--this", // this
-    "--hist", // historical
-    "--mc", // rebuild mc
-    "--mcdb", //rebuild mcdb
-    "--bkey", // display bucket passwd
-    "--rkey", // display root passwd
-    "--admin", //export admin privilege
-    "--accept", // accept license terms
-    "--echo", //echo_flag
+    "--std", /* standard info */
+    "--err", /* error info */
+    "--dbg", /* tf dbg info */
+    "--this", /* this */
+    "--hist", /* historical */
+    "--mc", /* rebuild mc */
+    "--mcdb", /* rebuild mcdb */
+    "--bkey", /* display bucket passwd */
+    "--rkey", /* display root passwd */
+    "--admin", /* export admin privilege */
+    "--accept", /* accept license terms */
+    "--echo", /* echo_flag */
     "--od",
     "--month",
     "--gcp",
@@ -81,21 +81,21 @@ char command_flags[CMD_FLAG_NUM][16]={
 };
 
 char command_keywords[CMD_KWDS_NUM][32]={
-    "-c", //cluster
-    "-u", //user
-    "-p", // password
-    "-s", //Source  | start
-    "-e", //End
-    "-d", //Destination
-    "-t", // target
-    "-n", //node_name
+    "-c", /* cluster */
+    "-u", /* user */
+    "-p", /* password */
+    "-s", /* Source  | start */
+    "-e", /* End */
+    "-d", /* Destination */
+    "-t", /* target */
+    "-n", /* node_name */
     "--cmd",
     "--dcmd",
     "--ucmd",
     "--acmd",
     "--app",
     "--jcmd",
-    "--jname", //Job Name
+    "--jname", /* Job Name */
     "--jid",
     "--jtime",
     "--jexec",
@@ -103,18 +103,18 @@ char command_keywords[CMD_KWDS_NUM][32]={
     "--level",
     "--log",
     "--vol",
-    "--cname", //cluster_name
+    "--cname", /* cluster_name */
     "--ak",
     "--sk",
     "--az-sid",
     "--az-tid",
-    "--ul", // user list
-    "--key", //key file
+    "--ul", /* user list */
+    "--key", /* key file */
     "--rg",
     "--az",
-    "--nn", //node_num
-    "--tn", //tasks per node
-    "--un", //user_num
+    "--nn", /* node_num */
+    "--tn", /* tasks per node */
+    "--un", /* user_num */
     "--mi",
     "--ci",
     "--os",
@@ -229,7 +229,6 @@ int get_key_value(char* filename, char* key, char ch, char* value){
         reset_string(tail);
         get_seq_string(line_buffer,ch,1,head);
         get_seq_string(line_buffer,ch,2,tail);
-//        printf("%s\t%s\t%s\n",line_buffer,head,tail);
         if(strcmp(key,head)==0){
             fclose(file_p);
             strcpy(value,tail);
@@ -241,7 +240,7 @@ int get_key_value(char* filename, char* key, char ch, char* value){
     return 1;
 }
 
-//This function is going to be deprecated
+/* This function is going to be deprecated */
 void reset_string(char* orig_string){
     int length=strlen(orig_string);
     int i;
@@ -260,7 +259,6 @@ void reset_nstring(char string[], unsigned int string_length){
  * SEGMENT FAULT MAY OCCUR IF YOU DO NOT USE THIS FUNCTION PROPERLY!
  */
 int fgetline(FILE* file_p, char* line_string){
-//    char ch;
     int ch='\0';
     int i=0;
     if(file_p==NULL){
@@ -273,11 +271,11 @@ int fgetline(FILE* file_p, char* line_string){
             *(line_string+i)=ch;
             i++;
         }
-    }while(ch!=EOF&&ch!='\n'&&i!=LINE_LENGTH); // Be careful! This function can only handle lines <= 4096 chars. Extra chars will be ommited
+    }while(ch!=EOF&&ch!='\n'&&i!=LINE_LENGTH); /* Be careful! This function can only handle lines <= 4096 chars. Extra chars will be ommited */
     if(i==LINE_LENGTH){
-        return -7; // When returns this value, the outcome will be unpredictable.
+        return -7; /* When returns this value, the outcome will be unpredictable. */
     }
-    *(line_string+i)='\0'; // This is very dangerous. You need to guarantee the length of line_string is long enough!
+    *(line_string+i)='\0'; /* This is very dangerous. You need to guarantee the length of line_string is long enough! */
     if(ch==EOF&&i==0){
         return 1;
     }
@@ -316,15 +314,15 @@ int fngetline(FILE* file_p, char line_string[], unsigned int max_length){
             *(line_string+i)=ch;
             i++;
         }
-    }while(ch!=EOF&&ch!='\n'&&ch!='\r'&&i<max_length-1); //Reserve a char for '\0'
+    }while(ch!=EOF&&ch!='\n'&&ch!='\r'&&i<max_length-1); /* Reserve a char for '\0' */
     if(i==max_length-1){
-        return 2; // When returns this value, the line is not read completely.
+        return 2; /* When returns this value, the line is not read completely. */
     }
     if(ch==EOF&&i==0){
-        return 1; //Read nothing
+        return 1; /* Read nothing */
     }
     else{
-        return 0; //Finished reading
+        return 0; /* Finished reading */
     }
 }
 
@@ -378,7 +376,7 @@ int contain_or_nnot(char line[], char findkey[]){
     if(strlen(line)<strlen(findkey)){
         return 0;
     }
-    if(strlen(findkey)==0){ //If findkey = '\0', then return 1 because the line contains at least one '\0'
+    if(strlen(findkey)==0){ /* If findkey = '\0', then return 1 because the line contains at least one '\0' */
         return 1;
     }
     int i=0;
@@ -736,12 +734,10 @@ int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, 
             continue;
         }
         contain_flag=contain_or_nnot(single_line,orig_string);
-        //printf("ERRRR %d %s %s\n",contain_flag,single_line,orig_string);
         if(contain_flag<1){
             fprintf(file_temp_p,"%s\n",single_line);
             continue;
         }
-        //printf("ERRRR\n");
         new_line=line_nreplace(single_line,contain_flag,orig_string,new_string);
         if(new_line==NULL){
             fprintf(file_temp_p,"%s\n",single_line);
@@ -916,8 +912,10 @@ int calc_str_nnum(char* line, char split_ch){
     }
 }
 
-//return -1: get finished
-//return 0: get_successed
+/* 
+ * return -1: get finished
+ * return 0: get_successed
+ */
 int get_seq_string(char* line, char split_ch, int string_seq, char* get_string){
     int total_string_num=calc_str_num(line,split_ch);
     int i=0,j=0;
@@ -1004,7 +1002,6 @@ int get_seq_nstring(char line[], char split_ch, int string_seq, char get_str[], 
     int i=0,j=0;
     int break_flag=0;
     int string_seq_current;
-    //printf("%d %d:::::::::;;;;;;;;;;;",strlen(line),total_string_num);
     if(string_seq>total_string_num){
         reset_nstring(get_str,getstr_len_max);
         return 1;
@@ -1039,9 +1036,7 @@ int get_seq_nstring(char line[], char split_ch, int string_seq, char get_str[], 
             }
             *(get_str+j-i)=*(line+j);
         }
-        //printf("%s---",get_str);
         if(break_flag==1&&j<strlen(line)-1){
-            //printf("%d   %c   ,,,",j-i,*(line+j+1));
             if(*(line+j+1)!=' '&&*(line+j+1)!='\t'){
                 reset_nstring(get_str,getstr_len_max);
                 return 3; 
@@ -1180,7 +1175,6 @@ int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primar
     }
     int j;
     while(fngetline(file_p,single_line,linelen_max)!=1){
-        //printf("%d,,%d,,%d,,\n",contain_or_nnot(single_line,findkey_primary1),contain_or_nnot(single_line,findkey_primary2),contain_or_nnot(single_line,findkey_primary3));
         if(contain_or_nnot(single_line,findkey_primary1)>0&&contain_or_nnot(single_line,findkey_primary2)>0&&contain_or_nnot(single_line,findkey_primary3)>0){
             if(contain_or_nnot(single_line,findkey1)>0&&contain_or_nnot(single_line,findkey2)>0&&contain_or_nnot(single_line,findkey3)>0){
                 get_seq_nstring(single_line,split_ch,string_seq_num,get_str,get_strlen_max);
@@ -2040,7 +2034,6 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
         return -5;
     }
     memset(password_temp,'\0',password_array_len);
-    //printf("%d  -- %d -- %s\n",ch_table_length,strlen(ch_table_final),ch_table_final);
     for(total_times=0;total_times<16;total_times++){
         i=0;
         while(i<password_array_len-1){
@@ -2076,7 +2069,7 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     return 1;
 }
 
-//Make sure the password[] is 20 width
+/* Make sure the password[] is 20 width */
 int generate_random_passwd(char* password){
     int i,total_times,rand_num;
     struct timespec current_time;
@@ -2434,9 +2427,7 @@ int local_path_parser(char* path_string, char* path_final){
             *(path_temp+i-1)=*(path_string+i);
         }
 #ifdef __linux__
-//        printf("%s       %s    ppppp\n",path_temp,path_final);
         sprintf(path_final,"/home/hpc-now%s",path_temp);
-//        printf("%s       %s    ppppp\n",path_temp,path_final);
 #elif __APPLE__
         sprintf(path_final,"/Users/hpc-now%s",path_temp);
 #else
@@ -2665,9 +2656,11 @@ int cmd_flag_check(int argc, char** argv, char* flag_string){
     return 1;
 }
 
-//return 0: found the keyword
-//return 1: not found
-//make sure the dest array has 128 width.
+/*
+ * return 0: found the keyword
+ * return 1: not found
+ * make sure the dest array has 128 width.
+ */
 int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string){
     int i,j;
     for(i=2;i<argc-1;i++){
@@ -2687,8 +2680,10 @@ int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string){
     return 1;
 }
 
-//return 0: found the keyword
-//return 1: not found
+/*
+ * return 0: found the keyword
+ * return 1: not found
+ */
 int cmd_keyword_ncheck(int argc, char** argv, char* key_word, char* kwd_string, unsigned int n){
     int i,j;
     for(i=2;i<argc-1;i++){
@@ -2719,7 +2714,7 @@ int include_string_or_not(int cmd_c, char** cmds, char* string){
 }
 
 int file_cr_clean(char* filename){
-#ifndef _WIN32 //For Windows 32 environment, there is no need to clean the \r char.
+#ifndef _WIN32 /* For Windows 32 environment, there is no need to clean the \r char. */
     if(file_exist_or_not(filename)!=0){
         return -1;
     }
@@ -2877,7 +2872,6 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
             else{
                 contain_end_flag=0;
             }
-            //printf("%d   %d   %d -->>%s\n",contain_start_flag,contain_end_flag,start_flag,line_buffer);
             if(contain_start_flag<1&&start_flag==0){
                 continue;
             }
@@ -2908,8 +2902,10 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
     return 0;
 }
 
-//overwrite flag =0, not replace
-//overwrite flag !=0, replace.
+/*
+ * overwrite flag =0, not replace
+ * overwrite flag !=0, replace.
+ */
 int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     char filename_temp[FILENAME_LENGTH]="";
     char line_buffer[LINE_LENGTH]="";
@@ -3037,10 +3033,12 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     return 0;
 }
 
-//Please *DO* make sure the md5sum_length equals to the md5sum_string array length
-//return -3: the given length is invalid
-//return 1: get_md5 failed
-//return 0: get_md5 succeeded
+/* 
+ * Please *DO* make sure the md5sum_length equals to the md5sum_string array length
+ * return -3: the given length is invalid
+ * return 1: get_md5 failed
+ * return 0: get_md5 succeeded
+ */
 int get_nmd5sum(char* filename, char md5sum_string[], int md5sum_length){
     memset(md5sum_string,'\0',md5sum_length);
     if(md5sum_length<33){
@@ -3181,7 +3179,7 @@ int windows_path_to_nstring(char* input_string, char new_string[], unsigned int 
 #endif
 }
 
-//memory allocated!
+/* memory allocated! */
 char* base64_clear_CRLF(char orig[], int length){
     char* new_string=(char*)malloc(sizeof(char)*(length+1));
     if(new_string==NULL){
@@ -3198,7 +3196,7 @@ char* base64_clear_CRLF(char orig[], int length){
     return new_string;
 }
 
-//Convert a base64 char to an unsigned char
+/* Convert a base64 char to an unsigned char */
 unsigned char get_base64_index(char base64_char){
     if(base64_char=='='){
         return 253;
@@ -3219,16 +3217,18 @@ unsigned char get_base64_index(char base64_char){
         return base64_char-71;
     }
     else{
-        return 255; //Illegal!
+        return 255; /* Illegal! */
     }
 }
 
-//decode a base64 string and print to a file.
-//return -1: MEM ALLOC FAILED
-//return -3: length invalid
-//return 1: Format invalid
-//return -5: FILE Output error
-//return 0: Normal exit
+/* 
+ * decode a base64 string and print to a file.
+ * return -1: MEM ALLOC FAILED
+ * return -3: length invalid
+ * return 1: Format invalid
+ * return -5: FILE Output error
+ * return 0: Normal exit
+ */
 int base64decode(char* encoded_string, char* export_path){
     char* encoded_string_new=base64_clear_CRLF(encoded_string,strlen(encoded_string));
     if(encoded_string_new==NULL){
@@ -3249,7 +3249,6 @@ int base64decode(char* encoded_string, char* export_path){
     unsigned long group=length>>2;
     unsigned long i,j=0;
     unsigned char ch0,ch1,ch2,ch3;
-    //unsigned char char0,char1,char2;
     
     for(i=0;i<group-1;i++){
         ch0=get_base64_index(encoded_string_new[i*4]);
@@ -3259,7 +3258,7 @@ int base64decode(char* encoded_string, char* export_path){
         if(ch0>63||ch1>63||ch2>63||ch3>63){
             free(encoded_string_new);
             free(decoded_string);
-            return 1; //Illegal format
+            return 1; /* Illegal format */
         }
         *(decoded_string+j)=(ch0<<2)|(ch1>>4);
         *(decoded_string+j+1)=(ch1<<4)|(ch2>>2);
@@ -3273,12 +3272,12 @@ int base64decode(char* encoded_string, char* export_path){
     if(ch0>63||ch1>63||ch2==255||ch3==255){
         free(encoded_string_new);
         free(decoded_string);
-        return 1; //Illegal format
+        return 1; /* Illegal format */
     }
     if(ch3!=253&&ch2==253){
         free(encoded_string_new);
         free(decoded_string);
-        return 1; //Illegal format
+        return 1; /* Illegal format */
     }
     *(decoded_string+j)=(ch0<<2)|(ch1>>4);
     if(ch3==253){
@@ -3291,7 +3290,6 @@ int base64decode(char* encoded_string, char* export_path){
         *(decoded_string+j+2)=ch2<<6|ch3;
     }
     free(encoded_string_new);
-    //printf("%s\n",decoded_string);
     FILE* file_p=fopen(export_path,"w+");
     if(file_p==NULL){
         free(decoded_string);
@@ -3303,10 +3301,12 @@ int base64decode(char* encoded_string, char* export_path){
     return 0;
 }
 
-//return -1: MEM ALLOC FAILED
-//return -3: Original length invalid
-//return -5: FILE output Error
-//return 0: Normal exit
+/*
+ * return -1: MEM ALLOC FAILED
+ * return -3: Original length invalid
+ * return -5: FILE output Error
+ * return 0: Normal exit
+ */
 int base64encode(char* plain_string, char* export_path){
     char encode_chars[64]={
         'A','B','C','D','E','F','G','H',
@@ -3320,9 +3320,9 @@ int base64encode(char* plain_string, char* export_path){
     };
     unsigned long length=strlen(plain_string);
     if(length<1){
-        return -3; //The original length should be at least 1;
+        return -3; /* The original length should be at least 1; */
     }
-    char* encoded_string=(char*)malloc(sizeof(char)*((length*3)>>1)); //Alloc 1.5x mem
+    char* encoded_string=(char*)malloc(sizeof(char)*((length*3)>>1)); /* Alloc 1.5x mem */
     if(encoded_string==NULL){
         return -1; 
     }
@@ -3349,7 +3349,6 @@ int base64encode(char* plain_string, char* export_path){
         *(encoded_string+j+2)=encode_chars[(plain_string[i*3+1]&0x0F)<<2];
         *(encoded_string+j+3)='=';
     }
-    //printf("%s\n",encoded_string);
     FILE* file_p=fopen(export_path,"w+");
     if(file_p==NULL){
         free(encoded_string);

@@ -23,7 +23,7 @@ typedef struct {
     char compute_inst[16];
     char os_image_raw[96];
     char ht_flag[8];
-} cluster_initinfo; // For future use if needed.
+} cluster_initinfo;
 
 void reset_initinfo(cluster_initinfo* init_info, char* cluster_id);
 void empty_initinfo(cluster_initinfo* init_info);

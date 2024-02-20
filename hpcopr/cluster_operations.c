@@ -14,7 +14,7 @@
 #ifndef _WIN32
 #include <sys/time.h>
 #else
-#include <conio.h> // This header is not standard! ONLY for mingw
+#include <conio.h>
 #endif
 
 #include "now_macros.h"
@@ -88,7 +88,6 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             }
             return 0;
         }
-        //decrypt_files(temp_cluster_workdir,crypto_keyfile);
         printf(GENERAL_BOLD "| switch : <> ");
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
             if(decrypt_flag!=0){
@@ -98,7 +97,6 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",temp_cluster_name,cluster_role,cloud_flag);
             }
         }
-        //delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
     }
     if(strcmp(target_cluster_name,"all")==0||strcmp(target_cluster_name,"ALL")==0||strcmp(target_cluster_name,"All")==0){
@@ -195,7 +193,6 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
             }
             return 0;
         }
-        //decrypt_files(temp_cluster_workdir,crypto_keyfile);
         if(graph(temp_cluster_workdir,crypto_keyfile,1)!=0){
             if(decrypt_flag!=0){
                 printf(FATAL_RED_BOLD "%s | %s | %s | * EMPTY CLUSTER * !DECRYPTED! *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
@@ -204,7 +201,6 @@ int glance_clusters(char* target_cluster_name, char* crypto_keyfile){
                 printf("%s | %s | %s | * EMPTY CLUSTER *" RESET_DISPLAY "\n",target_cluster_name,cluster_role,cloud_flag);
             }
         }
-        //delete_decrypted_files(temp_cluster_workdir,crypto_keyfile);
         return 0;
     }
 }
@@ -326,7 +322,6 @@ int rename_cluster(char* cluster_prev_name, char* cluster_new_name, char* crypto
     }
     snprintf(unique_cluster_id_prev,63,"%s-%s",cluster_prev_name,ucid_short);
     snprintf(unique_cluster_id_new,63,"%s-%s",cluster_new_name,ucid_short);
-    //printf("%s\n%s\n",unique_cluster_id_prev,unique_cluster_id_new);
     if(strcmp(cluster_role,"opr")!=0){
         goto print_finished;
     }

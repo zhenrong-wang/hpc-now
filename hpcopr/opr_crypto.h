@@ -9,6 +9,6 @@
 #define OPR_CRYPTO_H
 
 int encrypt_decrypt_clusters(char* cluster_list, char* crypto_keyfile, char* option, int batch_flag_local);
-int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, char* crypto_keyfile); //Decrypt sensitive files of a cluster
+int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, char* crypto_keyfile); /* Decrypt sensitive files of a cluster */
 
 #endif

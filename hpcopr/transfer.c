@@ -80,7 +80,7 @@ int user_list_check(char* cluster_name, char* user_list_read, char* user_list_fi
         }
         i++;
         if(strcmp(username_temp,"root")==0){
-            continue; //root user cannot be exported.
+            continue; /* root user cannot be exported. */
         }
         if(user_name_quick_check(cluster_name,username_temp,SSHKEY_DIR)==0){
             valid_user_num++;

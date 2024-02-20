@@ -36,8 +36,10 @@ void padding_length(uint_8bit* ptr, uint_64bit length_64bit){
     }
 }
 
-//transform 64*8 buffer to 32*16 buffer
-//so that the core function can use the 32bit buffer directly
+/* 
+ * transform 64*8 buffer to 32*16 buffer
+ * so that the core function can use the 32bit buffer directly
+ */
 void assemb_buffer32(uint_8bit buffer_8bit[], uint_32bit buffer_32bit[]){
     uint_8bit* ptr=buffer_8bit;
     for(uint_8bit i=0;i<16;i++){
@@ -46,14 +48,14 @@ void assemb_buffer32(uint_8bit buffer_8bit[], uint_32bit buffer_32bit[]){
     }
 }
 
-//state[4], buffer[16], 64 rounds of operation
+/* state[4], buffer[16], 64 rounds of operation */
 int now_md5_core_transform(uint_32bit state[], uint_32bit buffer[]){
     uint_32bit a=state[0];
     uint_32bit b=state[1];
     uint_32bit c=state[2];
     uint_32bit d=state[3];
 
-    //Round 1
+    /* Round 1 */
     a=FF(a,b,c,d,buffer[0],7,0xd76aa478);
     d=FF(d,a,b,c,buffer[1],12,0xe8c7b756);
     c=FF(c,d,a,b,buffer[2],17,0x242070db);
@@ -71,7 +73,7 @@ int now_md5_core_transform(uint_32bit state[], uint_32bit buffer[]){
     c=FF(c,d,a,b,buffer[14],17,0xa679438e);
     b=FF(b,c,d,a,buffer[15],22,0x49b40821);
 
-    //Round 2
+    /* Round 2 */
     a=GG(a,b,c,d,buffer[1],5,0xf61e2562);
     d=GG(d,a,b,c,buffer[6],9,0xc040b340);
     c=GG(c,d,a,b,buffer[11],14,0x265e5a51);
@@ -89,7 +91,7 @@ int now_md5_core_transform(uint_32bit state[], uint_32bit buffer[]){
     c=GG(c,d,a,b,buffer[7],14,0x676f02d9);
     b=GG(b,c,d,a,buffer[12],20,0x8d2a4c8a);
 
-    //Round 3
+    /* Round 3 */
     a=HH(a,b,c,d,buffer[5],4,0xfffa3942);
     d=HH(d,a,b,c,buffer[8],11,0x8771f681);
     c=HH(c,d,a,b,buffer[11],16,0x6d9d6122);
@@ -107,7 +109,7 @@ int now_md5_core_transform(uint_32bit state[], uint_32bit buffer[]){
     c=HH(c,d,a,b,buffer[15],16,0x1fa27cf8);
     b=HH(b,c,d,a,buffer[2],23,0xc4ac5665);
 
-    //Round 4
+    /* Round 4 */
     a=II(a,b,c,d,buffer[0],6,0xf4292244);
     d=II(d,a,b,c,buffer[7],10,0x432aff97);
     c=II(c,d,a,b,buffer[14],15,0xab9423a7);
@@ -143,7 +145,7 @@ void state_to_md5array(uint_32bit state[], uint_8bit md5_array[]){
     }
 }
 
-//Convert the lowest 4-bit to a char
+/* Convert the lowest 4-bit to a char */
 char hex_4bit_to_char(uint_8bit hex_4bit){
     if((hex_4bit&0x0F)>9){
         return hex_4bit-10+'a';
@@ -154,7 +156,7 @@ char hex_4bit_to_char(uint_8bit hex_4bit){
 }
 
 int md5_array_to_string(uint_8bit md5_array[], char md5sum_string[], int md5sum_len){
-    if(md5sum_len<33){ //There should be a '\0' and the end, so the length should be > 32
+    if(md5sum_len<33){ /* There should be a '\0' and the end, so the length should be > 32 */
         return -1;
     }
     uint_8bit i;
@@ -165,10 +167,12 @@ int md5_array_to_string(uint_8bit md5_array[], char md5sum_string[], int md5sum_
     return 0;
 }
 
-//return -3: The given length is incorrect
-//return -1: Failed to open the input file
-//return -5: Failed to read the input file
-//return 0 : Successfully get the md5
+/*
+ * return -3: The given length is incorrect
+ * return -1: Failed to open the input file
+ * return -5: Failed to read the input file
+ * return 0 : Successfully get the md5
+ */
 int now_md5_for_file(char* input_file, char md5sum_string[], int md5sum_len){
     if(md5sum_len<33){
         return -3;

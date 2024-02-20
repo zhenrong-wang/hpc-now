@@ -730,7 +730,6 @@ int get_azure_info(char* workdir, char* az_subscription_id, char* az_tenant_id){
     if(strlen(az_subscription_id)==0||strlen(az_tenant_id)==0){
         return 1;
     }
-//    printf("\n%s\n%s\n",az_subscription_id,az_tenant_id);
     return 0;
 }
 
@@ -874,7 +873,7 @@ int create_local_tf_config(tf_exec_config* tf_run, char* stackdir){
     char filename_temp[FILENAME_LENGTH]="";
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.tf_running.conf.local",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        return 1; // Normally, this should not happen.
+        return 1; /* Normally, this should not happen. */
     }
     FILE* file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
@@ -1312,19 +1311,17 @@ int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* hash_key){
     }
     snprintf(key_file,FILENAME_LENGTH-1,"%s%scloud_secrets_VERY_RISKY.txt",vaultdir,PATH_SLASH);
     if(file_exist_or_not(key_file)!=0){
-        return 0; // If the decrypted file is absent, skip.
+        return 0; /* If the decrypted file is absent, skip. */
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"%s encrypt %s %s%s.secrets.key %s %s",now_crypto_exec,key_file,vaultdir,PATH_SLASH,hash_key,SYSTEM_CMD_REDIRECT);
     flag=system(cmdline);
-    if(flag==0){ //If Encrypted successfully, then delete the decrypted one.
+    if(flag==0){ /* If Encrypted successfully, then delete the decrypted one. */
         return rm_file_or_dir(key_file);
     }
     return -7;
 }
 
-
 /*
- *
  * This function generate/update 2 *PLAIN_TEXT* files:
  * stackdir/currentstate
  * stackdir/hostfile_latest
@@ -1710,33 +1707,35 @@ int generate_encrypt_opr_sshkey(char* sshkey_folder, char* crypto_keyfile){
     if(file_exist_or_not(pubkey_file)==0&&file_exist_or_not(privkey_file_encrypted)==0){
         rm_file_or_dir(privkey_file_decrypted);
         rm_file_or_dir(privkey_file_decrypted2);
-        return 0; // The SSH key pair exists, force delete the decrypted one(if exists)
+        return 0; /* The SSH key pair exists, force delete the decrypted one(if exists) */
     }
-    // Generate a new key pair
+    /* Generate a new key pair */
     if(get_file_sha_hash(crypto_keyfile,hash_key,64)!=0){
-        return -3; //Failed to get the crypto key
+        return -3; /* Failed to get the crypto key */
     }
     batch_file_operation(sshkey_folder,"now-cluster-login*","","rm",0);
     snprintf(cmdline,CMDLINE_LENGTH-1,"ssh-keygen -t rsa -N \"\" -f %s%snow-cluster-login -q",sshkey_folder,PATH_SLASH);
     if(system(cmdline)!=0){
         batch_file_operation(sshkey_folder,"now-cluster-login*","","rm",0);
-        return 1; //Failed to generate a ssh keypair, delete any files generated and return 1
+        return 1; /* Failed to generate a ssh keypair, delete any files generated and return 1 */
     }
     snprintf(privkey_file_decrypted,FILENAME_LENGTH-1,"%s%snow-cluster-login",sshkey_folder,PATH_SLASH);
-    run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,privkey_file_decrypted,hash_key); //Encrypt the private key.
+    run_flag=encrypt_and_delete(NOW_CRYPTO_EXEC,privkey_file_decrypted,hash_key); /* Encrypt the private key. */
     if(run_flag>0){
         batch_file_operation(sshkey_folder,"now-cluster-login*","","rm",0);
-        return 3; //Failed to encrypt. delete any files generated and return 3;
+        return 3; /* Failed to encrypt. delete any files generated and return 3; */
     }
     return 0;
 }
 
-//Get the pubkey
-//return -1: pubkey doesn't exist
-//return 1: FILE I/O error
-//return 2: maxlength 
-//return 3: read nothing
-//return 0: normal exit
+/*
+ * Get the pubkey
+ * return -1: pubkey doesn't exist
+ * return 1: FILE I/O error
+ * return 2: maxlength 
+ * return 3: read nothing
+ * return 0: normal exit
+ */
 int get_opr_pubkey(char* sshkey_folder, char* pubkey, unsigned int length){
     char pubkey_file[FILENAME_LENGTH]="";
     int run_flag;
@@ -2610,8 +2609,10 @@ int confirm_to_operate_cluster(char* current_cluster_name, int batch_flag_local)
     return 0;
 }
 
-// 0: continue
-// 1: stop
+/* 
+ * Return 0: continue
+ *        1: stop
+ */
 int confirm_to_init_cluster(char* current_cluster_name, int batch_flag_local){
     if(batch_flag_local==0){
         return 0;
@@ -3340,7 +3341,7 @@ int get_nworkdir_without_last_slash(char* cluster_workdir, unsigned int dirlen_m
     return 0;
 }
 
-// Please make sure the cluster_name[] with width 25
+/* Please make sure the cluster_name[] with width 25 */
 int get_cluster_name(char* cluster_name, char* cluster_workdir){
     char path_seprator=PATH_SLASH[0];
     int i=0;
@@ -3367,7 +3368,7 @@ int get_cluster_nname(char* cluster_name, unsigned int cluster_name_len_max, cha
     int i=0;
     char dir_buffer[128]="";
     char dir_buffer2[128]="";  
-    // Max directory depth: 16
+    /* Max directory depth: 16 */
     while(i<16){
         i++;
         get_seq_nstring(cluster_workdir,path_seprator,i,dir_buffer,128);

@@ -72,7 +72,7 @@ typedef signed long long int int_64bit;
 #define HPC_NOW_USER_DIR             "C:\\hpc-now\\"
 #define TF_LOCAL_PLUGINS             "C:\\programdata\\hpc-now-tf\\"
 #define NOW_BINARY_DIR               HPC_NOW_USER_DIR"utils\\"
-#define CRYPTO_KEY_FILE              HPC_NOW_ROOT_DIR"now_crypto_seed.lock" // This is a global file!
+#define CRYPTO_KEY_FILE              HPC_NOW_ROOT_DIR"now_crypto_seed.lock"
 
 #define USAGE_LOG_FILE_OLD           HPC_NOW_ROOT_DIR"now-cluster-usage.log"
 #define OPERATION_LOG_FILE_OLD       HPC_NOW_ROOT_DIR"now-cluster-operation.log"
@@ -131,7 +131,7 @@ typedef signed long long int int_64bit;
 #define FILENAME_SUFFIX_FULL     "windows"
 #define CRLF_PASSWORD_HASH       "\n"
 
-// The urls below are permenant and fast to visit. Use them directly.
+/* The urls below are permenant and fast to visit. Use them directly. */
 #define URL_COSCLI    "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-windows.exe"
 #define URL_OSSUTIL   "https://gosspublic.alicdn.com/ossutil/1.7.16/ossutil-v1.7.16-windows-amd64.zip"
 #define URL_AWSCLI    "https://awscli.amazonaws.com/AWSCLIV2.msi"
@@ -205,7 +205,7 @@ typedef signed long long int int_64bit;
 #define FILENAME_SUFFIX_FULL     "linux"
 #define CRLF_PASSWORD_HASH       "\r\n"
 
-// The urls below are permenant and fast to visit. Use them directly.
+/* The urls below are permenant and fast to visit. Use them directly. */
 #define URL_COSCLI    "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-linux"
 #define URL_OSSUTIL   "https://gosspublic.alicdn.com/ossutil/1.7.16/ossutil-v1.7.16-linux-amd64.zip"
 #define URL_AWSCLI    "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
@@ -279,7 +279,7 @@ typedef signed long long int int_64bit;
 #define FILENAME_SUFFIX_FULL     "darwin"
 #define CRLF_PASSWORD_HASH       "\r\n"
 
-// The urls below are permenant and fast to visit. Use them directly.
+/* The urls below are permenant and fast to visit. Use them directly. */
 #define URL_COSCLI    "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-mac"
 #define URL_OSSUTIL   "https://gosspublic.alicdn.com/ossutil/1.7.16/ossutil-v1.7.16-mac-amd64.zip"
 #define URL_AWSCLI    "https://awscli.amazonaws.com/AWSCLIV2.pkg"

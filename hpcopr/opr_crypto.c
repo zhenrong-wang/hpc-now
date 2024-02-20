@@ -39,7 +39,7 @@ int encrypt_decrypt_clusters(char* cluster_list, char* crypto_keyfile, char* opt
     int final_flag=0;
     char registry_decbackup[FILENAME_LENGTH]="";
     char registry_encrypted[FILENAME_LENGTH]="";
-    char cluster_name_temp[32]=""; //Here we have to use a wider array.
+    char cluster_name_temp[32]=""; /* Here we have to use a wider array. */
     char cluster_workdir_temp[DIR_LENGTH]="";
     char registry_line_buffer[LINE_LENGTH_SHORT]="";
     char hash_key[64]="";
@@ -260,8 +260,8 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     if(run_flag!=0&&run_flag!=-5){
         return 1;
     }
-    decrypt_files(target_cluster_workdir,crypto_keyfile); //Delete the /stack files.
-    // Now, decrypt the /vault files.
+    decrypt_files(target_cluster_workdir,crypto_keyfile); /* Delete the /stack files. */
+    /* Now, decrypt the /vault files. */
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sCLUSTER_SUMMARY.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
     decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
@@ -270,11 +270,11 @@ int decrypt_single_cluster(char* target_cluster_name, char* now_crypto_exec, cha
     decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
     decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
-    if(strcmp(cloud_flag,"CLOUD_G")==0){ //Decrypt the special bucket secrets
+    if(strcmp(cloud_flag,"CLOUD_G")==0){ /* Decrypt the special bucket secrets */
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_key.txt.tmp",target_cluster_vaultdir,PATH_SLASH);
         decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
     }
-    if(strcmp(cloud_flag,"CLOUD_E")==0){ //Decrypt the special bucket secrets
+    if(strcmp(cloud_flag,"CLOUD_E")==0){ /* Decrypt the special bucket secrets */
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scredentials",target_cluster_vaultdir,PATH_SLASH);
         decrypt_single_file(now_crypto_exec,filename_temp,hash_key);
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconfig",target_cluster_vaultdir,PATH_SLASH);
