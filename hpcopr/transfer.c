@@ -116,7 +116,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char filename_temp_3[FILENAME_LENGTH]="";
     char filename_temp_4[FILENAME_LENGTH]="";
     char dirname_temp[DIR_LENGTH_EXT+16]="";
-    char cluster_vaults[FILENAME_LENGTH]="";
+    char tmp_cluster_vaults[FILENAME_LENGTH]="";
     char username_temp[32]="";
     char username_temp_2[32]="";
     char unique_id[16]="";
@@ -285,7 +285,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     snprintf(source_file,FILENAME_LENGTH-1,"%s%scluster_vaults.txt.tmp",current_vaultdir,PATH_SLASH);
     snprintf(target_file,FILENAME_LENGTH-1,"%s%scluster_vaults.txt",tmp_vaultdir,PATH_SLASH);
     decrypt_single_file_general(NOW_CRYPTO_EXEC,source_file,target_file,hash_key_current);
-    strcpy(cluster_vaults,target_file);
+    strcpy(tmp_cluster_vaults,target_file);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt.tmp",current_vaultdir,PATH_SLASH);
     decrypt_single_file(NOW_CRYPTO_EXEC,filename_temp,hash_key_current);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%suser_passwords.txt",current_vaultdir,PATH_SLASH);
@@ -322,15 +322,8 @@ next_user:
         }while(strlen(username_temp)!=0);
         fclose(file_p_tmp);
     }
-    if(strcmp(real_admin_flag,"admin")!=0){
-        /* 
-         * If not export admin previlege, the root password will not be exported
-         * Only short_unique_id and cloud_flag will be exported
-         */
-        file_ntrunc_by_kwds(cluster_vaults,LINE_LENGTH_SHORT,"short_unique_id:","",1);
-    }
     if(strcmp(real_admin_flag,"admin")==0){
-        if(file_exist_or_not(cluster_vaults)!=0){
+        if(file_exist_or_not(tmp_cluster_vaults)!=0){
             /*
              * For compatibility of previously-named file CLUSTER_SUMMARY.txt 
              * The file has been deprecated since 0.3.1.0027
@@ -344,8 +337,7 @@ next_user:
             }
         }
         else{
-            cp_file(cluster_vaults,tmp_vaultdir,0);
-            encrypt_and_delete(NOW_CRYPTO_EXEC,cluster_vaults,hash_key_trans);
+            encrypt_and_delete(NOW_CRYPTO_EXEC,tmp_cluster_vaults,hash_key_trans);
         }
         /* Decrypting and exporting the root ssh key */
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sroot.key.tmp",current_sshdir,PATH_SLASH);
@@ -355,9 +347,13 @@ next_user:
         encrypt_and_delete(NOW_CRYPTO_EXEC,filename_temp,hash_key_trans);
     }
     else{
+        /* 
+         * If not export admin previlege, the root password will not be exported
+         * Only short_unique_id and cloud_flag will be exported
+         */
         printf(WARN_YELLO_BOLD "[ -WARN- ] Not exporting Root/Admin privilege." RESET_DISPLAY "\n");
-        cp_file(cluster_vaults,tmp_vaultdir,0);
-        encrypt_and_delete(NOW_CRYPTO_EXEC,cluster_vaults,hash_key_trans);
+        file_ntrunc_by_kwds(tmp_cluster_vaults,LINE_LENGTH_SHORT,"short_unique_id:","",1);
+        encrypt_and_delete(NOW_CRYPTO_EXEC,tmp_cluster_vaults,hash_key_trans);
     }
     
     /* The file cloud_flag.flg has been deprecated since 0.3.1.0027! */
