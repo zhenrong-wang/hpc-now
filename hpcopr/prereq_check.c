@@ -9,10 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #ifndef _WIN32
 #include <sys/stat.h>
 #include <sys/types.h>
 #else
+#include <Windows.h>
 #include <sys\stat.h>
 #include <sys\types.h>
 #endif
@@ -155,44 +157,18 @@ int file_validity_check(char* filename, int repair_flag, char* target_sha){
 
 int check_current_user(void){
 #ifdef _WIN32
-    char current_user_full[128]="";
-    char current_user[128]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    char filename_temp[FILENAME_LENGTH]="";
-    char randstr[8]="";
-    int i,slash=0;
-    generate_random_nstring(randstr,8,1);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"C:\\programdata\\current_user.%s.temp",randstr);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"whoami > %s",filename_temp);
-    if(system(cmdline)!=0){
-        return 1;
-    }
-    FILE* file_p_temp=fopen(filename_temp,"r");
-    fscanf(file_p_temp,"%127s",current_user_full);
-    fclose(file_p_temp);
-    rm_file_or_dir(filename_temp);
-    for(i=0;i<strlen(current_user_full);i++){
-        if(*(current_user_full+i)=='\\'){
-            slash=i;
-            break;
+    char username[LINE_LENGTH_TINY]="";
+    if(GetUserName(username,LINE_LENGTH_TINY)){
+        if(strcmp(username,"hpc-now")==0){
+            return 0;
         }
     }
-    for(i=slash+1;i<strlen(current_user_full);i++){
-        *(current_user+i-slash-1)=*(current_user_full+i);
-    }
-    if(strcmp(current_user,"hpc-now")==0){
-        return 0;
-    }
-    else{
-        return 1;
-    }
+    return 1;
 #else
-    if(system("whoami | grep -w hpc-now >> /dev/null 2>&1")!=0){
-        return 1;
-    }
-    else{
+    if(strcmp(getlogin(),"hpc-now")==0){
         return 0;
     }
+    return 1;
 #endif
 }
 

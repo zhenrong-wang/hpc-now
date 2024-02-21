@@ -103,8 +103,8 @@ int check_current_user_root(void){
     if(file_empty_or_not("C:\\programdata\\check.txt.tmp")==0){
         system("del /f /q /s C:\\programdata\\check.txt.tmp > nul 2>&1");
         print_help_installer();
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] Please switch to Administrator or users with administration privilege:\n");
-        printf("[  ****  ] 1. Run a CMD window with the Administrator role\n");
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] Please switch to Administrator or users with admin privilege:\n");
+        printf("[  ****  ] 1. Run a CMD window as the Administrator Role\n");
         printf("[  ****  ] 2. Type the full path of this installer with an option, for example\n");
         printf("[  ****  ]    C:\\Users\\ABC\\installer-win.exe install\n");
         printf("[  ****  ]    to run this installer properly." RESET_DISPLAY "\n");
@@ -114,7 +114,7 @@ int check_current_user_root(void){
     }
     system("del /f /q /s C:\\programdata\\check.txt.tmp > nul 2>&1");
 #else
-    if(system("whoami | grep -w root >> /dev/null 2>&1")!=0){
+    if(getuid()!=0){
         print_help_installer();
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Please either run with 'sudo', or switch to the root/admin." RESET_DISPLAY "\n");
         print_tail_installer();
@@ -1187,7 +1187,7 @@ int main(int argc, char* argv[]){
     }  
     if(argc==1){
         print_help_installer();
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] Please specify option(s)." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] Please specify a " GENERAL_BOLD "General Option" RESET_DISPLAY " from the list above." RESET_DISPLAY "\n");
         print_tail_installer();
         return 5;
     }

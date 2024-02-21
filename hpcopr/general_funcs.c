@@ -27,6 +27,7 @@
 #include <sys\stat.h>
 #include <malloc.h>
 #include <conio.h>
+#include <Shlobj.h>
 #elif __linux__
 #include <malloc.h>
 #include <sys/time.h>
@@ -3372,29 +3373,20 @@ int reset_windows_cmd_display(void){
 #endif
 }
 
+/*
+ * The dir_lenmax should be 128 or greater
+ * Althought this is not standard in Windows (MAX_PATH=260)
+ * It should be OK.
+ */
 int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax){
-    char filename_temp[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    char buffer[LINE_LENGTH_SHORT]="";
-    char randstr[8]="";
-    memset(appdata,'\0',dir_lenmax);
+#ifdef _WIN32
     if(dir_lenmax<128){
         return -3;
     }
-    generate_random_nstring(randstr,8,1);
-    snprintf(filename_temp,FILENAME_LENGTH-1,"C:\\programdata\\appdata.%s.temp",randstr);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"echo %%APPDATA%% > %s",filename_temp);
-    system(cmdline);
-    FILE* file_p=fopen(filename_temp,"r");
-    if(file_p==NULL){
-        return -1;
-    }
-    fngetline(file_p,buffer,LINE_LENGTH_SHORT);
-    fclose(file_p);
-    rm_file_or_dir(filename_temp);
-    if(get_seq_nstring(buffer,' ',1,appdata,dir_lenmax)!=0){
+    if(SHGetFolderPath(NULL,CSIDL_APPDATA,NULL,SHGFP_TYPE_CURRENT,appdata)!=S_OK){
         return 1;
     }
+#endif
     return 0;
 }
 
