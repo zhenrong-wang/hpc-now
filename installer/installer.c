@@ -1187,7 +1187,7 @@ int main(int argc, char* argv[]){
     }  
     if(argc==1){
         print_help_installer();
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] Please specify a " GENERAL_BOLD "General Option" RESET_DISPLAY " from the list above." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] Please specify option(s) from the list above." RESET_DISPLAY "\n");
         print_tail_installer();
         return 5;
     }

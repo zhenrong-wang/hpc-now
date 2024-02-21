@@ -13,6 +13,7 @@
 #ifndef _WIN32
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <pwd.h>
 #else
 #include <Windows.h>
 #include <sys\stat.h>
@@ -165,7 +166,10 @@ int check_current_user(void){
     }
     return 1;
 #else
-    if(strcmp(getlogin(),"hpc-now")==0){
+    uid_t uid=getuid();
+    struct passwd* pw;
+    pw=getpwuid(uid);
+    if(strcmp(pw->pw_name,"hpc-now")==0){
         return 0;
     }
     return 1;
