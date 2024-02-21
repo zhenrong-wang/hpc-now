@@ -159,7 +159,8 @@ int file_validity_check(char* filename, int repair_flag, char* target_sha){
 int check_current_user(void){
 #ifdef _WIN32
     char username[LINE_LENGTH_TINY]="";
-    if(GetUserName(username,LINE_LENGTH_TINY)){
+    DWORD name_length=LINE_LENGTH_TINY;
+    if(GetUserName(username,&name_length)){
         if(strcmp(username,"hpc-now")==0){
             return 0;
         }
