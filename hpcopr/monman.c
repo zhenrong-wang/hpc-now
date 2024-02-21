@@ -34,14 +34,11 @@ int get_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey_
     if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
         return -7;
     }
-    char mon_data_dir[DIR_LENGTH]="";
-    snprintf(mon_data_dir,DIR_LENGTH-1,"%s%smon_data",HPC_NOW_ROOT_DIR,PATH_SLASH);
-    if(folder_exist_or_not(mon_data_dir)!=0){
-        if(mk_pdir(mon_data_dir)<0){
-            return -1;
-        }
+    mk_pdir(NOW_MON_DIR);
+    if(folder_check_general(NOW_MON_DIR,6)!=0){
+        return -3;
     }
-    sprintf(mon_data_file,"%s%smon_data_%s.csv",mon_data_dir,PATH_SLASH,cluster_name);
+    sprintf(mon_data_file,"%s%smon_data_%s.csv",NOW_MON_DIR,PATH_SLASH,cluster_name);
     if(cluster_asleep_or_not(workdir,crypto_keyfile)==0){
         if(file_empty_or_not(mon_data_file)<1){
             return -5;

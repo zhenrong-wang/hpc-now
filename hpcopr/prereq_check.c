@@ -720,7 +720,7 @@ int check_and_install_prerequisitions(int repair_flag){
     char dotssh_dir[128]="";
 #endif
     /* For compatibility, move the previous logs to the now_logs dir */
-    if(mk_pdir(NOW_BINARY_DIR)<0||mk_pdir(DESTROYED_DIR)<0||mk_pdir(NOW_LOG_DIR)<0||mk_pdir(SSHKEY_DIR)<0){
+    if(mk_pdir(NOW_BINARY_DIR)<0||mk_pdir(DESTROYED_DIR)<0||mk_pdir(NOW_LOG_DIR)<0||mk_pdir(SSHKEY_DIR)<0||mk_pdir(NOW_MON_DIR)<0){
         return -5;
     }
     snprintf(dirname_temp,DIR_LENGTH-1,"%s%sworkdir",HPC_NOW_ROOT_DIR,PATH_SLASH);
