@@ -15,6 +15,7 @@
 #include "..\\hpcopr\\general_funcs.h"
 #include "..\\hpcopr\\opr_crypto.h"
 #else
+#include <pwd.h>
 #include "../hpcopr/now_macros.h"
 #include "../hpcopr/general_funcs.h"
 #include "../hpcopr/opr_crypto.h"
@@ -158,7 +159,8 @@ int license_confirmation(void){
     return 0;
 }
 
-/* Install HPC-NOW Services
+/* 
+ * Install HPC-NOW Services
  * If everything goes well, return 0; otherwise return non-zero value
  * 1. Check and add the dedicated user 'hpc-now'
  * 2. Create necessary directories, including /Applications/.hpc-now 
@@ -172,6 +174,8 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     char opr_passwd_temp[PASSWORD_STRING_LENGTH]="";
 #ifdef __linux__
     char linux_packman[8]="";
+#elif __APPLE__
+    int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
 #endif
     FILE* file_p=NULL;
     int run_flag1,run_flag2;
@@ -187,18 +191,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         printf("[  ****  ]    C:\\Users\\ABC\\installer_windows_amd64.exe uninstall" RESET_DISPLAY "\n");
         return 1;
     }
-#elif __linux__
-    if(system("id hpc-now >> /dev/null 2>&1")==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
-        printf("[  ****  ] If you'd like to reinstall, please uninstall first. Reinstallation\n");
-        printf("[  ****  ] is not permitted in order to protect your cloud clusters. In order to\n");
-        printf("[  ****  ] uninstall current HPC-NOW services, please run the command:\n");
-        printf("[  ****  ] sudo THIS_INSTALLER_PATH uninstall (Double confirm is needed)" RESET_DISPLAY "\n");
-        return 1;
-    }
-#elif __APPLE__
-    int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
-    if(system("id hpc-now >> /dev/null 2>&1")==0){
+#else
+    struct passwd* pwd=getpwnam("hpc-now");
+    if(pwd!=NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
         printf("[  ****  ] If you'd like to reinstall, please uninstall first. Reinstallation\n");
         printf("[  ****  ] is not permitted in order to protect your cloud clusters. In order to\n");
@@ -614,7 +609,8 @@ int set_opr_password(char* opr_password){
         return -3;
     }
 #else
-    if(system("id hpc-now >> /dev/null 2>&1")!=0){
+    struct passwd* pwd=getpwnam("hpc-now");
+    if(pwd==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
         return -3;
@@ -808,7 +804,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         return 1;
     }
 #else
-    if(system("id hpc-now >> /dev/null 2>&1")!=0){
+    struct passwd* pwd=getpwnam("hpc-now");
+    if(pwd==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
         return 1;
