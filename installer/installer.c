@@ -99,22 +99,25 @@ void print_help_installer(void){
  */
 int check_current_user_root(void){
 #ifdef _WIN32
-    system("whoami /groups | find \"S-1-16-12288\" > C:\\programdata\\check.txt.tmp 2>&1");
-    if(file_empty_or_not("C:\\programdata\\check.txt.tmp")==0){
-        system("del /f /q /s C:\\programdata\\check.txt.tmp > nul 2>&1");
+    BOOL elevation_status=FALSE;
+    HANDLE token_handle=NULL;
+    DWORD dw_size;
+    if(!OpenProcessToken(GetCurrentProcess(),TOKEN_QUERY,&token_handle)){
+        return -1;
+    }
+    GetTokenInformation(token_handle,TokenElevationType,(LPVOID)&elevation_status,sizeof(BOOL),&dw_size);
+    CloseHandle(token_handle);
+    if(elevation_status!=TokenElevationTypeFull){
         print_help_installer();
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Please switch to Administrator or users with admin privilege:\n");
         printf("[  ****  ] 1. Run a CMD window as the Administrator Role\n");
         printf("[  ****  ] 2. Type the full path of this installer with an option, for example\n");
         printf("[  ****  ]    C:\\Users\\ABC\\installer-win.exe install\n");
-        printf("[  ****  ]    to run this installer properly." RESET_DISPLAY "\n");
-        system("del /f /q /s C:\\programdata\\check.txt.tmp > nul 2>&1");
         print_tail_installer();
-        return -1;    
+        return -1; 
     }
-    system("del /f /q /s C:\\programdata\\check.txt.tmp > nul 2>&1");
 #else
-    if(getuid()!=0){
+    if(geteuid()!=0){
         print_help_installer();
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Please either run with 'sudo', or switch to the root/admin." RESET_DISPLAY "\n");
         print_tail_installer();
