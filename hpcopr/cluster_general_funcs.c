@@ -14,6 +14,8 @@
 
 #ifndef _WIN32
 #include <sys/time.h>
+#include <sys/stat.h>
+#include <pwd.h>
 #endif
 
 #include "now_macros.h"
@@ -321,16 +323,18 @@ int decrypt_user_privkey(char* ssh_privkey_encrypted, char* crypto_keyfile){
     return 0;
 }
 
-//Change the permision of a *decrypted* ssh private key file
-//return -1: keyfile not exist
-//return -3: FILE I/O Error
-//return -5: Failed to change the ownership
-//return 0: Normal exit
+/* 
+ * Change the permision of a *decrypted* ssh private key file
+ * return -1: keyfile not exist
+ * return -3: FILE I/O Error
+ * return -5: Failed to change the ownership
+ * return -7: VERY Abnormal
+ * return 0: Normal exit
+ */
 int chmod_ssh_privkey(char* ssh_privkey){
     if(file_exist_or_not(ssh_privkey)!=0){
         return -1;
     }
-    char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
     FILE* file_p=NULL;
     char group_and_user[64]="";
@@ -339,6 +343,7 @@ int chmod_ssh_privkey(char* ssh_privkey){
     char line_buffer[512]="";
     char randstr[7]="";
     char get_perm_temp[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
     generate_random_nstring(randstr,7,1);
     snprintf(cmdline,CMDLINE_LENGTH-1,"takeown /f %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT_NULL);
     system(cmdline);
@@ -374,10 +379,14 @@ int chmod_ssh_privkey(char* ssh_privkey){
     fclose(file_p);
     rm_file_or_dir(get_perm_temp);
 #else
-    snprintf(cmdline,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"chmod 600 %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
+    struct passwd* pwd=getpwnam("hpc-now");
+    if(pwd==NULL){
+        return -7;
+    }
+    chown(ssh_privkey,pwd->pw_uid,pwd->pw_gid);
+    if(chmod(ssh_privkey,0600)!=0){
+        return 1;
+    }
 #endif
     return 0;
 }
