@@ -30,7 +30,7 @@ if "%~1"=="" (
     gcc -c .\hpcopr\now_md5.c -Wall -o .\installer\md5.o
 	gcc -c .\hpcopr\now_sha256.c -Wall -o .\installer\sha256.o
     ar -rc .\installer\libnow.a .\installer\gfuncs.o .\installer\ocrypto.o .\installer\cgfuncs.o .\installer\tproc.o .\installer\md5.o .\installer\gprint.o .\installer\sha256.o
-	gcc .\installer\installer.c .\installer\libnow.a -Wall -o .\build\installer-win-%installer_version_code%.exe
+	gcc .\installer\installer.c .\installer\libnow.a -lnetapi32 -Wall -o .\build\installer-win-%installer_version_code%.exe
 	gcc .\now-crypto\now-crypto-v3-aes.c -Wall -Ofast -o .\build\now-crypto-aes-win.exe
 	del /f /s /q .\installer\*.a
 	del /f /s /q .\installer\*.o	
