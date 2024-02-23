@@ -33,7 +33,8 @@
         "fcntl.h": "c",
         "features.h": "c",
         "stat.h": "c",
-        "errno.h": "c"
+        "errno.h": "c",
+        "pwd.h": "c"
     },
     "C_Cpp.dimInactiveRegions": true
 }

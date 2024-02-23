@@ -11,6 +11,9 @@
 #include <unistd.h>
 
 #ifdef _WIN32
+#include <windows.h>
+#include <lmaccess.h>
+#include <lmerr.h>
 #include "..\\hpcopr\\now_macros.h"
 #include "..\\hpcopr\\general_funcs.h"
 #include "..\\hpcopr\\opr_crypto.h"
