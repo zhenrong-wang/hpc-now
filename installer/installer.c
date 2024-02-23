@@ -181,7 +181,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     int run_flag1,run_flag2;
 #ifdef _WIN32
     char hpc_now_password[15]=""; /* Windows will prompt to confirm if the password string is longer than 14*/
-    if(system("net user hpc-now > nul 2>&1")==0){
+    USER_INFO_0* user_info0=NULL;
+    DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
+    if(result==NERR_Success){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
         printf("[  ****  ] If you'd like to reinstall, please uninstall first. Reinstallation\n");
         printf("[  ****  ] is not permitted in order to protect your cloud clusters. In order to\n");
@@ -189,7 +191,13 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         printf("[  ****  ] 1. Run a CMD window with Administrator role\n");
         printf("[  ****  ] 2. Type the path of this installer with an option, for example\n");
         printf("[  ****  ]    C:\\Users\\ABC\\installer_windows_amd64.exe uninstall" RESET_DISPLAY "\n");
+        if(user_info0!=NULL){
+            NetApiBufferFree(user_info0);
+        }
         return 1;
+    }
+    if(user_info0!=NULL){
+        NetApiBufferFree(user_info0);
     }
 #else
     struct passwd* pwd=getpwnam("hpc-now");
@@ -199,6 +207,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         printf("[  ****  ] is not permitted in order to protect your cloud clusters. In order to\n");
         printf("[  ****  ] uninstall current HPC-NOW services, please run the command:\n");
         printf("[  ****  ] sudo THIS_INSTALLER_PATH uninstall (Double confirm is needed)" RESET_DISPLAY "\n");
+        free(pwd);
         return 1;
     }
 #endif
@@ -602,11 +611,23 @@ int restore_perm_windows(void){
  * return 0: normal exit
  */
 int set_opr_password(char* opr_password){
+    char random_string[PASSWORD_STRING_LENGTH]="";
+    char opr_passwd_temp[PASSWORD_STRING_LENGTH]="";
+    FILE* file_p=NULL;
+    int run_flag;
 #ifdef _WIN32
-    if(system("net user hpc-now > nul 2>&1")!=0){
+    USER_INFO_0* user_info0=NULL;
+    DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
+    if(result!=NERR_Success){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
+        if(user_info0!=NULL){
+            NetApiBufferFree(user_info0);
+        }
         return -3;
+    }
+    if(user_info0!=NULL){
+        NetApiBufferFree(user_info0);
     }
 #else
     struct passwd* pwd=getpwnam("hpc-now");
@@ -615,11 +636,8 @@ int set_opr_password(char* opr_password){
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
         return -3;
     }
+    free(pwd);
 #endif
-    char random_string[PASSWORD_STRING_LENGTH]="";
-    char opr_passwd_temp[PASSWORD_STRING_LENGTH]="";
-    FILE* file_p=NULL;
-    int run_flag;
     /* The keystring's complexity has been checked before this function */
     if(strlen(opr_password)==0){
         getpass_stdin("[ INPUT: ] Specify a keystring (length < 20): ",opr_passwd_temp,20);
@@ -798,7 +816,9 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     char randstr[8]="";
     int i;
     generate_random_nstring(randstr,8,1);
-    if(system("net user hpc-now > nul 2>&1")!=0){
+    USER_INFO_0* user_info0=NULL;
+    DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
+    if(result!=NERR_Success){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
         return 1;
