@@ -436,8 +436,10 @@ int delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
     return rm_file_or_dir(user_privkey);
 }
 
-//return 0: succeeded
-//return non-zero: failed
+/*
+ * return 0: succeeded
+ * return non-zero: failed
+ */
 int create_and_get_vaultdir(char* workdir, char* vaultdir){
     int base_length=strlen(HPC_NOW_ROOT_DIR)+7;
     if(strlen(workdir)<base_length){
@@ -486,12 +488,12 @@ int remote_exec(char* workdir, char* crypto_keyfile, char* sshkey_folder, char* 
     }
     snprintf(opr_privkey_decrypted,FILENAME_LENGTH_EXT-1,"%s.%s",opr_privkey_base,randstr);
     if(chmod_ssh_privkey(opr_privkey_decrypted)!=0){
-        rm_file_or_dir(opr_privkey_decrypted);//Delete the decrypted opr ssh private key.
+        rm_file_or_dir(opr_privkey_decrypted);/* Delete the decrypted opr ssh private key. */
         return -5;
     }
     snprintf(cmdline,CMDLINE_LENGTH-1,"ssh -n -o StrictHostKeyChecking=no -i %s root@%s \"echo \"hpcmgr %s\" | at now + %d minutes\" %s",opr_privkey_decrypted,remote_address,exec_type,delay_minutes,SYSTEM_CMD_REDIRECT);
     run_flag=system(cmdline);
-    rm_file_or_dir(opr_privkey_decrypted);//Delete the decrypted opr ssh private key.
+    rm_file_or_dir(opr_privkey_decrypted);/* Delete the decrypted opr ssh private key. */
     if(run_flag!=0){
         return 1;
     }
@@ -530,7 +532,7 @@ int remote_exec_general(char* workdir, char* crypto_keyfile, char* sshkey_folder
     }
     snprintf(privkey_decrypted,FILENAME_LENGTH_EXT-1,"%s.%s",privkey_base,randstr);
     if(chmod_ssh_privkey(privkey_decrypted)!=0){
-        rm_file_or_dir(privkey_decrypted);//Delete the decrypted opr ssh private key.
+        rm_file_or_dir(privkey_decrypted); /* Delete the decrypted opr ssh private key. */
         return -3;
     }
     if(delay_minutes==0){
@@ -809,8 +811,10 @@ int get_cpu_num(const char* vm_model){
     return cpu_num;
 }
 
-//return 1: Locked: (terraform.tfstate was found and the cluster is not decrypted)
-//return 0: Unlocked: (terraform.tfstate was not found; or, terraform.tfstate was found bug the cluster is decrypted)
+/* 
+ * return 1: Locked: (terraform.tfstate was found and the cluster is not decrypted)
+ * return 0: Unlocked: (terraform.tfstate was not found; or, terraform.tfstate was found bug the cluster is decrypted)
+ */
 int check_pslock(char* workdir, int decrypt_flag){
     char stackdir[DIR_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -819,7 +823,7 @@ int check_pslock(char* workdir, int decrypt_flag){
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
     if(file_exist_or_not(filename_temp)==0){
-        if(decrypt_flag!=0){ //If also decrypted, return 0
+        if(decrypt_flag!=0){ /* If also decrypted, return 0 */
             return 0;
         }
         else{
@@ -831,9 +835,11 @@ int check_pslock(char* workdir, int decrypt_flag){
     }
 }
 
-//return -1: REGISTRY is missing
-//return 1: one or more clusters are locked
-//return 0: all clusters are not locked
+/* 
+ * return -1: REGISTRY is missing
+ * return 1: one or more clusters are locked
+ * return 0: all clusters are not locked
+ */
 int check_pslock_all(void){
     char randstr[7]="";
     char filename_temp[FILENAME_LENGTH]="";
@@ -921,7 +927,6 @@ int check_local_tf_config(char* workdir, char tf_running_config_local[], unsigne
     }
 }
 
-//
 int delete_local_tf_config(char* stackdir){
     char filename_temp[FILENAME_LENGTH]="";
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.tf_running.conf.local",stackdir,PATH_SLASH);
@@ -931,8 +936,10 @@ int delete_local_tf_config(char* stackdir){
     return 0;
 }
 
-//return 0, valid
-//return non-0, invalid
+/* 
+ * return 0, valid
+ * return non-0, invalid
+ */
 int valid_vm_config_or_not(char* workdir, char* vm_config){
     char config_list_file[FILENAME_LENGTH]="";
     char vm_config_ext[64]="";
@@ -979,9 +986,11 @@ int get_compute_node_num(char* stackdir, char* crypto_keyfile, char* option){
     return string_to_positive_num(get_num);
 }
 
-//return -1: source file not exist
-//return 0: normal exit
-//Decrypt a file with suffix to a file without .tmp suffix. e.g. text.txt.tmp to text.txt
+/* 
+ * return -1: source file not exist
+ * return 0: normal exit
+ * Decrypt a file with suffix to a file without .tmp suffix. e.g. text.txt.tmp to text.txt
+ */
 int decrypt_single_file(char* now_crypto_exec, char* filename, char* hash_key){
     char filename_new[FILENAME_LENGTH]="";
     char cmdline[CMDLINE_LENGTH]="";
@@ -1009,8 +1018,7 @@ int decrypt_single_file_general(char* now_crypto_exec, char* source_file, char* 
     }
 }
 
-//decrypt ALL the files in /stack
-//
+/* decrypt ALL the files in /stack */
 int decrypt_files(char* workdir, char* crypto_key_filename){
     char filename_temp[FILENAME_LENGTH]="";
     char hash_key[33]="";
@@ -1203,14 +1211,14 @@ int encrypt_decrypt_all_user_ssh_privkeys(char* cluster_name, char* option, char
     if(get_file_sha_hash(crypto_keyfile,hash_key,64)!=0){
         return -3;
     }
-    snprintf(user_passwords_decrypted,FILENAME_LENGTH-1,"%s%suser_passwords.txt.dec",vaultdir,PATH_SLASH); //Decrypted user registry
-    if(file_exist_or_not(user_passwords_decrypted)!=0){ //If not decrypted
-        snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH); //Encrypted user registry
+    snprintf(user_passwords_decrypted,FILENAME_LENGTH-1,"%s%suser_passwords.txt.dec",vaultdir,PATH_SLASH);
+    if(file_exist_or_not(user_passwords_decrypted)!=0){
+        snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt.tmp",vaultdir,PATH_SLASH);
         decrypt_single_file_general(NOW_CRYPTO_EXEC,user_passwords,user_passwords_decrypted,hash_key);
     }
     FILE* file_p=fopen(user_passwords_decrypted,"r");
     if(file_p==NULL){
-        return -5; //Failed to decrypt the user registry
+        return -5;
     }
     while(!feof(file_p)){
         fngetline(file_p,user_line,127);
@@ -1285,8 +1293,10 @@ int decrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* hash_key){
     return system(cmdline);
 }
 
-//return 1: decrypted
-//return 0: encrypted
+/* 
+ * return 1: decrypted
+ * return 0: encrypted
+ */
 int decryption_status(char* workdir){
     char vaultdir[DIR_LENGTH]="";
     char secret_file[FILENAME_LENGTH]="";
@@ -1309,7 +1319,7 @@ int decryption_status(char* workdir){
     return 0;
 }
 
-//return -7: SOMETHING FATAL happened.
+/* return -7: SOMETHING FATAL happened. */
 int encrypt_cloud_secrets(char* now_crypto_exec, char* workdir, char* hash_key){
     char cmdline[CMDLINE_LENGTH]="";
     char vaultdir[DIR_LENGTH];
@@ -1918,12 +1928,10 @@ int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* e
     char findkey[32]="";
     if(strcmp(option,"init")==0){
         strcpy(findkey,"successfully initialized!");
-        //snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s | %s successfully | %s initialized! %s",CAT_FILE_CMD,tf_realtime_log,GREP_CMD,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=1;
     }
     else if(strcmp(option,"apply")==0){
         strcpy(findkey,"Apply complete!");
-        //snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s | %s complete! %s",CAT_FILE_CMD,tf_realtime_log,GREP_CMD,SYSTEM_CMD_REDIRECT_NULL);
         total_minutes=3;
     }
     else if(strcmp(option,"destroy")==0){
@@ -2020,7 +2028,6 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
         return 1;
     }
     cluster_role_detect(workdir,cluster_role,cluster_role_ext,16);
-    //printf("HERE!\n");
     get_key_nvalue(statefile,LINE_LENGTH_SHORT,"master_public_ip:",' ',master_address,32);
     get_key_nvalue(statefile,LINE_LENGTH_SHORT,"master_status:",' ',master_status,16);
     get_key_nvalue(statefile,LINE_LENGTH_SHORT,"database_status:",' ',db_status,16);
@@ -2033,7 +2040,6 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
     if(strlen(ht_status)!=0){
         snprintf(ht_status_ext,31,"HT-%s",ht_status);
     }
-    //printf("HERE!\n");
     node_num=string_to_positive_num(node_num_string);
     get_key_nvalue(statefile,LINE_LENGTH_SHORT,"running_compute_nodes:",' ',running_node_num_string,8);
     running_node_num=string_to_positive_num(running_node_num_string);
@@ -2830,7 +2836,6 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag){
     return 0;
 }
 
-
 /* 
  * This function is deprecated
  * Please use get_bucket_ninfo() for security
@@ -2926,7 +2931,7 @@ int get_bucket_ninfo(char* workdir, char* crypto_keyfile, unsigned int linelen_m
     if(get_key_nvalue(filename_temp,linelen_max,"BUCKET:",' ',bucketinfo->bucket_address,128)==0){
         i++;
     }
-    if(get_key_nvalue(filename_temp,linelen_max,"REGION: ",'\"',bucketinfo->region_id,32)==0){ //There is a blank
+    if(get_key_nvalue(filename_temp,linelen_max,"REGION: ",'\"',bucketinfo->region_id,32)==0){ /* There is a blank */
         i++;
     }
     if(get_key_nvalue(filename_temp,linelen_max,"BUCKET_AK:",' ',bucketinfo->bucket_ak,128)==0){
@@ -3028,7 +3033,6 @@ int get_nucid(char* workdir, char* crypto_keyfile, char* ucid_string, unsigned i
         get_key_nvalue(cluster_vaults_decrypted,LINE_LENGTH_SHORT,"short_unique_id:",' ',ucid_string,ucid_strlen_max);
         rm_file_or_dir(cluster_vaults_decrypted);
         if(strlen(ucid_string)>0){
-            //printf("%s--\n",ucid_string);
             return 0;
         }
     }
@@ -3042,7 +3046,6 @@ int get_nucid(char* workdir, char* crypto_keyfile, char* ucid_string, unsigned i
     if(strlen(ucid_string)<1){
         return 1;
     }
-    //printf("%s--\n",ucid_string);
     return 0;
 }
 
@@ -3999,8 +4002,10 @@ int bceconfig_convert(char* vaultdir, char* option, char* region_id, char* bucke
     return 0;
 }
 
-//key_flag=0, gcp_secrets; key_flag!=0, bucket_secrets;
-//operation="decrypt", decrypt; others, encrypt
+/* 
+ * key_flag=0, gcp_secrets; key_flag!=0, bucket_secrets;
+ * operation="decrypt", decrypt; others, encrypt
+ */
 int gcp_credential_convert(char* workdir, const char* operation, int key_flag){
     char hash_key[64]="";
     char vaultdir[DIR_LENGTH]="";
@@ -4314,8 +4319,10 @@ int list_cloud_zones(char* cluster_name, char* region, int format_flag){
     return 0;
 }
 
-//return 0: valid
-//return 1: invalid
+/* 
+ * return 0: valid
+ * return 1: invalid
+ */
 int valid_region_or_not(char* cluster_name, char* region){
     char line_buffer[LINE_LENGTH_TINY]="";
     char region_ext[64]="";
