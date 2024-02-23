@@ -190,7 +190,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     if(result==NERR_Success){
         printf(FATAL_RED_BOLD "\n[ FATAL: ] User 'hpc-now' found. The HPC-NOW has already been installed.\n");
         printf("[  ****  ] If you'd like to reinstall, please uninstall first. In order to\n");
-        printf("[  ****  ] uninstall current HPC-NOW services, please:\n\n");
+        printf("[  ****  ] uninstall current HPC-NOW services, please:\n");
         printf("[  ****  ] 1. Run a Command Prompt Window with Administrator role\n");
         printf("[  ****  ] 2. Type the path of this installer with an option, for example\n");
         printf("[  ****  ]    C:\\Users\\ABC\\installer_windows_amd64.exe uninstall" RESET_DISPLAY "\n");
@@ -207,7 +207,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     if(pwd!=NULL){
         printf(FATAL_RED_BOLD "\n[ FATAL: ] User 'hpc-now' found. The HPC-NOW has already been installed.\n");
         printf("[  ****  ] If you'd like to reinstall, please uninstall first. In order to\n");
-        printf("[  ****  ] uninstall current HPC-NOW services, please run the command:\n\n");
+        printf("[  ****  ] uninstall current HPC-NOW services, please run the command:\n");
         printf("[  ****  ] sudo THIS_INSTALLER_PATH uninstall" RESET_DISPLAY "\n");
         free(pwd);
         return 1;
