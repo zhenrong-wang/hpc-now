@@ -117,7 +117,7 @@ int check_current_user_root(void){
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Please switch to Administrator or users with admin privilege:\n");
         printf("[  ****  ] 1. Run a CMD window as the Administrator Role\n");
         printf("[  ****  ] 2. Type the full path of this installer with an option, for example\n");
-        printf("[  ****  ]    C:\\Users\\ABC\\installer-win.exe install\n");
+        printf("[  ****  ]    C:\\Users\\ABC\\installer-win.exe install" RESET_DISPLAY "\n");
         print_tail_installer();
         return -1; 
     }
