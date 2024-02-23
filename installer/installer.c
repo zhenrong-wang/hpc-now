@@ -115,7 +115,7 @@ int check_current_user_root(void){
     if(elevation_status!=TokenElevationTypeFull){
         print_help_installer();
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Please switch to Administrator or users with admin privilege:\n");
-        printf("[  ****  ] 1. Run a CMD window as the Administrator Role\n");
+        printf("[  ****  ] 1. Run a Command Prompt Window as the Administrator Role\n");
         printf("[  ****  ] 2. Type the full path of this installer with an option, for example\n");
         printf("[  ****  ]    C:\\Users\\ABC\\installer-win.exe install" RESET_DISPLAY "\n");
         print_tail_installer();
@@ -188,11 +188,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     USER_INFO_0* user_info0=NULL;
     DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
     if(result==NERR_Success){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] User 'hpc-now' found. The HPC-NOW has already been installed.\n");
         printf("[  ****  ] If you'd like to reinstall, please uninstall first. Reinstallation\n");
         printf("[  ****  ] is not permitted in order to protect your cloud clusters. In order to\n");
         printf("[  ****  ] uninstall current HPC-NOW services, please run the command:\n");
-        printf("[  ****  ] 1. Run a CMD window with Administrator role\n");
+        printf("[  ****  ] 1. Run a Command Prompt Window with Administrator role\n");
         printf("[  ****  ] 2. Type the path of this installer with an option, for example\n");
         printf("[  ****  ]    C:\\Users\\ABC\\installer_windows_amd64.exe uninstall" RESET_DISPLAY "\n");
         if(user_info0!=NULL){
@@ -206,7 +206,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
 #else
     struct passwd* pwd=getpwnam("hpc-now");
     if(pwd!=NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' found. It seems the HPC-NOW services have been installed.\n");
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] User 'hpc-now' found. The HPC-NOW has already been installed.\n");
         printf("[  ****  ] If you'd like to reinstall, please uninstall first. Reinstallation\n");
         printf("[  ****  ] is not permitted in order to protect your cloud clusters. In order to\n");
         printf("[  ****  ] uninstall current HPC-NOW services, please run the command:\n");
@@ -623,7 +623,7 @@ int set_opr_password(char* opr_password){
     USER_INFO_0* user_info0=NULL;
     DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
     if(result!=NERR_Success){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been\n");
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
         if(user_info0!=NULL){
             NetApiBufferFree(user_info0);
@@ -636,7 +636,7 @@ int set_opr_password(char* opr_password){
 #else
     struct passwd* pwd=getpwnam("hpc-now");
     if(pwd==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been\n");
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
         return -3;
     }
@@ -823,14 +823,14 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     USER_INFO_0* user_info0=NULL;
     DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
     if(result!=NERR_Success){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been\n");
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
         return 1;
     }
 #else
     struct passwd* pwd=getpwnam("hpc-now");
     if(pwd==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems the HPC-NOW Services have not been\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been\n");
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
         return 1;
     }
