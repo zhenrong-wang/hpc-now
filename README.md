@@ -150,19 +150,19 @@ If everything goes well, the binaries will be built to the `build` folder.
 
     Suppose your installer version code is 0.3.2, hpcopr version code is 0.3.2, then the command should be:
 
-    `.\installer-win-0.3.2.exe install --hloc hpcopr-win-0.3.2.exe --cloc now-crypto-win.exe`
+    `.\installer-win-0.3.2.exe install --hloc hpcopr-win-0.3.2.exe --cloc now-crypto-aes-win.exe`
 
 - For **GNU/Linux Distros** : 
 
     Suppose your installer version code is 0.3.2, hpcopr version code is 0.3.2, then the command should be:
 
-    `sudo ./installer-lin-0.3.2.exe install --hloc hpcopr-lin-0.3.2.exe --cloc now-crypto-lin.exe`
+    `sudo ./installer-lin-0.3.2.exe install --hloc hpcopr-lin-0.3.2.exe --cloc now-crypto-aes-lin.exe`
 
 - For **macOS(Darwin)**:
 
     Suppose your installer version code is 0.3.2, hpcopr version code is 0.3.2, then the command should be:
 
-    `sudo ./installer-dwn-0.3.2.exe install --hloc hpcopr-dwn-0.3.2.exe --cloc now-crypto-dwn.exe`
+    `sudo ./installer-dwn-0.3.2.exe install --hloc hpcopr-dwn-0.3.2.exe --cloc now-crypto-aes-dwn.exe`
 
 **IMPORTANT**: Please replace the sample version code `0.3.2` with the real code of your own build.
 
@@ -192,7 +192,7 @@ In order to run the `hpcopr.exe`, you'll need to set a password and switch to th
     - Switch to the user 'hpc-now'          : `su hpc-now`
     - Run the main program 'hpcopr.exe'     : `hpcopr envcheck`
 
-Several extra packages (around 500 MB) will be download and installed. This process may needs minutes (depending on your local network connectivity).
+Several extra packages (around 500 MB) will be downloaded and installed. This process may needs minutes (depending on your internet connectivity).
 
 **NOTE:** For UNIX-like OS, it is not necessary to set a password for 'hpc-now' and switch to it in the terminal. You can just run `hpcopr.exe` with `sudo -Hu hpc-now` prefix. e.g.:
 
@@ -486,7 +486,7 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 &emsp;&emsp;&emsp;&emsp;+- **terraform/tofu**\
 &emsp;&emsp;&emsp;&emsp;+- **cloud utilities**\
 +- **RUNNING_ROOT/**\
-&emsp;&emsp;+- **.now_crypto_seed.lock**&emsp;&emsp;*The hpcopr crypto_password*\
+&emsp;&emsp;+- **.now_crypto_seed.lock**&emsp;&emsp;*The hpcopr crypto string*\
 &emsp;&emsp;+- **now_logs/**&emsp;&emsp;*Usages and Logs*\
 &emsp;&emsp;&emsp;&emsp;+- **log_trashbin.txt**&emsp;&emsp;*The trashbin of clusters' logs*\
 &emsp;&emsp;&emsp;&emsp;+- **now-cluster-usage.log**&emsp;&emsp;*The cluster usage log*\
@@ -514,4 +514,7 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- **conf/**&emsp;&emsp;*Cluster configuration*\
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- **vault/**&emsp;&emsp;*Cluster's sensitive files*\
 &emsp;&emsp;+- **mon_data/**&emsp;&emsp;*Monitoring data of all clusters*\
-*All the directories and files except the .now_crypto_seed.lock are set to be readable, writable, and executable only by the system user hpc-now.*
+
+**NOTE:**
+*1. All the directories and files except the .now_crypto_seed.lock are set to be readable, writable, and executable only by the system user hpc-now.*
+*2. The .now_crypto_seed.lock file is set to be readable only by root/Admin and hpc-now. And it is NOT writable even for root/Admin*
