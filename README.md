@@ -517,4 +517,7 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 
 **NOTE:**
 *1. All the directories and files except the .now_crypto_seed.lock are set to be readable, writable, and executable only by the system user hpc-now.*
-*2. The .now_crypto_seed.lock file is set to be readable only by root/Admin and hpc-now. And it is NOT writable even for root/Admin*
+
+*2. The .now_crypto_seed.lock file is set to be readable only by root/Admin and hpc-now. And it is NOT writable even for root/Admin.*
+
+*3. Manually modification of the .now_crypto_seed.lock file will destroy the whole HPC-NOW because you may not be able to decrypt critical files.*
