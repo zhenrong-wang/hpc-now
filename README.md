@@ -516,6 +516,7 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 &emsp;&emsp;+- **mon_data/**&emsp;&emsp;*Monitoring data of all clusters*\
 
 **NOTE:**
+
 *1. All the directories and files except the .now_crypto_seed.lock are set to be readable, writable, and executable only by the system user hpc-now.*
 
 *2. The .now_crypto_seed.lock file is set to be readable only by root/Admin and hpc-now. And it is NOT writable even for root/Admin.*
