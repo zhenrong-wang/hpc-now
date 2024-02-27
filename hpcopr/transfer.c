@@ -9,7 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include "now_macros.h"
 #include "general_funcs.h"

@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -19,6 +18,7 @@
 #include "..\\hpcopr\\general_funcs.h"
 #include "..\\hpcopr\\opr_crypto.h"
 #else
+#include <unistd.h>
 #include <pwd.h>
 #include "../hpcopr/now_macros.h"
 #include "../hpcopr/general_funcs.h"

@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <unistd.h>
 #include <signal.h>
 
 #ifndef _WIN32
+#include <unistd.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <pwd.h>
