@@ -90,11 +90,11 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 **Note 3**: The HPC-NOW relies on some fundamental system utilities. In most cases, these utilities have been included in the OS distros. See the list below. If you are not sure whether the utilities are installed or not, please run the commands in a terminal/command prompt window.
 
-- **Microsoft Windows**: `curl` `tar`
-- **GNU/Linux Distros**: `curl` `tar` `unzip`
-- **macOS (Darwin)**   : `curl` `tar` `unzip`
+- **Microsoft Windows**: `curl` `tar` `ssh` `scp`
+- **GNU/Linux Distros**: `curl` `tar` `unzip` `ssh` `scp`
+- **macOS (Darwin)**   : `curl` `tar` `unzip` `ssh` `scp`
 
-*If the utility `curl` is not pre-installed, please manually install it from the [official site](https://curl.se/download.html), and add the PATH to the system environment variables. Usually, `tar` and `unzip` are pre-installed.*
+*If the utility `curl` is not pre-installed, please manually install it from the [official site](https://curl.se/download.html), and add the PATH to the system environment variables. Usually, `tar`, `unzip` `ssh` and `scp` are pre-installed.*
 
 ## **3.1 Build**
 
