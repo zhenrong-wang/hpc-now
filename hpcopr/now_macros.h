@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0115"
+#define CORE_VERSION_CODE "0.3.1.0117"
 
 /* Define the printf ANSI colors. */
 #define FATAL_RED_BOLD   "\033[1;31m"
@@ -67,6 +67,7 @@ typedef signed long long int int_64bit;
 
 /* System-related paths and macros */
 #ifdef _WIN32
+#include                             <Windows.h>
 #define PATH_SLASH                   "\\"
 #define HPC_NOW_ROOT_DIR             "C:\\programdata\\hpc-now\\"
 #define HPC_NOW_USER_DIR             "C:\\hpc-now\\"
