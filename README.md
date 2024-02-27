@@ -121,8 +121,8 @@ If your connectivity to github is not stable, you can also try to clone from git
 ### **Step 3. Run the build script** 
 
 - For **Microsoft Windows**: `.\make_windows.bat build`
-- For **GNU/Linux Distro** : `./make_linux.sh build`
-- For **macOS (Darwin)**   : `./make_darwin.sh build`
+- For **GNU/Linux Distro** : `chmod +x make_linux.sh && ./make_linux.sh build`
+- For **macOS (Darwin)**   : `chmod +x make_darwin.sh && ./make_darwin.sh build`
 
 If everything goes well, the binaries will be built to the `build` folder.
 
