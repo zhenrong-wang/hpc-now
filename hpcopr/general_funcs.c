@@ -2087,7 +2087,6 @@ int generate_random_passwd(char* password){
             srand(seed_num+i);
             rand_num=rand()%72;
             *(password_temp+i)=*(ch_table+rand_num);
-            /*usleep(50);*/
         }
         if(password_complexity_check(password_temp,"~@&(){}[]=")==0){
             strcpy(password,password_temp);
@@ -2145,7 +2144,6 @@ int generate_random_string(char* random_string){
     srand(seed_num);
     rand_num=rand()%26; /* Start with a letter, not 0~9*/
     *(random_string+0)=*(ch_table+rand_num);
-    /*usleep(50);*/
     i=1;
     while(i<RANDSTR_LENGTH_PLUS-1){
         clock_gettime(CLOCK_MONOTONIC,&current_time);

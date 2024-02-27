@@ -324,7 +324,7 @@ awscli:
                 printf(RESET_DISPLAY GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
                 fflush(stdout);
                 i++;
-                sleep(1);
+                SLEEP_FUNC(1);
                 if(i==120){
                     printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
                     inst_flag=3;
