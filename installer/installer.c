@@ -719,23 +719,33 @@ int set_opr_password(char* opr_password){
  */
 int uninstall_services(void){
     char doubleconfirm[16]="";
+#ifdef _WIN32
+    USER_INFO_0* user_info0=NULL;
+    DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
+    if(result!=NERR_Success){
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. Nothing to uninstall." RESET_DISPLAY "\n");
+        return 1;
+    }
+#else
+    struct passwd* pwd=getpwnam("hpc-now");
+    if(pwd==NULL){
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. Nothing to uninstall." RESET_DISPLAY "\n");
+        return 1;
+    }
+#endif
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
-    printf("[  ****  ] YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM:\n");
-    printf("[  ****  ] 1. You have *DESTROYED* all the clusters managed by this\n");
-    printf("[  ****  ]    device. This is *!!! EXTREMELY IMPORTANT !!!*\n");
-    printf("[  ****  ] 2. You have *CHECKED* your cloud service account and all the\n");
-    printf("[  ****  ]     resources managed by this device have been destructed.\n");
-    printf("[  ****  ] 3. You have *EXPORTED* the usage logs and system logs to a \n");
-    printf("[  ****  ]    permenant directory by 'hpcopr syslog' and 'hpcopr usage'\n");
-    printf("[  ****  ]    commands.\n");
+    printf("[  ****  ] YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM:\n\n");
+    printf("[  ****  ] 1. You have *DESTROYED* all the clusters managed by this device.\n");
+    printf("[  ****  ] 2. You have *CHECKED* your cloud account(s) and no resource left.\n\n");
+    printf("[  ****  ] 3. You have *EXPORTED* the relevant logs to a permenant directory.\n");
     printf("[  ****  ] THIS OPERATION IS UNRECOVERABLE!" RESET_DISPLAY "\n");
-    printf("[ -INFO- ] ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:\n");
+    printf("[ -INFO- ] ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
     fflush(stdin);
     scanf("%15s",doubleconfirm);
     if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You denied the operation." RESET_DISPLAY "\n");
-        return 1;
+        return 3;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
 
@@ -744,17 +754,17 @@ int uninstall_services(void){
     system("icacls C:\\ProgramData\\hpc-now\\workdir /remove Administrators > nul 2>&1");
     if(folder_empty_or_not("C:\\ProgramData\\hpc-now\\workdir")!=0){
         restore_perm_windows();
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] The workdir is not empty. Please double check and retry." RESET_DISPLAY "\n");
-        printf(FATAL_RED_BOLD "[  ****  ] ->" RESET_DISPLAY GENERAL_BOLD " C:\\ProgramData\\hpc-now\\workdir" RESET_DISPLAY "\n");
-        return 3;
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The workdir is not empty. Please switch to user 'hpc-now' and check:" RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[  ****  ] -> C:\\ProgramData\\hpc-now\\workdir" RESET_DISPLAY "\n");
+        return 5;
     }
 #else
     char workdir[DIR_LENGTH]="";
     snprintf(workdir,DIR_LENGTH,"%s%sworkdir",HPC_NOW_ROOT_DIR,PATH_SLASH);
     if(folder_empty_or_not(workdir)!=0){
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] The workdir is not empty. Please double check and retry." RESET_DISPLAY "\n");
-        printf(FATAL_RED_BOLD "[  ****  ] ->" RESET_DISPLAY GENERAL_BOLD " %s" RESET_DISPLAY "\n",workdir);
-        return 3;
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The workdir is not empty. Please double check the directory below:" RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[  ****  ] -> %s" RESET_DISPLAY "\n",workdir);
+        return 5;
     }
 #endif
 
