@@ -271,7 +271,7 @@ int job_submit(char* workdir, char* crypto_keyfile, char* user_name, char* sshke
         for(i=0;i<5;i++){
             printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Will display the job output in %d seconds ... \r",5-i);
             fflush(stdout);
-            SLEEP_FUNC(1);
+            sleep_func(1);
         }
         printf("\n");
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s/%s_run.log",job_info->job_data,job_info->job_name);

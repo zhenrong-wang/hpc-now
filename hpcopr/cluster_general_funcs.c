@@ -1949,7 +1949,7 @@ int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* e
             fflush(stdout);
         }
         i++;
-        SLEEP_FUNC(1);
+        sleep_func(1);
         if(file_empty_or_not(errorlog)>0){
             if(find_multi_nkeys(errorlog,LINE_LENGTH_SMALL,"Warning:","","","","")>0){
                 archive_log(errlog_archive,errorlog);

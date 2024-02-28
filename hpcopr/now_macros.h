@@ -67,7 +67,6 @@ typedef signed long long int int_64bit;
 
 /* System-related paths and macros */
 #ifdef _WIN32
-#include                             <Windows.h>
 #define PATH_SLASH                   "\\"
 #define HPC_NOW_ROOT_DIR             "C:\\programdata\\hpc-now\\"
 #define HPC_NOW_USER_DIR             "C:\\hpc-now\\"
@@ -132,7 +131,6 @@ typedef signed long long int int_64bit;
 #define FILENAME_SUFFIX_SHORT    "win"
 #define FILENAME_SUFFIX_FULL     "windows"
 #define CRLF_PASSWORD_HASH       "\n"
-#define SLEEP_FUNC(a)            Sleep(a*1000)
 
 /* The urls below are permenant and fast to visit. Use them directly. */
 #define URL_COSCLI    "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-windows.exe"
@@ -208,7 +206,6 @@ typedef signed long long int int_64bit;
 #define FILENAME_SUFFIX_SHORT    "lin"
 #define FILENAME_SUFFIX_FULL     "linux"
 #define CRLF_PASSWORD_HASH       "\r\n"
-#define SLEEP_FUNC(a)            sleep(a)
 
 /* The urls below are permenant and fast to visit. Use them directly. */
 #define URL_COSCLI    "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-linux"
@@ -284,7 +281,6 @@ typedef signed long long int int_64bit;
 #define FILENAME_SUFFIX_SHORT    "dwn"
 #define FILENAME_SUFFIX_FULL     "darwin"
 #define CRLF_PASSWORD_HASH       "\r\n"
-#define SLEEP_FUNC(a)            sleep(a)
 
 /* The urls below are permenant and fast to visit. Use them directly. */
 #define URL_COSCLI    "https://cosbrowser-1253960454.cos.ap-shanghai.myqcloud.com/software/coscli/coscli-mac"

@@ -133,6 +133,14 @@ char command_keywords[CMD_KWDS_NUM][32]={
     "--pass"
 };
 
+void sleep_func(unsigned int time){
+#ifdef _WIN32
+    Sleep(time*1000);
+#else
+    sleep(time);
+#endif
+}
+
 int string_to_positive_num(char* string){
     int i,sum=0;
     int length=strlen(string);

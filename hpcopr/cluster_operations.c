@@ -1032,10 +1032,10 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     if(folder_exist_or_not(dot_terraform)==0){
         if(tf_execution(tf_run,"destroy",workdir,crypto_keyfile,1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (1/2)..." RESET_DISPLAY "\n");
-            SLEEP_FUNC(2);
+            sleep_func(2);
             if(tf_execution(tf_run,"destroy",workdir,crypto_keyfile,1)!=0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Some problems occoured. Retrying destroy now (2/2)..." RESET_DISPLAY "\n");
-                SLEEP_FUNC(2);
+                sleep_func(2);
                 if(tf_execution(tf_run,"destroy",workdir,crypto_keyfile,1)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] Failed to destroy your cluster. This usually caused by either TF or\n");
                     printf("[  ****  ] the providers developed and maintained by cloud service providers.\n");
@@ -1780,7 +1780,7 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Wait %d seconds for remote execution ... \r",GENERAL_SLEEP_TIME-i);
         fflush(stdout);
-        SLEEP_FUNC(1);
+        sleep_func(1);
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
     remote_copy(workdir,crypto_keyfile,sshkey_dir,filename_temp,"/root/hostfile","root","put","",0);
@@ -1990,7 +1990,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
         for(i=0;i<5;i++){
             printf("[ -WAIT- ] Refreshing the cluster now %d ...\r",5-i);
             fflush(stdout);
-            SLEEP_FUNC(1);
+            sleep_func(1);
         }
         printf("\n");
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,0)!=0){
@@ -2014,7 +2014,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     for(i=0;i<10;i++){
         printf("[ -WAIT- ] Still need to wait for %d sec(s) ...\r",10-i);
         fflush(stdout);
-        SLEEP_FUNC(1);
+        sleep_func(1);
     }
     printf("\n");
     sync_statefile(workdir,crypto_keyfile,sshkeydir);
@@ -2349,7 +2349,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
         for(i=0;i<ALI_SLEEP_TIME;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",ALI_SLEEP_TIME-i);
             fflush(stdout);
-            SLEEP_FUNC(1);
+            sleep_func(1);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_B")==0){
@@ -2357,7 +2357,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
         for(i=0;i<QCLOUD_SLEEP_TIME;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",QCLOUD_SLEEP_TIME-i);
             fflush(stdout);
-            SLEEP_FUNC(1);
+            sleep_func(1);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
@@ -2365,7 +2365,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
         for(i=0;i<AWS_SLEEP_TIME_GLOBAL;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",AWS_SLEEP_TIME_GLOBAL-i);
             fflush(stdout);
-            SLEEP_FUNC(1);
+            sleep_func(1);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_E")==0){
@@ -2373,7 +2373,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
         for(i=0;i<GENERAL_SLEEP_TIME;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
             fflush(stdout);
-            SLEEP_FUNC(1);
+            sleep_func(1);
         }
     }
     else if(strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0){
@@ -2381,7 +2381,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
         for(i=0;i<2*GENERAL_SLEEP_TIME;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",2*GENERAL_SLEEP_TIME-i);
             fflush(stdout);
-            SLEEP_FUNC(1);
+            sleep_func(1);
         }
     }
     else{

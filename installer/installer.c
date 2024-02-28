@@ -415,7 +415,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
         fflush(stdout);
         i++;
-        SLEEP_FUNC(1);
+        sleep_func(1);
         if(i==120){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
             break;
@@ -914,7 +914,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
             i++;
             printf("[ -WAIT- ] Encryption in progress, %d seconds passed ... \r",i);
             fflush(stdout);
-            SLEEP_FUNC(1);
+            sleep_func(1);
         }
         printf("\n");
 #endif
@@ -926,7 +926,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
             i++;
             printf("[ -WAIT- ] Decryption in progress, %d seconds passed ... \r",i);
             fflush(stdout);
-            SLEEP_FUNC(1);
+            sleep_func(1);
         }
         printf("\n");
 #endif
@@ -992,10 +992,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
             i++;
             printf("[ -WAIT- ] Encryption in progress, %d seconds passed ... \r",i);
             fflush(stdout);
-            SLEEP_FUNC(1);
+            sleep_func(1);
         }
         printf("\n");
-        SLEEP_FUNC(1);
+        sleep_func(1);
 #endif
     }
 #ifdef _WIN32
@@ -1024,7 +1024,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
         fflush(stdout);
         i++;
-        SLEEP_FUNC(1);
+        sleep_func(1);
         if(i==120){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
             goto update_done;

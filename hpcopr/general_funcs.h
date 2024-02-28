@@ -8,6 +8,7 @@
 #ifndef GENERAL_FUNCS_H
 #define GENERAL_FUNCS_H
 
+void sleep_func(unsigned int time);
 int string_to_positive_num(char* string);
 
 void reset_string(char* orig_string); /* This function is going to be deprecated */
