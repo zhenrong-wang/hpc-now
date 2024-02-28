@@ -738,20 +738,22 @@ int uninstall_services(void){
         return 1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
-    
+
 #ifdef _WIN32
     system("icacls C:\\ProgramData\\hpc-now /remove Administrators > nul 2>&1");
     system("icacls C:\\ProgramData\\hpc-now\\workdir /remove Administrators > nul 2>&1");
     if(folder_empty_or_not("C:\\ProgramData\\hpc-now\\workdir")!=0){
         restore_perm_windows();
-        printf(FATAL_RED_BOLD "[ FATAL: ] The workdir is not empty. Please double check and retry." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The workdir is not empty. Please double check and retry." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[  ****  ] ->" RESET_DISPLAY GENERAL_BOLD " C:\\ProgramData\\hpc-now\\workdir" RESET_DISPLAY "\n");
         return 3;
     }
 #else
     char workdir[DIR_LENGTH]="";
     snprintf(workdir,DIR_LENGTH,"%s%sworkdir",HPC_NOW_ROOT_DIR,PATH_SLASH);
     if(folder_empty_or_not(workdir)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The workdir is not empty. Please double check and retry." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The workdir is not empty. Please double check and retry." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[  ****  ] ->" RESET_DISPLAY GENERAL_BOLD " %s" RESET_DISPLAY "\n",workdir);
         return 3;
     }
 #endif

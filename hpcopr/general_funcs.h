@@ -49,6 +49,7 @@ int file_exist_or_not(char* filename);
 int file_empty_or_not(char* filename);
 int folder_exist_or_not(char* foldername);
 int folder_check_general(char* foldername, int rw_flag);
+int folder_empty_or_not(char* foldername);
 int delete_file_or_dir(char* file_or_dir);
 int_64bit get_filesize_byte(FILE* file_p);
 
