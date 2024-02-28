@@ -304,7 +304,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
 #elif __APPLE__
     rm_file_or_dir(HPC_NOW_USER_DIR);
     snprintf(cmdline1,CMDLINE_LENGTH-1,"chflags noschg %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
-    systme(cmdline1);
+    system(cmdline1);
     rm_file_or_dir(HPC_NOW_ROOT_DIR);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");
     flag1=system("dscl . -create /Users/hpc-now >> /dev/null 2>&1");
