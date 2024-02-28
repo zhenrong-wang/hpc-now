@@ -94,14 +94,14 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 - **GNU/Linux Distros**: `curl` `tar` `unzip` `ssh` `scp`
 - **macOS (Darwin)**   : `curl` `tar` `unzip` `ssh` `scp`
 
-*If the utility `curl` is not pre-installed, please manually install it from the [official site](https://curl.se/download.html), and add the PATH to the system environment variables. Usually, `tar`, `unzip` `ssh` and `scp` are pre-installed.*
+*If the utility `curl` is not pre-installed, please manually install it from the [official site](https://curl.se/download.html) or with the package manager (e.g. yum, apt), and add the PATH to the system environment variables. Usually, `tar`, `unzip` `ssh` and `scp` are pre-installed.*
 
 ## **3.1 Build**
 
 ### **Prerequisites** 
 
 - Use [git](https://git-scm.com/) for code management.
-- Use a standard C compiler. We recommend:
+- Use a standard C compiler. This project **required**:
   -  [gcc](https://gcc.gnu.org/) for **GNU/Linux distros**
   -  [clang](https://clang.llvm.org/) for **macOS (Darwin)**
   -  [mingw](https://sourceforge.net/projects/mingw/) for **Microsoft Windows**.
