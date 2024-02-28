@@ -8,10 +8,10 @@ for /f tokens^=2^ delims^=^" %%a in  ('findstr CORE_VERSION_CODE .\\hpcopr\\now_
 for /f tokens^=2^ delims^=^" %%a in  ('findstr INSTALLER_VERSION_CODE .\\installer\\installer.h') do set installer_version_code=%%a
 :help
 if "%~1"=="" (
-	echo [ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command.
+	echo [ -INFO- ] Please specify an option: 'build', 'delete', or 'clear'
 	echo ^|          build  - ^(re^)build the binaries
     echo ^|          delete - delete the previous binaries
-    echo ^|          clear  - remove the 'build' folder
+    echo ^|          clear  - remove the 'build' folder and binaries in it
 	echo [ -DONE- ] Exit now.
 	exit /b 1
 ) else if "%~1"=="build" (
@@ -43,10 +43,10 @@ if "%~1"=="" (
 	echo [ START: ] Removing the build folder now ...
 	rd /s /q .\build
 ) else (
-	echo [ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command.
+	echo [ -INFO- ] Please specify an option: 'build', 'delete', or 'clear'
 	echo ^|          build  - ^(re^)build the binaries
     echo ^|          delete - delete the previous binaries
-    echo ^|          clear  - remove the 'bin' folder
+    echo ^|          clear  - remove the 'build' folder and binaries in it
 	echo [ -DONE- ] Exit now.
 	exit /b 1
 )

@@ -14,12 +14,14 @@
 #include <lmaccess.h>
 #include <lmerr.h>
 #include <lmapibuf.h>
+#include <sys\stat.h>
 #include "..\\hpcopr\\now_macros.h"
 #include "..\\hpcopr\\general_funcs.h"
 #include "..\\hpcopr\\opr_crypto.h"
 #else
 #include <unistd.h>
 #include <pwd.h>
+#include <sys/stat.h>
 #include "../hpcopr/now_macros.h"
 #include "../hpcopr/general_funcs.h"
 #include "../hpcopr/opr_crypto.h"
@@ -42,6 +44,30 @@ int check_internet_installer(void){
         return 1;
     }
     return 0;
+}
+
+/* 
+ * return 0: Not installed
+ * return 1: Already installed
+ */
+int installed_or_not(void){
+#ifdef _WIN32
+    USER_INFO_0* user_info0=NULL;
+    DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
+    if(user_info0!=NULL){
+        NetApiBufferFree(user_info0);
+    }
+    if(result==NERR_Success){
+        return 1;
+    }
+    return 0;
+#else
+    struct passwd* pwd=getpwnam("hpc-now");
+    if(pwd!=NULL){
+        return 1;
+    }
+    return 0;
+#endif
 }
 
 void print_header_installer(void){
@@ -134,7 +160,7 @@ int check_current_user_root(void){
 
 int license_confirmation(void){
     char cmdline[CMDLINE_LENGTH]="";
-    char confirmation[64]="";
+    char confirmation[16]="";
     printf("\n");
 #ifdef _WIN32
     snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %s",URL_LICENSE);
@@ -154,7 +180,7 @@ int license_confirmation(void){
     printf("[  ****  ] If you do not accept, this installation will exit immediately.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please input ( case-sensitive ): ");
     fflush(stdin);
-    scanf("%63s",confirmation);
+    scanf("%15s",confirmation);
     if(strcmp(confirmation,"accept")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " This installation process is terminated because you didn't accept\n");
         printf("[  ****  ] the terms in the license.\n");
@@ -176,53 +202,43 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     char cmdline2[CMDLINE_LENGTH]="";
     char random_string[PASSWORD_STRING_LENGTH]="";
     char opr_passwd_temp[PASSWORD_STRING_LENGTH]="";
+    FILE* file_p=NULL;
+    int run_flag1,run_flag2;
 #ifdef __linux__
     char linux_packman[8]="";
 #elif __APPLE__
     int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
-#endif
-    FILE* file_p=NULL;
-    int run_flag1,run_flag2;
-#ifdef _WIN32
+#elif _WIN32
     char hpc_now_password[15]=""; /* Windows will prompt to confirm if the password string is longer than 14*/
-    USER_INFO_0* user_info0=NULL;
-    DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
-    if(result==NERR_Success){
+#endif
+
+    if(installed_or_not()!=0){
+#ifdef _WIN32
         printf(FATAL_RED_BOLD "\n[ FATAL: ] User 'hpc-now' found. The HPC-NOW has already been installed.\n");
         printf("[  ****  ] If you'd like to reinstall, please uninstall first. In order to\n");
         printf("[  ****  ] uninstall current HPC-NOW services, please:\n");
         printf("[  ****  ] 1. Run a Command Prompt Window with Administrator role\n");
         printf("[  ****  ] 2. Type the path of this installer with an option, for example\n");
         printf("[  ****  ]    C:\\Users\\ABC\\installer_windows_amd64.exe uninstall" RESET_DISPLAY "\n");
-        if(user_info0!=NULL){
-            NetApiBufferFree(user_info0);
-        }
-        return 1;
-    }
-    if(user_info0!=NULL){
-        NetApiBufferFree(user_info0);
-    }
 #else
-    struct passwd* pwd=getpwnam("hpc-now");
-    if(pwd!=NULL){
         printf(FATAL_RED_BOLD "\n[ FATAL: ] User 'hpc-now' found. The HPC-NOW has already been installed.\n");
         printf("[  ****  ] If you'd like to reinstall, please uninstall first. In order to\n");
         printf("[  ****  ] uninstall current HPC-NOW services, please run the command:\n");
         printf("[  ****  ] sudo THIS_INSTALLER_PATH uninstall" RESET_DISPLAY "\n");
-        free(pwd);
+#endif
         return 1;
     }
-#endif
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking and cleaning up current environment ...\n");
 #ifdef _WIN32
     generate_random_npasswd(hpc_now_password,15,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
-    system("icacls C:\\hpc-now /remove Administrators > nul 2>&1");
-    system("takeown /f C:\\hpc-now /r /d y > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now /remove Administrators > nul 2>&1");
-    system("takeown /f  C:\\ProgramData\\hpc-now /r /d y > nul 2>&1");
-    system("attrib -h -s -r C:\\ProgramData\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
-    system("rd /s /q C:\\hpc-now > nul 2>&1");
-    system("rd /s /q C:\\ProgramData\\hpc-now > nul 2>&1");
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"takeown /f %s /r /d y > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"attrib -h -s -r %s",CRYPTO_KEY_FILE);
+    system(cmdline1);
+    rm_file_or_dir(HPC_NOW_USER_DIR);
+    rm_file_or_dir(HPC_NOW_ROOT_DIR);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");   
     snprintf(cmdline1,CMDLINE_LENGTH-1,"net user hpc-now \"%s\" /add > nul 2>&1",hpc_now_password);
     if(system(cmdline1)!=0){
@@ -230,14 +246,17 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating and configuring the running directory ...\n");
-    system("mkdir C:\\hpc-now > nul 2>&1");
-    system("mkdir C:\\hpc-now\\utils > nul 2>&1");
-    system("mkdir C:\\hpc-now\\hpc-now.licenses > nul 2>&1");
-    system("mkdir C:\\ProgramData\\hpc-now\\ > nul 2>&1");
-    system("mkdir C:\\ProgramData\\hpc-now\\.now-ssh\\ > nul 2>&1");
-    system("mkdir C:\\ProgramData\\hpc-now\\.destroyed\\ > nul 2>&1");
-    system("icacls C:\\hpc-now /grant hpc-now:(OI)(CI)F /t > nul 2>&1");
-    system("icacls C:\\hpc-now /deny hpc-now:(DE) /t > nul 2>&1");
+    mk_pdir(HPC_NOW_USER_DIR);
+    mk_pdir(NOW_BINARY_DIR);
+    mk_pdir(NOW_LIC_DIR);
+    mk_pdir(HPC_NOW_ROOT_DIR);
+    mk_pdir(SSHKEY_DIR);
+    mk_pdir(DESTROYED_DIR);
+    mk_pdir(NOW_WORKDIR_ROOT);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"icacls %s /grant hpc-now:(OI)(CI)F /t > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"icacls %s /deny hpc-now:(DE) /t > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline1);
 #elif __linux__
     if(system("which yum >> /dev/null 2>&1")==0){
         strcpy(linux_packman,"yum");
@@ -268,9 +287,10 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
             return -1;
         }
     }
-    system("rm -rf /home/hpc-now/ >> /dev/null 2>&1");
-    system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("rm -rf /usr/.hpc-now/ >> /dev/null 2>&1");
+    rm_file_or_dir(HPC_NOW_USER_DIR);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chattr -i %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
+    system(cmdline1);
+    rm_file_or_dir(HPC_NOW_ROOT_DIR);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");
     strncpy(cmdline1,"useradd hpc-now -m -s /bin/bash >> /dev/null 2>&1",CMDLINE_LENGTH-1);
     if(system(cmdline1)!=0){
@@ -278,13 +298,14 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating and configuring the running directory ...\n");
-    system("mkdir -p /home/hpc-now/.bin/utils >> /dev/null 2>&1");
-    system("mkdir -p /usr/.hpc-now >> /dev/null 2>&1");
-    system("chmod 700 /usr/.hpc-now >> /dev/null 2>&1");
+    mk_pdir(NOW_BINARY_DIR);
+    mk_pdir(HPC_NOW_ROOT_DIR);
+    chmod(HPC_NOW_ROOT_DIR,0700);
 #elif __APPLE__
-    system("rm -rf /Users/hpc-now/ >> /dev/null 2>&1");
-    system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
+    rm_file_or_dir(HPC_NOW_USER_DIR);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chflags noschg %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
+    systme(cmdline1);
+    rm_file_or_dir(HPC_NOW_ROOT_DIR);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");
     flag1=system("dscl . -create /Users/hpc-now >> /dev/null 2>&1");
     flag2=system("dscl . -create /Users/hpc-now UserShell /bin/bash >> /dev/null 2>&1");
@@ -298,10 +319,10 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating and configuring the running directory ...\n");
-    system("mkdir -p /Users/hpc-now >> /dev/null 2>&1");
-    system("mkdir -p /Users/hpc-now/.bin/utils >> /dev/null 2>&1");
-    system("mkdir -p /Applications/.hpc-now >> /dev/null 2>&1");
-    system("chmod 700 /Applications/.hpc-now >> /dev/null 2>&1");
+    mk_pdir(HPC_NOW_USER_DIR);
+    mk_pdir(NOW_BINARY_DIR);
+    mk_pdir(HPC_NOW_ROOT_DIR);
+    chmod(HPC_NOW_ROOT_DIR,0700);
 #endif
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a file for encryption/decryption ...\n");
     generate_random_npasswd(random_string,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
@@ -315,14 +336,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
             printf(GENERAL_BOLD "\n[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
         }
     }
-#ifdef _WIN32
-    file_p=fopen("C:\\ProgramData\\hpc-now\\now_crypto_seed.lock","w+");
-#elif __linux__
-    file_p=fopen("/usr/.hpc-now/.now_crypto_seed.lock","w+");
-#elif __APPLE__
-    file_p=fopen("/Applications/.hpc-now/.now_crypto_seed.lock","w+");
-#endif
+    file_p=fopen(CRYPTO_KEY_FILE,"w+");
     if(file_p==NULL){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a key file. Exit now." RESET_DISPLAY "\n");
         return -1;
     }
     fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
@@ -331,14 +347,16 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     fprintf(file_p,"SALT_STRING: %s\nUSER_STRING: %s\n\nEND OF LOCKED NOW CRYPTO KEY FILE\n",random_string,opr_passwd_temp);
     fclose(file_p);
 #ifdef _WIN32
-    system("attrib +h +s +r C:\\ProgramData\\hpc-now\\now_crypto_seed.lock");
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"attrib +h +s +r %s",CRYPTO_KEY_FILE);
 #elif __linux__
-    system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");   
+    chown(CRYPTO_KEY_FILE,0,0);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chattr +i %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
 #elif __APPLE__
-    system("chown -R root:root /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+    chown(CRYPTO_KEY_FILE,0,0);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chflags schg %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
 #endif
+    system(cmdline1);
+
     if(hpcopr_loc_flag==-1){
         if(strlen(hpcopr_ver)==0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Will download the latest 'hpcopr' from the default URL.\n");
@@ -387,22 +405,32 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         printf(FATAL_RED_BOLD "[ FATAL: ] This installation process is terminated. If you specified the\n");
         printf("[  ****  ] location of hpcopr executable, please make sure the location \n");
         printf("[  ****  ] is correct. Roll back and exit." RESET_DISPLAY "\n");
-        system("icacls C:\\hpc-now /remove Administrators > nul 2>&1");
-        system("takeown /f C:\\hpc-now /r /d y > nul 2>&1");
-        system("icacls C:\\ProgramData\\hpc-now /remove Administrators > nul 2>&1");
-        system("takeown /f  C:\\ProgramData\\hpc-now /r /d y > nul 2>&1");
-        system("rd /s /q C:\\hpc-now > nul 2>&1");
-        system("rd /s /q C:\\ProgramData\\hpc-now > nul 2>&1");
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_USER_DIR);
+        system(cmdline1);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"takeown /f %s /r /d y > nul 2>&1",HPC_NOW_USER_DIR);
+        system(cmdline1);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_ROOT_DIR);
+        system(cmdline1);
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"takeown /f %s /r /d y > nul 2>&1",HPC_NOW_ROOT_DIR);
+        system(cmdline1);
+        rm_file_or_dir(HPC_NOW_USER_DIR);
+        rm_file_or_dir(HPC_NOW_ROOT_DIR);
         system("net user hpc-now /delete > nul 2>&1");
         return -1;
     }
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE",URL_LICENSE);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o %s",URL_LICENSE,NOW_MIT_LIC_FILE);
     system(cmdline1);
-    system("icacls C:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
-    system("icacls C:\\hpc-now /deny Administrators:F > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now /deny Administrators:F > nul 2>&1");
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"icacls %s* /deny Administrators:F > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"icacls %s /deny Administrators:F > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"icacls %s /grant hpc-now:F /t > nul 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"icacls %s* /deny Administrators:F /t > nul 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"icacls %s /deny Administrators:F > nul 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline1);
+    
     if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
         snprintf(cmdline1,CMDLINE_LENGTH-1,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
         system(cmdline1);
@@ -427,7 +455,6 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     printf("[  ****  ] Please follow the steps below:\n");
     printf("[  ****  ] 1. " HIGH_GREEN_BOLD "net user hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY " [optional]\n");
     printf("[  ****  ] 2. " HIGH_GREEN_BOLD "runas /savecred /user:mymachine\\hpc-now cmd" RESET_DISPLAY "\n");
-    printf("[  ****  ]    * You will be required to input the password.\n");
     printf("[  ****  ] 3. " GENERAL_BOLD "In the new CMD window" RESET_DISPLAY ", run " HIGH_GREEN_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
     printf(GENERAL_BOLD"[ -DONE- ] Enjoy you Cloud HPC journey!" RESET_DISPLAY "\n");
     return 0;
@@ -442,8 +469,9 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         printf(FATAL_RED_BOLD "[ FATAL: ] This installation process is terminated. If you specified the\n");
         printf("[  ****  ] location of hpcopr executable, please make sure the location \n");
         printf("[  ****  ] is correct. Rolling back and exit." RESET_DISPLAY "\n");
-        system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-        system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"chattr -i %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
+        system(cmdline1);
+        rm_file_or_dir(HPC_NOW_ROOT_DIR);
         system("userdel -f -r hpc-now >> /dev/null 2>&1");
         return -1;
     }
@@ -452,18 +480,23 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         strcpy(cmdline1,"echo \"export PATH=/home/hpc-now/.bin/:$PATH\" >> /home/hpc-now/.bashrc");
         system(cmdline1);
     }
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC);
-    system(cmdline1);
+    chmod(HPCOPR_EXEC,S_IRWXO|S_IXGRP|S_IXOTH);
+    chmod(NOW_CRYPTO_EXEC,S_IRWXO|S_IXGRP|S_IXOTH);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating other key running directories ...\n");
-    system("mkdir -p /home/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
-    system("mkdir -p /usr/.hpc-now/.now-ssh/ >> /dev/null 2>&1");
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o /home/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
+    mk_pdir(NOW_LIC_DIR);
+    mk_pdir(SSHKEY_DIR);
+    mk_pdir(NOW_WORKDIR_ROOT);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o %s",URL_LICENSE,NOW_MIT_LIC_FILE);
     system(cmdline1);
     system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
-    system("chown -R hpc-now:hpc-now /home/hpc-now >> /dev/null 2>&1");
-    system("chmod 711 /home/hpc-now >> /dev/null 2>&1");
-    system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
-    system("chown -R hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s >> /dev/null 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod 711 %s >> /dev/null 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod -R 711 %s%s.bin",HPC_NOW_USER_DIR,PATH_SLASH);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s >> /dev/null 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline1);
     snprintf(cmdline1,CMDLINE_LENGTH-1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     if(system("grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
@@ -475,7 +508,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         goto linux_install_done;
     }
     if(rdp_flag==0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Installing Remmina - the RDP client for GNU/Linux now ...\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Installing Remmina: the RDP client for GNU/Linux now ...\n");
         snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
         if(system(cmdline1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install Remmina, RDP won't work properly." RESET_DISPLAY "\n");
@@ -492,15 +525,13 @@ linux_install_done:
     printf(GENERAL_BOLD "\n[ -INFO- ]" RESET_DISPLAY " Congrats! The HPC-NOW services are ready to run!\n");
     printf("[  ****  ] Created the user 'hpc-now' " WARN_YELLO_BOLD "WITHOUT" RESET_DISPLAY " an initial password.\n\n");
     printf("[  ****  ] Please follow the steps below:\n");
-    printf(HIGH_CYAN_BOLD "[  ****  ] + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
+    printf(GENERAL_BOLD "[  ****  ] + SUDO-MODE (simple and fast for *sudoers*): \n" RESET_DISPLAY );
     printf("[  ****  ] " HIGH_GREEN_BOLD "  sudo -Hu hpc-now hpcopr envcheck" RESET_DISPLAY "\n");
     printf("[  ****  ]     * You need to input the password of the current sudoer.\n");
     printf(GENERAL_BOLD "[  ****  ] + USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
-    printf("[  ****  ]   1. " HIGH_GREEN_BOLD "sudo passwd hpc-now" RESET_DISPLAY "\n");
-    printf("[  ****  ]     * You will be required to set a password without echo.\n");
-    printf("[  ****  ]   2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "\n");
-    printf("[  ****  ]     * You will be required to input the password set just now.\n");
-    printf("[  ****  ]   3. " HIGH_GREEN_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
+    printf("[  ****  ]   1. " HIGH_GREEN_BOLD "sudo passwd hpc-now" RESET_DISPLAY "  * Set a password for 'hpc-now'.\n");
+    printf("[  ****  ]   2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "           * Input the password just set.\n");
+    printf("[  ****  ]   3. " HIGH_GREEN_BOLD "hpcopr envcheck -b" RESET_DISPLAY "   * Check and init the environment.\n");
     printf(GENERAL_BOLD"[ -DONE- ] Enjoy you Cloud HPC journey!" RESET_DISPLAY "\n");
     return 0;
 #elif __APPLE__
@@ -514,28 +545,34 @@ linux_install_done:
         printf(FATAL_RED_BOLD "[ FATAL: ] This installation process is terminated. If you specified the\n");
         printf("[  ****  ] location of hpcopr executable, please make sure the location \n");
         printf("[  ****  ] is correct. Rolling back and exit." RESET_DISPLAY "\n");
-        system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-        system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
+        snprintf(cmdline1,CMDLINE_LENGTH-1,"chflags noschg %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
+        system(cmdline1);
+        rm_file_or_dir(HPC_NOW_ROOT_DIR);
         system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
         system("dscl . -delete /Groups/hpc-now >> /dev/null 2>&1");
-        system("rm -rf /Users/hpc-now >> /dev/null 2>&1");
+        rm_file_or_dir(HPC_NOW_USER_DIR);
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Setting up environment variables for 'hpc-now' ...\n");
     strcpy(cmdline1,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
     system(cmdline1);
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC);
-    system(cmdline1);
+    chmod(HPCOPR_EXEC,S_IRWXO|S_IXGRP|S_IXOTH);
+    chmod(NOW_CRYPTO_EXEC,S_IRWXO|S_IXGRP|S_IXOTH);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating other key running directories ...\n");
-    system("mkdir -p /Users/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
-    system("mkdir -p /Applications/.hpc-now/.now-ssh/ >> /dev/null 2>&1");
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
+    mk_pdir(NOW_LIC_DIR);
+    mk_pdir(SSHKEY_DIR);
+    mk_pdir(NOW_WORKDIR_ROOT);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o %s",URL_LICENSE,NOW_MIT_LIC_FILE);
     system(cmdline1);
     system("mkdir -p '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chmod -R 755 '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chown -R hpc-now:hpc-now '/Library/Application Support/io.terraform' >> /dev/null 2>&1");
-    system("chown -R hpc-now:hpc-now /Users/hpc-now >> /dev/null 2>&1");
-    system("chmod 711 /Users/hpc-now >> /dev/null 2>&1");
-    system("chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
-    system("chown -R hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s >> /dev/null 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod 711 %s >> /dev/null 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod -R 711 %s%s.bin >> /dev/null 2>&1",HPC_NOW_USER_DIR,PATH_SLASH);
+    system(cmdline1);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s >> /dev/null 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline1);
     snprintf(cmdline1,CMDLINE_LENGTH-1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the Microsoft RDP Client now ...\n");
@@ -569,9 +606,8 @@ mac_install_done:
     printf("[  ****  ]     * You will need to input the password for the current sudoer.\n");
     printf(GENERAL_BOLD "[  ****  ] + USER-MODE (a little bit more steps): " RESET_DISPLAY "\n");
     printf("[  ****  ]   1. " HIGH_GREEN_BOLD "sudo dscl . -passwd /Users/hpc-now YOUR_COMPLEX_PASSWORD" RESET_DISPLAY "\n");
-    printf("[  ****  ]   2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "\n");
-    printf("[  ****  ]     * You will be required to input the password set just now.\n");
-    printf("[  ****  ]   3. " HIGH_GREEN_BOLD "hpcopr envcheck" RESET_DISPLAY "\n");
+    printf("[  ****  ]   2. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY "           * Input the password just set.\n");
+    printf("[  ****  ]   3. " HIGH_GREEN_BOLD "hpcopr envcheck -b" RESET_DISPLAY "   * Check and init the environment.\n");
     printf(GENERAL_BOLD"[ -DONE- ] Enjoy you Cloud HPC journey!" RESET_DISPLAY "\n");
     return 0;    
 #endif
@@ -579,20 +615,26 @@ mac_install_done:
 
 int restore_perm_windows(void){
 #ifdef _WIN32
+    char cmdline[CMDLINE_LENGTH]="";
     int cmd_flag=0;
-    if(system("icacls C:\\ProgramData\\hpc-now /grant hpc-now:F /t > nul 2>&1")!=0){
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /grant hpc-now:F /t > nul 2>&1",HPC_NOW_ROOT_DIR);
+    if(system(cmdline)!=0){
         cmd_flag++;
     }
-    if(system("icacls C:\\ProgramData\\hpc-now\\* /deny Administrators:F /t > nul 2>&1")!=0){
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s* /deny Administrators:F /t > nul 2>&1",HPC_NOW_ROOT_DIR);
+    if(system(cmdline)!=0){
         cmd_flag++;
     }
-    if(system("icacls C:\\ProgramData\\hpc-now /deny Administrators:F > nul 2>&1")!=0){
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /deny Administrators:F > nul 2>&1",HPC_NOW_ROOT_DIR);
+    if(system(cmdline)!=0){
         cmd_flag++;
     }
-    if(system("icacls C:\\hpc-now\\* /deny Administrators:F > nul 2>&1")!=0){
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s* /deny Administrators:F > nul 2>&1",HPC_NOW_USER_DIR);
+    if(system(cmdline)!=0){
         cmd_flag++;
     }
-    if(system("icacls C:\\hpc-now /deny Administrators:F > nul 2>&1")!=0){
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /deny Administrators:F > nul 2>&1",HPC_NOW_USER_DIR);
+    if(system(cmdline)!=0){
         cmd_flag++;
     }
     if(cmd_flag!=0){
@@ -617,29 +659,14 @@ int set_opr_password(char* opr_password){
     char opr_passwd_temp[PASSWORD_STRING_LENGTH]="";
     FILE* file_p=NULL;
     int run_flag;
-#ifdef _WIN32
-    USER_INFO_0* user_info0=NULL;
-    DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
-    if(result!=NERR_Success){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been\n");
-        printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
-        if(user_info0!=NULL){
-            NetApiBufferFree(user_info0);
-        }
-        return -3;
-    }
-    if(user_info0!=NULL){
-        NetApiBufferFree(user_info0);
-    }
-#else
-    struct passwd* pwd=getpwnam("hpc-now");
-    if(pwd==NULL){
+    char cmdline[CMDLINE_LENGTH]="";
+
+    if(installed_or_not()==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been\n");
         printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
         return -3;
     }
-    free(pwd);
-#endif
+
     /* The keystring's complexity has been checked before this function */
     if(strlen(opr_password)==0){
         getpass_stdin("[ INPUT: ] Specify a keystring (length < 20): ",opr_passwd_temp,20);
@@ -657,10 +684,14 @@ int set_opr_password(char* opr_password){
     }
     printf(GENERAL_BOLD "\n[ STEP 1 ] Decrypting current files with previous crypto keystring..." RESET_DISPLAY "\n");
 #ifdef _WIN32
-    system("icacls C:\\ProgramData\\hpc-now /remove Administrators > nul 2>&1");
-    system("takeown /f  C:\\ProgramData\\hpc-now /r /d y > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now\\* /grant Administrators:F /t > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_ROOT_DIR);
+    systm(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"takeown /f %s /r /d y > nul 2>&1",HPC_NOW_ROOT_DIR);
+    systm(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s* /grant Administrators:F /t > nul 2>&1",HPC_NOW_ROOT_DIR);
+    systm(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /grant Administrators:F > nul 2>&1",CRYPTO_KEY_FILE);
+    systm(cmdline);
 #endif
     run_flag=encrypt_decrypt_clusters("all",CRYPTO_KEY_FILE,"decrypt",0);
     if(run_flag!=0){
@@ -673,16 +704,17 @@ int set_opr_password(char* opr_password){
         return 3;
     }
     generate_random_npasswd(random_string,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
+
 #ifdef _WIN32
-    system("attrib -h -s -r C:\\ProgramData\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
-    file_p=fopen("C:\\ProgramData\\hpc-now\\now_crypto_seed.lock","w+");
+    snprintf(cmdline,CMDLINE_LENGTH-1,"attrib -h -s -r %s > nul 2>&1",CRYPTO_KEY_FILE);
 #elif __linux__
-    system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    file_p=fopen("/usr/.hpc-now/.now_crypto_seed.lock","w+");
-#elif __APPLE__
-    system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    file_p=fopen("/Applications/.hpc-now/.now_crypto_seed.lock","w+");
+    snprintf(cmdline,CMDLINE_LENGTH-1,"chattr -i %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
+#else
+    snprintf(cmdline,CMDLINE_LENGTH-1,"chflags noschg %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
 #endif
+    system(cmdline);
+
+    file_p=fopen(CRYPTO_KEY_FILE,"w+");
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create the now_crypto_seed.lock file." RESET_DISPLAY "\n");
         restore_perm_windows();
@@ -694,13 +726,18 @@ int set_opr_password(char* opr_password){
     fprintf(file_p,"SALT_STRING: %s\nUSER_STRING: %s\n\nEND OF LOCKED NOW CRYPTO KEY FILE\n",random_string,opr_passwd_temp);
     fclose(file_p);
 #ifdef _WIN32
-    system("attrib +h +s +r C:\\ProgramData\\hpc-now\\now_crypto_seed.lock");
-#elif __linux__
-    system("chown -R root:root /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("chattr +i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+    snprintf(cmdline,CMDLINE_LENGTH-1,"attrib +h +s +r %s > nul 2>&1",CRYPTO_KEY_FILE);
+    system(cmdline);
+#else
+    chown(CRYPTO_KEY_FILE,0,0);
+#endif
+
+#ifdef __linux__
+    snprintf(cmdline,CMDLINE_LENGTH-1,"chattr +i %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
+    system(cmdline);
 #elif __APPLE__
-    system("chown -R root:root /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("chflags schg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
+    snprintf(cmdline,CMDLINE_LENGTH-1,"chflags schg %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
+    system(cmdline);
 #endif
     printf(GENERAL_BOLD "\n[ STEP 2 ] Encrypting files with the new crypto keystring..." RESET_DISPLAY "\n");
     run_flag=encrypt_decrypt_clusters("all",CRYPTO_KEY_FILE,"encrypt",0);
@@ -719,25 +756,16 @@ int set_opr_password(char* opr_password){
  */
 int uninstall_services(void){
     char doubleconfirm[16]="";
-#ifdef _WIN32
-    USER_INFO_0* user_info0=NULL;
-    DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
-    if(result!=NERR_Success){
+    char cmdline[CMDLINE_LENGTH]="";
+    if(installed_or_not()==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. There is nothing to uninstall." RESET_DISPLAY "\n");
         return 1;
     }
-#else
-    struct passwd* pwd=getpwnam("hpc-now");
-    if(pwd==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. There is nothing to ninstall." RESET_DISPLAY "\n");
-        return 1;
-    }
-#endif
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("[  ****  ] YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM:\n\n");
     printf("[  ****  ] 1. You have *DESTROYED* all the clusters managed by this device.\n");
-    printf("[  ****  ] 2. You have *CHECKED* your cloud account(s) and no resource left.\n\n");
-    printf("[  ****  ] 3. You have *EXPORTED* the relevant logs to a permenant directory.\n");
+    printf("[  ****  ] 2. You have *CHECKED* your cloud account(s) and no resource left.\n");
+    printf("[  ****  ] 3. You have *EXPORTED* the relevant logs to a permenant directory.\n\n");
     printf("[  ****  ] THIS OPERATION IS UNRECOVERABLE!" RESET_DISPLAY "\n");
     printf("[ -INFO- ] ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
@@ -750,24 +778,17 @@ int uninstall_services(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
 
 #ifdef _WIN32
-    system("icacls C:\\ProgramData\\hpc-now /remove Administrators > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now\\workdir /remove Administrators > nul 2>&1");
-    if(folder_empty_or_not("C:\\ProgramData\\hpc-now\\workdir")!=0){
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",NOW_WORKDIR_ROOT);
+    system(cmdline);
+#endif
+    if(folder_check_general(NOW_WORKDIR_ROOT,0)==0&&folder_empty_or_not(NOW_WORKDIR_ROOT)!=0){
         restore_perm_windows();
         printf(FATAL_RED_BOLD "\n[ FATAL: ] The workdir is not empty. Please switch to user 'hpc-now' and check:" RESET_DISPLAY "\n");
-        printf(FATAL_RED_BOLD "[  ****  ] -> C:\\ProgramData\\hpc-now\\workdir" RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[  ****  ] -> %s" RESET_DISPLAY "\n",NOW_WORKDIR_ROOT);
         return 5;
     }
-#else
-    char workdir[DIR_LENGTH]="";
-    snprintf(workdir,DIR_LENGTH,"%s%sworkdir",HPC_NOW_ROOT_DIR,PATH_SLASH);
-    if(folder_empty_or_not(workdir)!=0){
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] The workdir is not empty. Please double check the directory below:" RESET_DISPLAY "\n");
-        printf(FATAL_RED_BOLD "[  ****  ] -> %s" RESET_DISPLAY "\n",workdir);
-        return 5;
-    }
-#endif
-
 #ifdef _WIN32
     char randstr[8]="";
     char tasklist_temp[FILENAME_LENGTH]="";
@@ -796,44 +817,56 @@ int uninstall_services(void){
         snprintf(cmdline,CMDLINE_LENGTH-1,"del /f /s /q %s > nul 2>&1",tasklist_temp);
         system(cmdline);
     }
-    system("icacls C:\\hpc-now /remove Administrators > nul 2>&1");
-    system("takeown /f C:\\hpc-now /r /d y > nul 2>&1");
-    system("icacls C:\\hpc-now\\* /grant Administrators:F > nul 2>&1");
-    system("takeown /f  C:\\ProgramData\\hpc-now /r /d y > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now\\* /grant Administrators:F > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now\\now_crypto_seed.lock /grant Administrators:F > nul 2>&1");
-    system("attrib -h -s -r C:\\ProgramData\\hpc-now\\now_crypto_seed.lock > nul 2>&1");
+
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"takeown /f %s /r /d y > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s* /grant Administrators:F > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline);
+
+    snprintf(cmdline,CMDLINE_LENGTH-1,"takeown /f %s /r /d y > nul 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s* /grant Administrators:F > nul 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /grant Administrators:F > nul 2>&1",CRYPTO_KEY_FILE);
+    system(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"attrib -h -s -r %s > nul 2>&1",CRYPTO_KEY_FILE);
+    system(cmdline);
     system("net user hpc-now /delete > nul 2>&1");
-    system("rd /s /q C:\\hpc-now > nul 2>&1");
-    system("rd /s /q C:\\ProgramData\\hpc-now > nul 2>&1");
-    system("rd /s /q C:\\users\\hpc-now > nul 2>&1");
+    rm_file_or_dir(HPC_NOW_USER_DIR);
+    rm_file_or_dir(HPC_NOW_ROOT_DIR);
+    system("rd /s /q C:\\Users\\hpc-now* > nul 2>&1");
 #elif __APPLE__
     system("ps -ax | grep hpc-now | cut -c 1-6 | xargs kill -9 >> /dev/null 2>&1");
     system("unlink /usr/local/bin/hpcopr >> /dev/null 2>&1");
-    system("chflags noschg /Applications/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("rm -rf /Applications/.hpc-now/ >> /dev/null 2>&1");
+    snprintf(cmdline,CMDLINE_LENGTH-1,"chflags noschg %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
+    system(cmdline);
+    rm_file_or_dir(HPC_NOW_ROOT_DIR);
     system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
     system("dscl . -delete /Groups/hpc-now >> /dev/null 2>&1");
-    system("rm -rf /Users/hpc-now >> /dev/null 2>&1");
-#elif __linux__
+    rm_file_or_dir(HPC_NOW_USER_DIR);
+#else
     system("ps -aux | grep hpc-now | cut -c 9-16 | xargs kill -9 >> /dev/null 2>&1");
     system("unlink /usr/local/bin/hpcopr >> /dev/null 2>&1");
-    system("chattr -i /usr/.hpc-now/.now_crypto_seed.lock >> /dev/null 2>&1");
-    system("rm -rf /usr/.hpc-now >> /dev/null 2>&1");
+    snprintf(cmdline,CMDLINE_LENGTH-1,"chattr -i %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
+    system(cmdline);
+    rm_file_or_dir(HPC_NOW_ROOT_DIR);
     system("userdel -f -r hpc-now >> /dev/null 2>&1");
 #endif
-    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been deleted from this OS and device.\n");
+
+    printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been deleted.\n");
 #ifdef _WIN32
-    printf("[  ****  ] There might still be remaining files for the specific user 'hpc-now'.\n");
-    printf("[  ****  ] Please mannually delete the folder C:\\Users\\hpc-now* after reboot.\n");
+    printf("[  ****  ] There might still be remaining files for the user 'hpc-now'.\n");
+    printf("[  ****  ] Please delete the folder C:\\Users\\hpc-now* after reboot.\n");
 #elif __linux__
     if(system("cat /etc/profile | grep -w \"# Added by HPC-NOW\" >> /dev/null 2>&1")==0){
         system("sed -i '/# Added by HPC-NOW/d' /etc/profile");
     }
-    printf("[  ****  ] There are still remaining files for reinstall. You can run the command: \n");
+    printf("[  ****  ] There are still remaining files for reinstall. You can run:\n");
     printf("[  ****  ] " HIGH_GREEN_BOLD "sudo rm -rf /usr/share/terraform" RESET_DISPLAY " to erase them.\n");
-#elif __APPLE__
-    printf("[  ****  ] There are still remaining files for reinstall. You can run the command: \n");
+#else
+    printf("[  ****  ] There are still remaining files for reinstall. You can run:\n");
     printf("[  ****  ] " HIGH_GREEN_BOLD "sudo rm -rf '/Library/Application Support/io.terraform'" RESET_DISPLAY " to erase them.\n");
 #endif
     return 0;
@@ -841,6 +874,7 @@ int uninstall_services(void){
 
 int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int crypto_loc_flag, char* now_crypto_loc, int rdp_flag){
     char doubleconfirm[16]="";
+    char cmdline_temp[CMDLINE_LENGTH]="";
     char cmdline1[CMDLINE_LENGTH]="";
     char cmdline2[CMDLINE_LENGTH]="";
     char cmdline_dec[CMDLINE_LENGTH]="";
@@ -849,25 +883,20 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     char linux_packman[8]="";
 #endif
     int run_flag1,run_flag2,decrypt_flag=0;
+    
 #ifdef _WIN32
     char randstr[8]="";
+    char filename_temp[FILENAME_LENGTH]="";
     int i;
     generate_random_nstring(randstr,8,1);
-    USER_INFO_0* user_info0=NULL;
-    DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
-    if(result!=NERR_Success){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been\n");
-        printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
-        return 1;
-    }
-#else
-    struct passwd* pwd=getpwnam("hpc-now");
-    if(pwd==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been\n");
-        printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
-        return 1;
-    }
 #endif
+
+    if(installed_or_not()==0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been\n");
+        printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
+        return 1;
+    }
+
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("[  ****  ] YOU ARE UPDATING THE HPC-NOW SERVICES. THE hpcopr executable WILL\n");
     printf("[  ****  ] BE REPLACED. IF YOU UPDATE WITH THE --hloc AND/OR --cloc OPTIONS,\n");
@@ -882,25 +911,36 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UPDATING THE SERVICES NOW ...\n");
 #ifdef _WIN32
-    system("icacls C:\\hpc-now /remove Administrators > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now /remove Administrators > nul 2>&1");
-    if(system("dir C:\\ProgramData\\hpc-now | findstr .now-ssh > nul 2>&1")!=0){ /* For compatibility */
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"dir %s | findstr .now-ssh > nul 2>&1",HPC_NOW_ROOT_DIR);
+    if(system(cmdline_temp)!=0){ /* For compatibility */
         printf("[ -INFO- ] Moving previous keys to the new directory ...\n");
         system("takeown /f C:\\hpc-now\\.now-ssh /r /d y > nul 2>&1");
         system("move /y C:\\hpc-now\\.now-ssh C:\\ProgramData\\hpc-now\\ > nul 2>&1");
         system("icacls C:\\ProgramData\\hpc-now\\.now-ssh /grant hpc-now:F /t > nul 2>&1");
     }
-    if(system("dir C:\\hpc-now | findstr utils > nul 2>&1")!=0){
+
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"dir %s | findstr utils > nul 2>&1",HPC_NOW_USER_DIR);
+    if(system(cmdline_temp)!=0){
         printf("[ -INFO- ] Moving previous utilities to the new directory ...\n");
         system("takeown /f C:\\ProgramData\\hpc-now\\bin /r /d y > nul 2>&1");
         system("move /y C:\\ProgramData\\hpc-now\\bin C:\\hpc-now\\utils > nul 2>&1");
         system("icacls C:\\hpc-now\\utils /grant hpc-now:F /t > nul 2>&1");
     }
-    system("takeown /f C:\\hpc-now\\hpcopr.exe /d y > nul 2>&1");
-    system("icacls C:\\hpc-now\\hpcopr.exe /grant Administrators:F > nul 2>&1");
-    system("takeown /f C:\\hpc-now\\utils\\now-crypto-aes.exe /d y > nul 2>&1");
-    system("icacls C:\\hpc-now\\utils\\now-crypto-aes.exe /grant Administrators:F > nul 2>&1");
-    if(system("C:\\hpc-now\\hpcopr.exe version | findstr \"/C:Version: 0.3.1.00\" > nul 2>&1")==0){
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"takeown /f %s /d y > nul 2>&1",HPCOPR_EXEC);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"icacls %s /grant Administrators:F > nul 2>&1",HPCOPR_EXEC);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"takeown /f %s /d y > nul 2>&1",NOW_CRYPTO_EXEC);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"icacls %s /grant Administrators:F > nul 2>&1",NOW_CRYPTO_EXEC);
+    system(cmdline_temp);
+    
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s version | findstr \"/C:Version: 0.3.1.00\" > nul 2>&1",HPCOPR_EXEC);
+    if(system(cmdline_temp)==0){
         decrypt_flag=1;
         snprintf(cmdline_enc,CMDLINE_LENGTH-1,"runas /savecred /user:mymachine\\hpc-now \"cmd.exe /c hpcopr encrypt --all -b > C:\\ProgramData\\hpc-now\\enc.%s.temp 2>&1\" > nul",randstr);
         snprintf(cmdline_dec,CMDLINE_LENGTH-1,"runas /savecred /user:mymachine\\hpc-now \"cmd.exe /c hpcopr decrypt --all -b > C:\\ProgramData\\hpc-now\\dec.%s.temp 2>&1\" > nul",randstr);
@@ -918,8 +958,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     if(system("hpcopr version | grep \"Version: 0.3.1.00\" >> /dev/null 2>&1")==0){
         decrypt_flag=1;
-        strncpy(cmdline_enc,"sudo -u hpc-now hpcopr encrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
-        strncpy(cmdline_dec,"sudo -u hpc-now hpcopr decrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
+        strncpy(cmdline_enc,"sudo -Hu hpc-now hpcopr encrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
+        strncpy(cmdline_dec,"sudo -Hu hpc-now hpcopr decrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
     }
 #elif __APPLE__
     if(system("ls -la /Users/hpc-now/.bin | grep utils >> /dev/null 2>&1")!=0){
@@ -935,8 +975,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     if(system("hpcopr version | grep \"Version: 0.3.1.00\" >> /dev/null 2>&1")==0){
         decrypt_flag=1;
-        strncpy(cmdline_enc,"sudo -u hpc-now hpcopr encrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
-        strncpy(cmdline_dec,"sudo -u hpc-now hpcopr decrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
+        strncpy(cmdline_enc,"sudo -Hu hpc-now hpcopr encrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
+        strncpy(cmdline_dec,"sudo -Hu hpc-now hpcopr decrypt --all -b > /dev/null",CMDLINE_LENGTH-1);
     }
 #endif
     if(decrypt_flag==1){
@@ -1034,23 +1074,29 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #endif
     }
 #ifdef _WIN32
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"del /s /q C:\\ProgramData\\hpc-now\\enc.%s.temp %s",randstr,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline1);
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"del /s /q C:\\ProgramData\\hpc-now\\dec.%s.temp %s",randstr,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline1);
-    system("mkdir C:\\hpc-now\\hpc-now.licenses > nul 2>&1");
-    if(file_exist_or_not("C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE")!=0){
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o C:\\hpc-now\\hpc-now.licenses\\MIT.LICENSE",URL_LICENSE);
-        system(cmdline1);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"C:\\ProgramData\\hpc-now\\enc.%s.temp",randstr);
+    rm_file_or_dir(filename_temp);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"C:\\ProgramData\\hpc-now\\dec.%s.temp",randstr);
+    rm_file_or_dir(filename_temp);
+    mk_pdir(NOW_LIC_DIR);
+    if(file_exist_or_not(NOW_MIT_LIC_FILE)!=0){
+        snprintf(cmdline_temp,CMDLINE_LENGTH-1,"curl -s %s -o %s",URL_LICENSE,NOW_MIT_LIC_FILE);
+        system(cmdline_temp);
     }
-    system("icacls C:\\hpc-now\\* /deny Administrators:F > nul 2>&1");
-    system("icacls C:\\hpc-now /deny Administrators:F > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now\\bin\\now-crypto-aes.exe /grant hpc-now:F /t > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now\\* /deny Administrators:F > nul 2>&1");
-    system("icacls C:\\ProgramData\\hpc-now /deny Administrators:F > nul 2>&1");
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"icacls %s* /deny Administrators:F > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"icacls %s /deny Administrators:F > nul 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"icacls %s /grant hpc-now:F /t > nul 2>&1",NOW_CRYPTO_EXEC);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"icacls %s* /deny Administrators:F > nul 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"icacls %s /deny Administrators:F > nul 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline_temp);
+
     if(system("set PATH | findstr C:\\hpc-now >nul 2>&1")!=0){
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
-        system(cmdline1);
+        snprintf(cmdline_temp,CMDLINE_LENGTH-1,"setx PATH \"%%PATH%%;C:\\hpc-now\" /m >nul 2>&1");
+        system(cmdline_temp);
     }
     if(file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe")!=0||file_exist_or_not("C:\\Program Files\\Amazon\\AWSCLIV2\\aws_completer.exe")!=0){
         system("start /b msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn");
@@ -1067,21 +1113,27 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     printf("\n");
 #elif __linux__
-    system("mkdir -p /home/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
-    if(file_exist_or_not("/home/hpc-now/hpc-now.licenses/MIT.LICENSE")!=0){
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o /home/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
-        system(cmdline1);
+    mk_pdir(NOW_LIC_DIR);
+    if(file_exist_or_not(NOW_MIT_LIC_FILE)!=0){
+        snprintf(cmdline_temp,CMDLINE_LENGTH-1,"curl -s %s -o %s",URL_LICENSE,NOW_MIT_LIC_FILE);
+        system(cmdline_temp);
     }
-    system("chown -R hpc-now:hpc-now /home/hpc-now >> /dev/null 2>&1");
-    system("chown -R hpc-now:hpc-now /usr/.hpc-now >> /dev/null 2>&1");
-    system("chmod 711 /home/hpc-now/ >> /dev/null 2>&1");
-    system("chmod 700 /usr/.hpc-now >> /dev/null 2>&1");
-    system("chmod -R 711 /home/hpc-now/.bin >> /dev/null 2>&1");
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
-    system(cmdline1);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s >> /dev/null 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s >> /dev/null 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chmod 711 %s >> /dev/null 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chmod 700 %s >> /dev/null 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chmod -R 711 %s%s.bin >> /dev/null 2>&1",HPC_NOW_USER_DIR,PATH_SLASH);
+    system(cmdline_temp);
+
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    system(cmdline_temp);
     system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
-    system(cmdline1);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
+    system(cmdline_temp);
     if(system("grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
         system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
     }
@@ -1105,8 +1157,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     if(rdp_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Installing Remmina - the RDP client for GNU/Linux now ...\n");
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
-        if(system(cmdline1)!=0){
+        snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
+        if(system(cmdline_temp)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install Remmina, RDP won't work properly." RESET_DISPLAY "\n");
         }
     }
@@ -1114,25 +1166,32 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
     }
     if(system("which xclip >> /dev/null 2>&1")==0){
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
-        system(cmdline1);
+        snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
+        system(cmdline_temp);
     }
 #elif __APPLE__
-    system("mkdir -p /Users/hpc-now/hpc-now.licenses/ >> /dev/null 2>&1");
-    if(file_exist_or_not("/Users/hpc-now/hpc-now.licenses/MIT.LICENSE")!=0){
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"curl -s %s -o /Users/hpc-now/hpc-now.licenses/MIT.LICENSE",URL_LICENSE);
-        system(cmdline1);
+    mk_pdir(NOW_LIC_DIR);
+    if(file_exist_or_not(NOW_MIT_LIC_FILE)!=0){
+        snprintf(cmdline_temp,CMDLINE_LENGTH-1,"curl -s %s -o %s",URL_LICENSE,NOW_MIT_LIC_FILE);
+        system(cmdline_temp);
     }
-    system("chown -R hpc-now:hpc-now /Users/hpc-now >> /dev/null 2>&1");
-    system("chown -R hpc-now:hpc-now /Applications/.hpc-now >> /dev/null 2>&1");
-    system("chmod 711 /Users/hpc-now >> /dev/null 2>&1");
-    system("chmod 700 /Applications/.hpc-now >> /dev/null 2>&1");
-    system("chmod -R 711 /Users/hpc-now/.bin >> /dev/null 2>&1");
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
-    system(cmdline1);
+
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s >> /dev/null 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s >> /dev/null 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chmod 711 %s >> /dev/null 2>&1",HPC_NOW_USER_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chmod 700 %s >> /dev/null 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chmod -R 711 %s%s.bin >> /dev/null 2>&1",HPC_NOW_USER_DIR,PATH_SLASH);
+    system(cmdline_temp);
+
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"mkdir -p /usr/local/bin && ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
+    system(cmdline_temp);
     system("mkdir -p '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chmod -R 755 '/Library/Application Support/io.terraform' >> /dev/null 2>&1 && chown -R hpc-now:hpc-now '/Library/Application Support/io.terraform' >> /dev/null 2>&1");
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
-    system(cmdline1);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
+    system(cmdline_temp);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the Microsoft RDP Client now ...\n");
     if(folder_exist_or_not("/Applications/msrdp.app")==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Microsoft RDP has been installed to your OS.\n");
@@ -1280,7 +1339,7 @@ int main(int argc, char* argv[]){
 
     if(strcmp(argv[1],"update")!=0&&strcmp(argv[1],"install")!=0&&strcmp(argv[1],"setpass")!=0){
         print_help_installer();
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] The specified general option " WARN_YELLO_BOLD "%s" FATAL_RED_BOLD " is invalid." RESET_DISPLAY "\n", argv[1]);
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The specified general option '%s' is invalid." RESET_DISPLAY "\n", argv[1]);
         print_tail_installer();
         return 4;
     }

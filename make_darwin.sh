@@ -9,10 +9,10 @@ hpcopr_version_code=`cat ./hpcopr/now_macros.h | grep CORE_VERSION_CODE | awk -F
 installer_version_code=`cat ./installer/installer.h | grep INSTALLER_VERSION_CODE | awk -F"\"" '{print $2}'`
 
 if [ ! -n "$1" ]; then
-	echo "[ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command."
+	echo "[ -INFO- ] Please specify an option: 'build', 'delete', or 'clear'"
 	echo "|          build  - (re)build the binaries"
     echo "|          delete - delete the previous binaries"
-    echo "|          clear  - remove the 'build' folder"
+    echo "|          clear  - remove the 'build' folder and binaries in it"
 	echo "[ -DONE- ] Exit now."
     exit 1
 elif [ "$1" = "build" ]; then
@@ -41,10 +41,10 @@ elif [ "$1" = "clear" ]; then
     echo "[ START: ] Removing the build folder now ..."
     rm -rf ./build
 else
-    echo "[ -INFO- ] Please specify either 'build', 'delete', or 'clear' when running this command."
+    echo "[ -INFO- ] Please specify an option: 'build', 'delete', or 'clear'"
 	echo "|          build  - (re)build the binaries"
     echo "|          delete - delete the previous binaries"
-    echo "|          clear  - remove the 'bin' folder"
+    echo "|          clear  - remove the 'build' folder and binaries in it"
 	echo "[ -DONE- ] Exit now."
     exit 1
 fi

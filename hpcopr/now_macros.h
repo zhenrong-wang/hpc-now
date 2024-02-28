@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0119"
+#define CORE_VERSION_CODE "0.3.1.0121"
 
 /* Define the printf ANSI colors. */
 #define FATAL_RED_BOLD   "\033[1;31m"
@@ -91,27 +91,29 @@ typedef signed long long int int_64bit;
 
 #define DESTROYED_DIR                HPC_NOW_ROOT_DIR".destroyed\\"
 #define NOW_LIC_DIR                  HPC_NOW_USER_DIR"hpc-now.licenses\\"
+#define NOW_MIT_LIC_FILE             NOW_LIC_DIR"MIT.LICENSE"
 #define SSHKEY_DIR                   HPC_NOW_ROOT_DIR".now-ssh\\"
 
-#define GENERAL_CONF_DIR            HPC_NOW_ROOT_DIR"etc\\"
-#define LOCATION_CONF_FILE          GENERAL_CONF_DIR"locations.conf"
-#define VERS_SHA_CONF_FILE          GENERAL_CONF_DIR"components.conf"
-#define ALL_CLUSTER_REGISTRY        GENERAL_CONF_DIR"all_clusters.dat"
-#define CURRENT_CLUSTER_INDICATOR   GENERAL_CONF_DIR"current_cluster.dat"
-#define TF_RUNNING_CONFIG           GENERAL_CONF_DIR"tf_running.conf"
+#define NOW_WORKDIR_ROOT             HPC_NOW_ROOT_DIR"workdir\\"
+#define GENERAL_CONF_DIR             HPC_NOW_ROOT_DIR"etc\\"
+#define LOCATION_CONF_FILE           GENERAL_CONF_DIR"locations.conf"
+#define VERS_SHA_CONF_FILE           GENERAL_CONF_DIR"components.conf"
+#define ALL_CLUSTER_REGISTRY         GENERAL_CONF_DIR"all_clusters.dat"
+#define CURRENT_CLUSTER_INDICATOR    GENERAL_CONF_DIR"current_cluster.dat"
+#define TF_RUNNING_CONFIG            GENERAL_CONF_DIR"tf_running.conf"
 
-#define NOW_CRYPTO_EXEC             NOW_BINARY_DIR"now-crypto-aes.exe"
-#define TERRAFORM_EXEC              NOW_BINARY_DIR"terraform.exe"
-#define TOFU_EXEC                   NOW_BINARY_DIR"tofu.exe"
-#define HPCOPR_EXEC                 HPC_NOW_USER_DIR"hpcopr.exe"
+#define NOW_CRYPTO_EXEC              NOW_BINARY_DIR"now-crypto-aes.exe"
+#define TERRAFORM_EXEC               NOW_BINARY_DIR"terraform.exe"
+#define TOFU_EXEC                    NOW_BINARY_DIR"tofu.exe"
+#define HPCOPR_EXEC                  HPC_NOW_USER_DIR"hpcopr.exe"
 
-#define S3CLI_EXEC                  "\"c:\\program files\\amazon\\awscliv2\\aws.exe\""
-#define COSCLI_EXEC                 NOW_BINARY_DIR"coscli.exe"
-#define OSSUTIL_EXEC                NOW_BINARY_DIR"ossutil64.exe"
-#define OBSUTIL_EXEC                NOW_BINARY_DIR"obsutil.exe"
-#define BCECMD_EXEC                 NOW_BINARY_DIR"bcecmd.exe"
-#define AZCOPY_EXEC                 NOW_BINARY_DIR"azcopy.exe"
-#define GCLOUD_CLI                  NOW_BINARY_DIR"google-cloud-sdk\\bin\\gcloud"
+#define S3CLI_EXEC                   "\"c:\\program files\\amazon\\awscliv2\\aws.exe\""
+#define COSCLI_EXEC                  NOW_BINARY_DIR"coscli.exe"
+#define OSSUTIL_EXEC                 NOW_BINARY_DIR"ossutil64.exe"
+#define OBSUTIL_EXEC                 NOW_BINARY_DIR"obsutil.exe"
+#define BCECMD_EXEC                  NOW_BINARY_DIR"bcecmd.exe"
+#define AZCOPY_EXEC                  NOW_BINARY_DIR"azcopy.exe"
+#define GCLOUD_CLI                   NOW_BINARY_DIR"google-cloud-sdk\\bin\\gcloud"
 
 #define DELETE_FILE_CMD          "del /f /q /s"
 #define DELETE_FOLDER_CMD        "rd /s /q"
@@ -166,8 +168,10 @@ typedef signed long long int int_64bit;
 
 #define DESTROYED_DIR                HPC_NOW_ROOT_DIR".destroyed/"
 #define NOW_LIC_DIR                  HPC_NOW_USER_DIR"hpc-now.licenses/"
+#define NOW_MIT_LIC_FILE             NOW_LIC_DIR"MIT.LICENSE"
 #define SSHKEY_DIR                   HPC_NOW_ROOT_DIR".now-ssh/"
 
+#define NOW_WORKDIR_ROOT             HPC_NOW_ROOT_DIR"workdir/"
 #define GENERAL_CONF_DIR             HPC_NOW_ROOT_DIR".etc/"
 #define LOCATION_CONF_FILE           GENERAL_CONF_DIR"locations.conf"
 #define VERS_SHA_CONF_FILE           GENERAL_CONF_DIR"components.conf"
@@ -241,8 +245,10 @@ typedef signed long long int int_64bit;
 
 #define DESTROYED_DIR                HPC_NOW_ROOT_DIR".destroyed/"
 #define NOW_LIC_DIR                  HPC_NOW_USER_DIR"hpc-now.licenses/"
+#define NOW_MIT_LIC_FILE             NOW_LIC_DIR"MIT.LICENSE"
 #define SSHKEY_DIR                   HPC_NOW_ROOT_DIR".now-ssh/"
 
+#define NOW_WORKDIR_ROOT             HPC_NOW_ROOT_DIR"workdir/"
 #define GENERAL_CONF_DIR             HPC_NOW_ROOT_DIR".etc/"
 #define LOCATION_CONF_FILE           GENERAL_CONF_DIR"locations.conf"
 #define VERS_SHA_CONF_FILE           GENERAL_CONF_DIR"components.conf"
