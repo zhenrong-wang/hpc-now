@@ -35,6 +35,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <libgen.h>
+#include <errno.h>
 #elif __APPLE__
 #include <unistd.h>
 #include <sys/time.h>
@@ -42,6 +43,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <libgen.h>
+#include <errno.h>
 #endif
 
 #include "now_macros.h"
@@ -1306,7 +1308,6 @@ int rm_pdir(char* pathname){
     WIN32_FIND_DATA find_data;
     char sub_path[MAX_PATH]=""; /* Windows max path length is 260, which is MAX_PATH*/
     char sub_search_pattern[MAX_PATH]="";
-
     if(!(GetFileAttributes(pathname)&FILE_ATTRIBUTE_DIRECTORY)){
         if(!DeleteFile(pathname)){
             return 1;
@@ -1344,11 +1345,10 @@ int rm_pdir(char* pathname){
     }
     return 0;
 #else
-    DIR* dir;
-    struct dirent* entry;
+    DIR* dir=NULL;
+    struct dirent* entry=NULL;
     char sub_path[DIR_LENGTH_EXT]="";
     struct stat sub_stat;
-
     if(lstat(pathname,&sub_stat)!=0){
         return -1;
     }
@@ -1854,6 +1854,44 @@ int folder_check_general(char* foldername, int rw_flag){
         }
     }
     return 1;
+#endif
+}
+
+int folder_empty_or_not(char* foldername){
+#ifdef _WIN32
+    HANDLE handle_find;
+    WIN32_FIND_DATA find_data;
+    char sub_search_pattern[MAX_PATH]=""; /* Windows max path length is 260, which is MAX_PATH*/
+    snprintf(sub_search_pattern,MAX_PATH-1,"%s\\*",foldername);
+    handle_find=FindFirstFile(sub_search_pattern,&find_data);
+    if(handle_find==INVALID_HANDLE_VALUE){
+        return -1; /* Failed to open the dir */
+    }
+    do{
+        if(strcmp(find_data.cFileName,".")==0&&strcmp(find_data.cFileName,"..")==0){
+            FindClose(handle_find);
+            return 1; /* If iterm(s) found, not empty*/
+        }
+    }while(FindNextFile(handle_find,&find_data)!=0);
+    FindClose(handle_find); /* Close the handle */
+    return 0; /* Folder is empty. */
+#else
+    DIR* dir=NULL;
+    struct dirent* entry=NULL;
+    dir=opendir(foldername);
+    if(dir==NULL){
+        return -1; /* Failed to open the dir. */
+    }
+    while((entry=readdir(dir))!=NULL){
+        if(strcmp(entry->d_name,".")!=0&&strcmp(entry->d_name,"..")!=0){
+            closedir(dir);
+            return 1; /* If iterm(s) found, not empty*/
+        }
+    }
+    if(errno!=0){
+        return 1; /* readdir() reports error. Folder may not be empty. */
+    }
+    return 0; /* Folder is empty. */
 #endif
 }
 
