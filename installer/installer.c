@@ -685,13 +685,13 @@ int set_opr_password(char* opr_password){
     printf(GENERAL_BOLD "\n[ STEP 1 ] Decrypting current files with previous crypto keystring..." RESET_DISPLAY "\n");
 #ifdef _WIN32
     snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_ROOT_DIR);
-    systm(cmdline);
+    system(cmdline);
     snprintf(cmdline,CMDLINE_LENGTH-1,"takeown /f %s /r /d y > nul 2>&1",HPC_NOW_ROOT_DIR);
-    systm(cmdline);
+    system(cmdline);
     snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s* /grant Administrators:F /t > nul 2>&1",HPC_NOW_ROOT_DIR);
-    systm(cmdline);
+    system(cmdline);
     snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /grant Administrators:F > nul 2>&1",CRYPTO_KEY_FILE);
-    systm(cmdline);
+    system(cmdline);
 #endif
     run_flag=encrypt_decrypt_clusters("all",CRYPTO_KEY_FILE,"decrypt",0);
     if(run_flag!=0){
@@ -792,7 +792,6 @@ int uninstall_services(void){
 #ifdef _WIN32
     char randstr[8]="";
     char tasklist_temp[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
     generate_random_nstring(randstr,8,1);
     snprintf(tasklist_temp,FILENAME_LENGTH-1,"C:\\ProgramData\\hpc-now-tasks.%s.temp",randstr);
     snprintf(cmdline,CMDLINE_LENGTH-1,"tasklist /FI \"USERNAME eq hpc-now\" > %s 2>nul",tasklist_temp);
