@@ -235,7 +235,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     system(cmdline1);
     snprintf(cmdline1,CMDLINE_LENGTH-1,"takeown /f %s /r /d y > nul 2>&1",HPC_NOW_USER_DIR);
     system(cmdline1);
-    snprintf(cmdline1,CMDLINE_LENGTH-1,"attrib -h -s -r %s",CRYPTO_KEY_FILE);
+    snprintf(cmdline1,CMDLINE_LENGTH-1,"attrib -h -s -r %s > nul 2>&1",CRYPTO_KEY_FILE);
     system(cmdline1);
     rm_file_or_dir(HPC_NOW_USER_DIR);
     rm_file_or_dir(HPC_NOW_ROOT_DIR);
