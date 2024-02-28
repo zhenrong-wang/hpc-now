@@ -723,13 +723,13 @@ int uninstall_services(void){
     USER_INFO_0* user_info0=NULL;
     DWORD result=NetUserGetInfo(NULL,L"hpc-now",0,(BYTE**)&user_info0);
     if(result!=NERR_Success){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. Nothing to uninstall." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. There is nothing to uninstall." RESET_DISPLAY "\n");
         return 1;
     }
 #else
     struct passwd* pwd=getpwnam("hpc-now");
     if(pwd==NULL){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. Nothing to uninstall." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. There is nothing to ninstall." RESET_DISPLAY "\n");
         return 1;
     }
 #endif
