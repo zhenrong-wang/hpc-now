@@ -835,7 +835,7 @@ int uninstall_services(void){
     system("net user hpc-now /delete > nul 2>&1");
     rm_file_or_dir(HPC_NOW_USER_DIR);
     rm_file_or_dir(HPC_NOW_ROOT_DIR);
-    system("rd /s /q C:\\Users\\hpc-now* > nul 2>&1");
+    rm_file_or_dir("C:\\Users\\hpc-now");
 #elif __APPLE__
     system("ps -ax | grep hpc-now | cut -c 1-6 | xargs kill -9 >> /dev/null 2>&1");
     system("unlink /usr/local/bin/hpcopr >> /dev/null 2>&1");
