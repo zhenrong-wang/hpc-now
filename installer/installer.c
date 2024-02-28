@@ -769,7 +769,6 @@ int uninstall_services(void){
     FILE* file_p=fopen(tasklist_temp,"r");
     char line_buffer[LINE_LENGTH_SHORT]="";
     char pid[16]="";
-    char cmdline[CMDLINE_LENGTH]="";
     if(file_p==NULL){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to creat/get the tasklist of hpc-now." RESET_DISPLAY "\n");
     }
