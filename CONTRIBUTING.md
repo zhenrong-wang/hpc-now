@@ -78,7 +78,7 @@ HPC-NOW can be developed locally on your devices with **Microsoft Windows**, **G
 
 Please follow the general workflow to develop:
 
-- Clone the source code directly from the HPC-NOW repository, or fork this repo to your github account and then clone to your local device
+- Fork this repo to your github account and then clone to your local device
 - Develop your code and test your build
 - Once done, you can submit a Pull Request (PR) to the HPC-NOW repository.
 
