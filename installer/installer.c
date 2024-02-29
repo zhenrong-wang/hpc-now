@@ -837,7 +837,6 @@ int uninstall_services(void){
     rm_file_or_dir(HPC_NOW_ROOT_DIR);
     if(folder_check_general("C:\\Users\\hpc-now",0)==0){
         snprintf(unins_trash_dir,DIR_LENGTH-1,"C:\\Users\\hpc-now.user.unins.trash\\%s",randstr);
-        mk_pdir(unins_trash_dir);
         rename("C:\\Users\\hpc-now",unins_trash_dir);
     }
 #elif __APPLE__
