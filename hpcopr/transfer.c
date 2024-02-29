@@ -31,7 +31,7 @@ int get_import_info(char cluster_name_output[], unsigned int name_len_max, char 
     char dir_dwn[DIR_LENGTH]="";
     char dir_top[DIR_LENGTH_EXT]="";
 
-    snprintf(dir_win,DIR_LENGTH-1,"%s%sprogramdata",tmp_import_root,PATH_SLASH);
+    snprintf(dir_win,DIR_LENGTH-1,"%s%sProgramData",tmp_import_root,PATH_SLASH);
     snprintf(dir_lin,DIR_LENGTH-1,"%s%susr",tmp_import_root,PATH_SLASH);
     snprintf(dir_dwn,DIR_LENGTH-1,"%s%sApplications",tmp_import_root,PATH_SLASH);
     if(folder_exist_or_not(dir_win)==0){

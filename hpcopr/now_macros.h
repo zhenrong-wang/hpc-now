@@ -68,9 +68,9 @@ typedef signed long long int int_64bit;
 /* System-related paths and macros */
 #ifdef _WIN32
 #define PATH_SLASH                   "\\"
-#define HPC_NOW_ROOT_DIR             "C:\\programdata\\hpc-now\\"
+#define HPC_NOW_ROOT_DIR             "C:\\ProgramData\\hpc-now\\"
 #define HPC_NOW_USER_DIR             "C:\\hpc-now\\"
-#define TF_LOCAL_PLUGINS             "C:\\programdata\\hpc-now-tf\\"
+#define TF_LOCAL_PLUGINS             "C:\\ProgramData\\hpc-now-tf\\"
 #define NOW_BINARY_DIR               HPC_NOW_USER_DIR"utils\\"
 #define CRYPTO_KEY_FILE              HPC_NOW_ROOT_DIR"now_crypto_seed.lock"
 

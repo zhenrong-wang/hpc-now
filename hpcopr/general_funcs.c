@@ -3052,13 +3052,13 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
 #elif __linux__
     snprintf(cmdline,CMDLINE_LENGTH-1,"md5sum '%s' | awk '{print $1}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif _WIN32
-    snprintf(cmdline,CMDLINE_LENGTH-1,"certutil -hashfile \"%s\" md5 > C:\\programdata\\md5.txt.tmp",crypto_key_filename);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"certutil -hashfile \"%s\" md5 > C:\\ProgramData\\md5.txt.tmp",crypto_key_filename);
 #endif
     if(system(cmdline)!=0){
         return -1;
     }
 #ifdef _WIN32
-    md5_tmp=fopen("C:\\programdata\\md5.txt.tmp","r");
+    md5_tmp=fopen("C:\\ProgramData\\md5.txt.tmp","r");
 #else
     md5_tmp=fopen("/tmp/md5.txt.tmp","r");
 #endif
@@ -3071,7 +3071,7 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
     fgetline(md5_tmp,md5sum);
     fclose(md5_tmp);
 #ifdef _WIN32
-    snprintf(cmdline,CMDLINE_LENGTH-1,"del /f /q C:\\programdata\\md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"del /f /q C:\\ProgramData\\md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
 #else
     snprintf(cmdline,CMDLINE_LENGTH-1,"rm -rf /tmp/md5.txt.tmp %s",SYSTEM_CMD_REDIRECT_NULL);
 #endif
