@@ -1857,6 +1857,10 @@ int folder_check_general(char* foldername, int rw_flag){
 #endif
 }
 
+/* 
+ * Return 1: Not empty
+ * Return 0: Empty
+ */
 int folder_empty_or_not(char* foldername){
 #ifdef _WIN32
     HANDLE handle_find;
@@ -1868,7 +1872,7 @@ int folder_empty_or_not(char* foldername){
         return -1; /* Failed to open the dir */
     }
     do{
-        if(strcmp(find_data.cFileName,".")==0&&strcmp(find_data.cFileName,"..")==0){
+        if(strcmp(find_data.cFileName,".")!=0&&strcmp(find_data.cFileName,"..")!=0){
             FindClose(handle_find);
             return 1; /* If iterm(s) found, not empty*/
         }
