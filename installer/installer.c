@@ -837,7 +837,7 @@ int uninstall_services(void){
     rm_pdir(HPC_NOW_ROOT_DIR);
     snprintf(unins_trash_dir,DIR_LENGTH-1,"C:\\Users\\hpc-now.user.unins.trash\\%s",randstr);
     snprintf(cmdline,CMDLINE_LENGTH-1,"move /y C:\\Users\\hpc-now %s > nul 2>&1",unins_trash_dir);
-    system(cmdline);
+    int move_flag=system(cmdline);
 #elif __APPLE__
     system("ps -ax | grep hpc-now | cut -c 1-6 | xargs kill -9 >> /dev/null 2>&1");
     system("unlink /usr/local/bin/hpcopr >> /dev/null 2>&1");
@@ -858,8 +858,11 @@ int uninstall_services(void){
 
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been deleted.\n");
 #ifdef _WIN32
-    printf("[  ****  ] There might still be remaining files for the user 'hpc-now'.\n");
-    printf("[  ****  ] Check and delete %s later.\n",unins_trash_dir);
+    printf("[  ****  ] There might still be remaining files for the user 'hpc-now' in:\n");
+    if(move_flag==0){
+        printf("[  ****  ] -> %s\n",unins_trash_dir);
+    }
+    printf("[  ****  ] -> %s\n",TF_LOCAL_PLUGINS);
 #elif __linux__
     if(system("cat /etc/profile | grep -w \"# Added by HPC-NOW\" >> /dev/null 2>&1")==0){
         system("sed -i '/# Added by HPC-NOW/d' /etc/profile");
