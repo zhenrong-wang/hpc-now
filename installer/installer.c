@@ -761,6 +761,18 @@ int uninstall_services(void){
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. There is nothing to uninstall." RESET_DISPLAY "\n");
         return 1;
     }
+#ifdef _WIN32
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",NOW_WORKDIR_ROOT);
+    system(cmdline);
+#endif
+    if(folder_check_general(NOW_WORKDIR_ROOT,0)==0&&folder_empty_or_not(NOW_WORKDIR_ROOT)!=0){
+        restore_perm_windows();
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The workdir is not empty. Please switch to user 'hpc-now' and check:" RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[  ****  ] -> %s" RESET_DISPLAY "\n",NOW_WORKDIR_ROOT);
+        return 5;
+    }
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("[  ****  ] YOU ARE UNINSTALLING THE HPC-NOW SERVICES, PLEASE CONFIRM:\n\n");
     printf("[  ****  ] 1. You have *DESTROYED* all the clusters managed by this device.\n");
@@ -776,19 +788,6 @@ int uninstall_services(void){
         return 3;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " UNINSTALLING THE SERVICES AND REMOVING THE DATA NOW ...\n");
-
-#ifdef _WIN32
-    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_ROOT_DIR);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",NOW_WORKDIR_ROOT);
-    system(cmdline);
-#endif
-    if(folder_check_general(NOW_WORKDIR_ROOT,0)==0&&folder_empty_or_not(NOW_WORKDIR_ROOT)!=0){
-        restore_perm_windows();
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] The workdir is not empty. Please switch to user 'hpc-now' and check:" RESET_DISPLAY "\n");
-        printf(FATAL_RED_BOLD "[  ****  ] -> %s" RESET_DISPLAY "\n",NOW_WORKDIR_ROOT);
-        return 5;
-    }
 #ifdef _WIN32
     char randstr[8]="";
     char tasklist_temp[FILENAME_LENGTH]="";
