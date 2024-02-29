@@ -237,8 +237,8 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     system(cmdline1);
     snprintf(cmdline1,CMDLINE_LENGTH-1,"attrib -h -s -r %s > nul 2>&1",CRYPTO_KEY_FILE);
     system(cmdline1);
-    rm_file_or_dir(HPC_NOW_USER_DIR);
-    rm_file_or_dir(HPC_NOW_ROOT_DIR);
+    rm_pdir(HPC_NOW_USER_DIR);
+    rm_pdir(HPC_NOW_ROOT_DIR);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");   
     snprintf(cmdline1,CMDLINE_LENGTH-1,"net user hpc-now \"%s\" /add > nul 2>&1",hpc_now_password);
     if(system(cmdline1)!=0){
@@ -287,10 +287,10 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
             return -1;
         }
     }
-    rm_file_or_dir(HPC_NOW_USER_DIR);
+    rm_pdir(HPC_NOW_USER_DIR);
     snprintf(cmdline1,CMDLINE_LENGTH-1,"chattr -i %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
     system(cmdline1);
-    rm_file_or_dir(HPC_NOW_ROOT_DIR);
+    rm_pdir(HPC_NOW_ROOT_DIR);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");
     strncpy(cmdline1,"useradd hpc-now -m -s /bin/bash >> /dev/null 2>&1",CMDLINE_LENGTH-1);
     if(system(cmdline1)!=0){
@@ -302,10 +302,10 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     mk_pdir(HPC_NOW_ROOT_DIR);
     chmod(HPC_NOW_ROOT_DIR,0700);
 #elif __APPLE__
-    rm_file_or_dir(HPC_NOW_USER_DIR);
+    rm_pdir(HPC_NOW_USER_DIR);
     snprintf(cmdline1,CMDLINE_LENGTH-1,"chflags noschg %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
     system(cmdline1);
-    rm_file_or_dir(HPC_NOW_ROOT_DIR);
+    rm_pdir(HPC_NOW_ROOT_DIR);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");
     flag1=system("dscl . -create /Users/hpc-now >> /dev/null 2>&1");
     flag2=system("dscl . -create /Users/hpc-now UserShell /bin/bash >> /dev/null 2>&1");
@@ -413,8 +413,8 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         system(cmdline1);
         snprintf(cmdline1,CMDLINE_LENGTH-1,"takeown /f %s /r /d y > nul 2>&1",HPC_NOW_ROOT_DIR);
         system(cmdline1);
-        rm_file_or_dir(HPC_NOW_USER_DIR);
-        rm_file_or_dir(HPC_NOW_ROOT_DIR);
+        rm_pdir(HPC_NOW_USER_DIR);
+        rm_pdir(HPC_NOW_ROOT_DIR);
         system("net user hpc-now /delete > nul 2>&1");
         return -1;
     }
@@ -471,7 +471,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         printf("[  ****  ] is correct. Rolling back and exit." RESET_DISPLAY "\n");
         snprintf(cmdline1,CMDLINE_LENGTH-1,"chattr -i %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
         system(cmdline1);
-        rm_file_or_dir(HPC_NOW_ROOT_DIR);
+        rm_pdir(HPC_NOW_ROOT_DIR);
         system("userdel -f -r hpc-now >> /dev/null 2>&1");
         return -1;
     }
@@ -547,10 +547,10 @@ linux_install_done:
         printf("[  ****  ] is correct. Rolling back and exit." RESET_DISPLAY "\n");
         snprintf(cmdline1,CMDLINE_LENGTH-1,"chflags noschg %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
         system(cmdline1);
-        rm_file_or_dir(HPC_NOW_ROOT_DIR);
+        rm_pdir(HPC_NOW_ROOT_DIR);
         system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
         system("dscl . -delete /Groups/hpc-now >> /dev/null 2>&1");
-        rm_file_or_dir(HPC_NOW_USER_DIR);
+        rm_pdir(HPC_NOW_USER_DIR);
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Setting up environment variables for 'hpc-now' ...\n");
@@ -833,24 +833,24 @@ int uninstall_services(void){
     snprintf(cmdline,CMDLINE_LENGTH-1,"attrib -h -s -r %s > nul 2>&1",CRYPTO_KEY_FILE);
     system(cmdline);
     system("net user hpc-now /delete > nul 2>&1");
-    rm_file_or_dir(HPC_NOW_USER_DIR);
-    rm_file_or_dir(HPC_NOW_ROOT_DIR);
-    rm_file_or_dir("C:\\Users\\hpc-now");
+    rm_pdir(HPC_NOW_USER_DIR);
+    rm_pdir(HPC_NOW_ROOT_DIR);
+    rm_pdir("C:\\Users\\hpc-now");
 #elif __APPLE__
     system("ps -ax | grep hpc-now | cut -c 1-6 | xargs kill -9 >> /dev/null 2>&1");
     system("unlink /usr/local/bin/hpcopr >> /dev/null 2>&1");
     snprintf(cmdline,CMDLINE_LENGTH-1,"chflags noschg %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
     system(cmdline);
-    rm_file_or_dir(HPC_NOW_ROOT_DIR);
+    rm_pdir(HPC_NOW_ROOT_DIR);
     system("dscl . -delete /Users/hpc-now >> /dev/null 2>&1");
     system("dscl . -delete /Groups/hpc-now >> /dev/null 2>&1");
-    rm_file_or_dir(HPC_NOW_USER_DIR);
+    rm_pdir(HPC_NOW_USER_DIR);
 #else
     system("ps -aux | grep hpc-now | cut -c 9-16 | xargs kill -9 >> /dev/null 2>&1");
     system("unlink /usr/local/bin/hpcopr >> /dev/null 2>&1");
     snprintf(cmdline,CMDLINE_LENGTH-1,"chattr -i %s >> /dev/null 2>&1",CRYPTO_KEY_FILE);
     system(cmdline);
-    rm_file_or_dir(HPC_NOW_ROOT_DIR);
+    rm_pdir(HPC_NOW_ROOT_DIR);
     system("userdel -f -r hpc-now >> /dev/null 2>&1");
 #endif
 
