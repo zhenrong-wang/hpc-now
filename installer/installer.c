@@ -1112,7 +1112,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
             goto update_done;
         }
     }
-    printf("\n");
+    printf(RESET_DISPLAY "\n");
 #elif __linux__
     mk_pdir(NOW_LIC_DIR);
     if(file_exist_or_not(NOW_MIT_LIC_FILE)!=0){
