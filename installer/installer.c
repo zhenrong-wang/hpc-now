@@ -769,7 +769,7 @@ int uninstall_services(void){
 #endif
     if(folder_check_general(NOW_WORKDIR_ROOT,0)==0&&folder_empty_or_not(NOW_WORKDIR_ROOT)!=0){
         restore_perm_windows();
-        printf(FATAL_RED_BOLD "\n[ FATAL: ] The workdir is not empty. Please switch to user 'hpc-now' and check:" RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] The workdir is not empty. Please switch to user 'hpc-now' and check:" RESET_DISPLAY "\n");
         printf(FATAL_RED_BOLD "[  ****  ] -> %s" RESET_DISPLAY "\n",NOW_WORKDIR_ROOT);
         return 5;
     }
