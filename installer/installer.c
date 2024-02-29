@@ -662,8 +662,8 @@ int set_opr_password(char* opr_password){
     char cmdline[CMDLINE_LENGTH]="";
 
     if(installed_or_not()==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been\n");
-        printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been installed.\n");
+        printf("[  ****  ] Please install it first in order to update." RESET_DISPLAY "\n");
         return -3;
     }
 
@@ -895,8 +895,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #endif
 
     if(installed_or_not()==0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been\n");
-        printf("[  ****  ] installed. Please install it first in order to update." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' not found. It seems HPC-NOW has not been installed.\n");
+        printf("[  ****  ] Please install it first in order to update." RESET_DISPLAY "\n");
         return 1;
     }
 
