@@ -11,6 +11,7 @@
 #define INSTALLER_VERSION_CODE    "0.3.1.0121"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/hpcopr-0.3.x/"
 #define URL_MSRDP_FOR_MAC         "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/packages/rdp_for_mac.zip"
+#define AWSCLI_WIN_WAIT_TIME      360
 
 int check_internet_installer(void);
 int installed_or_not(void);
