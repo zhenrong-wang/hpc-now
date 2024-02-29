@@ -792,6 +792,7 @@ int uninstall_services(void){
 #ifdef _WIN32
     char randstr[8]="";
     char tasklist_temp[FILENAME_LENGTH]="";
+    char unins_trash_dir[DIR_LENGTH]="";
     generate_random_nstring(randstr,8,1);
     snprintf(tasklist_temp,FILENAME_LENGTH-1,"C:\\ProgramData\\hpc-now-tasks.%s.temp",randstr);
     snprintf(cmdline,CMDLINE_LENGTH-1,"tasklist /FI \"USERNAME eq hpc-now\" > %s 2>nul",tasklist_temp);
@@ -813,8 +814,7 @@ int uninstall_services(void){
             system(cmdline);
         }
         fclose(file_p);
-        snprintf(cmdline,CMDLINE_LENGTH-1,"del /f /s /q %s > nul 2>&1",tasklist_temp);
-        system(cmdline);
+        rm_file_or_dir(tasklist_temp);
     }
 
     snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_USER_DIR);
@@ -835,7 +835,9 @@ int uninstall_services(void){
     system("net user hpc-now /delete > nul 2>&1");
     rm_file_or_dir(HPC_NOW_USER_DIR);
     rm_file_or_dir(HPC_NOW_ROOT_DIR);
-    rm_file_or_dir("C:\\Users\\hpc-now");
+    snprintf(unins_trash_dir,DIR_LENGTH-1,"C:\\Users\\hpc-now.user.unins.trash\\%s",randstr);
+    mk_pdir(unins_trash_dir);
+    rename("C:\\Users\\hpc-now",unins_trash_dir);
 #elif __APPLE__
     system("ps -ax | grep hpc-now | cut -c 1-6 | xargs kill -9 >> /dev/null 2>&1");
     system("unlink /usr/local/bin/hpcopr >> /dev/null 2>&1");
@@ -857,7 +859,7 @@ int uninstall_services(void){
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been deleted.\n");
 #ifdef _WIN32
     printf("[  ****  ] There might still be remaining files for the user 'hpc-now'.\n");
-    printf("[  ****  ] Please delete the folder C:\\Users\\hpc-now* after reboot.\n");
+    printf("[  ****  ] Check and delete %s later.\n",unins_trash_dir);
 #elif __linux__
     if(system("cat /etc/profile | grep -w \"# Added by HPC-NOW\" >> /dev/null 2>&1")==0){
         system("sed -i '/# Added by HPC-NOW/d' /etc/profile");
