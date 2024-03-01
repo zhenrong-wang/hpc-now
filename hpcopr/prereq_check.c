@@ -210,18 +210,25 @@ int install_bucket_clis(int silent_flag){
         }
 #ifdef _WIN32
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
-        system(cmdline);
+#elif __linux__
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
+#else
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
+#endif
+        if(system(cmdline)!=0){
+            rm_file_or_dir(filename_temp_zip);
+            inst_flag|=OSSUTIL_1_FAILED;
+            goto coscli;
+        }
+
+#ifdef _WIN32
         snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sossutil-v1.7.16-windows-amd64%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
         rename(filename_temp2,filename_temp);
 #elif __linux__   
-        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
-        system(cmdline);
         snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sossutil-v1.7.16-linux-amd64%sossutil64",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
         rename(filename_temp2,filename_temp);
         chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #elif __APPLE__
-        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -q -o '%s' -d %s",filename_temp_zip,NOW_BINARY_DIR);
-        system(cmdline);
         snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sossutil-v1.7.16-mac-amd64%sossutilmac64",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
         rename(filename_temp2,filename_temp);
         chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
@@ -524,6 +531,7 @@ azcopy:
 #endif
         if(system(cmdline)!=0){
             rm_file_or_dir(filename_temp_zip);
+            rm_file_or_dir(filename_temp);
             inst_flag|=AZCOPY_6_FAILED;
             goto gcloud_cli;
         }
