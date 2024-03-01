@@ -183,6 +183,9 @@ int install_bucket_clis(int silent_flag){
     char filename_temp_zip[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
     char* dirname_temp=NULL;
+#ifndef _WIN32
+    char dirname_temp_static[DIR_LENGTH]="";
+#endif
     int inst_flag=0;
     if(silent_flag!=0){
         printf(RESET_DISPLAY GENERAL_BOLD "|        . Checking & installing the dataman components: 1/7 ..." RESET_DISPLAY "\n");
@@ -234,6 +237,7 @@ int install_bucket_clis(int silent_flag){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 1/7." RESET_DISPLAY "\n");
             }
             inst_flag|=OSSUTIL_1_FAILED;
+            rm_file_or_dir(filename_temp); /* Clear the unreliable file. */
             goto coscli;
         }
     }
@@ -251,7 +255,7 @@ coscli:
         if(system(cmdline)!=0){
             if(silent_flag!=0){
                 printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/7." RESET_DISPLAY "\n");
-                rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
+                rm_file_or_dir(filename_temp); /* Clear the failed file (if exists) */
             }
             inst_flag|=COSCLI_2_FAILED;
             goto awscli;
@@ -285,9 +289,19 @@ awscli:
             }
         }
         snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -q -o '%s' -d /tmp",filename_temp_zip);
-        system(cmdline);
+        if(system(cmdline)!=0){
+            rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
+            inst_flag|=AWSCLI_3_FAILED;
+            goto obsutil;
+        }
         snprintf(cmdline,CMDLINE_LENGTH-1,"/tmp/aws/install -i %s%sawscli -b %s %s",NOW_BINARY_DIR,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
         system(cmdline);
+        if(system(cmdline)!=0){
+            inst_flag|=AWSCLI_3_FAILED;
+            snprintf(dirname_temp_static,DIR_LENGTH-1,"%s%sawscli",NOW_BINARY_DIR,PATH_SLASH);
+            rm_file_or_dir(dirname_temp_static);
+            goto obsutil;
+        }
         printf(RESET_DISPLAY);
     }
 #elif __APPLE__
@@ -325,12 +339,13 @@ awscli:
             system(cmdline);
             int i=0;
             while(file_exist_or_not("/Applications/aws-cli/aws")!=0||file_exist_or_not("/Applications/aws-cli/aws_completer")!=0){
-                printf(RESET_DISPLAY GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max 120s passed ... \r",i);
+                printf(RESET_DISPLAY GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " Installing additional component, %d sec(s) of max %ds passed ... \r",i,AWSCLI_INST_WAIT_TIME);
                 fflush(stdout);
                 i++;
                 sleep_func(1);
-                if(i==120){
+                if(i==AWSCLI_INST_WAIT_TIME){
                     printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
+                    rm_file_or_dir("Applications/aws-cli/");
                     inst_flag|=AWSCLI_3_FAILED;
                     goto obsutil;
                 }
@@ -389,7 +404,11 @@ obsutil:
 #else
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
 #endif
-        system(cmdline);
+        if(system(cmdline)!=0){
+            rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
+            inst_flag|=OBSUTIL_4_FAILED;
+            goto bcecmd;
+        }
         char* obsutil_dir=get_first_fuzzy_subpath(NOW_BINARY_DIR,"obsutil_*_amd64_*",DIR_LENGTH);
         if(obsutil_dir!=NULL){
 #ifndef _WIN32
@@ -443,34 +462,34 @@ bcecmd:
                 goto azcopy;
             }
         }
-        dirname_temp=(char*)malloc(sizeof(char)*DIR_LENGTH);
-        if(dirname_temp==NULL){
+#ifdef _WIN32
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+#elif __linux__
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+#else
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+#endif
+        if(system(cmdline)!=0){
+            rm_file_or_dir(filename_temp_zip);
             inst_flag|=BCECMD_5_FAILED;
             goto azcopy;
         }
 #ifdef _WIN32
-        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
-        system(cmdline);
-        snprintf(dirname_temp,DIR_LENGTH-1,"%s%swindows-bcecmd-0.4.1%s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
-        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sbcecmd.exe",dirname_temp,PATH_SLASH);
+        snprintf(dirname_temp_static,DIR_LENGTH-1,"%s%swindows-bcecmd-0.4.1%s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sbcecmd.exe",dirname_temp_static,PATH_SLASH);
         rename(filename_temp2,filename_temp);
 #elif __linux__
-        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(dirname_temp,DIR_LENGTH-1,"%s%slinux-bcecmd-0.4.1%s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
-        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sbcecmd",dirname_temp,PATH_SLASH);
+        snprintf(dirname_temp_static,DIR_LENGTH-1,"%s%slinux-bcecmd-0.4.1%s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sbcecmd",dirname_temp_static,PATH_SLASH);
         rename(filename_temp2,filename_temp);
         chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #elif __APPLE__
-        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(dirname_temp,DIR_LENGTH-1,"%s%smac-bcecmd-0.4.1%s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
-        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sbcecmd",dirname_temp,PATH_SLASH);
+        snprintf(dirname_temp_static,DIR_LENGTH-1,"%s%smac-bcecmd-0.4.1%s",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sbcecmd",dirname_temp_static,PATH_SLASH);
         rename(filename_temp2,filename_temp);
         chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
-        rm_pdir(dirname_temp);
-        free(dirname_temp);
+        rm_pdir(dirname_temp_static);
     }
     if(silent_flag!=0){
         printf(RESET_DISPLAY "|        v Installed the dataman components: 5/7 .\n");
@@ -480,13 +499,7 @@ azcopy:
         printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 6/7 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sazcopy.exe",NOW_BINARY_DIR,PATH_SLASH);
-#ifdef _WIN32
-    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_windows_amd64_10.20.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
-#elif __linux__
-    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_linux_amd64_10.20.1.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
-#elif __APPLE__
-    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_darwin_amd64_10.20.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
-#endif
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_%s_amd64_10.20.1.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH,FILENAME_SUFFIX_FULL);
     if(file_exist_or_not(filename_temp)!=0){
         printf(RESET_DISPLAY "[  ****  ] Dataman component 6 not found. Downloading and installing ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
@@ -504,34 +517,34 @@ azcopy:
                 goto gcloud_cli;
             }
         }
-        dirname_temp=(char*)malloc(sizeof(char)*DIR_LENGTH);
-        if(dirname_temp==NULL){
+#ifdef _WIN32
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
+#elif __linux__
+        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf '%s' -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+#else
+        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
+#endif
+        if(system(cmdline)!=0){
+            rm_file_or_dir(filename_temp_zip);
             inst_flag|=AZCOPY_6_FAILED;
             goto gcloud_cli;
         }
 #ifdef _WIN32
-        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf %s -C %s",filename_temp_zip,NOW_BINARY_DIR);
-        system(cmdline);
-        snprintf(dirname_temp,DIR_LENGTH-1,"%s%sazcopy_windows_amd64_10.20.1",NOW_BINARY_DIR,PATH_SLASH);
-        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sazcopy.exe",dirname_temp,PATH_SLASH);
+        snprintf(dirname_temp_static,DIR_LENGTH-1,"%s%sazcopy_windows_amd64_10.20.1",NOW_BINARY_DIR,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sazcopy.exe",dirname_temp_static,PATH_SLASH);
         rename(filename_temp2,filename_temp);
 #elif __linux__
-        snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf '%s' -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(dirname_temp,DIR_LENGTH-1,"%s%sazcopy_linux_amd64_10.20.1",NOW_BINARY_DIR,PATH_SLASH);
-        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sazcopy",dirname_temp,PATH_SLASH);
+        snprintf(dirname_temp_static,DIR_LENGTH-1,"%s%sazcopy_linux_amd64_10.20.1",NOW_BINARY_DIR,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sazcopy",dirname_temp_static,PATH_SLASH);
         rename(filename_temp2,filename_temp);
         chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #elif __APPLE__
-        snprintf(cmdline,CMDLINE_LENGTH-1,"unzip -o -q '%s' -d %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
-        snprintf(dirname_temp,DIR_LENGTH-1,"%s%sazcopy_darwin_amd64_10.20.1",NOW_BINARY_DIR,PATH_SLASH);
-        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sazcopy",dirname_temp,PATH_SLASH);
+        snprintf(dirname_temp_static,DIR_LENGTH-1,"%s%sazcopy_darwin_amd64_10.20.1",NOW_BINARY_DIR,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sazcopy",dirname_temp_static,PATH_SLASH);
         rename(filename_temp2,filename_temp);
         chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
-        rm_pdir(dirname_temp);
-        free(dirname_temp);
+        rm_pdir(dirname_temp_static);
     }
     if(silent_flag!=0){
         printf(RESET_DISPLAY "|        v Installed the dataman components: 6/7 .\n");
@@ -573,11 +586,14 @@ gcloud_cli:
         }
 #ifdef _WIN32
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar xf %s -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
 #else
         snprintf(cmdline,CMDLINE_LENGTH-1,"tar zxf '%s' -C %s %s",filename_temp_zip,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
 #endif
+        if(system(cmdline)!=0){
+            rm_file_or_dir(filename_temp_zip);
+            inst_flag|=GCLOUD_7_FAILED;
+            goto end_return;
+        }
     }
     if(silent_flag!=0){
         printf(RESET_DISPLAY "|        v Installed the dataman components: 7/7 .\n");

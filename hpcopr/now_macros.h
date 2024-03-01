@@ -73,6 +73,7 @@ typedef signed long long int int_64bit;
 #define BCECMD_5_FAILED              16 /* 0x00010000 */
 #define AZCOPY_6_FAILED              32 /* 0x00100000 */
 #define GCLOUD_7_FAILED              64 /* 0x01000000 */
+#define AWSCLI_INST_WAIT_TIME        360
 
 /* System-related paths and macros */
 #ifdef _WIN32
