@@ -183,10 +183,9 @@ int install_bucket_clis(int silent_flag){
     char filename_temp_zip[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
     char* dirname_temp=NULL;
-#ifndef _WIN32
     char dirname_temp_static[DIR_LENGTH]="";
-#endif
     int inst_flag=0;
+    
     if(silent_flag!=0){
         printf(RESET_DISPLAY GENERAL_BOLD "|        . Checking & installing the dataman components: 1/7 ..." RESET_DISPLAY "\n");
     }
