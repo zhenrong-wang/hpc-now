@@ -1154,25 +1154,25 @@ int check_and_install_prerequisitions(int repair_flag){
     printf(RESET_DISPLAY);
     flag=install_bucket_clis(force_repair_flag);
     if(flag&OSSUTIL_1_FAILED){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_A (aka AliCloud) data manager." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_A (aka AliCloud) data manager." RESET_DISPLAY "\n");
     }
     if(flag&COSCLI_2_FAILED){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_B (aka TencentCloud) data manager." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_B (aka TencentCloud) data manager." RESET_DISPLAY "\n");
     }
     if(flag&AWSCLI_3_FAILED){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_C (aka AWS) data manager." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_C (aka AWS) data manager." RESET_DISPLAY "\n");
     }
     if(flag&OBSUTIL_4_FAILED){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_D (aka HuaweiCloud) data manager." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_D (aka HuaweiCloud) data manager." RESET_DISPLAY "\n");
     }
     if(flag&BCECMD_5_FAILED){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_E (aka BaiduBCE) data manager." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_E (aka BaiduBCE) data manager." RESET_DISPLAY "\n");
     }
     if(flag&AZCOPY_6_FAILED){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_F (aka Microsoft Azure) data manager." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_F (aka Microsoft Azure) data manager." RESET_DISPLAY "\n");
     }
     if(flag&GCLOUD_7_FAILED){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_G (aka Google Cloud) data manager." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_G (aka Google Cloud) data manager." RESET_DISPLAY "\n");
     }
     if(file_exist_or_not(USAGE_LOG_FILE)!=0){
         file_p=fopen(USAGE_LOG_FILE,"w+");
