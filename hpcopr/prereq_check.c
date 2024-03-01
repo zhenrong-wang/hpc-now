@@ -294,7 +294,6 @@ awscli:
             goto obsutil;
         }
         snprintf(cmdline,CMDLINE_LENGTH-1,"/tmp/aws/install -i %s%sawscli -b %s %s",NOW_BINARY_DIR,PATH_SLASH,NOW_BINARY_DIR,SYSTEM_CMD_REDIRECT);
-        system(cmdline);
         if(system(cmdline)!=0){
             inst_flag|=AWSCLI_3_FAILED;
             snprintf(dirname_temp_static,DIR_LENGTH-1,"%s%sawscli",NOW_BINARY_DIR,PATH_SLASH);
@@ -1158,10 +1157,10 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_A (aka AliCloud) data manager." RESET_DISPLAY "\n");
     }
     if(flag&COSCLI_2_FAILED){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_A (aka TencentCloud) data manager." RESET_DISPLAY "\n");
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_B (aka TencentCloud) data manager." RESET_DISPLAY "\n");
     }
     if(flag&AWSCLI_3_FAILED){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_A (aka AWS) data manager." RESET_DISPLAY "\n");
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_C (aka AWS) data manager." RESET_DISPLAY "\n");
     }
     if(flag&OBSUTIL_4_FAILED){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_D (aka HuaweiCloud) data manager." RESET_DISPLAY "\n");
