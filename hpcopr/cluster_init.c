@@ -958,7 +958,10 @@ int clear_if_failed(char* stackdir, char* confdir, char* vaultdir, int condition
         if(batch_file_operation(stackdir,"*",DESTROYED_DIR,"mv",0)!=0){
             error_flag++;
         }
-        if(batch_file_operation(vaultdir,"*",DESTROYED_DIR,"mv",0)!=0){
+        if(batch_file_operation(vaultdir,"*.txt",DESTROYED_DIR,"mv",0)!=0){
+            error_flag++;
+        }
+        if(batch_file_operation(vaultdir,"*.tmp",DESTROYED_DIR,"mv",0)!=0){
             error_flag++;
         }
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%stf_prep.conf",confdir,PATH_SLASH);
