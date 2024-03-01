@@ -199,9 +199,10 @@ int install_bucket_clis(int silent_flag){
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 1/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 1/7." RESET_DISPLAY "\n");
+                    rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
-                inst_flag=1;
+                inst_flag|=OSSUTIL_1_FAILED;
                 goto coscli;
             }
         }
@@ -232,7 +233,7 @@ int install_bucket_clis(int silent_flag){
             if(silent_flag!=0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 1/7." RESET_DISPLAY "\n");
             }
-            inst_flag=1;
+            inst_flag|=OSSUTIL_1_FAILED;
             goto coscli;
         }
     }
@@ -249,9 +250,10 @@ coscli:
         snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_COSCLI,filename_temp);
         if(system(cmdline)!=0){
             if(silent_flag!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/7." RESET_DISPLAY "\n");
+                printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/7." RESET_DISPLAY "\n");
+                rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
             }
-            inst_flag=2;
+            inst_flag|=COSCLI_2_FAILED;
             goto awscli;
         }
 #ifndef _WIN32
@@ -276,8 +278,9 @@ awscli:
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
                     printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/7." RESET_DISPLAY "\n");
+                    rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
-                inst_flag=3;
+                inst_flag|=AWSCLI_3_FAILED;
                 goto obsutil;
             }
         }
@@ -296,8 +299,9 @@ awscli:
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
                     printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/7." RESET_DISPLAY "\n");
+                    rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
-                inst_flag=3;
+                inst_flag|=AWSCLI_3_FAILED;
                 goto obsutil;
             }
         }
@@ -307,7 +311,7 @@ awscli:
                 if(silent_flag!=0){
                     printf(RESET_DISPLAY FATAL_RED_BOLD "[ FATAL: ] File I/O error. Failed to create tmp files." RESET_DISPLAY "\n");
                 }
-                inst_flag=3;
+                inst_flag|=AWSCLI_3_FAILED;
                 goto obsutil;
             }
             fprintf(file_p,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -327,7 +331,7 @@ awscli:
                 sleep_func(1);
                 if(i==120){
                     printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install component. HPC-NOW dataman services may not work properly.");
-                    inst_flag=3;
+                    inst_flag|=AWSCLI_3_FAILED;
                     goto obsutil;
                 }
             }
@@ -346,7 +350,7 @@ awscli:
         if(silent_flag!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Please run the installer update to fix this issue." RESET_DISPLAY "\n");
         }
-        inst_flag=3;
+        inst_flag|=AWSCLI_3_FAILED;
         goto obsutil;
     }
 #endif
@@ -373,9 +377,10 @@ obsutil:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 4/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 4/7." RESET_DISPLAY "\n");
+                    rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
-                inst_flag=4;
+                inst_flag|=OBSUTIL_4_FAILED;
                 goto bcecmd;
             }
         }
@@ -402,7 +407,7 @@ obsutil:
             if(silent_flag!=0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 4/7." RESET_DISPLAY "\n");
             }
-            inst_flag=4;
+            inst_flag|=OBSUTIL_4_FAILED;
             goto bcecmd;
         }
     }
@@ -431,15 +436,16 @@ bcecmd:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 5/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 5/7." RESET_DISPLAY "\n");
+                    rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
-                inst_flag=5;
+                inst_flag|=BCECMD_5_FAILED;
                 goto azcopy;
             }
         }
         dirname_temp=(char*)malloc(sizeof(char)*DIR_LENGTH);
         if(dirname_temp==NULL){
-            inst_flag=5;
+            inst_flag|=BCECMD_5_FAILED;
             goto azcopy;
         }
 #ifdef _WIN32
@@ -491,15 +497,16 @@ azcopy:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 6/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 6/7." RESET_DISPLAY "\n");
+                    rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
-                inst_flag=6;
+                inst_flag|=AZCOPY_6_FAILED;
                 goto gcloud_cli;
             }
         }
         dirname_temp=(char*)malloc(sizeof(char)*DIR_LENGTH);
         if(dirname_temp==NULL){
-            inst_flag=5;
+            inst_flag|=AZCOPY_6_FAILED;
             goto gcloud_cli;
         }
 #ifdef _WIN32
@@ -557,9 +564,10 @@ gcloud_cli:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 7/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 7/7." RESET_DISPLAY "\n");
+                    rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
-                inst_flag=7;
+                inst_flag|=GCLOUD_7_FAILED;
                 goto end_return;
             }
         }
@@ -1131,8 +1139,26 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     printf(RESET_DISPLAY);
     flag=install_bucket_clis(force_repair_flag);
-    if(flag!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] IMPORTANT! The dataman component %d may not work properly." RESET_DISPLAY "\n",flag);
+    if(flag&OSSUTIL_1_FAILED){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_A (aka AliCloud) data manager." RESET_DISPLAY "\n");
+    }
+    if(flag&COSCLI_2_FAILED){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_A (aka TencentCloud) data manager." RESET_DISPLAY "\n");
+    }
+    if(flag&AWSCLI_3_FAILED){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_A (aka AWS) data manager." RESET_DISPLAY "\n");
+    }
+    if(flag&OBSUTIL_4_FAILED){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_D (aka HuaweiCloud) data manager." RESET_DISPLAY "\n");
+    }
+    if(flag&BCECMD_5_FAILED){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_E (aka BaiduBCE) data manager." RESET_DISPLAY "\n");
+    }
+    if(flag&AZCOPY_6_FAILED){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_F (aka Microsoft Azure) data manager." RESET_DISPLAY "\n");
+    }
+    if(flag&GCLOUD_7_FAILED){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install CLOUD_G (aka Google Cloud) data manager." RESET_DISPLAY "\n");
     }
     if(file_exist_or_not(USAGE_LOG_FILE)!=0){
         file_p=fopen(USAGE_LOG_FILE,"w+");

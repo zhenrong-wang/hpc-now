@@ -34,7 +34,16 @@
         "features.h": "c",
         "stat.h": "c",
         "errno.h": "c",
-        "pwd.h": "c"
+        "pwd.h": "c",
+        "fstream": "cpp",
+        "ostream": "cpp",
+        "array": "c",
+        "deque": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "string_view": "c",
+        "initializer_list": "c"
     },
     "C_Cpp.dimInactiveRegions": true
 }

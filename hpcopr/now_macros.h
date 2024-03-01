@@ -65,6 +65,15 @@ typedef signed long long int int_64bit;
 #define DEFAULT_APPS_PKGS_REPO_ROOT   "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/packages/"
 #define DEFAULT_LOCATIONS_COUNT       7
 
+/* Bucket CLI download and installation indicators */
+#define OSSUTIL_1_FAILED             1  /* 0x00000001 */
+#define COSCLI_2_FAILED              2  /* 0x00000010 */
+#define AWSCLI_3_FAILED              4  /* 0x00000100 */
+#define OBSUTIL_4_FAILED             8  /* 0x00001000 */
+#define BCECMD_5_FAILED              16 /* 0x00010000 */
+#define AZCOPY_6_FAILED              32 /* 0x00100000 */
+#define GCLOUD_7_FAILED              64 /* 0x01000000 */
+
 /* System-related paths and macros */
 #ifdef _WIN32
 #define PATH_SLASH                   "\\"
