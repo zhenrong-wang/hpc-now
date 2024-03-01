@@ -706,7 +706,7 @@ int set_opr_password(char* opr_password){
             encrypt_decrypt_clusters("all",CRYPTO_KEY_FILE,"encrypt",0);
         }
         printf(FATAL_RED_BOLD "\n[ FATAL: ] Operation failed and keystring unchanged." RESET_DISPLAY "\n");
-        restore_perm_windows();
+        restore_perm();
         return 3;
     }
     generate_random_npasswd(random_string,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
@@ -723,7 +723,7 @@ int set_opr_password(char* opr_password){
     file_p=fopen(CRYPTO_KEY_FILE,"w+");
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create the now_crypto_seed.lock file." RESET_DISPLAY "\n");
-        restore_perm_windows();
+        restore_perm();
         return -1;
     }
     fprintf(file_p,"THIS FILE IS GENERATED AND MAINTAINED BY HPC-NOW SERVICES.\n");
@@ -749,10 +749,10 @@ int set_opr_password(char* opr_password){
     run_flag=encrypt_decrypt_clusters("all",CRYPTO_KEY_FILE,"encrypt",0);
     if(run_flag!=0&&run_flag!=-1&&run_flag!=-11){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to encrypt files with new crypto keystring." RESET_DISPLAY "\n");
-        restore_perm_windows();
+        restore_perm();
         return 5;
     }
-    restore_perm_windows();
+    restore_perm();
     printf( GENERAL_BOLD "\n[ -DONE- ] The operator keystring has been updated." RESET_DISPLAY "\n");
     return 0;
 }
@@ -774,7 +774,7 @@ int uninstall_services(void){
     system(cmdline);
 #endif
     if(folder_check_general(NOW_WORKDIR_ROOT,0)==0&&folder_empty_or_not(NOW_WORKDIR_ROOT)!=0){
-        restore_perm_windows();
+        restore_perm();
         printf(FATAL_RED_BOLD "[ FATAL: ] The workdir is not empty. Please switch to user 'hpc-now' and check:" RESET_DISPLAY "\n");
         printf(FATAL_RED_BOLD "[  ****  ] -> %s" RESET_DISPLAY "\n",NOW_WORKDIR_ROOT);
         return 5;
@@ -1064,7 +1064,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf("[  ****  ] 2. The specified location (if specified) is correct.\n");
         printf("[  ****  ] 3. Your device is connected to the internet.\n");
         printf("[  ****  ] 4. Currently there is no 'hpcopr' thread(s) running." RESET_DISPLAY "\n");
-        restore_perm_windows();
+        restore_perm();
         return 1;
     }
     if(decrypt_flag==1){
