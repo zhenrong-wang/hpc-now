@@ -326,16 +326,22 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
 #endif
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Creating a file for encryption/decryption ...\n");
     generate_random_npasswd(random_string,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
+    
     if(strlen(opr_password)==0){
         getpass_stdin("[ INPUT: ] Specify an operator keystring (length < 20): ",opr_passwd_temp,20);
-        if(password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
-            generate_random_npasswd(opr_passwd_temp,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
-            printf(WARN_YELLO_BOLD "\n[ -WARN- ] The keystring is invalid. Generated: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
-        }
-        else{
-            printf(GENERAL_BOLD "\n[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
-        }
     }
+    else{
+        strncpy(opr_passwd_temp,opr_password,PASSWORD_STRING_LENGTH-1);
+    }
+
+    if(password_complexity_check(opr_passwd_temp,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(opr_passwd_temp,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS,strlen(SPECIAL_PASSWORD_CHARS));
+        printf(WARN_YELLO_BOLD "\n[ -WARN- ] The keystring is invalid. Generated: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
+    }
+    else{
+        printf(GENERAL_BOLD "\n[ -INFO- ] Specified keystring: " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY "\n",opr_passwd_temp);
+    }
+
     file_p=fopen(CRYPTO_KEY_FILE,"w+");
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a key file. Exit now." RESET_DISPLAY "\n");
