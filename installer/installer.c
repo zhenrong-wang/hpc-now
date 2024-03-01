@@ -613,10 +613,10 @@ mac_install_done:
 #endif
 }
 
-int restore_perm_windows(void){
-#ifdef _WIN32
+int restore_perm(void){
     char cmdline[CMDLINE_LENGTH]="";
     int cmd_flag=0;
+#ifdef _WIN32
     snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /grant hpc-now:F /t > nul 2>&1",HPC_NOW_ROOT_DIR);
     if(system(cmdline)!=0){
         cmd_flag++;
@@ -637,11 +637,17 @@ int restore_perm_windows(void){
     if(system(cmdline)!=0){
         cmd_flag++;
     }
-    if(cmd_flag!=0){
-        return 1;
+#else
+    snprintf(cmdline,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s",SSHKEY_DIR);
+    if(system(cmdline)!=0){
+        cmd_flag++;
+    }
+    snprintf(cmdline,CMDLINE_LENGTH-1,"chown -R hpc-now:hpc-now %s",NOW_WORKDIR_ROOT);
+    if(system(cmdline)!=0){
+        cmd_flag++;
     }
 #endif
-    return 0;
+    return cmd_flag;
 }
 
 /*
