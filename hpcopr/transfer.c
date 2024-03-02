@@ -140,7 +140,6 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
     char real_admin_flag[8]="";
     int i=0;
     int user1_flag=0;
-    int export_user_num=0;
     FILE* file_p_tmp=NULL;
     FILE* file_p=NULL;
     time_t current_time_long;
