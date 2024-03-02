@@ -437,7 +437,7 @@ next_user:
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Exported the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n\n",cluster_name);
         printf(GENERAL_BOLD "[  ****  ] +- Password" RESET_DISPLAY "       : " GREY_LIGHT "%s" RESET_DISPLAY "\n",real_password);
         printf(GENERAL_BOLD "[  ****  ] +- Exported File" RESET_DISPLAY "  : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",export_filename);
-        printf(GENERAL_BOLD "[  ****  ] +- User List" RESET_DISPLAY "      : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",user_list_buffer);
+        printf(GENERAL_BOLD "[  ****  ] +- User List" RESET_DISPLAY "      : " HIGH_CYAN_BOLD "%s" RESET_DISPLAY "\n",real_user_list);
         if(strcmp(real_admin_flag,"admin")==0){
             printf(GENERAL_BOLD "[  ****  ] +- Admin Privilege" RESET_DISPLAY ": " HIGH_CYAN_BOLD "YES" RESET_DISPLAY "\n");
         }
