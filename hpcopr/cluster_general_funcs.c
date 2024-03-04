@@ -2990,8 +2990,6 @@ int tail_f_for_windows(char* filename){
             return 1;
         }
     }
-    fclose(file_p);
-    return 0;
 }
 
 /*
