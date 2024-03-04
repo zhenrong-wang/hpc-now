@@ -385,17 +385,24 @@ int contain_or_not(const char* line, const char* findkey){
  */
 int contain_or_nnot(char line[], char findkey[]){
     int count=0;
-    if(strlen(line)<strlen(findkey)){
+    size_t line_len=0;
+    size_t key_len=0;
+    if(line==NULL||findkey==NULL){
+        return -1;
+    }
+    line_len=strlen(line);
+    key_len=strlen(findkey);
+    if(line_len<key_len){
         return 0;
     }
-    if(strlen(findkey)==0){ /* If findkey = '\0', then return 1 because the line contains at least one '\0' */
+    if(key_len==0){ /* If findkey = '\0', then return 1 because the line contains at least one '\0' */
         return 1;
     }
     int i=0;
-    while(i<strlen(line)-strlen(findkey)+1){
-        if(memcmp(findkey,line+i,strlen(findkey))==0){
+    while(i<line_len-key_len+1){
+        if(memcmp(findkey,line+i,key_len)==0){
             count++;
-            i+=strlen(findkey);
+            i+=key_len;
         }
         else{
             i++;
