@@ -10,6 +10,8 @@
 
 #define CORE_VERSION_CODE "0.3.1.0121"
 
+#define NULL_PTR_ARG -127
+
 /* Define the printf ANSI colors. */
 #define FATAL_RED_BOLD   "\033[1;31m"
 #define WARN_YELLO_BOLD  "\033[1;33m"

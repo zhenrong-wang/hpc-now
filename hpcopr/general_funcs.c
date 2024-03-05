@@ -144,6 +144,9 @@ void sleep_func(unsigned int time){
 }
 
 int string_to_positive_num(char* string){
+    if(string==NULL){
+        return NULL_PTR_ARG;
+    }
     int i,sum=0;
     int length=strlen(string);
     if(length<1){
@@ -169,6 +172,9 @@ int string_to_positive_num(char* string){
  * return  1: failed to get
  */
 int get_key_nvalue(char* filename, unsigned int linelen_max, char* key, char ch, char value[], unsigned int valen_max){
+    if(filename==NULL||key==NULL){
+        return NULL_PTR_ARG;
+    }
     if(linelen_max<1||valen_max<1||strlen(key)==0||ch=='\0'){
         memset(value,'\0',valen_max);
         return -1;
@@ -226,6 +232,9 @@ int get_key_value(char* filename, char* key, char ch, char* value){
     char line_buffer[LINE_LENGTH_SHORT]="";
     char head[128]="";
     char tail[256]="";
+    if(filename==NULL||key==NULL){
+        return NULL_PTR_ARG;
+    }
     FILE* file_p=fopen(filename,"r");
     if(file_p==NULL){
         strcpy(value,"");
@@ -254,6 +263,9 @@ int get_key_value(char* filename, char* key, char ch, char* value){
 
 /* This function is going to be deprecated */
 void reset_string(char* orig_string){
+    if(orig_string==NULL){
+        return;
+    }
     int length=strlen(orig_string);
     int i;
     for(i=0;i<length;i++){
@@ -262,6 +274,9 @@ void reset_string(char* orig_string){
 }
 
 void reset_nstring(char string[], unsigned int string_length){
+    if(string==NULL){
+        return;
+    }
     memset(string,'\0',string_length);
 }
 /* 
@@ -273,8 +288,8 @@ void reset_nstring(char string[], unsigned int string_length){
 int fgetline(FILE* file_p, char* line_string){
     int ch='\0';
     int i=0;
-    if(file_p==NULL){
-        return -1;
+    if(file_p==NULL||line_string==NULL){
+        return NULL_PTR_ARG;
     }
     reset_string(line_string);
     do{
@@ -313,12 +328,12 @@ int fgetline(FILE* file_p, char* line_string){
 int fngetline(FILE* file_p, char line_string[], unsigned int max_length){
     int ch='\0';
     int i=0;
+    if(file_p==NULL||line_string==NULL){
+        return NULL_PTR_ARG;
+    }
     memset(line_string,'\0',max_length);
     if(max_length<1){
         return -3;
-    }
-    if(file_p==NULL){
-        return -1;
     }
     do{
         ch=fgetc(file_p);
@@ -344,6 +359,9 @@ int fngetline(FILE* file_p, char line_string[], unsigned int max_length){
  * return -1: MEM ERROR!
  */
 int contain_or_not(const char* line, const char* findkey){
+    if(line==NULL||findkey==NULL){
+        return NULL_PTR_ARG;
+    }
     int length_line=strlen(line);
     int length_findkey=strlen(findkey);
     int i,j;
@@ -388,7 +406,7 @@ int contain_or_nnot(char line[], char findkey[]){
     size_t line_len=0;
     size_t key_len=0;
     if(line==NULL||findkey==NULL){
-        return -1;
+        return NULL_PTR_ARG;
     }
     line_len=strlen(line);
     key_len=strlen(findkey);
@@ -413,6 +431,9 @@ int contain_or_nnot(char line[], char findkey[]){
 
 /* This function is deprecated by global_nreplace() */
 int global_replace(char* filename, char* orig_string, char* new_string){
+    if(filename==NULL||orig_string==NULL||new_string==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strcmp(orig_string,new_string)==0){
         return 1;
     }
@@ -487,6 +508,9 @@ int global_replace(char* filename, char* orig_string, char* new_string){
  * This function is more secure and strict than global_replace
  */
 int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string, char* new_string){
+    if(filename==NULL||orig_string==NULL||new_string==NULL){
+        return NULL_PTR_ARG;
+    }
     unsigned int orig_str_len=(unsigned int)strlen(orig_string);
     unsigned int new_str_len=(unsigned int)strlen(new_string);
     if(linelen_max<1||linelen_max<orig_str_len){
@@ -558,6 +582,9 @@ int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string,
 }
 
 int line_replace(char* orig_line, char* new_line, char* orig_string, char* new_string){
+    if(orig_line==NULL||new_line==NULL||orig_string==NULL||new_string==NULL){
+        return NULL_PTR_ARG;
+    }
     int length=strlen(orig_line);
     int length_orig=strlen(orig_string);
     int length_new=strlen(new_string);
@@ -623,6 +650,9 @@ int line_replace(char* orig_line, char* new_line, char* orig_string, char* new_s
  * return char*: Replaced
  */
 char* line_nreplace(char* orig_line, int contain_count, char* orig_string, char* new_string){
+    if(orig_line==NULL||orig_string==NULL||new_string==NULL){
+        return NULL;
+    }
     unsigned int orig_line_len=(unsigned int)strlen(orig_line);
     if(orig_line_len==0||contain_count<1||strlen(orig_string)<1){
         return NULL;
@@ -651,6 +681,9 @@ char* line_nreplace(char* orig_line, int contain_count, char* orig_string, char*
 }
 
 int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5, char* orig_string, char* new_string){
+    if(filename==NULL||findkey1==NULL||findkey2==NULL||findkey3==NULL||findkey4==NULL||findkey5==NULL||orig_string==NULL||new_string==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strcmp(orig_string,new_string)==0){
         return -1;
     }
@@ -723,6 +756,9 @@ int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findk
 }
 
 int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5, char* orig_string, char* new_string){
+    if(filename==NULL||findkey1==NULL||findkey2==NULL||findkey3==NULL||findkey4==NULL||findkey5==NULL||orig_string==NULL||new_string==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strcmp(orig_string,new_string)==0||strlen(orig_string)<1||linelen_max<strlen(orig_string)){
         return -1;
     }
@@ -779,6 +815,9 @@ int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, 
 }
 
 int find_multi_keys(char* filename, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5){
+    if(filename==NULL||findkey1==NULL||findkey2==NULL||findkey3==NULL||findkey4==NULL||findkey5==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(findkey1)==0&&strlen(findkey2)==0&&strlen(findkey3)==0&&strlen(findkey4)==0&&strlen(findkey5)==0){
         return -1;
     }
@@ -825,6 +864,9 @@ int find_multi_nkeys(char* filename, unsigned int linelen_max, char* findkey1, c
     if(linelen_max<1){
         return -1;
     }
+    if(filename==NULL||findkey1==NULL||findkey2==NULL||findkey3==NULL||findkey4==NULL||findkey5==NULL){
+        return NULL_PTR_ARG;
+    }
     int find_count=0;
     FILE* file_p=fopen(filename, "r");
     if(file_p==NULL){
@@ -846,6 +888,9 @@ int find_multi_nkeys(char* filename, unsigned int linelen_max, char* findkey1, c
 }
 
 int calc_str_num(char* line, char split_ch){
+    if(line==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(line)==0){
         return 0;
     }
@@ -889,6 +934,9 @@ int calc_str_num(char* line, char split_ch){
 }
 
 int calc_str_nnum(char* line, char split_ch){
+    if(line==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(line)<1||split_ch=='\0'){
         return 0;
     }
@@ -1015,7 +1063,10 @@ int get_seq_string(char* line, char split_ch, int string_seq, char* get_string){
  */
 int get_seq_nstring(char line[], char split_ch, int string_seq, char get_str[], unsigned int getstr_len_max){
     if(getstr_len_max<1||split_ch=='\0'){
-        return -1;
+        return -5;
+    }
+    if(line==NULL||get_str==NULL){
+        return NULL_PTR_ARG;
     }
     int total_string_num=calc_str_nnum(line,split_ch);
     int i=0,j=0;
@@ -1103,13 +1154,16 @@ int get_seq_nstring(char line[], char split_ch, int string_seq, char get_str[], 
 }
 
 int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char* get_string){
+    if(filename==NULL||findkey_primary1==NULL||findkey_primary2==NULL||findkey_primary3==NULL||findkey1==NULL||findkey2==NULL||findkey3==NULL||get_string==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(findkey_primary1)==0&&strlen(findkey_primary2)==0&&strlen(findkey_primary3)==0){
         return -1;
     }
     if(strlen(findkey1)==0&&strlen(findkey2)==0&&strlen(findkey3)==0){
         return -1;
     }
-    FILE* file_p=fopen(filename, "r");
+    FILE* file_p=fopen(filename,"r");
     if(file_p==NULL){
         return -1;
     }
@@ -1179,6 +1233,9 @@ int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2,
 
 /* This function force empty the string */
 int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char get_str[], int get_strlen_max){
+    if(filename==NULL||findkey_primary1==NULL||findkey_primary2==NULL||findkey_primary3==NULL||findkey1==NULL||findkey2==NULL||findkey3==NULL||get_str==NULL){
+        return NULL_PTR_ARG;
+    }
     reset_nstring(get_str,get_strlen_max); /* force empty */
     if(linelen_max<1||split_ch=='\0'||string_seq_num<1||get_strlen_max<1){
         return -1;
@@ -1226,6 +1283,9 @@ int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primar
  * return 1: not exist or open failed
  */
 int file_exist_or_not(char* filename){
+    if(filename==NULL){
+        return NULL_PTR_ARG;
+    }
 #ifdef _WIN32
     if(GetFileAttributes(filename)&FILE_ATTRIBUTE_DIRECTORY){
         return 1;
@@ -1258,6 +1318,9 @@ int file_exist_or_not(char* filename){
  * return -1: Failed
  */
 int mk_pdir(char* pathname){
+    if(pathname==NULL){
+        return NULL_PTR_ARG;
+    }
     unsigned int length=strlen(pathname);
     unsigned int i=0;
     unsigned int exist_flag=0;
@@ -1307,6 +1370,9 @@ int mk_pdir(char* pathname){
  * Please be aware of the risk!
  */
 int rm_pdir(char* pathname){
+    if(pathname==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(pathname)<1){
         return -5;
     }
@@ -1424,6 +1490,9 @@ int cp_file(char* current_filename, char* new_filename, int force_flag){
 #ifndef _WIN32
     struct stat file_stat;
 #endif
+    if(current_filename==NULL||new_filename==NULL){
+        return NULL_PTR_ARG;
+    }
     if(file_exist_or_not(current_filename)!=0){
         return -1;
     }
@@ -1550,9 +1619,9 @@ int cp_file(char* current_filename, char* new_filename, int force_flag){
 
 /* 
  * Function: compare a string that contains wildcard '*' with a normal string.
- *           E.g. 1: fuzzy_strcmp("wangzhenrong", "w*", 32) should return 0(match);
- *           E.g. 2: fuzzy_strcmp("wangzhenrong", "*rong", 32) should return 0(match);
- *           E.g. 3: fuzzy_strcmp("wangzhenrong", "we*rong", 32) should return non-zero(not match);
+ *           E.g. 1: fuzzy_strcmp("wangzhenrong", "w*") should return 0(match);
+ *           E.g. 2: fuzzy_strcmp("wangzhenrong", "*rong") should return 0(match);
+ *           E.g. 3: fuzzy_strcmp("wangzhenrong", "we*rong") should return non-zero(not match);
  * 
  * Return values: -1 - invalid string or buffer size
  *                -3 - memory allocation failed
@@ -1562,6 +1631,9 @@ int cp_file(char* current_filename, char* new_filename, int force_flag){
 int fuzzy_strcmp(char* target_string, char* fuzzy_string){
     size_t i=0,j=0,k,buffer_length;
     char* buffer=NULL;
+    if(target_string==NULL||fuzzy_string==NULL){
+        return NULL_PTR_ARG;
+    }
     size_t target_str_len=strlen(target_string);
     size_t fuzzy_str_len=strlen(fuzzy_string);
     int memcmp_flag;
@@ -1623,10 +1695,13 @@ char* get_first_fuzzy_subpath(char* pathname, char* fuzzy_name, unsigned int buf
     WIN32_FIND_DATA find_data;
     char sub_search_pattern[MAX_PATH]="";
 #else
-    DIR* dir;
-    struct dirent* entry;
+    DIR* dir=NULL;
+    struct dirent* entry=NULL;
 #endif
     char* get_path=NULL;
+    if(pathname==NULL||fuzzy_name==NULL){
+        return NULL;
+    }
     if(strlen(pathname)<1||strlen(fuzzy_name)<1||buffer_size<8){
         return NULL;
     }
@@ -1682,9 +1757,12 @@ int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_di
     HANDLE handle_find;
     WIN32_FIND_DATA find_data;
 #else
-    DIR* dir;
-    struct dirent* entry;
+    DIR* dir=NULL;
+    struct dirent* entry=NULL;
 #endif
+    if(source_dir==NULL||fuzzy_filename==NULL||target_dir==NULL||option==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strcmp(option,"cp")!=0&&strcmp(option,"mv")!=0&&strcmp(option,"rm")!=0){
         return -7;
     }
@@ -1793,6 +1871,9 @@ int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_di
  * return >1, with content
  */
 int file_empty_or_not(char* filename){
+    if(filename==NULL){
+        return NULL_PTR_ARG;
+    }
     FILE* file_p=fopen(filename,"r");
     char temp_line[8]="";
     int line_num=0;
@@ -1813,6 +1894,9 @@ int file_empty_or_not(char* filename){
  * return non-zero: not exists (or not writable)
  */
 int folder_exist_or_not(char* foldername){
+    if(foldername==NULL){
+        return NULL_PTR_ARG;
+    }
 #ifdef _WIN32
     if(GetFileAttributes(foldername)&FILE_ATTRIBUTE_DIRECTORY){
         if(access(foldername,6)==0){
@@ -1843,6 +1927,9 @@ int folder_check_general(char* foldername, int rw_flag){
     if(rw_flag!=0&&rw_flag!=2&&rw_flag!=4&&rw_flag!=6){
         return -1;
     }
+    if(foldername==NULL){
+        return NULL_PTR_ARG;
+    }
 #ifdef _WIN32
     if(GetFileAttributes(foldername)&FILE_ATTRIBUTE_DIRECTORY){
         if(access(foldername,rw_flag)==0){
@@ -1869,6 +1956,9 @@ int folder_check_general(char* foldername, int rw_flag){
  * Return 0: Empty
  */
 int folder_empty_or_not(char* foldername){
+    if(foldername==NULL){
+        return NULL_PTR_ARG;
+    }
 #ifdef _WIN32
     HANDLE handle_find;
     WIN32_FIND_DATA find_data;
@@ -1912,6 +2002,9 @@ int folder_empty_or_not(char* foldername){
  */
 int delete_file_or_dir(char* file_or_dir){
     char cmdline[CMDLINE_LENGTH]="";
+    if(file_or_dir==NULL){
+        return NULL_PTR_ARG;
+    }
     if(file_exist_or_not(file_or_dir)==0){
         snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s %s",DELETE_FILE_CMD,file_or_dir,SYSTEM_CMD_REDIRECT_NULL);
         return system(cmdline);
@@ -1926,7 +2019,7 @@ int delete_file_or_dir(char* file_or_dir){
 int_64bit get_filesize_byte(FILE* file_p){
     int_64bit current,length;
     if(file_p==NULL){
-        return -3;
+        return NULL_PTR_ARG;
     }
 #ifdef _WIN32
     current=_ftelli64(file_p);
@@ -1951,6 +2044,9 @@ int_64bit get_filesize_byte(FILE* file_p){
  * This function is to replace the delete_file_or_dir function 
  */
 int rm_file_or_dir(char* file_or_dir){
+    if(file_or_dir==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(file_or_dir)<1){
         return -3;
     }
@@ -1981,6 +2077,9 @@ int rm_file_or_dir(char* file_or_dir){
  * return 1: The password is not complex enough
  */
 int password_complexity_check(char* password, char* special_chars){
+    if(password==NULL||special_chars==NULL){
+        return NULL_PTR_ARG;
+    }
     int i,length=strlen(password);
     int uppercase_flag=0;
     int lowercase_flag=0;
@@ -2044,6 +2143,9 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     struct timespec current_time;
     unsigned int seed_num;
 
+    if(password_array==NULL||special_chars_array==NULL){
+        return NULL_PTR_ARG;
+    }
     memset(password_array,'\0',password_array_len);
     if(password_array_len<5){
         return -1;
@@ -2136,6 +2238,9 @@ int generate_random_passwd(char* password){
     char ch_table[72]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~@&(){}[]=";
     char password_temp[PASSWORD_STRING_LENGTH]="";
 
+    if(password==NULL){
+        return NULL_PTR_ARG;
+    }
     for(total_times=0;total_times<16;total_times++){
         for(i=0;i<PASSWORD_LENGTH;i++){
             clock_gettime(CLOCK_MONOTONIC,&current_time);
@@ -2168,6 +2273,9 @@ int generate_random_db_passwd(char password[], unsigned int len_max){
     struct timespec current_time;
     unsigned int seed_num;
     char ch_table[62]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    if(password==NULL){
+        return NULL_PTR_ARG;
+    }
     if(len_max<9){
         strcpy(password,"");
         return -1;
@@ -2195,6 +2303,9 @@ int generate_random_string(char* random_string){
     struct timespec current_time;
     unsigned int seed_num;
 
+    if(random_string==NULL){
+        return NULL_PTR_ARG;
+    }
     clock_gettime(CLOCK_MONOTONIC,&current_time);
     /* create a random seed num using the time */
     seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
@@ -2224,8 +2335,10 @@ int generate_random_nstring(char random_string[], unsigned int len_max, int star
     int i,rand_num;
     struct timespec current_time;
     unsigned int seed_num;
-
     char ch_table[36]="abcdefghijklmnopqrstuvwxyz0123456789";
+    if(random_string==NULL){
+        return NULL_PTR_ARG;
+    }
     if(len_max<2){
         strcpy(random_string,"");
         return -1;
@@ -2270,6 +2383,9 @@ int getpass_stdin(char* prompt, char pass_string[], unsigned int pass_length){
 #else
     char ENTER='\r';
 #endif
+    if(prompt==NULL||pass_string==NULL){
+        return NULL_PTR_ARG;
+    }
     memset(pass_string,'\0',pass_length);
     if(pass_length<2){ /* There should at least be one char for input*/
         return -3;
@@ -2366,6 +2482,9 @@ char* getpass_win(char* prompt){
 #endif
 
 int insert_lines(char* filename, char* keyword, char* insert_string){
+    if(filename==NULL||keyword==NULL||insert_string==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(keyword)==0||strlen(insert_string)==0){
         return -1;
     }
@@ -2411,6 +2530,9 @@ int insert_lines(char* filename, char* keyword, char* insert_string){
 }
 
 int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char* insert_string){
+    if(filename==NULL||keyword==NULL||insert_string==NULL){
+        return NULL_PTR_ARG;
+    }
     if(linelen_max<1||strlen(keyword)==0||strlen(insert_string)==0){
         return -1;
     }
@@ -2469,6 +2591,9 @@ int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char*
 }
 
 int local_path_parser(char* path_string, char* path_final){
+    if(path_string==NULL||path_final==NULL){
+        return NULL_PTR_ARG;
+    }
 #ifdef _WIN32
     strcpy(path_final,path_string);
     return 0;
@@ -2499,6 +2624,9 @@ int local_path_parser(char* path_string, char* path_final){
 }
 
 int local_path_nparser(char* path_string, char path_final[], unsigned int path_final_len_max){
+    if(path_string==NULL||path_final==NULL){
+        return NULL_PTR_ARG;
+    }
     if(path_final_len_max<2){
         strcpy(path_final,"");
         return 1;
@@ -2537,6 +2665,9 @@ int direct_path_check(char* path_string, char* hpc_user, char* real_path){
     char tail[DIR_LENGTH]="";
     int i=0;
     int j;
+    if(path_string==NULL||hpc_user==NULL||real_path==NULL){
+        return NULL_PTR_ARG;
+    }
     while(*(path_string+i)!='/'&&i<strlen(path_string)){
         *(header+i)=*(path_string+i);
         i++;
@@ -2604,6 +2735,9 @@ int direct_path_ncheck(char* path_string, char* hpc_user, char* real_path, unsig
         strcpy(real_path,"");
         return -1;
     }
+    if(path_string==NULL||hpc_user==NULL||real_path==NULL){
+        return NULL_PTR_ARG;
+    }
     while(*(path_string+i)!='/'&&i<strlen(path_string)&&i<7){
         *(header+i)=*(path_string+i);
         i++;
@@ -2668,6 +2802,9 @@ int direct_path_ncheck(char* path_string, char* hpc_user, char* real_path, unsig
 }
 
 int file_creation_test(char* filename){
+    if(filename==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(filename)==0){
         return -1;
     }
@@ -2685,6 +2822,9 @@ int file_creation_test(char* filename){
 
 int cmd_flg_or_not(char* argv){
     int i;
+    if(argv==NULL){
+        return NULL_PTR_ARG;
+    }
     for(i=0;i<CMD_FLAG_NUM;i++){
         if(strcmp(argv,command_flags[i])==0){
             return 0;
@@ -2695,6 +2835,9 @@ int cmd_flg_or_not(char* argv){
 
 int cmd_key_or_not(char* argv){
     int i;
+    if(argv==NULL){
+        return NULL_PTR_ARG;
+    }
     for(i=0;i<CMD_KWDS_NUM;i++){
         if(strcmp(argv,command_keywords[i])==0){
             return 0;
@@ -2705,7 +2848,13 @@ int cmd_key_or_not(char* argv){
 
 int cmd_flag_check(int argc, char** argv, char* flag_string){
     int i;
+    if(argv==NULL||flag_string==NULL){
+        return NULL_PTR_ARG;
+    }
     for(i=2;i<argc;i++){
+        if(argv[i]==NULL){
+            continue;
+        }
         if(strcmp(argv[i],flag_string)==0){
             return 0;
         }
@@ -2720,7 +2869,13 @@ int cmd_flag_check(int argc, char** argv, char* flag_string){
  */
 int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string){
     int i,j;
+    if(argv==NULL||key_word==NULL||kwd_string==NULL){
+        return NULL_PTR_ARG;
+    }
     for(i=2;i<argc-1;i++){
+        if(argv[i]==NULL){
+            continue;
+        }
         if(strcmp(argv[i],key_word)==0){
             j=i+1;
             if(cmd_flg_or_not(argv[j])!=0&&cmd_key_or_not(argv[j])!=0){
@@ -2743,7 +2898,16 @@ int cmd_keyword_check(int argc, char** argv, char* key_word, char* kwd_string){
  */
 int cmd_keyword_ncheck(int argc, char** argv, char* key_word, char* kwd_string, unsigned int n){
     int i,j;
+    if(argv==NULL||key_word==NULL||kwd_string==NULL){
+        return NULL_PTR_ARG;
+    }
+    if(n<8){
+        return 1;
+    }
     for(i=2;i<argc-1;i++){
+        if(argv[i]==NULL){
+            continue;
+        }
         if(strcmp(argv[i],key_word)==0){
             j=i+1;
             if(cmd_flg_or_not(argv[j])!=0&&cmd_key_or_not(argv[j])!=0){
@@ -2762,7 +2926,13 @@ int cmd_keyword_ncheck(int argc, char** argv, char* key_word, char* kwd_string, 
 
 int include_string_or_not(int cmd_c, char** cmds, char* string){
     int i;
+    if(cmds==NULL||string==NULL){
+        return NULL_PTR_ARG;
+    }
     for(i=0;i<cmd_c;i++){
+        if(cmds[i]==NULL){
+            continue;
+        }
         if(strcmp(cmds[i],string)==0){
             return 0;
         }
@@ -2817,6 +2987,9 @@ int file_trunc_by_kwds(char* filename, char* start_key, char* end_key, int overw
     int contain_end_flag;
     if(file_exist_or_not(filename)!=0){
         return -1;
+    }
+    if(start_key==NULL||end_key==NULL){
+        return NULL_PTR_ARG;
     }
     if(strlen(start_key)==0&&strlen(end_key)==0){
         return 3;
@@ -2887,6 +3060,9 @@ int file_ntrunc_by_kwds(char* filename, unsigned int linelen_max, char* start_ke
     int start_flag=0;
     int contain_start_flag;
     int contain_end_flag;
+    if(filename==NULL||start_key==NULL||end_key==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(start_key)==0&&strlen(end_key)==0){
         return -3;
     }
@@ -2967,6 +3143,9 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
     char filename_temp[FILENAME_LENGTH]="";
     char line_buffer[LINE_LENGTH]="";
     int getline_flag=0;
+    if(filename==NULL||key==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(key)==0){
         return -3;
     }
@@ -3004,6 +3183,9 @@ int delete_lines_by_kwd(char* filename, char* key, int overwrite_flag){
  * overwrite_flag!=0: overwrite, ==0: not overwrite
  */
 int delete_nlines_by_kwd(char* filename, unsigned int linelen_max, char* key, int overwrite_flag){
+    if(filename==NULL||key==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(key)==0){
         return -3;
     }
@@ -3058,6 +3240,9 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
 #ifdef _WIN32
     char buffer[256]="";
 #endif
+    if(crypto_key_filename==NULL||md5sum==NULL){
+        return NULL_PTR_ARG;
+    }
 #ifdef __APPLE__
     snprintf(cmdline,CMDLINE_LENGTH-1,"md5 '%s' | awk '{print $NF}' > /tmp/md5.txt.tmp",crypto_key_filename);
 #elif __linux__
@@ -3097,6 +3282,9 @@ int get_crypto_key(char* crypto_key_filename, char* md5sum){
  * return 0: get_md5 succeeded
  */
 int get_nmd5sum(char* filename, char md5sum_string[], int md5sum_length){
+    if(filename==NULL||md5sum_string==NULL){
+        return NULL_PTR_ARG;
+    }
     memset(md5sum_string,'\0',md5sum_length);
     if(md5sum_length<33){
         return -3;
@@ -3109,6 +3297,9 @@ int get_nmd5sum(char* filename, char md5sum_string[], int md5sum_length){
 }
 
 int password_md5_hash(char* password, char md5_hash[], int md5_length){
+    if(password==NULL||md5_hash==NULL){
+        return NULL_PTR_ARG;
+    }
     if(strlen(password)==0){
         return -3;
     }
@@ -3138,6 +3329,9 @@ int password_md5_hash(char* password, char md5_hash[], int md5_length){
 /* Generate the SHA-256 string of the file and cut the [1-32] chars */
 int get_file_sha_hash(char* filename, char hash_string[], int hash_length){
     char sha256[65]="";
+    if(filename==NULL||hash_string==NULL){
+        return NULL_PTR_ARG;
+    }
     strcpy(hash_string,"");
     if(hash_length<33){
         return -3;
@@ -3152,6 +3346,9 @@ int get_file_sha_hash(char* filename, char hash_string[], int hash_length){
 }
 
 int get_file_sha_hash_full(char* filename, char hash_string_full[], int hash_length){
+    if(filename==NULL||hash_string_full==NULL){
+        return NULL_PTR_ARG;
+    }
     strcpy(hash_string_full,"");
     if(hash_length<65){
         return -1;
@@ -3168,6 +3365,9 @@ int password_sha_hash(char* password, char hash[], int hash_length){
     char filename_temp[FILENAME_LENGTH]="";
     char string_temp[16]="";
     int run_flag;
+    if(password==NULL||hash==NULL){
+        return NULL_PTR_ARG;
+    }
     strcpy(hash,"");
     if(strlen(password)==0){
         return -3;
@@ -3192,6 +3392,9 @@ int password_sha_hash(char* password, char hash[], int hash_length){
 }
 
 int windows_path_to_nstring(char* input_string, char new_string[], unsigned int maxlen){
+    if(input_string==NULL||new_string==NULL){
+        return NULL_PTR_ARG;
+    }
     if(maxlen<strlen(input_string)+16){ /* MAXIMUM ADD 15 slashes */
         strcpy(new_string,"");
         return -1;
@@ -3238,6 +3441,9 @@ int windows_path_to_nstring(char* input_string, char new_string[], unsigned int 
 
 /* memory allocated! */
 char* base64_clear_CRLF(char orig[], int length){
+    if(orig==NULL){
+        return NULL;
+    }
     char* new_string=(char*)malloc(sizeof(char)*(length+1));
     if(new_string==NULL){
         return NULL;
@@ -3287,6 +3493,9 @@ unsigned char get_base64_index(char base64_char){
  * return 0: Normal exit
  */
 int base64decode(char* encoded_string, char* export_path){
+    if(encoded_string==NULL||export_path==NULL){
+        return NULL_PTR_ARG;
+    }
     char* encoded_string_new=base64_clear_CRLF(encoded_string,strlen(encoded_string));
     if(encoded_string_new==NULL){
         return -1;
@@ -3375,6 +3584,9 @@ int base64encode(char* plain_string, char* export_path){
         'w','x','y','z','0','1','2','3',
         '4','5','6','7','8','9','+','/'
     };
+    if(plain_string==NULL||export_path==NULL){
+        return NULL_PTR_ARG;
+    }
     unsigned long length=strlen(plain_string);
     if(length<1){
         return -3; /* The original length should be at least 1; */
@@ -3435,6 +3647,9 @@ int reset_windows_cmd_display(void){
  * It should be OK.
  */
 int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax){
+    if(appdata==NULL){
+        return NULL_PTR_ARG;
+    }
 #ifdef _WIN32
     if(dir_lenmax<128){
         return -3;
