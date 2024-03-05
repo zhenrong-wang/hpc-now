@@ -477,16 +477,14 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
         glance_clusters(target_cluster_name,crypto_keyfile);
         printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? It is *NOT* recoverable!" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: " );
-        fflush_stdin();
         scanf("%63s",doubleconfirm);
-        getchar();
+        fflush_stdin();
         if(strcmp(doubleconfirm,CONFIRM_STRING)==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
             printf("[  ****  ] absolutely *NOT* recoverable!" RESET_DISPLAY "\n");
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-            fflush_stdin();
             scanf("%63s",doubleconfirm);
-            getchar();
+            fflush_stdin();
             if(strcmp(doubleconfirm,target_cluster_name)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only %s is accepted to confirm. Operation denied.\n",target_cluster_name);
                 return 5;
@@ -501,9 +499,8 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster is empty. This operation will remove all the\n");
         printf("[  ****  ] related files. Would you like to continue?\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm: ");
-        fflush_stdin();
         scanf("%63s",doubleconfirm);
-        getchar();
+        fflush_stdin();
         if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. Operation denied.\n");
             return 5;
@@ -611,9 +608,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " The JSON-format key file *ABSOLUTE* path: ");
-            fflush_stdin();
             scanf("%255s",gcp_key_file);
-            getchar();
+            fflush_stdin();
         }
         else{
             strncpy(gcp_key_file,cloud_sk,FILENAME_LENGTH-1);
@@ -709,9 +705,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Subscription id: ");
-            fflush_stdin();
             scanf("%36s",az_subscription_id);
-            getchar();
+            fflush_stdin();
         }
         else{
             strcpy(az_subscription_id,az_subscription);
@@ -723,9 +718,8 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Azure Tenant id: ");
-            fflush_stdin();
             scanf("%36s",az_tenant_id);
-            getchar();
+            fflush_stdin();
         }
         else{
             strcpy(az_tenant_id,az_tenant);
@@ -798,9 +792,8 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " The JSON-format key file *ABSOLUTE* path: ");
-            fflush_stdin();
             scanf("%255s",secret_key);
-            getchar();
+            fflush_stdin();
         }
         else{
             strcpy(secret_key,cloud_sk);
@@ -1314,9 +1307,8 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
             }
             else{
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:  ");
-                fflush_stdin();
                 scanf("%127s",string_temp);
-                getchar();
+                fflush_stdin();
                 if(strcmp(string_temp,CONFIRM_STRING)!=0){
                     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You denied this operation.\n");
                     return 1;
@@ -1446,9 +1438,8 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
             }
             else{
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:  ");
-                fflush_stdin();
                 scanf("%127s",string_temp);
-                getchar();
+                fflush_stdin();
                 if(strcmp(string_temp,CONFIRM_STRING)!=0){
                     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You denied this operation.\n");
                     return 1;

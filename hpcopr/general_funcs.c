@@ -2406,7 +2406,6 @@ int getpass_stdin(char* prompt, char pass_string[], unsigned int pass_length){
     else{
         printf(GENERAL_BOLD "[s]" RESET_DISPLAY);
     }
-    fflush_stdin();
 #ifdef _WIN32
     while((ch=_getch())!=ENTER&&i<pass_length-1){
         if(ch!=BACKSPACE&&ch!='\t'&&ch!=' '){
@@ -2464,7 +2463,6 @@ char* getpass_win(char* prompt){
     static char passwd[AKSK_LENGTH];
     char ch='\0';
     int i=0;
-    fflush_stdin();
     if(prompt!=NULL){
         printf("%s",prompt);
     }
@@ -2491,6 +2489,7 @@ char* getpass_win(char* prompt){
         }
     }
     passwd[i]='\0';
+    fflush_stdin();
     printf("\n");
     return passwd;
 }

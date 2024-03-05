@@ -330,9 +330,8 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Config file found. Input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to use it, others to abandon.\n");
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-            fflush_stdin();
             scanf("%7s",confirm);
-            getchar();
+            fflush_stdin();
             if(strcmp(confirm,CONFIRM_STRING)==0){
                 return 0;
             }
@@ -399,15 +398,13 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
     if(cmd_keyword_ncheck(argc,argv,"--rg",real_region,32)!=0){
         if(batch_flag_local!=0){
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "select" RESET_DISPLAY " a region (Default: " GENERAL_BOLD "%s" RESET_DISPLAY "): ",default_region);
-            fflush_stdin();
             scanf("%7s",confirm);
-            getchar();
+            fflush_stdin();
             if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
                 list_cloud_regions(cluster_name,1);
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
-                fflush_stdin();
                 scanf("%31s",real_region);
-                getchar();
+                fflush_stdin();
             }
             else{
                 strcpy(real_region,default_region);
@@ -429,15 +426,13 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
         if(cmd_keyword_ncheck(argc,argv,"--az",real_zone,64)!=0){
             if(batch_flag_local!=0){
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "select" RESET_DISPLAY " a zone (Default: " GENERAL_BOLD "%s" RESET_DISPLAY "): ",default_zone);
-                fflush_stdin();
                 scanf("%7s",confirm);
-                getchar();
+                fflush_stdin();
                 if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
                     list_cloud_zones(cluster_name,real_region,1);
                     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
-                    fflush_stdin();
                     scanf("%63s",real_zone);
-                    getchar();
+                    fflush_stdin();
                 }
                 else{
                     strcpy(real_zone,default_zone);
@@ -458,14 +453,12 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
     if(cmd_keyword_ncheck(argc,argv,"--nn",real_node_num_string,8)!=0){
         if(batch_flag_local!=0){
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "specify" RESET_DISPLAY " node num (Default: " GENERAL_BOLD "%d" RESET_DISPLAY "): ",default_node_num);
-            fflush_stdin();
             scanf("%7s",confirm);
-            getchar();
+            fflush_stdin();
             if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a number [Range: %d-%d]: ",MINIMUM_ADD_NODE_NUMBER,MAXIMUM_ADD_NODE_NUMBER);
-                fflush_stdin();
                 scanf("%7s",real_node_num_string);
-                getchar();
+                fflush_stdin();
                 real_node_num=string_to_positive_num(real_node_num_string);
             }
             else{
@@ -486,14 +479,12 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
     if(cmd_keyword_ncheck(argc,argv,"--un",real_user_num_string,8)!=0){
         if(batch_flag_local!=0){
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "specify" RESET_DISPLAY " user num (Default: " GENERAL_BOLD "%d" RESET_DISPLAY "): ",default_user_num);
-            fflush_stdin();
             scanf("%7s",confirm);
-            getchar();
+            fflush_stdin();
             if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a number [Range: %d-%d]: ",MINIMUM_ADD_USER_NUNMBER,MAXIMUM_ADD_USER_NUMBER);
-                fflush_stdin();
                 scanf("%7s",real_user_num_string);
-                getchar();
+                fflush_stdin();
                 real_user_num=string_to_positive_num(real_user_num_string);
             }
             else{
@@ -514,18 +505,16 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
     if(cmd_keyword_ncheck(argc,argv,"--mi",real_master_inst,16)!=0){
         if(batch_flag_local!=0){
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "select" RESET_DISPLAY " a master node type (Default: " GENERAL_BOLD "%s" RESET_DISPLAY "): ",default_master_inst);
-            fflush_stdin();
             scanf("%7s",confirm);
-            getchar();
+            fflush_stdin();
             if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
                 if(check_reconfigure_list(workdir,1)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] The reconf.list file may be incorrect." RESET_DISPLAY "\n");
                     goto invalid_conf; 
                 }
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
-                fflush_stdin();
                 scanf("%15s",real_master_inst);
-                getchar();
+                fflush_stdin();
             }
             else{
                 strcpy(real_master_inst,default_master_inst);
@@ -542,18 +531,16 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
     if(cmd_keyword_ncheck(argc,argv,"--ci",real_compute_inst,16)!=0){
         if(batch_flag_local!=0){
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "select" RESET_DISPLAY " a compute node type (Default: " GENERAL_BOLD "%s" RESET_DISPLAY "): ",default_compute_inst);
-            fflush_stdin();
             scanf("%7s",confirm);
-            getchar();
+            fflush_stdin();
             if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
                 if(check_reconfigure_list(workdir,1)!=0){
                     printf(FATAL_RED_BOLD "[ FATAL: ] The reconf.list file may be incorrect." RESET_DISPLAY "\n");
                     goto invalid_conf; 
                 }
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Select one from the list above: ");
-                fflush_stdin();
                 scanf("%15s",real_compute_inst);
-                getchar();
+                fflush_stdin();
             }
             else{
                 strcpy(real_compute_inst,default_compute_inst);
@@ -570,14 +557,12 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
     if(cmd_keyword_ncheck(argc,argv,"--os",real_os_image,96)!=0){
         if(batch_flag_local!=0){
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "specify" RESET_DISPLAY " an OS type or image_ID (Default: " GENERAL_BOLD "%s" RESET_DISPLAY "): ",default_os_image);
-            fflush_stdin();
             scanf("%7s",confirm);
-            getchar();
+            fflush_stdin();
             if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " : ");
-                fflush_stdin();
                 scanf("%95s",real_os_image);
-                getchar();
+                fflush_stdin();
             }
             else{
                 strcpy(real_os_image,default_os_image);
@@ -591,9 +576,8 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
         if(cmd_keyword_ncheck(argc,argv,"--ht",real_ht_flag,8)!=0){
             if(batch_flag_local!=0){
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD "OFF" RESET_DISPLAY " to " WARN_YELLO_BOLD "turn off" RESET_DISPLAY " hyperthreading (Default: " GENERAL_BOLD "ON" RESET_DISPLAY "): ");
-                fflush_stdin();
                 scanf("%7s",confirm);
-                getchar();
+                fflush_stdin();
                 if(strcmp(confirm,"OFF")==0){
                     strcpy(real_ht_flag,"OFF");
                 }
@@ -614,14 +598,12 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
         if(cmd_keyword_ncheck(argc,argv,"--vol",real_nfs_volume,8)!=0){
             if(batch_flag_local!=0){
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "specify" RESET_DISPLAY " NFS initial volume in GB (Default: " GENERAL_BOLD "100" RESET_DISPLAY "): ");
-                fflush_stdin();
                 scanf("%7s",confirm);
-                getchar();
+                fflush_stdin();
                 if(strcmp(confirm,CONFIRM_STRING_QUICK)==0){
                     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a number [Range: 100-32000]: ");
-                    fflush_stdin();
                     scanf("%7s",real_nfs_volume);
-                    getchar();
+                    fflush_stdin();
                     real_nfs_vol=string_to_positive_num(real_nfs_volume);
                 }
                 else{

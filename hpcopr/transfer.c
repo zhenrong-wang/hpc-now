@@ -169,9 +169,8 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input username(s) to export. E.g. " HIGH_CYAN_BOLD "user1:user2." RESET_DISPLAY "\n");
             hpc_user_list(workdir,crypto_keyfile,0,0);
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-            fflush_stdin();
             scanf("%1023s",user_list_buffer);
-            getchar();
+            fflush_stdin();
         }
     }
     else{
@@ -226,9 +225,8 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a path (folder or file) to export." RESET_DISPLAY "\n");
         printf("[  ****  ] E.g. " HIGH_CYAN_BOLD "/home/hpc-now/  D:\\hpc-now\\export.now" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-        fflush_stdin();
         scanf("%511s",filename_temp_2);
-        getchar();
+        fflush_stdin();
         local_path_nparser(filename_temp_2,filename_temp,FILENAME_LENGTH);
     }
     if(folder_exist_or_not(filename_temp)==0){
@@ -493,9 +491,8 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the *full* path of the now-cluster file.\n");
         printf("[  ****  ] E.g. " HIGH_CYAN_BOLD "~/import.now  /tmp/import.now  d:\\import.now" RESET_DISPLAY "\n");
         printf("[ INPUT: ] ");
-        fflush_stdin();
         scanf("%511s",filename_temp);
-        getchar();
+        fflush_stdin();
         local_path_nparser(filename_temp,filename_temp_2,FILENAME_LENGTH);
         if(strlen(filename_temp_2)==0||file_empty_or_not(filename_temp_2)<1){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the now-cluster file " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD ".\n" RESET_DISPLAY ,filename_temp_2);

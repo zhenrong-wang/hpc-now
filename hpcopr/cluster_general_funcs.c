@@ -1944,7 +1944,6 @@ int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* e
     }
     while(find_multi_nkeys(tf_realtime_log,LINE_LENGTH_SMALL,findkey,"","","","")<1&&i<max_time){
         if(silent_flag!=0){
-            fflush_stdin();
             printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " This may need %d min(s). %d sec(s) passed ... (%c)\r",total_minutes,i,*(annimation+i%4));
             fflush(stdout);
         }
@@ -2614,9 +2613,8 @@ int confirm_to_operate_cluster(char* current_cluster_name, int batch_flag_local)
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " You are operating the cluster " HIGH_CYAN_BOLD "%s" RESET_DISPLAY ", which may affect\n",current_cluster_name);
     printf("[  ****  ] the " GENERAL_BOLD "resources, data, or jobs" RESET_DISPLAY ". Input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to confirm.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    fflush_stdin();
     scanf("%63s",confirm);
-    getchar();
+    fflush_stdin();
     if(strcmp(confirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. Denied.\n");
         return 1;
@@ -2635,9 +2633,8 @@ int confirm_to_init_cluster(char* current_cluster_name, int batch_flag_local){
     char confirm[64]="";
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please check the summary above and input " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " to continue.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    fflush_stdin();
     scanf("%63s",confirm);
-    getchar();
+    fflush_stdin();
     if(strcmp(confirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. Denied.\n");
         return 1;
@@ -2657,9 +2654,8 @@ int prompt_to_confirm(const char* prompt_string, const char* confirm_string, int
     char confirm[256]="";
     printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "%s\n",prompt_string);
     printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY "Input " WARN_YELLO_BOLD "%s" RESET_DISPLAY " to confirm: ",confirm_string);
-    fflush_stdin();
     scanf("%255s",confirm);
-    getchar();
+    fflush_stdin();
     if(strcmp(confirm,confirm_string)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD "%s" RESET_DISPLAY " is accepted to confirm. Denied.\n",confirm_string);
         return 1;
@@ -2697,8 +2693,8 @@ int prompt_to_input(const char* prompt_string, char reply_string[], unsigned int
         printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "%s\n",prompt_string);
     }
     printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY "");
-    fflush_stdin();
     fgets(reply_string,reply_len_max,stdin);
+    fflush_stdin();
     for(i=0;i<reply_len_max;i++){
         if(reply_string[i]=='\n'||reply_string[i]=='\r'){
             reply_string[i]='\0';

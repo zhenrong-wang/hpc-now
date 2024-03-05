@@ -571,9 +571,8 @@ int main(int argc, char* argv[]){
                     return 33;
                 }
                 printf("[ -INFO- ] Input a list in the format " HIGH_GREEN_BOLD "cluster1:cluster2" RESET_DISPLAY " : ");
-                fflush_stdin();
                 scanf("%255s",string_temp);
-                getchar();
+                fflush_stdin();
                 run_flag=encrypt_decrypt_clusters(string_temp,crypto_keyfile,final_command,batch_flag);
             }
         }
@@ -1308,9 +1307,8 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "|       +- Bucket:" RESET_DISPLAY " put, get, copy, list, delete, move\n");
             printf(GENERAL_BOLD "|       +- Remote:" RESET_DISPLAY " cp, mv, ls, rm, mkdir, cat, more, less, tail, rput, rget \n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-            fflush_stdin();
             scanf("%31s",data_cmd);
-            getchar();
+            fflush_stdin();
         }
         int i=0;
         while(strcmp(data_cmd,dataman_commands[i])!=0){
@@ -1348,9 +1346,8 @@ int main(int argc, char* argv[]){
                     printf("[  ****  ] Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " GENERAL_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-                fflush_stdin();
                 scanf("%511s",source_path);
-                getchar();
+                fflush_stdin();
             }
             if(cmd_keyword_ncheck(argc,argv,"-d",destination_path,512)!=0){
                 if(batch_flag==0){
@@ -1364,9 +1361,8 @@ int main(int argc, char* argv[]){
                     printf("[  ****  ] Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " GENERAL_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-                fflush_stdin();
                 scanf("%511s",destination_path);
-                getchar();
+                fflush_stdin();
             }
         }
         else{
@@ -1382,9 +1378,8 @@ int main(int argc, char* argv[]){
                     printf("[  ****  ] Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " GENERAL_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-                fflush_stdin();
                 scanf("%511s",target_path);
-                getchar();
+                fflush_stdin();
             }
         }
         if(strcmp(data_cmd,"put")==0||strcmp(data_cmd,"get")==0||strcmp(data_cmd,"copy")==0||strcmp(data_cmd,"move")==0||strcmp(data_cmd,"delete")==0||strcmp(data_cmd,"list")==0||strcmp(data_cmd,"cp")==0||strcmp(data_cmd,"mv")==0||strcmp(data_cmd,"rput")==0||strcmp(data_cmd,"rget")==0||strcmp(data_cmd,"rm")==0){
@@ -1873,9 +1868,8 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a user manager command below:\n");
             printf("[  ****  ] list | add | delete | enable | disable | passwd \n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-            fflush_stdin();
             scanf("%31s",user_cmd);
-            getchar();
+            fflush_stdin();
         }
         if(strcmp(user_cmd,"list")!=0&&strcmp(user_cmd,"add")!=0&&strcmp(user_cmd,"delete")!=0&&strcmp(user_cmd,"enable")!=0&&strcmp(user_cmd,"disable")!=0&&strcmp(user_cmd,"passwd")!=0){
             print_usrmgr_info();
@@ -2014,9 +2008,8 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a valid command:\n");
             printf(GENERAL_BOLD "[  ****  ]" RESET_DISPLAY " store, avail, build, install, check, remove, update-conf, check-conf\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-            fflush_stdin();
             scanf("%31s",app_cmd);
-            getchar();
+            fflush_stdin();
         }
         int i=0;
         while(strcmp(app_cmd,appman_commands[i])!=0){
@@ -2058,9 +2051,8 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ -INFO- ] Please specify an app name, e.g. " HIGH_GREEN_BOLD "mpich4" RESET_DISPLAY " :\n");
                 printf(GENERAL_BOLD "[ INPUT: ] ");
-                fflush_stdin();
                 scanf("%31s",app_name);
-                getchar();
+                fflush_stdin();
             }
             if(strcmp(app_cmd,"check")==0){
                 run_flag=app_list(workdir,crypto_keyfile,"check",user_name,app_name,SSHKEY_DIR,"","");
@@ -2096,9 +2088,8 @@ int main(int argc, char* argv[]){
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a valid command: submit, list, cancel\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-            fflush_stdin();
             scanf("%31s",job_cmd);
-            getchar();
+            fflush_stdin();
         }
         int i=0;
         while(strcmp(job_cmd,jobman_commands[i])!=0){
@@ -2136,9 +2127,8 @@ int main(int argc, char* argv[]){
                     return 5;
                 }
                 printf("[ INPUT: ] Please specify the job id to be canceled: ");
-                fflush_stdin();
                 scanf("%31s",job_id);
-                getchar();
+                fflush_stdin();
             }
             run_flag=job_cancel(workdir,crypto_keyfile,user_name,SSHKEY_DIR,job_id,batch_flag);
         }
