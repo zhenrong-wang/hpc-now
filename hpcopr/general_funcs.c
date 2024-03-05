@@ -2450,7 +2450,6 @@ int getpass_stdin(char* prompt, char pass_string[], unsigned int pass_length){
     }
     tcsetattr(fileno(stdin),TCSAFLUSH,&prev);
 #endif
-    fflush_stdin();
     printf("\n");
     return 0;
 }
@@ -2489,7 +2488,6 @@ char* getpass_win(char* prompt){
         }
     }
     passwd[i]='\0';
-    fflush_stdin();
     printf("\n");
     return passwd;
 }
