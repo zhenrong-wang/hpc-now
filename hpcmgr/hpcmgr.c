@@ -49,7 +49,7 @@ int main(int argc,char *argv[]){
   if(env_flag==1){
     printf("[ -WARN- ] The HPC appstore may not work properly.\n");
   }
-  int i,j;
+  int i,j,ch;
   int position=0;
   int system_run_flag=0;
   char* cmd_cp="/bin/cp -r /usr/hpc-now/.hpcmgr_main.sh /tmp/.thread-";
@@ -61,7 +61,7 @@ int main(int argc,char *argv[]){
   char cmd_run[128]="";
   char final_cmd_run[1024]="";
   char final_cmd_dele[64];
-  char confirm[64];
+  char confirm[8]="";
   int real_argc;
   
   srand((unsigned)time(NULL));
@@ -98,9 +98,13 @@ int main(int argc,char *argv[]){
   if(argc>4&&strcmp(argv[1],"users")==0&&strcmp(argv[2],"delete")==0&&strcmp(argv[4],"os")==0){
     printf("[ -WARN- ] You are deleting User %s from the cluster and the OS!\n", argv[3]);
     printf("[ INPUT: ] Please input 'y-e-s' to confirm: ");
-    fflush(stdin);
-    scanf("%63s",confirm);
-    getchar();
+    scanf("%7s",confirm);
+    while((ch=getchar())!='\n'&&ch!=EOF){}
+    if(ch==EOF){
+        if(ferror(stdin)){
+            clearerr(stdin);
+        }
+    }
     if(strcmp(confirm,"y-e-s")==0){
       printf("Operation confirmed.\n");
     }
