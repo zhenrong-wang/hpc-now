@@ -66,7 +66,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify an app for this job.\n");
         app_list(workdir,crypto_keyfile,"installed",user_name,"",sshkey_dir,"","");
         printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-        fflush(stdin);
+        fflush_stdin();
         scanf("%127s",app_name);
         getchar();
     }
@@ -83,7 +83,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
             return 17;
         }
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify compute node num (<=%d) for this job: ",cluster_node_num);
-        fflush(stdin);
+        fflush_stdin();
         scanf("%127s",node_num_string);
         getchar();
     }
@@ -99,7 +99,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
             return 17;
         }
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please specify threads per node (<=%d) for this job: ",cluster_node_cores);
-        fflush(stdin);
+        fflush_stdin();
         scanf("%127s",node_cores_string);
         getchar();
     }
@@ -116,7 +116,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         }
         printf(WARN_YELLO_BOLD "[ -WARN- ] No job name specified. Input y or yes to use the default (%s-job)." RESET_DISPLAY "\n",user_name);
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Or, input a string as the job name:" RESET_DISPLAY" ");
-        fflush(stdin);
+        fflush_stdin();
         scanf("%127s",string_temp);
         getchar();
         if(strcmp(string_temp,"y")==0||strcmp(string_temp,"yes")==0||strcmp(string_temp,"Y")==0||strcmp(string_temp,"YES")==0||strcmp(string_temp,"Yes")==0){
@@ -135,7 +135,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         }
         printf(WARN_YELLO_BOLD "[ -WARN- ] No duration hours specified. Input y or yes to use the default (INFINITE)." RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Or, input a positive number: ");
-        fflush(stdin);
+        fflush_stdin();
         scanf("%127s",string_temp);
         getchar();
         if(strcmp(string_temp,"y")==0||strcmp(string_temp,"yes")==0||strcmp(string_temp,"Y")==0||strcmp(string_temp,"YES")==0||strcmp(string_temp,"Yes")==0){
@@ -175,7 +175,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
             return 17;
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please specify an executable: ");
-        fflush(stdin);
+        fflush_stdin();
         scanf("%127s",exec_name);
         getchar();
     }
@@ -188,7 +188,7 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         printf(WARN_YELLO_BOLD "[ -WARN- ] No data directory specified. Please specify a remote path." RESET_DISPLAY "\n");
         printf("[  ****  ] *MUST* use " HIGH_CYAN_BOLD "@d/" RESET_DISPLAY " (user data) or " HIGH_CYAN_BOLD "@p/" RESET_DISPLAY " (public data) as the prefix.\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-        fflush(stdin);
+        fflush_stdin();
         scanf("%255s",job_data);
         getchar();
     }

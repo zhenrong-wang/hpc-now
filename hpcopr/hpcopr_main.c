@@ -571,7 +571,7 @@ int main(int argc, char* argv[]){
                     return 33;
                 }
                 printf("[ -INFO- ] Input a list in the format " HIGH_GREEN_BOLD "cluster1:cluster2" RESET_DISPLAY " : ");
-                fflush(stdin);
+                fflush_stdin();
                 scanf("%255s",string_temp);
                 getchar();
                 run_flag=encrypt_decrypt_clusters(string_temp,crypto_keyfile,final_command,batch_flag);
@@ -1308,7 +1308,7 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "|       +- Bucket:" RESET_DISPLAY " put, get, copy, list, delete, move\n");
             printf(GENERAL_BOLD "|       +- Remote:" RESET_DISPLAY " cp, mv, ls, rm, mkdir, cat, more, less, tail, rput, rget \n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-            fflush(stdin);
+            fflush_stdin();
             scanf("%31s",data_cmd);
             getchar();
         }
@@ -1348,7 +1348,7 @@ int main(int argc, char* argv[]){
                     printf("[  ****  ] Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " GENERAL_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-                fflush(stdin);
+                fflush_stdin();
                 scanf("%511s",source_path);
                 getchar();
             }
@@ -1364,7 +1364,7 @@ int main(int argc, char* argv[]){
                     printf("[  ****  ] Use prefix @h/ , @d/, @p/, @a/, @R/, @t/ to specify " GENERAL_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-                fflush(stdin);
+                fflush_stdin();
                 scanf("%511s",destination_path);
                 getchar();
             }
@@ -1382,7 +1382,7 @@ int main(int argc, char* argv[]){
                     printf("[  ****  ] Use prefix @h/ , @d/ , @p/, @a/, @R/ to specify " GENERAL_BOLD "Cluster paths" RESET_DISPLAY ".\n");
                 }
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-                fflush(stdin);
+                fflush_stdin();
                 scanf("%511s",target_path);
                 getchar();
             }
@@ -1873,7 +1873,7 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a user manager command below:\n");
             printf("[  ****  ] list | add | delete | enable | disable | passwd \n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-            fflush(stdin);
+            fflush_stdin();
             scanf("%31s",user_cmd);
             getchar();
         }
@@ -2014,7 +2014,7 @@ int main(int argc, char* argv[]){
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a valid command:\n");
             printf(GENERAL_BOLD "[  ****  ]" RESET_DISPLAY " store, avail, build, install, check, remove, update-conf, check-conf\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-            fflush(stdin);
+            fflush_stdin();
             scanf("%31s",app_cmd);
             getchar();
         }
@@ -2058,7 +2058,7 @@ int main(int argc, char* argv[]){
                 }
                 printf(GENERAL_BOLD "[ -INFO- ] Please specify an app name, e.g. " HIGH_GREEN_BOLD "mpich4" RESET_DISPLAY " :\n");
                 printf(GENERAL_BOLD "[ INPUT: ] ");
-                fflush(stdin);
+                fflush_stdin();
                 scanf("%31s",app_name);
                 getchar();
             }
@@ -2096,7 +2096,7 @@ int main(int argc, char* argv[]){
             }
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Input a valid command: submit, list, cancel\n");
             printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-            fflush(stdin);
+            fflush_stdin();
             scanf("%31s",job_cmd);
             getchar();
         }
@@ -2136,7 +2136,7 @@ int main(int argc, char* argv[]){
                     return 5;
                 }
                 printf("[ INPUT: ] Please specify the job id to be canceled: ");
-                fflush(stdin);
+                fflush_stdin();
                 scanf("%31s",job_id);
                 getchar();
             }

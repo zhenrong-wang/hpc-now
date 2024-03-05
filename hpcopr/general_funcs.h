@@ -10,6 +10,7 @@
 
 void sleep_func(unsigned int time);
 int string_to_positive_num(char* string);
+void fflush_stdin(void);
 
 void reset_string(char* orig_string); /* This function is going to be deprecated */
 void reset_nstring(char string[], unsigned int string_length);

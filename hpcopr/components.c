@@ -703,7 +703,7 @@ int configure_locations(int batch_flag_local){
     printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("[  ****  ] -> %s \n",DEFAULT_URL_TF_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    fflush(stdin);
+    fflush_stdin();
     scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
@@ -719,7 +719,7 @@ int configure_locations(int batch_flag_local){
     printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("[  ****  ] -> %s \n",DEFAULT_URL_CODE_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    fflush(stdin);
+    fflush_stdin();
     scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
@@ -735,7 +735,7 @@ int configure_locations(int batch_flag_local){
     printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("[  ****  ] -> %s \n",DEFAULT_URL_SHELL_SCRIPTS);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    fflush(stdin);
+    fflush_stdin();
     scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
@@ -754,7 +754,7 @@ int configure_locations(int batch_flag_local){
     printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("[  ****  ] -> %s \n",DEFAULT_URL_NOW_CRYPTO);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    fflush(stdin);
+    fflush_stdin();
     scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
@@ -770,7 +770,7 @@ int configure_locations(int batch_flag_local){
     printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("[  ****  ] -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    fflush(stdin);
+    fflush_stdin();
     scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
@@ -790,7 +790,7 @@ int configure_locations(int batch_flag_local){
     printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("[  ****  ] -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    fflush(stdin);
+    fflush_stdin();
     scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){
@@ -810,7 +810,7 @@ int configure_locations(int batch_flag_local){
     printf("[  ****  ] You can input " HIGH_CYAN_BOLD "default" RESET_DISPLAY " to use default location below: \n");
     printf("[  ****  ] -> %s \n",DEFAULT_INITUTILS_REPO_ROOT);
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    fflush(stdin);
+    fflush_stdin();
     scanf("%383s",loc_string);
     getchar();
     if(strcmp(loc_string,"default")!=0){

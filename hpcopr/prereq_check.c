@@ -1333,7 +1333,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
     if(argc<2){
         list_all_commands();
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input a " HIGH_GREEN_BOLD "command" RESET_DISPLAY " : " HIGH_GREEN_BOLD);
-        fflush(stdin);
+        fflush_stdin();
         scanf("%63s",final_command);
         getchar();
         printf(RESET_DISPLAY);
@@ -1391,7 +1391,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
                 printf("\n");
                 list_all_cluster_names(1);
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-                fflush(stdin);
+                fflush_stdin();
                 scanf("%31s",temp_cluster_name);
                 getchar();
                 if(cluster_name_check(temp_cluster_name)!=-7){
@@ -1448,7 +1448,7 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input a valid user name from the list below. \n");
                 hpc_user_list(workdir,CRYPTO_KEY_FILE,0,0);
                 printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY);
-                fflush(stdin);
+                fflush_stdin();
                 scanf("%63s",string_temp);
                 getchar();
                 if(user_name_quick_check(cluster_name,string_temp,SSHKEY_DIR)!=0){

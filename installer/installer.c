@@ -179,7 +179,7 @@ int license_confirmation(void){
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " If you accept the terms above, please input " WARN_YELLO_BOLD "accept " RESET_DISPLAY ".\n");
     printf("[  ****  ] If you do not accept, this installation will exit immediately.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Please input ( case-sensitive ): ");
-    fflush(stdin);
+    fflush_stdin();
     scanf("%15s",confirmation);
     if(strcmp(confirmation,"accept")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " This installation process is terminated because you didn't accept\n");
@@ -793,7 +793,7 @@ int uninstall_services(void){
     printf("[  ****  ] THIS OPERATION IS UNRECOVERABLE!" RESET_DISPLAY "\n");
     printf("[ -INFO- ] ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm.\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    fflush(stdin);
+    fflush_stdin();
     scanf("%15s",doubleconfirm);
     if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You denied the operation." RESET_DISPLAY "\n");
@@ -918,7 +918,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     printf("[  ****  ] PLEASE MAKE SURE THEY ARE VALID." RESET_DISPLAY "\n");
     printf("[ -INFO- ] ARE YOU SURE? Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:\n");
     printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-    fflush(stdin);
+    fflush_stdin();
     scanf("%15s",doubleconfirm);
     if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm. You denied the operation." RESET_DISPLAY "\n");

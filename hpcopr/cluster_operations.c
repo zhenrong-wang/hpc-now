@@ -477,14 +477,14 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
         glance_clusters(target_cluster_name,crypto_keyfile);
         printf(WARN_YELLO_BOLD "[ -WARN- ] Would you like to remove it anyway? It is *NOT* recoverable!" RESET_DISPLAY "\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to continuie: " );
-        fflush(stdin);
+        fflush_stdin();
         scanf("%63s",doubleconfirm);
         getchar();
         if(strcmp(doubleconfirm,CONFIRM_STRING)==0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Please type the cluster name %s to confirm. This opeartion is\n",target_cluster_name);
             printf("[  ****  ] absolutely *NOT* recoverable!" RESET_DISPLAY "\n");
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " ");
-            fflush(stdin);
+            fflush_stdin();
             scanf("%63s",doubleconfirm);
             getchar();
             if(strcmp(doubleconfirm,target_cluster_name)!=0){
@@ -501,7 +501,7 @@ int remove_cluster(char* target_cluster_name, char* crypto_keyfile, char* force_
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster is empty. This operation will remove all the\n");
         printf("[  ****  ] related files. Would you like to continue?\n");
         printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm: ");
-        fflush(stdin);
+        fflush_stdin();
         scanf("%63s",doubleconfirm);
         getchar();
         if(strcmp(doubleconfirm,CONFIRM_STRING)!=0){
@@ -611,7 +611,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " The JSON-format key file *ABSOLUTE* path: ");
-            fflush(stdin);
+            fflush_stdin();
             scanf("%255s",gcp_key_file);
             getchar();
         }
@@ -709,7 +709,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Subscription id: ");
-            fflush(stdin);
+            fflush_stdin();
             scanf("%36s",az_subscription_id);
             getchar();
         }
@@ -723,7 +723,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Azure Tenant id: ");
-            fflush(stdin);
+            fflush_stdin();
             scanf("%36s",az_tenant_id);
             getchar();
         }
@@ -798,7 +798,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
                 return 17;
             }
             printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " The JSON-format key file *ABSOLUTE* path: ");
-            fflush(stdin);
+            fflush_stdin();
             scanf("%255s",secret_key);
             getchar();
         }
@@ -1314,7 +1314,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
             }
             else{
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:  ");
-                fflush(stdin);
+                fflush_stdin();
                 scanf("%127s",string_temp);
                 getchar();
                 if(strcmp(string_temp,CONFIRM_STRING)!=0){
@@ -1446,7 +1446,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
             }
             else{
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Only " WARN_YELLO_BOLD CONFIRM_STRING RESET_DISPLAY " is accepted to confirm:  ");
-                fflush(stdin);
+                fflush_stdin();
                 scanf("%127s",string_temp);
                 getchar();
                 if(strcmp(string_temp,CONFIRM_STRING)!=0){
