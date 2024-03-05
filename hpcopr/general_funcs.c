@@ -2383,14 +2383,14 @@ int getpass_stdin(char* prompt, char pass_string[], unsigned int pass_length){
 #else
     char ENTER='\r';
 #endif
-    if(prompt==NULL||pass_string==NULL){
+    if(pass_string==NULL){
         return NULL_PTR_ARG;
     }
     memset(pass_string,'\0',pass_length);
     if(pass_length<2){ /* There should at least be one char for input*/
         return -3;
     }
-    if(strlen(prompt)>0){
+    if(prompt!=NULL&&strlen(prompt)>0){
         printf("%s" GENERAL_BOLD "[s]" RESET_DISPLAY ,prompt);
     }
     else{
@@ -2455,7 +2455,12 @@ char* getpass_win(char* prompt){
     char ch='\0';
     int i=0;
     fflush(stdin);
-    printf("%s",prompt);
+    if(prompt!=NULL){
+        printf("%s",prompt);
+    }
+    else{
+        printf(":");
+    }
     char BACKSPACE='\b';
     char ENTER='\r';
     while((ch=_getch())!=ENTER&&i!=AKSK_LENGTH-1){
