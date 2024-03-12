@@ -9,7 +9,7 @@
 #define DATAMAN_H
 
 void unset_bucket_envs(char* cloud_flag);
-void bucket_path_check(char* path_string, char* hpc_user, char* real_path);
+void bucket_path_check(char* path_string, char* hpc_user, char* real_path, unsigned int real_path_length);
 void rf_flag_parser(const char* rflag, const char* fflag, char* real_rflag, char* real_fflag);
 
 int bucket_cp(char* workdir, char* crypto_keyfile, char* hpc_user, char* source_path, char* target_path, char* rflag, char* fflag, char* cloud_flag, char* cmd_type);

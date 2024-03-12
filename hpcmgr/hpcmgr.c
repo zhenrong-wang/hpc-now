@@ -70,10 +70,10 @@ int main(int argc,char *argv[]){
     rand_num=rand_num%1000000;
   }
 
-  sprintf(final_cmd_cp,"%s%d >> /dev/null 2>&1",cmd_cp,rand_num);
-  sprintf(final_cmd_chmod,"%s%d",cmd_chmod,rand_num);
-  sprintf(cmd_run,"%s%d",cmd_base,rand_num);
-  sprintf(final_cmd_dele,"%s%d",cmd_dele,rand_num);
+  snprintf(final_cmd_cp,255,"%s%d >> /dev/null 2>&1",cmd_cp,rand_num);
+  snprintf(final_cmd_chmod,127,"%s%d",cmd_chmod,rand_num);
+  snprintf(cmd_run,127,"%s%d",cmd_base,rand_num);
+  snprintf(final_cmd_dele,63,"%s%d",cmd_dele,rand_num);
   
   for(i=0;i<strlen(cmd_run);i++){
     *(final_cmd_run+i)=*(cmd_run+i);

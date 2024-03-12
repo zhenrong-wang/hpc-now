@@ -214,6 +214,7 @@ final_check:
     return 0;
 }
 
+/* This function is deprecated. */
 int decrypt_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_info){
     char vaultdir[DIR_LENGTH]="";
     char hash_key[64]="";
@@ -437,6 +438,7 @@ int delete_user_sshkey(char* cluster_name, char* user_name, char* sshkey_dir){
 }
 
 /*
+ * This function is deprecated.
  * return 0: succeeded
  * return non-zero: failed
  */
@@ -3321,6 +3323,7 @@ int delete_user_from_registry(char* user_registry_file, char* username){
     return 0;
 }
 
+/* This function is deprecated. */
 void get_workdir(char* cluster_workdir, char* cluster_name){
     sprintf(cluster_workdir,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,cluster_name,PATH_SLASH);
 }
