@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/liman/Desktop/devel/hpc-now/hpcmgr",
-      "program": "c:/Users/liman/Desktop/devel/hpc-now/hpcmgr/build/Debug/outDebug",
+      "cwd": "c:/Users/liman/Desktop/devel/hpc-now/hpcopr",
+      "program": "c:/Users/liman/Desktop/devel/hpc-now/hpcopr/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

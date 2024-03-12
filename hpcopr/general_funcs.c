@@ -2594,6 +2594,7 @@ int insert_nlines(char* filename, unsigned int linelen_max, char* keyword, char*
     return 0;
 }
 
+/* This function is deprecated. */
 int local_path_parser(char* path_string, char* path_final){
     if(path_string==NULL||path_final==NULL){
         return NULL_PTR_ARG;
@@ -2664,6 +2665,7 @@ int local_path_nparser(char* path_string, char path_final[], unsigned int path_f
     return 0;
 }
 
+/* This function is deprecated. */
 int direct_path_check(char* path_string, char* hpc_user, char* real_path){
     char header[256]="";
     char tail[DIR_LENGTH]="";
@@ -2747,7 +2749,7 @@ int direct_path_ncheck(char* path_string, char* hpc_user, char* real_path, unsig
         i++;
     }
     if(i>4){
-        strncpy(real_path,path_string,real_path_len_max);
+        strncpy(real_path,path_string,real_path_len_max-1);
         return 1;
     }
     for(j=i+1;j<strlen(path_string);j++){

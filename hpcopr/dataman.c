@@ -49,21 +49,21 @@ void unset_bucket_envs(char* cloud_flag){
     }
 }
 
-void bucket_path_check(char* path_string, char* hpc_user, char* real_path){
+void bucket_path_check(char* path_string, char* hpc_user, char* real_path, unsigned int real_path_length){
     if(*(path_string+0)!='/'){
         if(strcmp(hpc_user,"root")==0){
-            sprintf(real_path,"/%s",path_string);
+            snprintf(real_path,real_path_length-1,"/%s",path_string);
         }
         else{
-            sprintf(real_path,"/%s/%s",hpc_user,path_string);
+            snprintf(real_path,real_path_length-1,"/%s/%s",hpc_user,path_string);
         }
     }
     else{
         if(strcmp(hpc_user,"root")==0){
-            strcpy(real_path,path_string);
+            strncpy(real_path,path_string,real_path_length-1);
         }
         else{
-            sprintf(real_path,"/%s%s",hpc_user,path_string);
+            snprintf(real_path,real_path_length-1,"/%s%s",hpc_user,path_string);
         }
     }
 }
@@ -130,15 +130,15 @@ int bucket_cp(char* workdir, char* crypto_keyfile, char* hpc_user, char* source_
     }
     if(strcmp(cmd_type,"put")==0){
         local_path_nparser(source_path,real_source_path,DIR_LENGTH);
-        bucket_path_check(target_path,hpc_user,real_target_path);
+        bucket_path_check(target_path,hpc_user,real_target_path,DIR_LENGTH);
     }
     else if(strcmp(cmd_type,"get")==0){
-        bucket_path_check(source_path,hpc_user,real_source_path);
+        bucket_path_check(source_path,hpc_user,real_source_path,DIR_LENGTH);
         local_path_nparser(target_path,real_target_path,DIR_LENGTH);
     }
     else{
-        bucket_path_check(source_path,hpc_user,real_source_path);
-        bucket_path_check(target_path,hpc_user,real_target_path);
+        bucket_path_check(source_path,hpc_user,real_source_path,DIR_LENGTH);
+        bucket_path_check(target_path,hpc_user,real_target_path,DIR_LENGTH);
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"copy")==0){
@@ -295,7 +295,7 @@ int bucket_rm_ls(char* workdir, char* crypto_keyfile, char* hpc_user, char* remo
             strcpy(real_fflag,"--force-if-read-only");
         }
     }
-    bucket_path_check(remote_path,hpc_user,real_remote_path);
+    bucket_path_check(remote_path,hpc_user,real_remote_path,DIR_LENGTH);
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"delete")==0){
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s -e oss-%s.aliyuncs.com -i %s -k %s rm %s%s %s %s",OSSUTIL_EXEC,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_remote_path,real_rflag,real_fflag);
@@ -419,8 +419,8 @@ int direct_cp_mv(char* workdir, char* crypto_keyfile, char* hpc_user, char* sshk
             strcpy(real_rf_flag,"-r");
         }
     }
-    path_flag1=direct_path_check(source_path,hpc_user,real_source_path);
-    path_flag2=direct_path_check(target_path,hpc_user,real_target_path);
+    path_flag1=direct_path_ncheck(source_path,hpc_user,real_source_path,DIR_LENGTH);
+    path_flag2=direct_path_ncheck(target_path,hpc_user,real_target_path,DIR_LENGTH);
     if(strcmp(cmd_type,"mv")==0){
         if(path_flag1==path_flag2){
             if(path_flag1==0){
@@ -481,7 +481,7 @@ int direct_rm_ls_mkdir(char* workdir, char* crypto_keyfile, char* hpc_user, char
     char real_remote_path[DIR_LENGTH]="";
     char real_rf_flag[4]="";
     char remote_commands[CMDLINE_LENGTH]="";
-    if(direct_path_check(remote_path,hpc_user,real_remote_path)!=0){
+    if(direct_path_ncheck(remote_path,hpc_user,real_remote_path,DIR_LENGTH)!=0){
         if(strcmp(hpc_user,"root")==0){
             snprintf(real_remote_path,DIR_LENGTH-1,"/root/%s",remote_path);
         }
@@ -539,7 +539,7 @@ int direct_file_operations(char* workdir, char* crypto_keyfile, char* hpc_user, 
     int run_flag=0;
     char real_remote_path[DIR_LENGTH]="";
     char remote_commands[CMDLINE_LENGTH]="";
-    direct_path_check(remote_path,hpc_user,real_remote_path);
+    direct_path_ncheck(remote_path,hpc_user,real_remote_path,DIR_LENGTH);
     if(strcmp(hpc_user,"root")==0||strcmp(hpc_user,"user1")==0){
         if(strcmp(cmd_type,"tail")!=0){
             snprintf(remote_commands,CMDLINE_LENGTH-1,"sudo %s %s",cmd_type,real_remote_path);
@@ -611,12 +611,12 @@ int remote_bucket_cp(char* workdir, char* crypto_keyfile, char* hpc_user, char* 
         }
     }
     if(strcmp(cmd_type,"rput")==0){
-        direct_path_check(source_path,hpc_user,real_source_path);
-        bucket_path_check(dest_path,hpc_user,real_dest_path);
+        direct_path_ncheck(source_path,hpc_user,real_source_path,DIR_LENGTH);
+        bucket_path_check(dest_path,hpc_user,real_dest_path,DIR_LENGTH);
     }
     else{
-        bucket_path_check(source_path,hpc_user,real_source_path);
-        direct_path_check(dest_path,hpc_user,real_dest_path);
+        bucket_path_check(source_path,hpc_user,real_source_path,DIR_LENGTH);
+        direct_path_ncheck(dest_path,hpc_user,real_dest_path,DIR_LENGTH);
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
         if(strcmp(cmd_type,"rget")==0){
