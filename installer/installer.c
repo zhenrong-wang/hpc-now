@@ -928,6 +928,8 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
 #ifdef _WIN32
     snprintf(cmdline_temp,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_USER_DIR);
     system(cmdline_temp);
+    snprintf(cmdline_temp,CMDLINE_LENGTH-1,"takeown /f %s > nul 2>&1",HPC_NOW_ROOT_DIR);
+    system(cmdline_temp);
     snprintf(cmdline_temp,CMDLINE_LENGTH-1,"icacls %s /remove Administrators > nul 2>&1",HPC_NOW_ROOT_DIR);
     system(cmdline_temp);
     snprintf(cmdline_temp,CMDLINE_LENGTH-1,"dir %s | findstr .now-ssh > nul 2>&1",HPC_NOW_ROOT_DIR);
