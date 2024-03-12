@@ -2207,11 +2207,11 @@ int generate_random_npasswd(char password_array[], unsigned int password_array_l
     memset(password_temp,'\0',password_array_len);
     for(total_times=0;total_times<16;total_times++){
         i=0;
-        while(i<password_array_len-1){
-            clock_gettime(CLOCK_MONOTONIC,&current_time);
+        clock_gettime(CLOCK_MONOTONIC,&current_time);
             /* create a random seed num using the time */
-            seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
-            srand(seed_num+i);
+        seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
+        srand(seed_num+i);
+        while(i<password_array_len-1){
             /* generate a random number as the index of the char table for password */
             rand_num=rand()%ch_table_length;
             /* get a char to paddle the password */
@@ -2252,11 +2252,11 @@ int generate_random_passwd(char* password){
         return NULL_PTR_ARG;
     }
     for(total_times=0;total_times<16;total_times++){
+        clock_gettime(CLOCK_MONOTONIC,&current_time);
+        /* create a random seed num using the time */
+        seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
+        srand(seed_num+i);
         for(i=0;i<PASSWORD_LENGTH;i++){
-            clock_gettime(CLOCK_MONOTONIC,&current_time);
-            /* create a random seed num using the time */
-            seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
-            srand(seed_num+i);
             rand_num=rand()%72;
             *(password_temp+i)=*(ch_table+rand_num);
         }
@@ -2291,12 +2291,12 @@ int generate_random_db_passwd(char password[], unsigned int len_max){
         return -1;
     }
     reset_nstring(password,len_max);
+    clock_gettime(CLOCK_MONOTONIC,&current_time);
+        /* create a random seed num using the time */
+    seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
+    srand(seed_num);
     i=0;
     while(i<len_max-1){
-        clock_gettime(CLOCK_MONOTONIC,&current_time);
-        /* create a random seed num using the time */
-        seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
-        srand(seed_num+i);
         rand_num=rand()%62;
         *(password+i)=*(ch_table+rand_num);
         i++;
@@ -2324,10 +2324,6 @@ int generate_random_string(char* random_string){
     *(random_string+0)=*(ch_table+rand_num);
     i=1;
     while(i<RANDSTR_LENGTH_PLUS-1){
-        clock_gettime(CLOCK_MONOTONIC,&current_time);
-        /* create a random seed num using the time */
-        seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
-        srand(seed_num+i);
         rand_num=rand()%36;
         *(random_string+i)=*(ch_table+rand_num);
         i++;
@@ -2367,10 +2363,6 @@ int generate_random_nstring(char random_string[], unsigned int len_max, int star
     *(random_string+0)=*(ch_table+rand_num);
     i=1;
     while(i<len_max-1){
-        clock_gettime(CLOCK_MONOTONIC,&current_time);
-        /* create a random seed num using the time */
-        seed_num=(unsigned int)(current_time.tv_sec*1000000000+current_time.tv_nsec);
-        srand(seed_num+i);
         rand_num=rand()%36;
         *(random_string+i)=*(ch_table+rand_num);
         i++;
