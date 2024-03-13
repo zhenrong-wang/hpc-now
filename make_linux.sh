@@ -7,50 +7,11 @@
 
 hpcopr_version_code=`cat ./hpcopr/now_macros.h | grep CORE_VERSION_CODE | awk -F"\"" '{print $2}'`
 installer_version_code=`cat ./installer/installer.h | grep INSTALLER_VERSION_CODE | awk -F"\"" '{print $2}'`
-make_tmp_log='/tmp/hpc-now.make.log'
-
-which apt >> /dev/null 2>&1
-if [ $? -eq 0 ]; then
-    pkg_mgr='apt'
-else
-    which yum >> /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        pkg_mgr='yum'
-    else
-        which dnf >> /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            pkg_mgr='dnf'
-        else
-            which zypper >> /dev/null 2>&1
-            if [ $? -eq 0 ]; then
-                pkg_mgr='zypper'
-            else
-                echo -e "[ FATAL: ] Failed to detect package manager. Exit now."
-                exit 1
-            fi
-        fi
-    fi
-fi
-
-echo -e "[ -INFO- ] GNU/Linux package manager detected: ${pkg_mgr}."
-echo -e "# Making HPC-NOW ..." > $make_tmp_log
-
-which curl >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo -e "[ -INFO- ] cURL not found. Installing now. Log: $make_tmp_log"
-    ${pkg_mgr} -y install curl >> $make_tmp_log 2>&1
-fi
-
-which tar >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo -e "[ -INFO- ] tar not found. Installing now. Log: $make_tmp_log"
-    ${pkg_mgr} -y install tar >> $make_tmp_log 2>&1
-fi
 
 which gcc >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo -e "[ -INFO- ] gcc not found. Installing now. Log: $make_tmp_log"
-    ${pkg_mgr} -y install gcc >> $make_tmp_log 2>&1
+    echo -e "[ -INFO- ] gcc not found. Please install it first. Exit now."
+    exit 1
 fi
 
 if [ ! -n "$1" ]; then
