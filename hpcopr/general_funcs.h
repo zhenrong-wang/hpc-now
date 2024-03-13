@@ -12,38 +12,59 @@ void sleep_func(unsigned int time);
 int string_to_positive_num(char* string);
 void fflush_stdin(void);
 
-void reset_string(char* orig_string); /* This function is going to be deprecated */
+/* DEPRECATED. Please do not use. */
+void reset_string(char* orig_string);
+/* SECURE VERSION. */
 void reset_nstring(char string[], unsigned int string_length);
 
+/* DEPRECATED. Please do not use. */
 int get_key_value(char* filename, char* key, char ch, char* value);
+/* SECURE VERSION. */
 int get_key_nvalue(char* filename, unsigned int linelen_max, char* key, char ch, char value[], unsigned int valen_max);
 
+/* DEPRECATED. Please do not use. */
 int calc_str_num(char* line, char split_ch);
+/* SECURE VERSION. */
 int calc_str_nnum(char* line, char split_ch);
 
+/* DEPRECATED. Please do not use. */
 int get_seq_string(char* line, char split_ch, int string_seq, char* get_string);
+/* SECURE VERSION. */
 int get_seq_nstring(char line[], char split_ch, int string_seq, char get_str[], unsigned int getstr_len_max);
 
+/* DEPRECATED. Please do not use. */
 int fgetline(FILE* file_p, char* line_string);
+/* SECURE VERSION. */
 int fngetline(FILE* file_p, char line_string[], unsigned int max_length);
 
+/* DEPRECATED. Please do not use. */
 int contain_or_not(const char* line, const char* findkey);
+/* SECURE VERSION. */
 int contain_or_nnot(char line[], char findkey[]);
 
+/* DEPRECATED. Please do not use. */
 int global_replace(char* filename, char* orig_string, char* new_string);
+/* SECURE VERSION. */
 int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string, char* new_string);
 
+/* DEPRECATED. Please do not use. */
 int line_replace(char* orig_line, char* new_line, char* orig_string, char* new_string);
+/* SECURE VERSION. */
 char* line_nreplace(char* orig_line, int contain_count, char* orig_string, char* new_string);
 
+/* DEPRECATED. Please do not use. */
 int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5, char* orig_string, char* new_string);
+/* SECURE VERSION. */
 int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5, char* orig_string, char* new_string);
 
+/* DEPRECATED. Please do not use. */
 int find_multi_keys(char* filename, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5);
+/* SECURE VERSION. */
 int find_multi_nkeys(char* filename, unsigned int linelen_max, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5);
 
-/* int get_seq_string_general(char* line, char split_ch, int start, int end, char* get_string); */
+/* DEPRECATED. Please do not use. */
 int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char* get_string);
+/* SECURE VERSION. */
 int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char get_str[], int get_strlen_max);
 
 int file_exist_or_not(char* filename);
