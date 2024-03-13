@@ -6,7 +6,7 @@
 #!/bin/bash
 
 hpcopr_version_code=`cat ./hpcopr/now_macros.h | grep CORE_VERSION_CODE | awk -F"\"" '{print $2}'`
-installer_version_code= `cat ./installer/installer.h | grep INSTALLER_VERSION_CODE | awk -F"\"" '{print $2}'`
+installer_version_code=`cat ./installer/installer.h | grep INSTALLER_VERSION_CODE | awk -F"\"" '{print $2}'`
 make_tmp_log='/tmp/hpc-now.make.log'
 
 which apt >> /dev/null 2>&1
