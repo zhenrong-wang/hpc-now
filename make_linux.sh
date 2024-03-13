@@ -15,11 +15,11 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ ! -n "$1" ]; then
-	echo -e "[ -INFO- ] Please specify an option: 'build', 'delete', or 'clear'"
-	echo -e "|          build  - (re)build the binaries"
+    echo -e "[ -INFO- ] Please specify an option: 'build', 'delete', or 'clear'"
+    echo -e "|          build  - (re)build the binaries"
     echo -e "|          delete - delete the previous binaries"
     echo -e "|          clear  - remove the 'build' folder and binaries in it"
-	echo -e "[ -DONE- ] Exit now."
+    echo -e "[ -DONE- ] Exit now."
     exit 1
 elif [ "$1" = "build" ]; then
     echo -e "[ START: ] Building the binaries now (including hpcmgr and now-server) ..."
@@ -49,10 +49,10 @@ elif [ "$1" = "clear" ]; then
     rm -rf ./build
 else
     echo -e "[ -INFO- ] Please specify an option: 'build', 'delete', or 'clear'"
-	echo -e "|          build  - (re)build the binaries"
+    echo -e "|          build  - (re)build the binaries"
     echo -e "|          delete - delete the previous binaries"
     echo -e "|          clear  - remove the 'build' folder and binaries in it"
-	echo -e "[ -DONE- ] Exit now."
+    echo -e "[ -DONE- ] Exit now."
     exit 1
 fi
 echo -e "[ -DONE- ] Please check the console output for building results."
