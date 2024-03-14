@@ -449,9 +449,9 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 - `license`      Read the terms of the MIT License
 - `repair`       Try to repair the hpcopr core components.
 
-For more information, please refer to Docs/UserManual-EN.pdf.
+For more information, please refer to docs/UserManual-EN.pdf **CAUTION: This file may not be updated**.
 
-The most detailed help info can be found by the command `hpcopr help`. We are also considering writing a standard mannual for `hpcopr`. If you are interested, please let us know.
+The most detailed and updated help info can be found by the command `hpcopr help`. We are also considering writing a standard mannual for `hpcopr`. If you are interested, please let us know.
 
 # **4. Contributing**
 

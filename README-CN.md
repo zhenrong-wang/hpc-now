@@ -56,7 +56,7 @@
 
 ### 3. 如何部署、使用、卸载、构建与开发
 
-请查阅 Docs/UserManual-CN.pdf 。
+请查阅 docs/UserManual-CN.pdf ，**请注意：该文档可能不是最新的**。
 
 ### 4. Bug与技术沟通
 
