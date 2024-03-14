@@ -1352,6 +1352,7 @@ int mk_pdir(char* pathname){
         if(access(sub_path,0)==0){
             exist_flag=1;
             i++;
+            free(sub_path);
             continue;
         }
         exist_flag=0;
