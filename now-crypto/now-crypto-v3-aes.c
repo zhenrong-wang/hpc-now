@@ -547,8 +547,8 @@ int now_aes_ecb_file_encryption(char* input, char* output, char* md5_string){
     unsigned long i,block_num;    
     uint_8bit* pt_read;
     uint_8bit* pt_write;
-    uint_8bit state[4][4]={0x00};
-    uint_8bit out[4][4]={0x00};
+    uint_8bit state[4][4]={{0x00}};
+    uint_8bit out[4][4]={{0x00}};
     uint_8bit key[16]={0x00};
     now_aes_key AES_key;
     if(md5convert(md5_string,key,16)!=0){
@@ -631,8 +631,8 @@ int now_aes_ecb_file_decryption(char* input, char* output, char* md5_string){
     unsigned long i,block_num;    
     uint_8bit* pt_read;
     uint_8bit* pt_write;
-    uint_8bit state[4][4]={0x00};
-    uint_8bit out[4][4]={0x00};
+    uint_8bit state[4][4]={{0x00}};
+    uint_8bit out[4][4]={{0x00}};
     uint_8bit padding_num;   
     uint_8bit key[16]={0x00};
     now_aes_key AES_key;

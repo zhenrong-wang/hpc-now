@@ -9,10 +9,18 @@ hpcopr_version_code=`cat ./hpcopr/now_macros.h | grep CORE_VERSION_CODE | awk -F
 installer_version_code=`cat ./installer/installer.h | grep INSTALLER_VERSION_CODE | awk -F"\"" '{print $2}'`
 
 which gcc >> /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo -e "[ -INFO- ] gcc not found. Please install it first. Exit now."
-    exit 1
+if [ $? -eq 0 ]; then
+    compiler='gcc'
+else
+    which clang >> /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        compiler='clang'
+    else
+        echo -e "[ FATAL: ] No compiler (gcc/clang) found. Please install one. Exit now."
+        exit 1
+    fi
 fi
+echo -e "[ -INFO- ] Using the compiler ${compiler} to build this project."
 
 if [ ! -n "$1" ]; then
     echo -e "[ -INFO- ] Please specify an option: 'build', 'delete', or 'clear'"
@@ -25,19 +33,19 @@ elif [ "$1" = "build" ]; then
     echo -e "[ START: ] Building the binaries now (including hpcmgr and now-server) ..."
     mkdir -p ./build
     rm -rf ./build/*
-    gcc ./hpcopr/*.c -Wall -o ./build/hpcopr-lin-${hpcopr_version_code}.exe
-    gcc -c ./hpcopr/general_funcs.c -Wall -o ./installer/gfuncs.o
-    gcc -c ./hpcopr/opr_crypto.c -Wall -o ./installer/ocrypto.o
-    gcc -c ./hpcopr/cluster_general_funcs.c -Wall -o ./installer/cgfuncs.o
-    gcc -c ./hpcopr/time_process.c -Wall -o ./installer/tproc.o
-    gcc -c ./hpcopr/general_print_info.c -Wall -o ./installer/gprint.o
-    gcc -c ./hpcopr/now_md5.c -Wall -o ./installer/md5.o
-    gcc -c ./hpcopr/now_sha256.c -Wall -o ./installer/sha256.o
+    ${compiler} ./hpcopr/*.c -Wall -o ./build/hpcopr-lin-${hpcopr_version_code}.exe
+    ${compiler} -c ./hpcopr/general_funcs.c -Wall -o ./installer/gfuncs.o
+    ${compiler} -c ./hpcopr/opr_crypto.c -Wall -o ./installer/ocrypto.o
+    ${compiler} -c ./hpcopr/cluster_general_funcs.c -Wall -o ./installer/cgfuncs.o
+    ${compiler} -c ./hpcopr/time_process.c -Wall -o ./installer/tproc.o
+    ${compiler} -c ./hpcopr/general_print_info.c -Wall -o ./installer/gprint.o
+    ${compiler} -c ./hpcopr/now_md5.c -Wall -o ./installer/md5.o
+    ${compiler} -c ./hpcopr/now_sha256.c -Wall -o ./installer/sha256.o
     ar -rc ./installer/libnow.a ./installer/gfuncs.o ./installer/ocrypto.o ./installer/cgfuncs.o ./installer/tproc.o ./installer/md5.o ./installer/gprint.o ./installer/sha256.o
-    gcc ./installer/installer.c -Wall ./installer/libnow.a -o ./build/installer-lin-${installer_version_code}.exe
-    gcc ./now-crypto/now-crypto-v3-aes.c -Wall -Ofast -o ./build/now-crypto-aes-lin.exe
-    gcc ./hpcmgr/hpcmgr.c -Wall -o ./build/hpcmgr.exe
-    gcc ./now-server/now-server.c -Wall -o ./build/now-server.exe
+    ${compiler} ./installer/installer.c -Wall ./installer/libnow.a -o ./build/installer-lin-${installer_version_code}.exe
+    ${compiler} ./now-crypto/now-crypto-v3-aes.c -Wall -Ofast -o ./build/now-crypto-aes-lin.exe
+    ${compiler} ./hpcmgr/hpcmgr.c -Wall -o ./build/hpcmgr.exe
+    ${compiler} ./now-server/now-server.c -Wall -o ./build/now-server.exe
     chmod +x ./build/*
     rm -rf ./installer/*.a
     rm -rf ./installer/*.o
