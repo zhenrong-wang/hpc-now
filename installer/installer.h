@@ -12,6 +12,7 @@
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/hpcopr-0.3.x/"
 #define URL_MSRDP_FOR_MAC         "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/packages/rdp_for_mac.zip"
 
+int check_linux_packman(char* linux_packman, int length);
 int check_internet_installer(void);
 int installed_or_not(void);
 void print_header_installer(void);

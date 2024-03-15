@@ -29,14 +29,45 @@
 
 #include "installer.h"
 
+int check_linux_packman(char* linux_packman, int length){
+#ifndef __linux__
+    return 0; /* For Windows, this function is skipped. */
+#else
+    if(system("which yum >> /dev/null 2>&1")==0){
+        strncpy(linux_packman,"yum",length-1);
+        return 0;
+    }
+    else if(system("which dnf >> /dev/null 2>&1")==0){
+        strncpy(linux_packman,"dnf",length-1);
+        return 0;
+    }
+    else if(system("which apt >> /dev/null 2>&1")==0){
+        strncpy(linux_packman,"apt",length-1);
+        return 0;
+    }
+    else if(system("which zypper >> /dev/null 2>&1")==0){
+        strncpy(linux_packman,"zypper",length-1);
+        return 0;
+    }
+    else if(system("which pacman >> /dev/null 2>&1")==0){
+        strncpy(linux_packman,"pacman",length-1);
+        return 0;
+    }
+    else{
+        strncpy(linux_packman,"",length-1);
+        return 1;
+    }
+#endif
+}
+
 int check_internet_installer(void){
     char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
-    strcpy(cmdline,"ping -n 1 www.baidu.com > nul 2>&1");
+    strncpy(cmdline,"ping -n 1 www.baidu.com > nul 2>&1",CMDLINE_LENGTH-1);
 #elif __linux__
-    strcpy(cmdline,"ping -c 1 www.baidu.com >> /dev/null 2>&1");
+    strncpy(cmdline,"ping -c 1 www.baidu.com >> /dev/null 2>&1",CMDLINE_LENGTH-1);
 #elif __APPLE__
-    strcpy(cmdline,"ping -c 1 -t 1 www.baidu.com >> /dev/null 2>&1");
+    strncpy(cmdline,"ping -c 1 -t 1 www.baidu.com >> /dev/null 2>&1",CMDLINE_LENGTH-1);
 #endif
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please check your DNS\n");
@@ -205,7 +236,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     FILE* file_p=NULL;
     int run_flag1,run_flag2;
 #ifdef __linux__
-    char linux_packman[8]="";
+    char linux_packman[16]="";
 #elif __APPLE__
     int flag1=0,flag2=0,flag3=0,flag4=0,flag5=0,flag6=0;
 #elif _WIN32
@@ -258,25 +289,21 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     snprintf(cmdline1,CMDLINE_LENGTH-1,"icacls %s /deny hpc-now:(DE) /t > nul 2>&1",HPC_NOW_USER_DIR);
     system(cmdline1);
 #elif __linux__
-    if(system("which yum >> /dev/null 2>&1")==0){
-        strcpy(linux_packman,"yum");
-    }
-    else if(system("which dnf >> /dev/null 2>&1")==0){
-        strcpy(linux_packman,"dnf");
-    }
-    else if(system("which apt >> /dev/null 2>&1")==0){
-        strcpy(linux_packman,"apt");
-    }
-    else if(system("which zypper >> /dev/null 2>&1")==0){
-        strcpy(linux_packman,"zypper");
+    if(check_linux_packman(linux_packman,16)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Linux package manager not found. Please install the 'unzip' manually." RESET_DISPLAY "\n");
     }
     else{
-        printf(FATAL_RED_BOLD "[ FATAL: ] YUM|DNF|APT|ZYPPER not found. Please install the 'unzip' manually." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Detected Linux package manager: %s\n",linux_packman);
         return -1;
     }
     if(system("which unzip >> /dev/null 2>&1")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Unzip not found. Install the utility 'unzip' with %s ...\n",linux_packman);
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install unzip -y >> /dev/null 2>&1",linux_packman);
+        if(strcmp(linux_packman,"pacman")!=0){
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install unzip -y >> /dev/null 2>&1",linux_packman);
+        }
+        else{
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s -S unzip --noconfirm >> /dev/null 2>&1",linux_packman);
+        }
         if(system(cmdline1)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install unzip. Please install it first." RESET_DISPLAY "\n");
             return -1;
@@ -284,7 +311,12 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
     if(system("which curl >> /dev/null 2>&1")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Curl not found. Install the utility 'curl' with %s ...\n",linux_packman);
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install curl -y >> /dev/null 2>&1",linux_packman);
+        if(strcmp(linux_packman,"pacman")!=0){
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install curl -y >> /dev/null 2>&1",linux_packman);
+        }
+        else{
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s -S curl --noconfirm >> /dev/null 2>&1",linux_packman);
+        }
         if(system(cmdline1)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to install curl. Please install it first." RESET_DISPLAY "\n");
             return -1;
@@ -497,7 +529,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Setting up environment variables for 'hpc-now' ...\n"); 
     if(system("cat /home/hpc-now/.bashrc | grep PATH=/home/hpc-now/.bin/ >> /dev/null 2>&1")!=0){
-        strcpy(cmdline1,"echo \"export PATH=/home/hpc-now/.bin/:$PATH\" >> /home/hpc-now/.bashrc");
+        strncpy(cmdline1,"echo \"export PATH=/home/hpc-now/.bin/:$PATH\" >> /home/hpc-now/.bashrc",CMDLINE_LENGTH-1);
         system(cmdline1);
     }
     chmod(HPCOPR_EXEC,S_IRWXO|S_IXGRP|S_IXOTH);
@@ -529,7 +561,12 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
     if(rdp_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Installing Remmina: the RDP client for GNU/Linux now ...\n");
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
+        if(strcmp(linux_packman,"pacman")!=0){
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
+        }
+        else{
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s -S remmina --noconfirm >> /dev/null 2>&1",linux_packman);
+        }
         if(system(cmdline1)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install Remmina, RDP won't work properly." RESET_DISPLAY "\n");
         }
@@ -538,7 +575,12 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
     }
     if(system("which xclip >> /dev/null 2>&1")==0){
-        snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
+        if(strcmp(linux_packman,"pacman")!=0){
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
+        }
+        else{
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s -S xclip --noconfirm >> /dev/null 2>&1",linux_packman);
+        }
         system(cmdline1);
     }
 linux_install_done:
@@ -574,7 +616,7 @@ linux_install_done:
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Setting up environment variables for 'hpc-now' ...\n");
-    strcpy(cmdline1,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc");
+    strncpy(cmdline1,"echo \"export PATH=/Users/hpc-now/.bin/:$PATH\" >> /Users/hpc-now/.bashrc",CMDLINE_LENGTH-1);
     system(cmdline1);
     chmod(HPCOPR_EXEC,S_IRWXO|S_IXGRP|S_IXOTH);
     chmod(NOW_CRYPTO_EXEC,S_IRWXO|S_IXGRP|S_IXOTH);
@@ -910,7 +952,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     char cmdline_dec[CMDLINE_LENGTH]="";
     char cmdline_enc[CMDLINE_LENGTH]="";
 #ifdef __linux__
-    char linux_packman[8]="";
+    char linux_packman[16]="";
 #endif
     int run_flag1,run_flag2,decrypt_flag=0;
     
@@ -1169,16 +1211,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     if(system("grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
         system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
     }
-    if(system("which yum >> /dev/null 2>&1")==0){
-        strcpy(linux_packman,"yum");
-    }
-    else if(system("which dnf >> /dev/null 2>&1")==0){
-        strcpy(linux_packman,"dnf");
-    }
-    else if(system("which apt >> /dev/null 2>&1")==0){
-        strcpy(linux_packman,"apt");
-    }
-    else{
+    if(check_linux_packman(linux_packman,16)!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to detect the package manager." RESET_DISPLAY "\n");
         goto update_done;
     }
@@ -1189,7 +1222,12 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     if(rdp_flag==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Installing Remmina - the RDP client for GNU/Linux now ...\n");
-        snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
+        if(strcmp(linux_packman,"pacman")!=0){
+            snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s install remmina -y >> /dev/null 2>&1",linux_packman);
+        }
+        else{
+            snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s -S remmina --noconfirm >> /dev/null 2>&1",linux_packman);
+        }
         if(system(cmdline_temp)!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install Remmina, RDP won't work properly." RESET_DISPLAY "\n");
         }
@@ -1198,7 +1236,12 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
     }
     if(system("which xclip >> /dev/null 2>&1")==0){
-        snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
+        if(strcmp(linux_packman,"pacman")!=0){
+            snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
+        }
+        else{
+            snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s -S xclip --noconfirm >> /dev/null 2>&1",linux_packman);
+        }
         system(cmdline_temp);
     }
 #elif __APPLE__
@@ -1384,17 +1427,17 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1],"setpass")==0||strcmp(argv[1],"install")==0){
         cmd_keyword_ncheck(argc,argv,"--pass",opr_password_arg,32);
         if(strlen(opr_password_arg)==0){
-            strcpy(opr_password,"");
+            strncpy(opr_password,"",PASSWORD_STRING_LENGTH-1);
         }
         else if(strlen(opr_password_arg)>19){
             printf(WARN_YELLO_BOLD "[ -WARN- ] The keystring " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY WARN_YELLO_BOLD " is too long." RESET_DISPLAY "\n",opr_password_arg);
-            strcpy(opr_password,"");
+            strncpy(opr_password,"",PASSWORD_STRING_LENGTH-1);
         }
         else{
             strncpy(opr_password,opr_password_arg,19);
             if(password_complexity_check(opr_password,SPECIAL_PASSWORD_CHARS)!=0){
                 printf(WARN_YELLO_BOLD "[ -WARN- ] The keystring " RESET_DISPLAY GREY_LIGHT "%s" RESET_DISPLAY WARN_YELLO_BOLD " is not complex enough." RESET_DISPLAY "\n",opr_password_arg);
-                strcpy(opr_password,"");
+                strncpy(opr_password,"",PASSWORD_STRING_LENGTH-1);
             }
         }
     }
@@ -1412,7 +1455,7 @@ int main(int argc, char* argv[]){
     hpcopr_loc_flag=valid_loc_format_or_not(hpcopr_loc);
     crypto_loc_flag=valid_loc_format_or_not(now_crypto_loc);
     if(hpcopr_loc_flag!=-1){
-        strcpy(hpcopr_ver,"");
+        strncpy(hpcopr_ver,"",255);
     }
     else{
         if(strlen(hpcopr_ver)!=0){
