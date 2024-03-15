@@ -296,7 +296,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     rm_pdir(HPC_NOW_ROOT_DIR);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");
     if(strcmp(linux_packman,"zypper")==0){
-        strncpy(cmdline1,"groupadd hpc-now /dev/null 2>&1",CMDLINE_LENGTH-1);
+        strncpy(cmdline1,"groupadd hpc-now >> /dev/null 2>&1",CMDLINE_LENGTH-1);
         /* For SUSE, we may need to add a group hpc-now first. */
         system(cmdline1);
         /* And then add the user hpc-now to the group. */
