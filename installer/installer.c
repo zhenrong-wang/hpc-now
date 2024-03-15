@@ -267,8 +267,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     else if(system("which apt >> /dev/null 2>&1")==0){
         strcpy(linux_packman,"apt");
     }
+    else if(system("which zypper >> /dev/null 2>&1")==0){
+        strcpy(linux_packman,"zypper");
+    }
     else{
-        printf(FATAL_RED_BOLD "[ FATAL: ] YUM|DNF|APT not found. Please install the 'unzip' manually." RESET_DISPLAY "\n");
+        printf(FATAL_RED_BOLD "[ FATAL: ] YUM|DNF|APT|ZYPPER not found. Please install the 'unzip' manually." RESET_DISPLAY "\n");
         return -1;
     }
     if(system("which unzip >> /dev/null 2>&1")!=0){
