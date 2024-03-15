@@ -185,6 +185,7 @@ int install_bucket_clis(int silent_flag){
     char* dirname_temp=NULL;
     char dirname_temp_static[DIR_LENGTH]="";
     int inst_flag=0;
+    int timer=0;
     
     if(silent_flag!=0){
         printf(RESET_DISPLAY GENERAL_BOLD "|        . Checking & installing the dataman components: 1/7 ..." RESET_DISPLAY "\n");
@@ -514,12 +515,19 @@ azcopy:
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AZCOPY,filename_temp_zip);
 #endif
             if(system(cmdline)!=0){
-                if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 6/7." RESET_DISPLAY "\n");
-                    rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
+#ifdef _WIN32
+                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_AZCOPY_BK,filename_temp_zip);
+#else
+                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AZCOPY_BK,filename_temp_zip);
+#endif
+                if(system(cmdline)!=0){
+                    if(silent_flag!=0){
+                        printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 6/7." RESET_DISPLAY "\n");
+                        rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
+                    }
+                    inst_flag|=AZCOPY_6_FAILED;
+                    goto gcloud_cli;
                 }
-                inst_flag|=AZCOPY_6_FAILED;
-                goto gcloud_cli;
             }
         }
 #ifdef _WIN32

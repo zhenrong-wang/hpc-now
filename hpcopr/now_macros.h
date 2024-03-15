@@ -153,6 +153,7 @@ typedef signed long long int int_64bit;
 #define URL_OBSUTIL   "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_windows_amd64.zip"
 #define URL_BCECMD    "https://doc.bce.baidu.com/bce-documentation/BOS/windows-bcecmd-0.4.1.zip"
 #define URL_AZCOPY    "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_windows_amd64_10.20.1.zip"
+#define URL_AZCOPY_BK "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/azcopy_windows_amd64_10.20.1.zip"
 #define URL_GCLOUD    "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-449.0.0-windows-x86_64-bundled-python.zip"
 
 #elif __linux__
@@ -230,6 +231,7 @@ typedef signed long long int int_64bit;
 #define URL_OBSUTIL   "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz"
 #define URL_BCECMD    "https://doc.bce.baidu.com/bce-documentation/BOS/linux-bcecmd-0.4.1.zip"
 #define URL_AZCOPY    "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_linux_amd64_10.20.1.tar.gz"
+#define URL_AZCOPY_BK "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/azcopy_linux_amd64_10.20.1.tar.gz"
 #define URL_GCLOUD    "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-449.0.0-linux-x86_64.tar.gz"
 
 #elif __APPLE__
@@ -307,6 +309,7 @@ typedef signed long long int int_64bit;
 #define URL_OBSUTIL   "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_darwin_amd64.tar.gz"
 #define URL_BCECMD    "https://doc.bce.baidu.com/bce-documentation/BOS/mac-bcecmd-0.4.1.zip"
 #define URL_AZCOPY    "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_darwin_amd64_10.20.1.zip"
+#define URL_AZCOPY_BK "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/azcopy_darwin_amd64_10.20.1.zip"
 #define URL_GCLOUD    "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-449.0.0-darwin-x86_64.tar.gz"
 
 #endif
