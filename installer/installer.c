@@ -295,7 +295,17 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     system(cmdline1);
     rm_pdir(HPC_NOW_ROOT_DIR);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Adding the specific user 'hpc-now' to your OS ...\n");
-    strncpy(cmdline1,"useradd hpc-now -m -s /bin/bash >> /dev/null 2>&1",CMDLINE_LENGTH-1);
+    if(strcmp(linux_packman,"zypper")==0){
+        strncpy(cmdline1,"groupadd hpc-now /dev/null 2>&1",CMDLINE_LENGTH-1);
+        /* For SUSE, we may need to add a group hpc-now first. */
+        system(cmdline1);
+        /* And then add the user hpc-now to the group. */
+        strncpy(cmdline1,"useradd hpc-now -g hpc-now -m -s /bin/bash >> /dev/null 2>&1",CMDLINE_LENGTH-1);
+    }
+    else{
+        /* For other distros, just add hpc-now and the group hpc-now would automatically created. */
+        strncpy(cmdline1,"useradd hpc-now -m -s /bin/bash >> /dev/null 2>&1",CMDLINE_LENGTH-1);
+    }
     if(system(cmdline1)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Internal Error. Please contact info@hpc-now.com for truble shooting." RESET_DISPLAY "\n");
         return -1;
@@ -482,6 +492,7 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
         system(cmdline1);
         rm_pdir(HPC_NOW_ROOT_DIR);
         system("userdel -f -r hpc-now >> /dev/null 2>&1");
+        system("groupdel hpc-now >> /dev/null 2>&1");
         return -1;
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Setting up environment variables for 'hpc-now' ...\n"); 
@@ -868,6 +879,7 @@ int uninstall_services(void){
     system(cmdline);
     rm_pdir(HPC_NOW_ROOT_DIR);
     system("userdel -f -r hpc-now >> /dev/null 2>&1");
+    system("groupdel hpc-now >> /dev/null 2>&1");
 #endif
 
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The HPC-NOW cluster services have been deleted.\n");
