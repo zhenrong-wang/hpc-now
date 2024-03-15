@@ -1272,7 +1272,7 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     char cloud_flag[16]="";
     int i;
     int down_num=0;
-    char node_name[16]="";
+    char node_name[32]="";
     int compute_node_num=0;
 
     if(get_nucid(workdir,crypto_keyfile,unique_cluster_id,16)!=0){
@@ -1320,13 +1320,13 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
             printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
             for(i=compute_node_num-down_num+1;i<compute_node_num+1;i++){
-                snprintf(node_name,15,"compute%d",i);
+                snprintf(node_name,31,"compute%d",i);
                 node_file_to_stop(stackdir,node_name,cloud_flag);
             }
             if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
                 for(i=compute_node_num-down_num+1;i<compute_node_num+1;i++){
-                    snprintf(node_name,15,"compute%d",i);
+                    snprintf(node_name,31,"compute%d",i);
                     node_file_to_running(stackdir,node_name,cloud_flag);
                 }
                 if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1356,13 +1356,13 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     for(i=1;i<compute_node_num+1;i++){
-        snprintf(node_name,15,"compute%d",i);
+        snprintf(node_name,31,"compute%d",i);
         node_file_to_stop(stackdir,node_name,cloud_flag);
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
         for(i=1;i<compute_node_num+1;i++){
-            snprintf(node_name,15,"compute%d",i);
+            snprintf(node_name,31,"compute%d",i);
             node_file_to_running(stackdir,node_name,cloud_flag);
         }
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1392,7 +1392,7 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     char string_temp[128]="";
     char unique_cluster_id[16]="";
     char stackdir[DIR_LENGTH]="";
-    char node_name[16]="";
+    char node_name[32]="";
     char cloud_flag[16]="";
     char* sshkey_dir=SSHKEY_DIR;
     int i;
@@ -1451,13 +1451,13 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
             printf("%s\n",string_temp);
             decrypt_files(workdir,crypto_keyfile);
             for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
-                snprintf(node_name,15,"compute%d",i);
+                snprintf(node_name,31,"compute%d",i);
                 node_file_to_running(stackdir,node_name,cloud_flag);
             }
             if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
                 printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ... \n");
                 for(i=compute_node_num_on+1;i<compute_node_num_on+on_num+1;i++){
-                    snprintf(node_name,15,"compute%d",i);
+                    snprintf(node_name,31,"compute%d",i);
                     node_file_to_stop(stackdir,node_name,cloud_flag);
                 }
                 if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1488,13 +1488,13 @@ int turn_on_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int 
     printf("%s\n",string_temp);
     decrypt_files(workdir,crypto_keyfile);
     for(i=compute_node_num_on+1;i<compute_node_num+1;i++){
-        snprintf(node_name,15,"compute%d",i);
+        snprintf(node_name,31,"compute%d",i);
         node_file_to_running(stackdir,node_name,cloud_flag);
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back now ...\n");
         for(i=compute_node_num_on+1;i<compute_node_num+1;i++){
-            snprintf(node_name,15,"compute%d",i);
+            snprintf(node_name,31,"compute%d",i);
             node_file_to_stop(stackdir,node_name,cloud_flag);
         }
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1851,7 +1851,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     char stackdir[DIR_LENGTH]="";
     char cloud_flag[16]="";
     int i;
-    char node_name[16]="";
+    char node_name[32]="";
     int compute_node_num=0;
     if(get_nucid(workdir,crypto_keyfile,unique_cluster_id,16)!=0){
         return -1;
@@ -1876,7 +1876,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     node_file_to_stop(stackdir,"database",cloud_flag);
     node_file_to_stop(stackdir,"natgw",cloud_flag);
     for(i=1;i<compute_node_num+1;i++){
-        snprintf(node_name,15,"compute%d",i);
+        snprintf(node_name,31,"compute%d",i);
         node_file_to_stop(stackdir,node_name,cloud_flag);
     }
     if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1885,7 +1885,7 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
         node_file_to_running(stackdir,"database",cloud_flag);
         node_file_to_running(stackdir,"natgw",cloud_flag);
         for(i=1;i<compute_node_num+1;i++){
-            snprintf(node_name,15,"compute%d",i);
+            snprintf(node_name,31,"compute%d",i);
             node_file_to_running(stackdir,node_name,cloud_flag);
         }
         if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,1)!=0){
@@ -1924,7 +1924,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     char cloud_flag[16]="";
     int i;
     char* sshkeydir=SSHKEY_DIR;
-    char node_name[16]="";
+    char node_name[32]="";
     int compute_node_num=0;
     if(get_nucid(workdir,crypto_keyfile,unique_cluster_id,16)!=0){
         return -1;
@@ -1953,7 +1953,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
     node_file_to_running(stackdir,"natgw",cloud_flag);
     if(strcmp(option,"all")==0){
         for(i=1;i<compute_node_num+1;i++){
-            snprintf(node_name,15,"compute%d",i);
+            snprintf(node_name,31,"compute%d",i);
             node_file_to_running(stackdir,node_name,cloud_flag);
         }
     }
@@ -1964,7 +1964,7 @@ int cluster_wakeup(char* workdir, char* crypto_keyfile, char* option, tf_exec_co
         node_file_to_stop(stackdir,"natgw",cloud_flag);
         if(strcmp(option,"all")==0){
             for(i=1;i<compute_node_num+1;i++){
-                snprintf(node_name,15,"compute%d",i);
+                snprintf(node_name,31,"compute%d",i);
                 node_file_to_stop(stackdir,node_name,cloud_flag);
             }
         }
@@ -2258,7 +2258,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     char master_tf[FILENAME_LENGTH]="";
     char user_passwords[FILENAME_LENGTH]="";
     char* sshkey_folder=SSHKEY_DIR;
-    char node_name[16]="";
+    char node_name[32]="";
     char cluster_name[CLUSTER_ID_LENGTH_MAX_PLUS]="";
     char username_temp[64]="";
     char user_status_temp[32]="";
@@ -2318,7 +2318,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     node_file_to_running(stackdir,"database",cloud_flag);
     compute_node_num=get_compute_node_num(stackdir,crypto_keyfile,"all");
     for(i=1;i<compute_node_num+1;i++){
-        snprintf(node_name,15,"compute%d",i);
+        snprintf(node_name,31,"compute%d",i);
         node_file_to_running(stackdir,node_name,cloud_flag);
     }
 
