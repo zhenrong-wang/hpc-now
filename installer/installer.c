@@ -291,10 +291,10 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
 #elif __linux__
     if(check_linux_packman(linux_packman,16)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Linux package manager not found. Please install the 'unzip' manually." RESET_DISPLAY "\n");
+        return -1;
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ] Detected Linux package manager: %s\n",linux_packman);
-        return -1;
     }
     if(system("which unzip >> /dev/null 2>&1")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Unzip not found. Install the utility 'unzip' with %s ...\n",linux_packman);
