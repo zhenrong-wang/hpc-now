@@ -1235,7 +1235,7 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
     }
-    if(system("which xclip >> /dev/null 2>&1")==0){
+    if(system("which xclip >> /dev/null 2>&1")!=0){
         if(strcmp(linux_packman,"pacman")!=0){
             snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
         }
