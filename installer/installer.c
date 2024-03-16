@@ -554,6 +554,15 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     if(system("grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
         system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
     }
+    if(system("which xclip >> /dev/null 2>&1")!=0){
+        if(strcmp(linux_packman,"pacman")!=0){
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
+        }
+        else{
+            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s -S xclip --noconfirm >> /dev/null 2>&1",linux_packman);
+        }
+        system(cmdline1);
+    }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking Remmina (the RDP client for GNU/Linux) now ...\n");
     if(system("which remmina >> /dev/null 2>&1")==0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina has been installed to your OS.\n");
@@ -573,15 +582,6 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
-    }
-    if(system("which xclip >> /dev/null 2>&1")!=0){
-        if(strcmp(linux_packman,"pacman")!=0){
-            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
-        }
-        else{
-            snprintf(cmdline1,CMDLINE_LENGTH-1,"%s -S xclip --noconfirm >> /dev/null 2>&1",linux_packman);
-        }
-        system(cmdline1);
     }
 linux_install_done:
     printf(GENERAL_BOLD "\n[ -INFO- ]" RESET_DISPLAY " Congrats! The HPC-NOW services are ready to run!\n");
@@ -1208,12 +1208,23 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     system("mkdir -p /usr/share/terraform >> /dev/null 2>&1 && chmod -R 755 /usr/share/terraform >> /dev/null 2>&1 && chown -R hpc-now:hpc-now /usr/share/terraform >> /dev/null 2>&1");
     snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline_temp);
+
     if(system("grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
         system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
     }
+
     if(check_linux_packman(linux_packman,16)!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to detect the package manager." RESET_DISPLAY "\n");
         goto update_done;
+    }
+    if(system("which xclip >> /dev/null 2>&1")!=0){
+        if(strcmp(linux_packman,"pacman")!=0){
+            snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
+        }
+        else{
+            snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s -S xclip --noconfirm >> /dev/null 2>&1",linux_packman);
+        }
+        system(cmdline_temp);
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking Remmina (the RDP client for GNU/Linux) now ...\n");
     if(system("which remmina >> /dev/null 2>&1")==0){
@@ -1234,15 +1245,6 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Remmina is absent. Please update with --rdp to install it later.\n");
-    }
-    if(system("which xclip >> /dev/null 2>&1")!=0){
-        if(strcmp(linux_packman,"pacman")!=0){
-            snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s install xclip -y >> /dev/null 2>&1",linux_packman);
-        }
-        else{
-            snprintf(cmdline_temp,CMDLINE_LENGTH-1,"%s -S xclip --noconfirm >> /dev/null 2>&1",linux_packman);
-        }
-        system(cmdline_temp);
     }
 #elif __APPLE__
     mk_pdir(NOW_LIC_DIR);
