@@ -255,12 +255,27 @@ coscli:
         printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 2/7 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scoscli.exe",NOW_BINARY_DIR,PATH_SLASH);
+    snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%scoscli.exe",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
         printf(RESET_DISPLAY "[  ****  ] Dataman component 2 not found. Downloading and installing ..." GREY_LIGHT "\n");
-        snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_COSCLI,filename_temp);
-        if(system(cmdline)!=0){
+        if(file_exist_or_not(filename_temp_zip)!=0){
+#ifdef _WIN32
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_COSCLI,filename_temp_zip);
+#else
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_COSCLI,filename_temp_zip);
+#endif
+            if(system(cmdline)!=0){
+                if(silent_flag!=0){
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/7." RESET_DISPLAY "\n");
+                    rm_file_or_dir(filename_temp_zip); /* Clear the failed file (if exists) */
+                }
+                inst_flag|=COSCLI_2_FAILED;
+                goto awscli;
+            }
+        }
+        if(cp_file(filename_temp_zip,filename_temp,0)!=0){
             if(silent_flag!=0){
-                printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/7." RESET_DISPLAY "\n");
+                printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 2/7." RESET_DISPLAY "\n");
                 rm_file_or_dir(filename_temp); /* Clear the failed file (if exists) */
             }
             inst_flag|=COSCLI_2_FAILED;
