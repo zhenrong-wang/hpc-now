@@ -551,8 +551,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
     system(cmdline1);
     snprintf(cmdline1,CMDLINE_LENGTH-1,"ln -s %s /usr/local/bin/hpcopr >> /dev/null 2>&1",HPCOPR_EXEC);
     system(cmdline1);
-    if(system("grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
-        system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
+    
+    /* Allow only local:hpc-now group access the x server. */
+    system("sed -i '/xhost + >> \\/dev\\/null 2>&1 # Added by HPC-NOW/d' /etc/profile >> /dev/null 2>&1");
+    if(system("grep -w \"xhost + local:hpc-now >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
+        system("echo \"xhost + local:hpc-now >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
     }
     if(system("which xclip >> /dev/null 2>&1")!=0){
         if(strcmp(linux_packman,"pacman")!=0){
@@ -1209,8 +1212,10 @@ int update_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, int
     snprintf(cmdline_temp,CMDLINE_LENGTH-1,"chmod +x %s && chmod +x %s && chown -R hpc-now:hpc-now %s && chown -R hpc-now:hpc-now %s",HPCOPR_EXEC,NOW_CRYPTO_EXEC,HPCOPR_EXEC,NOW_CRYPTO_EXEC);
     system(cmdline_temp);
 
-    if(system("grep -w \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
-        system("echo \"xhost + >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
+    /* Allow only local:hpc-now group access the x server. */
+    system("sed -i '/xhost + >> \\/dev\\/null 2>&1 # Added by HPC-NOW/d' /etc/profile >> /dev/null 2>&1");
+    if(system("grep -w \"xhost + local:hpc-now >> /dev/null 2>&1 # Added by HPC-NOW\" /etc/profile >> /dev/null 2>&1")!=0){
+        system("echo \"xhost + local:hpc-now >> /dev/null 2>&1 # Added by HPC-NOW\" >> /etc/profile");
     }
 
     if(check_linux_packman(linux_packman,16)!=0){
