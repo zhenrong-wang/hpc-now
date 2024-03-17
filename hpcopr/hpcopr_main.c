@@ -1099,10 +1099,10 @@ int main(int argc, char* argv[]){
         }
         else if(run_flag==1){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get and copy the password of %s. Please make sure:" RESET_DISPLAY "\n",user_name);
-            printf(GENERAL_BOLD "[  ****  ] 1. You are in a GNU/Linux Desktop environment (e.g. GNOME)." RESET_DISPLAY "\n",user_name);
-            printf(GENERAL_BOLD "[  ****  ] 2. Allow the user 'hpc-now' to use the current display by:" RESET_DISPLAY "\n",user_name);
-            printf("[  ****  ]    2a. Open another Terminal " GENERAL_BOLD "as the current display user" RESET_DISPLAY "\n",user_name);
-            printf("[  ****  ]    2b. Run command: " GENERAL_BOLD "xhost + local:hpc-now" RESET_DISPLAY "\n",user_name);
+            printf(GENERAL_BOLD "[  ****  ] 1. You are in a GNU/Linux Desktop environment (e.g. GNOME)." RESET_DISPLAY "\n");
+            printf(GENERAL_BOLD "[  ****  ] 2. Allow the user 'hpc-now' to use the current display by:" RESET_DISPLAY "\n");
+            printf("[  ****  ]    2a. Open another Terminal " GENERAL_BOLD "as the current display user" RESET_DISPLAY "\n");
+            printf("[  ****  ]    2b. Run command: " GENERAL_BOLD "xhost + local:hpc-now" RESET_DISPLAY "\n");
         }
         else if(run_flag==3){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cluster name." RESET_DISPLAY "\n");
