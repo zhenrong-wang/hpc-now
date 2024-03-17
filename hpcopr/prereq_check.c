@@ -576,7 +576,7 @@ gcloud_cli:
     }
     if(get_google_connectivity()!=0){
         if(silent_flag!=0){
-            printf(WARN_YELLO_BOLD "|        x Failed to connect to api.google.com. Skip installing the gcp component." RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "|        x Failed to connect to gcp. Skip installing the gcp component." RESET_DISPLAY "\n");
         }
         goto end_return;
     }
@@ -687,7 +687,9 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
     if(mk_pdir(provider_dir_tf)<0||mk_pdir(provider_dir_tofu)<0){
         return -1;
     }
-
+    if(force_repair_flag!=0){
+        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Checking the cloud provider for " GENERAL_BOLD "%s" RESET_DISPLAY " (%s) ...\n",cloud_name,seq_code);
+    }
     file_check_flag_tf=file_validity_check(provider_exec_tf,force_repair_flag,sha_exec);
     file_check_flag_tofu=file_validity_check(provider_exec_tofu,force_repair_flag,sha_exec);
     if(file_check_flag_tf==1||file_check_flag_tofu==1){
@@ -744,6 +746,9 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
             }
         }
     }
+    if(force_repair_flag!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cloud provider for %s has been validated.\n",cloud_name,seq_code);
+    }
     return 0;
 }
 
@@ -756,7 +761,7 @@ int check_and_install_prerequisitions(int repair_flag){
     int flag=0;
     int gcp_flag=0;
     int file_check_flag=0;
-    int force_repair_flag;
+    int force_repair_flag=0;
     FILE* file_p=NULL;
     char plugin_dir_root[DIR_LENGTH]="";
 #ifdef _WIN32
@@ -961,6 +966,9 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create directory %s." RESET_DISPLAY "\n",dirname_temp);
         return -5;
     }
+    if(force_repair_flag!=0){
+        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Checking and validating the " GENERAL_BOLD "Terraform executable ..." RESET_DISPLAY "\n");
+    }
     file_check_flag=file_validity_check(TERRAFORM_EXEC,force_repair_flag,sha_tf_exec_var);
     if(file_check_flag==1){
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,sha_tf_zip_var);
@@ -1012,6 +1020,9 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(RESET_DISPLAY "|        v The Terraform executable has been repaired.\n");
     }
 
+    if(force_repair_flag!=0){
+        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Checking and validating the " GENERAL_BOLD "openTofu" RESET_DISPLAY " executable ...\n");
+    }
 #ifdef _WIN32
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s\\tofu_%s_windows_amd64.zip",TF_LOCAL_PLUGINS,tofu_version_var);
 #elif __linux__
@@ -1070,6 +1081,9 @@ int check_and_install_prerequisitions(int repair_flag){
         printf(RESET_DISPLAY "|        v The openTofu executable has been repaired.\n");
     }
 
+    if(force_repair_flag!=0){
+        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Checking and validating the " GENERAL_BOLD "now-crypto" RESET_DISPLAY " executable ...\n");
+    }
     file_check_flag=file_validity_check(NOW_CRYPTO_EXEC,repair_flag,sha_now_crypto_var);
     if(file_check_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the now-crypto executable ...\n");
