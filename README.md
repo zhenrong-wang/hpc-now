@@ -194,11 +194,16 @@ In order to run the `hpcopr.exe`, you'll need to set a password and switch to th
 
 Several extra packages (around 500 MB) will be downloaded and installed. This process may needs minutes (depending on your internet connectivity).
 
-**NOTE:** For UNIX-like OS, it is not necessary to set a password for 'hpc-now' and switch to it in the terminal. You can just run `hpcopr.exe` with `sudo -Hu hpc-now` prefix. e.g.:
+**NOTE 1:** For UNIX-like OS, it is not necessary to set a password for 'hpc-now' and switch to it in the terminal. You can just run `hpcopr.exe` with `sudo -Hu hpc-now` prefix. e.g.:
 
 `sudo -Hu hpc-now hpcopr envcheck`  *The -Hu specifies the user hpc-now and its home directory*
 
-**NOTE:** This method is only valid for **sudoers**.
+This method is only valid for **sudoers**.
+
+**NOTE 2:** If you are using a GNU/Linux distro with desktop envrionment (E.g. Debian with GNOME), after switching to the user *hpc-now* in a terminal, your desktop environment may not be authorized to *hpc-now* by default. The `hpcopr rdp --copypass` function would not work properly. Please follow the instructions below:
+
+- Run command `source /etc/profile` to authorize the user *hpc-now* to use the current desktop environment.
+- Add `source /etc/profile` to the `~/.bashrc` file using a text editor. E.g. `gedit ~/.bashrc`.
 
 ## **3.3 Run**
 
