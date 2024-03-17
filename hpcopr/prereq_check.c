@@ -747,7 +747,7 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
         }
     }
     if(force_repair_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cloud provider for %s has been validated.\n",cloud_name,seq_code);
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cloud provider for %s has been validated.\n",cloud_name);
     }
     return 0;
 }
