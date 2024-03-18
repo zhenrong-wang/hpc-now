@@ -187,7 +187,7 @@ int install_bucket_clis(int silent_flag){
     int inst_flag=0;
     
     if(silent_flag!=0){
-        printf(RESET_DISPLAY GENERAL_BOLD "|        . Checking & installing the dataman components: 1/7 ..." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 1/7 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
@@ -248,11 +248,11 @@ int install_bucket_clis(int silent_flag){
         }
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 1/7 .\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
     }
 coscli:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 2/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 2/7 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scoscli.exe",NOW_BINARY_DIR,PATH_SLASH);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%scoscli.exe",TF_LOCAL_PLUGINS,PATH_SLASH);
@@ -286,11 +286,11 @@ coscli:
 #endif
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 2/7 .\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
     }
 awscli: 
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 3/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 3/7 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%saws",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef __linux__
@@ -390,11 +390,11 @@ awscli:
     }
 #endif
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 3/7 .\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
     }
 obsutil:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 4/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 4/7 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sobsutil.exe",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef _WIN32
@@ -451,11 +451,11 @@ obsutil:
         }
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 4/7 .\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
     }
 bcecmd:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 5/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 5/7 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbcecmd.exe",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef _WIN32
@@ -512,11 +512,11 @@ bcecmd:
         rm_pdir(dirname_temp_static);
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 5/7 .\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
     }
 azcopy:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 6/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 6/7 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sazcopy.exe",NOW_BINARY_DIR,PATH_SLASH);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_%s_amd64_10.20.1.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH,FILENAME_SUFFIX_FULL);
@@ -568,15 +568,15 @@ azcopy:
         rm_pdir(dirname_temp_static);
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 6/7 .\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
     }
 gcloud_cli:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "|        . Checking & installing the dataman components: 7/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 7/7 ..." RESET_DISPLAY "\n");
     }
     if(get_google_connectivity()!=0){
         if(silent_flag!=0){
-            printf(WARN_YELLO_BOLD "|        x Failed to connect to gcp. Skip installing the gcp component." RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to connect to GCP. Skip installing the GCP component." RESET_DISPLAY "\n");
         }
         goto end_return;
     }
@@ -617,7 +617,7 @@ gcloud_cli:
         }
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY "|        v Installed the dataman components: 7/7 .\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
     }
 end_return:
     return inst_flag;
@@ -747,7 +747,7 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
         }
     }
     if(force_repair_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cloud provider for %s has been validated.\n",cloud_name);
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
     }
     return 0;
 }
@@ -840,7 +840,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     if(repair_flag==1){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Start checking and repairing the HPC-NOW services now ... \n");
-        printf("|        . Checking and repairing the registry now ...\n");
+        printf("[ -INFO- ] Checking and repairing the registry now ...\n");
     }
     else{
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the environment for HPC-NOW services ...\n");
@@ -848,13 +848,13 @@ int check_and_install_prerequisitions(int repair_flag){
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0||repair_flag==1||repair_flag==2){
-        printf("|        . Checking whether Google Cloud Platform (GCP) is accessible ...\n");
+        printf("[ -INFO- ] Checking whether Google Cloud Platform (GCP) is accessible ...\n");
         check_internet_google();
     }
     gcp_flag=get_google_connectivity();
     if(gcp_flag==1){
         if(repair_flag==1){
-            printf(WARN_YELLO_BOLD "|        x Failed to call GCP's API. GCP is unavailable currently." RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to call GCP's API. GCP is unavailable currently." RESET_DISPLAY "\n");
         }
         else{
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to call GCP's API. GCP is unavailable currently." RESET_DISPLAY "\n");
@@ -862,27 +862,27 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     else if(gcp_flag==-1){
         if(repair_flag==1){
-            printf(WARN_YELLO_BOLD "|        x Internal error (GCP connectivity status is absent)." RESET_DISPLAY "\n");
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Internal error (GCP connectivity status is absent)." RESET_DISPLAY "\n");
         }
         else{
             printf(WARN_YELLO_BOLD "[ -WARN- ] Internal error (GCP connectivity status is absent)." RESET_DISPLAY "\n");
         }
     }
     if(repair_flag==1){
-        printf("|        . Checking and repairing the registry now ...\n");
+        printf("[ -INFO- ] Checking and repairing the registry now ...\n");
     }
     if(check_cluster_registry()!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to check and repair the cluster registry." RESET_DISPLAY "\n");
         return -1;
     }
     if(repair_flag==1){
-        printf(RESET_DISPLAY "|        v The registry has been repaired.\n");
-        printf("|        . Checking and repairing the location configuration file now ...\n");
+        printf(RESET_DISPLAY "[  ****  ] The registry has been repaired.\n");
+        printf("[ -INFO- ] Checking and repairing the location configuration file now ...\n");
         if(reset_locations()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the locations for binaries and templates." RESET_DISPLAY "\n");
             return -3;
         }
-        printf( RESET_DISPLAY "|        v All the locations has been reset to the default ones.\n");
+        printf( RESET_DISPLAY "[  ****  ] All the locations has been reset to the default ones.\n");
     }
     flag=get_locations();
     if(flag!=0){
@@ -915,24 +915,24 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     if(file_exist_or_not(TF_RUNNING_CONFIG)!=0||repair_flag==1){
         if(repair_flag==1){
-            printf("|        . Resetting TF running configurations ...\n");
+            printf("[ -INFO- ] Checking TF running configurations ...\n");
         }
         if(reset_tf_running()!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to create tf_running_config file." RESET_DISPLAY "\n");
         }
         if(repair_flag==1){
-            printf("|        v TF running configurations reset.\n");
+            printf("[  ****  ] TF running configurations reset.\n");
         }
     }
     if(repair_flag==1){
-        printf( RESET_DISPLAY "|        v Location configuration has been repaired.\n");
-        printf("|        . Checking and repairing the versions and hashes ...\n");
+        printf( RESET_DISPLAY "[  ****  ] Location configuration has been repaired.\n");
+        printf("[ -INFO- ] Checking and repairing the versions and hashes ...\n");
         if(reset_vers_sha_vars()!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to reset the versions and hashes." RESET_DISPLAY "\n");
             return 7;
         }
-        printf( RESET_DISPLAY "|        v Versions and hashes been repaired.\n");
-        printf("|        . Checking and repairing the key directories and files ...\n");
+        printf( RESET_DISPLAY "[  ****  ] Versions and hashes been repaired.\n");
+        printf("[ -INFO- ] Checking and repairing the key directories and files ...\n");
     }
     flag=get_vers_sha_vars();
     if(flag!=0){
@@ -1017,7 +1017,7 @@ int check_and_install_prerequisitions(int repair_flag){
     chmod(TERRAFORM_EXEC,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
     if(repair_flag==1){
-        printf(RESET_DISPLAY "|        v The Terraform executable has been repaired.\n");
+        printf(RESET_DISPLAY "[  ****  ] The Terraform executable has been repaired.\n");
     }
 
     if(force_repair_flag!=0){
@@ -1078,7 +1078,7 @@ int check_and_install_prerequisitions(int repair_flag){
     chmod(TOFU_EXEC,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
     if(repair_flag==1){
-        printf(RESET_DISPLAY "|        v The openTofu executable has been repaired.\n");
+        printf(RESET_DISPLAY "[  ****  ] The openTofu executable has been repaired.\n");
     }
 
     if(force_repair_flag!=0){
@@ -1117,7 +1117,7 @@ int check_and_install_prerequisitions(int repair_flag){
     chmod(NOW_CRYPTO_EXEC,S_IRWXU|S_IXGRP|S_IXOTH);
 #endif
     if(repair_flag==1){
-        printf(RESET_DISPLAY "|        v The now-crypto executable has been repaired.\n");
+        printf(RESET_DISPLAY "[  ****  ] The now-crypto executable has been repaired.\n");
     }
 
 #ifdef _WIN32
@@ -1153,8 +1153,8 @@ int check_and_install_prerequisitions(int repair_flag){
     }
 #endif
     if(repair_flag==1){
-        printf(RESET_DISPLAY "|        v The terraformrc file has been repaired.\n");
-        printf("|        . Checking and repairing the TF Providers ... \n");
+        printf(RESET_DISPLAY "[  ****  ] The terraformrc file has been repaired.\n");
+        printf("[ -INFO- ] Checking and repairing the TF Providers ... \n");
     }
 #ifdef _WIN32
     snprintf(plugin_dir_root,DIR_LENGTH-1,"%s\\terraform.d\\plugins\\",appdata_dir);
@@ -1186,7 +1186,7 @@ int check_and_install_prerequisitions(int repair_flag){
         return 3;
     }
     if(repair_flag==1){
-        printf(RESET_DISPLAY "|        v The Terraform Providers have been repaired.\n");
+        printf(RESET_DISPLAY "[  ****  ] The Terraform Providers have been repaired.\n");
     }
     printf(RESET_DISPLAY);
     flag=install_bucket_clis(force_repair_flag);
@@ -1219,7 +1219,7 @@ int check_and_install_prerequisitions(int repair_flag){
         fclose(file_p);
     }
     if(repair_flag==1){
-        printf("|        . Checking and repairing the key folders and environment variables ... \n");
+        printf("[ -INFO- ] Checking and repairing the key folders and ENV VARs ... \n");
     }
 #ifdef _WIN32
     snprintf(filename_temp,FILENAME_LENGTH-1,"c:\\users\\%s\\.cos.yaml",home_path);
@@ -1263,8 +1263,6 @@ int check_and_install_prerequisitions(int repair_flag){
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sLICENSE",NOW_BINARY_DIR,PATH_SLASH);
     rm_file_or_dir(filename_temp);
     if(repair_flag==1){
-        printf(RESET_DISPLAY "|        v Environment variables have been repaired.\n");
-        printf("|        v SSH files have been repaired. \n");
         if(gcp_flag==0){
             printf(HIGH_GREEN_BOLD "[ -INFO- ] Running environment successfully checked and repaired." RESET_DISPLAY "\n");
         }
