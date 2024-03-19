@@ -693,8 +693,7 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
     file_check_flag_tf=file_validity_check(provider_exec_tf,force_repair_flag,sha_exec);
     file_check_flag_tofu=file_validity_check(provider_exec_tofu,force_repair_flag,sha_exec);
     if(file_check_flag_tf==1||file_check_flag_tofu==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud provider for %s (%s) ...\n",cloud_name,seq_code);
-        printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud provider for %s (%s) ..." RESET_DISPLAY GREY_LIGHT "\n",cloud_name,seq_code);
         file_check_flag=file_validity_check(provider_zip,force_repair_flag,sha_zip);
         if(file_check_flag==1){
             if(tf_loc_flag_var==1){
@@ -973,8 +972,7 @@ int check_and_install_prerequisitions(int repair_flag){
     if(file_check_flag==1){
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,sha_tf_zip_var);
         if(file_check_flag==1){
-            printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the Terraform binary ...\n");
-            printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+            printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the Terraform binary ..." RESET_DISPLAY GREY_LIGHT "\n");
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
                 snprintf(cmdline,CMDLINE_LENGTH-1,"copy /y %s\\tf-win\\terraform_%s_windows_amd64.zip %s",url_tf_root_var,terraform_version_var,filename_temp_zip);
@@ -1034,8 +1032,7 @@ int check_and_install_prerequisitions(int repair_flag){
     if(file_check_flag==1){
         file_check_flag=file_validity_check(filename_temp_zip,force_repair_flag,sha_tofu_zip_var);
         if(file_check_flag==1){
-            printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the openTofu binary ...\n");
-            printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+            printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the openTofu binary ..." RESET_DISPLAY GREY_LIGHT "\n");
             if(tf_loc_flag_var==1){
 #ifdef _WIN32
                 snprintf(cmdline,CMDLINE_LENGTH-1,"copy /y %s\\tf-win\\tofu_%s_windows_amd64.zip %s",url_tf_root_var,tofu_version_var,filename_temp_zip);
@@ -1086,8 +1083,7 @@ int check_and_install_prerequisitions(int repair_flag){
     }
     file_check_flag=file_validity_check(NOW_CRYPTO_EXEC,repair_flag,sha_now_crypto_var);
     if(file_check_flag==1){
-        printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the now-crypto executable ...\n");
-        printf("[  ****  ] Usually *ONLY* for the first time of running hpcopr or repair mode." RESET_DISPLAY "\n" GREY_LIGHT "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Downloading/Copying the now-crypto executable ..." RESET_DISPLAY GREY_LIGHT "\n");
         if(now_crypto_loc_flag_var==1){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"copy /y %s\\now-crypto-aes-win.exe %s",url_now_crypto_var,NOW_CRYPTO_EXEC);
