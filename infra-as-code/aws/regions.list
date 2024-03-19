@@ -8,11 +8,11 @@
 [cn-northwest-1] cn-northwest-1c [Default]
 
 [Region:us-east-1] N.Virginia [Default]
-[us-east-1] us-east-1a
+[us-east-1] us-east-1a [Default]
 [us-east-1] us-east-1b
 [us-east-1] us-east-1c
 [us-east-1] us-east-1d
-[us-east-1] us-east-1e [Default]
+[us-east-1] us-east-1e
 [us-east-1] us-east-1f
 
 [Region:us-east-2] Ohio

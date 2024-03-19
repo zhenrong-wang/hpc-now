@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0127"
+#define CORE_VERSION_CODE "0.3.1.0129"
 
 #define NULL_PTR_ARG -127
 
@@ -58,13 +58,13 @@ typedef signed long long int int_64bit;
  * There are some subdirectory paths in the program, please follow the directory structure
  * Otherwise the repository won't work properly
  */
-#define DEFAULT_URL_TF_ROOT           "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/tf-root/"
-#define DEFAULT_URL_CODE_ROOT         "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/infra-as-code/"
-#define DEFAULT_URL_SHELL_SCRIPTS     "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/scripts/"
-#define DEFAULT_URL_APPS_INST_SCRIPTS "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/scripts/apps-install/"
-#define DEFAULT_URL_NOW_CRYPTO        "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/now-crypto-aes/"
-#define DEFAULT_INITUTILS_REPO_ROOT   "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/"
-#define DEFAULT_APPS_PKGS_REPO_ROOT   "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/packages/"
+#define DEFAULT_URL_TF_ROOT           "https://hpc-now-1308065454.cos.accelerate.myqcloud.com/tf-root/"
+#define DEFAULT_URL_CODE_ROOT         "https://hpc-now-1308065454.cos.accelerate.myqcloud.com/infra-as-code/"
+#define DEFAULT_URL_SHELL_SCRIPTS     "https://hpc-now-1308065454.cos.accelerate.myqcloud.com/scripts/"
+#define DEFAULT_URL_APPS_INST_SCRIPTS "https://hpc-now-1308065454.cos.accelerate.myqcloud.com/scripts/apps-install/"
+#define DEFAULT_URL_NOW_CRYPTO        "https://hpc-now-1308065454.cos.accelerate.myqcloud.com/now-crypto-aes/"
+#define DEFAULT_INITUTILS_REPO_ROOT   "https://hpc-now-1308065454.cos.accelerate.myqcloud.com/utils/"
+#define DEFAULT_APPS_PKGS_REPO_ROOT   "https://hpc-now-1308065454.cos.accelerate.myqcloud.com/packages/"
 #define DEFAULT_LOCATIONS_COUNT       7
 
 /* Bucket CLI download and installation indicators */

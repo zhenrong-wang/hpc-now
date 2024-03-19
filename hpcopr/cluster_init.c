@@ -71,49 +71,43 @@ int get_static_conf_files(char* confdir, char* cloud_name, int code_loc_flag, ch
         snprintf(url_code,DIR_LENGTH_EXT-1,"%s%s/",url_code_root,cloud_name);
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sreconf.list",confdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        if(code_loc_flag==1){
-            snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sreconf.list",url_code,PATH_SLASH);
-            if(cp_file(filename_temp2,filename_temp,0)!=0){
-                return 2;
-            }
+    if(code_loc_flag==1){
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sreconf.list",url_code,PATH_SLASH);
+        if(cp_file(filename_temp2,filename_temp,0)!=0){
+            return 2;
         }
-        else{
-            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %sreconf.list -o %s -s",url_code,filename_temp);
-            if(system(cmdline)!=0){
-                return 2;
-            }
+    }
+    else{
+        snprintf(cmdline,CMDLINE_LENGTH-1,"curl %sreconf.list -o %s -s",url_code,filename_temp);
+        if(system(cmdline)!=0){
+            return 2;
         }
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sregions.list",confdir,PATH_SLASH);
-    if(file_exist_or_not(filename_temp)!=0){
-        if(code_loc_flag==1){
-            snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sregions.list",url_code,PATH_SLASH);
-            if(cp_file(filename_temp2,filename_temp,0)!=0){
-                return 2;
-            }
+    if(code_loc_flag==1){
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%sregions.list",url_code,PATH_SLASH);
+        if(cp_file(filename_temp2,filename_temp,0)!=0){
+            return 2;
         }
-        else{
-            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %sregions.list -o %s -s",url_code,filename_temp);
-            if(system(cmdline)!=0){
-                return 2;
-            }
+    }
+    else{
+        snprintf(cmdline,CMDLINE_LENGTH-1,"curl %sregions.list -o %s -s",url_code,filename_temp);
+        if(system(cmdline)!=0){
+            return 2;
         }
     }
     if(strcmp(cloud_name,"alicloud")==0||strcmp(cloud_name,"qcloud")==0){
         snprintf(filename_temp,FILENAME_LENGTH-1,"%s%snas_zones.list",confdir,PATH_SLASH);
-        if(file_exist_or_not(filename_temp)!=0){
-            if(code_loc_flag==1){
-                snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%snas_zones_%s.txt",url_code,PATH_SLASH,cloud_name);
-                if(cp_file(filename_temp2,filename_temp,0)!=0){
-                    return 2;
-                }
+        if(code_loc_flag==1){
+            snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%snas_zones_%s.txt",url_code,PATH_SLASH,cloud_name);
+            if(cp_file(filename_temp2,filename_temp,0)!=0){
+                return 2;
             }
-            else{
-                snprintf(cmdline,CMDLINE_LENGTH-1,"curl %snas_zones_%s.txt -o %s -s",url_code,cloud_name,filename_temp);
-                if(system(cmdline)!=0){
-                    return 2;
-                }
+        }
+        else{
+            snprintf(cmdline,CMDLINE_LENGTH-1,"curl %snas_zones_%s.txt -o %s -s",url_code,cloud_name,filename_temp);
+            if(system(cmdline)!=0){
+                return 2;
             }
         }
     }
@@ -360,8 +354,8 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
         strcpy(default_os_image,"centoss9");
     }
     else if(strcmp(cloud_flag,"CLOUD_C")==0){
-        strcpy(default_region,"cn-northwest-1");
-        strcpy(default_zone,"cn-northwest-1a");
+        strcpy(default_region,"us-east-1");
+        strcpy(default_zone,"us-east-1a");
         strcpy(default_master_inst,"a8c16g");
         strcpy(default_compute_inst,"a4c8g");
         strcpy(default_os_image,"centoss9");
