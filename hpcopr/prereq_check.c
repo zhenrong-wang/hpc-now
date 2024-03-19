@@ -192,7 +192,7 @@ int install_bucket_clis(int silent_flag){
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf(RESET_DISPLAY "[  ****  ] Dataman component 1 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Not found. Downloading and installing now ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_OSSUTIL,filename_temp_zip);
@@ -248,7 +248,7 @@ int install_bucket_clis(int silent_flag){
         }
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed the component successfully." RESET_DISPLAY "\n");
     }
 coscli:
     if(silent_flag!=0){
@@ -257,7 +257,7 @@ coscli:
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scoscli.exe",NOW_BINARY_DIR,PATH_SLASH);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%scoscli.exe",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf(RESET_DISPLAY "[  ****  ] Dataman component 2 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Not found. Downloading and installing now ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_COSCLI,filename_temp_zip);
@@ -286,7 +286,7 @@ coscli:
 #endif
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed the component successfully." RESET_DISPLAY "\n");
     }
 awscli: 
     if(silent_flag!=0){
@@ -296,7 +296,7 @@ awscli:
 #ifdef __linux__
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sawscliv2.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf(RESET_DISPLAY "[  ****  ] Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Not found. Downloading and installing now ..." GREY_LIGHT "\n");
         batch_file_operation(NOW_BINARY_DIR,"aws*","","rm",0);
         if(file_exist_or_not(filename_temp_zip)!=0){
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
@@ -327,7 +327,7 @@ awscli:
 #elif __APPLE__
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sAWSCLIV2.pkg",TF_LOCAL_PLUGINS,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0){
-        printf(RESET_DISPLAY "[  ****  ] Dataman component 3 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Not found. Downloading and installing now ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
@@ -390,7 +390,7 @@ awscli:
     }
 #endif
     if(silent_flag!=0){
-        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed the component successfully." RESET_DISPLAY "\n");
     }
 obsutil:
     if(silent_flag!=0){
@@ -403,7 +403,7 @@ obsutil:
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sobsutil_amd64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        printf(RESET_DISPLAY "[  ****  ] Dataman component 4 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Not found. Downloading and installing now ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_OBSUTIL,filename_temp_zip);
@@ -451,7 +451,7 @@ obsutil:
         }
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed the component successfully." RESET_DISPLAY "\n");
     }
 bcecmd:
     if(silent_flag!=0){
@@ -466,7 +466,7 @@ bcecmd:
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%smac-bcecmd-0.4.1.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        printf(RESET_DISPLAY "[  ****  ] Dataman component 5 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Not found. Downloading and installing now ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_BCECMD,filename_temp_zip);
@@ -512,7 +512,7 @@ bcecmd:
         rm_pdir(dirname_temp_static);
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed the component successfully." RESET_DISPLAY "\n");
     }
 azcopy:
     if(silent_flag!=0){
@@ -521,7 +521,7 @@ azcopy:
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sazcopy.exe",NOW_BINARY_DIR,PATH_SLASH);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_%s_amd64_10.20.1.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH,FILENAME_SUFFIX_FULL);
     if(file_exist_or_not(filename_temp)!=0){
-        printf(RESET_DISPLAY "[  ****  ] Dataman component 6 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Not found. Downloading and installing now ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_AZCOPY,filename_temp_zip);
@@ -568,7 +568,7 @@ azcopy:
         rm_pdir(dirname_temp_static);
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed the component successfully." RESET_DISPLAY "\n");
     }
 gcloud_cli:
     if(silent_flag!=0){
@@ -589,7 +589,7 @@ gcloud_cli:
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sgoogle-cloud-cli-449.0.0-darwin-x86_64.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH);
 #endif
     if(file_exist_or_not(filename_temp)!=0){
-        printf(RESET_DISPLAY "[  ****  ] Dataman component 7 not found. Downloading and installing ..." GREY_LIGHT "\n");
+        printf(RESET_DISPLAY "[  ****  ] Not found. Downloading and installing now ..." GREY_LIGHT "\n");
         if(file_exist_or_not(filename_temp_zip)!=0){
 #ifdef _WIN32
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_GCLOUD,filename_temp_zip);
@@ -617,7 +617,7 @@ gcloud_cli:
         }
     }
     if(silent_flag!=0){
-        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed the component successfully." RESET_DISPLAY "\n");
     }
 end_return:
     return inst_flag;
@@ -688,12 +688,12 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
         return -1;
     }
     if(force_repair_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Checking the cloud provider for " GENERAL_BOLD "%s" RESET_DISPLAY " (%s) ...\n",cloud_name,seq_code);
+        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Checking the provider for " GENERAL_BOLD "%s" RESET_DISPLAY " (%s) ...\n",cloud_name,seq_code);
     }
     file_check_flag_tf=file_validity_check(provider_exec_tf,force_repair_flag,sha_exec);
     file_check_flag_tofu=file_validity_check(provider_exec_tofu,force_repair_flag,sha_exec);
     if(file_check_flag_tf==1||file_check_flag_tofu==1){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Downloading/Copying the cloud provider for %s (%s) ..." RESET_DISPLAY GREY_LIGHT "\n",cloud_name,seq_code);
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Getting and installing the provider for %s (%s) ..." RESET_DISPLAY GREY_LIGHT "\n",cloud_name,seq_code);
         file_check_flag=file_validity_check(provider_zip,force_repair_flag,sha_zip);
         if(file_check_flag==1){
             if(tf_loc_flag_var==1){
@@ -746,7 +746,7 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
         }
     }
     if(force_repair_flag!=0){
-        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed successfully." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed the provider successfully." RESET_DISPLAY "\n");
     }
     return 0;
 }
@@ -847,7 +847,7 @@ int check_and_install_prerequisitions(int repair_flag){
 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
     if(file_exist_or_not(filename_temp)!=0||repair_flag==1||repair_flag==2){
-        printf("[ -INFO- ] Checking whether Google Cloud Platform (GCP) is accessible ...\n");
+        printf("[ -INFO- ] Checking whether Google Cloud Platform is accessible ...\n");
         check_internet_google();
     }
     gcp_flag=get_google_connectivity();
