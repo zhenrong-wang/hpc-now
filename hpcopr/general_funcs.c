@@ -1963,8 +1963,9 @@ int folder_check_general(char* foldername, int rw_flag){
 }
 
 /* 
- * Return 1: Not empty
- * Return 0: Empty
+ * Return:  0 - Successfully checked and empty;
+ *          1 - Successfully checked and NOT empty
+ *         -1 - Failed to check 
  */
 int folder_empty_or_not(char* foldername){
     if(foldername==NULL){
@@ -2003,7 +2004,7 @@ int folder_empty_or_not(char* foldername){
     }
     closedir(dir);
     if(errno!=0){
-        return 1; /* readdir() reports error. Folder may not be empty. */
+        return -1; /* readdir() reports error. */
     }
     return 0; /* Folder is empty. */
 #endif
