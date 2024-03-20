@@ -1994,6 +1994,7 @@ int folder_empty_or_not(char* foldername){
     if(dir==NULL){
         return -1; /* Failed to open the dir. */
     }
+    errno=0;
     while((entry=readdir(dir))!=NULL){
         if(strcmp(entry->d_name,".")!=0&&strcmp(entry->d_name,"..")!=0){
             closedir(dir);
