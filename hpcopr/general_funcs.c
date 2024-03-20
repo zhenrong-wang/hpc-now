@@ -2001,6 +2001,7 @@ int folder_empty_or_not(char* foldername){
             return 1; /* If iterm(s) found, not empty*/
         }
     }
+    closedir(dir);
     if(errno!=0){
         return 1; /* readdir() reports error. Folder may not be empty. */
     }
