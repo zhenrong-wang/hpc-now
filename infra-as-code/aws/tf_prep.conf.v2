@@ -1,8 +1,8 @@
 # This file is generated and maintained by the HPC-NOW services. We do not recommend
 # to edit it manually. If need to do so, please follow the strict format.
 cluster_id          : hpcnow
-region_id           : cn-northwest-1
-zone_id             : cn-northwest-1a
+region_id           : us-east-1
+zone_id             : us-east-1a
 node_num            : 1
 hpc_user_num        : 3
 master_init_param   : db skip
