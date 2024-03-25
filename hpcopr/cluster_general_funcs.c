@@ -2699,9 +2699,6 @@ int prompt_to_input(const char* prompt_string, char reply_string[], unsigned int
         reply_string[i]=ch;
         i++;
     }
-    if(ch==EOF){
-        return -1; /* Abnormal */
-    }
     reply_string[i]='\0';
     if(i==reply_len_max-1&&ch!='\n'){
         fflush_stdin(); /* If the maximum of reply string reached, flush the stdin. */
