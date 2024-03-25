@@ -2696,7 +2696,6 @@ int prompt_to_input(const char* prompt_string, char reply_string[], unsigned int
     }
     printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY "");
     fgets(reply_string,reply_len_max,stdin);
-    fflush_stdin();
     for(i=0;i<reply_len_max;i++){
         if(reply_string[i]=='\n'||reply_string[i]=='\r'){
             reply_string[i]='\0';
