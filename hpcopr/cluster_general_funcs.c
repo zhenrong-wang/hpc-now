@@ -2687,7 +2687,7 @@ int prompt_to_confirm_args(const char* prompt_string, const char* confirm_string
  * return 0 : user input
  */
 int prompt_to_input(const char* prompt_string, char reply_string[], unsigned int reply_len_max, int batch_flag_local){
-    int i;
+    int i=0,ch=0;
     if(batch_flag_local==0){
         return 1;
     }
@@ -2695,11 +2695,16 @@ int prompt_to_input(const char* prompt_string, char reply_string[], unsigned int
         printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "%s\n",prompt_string);
     }
     printf(GENERAL_BOLD "[ INPUT: ] " RESET_DISPLAY "");
-    fgets(reply_string,reply_len_max,stdin);
-    for(i=0;i<reply_len_max;i++){
-        if(reply_string[i]=='\n'||reply_string[i]=='\r'){
-            reply_string[i]='\0';
-        }
+    while((ch=getchar())!='\n'&&ch!=EOF&&i<reply_len_max-1){
+        reply_string[i]=ch;
+        i++;
+    }
+    if(ch==EOF){
+        return -1; /* Abnormal */
+    }
+    reply_string[i]='\0';
+    if(i==reply_len_max-1&&ch!='\n'){
+        fflush_stdin(); /* If the maximum of reply string reached, flush the stdin. */
     }
     return 0;
 }
