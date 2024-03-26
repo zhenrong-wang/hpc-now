@@ -86,7 +86,7 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 
 **Note 1**: Currently only **x86_64** platform is supported. If you are using other cpu platforms, please let us know.
 
-**Note 2**: Instead of compiling/building from the source code, you can download pre-built executables/binaries from the release of this repository. In this case, the dev/build tools (`git`, `gcc`, `clang`, or `mingw`) are **NOT** needed.
+**Note 2**: Instead of compiling/building from the source code, you can download pre-built executables/binaries from the release of this repository. In this case, the dev/build tools (`git`, `gcc`, `clang`, or `mingw-w64`) are **NOT** needed.
 
 **Note 3**: The HPC-NOW relies on some fundamental system utilities. In most cases, these utilities have been included in the OS distros. See the list below. If you are not sure whether the utilities are installed or not, please run the commands in a terminal/command prompt window.
 
