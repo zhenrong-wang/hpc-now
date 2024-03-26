@@ -5,70 +5,150 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
+/* 
+ * This file contains fundamental and general functions to be used by the 
+ * HPC-NOW Project.
+ * Including file operations, directory operations, string operations, etc.
+ * Any updates of these functions should be carefully checked and 
+ * validated because the whole project would be affected.
+ */
+
 #ifndef GENERAL_FUNCS_H
 #define GENERAL_FUNCS_H
 
+/* A cross-platform sleep function. The time resolution is second. */
 void sleep_func(unsigned int time);
+
+/* 
+ * Convert a given string to a positive number.
+ * Return -1 or NULL_PTR_ARG (-127) if the string is invalid. 
+ */
 int string_to_positive_num(char* string);
+
+/* Discard the chars in the STDIN buffer. */
 void fflush_stdin(void);
 
 /* DEPRECATED. Please do not use. */
 void reset_string(char* orig_string);
-/* SECURE VERSION. */
+
+/* Reset a string to '\0' as an empty string. */
 void reset_nstring(char string[], unsigned int string_length);
 
 /* DEPRECATED. Please do not use. */
 int get_key_value(char* filename, char* key, char ch, char* value);
-/* SECURE VERSION. */
+
+/* 
+ * Extract a value against a key from a given file. 
+ * The key and value needs to be sperated by a given char.
+ * E.g. path: /opt/my/path
+ * The key here is 'path:', the value is /opt/my/path, and the splitter is ' ' 
+ */
 int get_key_nvalue(char* filename, unsigned int linelen_max, char* key, char ch, char value[], unsigned int valen_max);
 
 /* DEPRECATED. Please do not use. */
 int calc_str_num(char* line, char split_ch);
-/* SECURE VERSION. */
+
+/* 
+ * Calculate how many substrings in a given line_string.
+ * The substrings are seperated by a given char.
+ * E.g. AxBBxCCCxDDD contains 4 substrings seperated by 'x'.
+ */
 int calc_str_nnum(char* line, char split_ch);
 
 /* DEPRECATED. Please do not use. */
 int get_seq_string(char* line, char split_ch, int string_seq, char* get_string);
-/* SECURE VERSION. */
+
+/* 
+ * Get the Nth substring seperated by a given char in a string.
+ * E.g. The second substring seperated by ' ' of "Hello World!" should be "World!" 
+ * The result is written to get_str[].
+ */
 int get_seq_nstring(char line[], char split_ch, int string_seq, char get_str[], unsigned int getstr_len_max);
 
 /* DEPRECATED. Please do not use. */
 int fgetline(FILE* file_p, char* line_string);
-/* SECURE VERSION. */
+
+/* 
+ * Get a line from a FILE stream and written to line_string.
+ * Maximum max_length-1 chars are saved, others would be discarded.
+ * return non-zero if something abnormal happens.
+ */
 int fngetline(FILE* file_p, char line_string[], unsigned int max_length);
 
 /* DEPRECATED. Please do not use. */
 int contain_or_not(const char* line, const char* findkey);
-/* SECURE VERSION. */
+
+/* 
+ * Whether a given string line[] contains a substring findkey[].
+ * If contains, return a positive integer that tells how many substrings found.
+ * E.g. "Hello World!" contains 2 "o" substrings
+ */
 int contain_or_nnot(char line[], char findkey[]);
 
 /* DEPRECATED. Please do not use. */
 int global_replace(char* filename, char* orig_string, char* new_string);
-/* SECURE VERSION. */
+
+/* 
+ * Replace the original string (*orig_string) to a new string (*new_string) in a given file.
+ * CAUTION: All the original strings would be replaced.
+ * return non-zero if something abnormal happens
+ */
 int global_nreplace(char* filename, unsigned int linelen_max, char* orig_string, char* new_string);
 
 /* DEPRECATED. Please do not use. */
 int line_replace(char* orig_line, char* new_line, char* orig_string, char* new_string);
-/* SECURE VERSION. */
+
+/* 
+ * Replace the original string (*orig_string) to a new string (*new_string) in a given string (*orig_line).
+ * Returns the pointer of the new line.
+ * CAUTION: Memory allocated in this function. Any receivers should take care of the memory.
+ * return non-zero if something error happens.
+ */
 char* line_nreplace(char* orig_line, int contain_count, char* orig_string, char* new_string);
 
 /* DEPRECATED. Please do not use. */
 int find_and_replace(char* filename, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5, char* orig_string, char* new_string);
-/* SECURE VERSION. */
+
+/* 
+ * Find a target line and replace the original string to a new string.
+ * The target line should contains all the findkeys (maximum 5).
+ * You can specify an empty findkey if you'd like to ignore it.
+ */
 int find_and_nreplace(char* filename, unsigned int linelen_max, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5, char* orig_string, char* new_string);
 
 /* DEPRECATED. Please do not use. */
 int find_multi_keys(char* filename, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5);
-/* SECURE VERSION. */
+
+/*
+ * Find a target line that contains all the findkeys (maximum 5).
+ * You can specify an empty findkey if you'd like to ignore it.
+ */
 int find_multi_nkeys(char* filename, unsigned int linelen_max, char* findkey1, char* findkey2, char* findkey3, char* findkey4, char* findkey5);
 
 /* DEPRECATED. Please do not use. */
 int find_and_get(char* filename, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char* get_string);
-/* SECURE VERSION. */
+
+/* 
+ * Find a target line by 2 layers of search. 
+ * First layer: contains all the primary keys. And then searching in the next 'plus_line_num' lines.
+ * Second layer: contains all the findkeys.
+ * Then get the Nth substring of the target line and write it to get_str[].
+ */
 int find_and_nget(char* filename, unsigned int linelen_max, char* findkey_primary1, char* findkey_primary2, char* findkey_primary3, int plus_line_num, char* findkey1, char* findkey2, char* findkey3, char split_ch, int string_seq_num, char get_str[], int get_strlen_max);
 
+/* 
+ * Detect whether a given file exists or not.
+ * return 0 if it exists, non-zero if not (or something abnormal happens)
+ */
 int file_exist_or_not(char* filename);
+
+/* 
+ * Detect whether a given file is empty or not. 
+ * return 0 if it is empty, a positive integer if not.
+ */
 int file_empty_or_not(char* filename);
+
+/* Detect whether a folder exists or not. */
 int folder_exist_or_not(char* foldername);
 int folder_check_general(char* foldername, int rw_flag);
 int folder_empty_or_not(char* foldername);

@@ -5,6 +5,14 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
+/* 
+ * This file contains fundamental and general functions to be used by the 
+ * HPC-NOW Project.
+ * Including file operations, directory operations, string operations, etc.
+ * Any updates of these functions should be carefully checked and 
+ * validated because the whole project would be affected.
+ */
+
 #ifndef _WIN32
 #define _GNU_SOURCE 1
 #include <termios.h> /* For terminal operation of the getpass function*/
