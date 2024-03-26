@@ -150,24 +150,62 @@ int file_empty_or_not(char* filename);
 
 /* Detect whether a folder exists or not. */
 int folder_exist_or_not(char* foldername);
+
+/* 
+ * This is a more generalized version of folder_exist_or_not().
+ * Users can check a given folder with the RW flag.
+ * rw_flag: 0-existence, 2-Readable, 4-Writable, 6-R&W.
+ * return non-zero if check faild.
+ */
 int folder_check_general(char* foldername, int rw_flag);
+
+/* 
+ * Detect whether a given folder is empty or not.
+ * Return 0 if empty, non-zero if not (or check failed).
+ */
 int folder_empty_or_not(char* foldername);
+
+/* Deprecated, please do not use*/
 int delete_file_or_dir(char* file_or_dir);
+
+/* Get the size of a given file. */
 int_64bit get_filesize_byte(FILE* file_p);
 
+/* Remove a given file or directory. Return 0 if successfully. */
 int rm_file_or_dir(char* file_or_dir);
+
+/* Make a directory recursively. */
 int mk_pdir(char* pathname);
+
+/* Remove a directory recursively. */
 int rm_pdir(char* pathname);
+
+/* Copy a file. force_flag=0 indicates a force operation. */
 int cp_file(char* current_filename, char* new_filename, int force_flag);
+
+/* Fuzzy string compare. E.g. fuzzy_strcmp("hpc-now", "hpc*") should return 0. */
 int fuzzy_strcmp(char* target_string, char* fuzzy_string);
+
+/* Get the first fuzzy subpath of a given path. */
 char* get_first_fuzzy_subpath(char* pathname, char* fuzzy_name, unsigned int buffer_size);
+
+/* File operation (copy, move, or delete) in batch. */
 int batch_file_operation(char* source_dir, char* fuzzy_filename, char* target_dir, char* option, int force_flag); 
 
+/* Check the complexity of a password. */
 int password_complexity_check(char* password, char* special_chars);
-int generate_random_passwd(char* password); /* This function is deprecated, please use generate_random_npasswd */
+
+/* This function is deprecated, please use generate_random_npasswd */
+int generate_random_passwd(char* password); 
+
+/* Generate a random password with length password_array_len. */
 int generate_random_npasswd(char password_array[], unsigned int password_array_len, char special_chars_array[], unsigned int special_chars_array_len);
 int generate_random_db_passwd(char password[], unsigned int len_max);
-int generate_random_string(char* random_string); /* This function is deprecated, please use generate_random_nstring*/
+
+/* This function is deprecated, please use generate_random_nstring*/
+int generate_random_string(char* random_string);
+
+/* Generate a random string with length len_max. */
 int generate_random_nstring(char random_string[], unsigned int len_max, int start_flag);
 
 char* getpass_win(char* prompt); /* This function is deprecated. Please use getpass_stdin() instead. */
