@@ -38,14 +38,21 @@ void print_header(void){
     time(&current_time_long);
     time_p=localtime(&current_time_long);
     reset_windows_cmd_display();
-    printf(GENERAL_BOLD "//\\\\\\ HPC +-> Welcome to HPC-NOW Cluster Operator! Version: %s\n",CORE_VERSION_CODE);
-    printf(GENERAL_BOLD "\\\\/// NOW +-> %d-%d-%d %d:%d:%d\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
-    printf(GENERAL_BOLD "Copyright (c) 2024 Shanghai HPC-NOW Technologies Co., Ltd  LICENSE: MIT" RESET_DISPLAY "\n\n");
+
+    /*printf(HIGH_GREEN_BOLD "  __  __   ______   __  __" RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD " /  \\/ /: / __  /: /  /  /:  Welcome to HPC-NOW Operator! V. %s\n",CORE_VERSION_CODE);
+    printf(HIGH_GREEN_BOLD "/_/\\__/:'/_____/:'/_____/:'  Current: %d-%d-%d %d:%d:%d    LICENSE: MIT\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
+    printf(HIGH_GREEN_BOLD "':: :::' '::::::' '::::::'   [C] Shanghai HPC-NOW Technologies Co., Ltd" RESET_DISPLAY "\n\n");*/
+
+    printf(HIGH_GREEN_BOLD "  __  __   ______   __  __" RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD " /  \\/ /" RESET_DISPLAY ":" HIGH_GREEN_BOLD " / __  /" RESET_DISPLAY ":" HIGH_GREEN_BOLD " /  /  /" RESET_DISPLAY ":  :. " GENERAL_BOLD "Welcome to HPC-NOW Operator! V. %s" RESET_DISPLAY "\n",CORE_VERSION_CODE);
+    printf(HIGH_GREEN_BOLD "/_/\\__/" RESET_DISPLAY ":'" HIGH_GREEN_BOLD "/_____/" RESET_DISPLAY ":'" HIGH_GREEN_BOLD "/_____/" RESET_DISPLAY ":' :. "  GENERAL_BOLD "Current: %d-%d-%d %d:%d:%d    LICENSE: MIT" RESET_DISPLAY "\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
+    printf(RESET_DISPLAY "':: :::' '::::::' '::::::' :. " GENERAL_BOLD "[C] Shanghai HPC-NOW Technologies Co., Ltd" RESET_DISPLAY "\n\n");
 }
 
 void print_tail(void){
     printf("\n");
-    printf(GENERAL_BOLD "+> visit:" RESET_DISPLAY " https://www.hpc-now.com    " GENERAL_BOLD "+> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
+    printf(GENERAL_BOLD ":. visit:" RESET_DISPLAY " https://www.hpc-now.com    " GENERAL_BOLD ":. mailto:" RESET_DISPLAY " info@hpc-now.com\n");
 }
 
 void print_new_cluster_done(int gcp_flag){

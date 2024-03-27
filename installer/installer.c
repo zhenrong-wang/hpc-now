@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -102,16 +103,22 @@ int installed_or_not(void){
 }
 
 void print_header_installer(void){
+    time_t current_time_long;
+    struct tm* time_p=NULL;
+    time(&current_time_long);
+    time_p=localtime(&current_time_long);
     reset_windows_cmd_display();
-    printf(GENERAL_BOLD "| Welcome to the HPC-NOW Service Installer! Version: %s\n",INSTALLER_VERSION_CODE);
-    printf(GENERAL_BOLD "| Copyright (c) 2023 Shanghai HPC-NOW Technologies Co., Ltd     LICENSE: MIT\n\n");
-    printf(GENERAL_BOLD "| This is free software; see the source for copying conditions.  There is NO\n");
-    printf(GENERAL_BOLD "| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE." RESET_DISPLAY "\n\n");
+    printf(HIGH_GREEN_BOLD "  __  __   ______   __  __" RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD " /  \\/ /" RESET_DISPLAY ":" HIGH_GREEN_BOLD " / __  /" RESET_DISPLAY ":" HIGH_GREEN_BOLD " /  /  /" RESET_DISPLAY ":  :. " GENERAL_BOLD "Welcome to HPC-NOW Installer! V. %s" RESET_DISPLAY "\n",INSTALLER_VERSION_CODE);
+    printf(HIGH_GREEN_BOLD "/_/\\__/" RESET_DISPLAY ":'" HIGH_GREEN_BOLD "/_____/" RESET_DISPLAY ":'" HIGH_GREEN_BOLD "/_____/" RESET_DISPLAY ":' :. "  GENERAL_BOLD "Current: %d-%d-%d %d:%d:%d    LICENSE: MIT" RESET_DISPLAY "\n",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday,time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
+    printf(RESET_DISPLAY "':: :::' '::::::' '::::::' :. " GENERAL_BOLD "[C] Shanghai HPC-NOW Technologies Co., Ltd" RESET_DISPLAY "\n\n");
+    printf("| This is free software; see the source for copying conditions.  There is NO\n");
+    printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
 }
 
 void print_tail_installer(void){
     printf("\n");
-    printf(GENERAL_BOLD "+> visit:" RESET_DISPLAY " https://www.hpc-now.com    " GENERAL_BOLD "+> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
+    printf(GENERAL_BOLD ":. visit:" RESET_DISPLAY " https://www.hpc-now.com    " GENERAL_BOLD ":. mailto:" RESET_DISPLAY " info@hpc-now.com\n");
 }
 
 /* Print out help info for this installer */
@@ -198,7 +205,7 @@ int license_confirmation(void){
 #else
     snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %s | more",URL_LICENSE);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please read the following important information before continuing.\n");
-    printf("[  ****  ] You can press 'Enter' to continue reading, or press 'q' to quit reading.\n");
+    printf("[  ****  ] Press 'Enter' to continue reading, or press 'q' to quit reading.\n");
 #endif
     if(system(cmdline)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Currently the installer failed to download or print out the license.\n");
