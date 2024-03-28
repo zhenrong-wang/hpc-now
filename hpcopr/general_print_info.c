@@ -51,7 +51,7 @@ void print_header(void){
 }
 
 void print_logo(void){
-    printf(RESET_DISPLAY HIGH_GREEN_BOLD"  __  __    ______    ____      __  __    ______    _    _" RESET_DISPLAY "\n");
+    printf(RESET_DISPLAY HIGH_GREEN_BOLD"  __  __    ______    ____      __  __    ______    __  __" RESET_DISPLAY "\n");
     printf(HIGH_GREEN_BOLD " / /_/ /" RESET_DISPLAY "\\" HIGH_GREEN_BOLD "  / ____/" RESET_DISPLAY "\\" HIGH_GREEN_BOLD "  / __/" RESET_DISPLAY "\\" HIGH_GREEN_BOLD "    /  \\/ /" RESET_DISPLAY "\\" HIGH_GREEN_BOLD "  / __  /" RESET_DISPLAY "\\" HIGH_GREEN_BOLD "  /  /  /" RESET_DISPLAY "\\\n");
     printf(HIGH_GREEN_BOLD "/_/ /_/ " RESET_DISPLAY "/" HIGH_GREEN_BOLD " /_/" RESET_DISPLAY "\\\\\\\\\\/ " HIGH_GREEN_BOLD "/_____/" RESET_DISPLAY "\\  " HIGH_GREEN_BOLD "/_/\\__/ " RESET_DISPLAY "/" HIGH_GREEN_BOLD " /_____/ " RESET_DISPLAY "/" HIGH_GREEN_BOLD " /_____/ " RESET_DISPLAY "/\n");
     printf("\\\\\\/\\\\\\/  \\\\\\/      \\\\\\\\\\\\\\/  \\\\\\/\\\\\\/  \\\\\\\\\\\\\\/  \\\\\\\\\\\\\\/\n\n");
