@@ -1,8 +1,3 @@
-  __  __    ______    ____      __  __    ______    _    _
- / /_/ /\  / ____/\  / __/\    /  \/ /\  / __  /\  /  /  /\
-/_/ /_/\/ /_/\\\\\/ /_____/\  /_/\__/ / /_____/ / /_____/\/
-\\\/ \\\/  \\\/     \\\\\\\/  \\\/\\\/  \\\\\\\/  \\\\\\\/
-
 **HPC-NOW, start your HPC journey in the cloud <u>now</u>, with <u>n</u>o <u>o</u>peration <u>w</u>orkload!**
 
 *<u>A full-stack HPC solution in the cloud, for the HPC community.</u>*
