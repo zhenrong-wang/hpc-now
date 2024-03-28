@@ -25,6 +25,12 @@
 #include <fcntl.h>
 
 #ifdef _WIN32
+/* Windows Socket-related headers */
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windef.h>
+#include <mswsock.h>
+
 #include <windows.h>
 #include <io.h>
 #include <share.h>
@@ -36,12 +42,6 @@
 #include <malloc.h>
 #include <conio.h>
 #include <Shlobj.h>
-
-/* Windows Socket-related headers */
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <windef.h>
-#include <mswsock.h>
 
 #elif __linux__
 #include <unistd.h>
