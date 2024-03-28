@@ -74,18 +74,23 @@ extern tf_exec_config tf_this_run;
 extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
 
 int check_internet(void){
-    char cmdline[CMDLINE_LENGTH]="";
+    int run_flag=check_connectivity("www.baidu.com","443",1);
+    if(run_flag!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please check your DNS service\n");
+        printf("[  ****  ] or network and retry. Error Code: %d." RESET_DISPLAY "\n",run_flag);
+        return 1;
+    }
+    return 0;
+    /* char cmdline[CMDLINE_LENGTH]="";
 #ifdef _WIN32
     snprintf(cmdline,CMDLINE_LENGTH-1,"ping -n 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #else
     snprintf(cmdline,CMDLINE_LENGTH-1,"ping -c 1 www.baidu.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #endif
     if(system(cmdline)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please check your DNS\n");
-        printf("[  ****  ] service or network and retry." RESET_DISPLAY "\n");
-        return 1;
+        
     }
-    return 0;
+    return 0;*/
 }
 
 /* 
@@ -93,7 +98,7 @@ int check_internet(void){
  * This function is critical for GCP
  */
 int check_internet_google(void){
-    char cmdline[CMDLINE_LENGTH]="";
+    /*char cmdline[CMDLINE_LENGTH]="";
     char google_connectivity_flag[FILENAME_LENGTH];
     int run_flag;
     snprintf(google_connectivity_flag,FILENAME_LENGTH-1,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
@@ -102,7 +107,12 @@ int check_internet_google(void){
 #else
     snprintf(cmdline,CMDLINE_LENGTH-1,"ping -c 1 api.google.com %s",SYSTEM_CMD_REDIRECT_NULL);
 #endif
-    run_flag=system(cmdline);
+    run_flag=system(cmdline);*/
+
+    char google_connectivity_flag[FILENAME_LENGTH];
+    snprintf(google_connectivity_flag,FILENAME_LENGTH-1,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
+    int run_flag=check_connectivity("api.google.com","443",1);
+
     FILE* file_p=fopen(google_connectivity_flag,"w+");
     if(file_p==NULL){
         return -1;

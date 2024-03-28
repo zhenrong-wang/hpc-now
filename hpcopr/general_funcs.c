@@ -22,9 +22,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <fcntl.h>
 
 #ifdef _WIN32
-#include <Windows.h>
+/* Windows Socket-related headers */
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windef.h>
+#include <mswsock.h>
+
+#include <windows.h>
 #include <io.h>
 #include <share.h>
 #include <direct.h>
@@ -35,6 +42,7 @@
 #include <malloc.h>
 #include <conio.h>
 #include <Shlobj.h>
+
 #elif __linux__
 #include <unistd.h>
 #include <malloc.h>
@@ -44,6 +52,7 @@
 #include <dirent.h>
 #include <libgen.h>
 #include <errno.h>
+
 #elif __APPLE__
 #include <unistd.h>
 #include <sys/time.h>
@@ -52,6 +61,15 @@
 #include <dirent.h>
 #include <libgen.h>
 #include <errno.h>
+#endif
+
+/* POSIX Socket-related headers */
+#ifndef _WIN32
+#include <features.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 #endif
 
 #include "now_macros.h"
@@ -3679,7 +3697,122 @@ int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax){
     return 0;
 }
 
-/*int main(){
-    base64decode("KihlbmNvZGVkX3N0cmluZytqKzIpPWVuY29kZV9jaGFyc1soKHBsYWluX3N0cmluZ1tpKjMrMV0mMHgwRik8PDIpfChwbGFpbl9zdHJpbmdbaSozKzJdPj42KV07TK==","");
-    base64encode("*(encoded_string+j+2)=encode_chars[((plain_string[i*3+1]&0x0F)<<2)|(plain_string[i*3+2]>>6)];L","");
-}*/
+/* Socket-related functions. */
+
+void close_socket(int socket_fd){
+#ifdef _WIN32
+    closesocket(socket_fd);
+#else
+    close(socket_fd);
+#endif
+}
+
+/* Check the connect() status */
+int sock_connect_errno_check(void){
+#ifdef _WIN32
+    if(WSAGetLastError()==WSAEWOULDBLOCK){
+        return 0;
+    }
+#else
+    if(errno==EINPROGRESS){
+        return 0;
+    }
+#endif
+    return 1;
+}
+
+/* 
+ * Check connectivity using socket.
+ * Return -127: NULL Pointer
+ *        -3  : WINDOWS Socket initialization error
+ *        -1  : Failed to get address
+ *         1  : Failed to connect
+ *         0  : Connectivity checked successfully
+ */
+int check_connectivity(const char* domain, const char* port, const unsigned int max_wait_sec){
+    int socket_fd=-1;
+    struct addrinfo hints;
+    struct addrinfo *server_info=NULL;
+    struct addrinfo *addr_ptr=NULL;
+    int sockopt_error=1;
+    socklen_t sockopt_error_len=sizeof(sockopt_error);
+#ifndef _WIN32
+    int block_flag=0;
+#endif
+    fd_set write_fds;
+    struct timeval timeout;
+    int connectivity_flag=1;
+
+    if(domain==NULL||port==NULL){
+        return NULL_PTR_ARG; /* Reject null pointer(s) */
+    }
+    if(max_wait_sec>10||max_wait_sec<1){
+        timeout.tv_sec=1;
+    }
+    else{
+        timeout.tv_sec=max_wait_sec;
+    }
+    timeout.tv_usec=0;
+    memset(&hints,0,sizeof(struct addrinfo));
+    hints.ai_family=AF_UNSPEC;
+    hints.ai_socktype=SOCK_STREAM;
+
+#ifdef _WIN32
+    WSADATA win_socket_start;
+    WORD version_requested=MAKEWORD(2,2);
+    unsigned long non_blocking=1;
+    int winsock_result=0;
+    if(WSAStartup(version_requested,&win_socket_start)!=0){
+        return -3;
+    }
+#endif
+    int get_addr_result=getaddrinfo(domain,port,&hints,&server_info);
+    if(get_addr_result!=0){
+#ifdef _WIN32
+        WSACleanup();
+#endif
+        return -1;
+    }
+    for(addr_ptr=server_info;addr_ptr!=NULL;addr_ptr=addr_ptr->ai_next){
+        socket_fd=socket(addr_ptr->ai_family,addr_ptr->ai_socktype,addr_ptr->ai_protocol);
+        if(socket_fd==-1){
+            continue;
+        }
+#ifdef _WIN32
+        winsock_result=ioctlsocket(socket_fd,FIONBIO,&non_blocking);
+        if(winsock_result==SOCKET_ERROR){
+            closesocket(socket_fd);
+            continue;
+        }
+#else
+        block_flag=fcntl(socket_fd,F_GETFL,0);
+        fcntl(socket_fd,F_SETFL,block_flag|O_NONBLOCK);
+        errno=0;
+#endif
+        if(connect(socket_fd,addr_ptr->ai_addr,addr_ptr->ai_addrlen)!=0){
+            if(sock_connect_errno_check()!=0){
+                close_socket(socket_fd);
+                continue;
+            }
+        }
+        FD_ZERO(&write_fds);
+        FD_SET(socket_fd,&write_fds);
+        if(select(socket_fd+1,NULL,&write_fds,NULL,&timeout)>0){
+            if(FD_ISSET(socket_fd,&write_fds)){
+                if(getsockopt(socket_fd,SOL_SOCKET,SO_ERROR,(char*)&sockopt_error,&sockopt_error_len)==0){
+                    if(sockopt_error==0){
+                        connectivity_flag=0;
+                        close_socket(socket_fd);
+                        break;
+                    }
+                }
+            }
+        }
+        close_socket(socket_fd);
+    }
+    freeaddrinfo(server_info);
+#ifdef _WIN32
+    WSACleanup();
+#endif
+    return connectivity_flag;
+}
