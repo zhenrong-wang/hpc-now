@@ -62,25 +62,13 @@ int check_linux_packman(char* linux_packman, int length){
 }
 
 int check_internet_installer(void){
-    int run_flag=check_connectivity("www.baidu.com","443",1);
+    int run_flag=check_connectivity("www.baidu.com","443",2);
     if(run_flag!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please check your DNS service\n");
         printf("[  ****  ] or network and then retry. Error Code: %d." RESET_DISPLAY "\n",run_flag);
         return 1;
     }
     return 0;
-    /*char cmdline[CMDLINE_LENGTH]="";
-#ifdef _WIN32
-    strncpy(cmdline,"ping -n 1 www.baidu.com > nul 2>&1",CMDLINE_LENGTH-1);
-#elif __linux__
-    strncpy(cmdline,"ping -c 1 www.baidu.com >> /dev/null 2>&1",CMDLINE_LENGTH-1);
-#elif __APPLE__
-    strncpy(cmdline,"ping -c 1 -t 1 www.baidu.com >> /dev/null 2>&1",CMDLINE_LENGTH-1);
-#endif
-    if(system(cmdline)!=0){
-        
-    }
-    return 0;*/
 }
 
 /* 
