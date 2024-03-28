@@ -257,4 +257,9 @@ int base64encode(char* plain_string, char* export_path);
 int reset_windows_cmd_display(void);
 int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax);
 
+/* Socket-related functions. */
+void close_socket(int socket_fd);
+int sock_connect_errno_check(void);
+int check_connectivity(const char* domain, const char* port, const unsigned int max_wait_sec);
+
 #endif
