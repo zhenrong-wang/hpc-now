@@ -1,3 +1,5 @@
+![hpc-now-logo](./img/hpc-now-project-logo.png)
+
 **HPC-NOW, start your HPC journey in the cloud <u>now</u>, with <u>n</u>o <u>o</u>peration <u>w</u>orkload!**
 
 *<u>A full-stack HPC solution in the cloud, for the HPC community.</u>*
