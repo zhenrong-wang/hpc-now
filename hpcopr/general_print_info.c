@@ -50,6 +50,13 @@ void print_header(void){
     printf(RESET_DISPLAY "':: :::' '::::::' '::::::' :. " GENERAL_BOLD "[C] Shanghai HPC-NOW Technologies Co., Ltd" RESET_DISPLAY "\n\n");
 }
 
+void print_logo(void){
+    printf(RESET_DISPLAY HIGH_GREEN_BOLD"  __  __    ______    ____      __  __    ______    _    _" RESET_DISPLAY "\n");
+    printf(HIGH_GREEN_BOLD " / /_/ /" RESET_DISPLAY "\\" HIGH_GREEN_BOLD "  / ____/" RESET_DISPLAY "\\" HIGH_GREEN_BOLD "  / __/" RESET_DISPLAY "\\" HIGH_GREEN_BOLD "    /  \\/ /" RESET_DISPLAY "\\" HIGH_GREEN_BOLD "  / __  /" RESET_DISPLAY "\\" HIGH_GREEN_BOLD "  /  /  /" RESET_DISPLAY "\\\n");
+    printf(HIGH_GREEN_BOLD "/_/ /_/ " RESET_DISPLAY "/" HIGH_GREEN_BOLD " /_/" RESET_DISPLAY "\\\\\\\\\\/ " HIGH_GREEN_BOLD "/_____/" RESET_DISPLAY "\\  " HIGH_GREEN_BOLD "/_/\\__/ " RESET_DISPLAY "/" HIGH_GREEN_BOLD " /_____/ " RESET_DISPLAY "/" HIGH_GREEN_BOLD " /_____/ " RESET_DISPLAY "/\n");
+    printf("\\\\\\/\\\\\\/  \\\\\\/      \\\\\\\\\\\\\\/  \\\\\\/\\\\\\/  \\\\\\\\\\\\\\/  \\\\\\\\\\\\\\/\n\n");
+}
+
 void print_tail(void){
     printf("\n");
     printf(GENERAL_BOLD ":. visit:" RESET_DISPLAY " https://www.hpc-now.com    " GENERAL_BOLD ":. mailto:" RESET_DISPLAY " info@hpc-now.com\n");
@@ -413,6 +420,7 @@ void print_version(void){
 }
 
 void print_about(void){
+    print_logo();
     printf("| This is free software; see the source for copying conditions.  There is NO\n");
     printf("| warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
     printf("| This project is powered by many excellent free and open-source projects:\n");
