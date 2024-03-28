@@ -409,7 +409,7 @@ void print_help(char* cmd_name){
         printf("|  " HIGH_GREEN_BOLD "repair" RESET_DISPLAY "      :~ Try to repair the hpcopr core components.\n");
     }
     printf("\n");
-    printf(GENERAL_BOLD "+> visit:" RESET_DISPLAY " https://www.hpc-now.com    " GENERAL_BOLD "+> mailto:" RESET_DISPLAY " info@hpc-now.com\n");
+    printf(GENERAL_BOLD ":. visit:" RESET_DISPLAY " https://www.hpc-now.com    " GENERAL_BOLD ":. mailto:" RESET_DISPLAY " info@hpc-now.com\n");
 }
 
 void print_version(void){
