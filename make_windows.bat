@@ -21,7 +21,7 @@ if "%~1"=="" (
     echo [ -INFO- ] Deleting previously built binaries ^(if exist^)...
     del /s /q /f .\build\* > nul
     echo [ -INFO- ] Bulding new binaries with the gcc ...
-    gcc .\hpcopr\*.c -Wall -lpthread -o .\build\hpcopr-win-%hpcopr_version_code%.exe
+    gcc .\hpcopr\*.c -Wall -lpthread -lWs2_32 -o .\build\hpcopr-win-%hpcopr_version_code%.exe
     gcc -c .\hpcopr\general_funcs.c -Wall -o .\installer\gfuncs.o
     gcc -c .\hpcopr\opr_crypto.c -Wall -o .\installer\ocrypto.o
     gcc -c .\hpcopr\cluster_general_funcs.c -Wall -o .\installer\cgfuncs.o
@@ -30,7 +30,7 @@ if "%~1"=="" (
     gcc -c .\hpcopr\now_md5.c -Wall -o .\installer\md5.o
     gcc -c .\hpcopr\now_sha256.c -Wall -o .\installer\sha256.o
     ar -rc .\installer\libnow.a .\installer\gfuncs.o .\installer\ocrypto.o .\installer\cgfuncs.o .\installer\tproc.o .\installer\md5.o .\installer\gprint.o .\installer\sha256.o
-    gcc .\installer\installer.c .\installer\libnow.a -lnetapi32 -lpthread -Wall -o .\build\installer-win-%installer_version_code%.exe
+    gcc .\installer\installer.c .\installer\libnow.a -lnetapi32 -lpthread -lWs2_32 -Wall -o .\build\installer-win-%installer_version_code%.exe
     gcc .\now-crypto\now-crypto-v3-aes.c -Wall -Ofast -o .\build\now-crypto-aes-win.exe
     del /f /s /q .\installer\*.a > nul
     del /f /s /q .\installer\*.o > nul
