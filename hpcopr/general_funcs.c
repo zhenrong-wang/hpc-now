@@ -44,7 +44,6 @@
 #include <Shlobj.h>
 
 #elif __linux__
-#include <features.h>
 #include <unistd.h>
 #include <malloc.h>
 #include <sys/time.h>
@@ -66,16 +65,25 @@
 
 /* POSIX Socket-related headers */
 #ifndef _WIN32
+#include <features.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <pthread.h>
 #endif
 
 #include "now_macros.h"
 #include "now_md5.h"
 #include "now_sha256.h"
 #include "general_funcs.h"
+
+typedef struct {
+    char* req_domain;
+    char* req_port;
+    struct addrinfo req_hints;
+    int req_result;
+} req_info; /* This is for multi-thread network connectivity check. */
 
 char command_flags[CMD_FLAG_NUM][16]={
     "-b", /* batch mode, skip every confirmation */
@@ -3699,6 +3707,20 @@ int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax){
 
 /* Socket-related functions. */
 
+void* thread_getaddrinfo(void* arg){
+    req_info* request=(req_info*)arg;
+    struct addrinfo* server_info=NULL;
+    int getaddr_result=getaddrinfo(request->req_domain,request->req_port,&(request->req_hints),&server_info);
+    if(getaddr_result==0){
+        request->req_result=0;
+        pthread_exit((void*)server_info);
+    }
+    if(server_info!=NULL){
+        freeaddrinfo(server_info);
+    }
+    pthread_exit(NULL);
+}
+
 void close_socket(int socket_fd){
 #ifdef _WIN32
     closesocket(socket_fd);
@@ -3736,8 +3758,17 @@ int check_connectivity(const char* domain, const char* port, const unsigned int 
     struct addrinfo *addr_ptr=NULL;
     int sockopt_error=1;
     socklen_t sockopt_error_len=sizeof(sockopt_error);
+
 #ifndef _WIN32
+    req_info dns_request;
+    pthread_t thread_id=-1;
+    int thread_c=-1;
     int block_flag=0;
+    unsigned long thread_timer_nsec=0;
+    void* thread_result=NULL;
+    struct timespec sleep_time;
+    sleep_time.tv_sec=0;
+    sleep_time.tv_nsec=1000000;
 #endif
     fd_set write_fds;
     struct timeval timeout;
@@ -3765,14 +3796,39 @@ int check_connectivity(const char* domain, const char* port, const unsigned int 
     if(WSAStartup(version_requested,&win_socket_start)!=0){
         return -3;
     }
-#endif
-    int get_addr_result=getaddrinfo(domain,port,&hints,&server_info);
-    if(get_addr_result!=0){
-#ifdef _WIN32
+    if(getaddrinfo(domain,port,&hints,&server_info)!=0){
         WSACleanup();
-#endif
         return -1;
     }
+#else
+    dns_request.req_domain=(char*)domain;
+    dns_request.req_port=(char*)port;
+    memcpy(&(dns_request.req_hints),&hints,sizeof(hints));
+    dns_request.req_result=-1;
+    thread_c=pthread_create(&thread_id,NULL,thread_getaddrinfo,(void*)&dns_request);
+    if(thread_c!=0){
+        return -3;
+    }
+    while(thread_timer_nsec<max_wait_sec*1000000000){
+        if(dns_request.req_result==0){
+            pthread_join(thread_id,&thread_result);
+            break;
+        }
+        if((thread_timer_nsec%500000000)==0){
+            printf("[ -INFO- ] Checking internet connectivity: " GREY_LIGHT "%ld" RESET_DISPLAY " / %d sec ...\r",thread_timer_nsec/500000000,max_wait_sec);
+            fflush(stdout);
+        }
+        thread_timer_nsec+=sleep_time.tv_nsec;
+        nanosleep(&sleep_time,NULL);
+    }
+    if(thread_result!=NULL){
+        server_info=(struct addrinfo*)thread_result;
+    }
+    else{
+        pthread_cancel(thread_id);
+        return -1;
+    }
+#endif
     for(addr_ptr=server_info;addr_ptr!=NULL;addr_ptr=addr_ptr->ai_next){
         socket_fd=socket(addr_ptr->ai_family,addr_ptr->ai_socktype,addr_ptr->ai_protocol);
         if(socket_fd==-1){

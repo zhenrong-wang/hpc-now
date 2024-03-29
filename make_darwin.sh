@@ -20,7 +20,7 @@ elif [ "$1" = "build" ]; then
     echo "[ -INFO- ] Please build hpcmgr with GNU/Linux, not macOS."
     mkdir -p ./build
     rm -rf ./build/*
-    clang ./hpcopr/*.c -Wall -o ./build/hpcopr-dwn-${hpcopr_version_code}.exe
+    clang ./hpcopr/*.c -Wall -lpthread -o ./build/hpcopr-dwn-${hpcopr_version_code}.exe
     clang -c ./hpcopr/general_funcs.c -Wall -o ./installer/gfuncs.o
     clang -c ./hpcopr/opr_crypto.c -Wall -o ./installer/ocrypto.o
     clang -c ./hpcopr/cluster_general_funcs.c -Wall -o ./installer/cgfuncs.o
@@ -29,7 +29,7 @@ elif [ "$1" = "build" ]; then
     clang -c ./hpcopr/now_md5.c -Wall -o ./installer/md5.o
     clang -c ./hpcopr/now_sha256.c -Wall -o ./installer/sha256.o
     ar -rc ./installer/libnow.a ./installer/gfuncs.o ./installer/ocrypto.o ./installer/cgfuncs.o ./installer/tproc.o ./installer/md5.o ./installer/gprint.o ./installer/sha256.o
-    clang ./installer/installer.c ./installer/libnow.a -Wall -o ./build/installer-dwn-${installer_version_code}.exe
+    clang ./installer/installer.c ./installer/libnow.a -lpthread -Wall -o ./build/installer-dwn-${installer_version_code}.exe
     clang ./now-crypto/now-crypto-v3-aes.c -Wall -Ofast -o ./build/now-crypto-aes-dwn.exe
     chmod +x ./build/*
     rm -rf ./installer/*.a
