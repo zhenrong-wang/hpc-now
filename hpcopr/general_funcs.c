@@ -23,6 +23,7 @@
 #include <string.h>
 #include <time.h>
 #include <fcntl.h>
+#include <pthread.h> /* Mingw-w64 with pthread is required. */
 
 #ifdef _WIN32
 /* Windows Socket-related headers */
@@ -70,7 +71,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <pthread.h>
 #endif
 
 #include "now_macros.h"
