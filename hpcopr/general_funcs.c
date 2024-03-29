@@ -3765,14 +3765,14 @@ int check_connectivity(const char* domain, const char* port, const unsigned long
 
 #ifndef _WIN32
     req_info dns_request;
-    pthread_t thread_id=-1;
+    pthread_t thread_id;
     int thread_c=-1;
     int block_flag=0;
     unsigned long thread_timer_nsec=0;
     void* thread_result=NULL;
     struct timespec sleep_time;
     sleep_time.tv_sec=0;
-    sleep_time.tv_nsec=1000000;
+    sleep_time.tv_nsec=20000000; /* 20 millisecond */
 #endif
     fd_set write_fds;
     struct timeval timeout;
