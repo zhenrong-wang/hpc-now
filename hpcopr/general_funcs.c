@@ -3815,7 +3815,7 @@ int check_connectivity(const char* domain, const char* port, const unsigned int 
             break;
         }
         if((thread_timer_nsec%500000000)==0){
-            printf("[ -INFO- ] Checking internet connectivity: " GREY_LIGHT "%ld" RESET_DISPLAY " / %d sec ...\r",thread_timer_nsec/500000000,max_wait_sec);
+            printf("[ -INFO- ] Checking internet connectivity: " GREY_LIGHT "%.1ld" RESET_DISPLAY " / %d sec ...\r",thread_timer_nsec/500000000,max_wait_sec);
             fflush(stdout);
         }
         thread_timer_nsec+=sleep_time.tv_nsec;
