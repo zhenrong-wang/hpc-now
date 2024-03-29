@@ -78,12 +78,14 @@
 #include "now_sha256.h"
 #include "general_funcs.h"
 
+#ifndef _WIN32
 typedef struct {
     char* req_domain;
     char* req_port;
     struct addrinfo req_hints;
     int req_result;
 } req_info; /* This is for multi-thread network connectivity check. */
+#endif
 
 char command_flags[CMD_FLAG_NUM][16]={
     "-b", /* batch mode, skip every confirmation */
@@ -3707,6 +3709,7 @@ int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax){
 
 /* Socket-related functions. */
 
+#ifndef _WIN32
 void* thread_getaddrinfo(void* arg){
     req_info* request=(req_info*)arg;
     struct addrinfo* server_info=NULL;
@@ -3720,6 +3723,7 @@ void* thread_getaddrinfo(void* arg){
     }
     pthread_exit(NULL);
 }
+#endif
 
 void close_socket(int socket_fd){
 #ifdef _WIN32
