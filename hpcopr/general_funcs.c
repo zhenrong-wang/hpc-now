@@ -3772,7 +3772,7 @@ int check_connectivity(const char* domain, const char* port, const unsigned long
     void* thread_result=NULL;
     struct timespec sleep_time;
     sleep_time.tv_sec=0;
-    sleep_time.tv_nsec=20000000; /* 20 millisecond */
+    sleep_time.tv_nsec=100000000; /* 20 millisecond */
 #endif
     fd_set write_fds;
     struct timeval timeout;
