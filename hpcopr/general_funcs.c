@@ -3772,7 +3772,7 @@ int check_connectivity(const char* domain, const char* port, const unsigned long
     void* thread_result=NULL;
     struct timespec sleep_time;
     sleep_time.tv_sec=0;
-    sleep_time.tv_nsec=1000000;
+    sleep_time.tv_nsec=1000000; /* 1 millisecond */
 #endif
     fd_set write_fds;
     struct timeval timeout;
@@ -3822,7 +3822,7 @@ int check_connectivity(const char* domain, const char* port, const unsigned long
             printf("[ -INFO- ] Checking internet connectivity: " GREY_LIGHT "%.1lf" RESET_DISPLAY " / %ld sec ...\r",(double)thread_timer_nsec/1000000000,max_wait_sec);
             fflush(stdout);
         }
-        thread_timer_nsec+=sleep_time.tv_nsec;
+        thread_timer_nsec+=sleep_time.tv_nsec; /* Step: 1 millisecond */
         nanosleep(&sleep_time,NULL);
     }
     if(thread_result!=NULL){
