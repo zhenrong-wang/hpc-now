@@ -106,7 +106,7 @@ The HPC-NOW platform is very easy to build, run, and use. It is also cross-platf
 - Use a standard C compiler. This project **required**:
   -  [gcc](https://gcc.gnu.org/) for **GNU/Linux distros**. You can get it easily with the package manager (E.g. `yum`).
   -  [clang](https://clang.llvm.org/) for **macOS (Darwin)**. Please install it by running the command `clang`. If clang is absent, macOS would ask you for installing it automatically.
-  -  [mingw-w64](https://sourceforge.net/projects/mingw-w64/) for **Microsoft Windows**. We recommend **MinGW-W64 GCC-8.1.0-x86_64-posix-sjlj** , you can go to [this link](https://sourceforge.net/projects/mingw-w64/files/) and find it. Download the tarball -> Unzip it to a directory -> Add the full path of the `bin` subdirectory to the `$PATH` environment variable.
+  -  [mingw-w64 (with POSIX)](https://sourceforge.net/projects/mingw-w64/) for **Microsoft Windows**, **POSIX support is a must**. We recommend **MinGW-W64 GCC-8.1.0-x86_64-posix-sjlj** , you can go to [this link](https://sourceforge.net/projects/mingw-w64/files/) and find it. Download the tarball -> Unzip it to a directory -> Add the full path of the `bin` subdirectory to the `$PATH` environment variable.
 
 ### **Step 1. Clone this repository** 
 
