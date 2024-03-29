@@ -3765,7 +3765,7 @@ int check_connectivity(const char* domain, const char* port, const unsigned long
 
 #ifndef _WIN32
     req_info dns_request;
-    pthread_t thread_id=-1;
+    pthread_t thread_id;
     int thread_c=-1;
     int block_flag=0;
     unsigned long thread_timer_nsec=0;
