@@ -263,6 +263,6 @@ void* thread_getaddrinfo(void* arg);
 #endif
 void close_socket(int socket_fd);
 int sock_connect_errno_check(void);
-int check_connectivity(const char* domain, const char* port, const unsigned int max_wait_sec);
+int check_connectivity(const char* domain, const char* port, const unsigned long max_wait_sec);
 
 #endif
