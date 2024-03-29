@@ -44,6 +44,7 @@
 #include <Shlobj.h>
 
 #elif __linux__
+#include <features.h>
 #include <unistd.h>
 #include <malloc.h>
 #include <sys/time.h>
@@ -65,7 +66,6 @@
 
 /* POSIX Socket-related headers */
 #ifndef _WIN32
-#include <features.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
