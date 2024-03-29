@@ -78,14 +78,12 @@
 #include "now_sha256.h"
 #include "general_funcs.h"
 
-#ifndef _WIN32
 typedef struct {
     char* req_domain;
     char* req_port;
     struct addrinfo req_hints;
     int req_result;
 } req_info; /* This is for multi-thread network connectivity check. */
-#endif
 
 char command_flags[CMD_FLAG_NUM][16]={
     "-b", /* batch mode, skip every confirmation */
@@ -3708,8 +3706,6 @@ int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax){
 }
 
 /* Socket-related functions. */
-
-#ifndef _WIN32
 void* thread_getaddrinfo(void* arg){
     req_info* request=(req_info*)arg;
     struct addrinfo* server_info=NULL;
@@ -3723,7 +3719,6 @@ void* thread_getaddrinfo(void* arg){
     }
     pthread_exit(NULL);
 }
-#endif
 
 void close_socket(int socket_fd){
 #ifdef _WIN32
@@ -3755,24 +3750,25 @@ int sock_connect_errno_check(void){
  *         1  : Failed to connect
  *         0  : Connectivity checked successfully
  */
-int check_connectivity(const char* domain, const char* port, const unsigned long max_wait_sec){
+int check_connectivity(const char* domain, const char* port, const unsigned int max_wait_sec){
     int socket_fd=-1;
     struct addrinfo hints;
     struct addrinfo *server_info=NULL;
     struct addrinfo *addr_ptr=NULL;
     int sockopt_error=1;
     socklen_t sockopt_error_len=sizeof(sockopt_error);
-
-#ifndef _WIN32
     req_info dns_request;
     pthread_t thread_id;
     int thread_c=-1;
-    int block_flag=0;
-    unsigned long thread_timer_nsec=0;
+
+    unsigned long long thread_timer_nsec=0;
     void* thread_result=NULL;
     struct timespec sleep_time;
     sleep_time.tv_sec=0;
     sleep_time.tv_nsec=100000000; /* 100 millisecond */
+
+#ifndef _WIN32
+    int block_flag=0;
 #endif
     fd_set write_fds;
     struct timeval timeout;
@@ -3800,11 +3796,7 @@ int check_connectivity(const char* domain, const char* port, const unsigned long
     if(WSAStartup(version_requested,&win_socket_start)!=0){
         return -3;
     }
-    if(getaddrinfo(domain,port,&hints,&server_info)!=0){
-        WSACleanup();
-        return -1;
-    }
-#else
+#endif
     dns_request.req_domain=(char*)domain;
     dns_request.req_port=(char*)port;
     memcpy(&(dns_request.req_hints),&hints,sizeof(hints));
@@ -3813,7 +3805,7 @@ int check_connectivity(const char* domain, const char* port, const unsigned long
     if(thread_c!=0){
         return -3;
     }
-    while(thread_timer_nsec<max_wait_sec*1000000000){
+    while(thread_timer_nsec<(unsigned long long)max_wait_sec*1000000000){
         if(dns_request.req_result==0){
             pthread_join(thread_id,&thread_result);
             break;
@@ -3823,16 +3815,23 @@ int check_connectivity(const char* domain, const char* port, const unsigned long
             fflush(stdout);
         }
         thread_timer_nsec+=sleep_time.tv_nsec;
+#ifdef _WIN32
+        Sleep(sleep_time.tv_nsec/1000000);
+#else
         nanosleep(&sleep_time,NULL);
+#endif
     }
     if(thread_result!=NULL){
         server_info=(struct addrinfo*)thread_result;
     }
     else{
         pthread_cancel(thread_id);
+#ifdef _WIN32
+        WSACleanup();
+#endif
         return -1;
     }
-#endif
+
     for(addr_ptr=server_info;addr_ptr!=NULL;addr_ptr=addr_ptr->ai_next){
         socket_fd=socket(addr_ptr->ai_family,addr_ptr->ai_socktype,addr_ptr->ai_protocol);
         if(socket_fd==-1){
