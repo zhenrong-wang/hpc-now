@@ -3718,6 +3718,7 @@ void* thread_getaddrinfo(void* arg){
         freeaddrinfo(server_info);
     }
     pthread_exit(NULL);
+    return NULL;
 }
 
 void close_socket(int socket_fd){
@@ -3811,7 +3812,7 @@ int check_connectivity(const char* domain, const char* port, const unsigned int 
             break;
         }
         if((thread_timer_nsec%500000000)==0){
-            printf("[ -INFO- ] Checking internet connectivity: " GREY_LIGHT "%.1lf" RESET_DISPLAY " / %ld sec ...\r",(double)thread_timer_nsec/1000000000,max_wait_sec);
+            printf("[ -INFO- ] Checking internet connectivity: " GREY_LIGHT "%.1lf" RESET_DISPLAY " / %d sec ...\r",(double)thread_timer_nsec/1000000000,max_wait_sec);
             fflush(stdout);
         }
         thread_timer_nsec+=sleep_time.tv_nsec;
