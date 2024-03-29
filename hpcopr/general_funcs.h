@@ -258,6 +258,9 @@ int reset_windows_cmd_display(void);
 int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax);
 
 /* Socket-related functions. */
+#ifndef _WIN32
+void* thread_getaddrinfo(void* arg);
+#endif
 void close_socket(int socket_fd);
 int sock_connect_errno_check(void);
 int check_connectivity(const char* domain, const char* port, const unsigned int max_wait_sec);
