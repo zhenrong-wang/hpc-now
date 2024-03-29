@@ -3812,7 +3812,7 @@ int check_connectivity(const char* domain, const char* port, const unsigned int 
             break;
         }
         if((thread_timer_nsec%500000000)==0){
-            printf("[ -INFO- ] Checking internet connectivity: " GREY_LIGHT "%.1lf" RESET_DISPLAY " / %d sec ...\r",(double)thread_timer_nsec/1000000000,max_wait_sec);
+            printf("[ -INFO- ] Checking network connectivity: " GREY_LIGHT "%.1lf" RESET_DISPLAY " / %d sec ...\r",(double)thread_timer_nsec/1000000000,max_wait_sec);
             fflush(stdout);
         }
         thread_timer_nsec+=sleep_time.tv_nsec;
@@ -3822,6 +3822,8 @@ int check_connectivity(const char* domain, const char* port, const unsigned int 
         nanosleep(&sleep_time,NULL);
 #endif
     }
+    printf("                                                    \r");
+    fflush(stdout);
     if(thread_result!=NULL){
         server_info=(struct addrinfo*)thread_result;
     }
