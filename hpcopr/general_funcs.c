@@ -3755,7 +3755,7 @@ int sock_connect_errno_check(void){
  *         1  : Failed to connect
  *         0  : Connectivity checked successfully
  */
-int check_connectivity(const char* domain, const char* port, const unsigned int max_wait_sec){
+int check_connectivity(const char* domain, const char* port, const unsigned long max_wait_sec){
     int socket_fd=-1;
     struct addrinfo hints;
     struct addrinfo *server_info=NULL;
@@ -3819,7 +3819,7 @@ int check_connectivity(const char* domain, const char* port, const unsigned int 
             break;
         }
         if((thread_timer_nsec%500000000)==0){
-            printf("[ -INFO- ] Checking internet connectivity: " GREY_LIGHT "%.1ld" RESET_DISPLAY " / %d sec ...\r",thread_timer_nsec/500000000,max_wait_sec);
+            printf("[ -INFO- ] Checking internet connectivity: " GREY_LIGHT "%.1lf" RESET_DISPLAY " / %ld sec ...\r",(double)thread_timer_nsec/1000000000,max_wait_sec);
             fflush(stdout);
         }
         thread_timer_nsec+=sleep_time.tv_nsec;

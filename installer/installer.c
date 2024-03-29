@@ -192,7 +192,6 @@ int check_current_user_root(void){
 int license_confirmation(void){
     char cmdline[CMDLINE_LENGTH]="";
     char confirmation[16]="";
-    printf("\n");
 #ifdef _WIN32
     snprintf(cmdline,CMDLINE_LENGTH-1,"curl -s %s",URL_LICENSE);
 #else
