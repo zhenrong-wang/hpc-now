@@ -62,7 +62,7 @@ int check_linux_packman(char* linux_packman, int length){
 }
 
 int check_internet_installer(void){
-    int run_flag=check_connectivity("www.baidu.com","443",2);
+    int run_flag=check_connectivity("www.baidu.com","443",5);
     if(run_flag!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please check your DNS service\n");
         printf("[  ****  ] or network and then retry. Error Code: %d." RESET_DISPLAY "\n",run_flag);

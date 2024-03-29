@@ -74,7 +74,7 @@ extern tf_exec_config tf_this_run;
 extern char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX];
 
 int check_internet(void){
-    int run_flag=check_connectivity("www.baidu.com","443",2);
+    int run_flag=check_connectivity("www.baidu.com","443",5);
     if(run_flag!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Internet connectivity check failed. Please check your DNS service\n");
         printf("[  ****  ] or network and retry. Error Code: %d." RESET_DISPLAY "\n",run_flag);
@@ -90,7 +90,7 @@ int check_internet(void){
 int check_internet_google(void){
     char google_connectivity_flag[FILENAME_LENGTH];
     snprintf(google_connectivity_flag,FILENAME_LENGTH-1,"%s%sgoogle_check.dat",GENERAL_CONF_DIR,PATH_SLASH);
-    int run_flag=check_connectivity("api.google.com","443",2);
+    int run_flag=check_connectivity("api.google.com","443",5);
 
     FILE* file_p=fopen(google_connectivity_flag,"w+");
     if(file_p==NULL){

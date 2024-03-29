@@ -33,7 +33,7 @@ elif [ "$1" = "build" ]; then
     echo -e "[ START: ] Building the binaries now (including hpcmgr and now-server) ..."
     mkdir -p ./build
     rm -rf ./build/*
-    ${compiler} ./hpcopr/*.c -Wall -o ./build/hpcopr-lin-${hpcopr_version_code}.exe
+    ${compiler} ./hpcopr/*.c -Wall -lpthread -o ./build/hpcopr-lin-${hpcopr_version_code}.exe
     ${compiler} -c ./hpcopr/general_funcs.c -Wall -o ./installer/gfuncs.o
     ${compiler} -c ./hpcopr/opr_crypto.c -Wall -o ./installer/ocrypto.o
     ${compiler} -c ./hpcopr/cluster_general_funcs.c -Wall -o ./installer/cgfuncs.o
@@ -42,7 +42,7 @@ elif [ "$1" = "build" ]; then
     ${compiler} -c ./hpcopr/now_md5.c -Wall -o ./installer/md5.o
     ${compiler} -c ./hpcopr/now_sha256.c -Wall -o ./installer/sha256.o
     ar -rc ./installer/libnow.a ./installer/gfuncs.o ./installer/ocrypto.o ./installer/cgfuncs.o ./installer/tproc.o ./installer/md5.o ./installer/gprint.o ./installer/sha256.o
-    ${compiler} ./installer/installer.c -Wall ./installer/libnow.a -o ./build/installer-lin-${installer_version_code}.exe
+    ${compiler} ./installer/installer.c -Wall ./installer/libnow.a -lpthread -o ./build/installer-lin-${installer_version_code}.exe
     ${compiler} ./now-crypto/now-crypto-v3-aes.c -Wall -Ofast -o ./build/now-crypto-aes-lin.exe
     ${compiler} ./hpcmgr/hpcmgr.c -Wall -o ./build/hpcmgr.exe
     ${compiler} ./now-server/now-server.c -Wall -o ./build/now-server.exe
