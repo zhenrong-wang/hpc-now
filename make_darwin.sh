@@ -5,6 +5,12 @@
 
 #!/bin/bash
 
+uname -s | grep Darwin >> /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo -e "[ FATAL: ] You are not working on macOS (Darwin). Exit now."
+    exit 3
+fi
+
 hpcopr_version_code=`cat ./hpcopr/now_macros.h | grep CORE_VERSION_CODE | awk -F"\"" '{print $2}'`
 installer_version_code=`cat ./installer/installer.h | grep INSTALLER_VERSION_CODE | awk -F"\"" '{print $2}'`
 
