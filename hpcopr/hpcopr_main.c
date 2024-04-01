@@ -321,7 +321,7 @@ int main(int argc, char* argv[]){
         printf("[  ****  ]    2. run " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands in the " GENERAL_BOLD "new" RESET_DISPLAY " CMD Window.\n");
         printf("[  ****  ] +- " GENERAL_BOLD "DESKTOP MODE" RESET_DISPLAY " (switch the whole desktop environment):\n");
         printf("[  ****  ]    1. Press " HIGH_GREEN_BOLD "Ctrl + Alt + Delete" RESET_DISPLAY "\n");
-        printf("[  ****  ]    2. Select the user " HIGH_GREEN_BOLD "hpc-now" RESET_DISPLAY " and log in.\n");
+        printf("[  ****  ]    2. Select the user " HIGH_GREEN_BOLD "hpc-now" RESET_DISPLAY " and log in.\n\n");
         printf(FATAL_RED_BOLD "[ FATAL: ] You *MUST* run hpcopr as the system user 'hpc-now'." RESET_DISPLAY "\n");
         print_tail();
         return 117;
@@ -333,7 +333,7 @@ int main(int argc, char* argv[]){
         printf("[  ****  ]    Run with " HIGH_GREEN_BOLD "sudo -Hu" RESET_DISPLAY ", e.g. " HIGH_GREEN_BOLD "sudo -Hu hpc-now hpcopr help" RESET_DISPLAY "\n");
         printf("[  ****  ] +- " GENERAL_BOLD "USER MODE" RESET_DISPLAY " (for both *non-sudoers* and *sudoers*):" RESET_DISPLAY "\n");
         printf("[  ****  ]    1. " HIGH_GREEN_BOLD "su hpc-now" RESET_DISPLAY " (The password of 'hpc-now' is needed)\n");
-        printf("[  ****  ]    2. run the " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands, e.g. " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY "\n");
+        printf("[  ****  ]    2. run the " HIGH_GREEN_BOLD "hpcopr" RESET_DISPLAY " commands, e.g. " HIGH_GREEN_BOLD "hpcopr glance --all" RESET_DISPLAY "\n\n");
         printf(FATAL_RED_BOLD "[ FATAL: ] You *MUST* run hpcopr as the system user 'hpc-now'." RESET_DISPLAY "\n");
         print_tail();
         return 117;
