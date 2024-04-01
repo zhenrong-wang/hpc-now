@@ -16,6 +16,11 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <pwd.h>
+#else
+#include <windows.h>
+#include <winerror.h>
+#include <aclapi.h>
+#include <sddl.h>
 #endif
 
 #include "now_macros.h"
@@ -337,48 +342,48 @@ int chmod_ssh_privkey(char* ssh_privkey){
         return -1;
     }
 #ifdef _WIN32
-    FILE* file_p=NULL;
-    char group_and_user[64]="";
-    char line_seq_buffer[256]="";
-    char line_seq_buffer2[128]="";
-    char line_buffer[512]="";
-    char randstr[7]="";
-    char get_perm_temp[FILENAME_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
-    generate_random_nstring(randstr,7,1);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"takeown /f %s %s",ssh_privkey,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /c /t /inheritance:d %s",ssh_privkey,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /c /t /remove:g Users %s",ssh_privkey,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /c /t /remove:g \"Authenticated Users\" %s",ssh_privkey,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /c /t /remove:g Administrators %s",ssh_privkey,SYSTEM_CMD_REDIRECT_NULL);
-    system(cmdline);
-    snprintf(get_perm_temp,FILENAME_LENGTH-1,"%s%s.tmp%skey_perm.%s.txt",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,randstr);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s > %s",ssh_privkey,get_perm_temp);
-    system(cmdline);
-    file_p=fopen(get_perm_temp,"r");
-    if(file_p==NULL){
+    EXPLICIT_ACCESS access_policy;
+    PACL ptr_acl=NULL;
+    DWORD dw_res=0;
+    PSECURITY_DESCRIPTOR ptr_sd=NULL;
+
+    ptr_sd=(PSECURITY_DESCRIPTOR)LocalAlloc(LPTR,SECURITY_DESCRIPTOR_MIN_LENGTH);
+    if(ptr_sd==NULL){
+        return -9;
+    }
+    if(!InitializeSecurityDescriptor(ptr_sd,SECURITY_DESCRIPTOR_REVISION)){
+        LocalFree(ptr_sd);
+        return -7;
+    }
+    if(!SetSecurityDescriptorDacl(ptr_sd,TRUE,NULL,FALSE)){
+        LocalFree(ptr_sd);
+        return -7;
+    }
+    ZeroMemory(&access_policy,sizeof(EXPLICIT_ACCESS));
+    access_policy.grfAccessPermissions=GENERIC_ALL;
+    access_policy.grfAccessMode=SET_ACCESS;
+    access_policy.grfInheritance=NO_INHERITANCE;
+    access_policy.Trustee.TrusteeForm=TRUSTEE_IS_NAME;
+    access_policy.Trustee.TrusteeType=TRUSTEE_IS_USER;
+    access_policy.Trustee.ptstrName=(LPTSTR)"hpc-now";
+    
+    dw_res=SetEntriesInAcl(1,&access_policy,NULL,&ptr_acl);
+    if(dw_res!=ERROR_SUCCESS){
+        LocalFree(ptr_sd);
+        return -5;
+    }
+    if(!SetSecurityDescriptorDacl(ptr_sd,TRUE,ptr_acl,FALSE)){
+        LocalFree(ptr_acl);
+        LocalFree(ptr_sd);
+        return -5;
+    }
+    if(!SetFileSecurity(ssh_privkey,DACL_SECURITY_INFORMATION,ptr_sd)){
+        LocalFree(ptr_acl);
+        LocalFree(ptr_sd);
         return -3;
     }
-    while(!feof(file_p)){
-        fngetline(file_p,line_buffer,511);
-        get_seq_nstring(line_buffer,' ',2,line_seq_buffer,256);
-        get_seq_nstring(line_seq_buffer,'\\',2,line_seq_buffer2,128);
-        get_seq_nstring(line_seq_buffer2,':',1,group_and_user,64);
-        if(strcmp(group_and_user,"hpc-now")!=0&&strlen(group_and_user)!=0){
-            snprintf(cmdline,CMDLINE_LENGTH-1,"icacls %s /c /t /remove %s %s",ssh_privkey,group_and_user,SYSTEM_CMD_REDIRECT_NULL);
-            if(system(cmdline)!=0){
-                fclose(file_p);
-                rm_file_or_dir(get_perm_temp);
-                return -5;
-            }
-        }
-    }
-    fclose(file_p);
-    rm_file_or_dir(get_perm_temp);
+    LocalFree(ptr_acl);
+    LocalFree(ptr_sd);
 #else
     struct passwd* pwd=getpwnam("hpc-now");
     if(pwd==NULL){
