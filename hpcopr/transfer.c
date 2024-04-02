@@ -207,7 +207,7 @@ int export_cluster(char* cluster_name, char* user_list, char* admin_flag, char* 
         getpass_stdin("[ INPUT: ] Type a password: ",real_password,128);
     }
     else{
-        strcpy(real_password,password);
+        strncpy(real_password,password,127);
     }
     if(password_complexity_check(real_password,SPECIAL_PASSWORD_CHARS)!=0){
         printf(WARN_YELLO_BOLD "[ -WARN- ] The provided password " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is not complex enough." RESET_DISPLAY "\n",real_password);
@@ -513,11 +513,9 @@ int import_cluster(char* zip_file, char* password, char* crypto_keyfile, int bat
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input the password to decrypt and import.\n");
         getpass_stdin("[ INPUT: ] Type a password: ",real_password,128);
-        /*password_temp=GETPASS_FUNC("[ INPUT: ] *without echo* ");
-        strcpy(real_password,password_temp);*/
     }
     else{
-        strcpy(real_password,password);
+        strncpy(real_password,password,127);
     }
     password_sha_hash(real_password,hash_key_password,64);
     if(get_file_sha_hash(crypto_keyfile,hash_key_local,64)!=0){
