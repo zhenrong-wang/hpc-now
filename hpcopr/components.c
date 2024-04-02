@@ -149,77 +149,77 @@ int get_vers_sha_vars(void){
         get_seq_nstring(vers_sha_line,' ',4,zip_sha,80);    
         if(strcmp(header,"terraform:")==0){
             if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
-                strcpy(terraform_version_var,version);
-                strcpy(sha_tf_exec_var,exec_sha);
-                strcpy(sha_tf_zip_var,zip_sha);
+                strncpy(terraform_version_var,version,31);
+                strncpy(sha_tf_exec_var,exec_sha,79);
+                strncpy(sha_tf_zip_var,zip_sha,79);
             }
         }
         else if(strcmp(header,"tofu:")==0){
             if(valid_ver_or_not_tofu(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
-                strcpy(tofu_version_var,version);
-                strcpy(sha_tofu_exec_var,exec_sha);
-                strcpy(sha_tofu_zip_var,zip_sha);
+                strncpy(tofu_version_var,version,31);
+                strncpy(sha_tofu_exec_var,exec_sha,79);
+                strncpy(sha_tofu_zip_var,zip_sha,79);
             }
         }
         else if(strcmp(header,"alicloud_tf:")==0){
             if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
-                strcpy(ali_tf_plugin_version_var,version);
-                strcpy(sha_ali_tf_var,exec_sha);
-                strcpy(sha_ali_tf_zip_var,zip_sha);
+                strncpy(ali_tf_plugin_version_var,version,31);
+                strncpy(sha_ali_tf_var,exec_sha,79);
+                strncpy(sha_ali_tf_zip_var,zip_sha,79);
             }
         }
         else if(strcmp(header,"tencentcloud_tf:")==0){
             if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
-                strcpy(qcloud_tf_plugin_version_var,version);
-                strcpy(sha_qcloud_tf_var,exec_sha);
-                strcpy(sha_qcloud_tf_zip_var,zip_sha);
+                strncpy(qcloud_tf_plugin_version_var,version,31);
+                strncpy(sha_qcloud_tf_var,exec_sha,79);
+                strncpy(sha_qcloud_tf_zip_var,zip_sha,79);
             }
         }
         else if(strcmp(header,"aws_tf:")==0){
             if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
-                strcpy(aws_tf_plugin_version_var,version);
-                strcpy(sha_aws_tf_var,exec_sha);
-                strcpy(sha_aws_tf_zip_var,zip_sha);
+                strncpy(aws_tf_plugin_version_var,version,31);
+                strncpy(sha_aws_tf_var,exec_sha,79);
+                strncpy(sha_aws_tf_zip_var,zip_sha,79);
             }
         }
         else if(strcmp(header,"huaweicloud_tf:")==0){
             if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
-                strcpy(hw_tf_plugin_version_var,version);
-                strcpy(sha_hw_tf_var,exec_sha);
-                strcpy(sha_hw_tf_zip_var,zip_sha);
+                strncpy(hw_tf_plugin_version_var,version,31);
+                strncpy(sha_hw_tf_var,exec_sha,79);
+                strncpy(sha_hw_tf_zip_var,zip_sha,79);
             }
         }
         else if(strcmp(header,"baidubce_tf:")==0){
             if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
-                strcpy(bd_tf_plugin_version_var,version);
-                strcpy(sha_bd_tf_var,exec_sha);
-                strcpy(sha_bd_tf_zip_var,zip_sha);
+                strncpy(bd_tf_plugin_version_var,version,31);
+                strncpy(sha_bd_tf_var,exec_sha,79);
+                strncpy(sha_bd_tf_zip_var,zip_sha,79);
             }
         }
         else if(strcmp(header,"azurerm_tf:")==0){
             if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
-                strcpy(azrm_tf_plugin_version_var,version);
-                strcpy(sha_azrm_tf_var,exec_sha);
-                strcpy(sha_azrm_tf_zip_var,zip_sha);
+                strncpy(azrm_tf_plugin_version_var,version,31);
+                strncpy(sha_azrm_tf_var,exec_sha,79);
+                strncpy(sha_azrm_tf_zip_var,zip_sha,79);
             }
         }
         else if(strcmp(header,"azuread_tf:")==0){
             if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
-                strcpy(azad_tf_plugin_version_var,version);
-                strcpy(sha_azad_tf_var,exec_sha);
-                strcpy(sha_azad_tf_zip_var,zip_sha);
+                strncpy(azad_tf_plugin_version_var,version,31);
+                strncpy(sha_azad_tf_var,exec_sha,79);
+                strncpy(sha_azad_tf_zip_var,zip_sha,79);
             }
         }
         else if(strcmp(header,"gcp_tf:")==0){
             if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
-                strcpy(gcp_tf_plugin_version_var,version);
-                strcpy(sha_gcp_tf_var,exec_sha);
-                strcpy(sha_gcp_tf_zip_var,zip_sha);
+                strncpy(gcp_tf_plugin_version_var,version,31);
+                strncpy(sha_gcp_tf_var,exec_sha,79);
+                strncpy(sha_gcp_tf_zip_var,zip_sha,79);
             }
         }
         else if(strcmp(header,"now_crypto:")==0){
             if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0){
-                strcpy(sha_now_crypto_var,exec_sha);
+                strncpy(sha_now_crypto_var,exec_sha,79);
             }
         }
         else{
@@ -428,7 +428,7 @@ int get_locations(void){
         get_seq_nstring(location_line,' ',1,header_string,LINE_LENGTH_TINY);
         get_seq_nstring(location_line,' ',2,loc_string,LOCATION_LENGTH);
         if(strcmp(header_string,"tf_binary_root:")==0){
-            strcpy(url_tf_root_var,loc_string);
+            strncpy(url_tf_root_var,loc_string,LOCATION_LENGTH-1);
 #ifdef _WIN32
             if(loc_string[1]==':'){
                 tf_loc_flag_var=1;
@@ -441,7 +441,7 @@ int get_locations(void){
             i++;
         }
         else if(strcmp(header_string,"cloud_iac_root:")==0){
-            strcpy(url_code_root_var,loc_string);
+            strncpy(url_code_root_var,loc_string,LOCATION_LENGTH-1);
 #ifdef _WIN32
             if(loc_string[1]==':'){
                 code_loc_flag_var=1;
@@ -454,19 +454,19 @@ int get_locations(void){
             i++;
         }
         else if(strcmp(header_string,"online_scripts:")==0){
-            strcpy(url_shell_scripts_var,loc_string);
+            strncpy(url_shell_scripts_var,loc_string,LOCATION_LENGTH-1);
             i++;
         }
         else if(strcmp(header_string,"online_apps_pkgs:")==0){
-            strcpy(url_app_pkgs_root_var,loc_string);
+            strncpy(url_app_pkgs_root_var,loc_string,LOCATION_LENGTH-1);
             i++;
         }
         else if(strcmp(header_string,"online_apps_inst:")==0){
-            strcpy(url_app_inst_root_var,loc_string);
+            strncpy(url_app_inst_root_var,loc_string,LOCATION_LENGTH-1);
             i++;
         }
         else if(strcmp(header_string,"now_crypto_bin:")==0){
-            strcpy(url_now_crypto_var,loc_string);
+            strncpy(url_now_crypto_var,loc_string,LOCATION_LENGTH-1);
 #ifdef _WIN32
             if(loc_string[1]==':'){
                 now_crypto_loc_flag_var=1;
@@ -479,7 +479,7 @@ int get_locations(void){
             i++;
         }
         else if(strcmp(header_string,"online_initutl:")==0){
-            strcpy(url_initutils_root_var,loc_string);
+            strncpy(url_initutils_root_var,loc_string,LOCATION_LENGTH-1);
             i++;
         }
         else{
@@ -540,9 +540,9 @@ int get_tf_running(tf_exec_config* tf_config, char* tf_config_file){
     char tail[512]="";
     int time,get_flag=0;
     if(file_p==NULL){
-        strcpy(tf_config->tf_runner_type,"terraform");
-        strcpy(tf_config->tf_runner,TERRAFORM_EXEC);
-        strcpy(tf_config->dbg_level,"warn");
+        strncpy(tf_config->tf_runner_type,"terraform",15);
+        strncpy(tf_config->tf_runner,TERRAFORM_EXEC,255);
+        strncpy(tf_config->dbg_level,"warn",127);
         tf_config->max_wait_time=MAXIMUM_WAIT_TIME;
         return -1;
     }
@@ -554,20 +554,20 @@ int get_tf_running(tf_exec_config* tf_config, char* tf_config_file){
         get_seq_nstring(conf_line,' ',2,tail,511);
         if(strcmp(header,"tf_execution:")==0){
             if(strcmp(tail,TOFU_EXEC)==0){
-                strcpy(tf_config->tf_runner,TOFU_EXEC);
-                strcpy(tf_config->tf_runner_type,"tofu");
+                strncpy(tf_config->tf_runner,TOFU_EXEC,255);
+                strncpy(tf_config->tf_runner_type,"tofu",15);
             }
             else{
-                strcpy(tf_config->tf_runner,TERRAFORM_EXEC);
-                strcpy(tf_config->tf_runner_type,"terraform");
+                strncpy(tf_config->tf_runner,TERRAFORM_EXEC,255);
+                strncpy(tf_config->tf_runner_type,"terraform",15);
             }
         }
         else if(strcmp(header,"tf_dbg_level:")==0){
             if(strcmp(tail,"trace")!=0&&strcmp(tail,"debug")!=0&&strcmp(tail,"info")!=0&&strcmp(tail,"warn")!=0&&strcmp(tail,"error")!=0&&strcmp(tail,"off")!=0&&strcmp(tail,"TRACE")!=0&&strcmp(tail,"DEBUG")!=0&&strcmp(tail,"INFO")!=0&&strcmp(tail,"WARN")!=0&&strcmp(tail,"ERROR")!=0&&strcmp(tail,"OFF")!=0){
-                strcpy(tf_config->dbg_level,"warn");
+                strncpy(tf_config->dbg_level,"warn",127);
             }
             else{
-                strcpy(tf_config->dbg_level,tail);
+                strncpy(tf_config->dbg_level,tail,127);
             }
         }
         else if(strcmp(header,"max_wait_sec:")==0){
@@ -585,12 +585,12 @@ int get_tf_running(tf_exec_config* tf_config, char* tf_config_file){
     }
     fclose(file_p);
     if(strcmp(tf_config->tf_runner,TERRAFORM_EXEC)!=0&&strcmp(tf_config->tf_runner,TOFU_EXEC)!=0){
-        strcpy(tf_config->tf_runner,TERRAFORM_EXEC);
-        strcpy(tf_config->tf_runner_type,"terraform");
+        strncpy(tf_config->tf_runner,TERRAFORM_EXEC,255);
+        strncpy(tf_config->tf_runner_type,"terraform",15);
         get_flag++;
     }
     if(strcmp(tf_config->dbg_level,"trace")!=0&&strcmp(tf_config->dbg_level,"debug")!=0&&strcmp(tf_config->dbg_level,"info")!=0&&strcmp(tf_config->dbg_level,"warn")!=0&&strcmp(tf_config->dbg_level,"error")!=0&&strcmp(tf_config->dbg_level,"off")!=0&&strcmp(tf_config->dbg_level,"TRACE")!=0&&strcmp(tf_config->dbg_level,"DEBUG")!=0&&strcmp(tf_config->dbg_level,"INFO")!=0&&strcmp(tf_config->dbg_level,"WARN")!=0&&strcmp(tf_config->dbg_level,"ERROR")!=0&&strcmp(tf_config->dbg_level,"OFF")!=0){
-        strcpy(tf_config->dbg_level,"warn");
+        strncpy(tf_config->dbg_level,"warn",127);
         get_flag++;
     }
     if(tf_config->max_wait_time<MAXIMUM_WAIT_TIME||tf_config->max_wait_time>MAXIMUM_WAIT_TIME_EXT){
@@ -636,12 +636,12 @@ int update_tf_running(char* new_tf_runner, char* new_dbg_level, int new_max_time
     int i=0;
     if(strcmp(new_tf_runner,"terraform")==0||strcmp(new_tf_runner,"tofu")==0){
         if(strcmp(new_tf_runner,"terraform")==0){
-            strcpy(new_tf_runner_path,TERRAFORM_EXEC);
-            strcpy(prev_runner_assume,"tofu");
+            strncpy(new_tf_runner_path,TERRAFORM_EXEC,255);
+            strncpy(prev_runner_assume,"tofu",15);
         }
         else{
-            strcpy(new_tf_runner_path,TOFU_EXEC);
-            strcpy(prev_runner_assume,"terraform");
+            strncpy(new_tf_runner_path,TOFU_EXEC,255);
+            strncpy(prev_runner_assume,"terraform",15);
         }
         find_and_nget(TF_RUNNING_CONFIG,LINE_LENGTH_SHORT,"tf_execution:","","",1,"tf_execution:","","",' ',2,prev_config,128);
         if(strcmp(prev_config,new_tf_runner_path)!=0){
@@ -711,7 +711,7 @@ int configure_locations(int batch_flag_local){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location." RESET_DISPLAY "\n");
         }
         else{
-            strcpy(url_tf_root_var,loc_string);
+            strncpy(url_tf_root_var,loc_string,LOCATION_LENGTH-1);
         }
     }
     printf("[ LOC2/7 ] Please specify the root location of the infra-as-code templates. \n");
@@ -726,7 +726,7 @@ int configure_locations(int batch_flag_local){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location." RESET_DISPLAY "\n");
         }
         else{
-            strcpy(url_code_root_var,loc_string);
+            strncpy(url_code_root_var,loc_string,LOCATION_LENGTH-1);
         }
     }
     printf("[ LOC3/7 ] Please specify the root location of the *online* shell scripts.\n");
@@ -744,7 +744,7 @@ int configure_locations(int batch_flag_local){
             printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify." RESET_DISPLAY "\n");
         }
         else{
-            strcpy(url_shell_scripts_var,loc_string);
+            strncpy(url_shell_scripts_var,loc_string,LOCATION_LENGTH-1);
         }
     }
     printf("[ LOC4/7 ] Please input the root location of the now-crypto binary.\n");
@@ -759,7 +759,7 @@ int configure_locations(int batch_flag_local){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Invalid format. Will not modify this location." RESET_DISPLAY "\n");
         }
         else{
-            strcpy(url_now_crypto_var,loc_string);
+            strncpy(url_now_crypto_var,loc_string,LOCATION_LENGTH-1);
         }
     }
     printf("[ LOC5/7 ] Please specify the location of the *online* repo for utils and apps.\n");
@@ -777,7 +777,7 @@ int configure_locations(int batch_flag_local){
             printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify." RESET_DISPLAY "\n");
         }
         else{
-            strcpy(url_initutils_root_var,loc_string);
+            strncpy(url_initutils_root_var,loc_string,LOCATION_LENGTH-1);
         }
     }
 
@@ -796,7 +796,7 @@ int configure_locations(int batch_flag_local){
             printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify." RESET_DISPLAY "\n");
         }
         else{
-            strcpy(url_app_inst_root_var,loc_string);
+            strncpy(url_app_inst_root_var,loc_string,LOCATION_LENGTH-1);
         }
     }
 
@@ -815,7 +815,7 @@ int configure_locations(int batch_flag_local){
             printf(WARN_YELLO_BOLD "[ -WARN- ] This location must be a public URL. Will not modify." RESET_DISPLAY "\n");
         }
         else{
-            strcpy(url_app_pkgs_root_var,loc_string);
+            strncpy(url_app_pkgs_root_var,loc_string,LOCATION_LENGTH-1);
         }
     }
 

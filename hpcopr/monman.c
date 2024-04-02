@@ -29,16 +29,16 @@
  * Return  1: Cluster not asleep, but seems remote copy failed
  * Return  0: Remote copy succeeded
  */
-int get_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey_dir, char* mon_data_file){
+int get_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey_dir, char* mon_data_file, unsigned int filename_len_max){
     char workdir[DIR_LENGTH]="";
-    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0){
+    if(get_nworkdir(workdir,DIR_LENGTH,cluster_name)!=0||filename_len_max<DIR_LENGTH){
         return -7;
     }
     mk_pdir(NOW_MON_DIR);
     if(folder_check_general(NOW_MON_DIR,6)!=0){
         return -3;
     }
-    sprintf(mon_data_file,"%s%smon_data_%s.csv",NOW_MON_DIR,PATH_SLASH,cluster_name);
+    snprintf(mon_data_file,filename_len_max-1,"%s%smon_data_%s.csv",NOW_MON_DIR,PATH_SLASH,cluster_name);
     if(cluster_asleep_or_not(workdir,crypto_keyfile)==0){
         if(file_empty_or_not(mon_data_file)<1){
             return -5;
@@ -71,7 +71,7 @@ int update_all_mon_data(char* cluster_registry, char* crypto_keyfile, char* sshk
             continue;
         }
         get_seq_nstring(cluster_name_temp,' ',4,cluster_name_temp,64);
-        run_flag=get_cluster_mon_data(cluster_name_temp,crypto_keyfile,sshkey_dir,mon_data_file_temp);
+        run_flag=get_cluster_mon_data(cluster_name_temp,crypto_keyfile,sshkey_dir,mon_data_file_temp,FILENAME_LENGTH);
         if(run_flag==0){
             updated++;
         }
@@ -79,7 +79,7 @@ int update_all_mon_data(char* cluster_registry, char* crypto_keyfile, char* sshk
     return updated;
 }
 
-int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_string, char* time_string){
+int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_string, char* time_string, unsigned int datetime_str_len){
     char ymd[32]="";
     char year[8]="";
     char month[8]="";
@@ -100,14 +100,20 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
     int curr_hour=time_p->tm_hour;
     int curr_min=time_p->tm_min;
 
+    if(datetime_input==NULL){
+        return NULL_PTR_ARG;
+    }
+    if(datetime_str_len<32){
+        return -3;
+    }
     if(strlen(datetime_input)>16||strlen(datetime_input)<3){
         if(extend_flag==0){
-            strcpy(date_string,"2000-1-1");
-            strcpy(time_string,"0:0:0");
+            strncpy(date_string,"2000-1-1",datetime_str_len-1);
+            strncpy(time_string,"0:0:0",datetime_str_len-1);
         }
         else{
-            strcpy(date_string,"2049-12-31");
-            strcpy(time_string,"23:59:59");
+            strncpy(date_string,"2049-12-31",datetime_str_len-1);
+            strncpy(time_string,"23:59:59",datetime_str_len-1);
         }
         return -1;
     }
@@ -151,7 +157,7 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
         i=4;
         day_num=curr_mday;
     }
-    sprintf(date_string,"%d-%d-%d",year_num,month_num,day_num);
+    snprintf(date_string,datetime_str_len-1,"%d-%d-%d",year_num,month_num,day_num);
     if(hour_num<0||hour_num>23){
         i=5;
         hour_num=curr_hour;
@@ -160,7 +166,7 @@ int valid_time_format_or_not(char* datetime_input, int extend_flag, char* date_s
         i=6;
         min_num=curr_min;
     }
-    sprintf(time_string,"%d:%d:0",hour_num,min_num);
+    snprintf(time_string,datetime_str_len-1,"%d:%d:0",hour_num,min_num);
     return i;
 }
 
@@ -196,7 +202,7 @@ int show_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey
     
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
-    int run_flag=get_cluster_mon_data(cluster_name,crypto_keyfile,sshkey_dir,cluster_mon_data_file);
+    int run_flag=get_cluster_mon_data(cluster_name,crypto_keyfile,sshkey_dir,cluster_mon_data_file,FILENAME_LENGTH);
     if(run_flag==-3){
         printf(WARN_YELLO_BOLD "[ -WARN- ] The cluster %s is not running. The data is not updated.\n" RESET_DISPLAY,cluster_name);
     }
@@ -210,7 +216,7 @@ int show_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey
     if(file_p_2==NULL){
         return -1;
     }
-    run_flag=valid_time_format_or_not(start_datetime,0,start_date,start_time);
+    run_flag=valid_time_format_or_not(start_datetime,0,start_date,start_time,32);
     if(run_flag==-1){
         printf(WARN_YELLO_BOLD "[ -WARN- ] No start date&time specified. Will start from the first timestamp." RESET_DISPLAY "\n");
     }
@@ -234,7 +240,7 @@ int show_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey
     }
     datetime_to_num(start_date,start_time,&time_tm1);
     time1=mktime(&time_tm1);
-    run_flag=valid_time_format_or_not(end_datetime,1,end_date,end_time);
+    run_flag=valid_time_format_or_not(end_datetime,1,end_date,end_time,32);
     if(run_flag==-1){
         printf(WARN_YELLO_BOLD "[ -WARN- ] No end date&time specified. Will end with the last timestamp." RESET_DISPLAY "\n");
     }
@@ -258,7 +264,7 @@ int show_cluster_mon_data(char* cluster_name, char* crypto_keyfile, char* sshkey
         time2=mktime(&time_tm2);
         if(time1>time2){
             printf(WARN_YELLO_BOLD "[ -WARN- ] The specified end date&time is earlier than the start date&time. Skipping it." RESET_DISPLAY "\n");
-            valid_time_format_or_not("",1,end_date,end_time);
+            valid_time_format_or_not("",1,end_date,end_time,32);
         }
         else{
             printf(GENERAL_BOLD "[ INFO- ]" RESET_DISPLAY " End date&time: %s~%s.\n",end_date,end_time);

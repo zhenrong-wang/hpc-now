@@ -198,13 +198,13 @@ int get_job_info(int argc, char** argv, char* workdir, char* user_name, char* ss
         direct_path_check(job_data,user_name,job_data_final);
     }
    
-    strcpy(job_info->app_name,app_name);
+    strncpy(job_info->app_name,app_name,127);
     job_info->node_num=specified_node_num;
     job_info->tasks_per_node=specified_node_cores;
-    strcpy(job_info->job_name,job_name);
+    strncpy(job_info->job_name,job_name,127);
     job_info->duration_hours=duration_hours;
-    strcpy(job_info->job_exec,exec_name);
-    strcpy(job_info->job_data,job_data_final);
+    strncpy(job_info->job_exec,exec_name,255);
+    strncpy(job_info->job_data,job_data_final,255);
     if(cmd_flag_check(argc,argv,"--echo")==0){
         strcpy(job_info->echo_flag,"true");
     }
