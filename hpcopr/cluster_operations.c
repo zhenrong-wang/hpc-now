@@ -709,7 +709,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             fflush_stdin();
         }
         else{
-            strcpy(az_subscription_id,az_subscription);
+            strncpy(az_subscription_id,az_subscription,AKSK_LENGTH-1);
         }
         if(strlen(az_tenant)!=36){
             if(batch_flag_local==0){
@@ -722,7 +722,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             fflush_stdin();
         }
         else{
-            strcpy(az_tenant_id,az_tenant);
+            strncpy(az_tenant_id,az_tenant,AKSK_LENGTH-1);
         }
         fprintf(file_p,"%s\n%s\nCLOUD_F\nazure_subscription_id: %s\nazure_tenant_id: %s\n",access_key,secret_key,az_subscription_id,az_tenant_id);
     }
@@ -796,7 +796,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             fflush_stdin();
         }
         else{
-            strcpy(secret_key,cloud_sk);
+            strncpy(secret_key,cloud_sk,AKSK_LENGTH-1);
         }
         file_p=fopen(secret_key,"r");
         if(file_p==NULL){
@@ -854,12 +854,6 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your new secrets key pair:\n");
         getpass_stdin("[ INPUT: ] Access key ID : ",access_key,AKSK_LENGTH);
         getpass_stdin("[ INPUT: ] Access secrets: ",secret_key,AKSK_LENGTH);
-        /*keypair_temp=GETPASS_FUNC("[ INPUT: ] Access key ID  : ");
-        strcpy(access_key,keypair_temp);
-        reset_string(keypair_temp);
-        keypair_temp=GETPASS_FUNC("[ INPUT: ] Access secrets : ");
-        strcpy(secret_key,keypair_temp);
-        reset_string(keypair_temp);*/
     }
     else{
         strncpy(access_key,cloud_ak,AKSK_LENGTH-1);
@@ -2479,7 +2473,7 @@ int view_run_log(char* workdir, char* stream, char* run_option, char* view_optio
         strcpy(real_stream,"std");
     }
     else{
-        strcpy(real_stream,stream);
+        strncpy(real_stream,stream,15);
     }
     if(strcmp(run_option,"realtime")!=0&&strcmp(run_option,"archive")!=0){
         if(strcmp(real_stream,"std")==0){
