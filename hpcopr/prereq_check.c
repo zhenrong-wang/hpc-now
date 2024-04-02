@@ -753,9 +753,9 @@ int check_and_install_prerequisitions(int repair_flag){
     FILE* file_p=NULL;
     char plugin_dir_root[DIR_LENGTH]="";
 #ifdef _WIN32
-    char appdata_dir[128]="";
-    char home_path[80]="";
-    char dotssh_dir[128]="";
+    char appdata_dir[MAX_PATH]="";
+    char home_path[128]=""; /* This might be a little bit risky */
+    char dotssh_dir[MAX_PATH]="";
 #endif
     /* For compatibility, move the previous logs to the now_logs dir */
     if(mk_pdir(NOW_BINARY_DIR)<0||mk_pdir(DESTROYED_DIR)<0||mk_pdir(NOW_LOG_DIR)<0||mk_pdir(SSHKEY_DIR)<0||mk_pdir(NOW_MON_DIR)<0){
@@ -802,11 +802,11 @@ int check_and_install_prerequisitions(int repair_flag){
         rename(filename_temp,filename_temp2);
     }
 #ifdef _WIN32
-    if(get_win_appdata_dir(appdata_dir,128)!=0){
+    if(get_win_appdata_dir(appdata_dir,MAX_PATH)!=0){
         return -5;
     }
-    get_seq_nstring(appdata_dir,'\\',3,home_path,80);
-    snprintf(dotssh_dir,127,"c:\\users\\%s\\.ssh",home_path);
+    get_seq_nstring(appdata_dir,'\\',3,home_path,127);
+    snprintf(dotssh_dir,MAX_PATH-1,"c:\\users\\%s\\.ssh",home_path);
     if(mk_pdir(TF_LOCAL_PLUGINS)<0){
         return -5;
     }

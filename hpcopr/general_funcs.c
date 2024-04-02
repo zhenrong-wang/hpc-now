@@ -3691,11 +3691,11 @@ int reset_windows_cmd_display(void){
  * It should be OK.
  */
 int get_win_appdata_dir(char appdata[], unsigned int dir_lenmax){
+#ifdef _WIN32
     if(appdata==NULL){
         return NULL_PTR_ARG;
     }
-#ifdef _WIN32
-    if(dir_lenmax<128){
+    if(dir_lenmax<MAX_PATH){
         return -3;
     }
     if(SHGetFolderPath(NULL,CSIDL_APPDATA,NULL,SHGFP_TYPE_CURRENT,appdata)!=S_OK){
