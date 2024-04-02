@@ -1671,8 +1671,8 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
     }
     else{
         if(reinit_flag==0){
-            remote_exec(workdir,crypto_keyfile,sshkey_dir,"connect",1);
-            remote_exec(workdir,crypto_keyfile,sshkey_dir,"all",2);
+            remote_exec(workdir,crypto_keyfile,sshkey_dir,"connect",2);
+            remote_exec(workdir,crypto_keyfile,sshkey_dir,"all",3);
         }
         else{
             remote_exec(workdir,crypto_keyfile,sshkey_dir,"connect",7);
