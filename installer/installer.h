@@ -14,6 +14,7 @@
 
 int check_linux_packman(char* linux_packman, int length);
 int check_internet_installer(void);
+int preinstall_check(void);
 int installed_or_not(void);
 void print_header_installer(void);
 void print_tail_installer(void);

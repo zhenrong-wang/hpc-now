@@ -30,9 +30,17 @@
 
 #include "installer.h"
 
+static char preinst_check_failures[5][16]={
+    "ssh",
+    "scp",
+    "curl",
+    "tar",
+    "unzip"
+};
+
 int check_linux_packman(char* linux_packman, int length){
 #ifndef __linux__
-    return 0; /* For Windows, this function is skipped. */
+    return 0; /* For Windows or macOS, this function is skipped. */
 #else
     if(system("which yum >> /dev/null 2>&1")==0){
         strncpy(linux_packman,"yum",length-1);
@@ -69,6 +77,61 @@ int check_internet_installer(void){
         return 1;
     }
     return 0;
+}
+
+/**
+ * @brief
+ *   Check whether the prerequisites are satisfied. 
+ *   Microsoft Windows and macOS doesn't provide a package manager.
+ *   Therefore, any absence of prerequisites should be reported and 
+ *   The users need to manually install them.
+ *   For GNU/Linux, this function does nothing.
+ * 
+ * @param [in] void
+ * 
+ * @returns
+ *   0 if all checked successfully
+ *   1 ~ 5 as the index+1 of static char preinst_check_failures[5][16]
+ *   6 if the compiler failed to detect the system-specific macros
+ * 
+ */
+int preinstall_check(void){
+#ifdef _WIN32
+    if(system("where ssh >nul 2>&1")!=0){
+        return 1;
+    }
+    if(system("where scp >nul 2>&1")!=0){
+        return 2;
+    }
+    if(system("where curl >nul 2>&1")!=0){
+        return 3;
+    }
+    if(system("where tar >nul 2>&1")!=0){
+        return 4;
+    }
+    return 0;
+#elif __APPLE__
+    if(system("which ssh >>/dev/null 2>&1")!=0){
+        return 1;
+    }
+    if(system("which scp >>/dev/null 2>&1")!=0){
+        return 2;
+    }
+    if(system("which curl >>/dev/null 2>&1")!=0){
+        return 3;
+    }
+    if(system("which tar >>/dev/null 2>&1")!=0){
+        return 4;
+    }
+    if(system("which unzip >>/dev/null 2>&1")!=0){
+        return 5;
+    }
+    return 0;
+#elif __linux__
+    return 0;
+#else
+    return 6;
+#endif
 }
 
 /* 
@@ -241,7 +304,16 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
 #elif _WIN32
     char hpc_now_password[15]=""; /* Windows will prompt to confirm if the password string is longer than 14*/
 #endif
-
+    int preinst_check_flag=preinstall_check();
+    if(preinst_check_flag!=0){
+        if(preinst_check_flag==6){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Please build this software on Windows, macOS, or GNU/Linux." RESET_DISPLAY "\n");
+        }
+        else{
+            printf(FATAL_RED_BOLD "[ FATAL: ] The utility '%s' is absent. Install it manually and retry." RESET_DISPLAY "\n",preinst_check_failures[preinst_check_flag-1]);
+        }
+        return 1;
+    }
     if(installed_or_not()!=0){
 #ifdef _WIN32
         printf(FATAL_RED_BOLD "[ FATAL: ] User 'hpc-now' found. The HPC-NOW has already been installed.\n");
@@ -308,6 +380,11 @@ int install_services(int hpcopr_loc_flag, char* hpcopr_loc, char* hpcopr_ver, ch
             return -1;
         }
     }
+    /*
+     * For Linux, only check curl and unzip. Usually, the other required utilities `tar`, `ssh` and `scp` are
+     * already installed. But this is just an assumption based on the experience. Maybe we need to add the 
+     * check of them later. For now, it should be OK.
+     */
     if(system("which curl >> /dev/null 2>&1")!=0){
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Curl not found. Install the utility 'curl' with %s ...\n",linux_packman);
         if(strcmp(linux_packman,"pacman")!=0){
