@@ -1,4 +1,4 @@
-<img src="./img/hpc-now-project-logo.png" alt="HPC-NOW Logo" style="width: 200px;">
+<img src="./img/hpc-now-project-logo.png" alt="HPC-NOW Logo" style="width: 500px;">
 
 **HPC-NOW, start your HPC journey in the cloud <u>now</u>, with <u>n</u>o <u>o</u>peration <u>w</u>orkload!**
 
