@@ -1011,7 +1011,8 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
+    char cluster_sshkey_dir[DIR_LENGTH]="";
+
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
@@ -1028,7 +1029,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char db_os_image[64]="";
     char nat_os_image[64]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
-    char* sshkey_folder=SSHKEY_DIR;
+    
     char pubkey[1024]="";
     int number_of_vcpu=0;
     int cpu_core_num=0;
@@ -1060,7 +1061,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
         return -1;
     }
-    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
+    if(get_opr_pubkey(SSHKEY_DIR,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -1282,9 +1283,9 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(cloud_flag,filename_temp,bucket_id,init_info.region_id,bucket_ak,bucket_sk,"");
     save_cluster_vaults(vaultdir,init_info.master_passwd,init_info.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"connect",7);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"all",8);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"connect",7);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"all",8);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -1322,14 +1323,14 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     }
     fclose(file_p);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
-    sync_statefile(workdir,crypto_keyfile,sshkey_folder);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_info.cluster_id,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,SSHKEY_DIR);
+    snprintf(cluster_sshkey_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,init_info.cluster_id);
+    mk_pdir(cluster_sshkey_dir);
+    get_user_sshkey(init_info.cluster_id,"root","ENABLED",SSHKEY_DIR,crypto_keyfile);
     for(i=0;i<init_info.hpc_user_num;i++){
         snprintf(string_temp,127,"user%d",i+1);
-        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
+        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",SSHKEY_DIR,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -1346,7 +1347,8 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
+    char cluster_sshkey_dir[DIR_LENGTH]="";
+
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
@@ -1360,7 +1362,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     char string_temp[128]="";
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
-    char* sshkey_folder=SSHKEY_DIR;
+    
     char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
@@ -1389,7 +1391,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
         return -1;
     }
-    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
+    if(get_opr_pubkey(SSHKEY_DIR,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -1575,9 +1577,9 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(cloud_flag,filename_temp,bucket_id,init_info.region_id,bucket_ak,bucket_sk,"");
     save_cluster_vaults(vaultdir,init_info.master_passwd,init_info.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"connect",7);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"all",8);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"connect",7);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"all",8);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -1615,14 +1617,14 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     }
     fclose(file_p);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
-    sync_statefile(workdir,crypto_keyfile,sshkey_folder);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_info.cluster_id,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,SSHKEY_DIR);
+    snprintf(cluster_sshkey_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,init_info.cluster_id);
+    mk_pdir(cluster_sshkey_dir);
+    get_user_sshkey(init_info.cluster_id,"root","ENABLED",SSHKEY_DIR,crypto_keyfile);
     for(i=0;i<init_info.hpc_user_num;i++){
         snprintf(string_temp,127,"user%d",i+1);
-        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
+        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",SSHKEY_DIR,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -1639,7 +1641,8 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
+    char cluster_sshkey_dir[DIR_LENGTH]="";
+    
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
@@ -1653,7 +1656,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     char string_temp[128]="";
     char NAS_Zone[CONF_STRING_LENTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
-    char* sshkey_folder=SSHKEY_DIR;
+
     char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
@@ -1682,7 +1685,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
         return -1;
     }
-    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
+    if(get_opr_pubkey(SSHKEY_DIR,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -1864,9 +1867,9 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(cloud_flag,filename_temp,bucket_id,init_info.region_id,bucket_ak,bucket_sk,"");
     save_cluster_vaults(vaultdir,init_info.master_passwd,init_info.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"connect",7);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"all",8);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"connect",7);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"all",8);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -1904,14 +1907,14 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     }
     fclose(file_p);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
-    sync_statefile(workdir,crypto_keyfile,sshkey_folder);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_info.cluster_id,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    get_user_sshkey(init_info.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,SSHKEY_DIR);
+    snprintf(cluster_sshkey_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,init_info.cluster_id);
+    mk_pdir(cluster_sshkey_dir);
+    get_user_sshkey(init_info.cluster_id,"root","ENABLED",SSHKEY_DIR,crypto_keyfile);
     for(i=0;i<init_info.hpc_user_num;i++){
         snprintf(string_temp,127,"user%d",i+1);
-        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
+        get_user_sshkey(init_info.cluster_id,string_temp,"ENABLED",SSHKEY_DIR,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -1959,7 +1962,8 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
+    char cluster_sshkey_dir[DIR_LENGTH]="";
+    
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
@@ -1972,7 +1976,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     char unique_cluster_id[64]="";
     char string_temp[128]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
-    char* sshkey_folder=SSHKEY_DIR;
+    
     char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
@@ -2004,7 +2008,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
         return -1;
     }
-    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
+    if(get_opr_pubkey(SSHKEY_DIR,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -2186,9 +2190,9 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(cloud_flag,filename_temp,bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"");
     save_cluster_vaults(vaultdir,init_conf.master_passwd,init_conf.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"connect",7);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"all",8);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"connect",7);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"all",8);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -2222,14 +2226,14 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     }
     fclose(file_p);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
-    sync_statefile(workdir,crypto_keyfile,sshkey_folder);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,SSHKEY_DIR);
+    snprintf(cluster_sshkey_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,init_conf.cluster_id);
+    mk_pdir(cluster_sshkey_dir);
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",SSHKEY_DIR,crypto_keyfile);
     for(i=0;i<init_conf.hpc_user_num;i++){
         snprintf(string_temp,127,"user%d",i+1);
-        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",SSHKEY_DIR,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -2246,7 +2250,8 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
+    char cluster_sshkey_dir[DIR_LENGTH]="";
+    
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
@@ -2259,7 +2264,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     char unique_cluster_id[64]="";
     char string_temp[128]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
-    char* sshkey_folder=SSHKEY_DIR;
+    
     char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
@@ -2290,7 +2295,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
         return -1;
     }
-    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
+    if(get_opr_pubkey(SSHKEY_DIR,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -2484,9 +2489,9 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(cloud_flag,filename_temp,bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"");
     save_cluster_vaults(vaultdir,init_conf.master_passwd,init_conf.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"connect",7);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"all",8);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"connect",7);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"all",8);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -2524,22 +2529,22 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     }
     fclose(file_p);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
-    sync_statefile(workdir,crypto_keyfile,sshkey_folder);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,SSHKEY_DIR);
+    snprintf(cluster_sshkey_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,init_conf.cluster_id);
+    mk_pdir(cluster_sshkey_dir);
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",SSHKEY_DIR,crypto_keyfile);
     for(i=0;i<init_conf.hpc_user_num;i++){
         snprintf(string_temp,127,"user%d",i+1);
-        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",SSHKEY_DIR,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
     bceconfig_convert(vaultdir,"generate",init_conf.region_id,bucket_ak,bucket_sk);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scredentials",vaultdir,PATH_SLASH);
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/credentials","root","put","",0);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket_creds/credentials","root","put","",0);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sconfig",vaultdir,PATH_SLASH);
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_creds/config","root","put","",0);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket_creds/config","root","put","",0);
     bceconfig_convert(vaultdir,"delete","","","");
     delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
@@ -2554,7 +2559,8 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
+    char cluster_sshkey_dir[DIR_LENGTH]="";
+    
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
@@ -2570,7 +2576,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     char string_temp[128]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
     char random_storage_account[RANDSTR_LENGTH_PLUS]="";
-    char* sshkey_folder=SSHKEY_DIR;
+    
     char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
@@ -2597,15 +2603,12 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
     if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
-        /*printf("HHHHHxxx! \n");*/
         return -1;
     }
     if(get_azure_ninfo(workdir,LINE_LENGTH_SHORT,crypto_keyfile,subscription_id,tenant_id,256)!=0){
-        /*printf("HHHHHsss! \n");*/
         return -1;
     }
-    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
-        /*printf("HHHHHaaaa! \n");*/
+    if(get_opr_pubkey(SSHKEY_DIR,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -2743,9 +2746,9 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(cloud_flag,filename_temp,bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"");
     save_cluster_vaults(vaultdir,init_conf.master_passwd,init_conf.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"connect",7);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"all",8);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"connect",7);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"all",8);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -2779,14 +2782,14 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     }
     fclose(file_p);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
-    sync_statefile(workdir,crypto_keyfile,sshkey_folder);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,SSHKEY_DIR);
+    snprintf(cluster_sshkey_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,init_conf.cluster_id);
+    mk_pdir(cluster_sshkey_dir);
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",SSHKEY_DIR,crypto_keyfile);
     for(i=0;i<init_conf.hpc_user_num;i++){
         snprintf(string_temp,127,"user%d",i+1);
-        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",SSHKEY_DIR,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
@@ -2803,7 +2806,8 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char vaultdir[DIR_LENGTH]="";
     char logdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
-    char cmdline[CMDLINE_LENGTH]="";
+    char cluster_sshkey_dir[DIR_LENGTH]="";
+
     char conf_file[FILENAME_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
@@ -2818,7 +2822,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     char gcp_project_id[128]="";
     char gcp_bucket_key[FILENAME_LENGTH]="";
     char randstr[RANDSTR_LENGTH_PLUS]="";
-    char* sshkey_folder=SSHKEY_DIR;
+
     char pubkey[1024]="";
     FILE* file_p=NULL;
     FILE* file_p_2=NULL;
@@ -2845,7 +2849,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     if(gcp_credential_convert(workdir,"decrypt",0)!=0){
         return -1;
     }
-    if(get_opr_pubkey(sshkey_folder,pubkey,1023)!=0){
+    if(get_opr_pubkey(SSHKEY_DIR,pubkey,1023)!=0){
         return -1;
     }
     printf("[ STEP 1 ] Creating initialization files now ...\n");
@@ -3009,14 +3013,14 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Sending commands and sync files ...\n");
     snprintf(gcp_bucket_key,FILENAME_LENGTH-1,"%s%sbucket_key.txt",vaultdir,PATH_SLASH);
     base64decode(bucket_private_key,gcp_bucket_key);
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket_key.json","root","put","",0);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket_key.json","root","put","",0);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
     save_bucket_info(cloud_flag,filename_temp,randstr,init_conf.region_id,bucket_selflink,"",gcp_bucket_key);
     rm_file_or_dir(gcp_bucket_key);
     save_cluster_vaults(vaultdir,init_conf.master_passwd,init_conf.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0); 
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"connect",7);
-    remote_exec(workdir,crypto_keyfile,sshkey_folder,"all",8);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0); 
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"connect",7);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"all",8);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
     graph(workdir,crypto_keyfile,0);
     printf("|\n");
@@ -3050,14 +3054,14 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     }
     fclose(file_p);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
-    remote_copy(workdir,crypto_keyfile,sshkey_folder,filename_temp,"/root/hostfile","root","put","",0);
-    sync_statefile(workdir,crypto_keyfile,sshkey_folder);
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s %s%s.%s %s", MKDIR_CMD,sshkey_folder,PATH_SLASH,init_conf.cluster_id,SYSTEM_CMD_REDIRECT);
-    system(cmdline);
-    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",sshkey_folder,crypto_keyfile);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,SSHKEY_DIR);
+    snprintf(cluster_sshkey_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,init_conf.cluster_id);
+    mk_pdir(cluster_sshkey_dir);
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",SSHKEY_DIR,crypto_keyfile);
     for(i=0;i<init_conf.hpc_user_num;i++){
         snprintf(string_temp,127,"user%d",i+1);
-        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",sshkey_folder,crypto_keyfile);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",SSHKEY_DIR,crypto_keyfile);
     }
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
