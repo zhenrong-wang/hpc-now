@@ -1976,7 +1976,7 @@ int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* e
     }
     else{
         if(silent_flag!=0){
-            printf("\n");
+            printf("                                                           \r");
         }
         return 0;
     }
