@@ -2295,6 +2295,7 @@ int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, ch
     char tf_dbg_log[FILENAME_LENGTH]="";
     char tf_dbg_log_archive[FILENAME_LENGTH]="";
     char cloud_flag[16]="";
+    char tf_runner_type[8]="";
 
     if(create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH)!=0||get_cloud_flag(workdir,crypto_keyfile,cloud_flag,16)!=0){
         return -3;
@@ -2323,8 +2324,14 @@ int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, ch
         /*signal(SIGINT,SIG_DFL);*/
         return -7;
     }
+    if(strcmp(tf_run->tf_runner_type,"terraform")==0){
+        strncpy(tf_runner_type,"tf",7);
+    }
+    else{
+        strncpy(tf_runner_type,"otf",7);
+    }
     if(silent_flag!=0){
-        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process. TF: %s. Tmax: %d secs.\n",tf_run->tf_runner_type,tf_run->max_wait_time);
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process. TF: %s. Tmax: %d secs.\n",tf_runner_type,tf_run->max_wait_time);
         printf("[  ****  ] CMD: %s. DBG: %s. LOG: hpcopr -b viewlog" RESET_DISPLAY "\n",execution_name,tf_run->dbg_level);
     }
     if(wait_for_complete(tf_realtime_log,execution_name,tf_run->max_wait_time,tf_error_log,tf_error_log_archive,1)!=0){
