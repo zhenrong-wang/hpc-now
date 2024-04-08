@@ -170,6 +170,8 @@ int password_to_clipboard(char* cluster_workdir, char*crypto_keyfile, char* user
 int generate_rdp_file(char* cluster_name, char* master_address, char* username, char* randstr);
 int start_rdp_connection(char* cluster_workdir, char* crypto_keyfile, char* username, int password_flag);
 int cluster_rdp(char* cluster_workdir, char* crypto_keyfile, char* username, char* cluster_role, int password_flag);
+int get_cluster_sshkey_dir(char* cluster_workdir, char* sshkey_dir, char* cluster_sshkey_dir, unsigned int dir_lenmax);
+int check_cluster_status(char* cluster_workdir, char* crypto_keyfile, char* sshkey_dir);
 
 FILE* check_regions_list_file(char* cluster_name);
 int list_cloud_regions(char* cluster_name, int format_flag);

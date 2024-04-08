@@ -346,6 +346,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 - `vault`        Check the sensitive information of the current cluster.
 - `graph`        Display the cluster map including all the nodes and status.
 - `viewlog`      View the operation log of the current cluster.
+- `status`       Check the status of SLURM service running in the cluster.
 
 ### **Cluster Operation**
 

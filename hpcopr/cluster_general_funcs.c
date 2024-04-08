@@ -4242,6 +4242,53 @@ int cluster_rdp(char* cluster_workdir, char* crypto_keyfile, char* username, cha
     return start_rdp_connection(cluster_workdir,crypto_keyfile,username,password_flag);
 }
 
+int get_cluster_sshkey_dir(char* cluster_workdir, char* sshkey_dir, char* cluster_sshkey_dir, unsigned int dir_lenmax){
+    if(cluster_sshkey_dir==NULL||dir_lenmax<DIR_LENGTH_SHORT||cluster_workdir==NULL||sshkey_dir==NULL){
+        return -3;
+    }
+    char cluster_name[32]="";
+    if(get_cluster_nname(cluster_name,32,cluster_workdir)!=0){
+        return -1;
+    }
+    snprintf(cluster_sshkey_dir,dir_lenmax-1,"%s%s.%s",sshkey_dir,PATH_SLASH,cluster_name);
+    return 0;
+}
+
+int check_cluster_status(char* cluster_workdir, char* crypto_keyfile, char* sshkey_dir){
+    char cluster_role[32]="";
+    char cluster_role_ext[32]="";
+    char cluster_sshkey_dir[DIR_LENGTH]="";
+    char *user_sshkey_path=NULL;
+    char string_temp[64]="", user_name[32]="";
+    if(cluster_role_detect(cluster_workdir,cluster_role,cluster_role_ext,32)!=0){
+        return -3;
+    }
+    if(strcmp(cluster_role,"opr")==0){
+        putchar('\n');
+        remote_exec_general(cluster_workdir,crypto_keyfile,sshkey_dir,"root","sinfo -N","",0,3,"","");
+        return 0;
+    }
+    else{
+        if(get_cluster_sshkey_dir(cluster_workdir,sshkey_dir,cluster_sshkey_dir,DIR_LENGTH)!=0){
+            return -1;
+        }
+        user_sshkey_path=get_first_fuzzy_subpath(cluster_sshkey_dir,"*.key.tmp",DIR_LENGTH);
+        if(user_sshkey_path==NULL){
+            return -1;
+        }
+        if(get_seq_nstring(user_sshkey_path,PATH_SLASH[0],calc_str_nnum(user_sshkey_path,PATH_SLASH[0]),string_temp,64)!=0){
+            return -1;
+        };
+        free(user_sshkey_path);
+        if(get_seq_nstring(string_temp,'.',1,user_name,32)!=0){
+            return -1;
+        }
+        putchar('\n');
+        remote_exec_general(cluster_workdir,crypto_keyfile,sshkey_dir,user_name,"sinfo -N","",0,3,"","");
+        return 0;
+    }
+}
+
 /* 
  * If file exists, return the file pointer
  * Otherwise, return NULL

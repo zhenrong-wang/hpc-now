@@ -129,6 +129,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "edit-conf,opr,CNAME",
     "rm-conf,opr,CNAME",
     "init,opr,CNAME",
+    "status,gen,CNAME",
     "rebuild,opr,CNAME",
     "vault,gen,CNAME",
     "graph,gen,CNAME",
@@ -242,6 +243,7 @@ char jobman_commands[3][SUBCMD_STRING_LENGTH_MAX]={
 57 ALREADY_INITED
 59 UNKNOWN_CLOUD
 61 WORKDIR_NOT_EXIST
+62 CHECK_STATUS_FAILED
 63 AWS_REGION_VALID_FAILED
 65 GET_FILE_FAILED
 67 ZONE_ID_ERROR
@@ -1468,6 +1470,7 @@ int main(int argc, char* argv[]){
         check_and_cleanup(workdir);
         return 53;
     }
+
     if(strcmp(final_command,"get-conf")==0){
         if(cluster_empty_or_not(workdir,crypto_keyfile)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not empty. In order to protect current cluster,\n");
@@ -1992,14 +1995,27 @@ int main(int argc, char* argv[]){
 
     if(cluster_state_flag==0){
         if(strcmp(final_command,"addc")==0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster not running. Please run " RESET_DISPLAY GENERAL_BOLD "hpcopr wakeup --all." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster not running. Please run hpcopr wakeup --all." RESET_DISPLAY "\n");
         }
         else{
-            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster not running. Please run " RESET_DISPLAY GENERAL_BOLD "hpcopr wakeup --all | --min." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Cluster not running. Please run hpcopr wakeup --all | --min." RESET_DISPLAY "\n");
         }
         write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_IS_ASLEEP",43);
         check_and_cleanup(workdir);
         return 43;
+    }
+
+    if(strcmp(final_command,"status")==0){
+        run_flag=check_cluster_status(workdir,crypto_keyfile,SSHKEY_DIR);
+        if(run_flag!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to check the status of the cluster. Error: %d." RESET_DISPLAY "\n",run_flag);
+            write_operation_log(cluster_name,operation_log,argc,argv,"CHECK_STATUS_FAILED",run_flag);
+            check_and_cleanup(workdir);
+            return 62;
+        }
+        write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",run_flag);
+        check_and_cleanup(workdir);
+        return 0;
     }
 
     if(strcmp(final_command,"appman")==0){

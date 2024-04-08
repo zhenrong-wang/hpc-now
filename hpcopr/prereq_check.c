@@ -1388,8 +1388,9 @@ int command_parser(int argc, char** argv, char command_name_prompt[], unsigned i
             }
         }
         if(cluster_name_check(temp_cluster_name)!=-7){
-            run_flag=list_all_cluster_names(1);
+            run_flag=list_all_cluster_names(0);
             if(run_flag!=0){
+                list_all_cluster_names(1);
                 return -3;
             }
             if(batch_flag!=0){

@@ -284,6 +284,9 @@ void print_help(char* cmd_name){
         printf("|                     ~ If not specified, the default URLs will be used automatically.\n");
         printf("|                     ~ You can run 'hpcopr showloc' to check them.\n");
     }
+    if(strcmp(cmd_name,"status")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "status" RESET_DISPLAY "     :~ Check the status of the scheduler of the cluster.\n");
+    }
     if(strcmp(cmd_name,"rebuild")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "rebuild" RESET_DISPLAY "     :~ Rebuild the nodes *without* destroying the cluster's storage.\n");
         printf("|   --mc              ~ Only rebuild the master and all the compute node(s).\n");
