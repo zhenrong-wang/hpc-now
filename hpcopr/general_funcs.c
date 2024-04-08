@@ -1757,6 +1757,9 @@ char* get_first_fuzzy_subpath(char* pathname, char* fuzzy_name, unsigned int buf
         return NULL;
     }
     do{
+        if(strcmp(find_data.cFileName,".")==0||strcmp(find_data.cFileName,"..")==0){
+            continue;
+        }
         if(fuzzy_strcmp(find_data.cFileName,fuzzy_name)==0){
             get_path=(char*)malloc(sizeof(char)*buffer_size);
             if(get_path==NULL){
@@ -1775,6 +1778,9 @@ char* get_first_fuzzy_subpath(char* pathname, char* fuzzy_name, unsigned int buf
         return NULL;
     }
     while((entry=readdir(dir))!=NULL){
+        if(strcmp(entry->d_name,".")==0||strcmp(entry->d_name,"..")==0){
+            continue;
+        }
         if(fuzzy_strcmp(entry->d_name,fuzzy_name)==0){
             get_path=(char*)malloc(sizeof(char)*buffer_size);
             if(get_path==NULL){
