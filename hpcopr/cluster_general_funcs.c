@@ -4265,7 +4265,9 @@ int check_cluster_status(char* cluster_workdir, char* crypto_keyfile, char* sshk
     }
     if(strcmp(cluster_role,"opr")==0){
         putchar('\n');
-        remote_exec_general(cluster_workdir,crypto_keyfile,sshkey_dir,"root","sinfo -N","",0,3,"","");
+        if(remote_exec_general(cluster_workdir,crypto_keyfile,sshkey_dir,"root","sinfo -N","",0,3,"","")!=0){
+            return 1;
+        }
         return 0;
     }
     else{
@@ -4284,7 +4286,9 @@ int check_cluster_status(char* cluster_workdir, char* crypto_keyfile, char* sshk
             return -1;
         }
         putchar('\n');
-        remote_exec_general(cluster_workdir,crypto_keyfile,sshkey_dir,user_name,"sinfo -N","",0,3,"","");
+        if(remote_exec_general(cluster_workdir,crypto_keyfile,sshkey_dir,user_name,"sinfo -N","",0,3,"","")!=0){
+            return 1;
+        }
         return 0;
     }
 }
