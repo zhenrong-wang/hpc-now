@@ -10,8 +10,15 @@
 
 #define FILEIO_BUFFER_SIZE_SHA 67108864 /* 64MB maximum memory buffer*/
 
+/** 
+ * Portability risk: The unsigned int does not always has 32 bits. It is *NOT*
+ * defined by standards. We assert that on all the target platforms of this 
+ * project, that is, x86_64 with Windows/Linux/macOS, the unsigned int is 32 bit.
+ * This is an assertion! If you encounter any portability problems, please
+ * submit issues to this repository.
+ * 
+ */
 typedef unsigned char uint_8bit;
-typedef unsigned short uint_16bit;
 typedef unsigned int uint_32bit;
 typedef unsigned long long int uint_64bit;
 typedef signed long long int int_64bit;
