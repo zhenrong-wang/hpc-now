@@ -20,6 +20,8 @@
 #include <stdint.h>
 #ifndef _WIN32
 #include <unistd.h>
+#else
+#include <Windows.h>
 #endif
 #include <fcntl.h>
 #include <time.h>
