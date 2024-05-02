@@ -8,6 +8,8 @@
 #ifndef NOW_SHA256_H
 #define NOW_SHA256_H
 
+#include <stdint.h>
+
 #define FILEIO_BUFFER_SIZE_SHA 67108864 /* 64MB maximum memory buffer*/
 
 /** 
@@ -18,10 +20,6 @@
  * submit issues to this repository.
  * 
  */
-typedef unsigned char uint_8bit;
-typedef unsigned int uint_32bit;
-typedef unsigned long long int uint_64bit;
-typedef signed long long int int_64bit;
 
 #define s_rot_right(a,n) ((a>>n)|(a<<(32-n)))
 #define rot_right(a,n) (a>>n)
@@ -33,12 +31,12 @@ typedef signed long long int int_64bit;
 #define sigma_small0(x) (s_rot_right(x,7)^s_rot_right(x,18)^rot_right(x,3))
 #define sigma_small1(x) (s_rot_right(x,17)^s_rot_right(x,19)^rot_right(x,10))
 
-void print_buffer(uint_8bit buffer_8bit[]);
-void state_init_sha256(uint_32bit state[]);
-void padding_length_sha256(uint_8bit* ptr, uint_64bit length_64bit);
-void generate_words(uint_32bit w_array[], uint_8bit raw_512bit[]);
-void now_sha256_core(uint_32bit state[], uint_8bit raw_512bit[]);
-int state_to_sha256_string(uint_32bit state[], char sha256_string[], uint_8bit sha256_len);
+void print_buffer(uint8_t buffer_8bit[]);
+void state_init_sha256(uint32_t state[]);
+void padding_length_sha256(uint8_t* ptr, uint64_t length_64bit);
+void generate_words(uint32_t w_array[], uint8_t raw_512bit[]);
+void now_sha256_core(uint32_t state[], uint8_t raw_512bit[]);
+int state_to_sha256_string(uint32_t state[], char sha256_string[], uint8_t sha256_len);
 int now_sha256_for_file(char* input_file, char sha256_string[], int sha256_len);
 
 #endif

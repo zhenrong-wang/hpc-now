@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <stdint.h>
 #ifndef _WIN32
 #include <unistd.h>
 #endif
@@ -25,24 +26,13 @@
 
 #define CRYPTO_VERSION "0.3.0"
 
-/** 
- * Portability risk: The unsigned int does not always has 32 bits. It is *NOT*
- * defined by standards. We assert that on all the target platforms of this 
- * project, that is, x86_64 with Windows/Linux/macOS, the unsigned int is 32 bit.
- * This is an assertion! If you encounter any portability problems, please
- * submit issues to this repository.
- * 
- */
-typedef unsigned char uint_8bit;
-typedef unsigned int uint_32bit;
-
 /* Each expanded key is in format of 0xAABBCCDD, so 4X8bit=32bit */
 typedef struct{
-    uint_32bit encryption_key[44];
+    uint32_t encryption_key[44];
     int expansion_round;
 } now_aes_key;
 
-const uint_8bit s_box[256]={
+const uint8_t s_box[256]={
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
     0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,
     0xB7, 0xFD, 0x93, 0x26, 0x36, 0x3F, 0xF7, 0xCC, 0x34, 0xA5, 0xE5, 0xF1, 0x71, 0xD8, 0x31, 0x15,
@@ -61,7 +51,7 @@ const uint_8bit s_box[256]={
     0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16
 };
 
-const uint_8bit inv_s_box[256]={
+const uint8_t inv_s_box[256]={
     0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
     0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34, 0x8E, 0x43, 0x44, 0xC4, 0xDE, 0xE9, 0xCB,
     0x54, 0x7B, 0x94, 0x32, 0xA6, 0xC2, 0x23, 0x3D, 0xEE, 0x4C, 0x95, 0x0B, 0x42, 0xFA, 0xC3, 0x4E,
@@ -80,12 +70,12 @@ const uint_8bit inv_s_box[256]={
     0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
 };
 
-const uint_32bit round_con[10]={
+const uint32_t round_con[10]={
     0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000, 0x1B000000, 0x36000000
 };
 
 /* Get an 8-bit(1 byte) from a given 32 bit number. */
-uint_8bit get_byte(uint_32bit a, unsigned int n){
+uint8_t get_byte(uint32_t a, uint8_t n){
     return (a>>(8*n))&0xFF;
 }
 
@@ -93,10 +83,10 @@ uint_8bit get_byte(uint_32bit a, unsigned int n){
  * key=128bit, stored in an array width 16; so the element of the key array is 8bit each;
  * key_length should be less than 16;
  */
-int key_expansion(uint_8bit* key, uint_8bit key_length, now_aes_key* AES_key){
+int key_expansion(uint8_t* key, uint8_t key_length, now_aes_key* AES_key){
     int i,j;
-    uint_32bit a,b;
-    uint_8bit c,d,e,f;
+    uint32_t a,b;
+    uint8_t c,d,e,f;
     if(key_length!=16){
         return -1; /* Illegal length */
     }
@@ -127,8 +117,8 @@ int key_expansion(uint_8bit* key, uint_8bit key_length, now_aes_key* AES_key){
 }
 
 /* The key is an array with 4 32-bit numbers, aka, w[i] */
-void AddRoundKey(uint_8bit (*state)[4], uint_32bit *key){
-    int i,j;
+void AddRoundKey(uint8_t (*state)[4], uint32_t *key){
+    uint8_t i,j;
     for(j=0;j<4;j++){
         for(i=0;i<4;i++){
             state[i][j]^=get_byte(key[j],3-i);
@@ -137,13 +127,13 @@ void AddRoundKey(uint_8bit (*state)[4], uint_32bit *key){
 }
 
 /* Assemble a 32bit number from 4 8bit numbers */
-uint_32bit assem_row(uint_8bit* short_nums){
+uint32_t assem_row(uint8_t* short_nums){
     return ((short_nums[0]<<24)&0xFF000000)^((short_nums[1]<<16)&0xFF0000)^((short_nums[2]<<8)&0xFF00)^((short_nums[3])&0xFF); /* Push 4 8-bit integers to a 32-bit integer. */
 }
 
 /* Push 16 8bit number to state */
-void assem_state(uint_8bit (*state)[4], uint_8bit* head_pt){
-    uint_8bit i,j;;
+void assem_state(uint8_t (*state)[4], uint8_t* head_pt){
+    uint8_t i,j;;
     for(i=0;i<4;i++){
         for(j=0;j<4;j++){
             state[j][i]=*(head_pt+i*4+j);
@@ -152,15 +142,15 @@ void assem_state(uint_8bit (*state)[4], uint_8bit* head_pt){
 }
 
 /* Deassemble a 32bit number into 4 8bit numbers */
-void deassem_row(uint_32bit a, uint_8bit* short_nums){
-    for(int i=0;i<4;i++){
+void deassem_row(uint32_t a, uint8_t* short_nums){
+    for(uint8_t i=0;i<4;i++){
         short_nums[i]=get_byte(a,3-i);
     }
 }
 
 /* Pull 16 8bit number to a one-dimensional array */
-void deassem_out(uint_8bit (*out)[4], uint_8bit* head_pt){
-    uint_8bit i,j;;
+void deassem_out(uint8_t (*out)[4], uint8_t* head_pt){
+    uint8_t i,j;
     for(i=0;i<4;i++){
         for(j=0;j<4;j++){
             *(head_pt+i*4+j)=out[j][i];
@@ -169,11 +159,11 @@ void deassem_out(uint_8bit (*out)[4], uint_8bit* head_pt){
 }
 
 /* Rotate the 32-bit number a to another 32-bit number b, direction: left */
-int rot_left(uint_32bit a, uint_8bit n, uint_32bit* b){
-    uint_8bit a3=get_byte(a,3);
-    uint_8bit a2=get_byte(a,2);
-    uint_8bit a1=get_byte(a,1);
-    uint_8bit a0=get_byte(a,0);
+int rot_left(uint32_t a, uint8_t n, uint32_t* b){
+    uint8_t a3=get_byte(a,3);
+    uint8_t a2=get_byte(a,2);
+    uint8_t a1=get_byte(a,1);
+    uint8_t a0=get_byte(a,0);
     if(n==0){
         *b=a; /* If no rotation, just copy the number and return 0 */
         return 0;
@@ -196,13 +186,13 @@ int rot_left(uint_32bit a, uint_8bit n, uint_32bit* b){
 }
 
 /* Right-direction rotation is a reverse rotation to left. */
-int rot_right(uint_32bit a, uint_8bit n, uint_32bit* b){
+int rot_right(uint32_t a, uint8_t n, uint32_t* b){
     return rot_left(a,4-n,b);   
 }
 
-int ShiftRows(uint_8bit (*state)[4]){
-    int i;
-    uint_32bit a,b;
+int ShiftRows(uint8_t (*state)[4]){
+    uint8_t i;
+    uint32_t a,b;
     for(i=1;i<4;i++){
         a=assem_row(state[i]);
         if(rot_left(a,i,&b)!=0){
@@ -213,9 +203,9 @@ int ShiftRows(uint_8bit (*state)[4]){
     return 0;
 }
 
-int InvShiftRows(uint_8bit (*state)[4]){
-    int i;
-    uint_32bit a,b;
+int InvShiftRows(uint8_t (*state)[4]){
+    uint8_t i;
+    uint32_t a,b;
     for(i=1;i<4;i++){
         a=assem_row(state[i]);
         if(rot_right(a,i,&b)!=0){
@@ -226,8 +216,8 @@ int InvShiftRows(uint_8bit (*state)[4]){
     return 0;
 }
 
-uint_8bit GaloisMultiple2(uint_8bit a){
-    uint_8bit flag=(a>>7)&0x01;
+uint8_t GaloisMultiple2(uint8_t a){
+    uint8_t flag=(a>>7)&0x01;
     if(flag==1){
         return ((a<<1)&0xFF)^0x1B;
     }
@@ -236,10 +226,10 @@ uint_8bit GaloisMultiple2(uint_8bit a){
     }
 }
 
-uint_8bit GaloisMultipleGeneral(uint_8bit a, uint_8bit b){
-    uint_8bit c=0x00;
-    int i;
-    uint_8bit flag;
+uint8_t GaloisMultipleGeneral(uint8_t a, uint8_t b){
+    uint8_t c=0x00;
+    uint8_t i;
+    uint8_t flag;
     for(i=0;i<8;i++){
         flag=b&0x01; /* If the last bit is 1, then xor a, otherwise keep the result unchanged. */
         if(flag==1){
@@ -251,8 +241,8 @@ uint_8bit GaloisMultipleGeneral(uint_8bit a, uint_8bit b){
     return c;
 }
 
-void SubBytes(uint_8bit (*state)[4]){
-    int i,j;
+void SubBytes(uint8_t (*state)[4]){
+    uint8_t i,j;
     for(i=0;i<4;i++){
         for(j=0;j<4;j++){
             state[i][j]=s_box[state[i][j]];
@@ -260,8 +250,8 @@ void SubBytes(uint_8bit (*state)[4]){
     }
 }
 
-void InvSubBytes(uint_8bit (*state)[4]){
-    int i,j;
+void InvSubBytes(uint8_t (*state)[4]){
+    uint8_t i,j;
     for(i=0;i<4;i++){
         for(j=0;j<4;j++){
             state[i][j]=inv_s_box[state[i][j]];
@@ -269,17 +259,17 @@ void InvSubBytes(uint_8bit (*state)[4]){
     }
 }
 
-void MixColumns(uint_8bit (*state)[4]){
-    const uint_8bit MixColumnMatrix[4][4] = {
+void MixColumns(uint8_t (*state)[4]){
+    const uint8_t MixColumnMatrix[4][4] = {
         {0x02, 0x03, 0x01, 0x01},
         {0x01, 0x02, 0x03, 0x01},
         {0x01, 0x01, 0x02, 0x03},
         {0x03, 0x01, 0x01, 0x02}
     };
-    uint_8bit temp[4][4];
-    uint_8bit s0,s1,s2,s3;
-    int i,j;
-    memcpy(temp,state,16*sizeof(uint_8bit));
+    uint8_t temp[4][4];
+    uint8_t s0,s1,s2,s3;
+    uint8_t i,j;
+    memcpy(temp,state,16*sizeof(uint8_t));
     for(i=0;i<4;i++){
         for(j=0;j<4;j++){
             s0=GaloisMultipleGeneral(MixColumnMatrix[i][0],temp[0][j]);
@@ -291,17 +281,17 @@ void MixColumns(uint_8bit (*state)[4]){
     }
 }
 
-void InvMixColums(uint_8bit (*state)[4]){
-    const uint_8bit InvMixColumnMatrix[4][4] = {
+void InvMixColums(uint8_t (*state)[4]){
+    const uint8_t InvMixColumnMatrix[4][4] = {
         {0x0E, 0x0B, 0x0D, 0x09},
         {0x09, 0x0E, 0x0B, 0x0D},
         {0x0D, 0x09, 0x0E, 0x0B},
         {0x0B, 0x0D, 0x09, 0x0E}
     };
-    int i,j;
-    uint_8bit temp[4][4];
-    uint_8bit s0,s1,s2,s3;
-    memcpy(temp,state,16*sizeof(uint_8bit));
+    uint8_t i,j;
+    uint8_t temp[4][4];
+    uint8_t s0,s1,s2,s3;
+    memcpy(temp,state,16*sizeof(uint8_t));
     for(i=0;i<4;i++){
         for(j=0;j<4;j++){
             s0=GaloisMultipleGeneral(InvMixColumnMatrix[i][0],temp[0][j]);
@@ -313,8 +303,8 @@ void InvMixColums(uint_8bit (*state)[4]){
     }
 }
 
-void print_state(uint_8bit (*state)[4]){
-    int i,j;
+void print_state(uint8_t (*state)[4]){
+    uint8_t i,j;
     printf("\n");
     for(i=0;i<4;i++){
         for(j=0;j<4;j++){
@@ -326,12 +316,12 @@ void print_state(uint_8bit (*state)[4]){
 }
 
 /* Improved, move the key_expansion out of the encryption process */
-int aes_ecb_encryption_core(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_key* AES_key){
+int aes_ecb_encryption_core(uint8_t (*state)[4], uint8_t (*out)[4], now_aes_key* AES_key){
     if(state==NULL||out==NULL||AES_key==NULL){
         return -1;
     }
-    int i;
-    uint_32bit* key_pointer=AES_key->encryption_key;
+    uint8_t i;
+    uint32_t* key_pointer=AES_key->encryption_key;
     AddRoundKey(state,key_pointer);
     for(i=1;i<10;i++){
         key_pointer+=4;
@@ -344,16 +334,16 @@ int aes_ecb_encryption_core(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_
     SubBytes(state);
     ShiftRows(state);
     AddRoundKey(state,key_pointer);
-    memcpy(out,state,16*sizeof(uint_8bit));
+    memcpy(out,state,16*sizeof(uint8_t));
     return 0;
 }
 
-int aes_ecb_decryption_core(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_key* AES_key){
+int aes_ecb_decryption_core(uint8_t (*state)[4], uint8_t (*out)[4], now_aes_key* AES_key){
     if(AES_key==NULL||state==NULL||out==NULL){
         return -1;
     }
-    int i;
-    uint_32bit* key_pointer=AES_key->encryption_key+40;
+    uint8_t i;
+    uint32_t* key_pointer=AES_key->encryption_key+40;
     AddRoundKey(state,key_pointer);
     for(i=1;i<10;i++){
         key_pointer-=4;
@@ -366,30 +356,45 @@ int aes_ecb_decryption_core(uint_8bit (*state)[4], uint_8bit (*out)[4], now_aes_
     InvShiftRows(state);
     InvSubBytes(state);
     AddRoundKey(state,key_pointer);
-    memcpy(out,state,16*sizeof(uint_8bit));
+    memcpy(out,state,16*sizeof(uint8_t));
     return 0;
 }
 
-long get_file_size(char* filename){
-    int fd=-1;
-    struct stat file_stat;
-    fd=open(filename,O_RDONLY);
-    if(fd==-1){
-        return -1;
-    }
-    if(fstat(fd,&file_stat)==-1){
-        close(fd);;
-        return -1;
-    }
-    close(fd);
+int64_t get_file_size(char* filename) {
+#ifndef _WIN32
+	struct stat file_stat;
+	int fd=open(filename, O_RDONLY);
+	if(fd==-1) {
+		return -3;
+	}
+	if(fstat(fd,&file_stat)==-1) {
+		close(fd);
+		return -1;
+	}
+	close(fd);
     return file_stat.st_size;
+#else
+	HANDLE file_handle=CreateFile(
+        filename,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL
+    );
+    if(file_handle==INVALID_HANDLE_VALUE) {
+        return -3;
+    }
+    LARGE_INTEGER filesize;
+    if(!GetFileSizeEx(file_handle,&filesize)) {
+        CloseHandle(file_handle);
+        return -1;
+    }
+    CloseHandle(file_handle);
+    return filesize.QuadPart;
+#endif
 }
 
 /* 
  * should return a value between 1-16
  * if 0xFF get, filesize is invalid.
  */
-uint_8bit get_padding_num(long filesize){
+uint8_t get_padding_num(long filesize){
     if(filesize<0){
         return 0xFF;
     }
@@ -397,8 +402,8 @@ uint_8bit get_padding_num(long filesize){
 }
 
 
-uint_8bit get_file_padding_num(char* filename){
-    long filesize=get_file_size(filename);
+uint8_t get_file_padding_num(char* filename){
+    int64_t filesize=get_file_size(filename);
     if(filesize<0){
         return 0xFF;
     }
@@ -411,10 +416,10 @@ uint_8bit get_file_padding_num(char* filename){
  * CAUTION! Dynamic allocation is here! Do free them after using!!!
  * buffer_size: byte
  */
-uint_8bit* malloc_read_encryption(char* input, unsigned long* buffer_size){
-    long filesize=get_file_size(input);
-    uint_8bit padding_num;
-    unsigned long buffer_size_temp;
+uint8_t* malloc_read_encryption(char* input, uint64_t* buffer_size){
+    int64_t filesize=get_file_size(input);
+    uint8_t padding_num;
+    uint64_t buffer_size_temp;
     if(filesize==-1){
         *buffer_size=0;
         return NULL;
@@ -425,12 +430,12 @@ uint_8bit* malloc_read_encryption(char* input, unsigned long* buffer_size){
         return NULL;
     }
     if(padding_num==0x00){
-        buffer_size_temp=sizeof(uint_8bit)*(filesize+16);
+        buffer_size_temp=sizeof(uint8_t)*(filesize+16);
     }
     else{
-        buffer_size_temp=sizeof(uint_8bit)*(filesize+padding_num);
+        buffer_size_temp=sizeof(uint8_t)*(filesize+padding_num);
     }
-    uint_8bit* buffer=(uint_8bit*)malloc(buffer_size_temp);
+    uint8_t* buffer=(uint8_t*)malloc(buffer_size_temp);
     if(buffer==NULL){
         *buffer_size=0;
         return NULL;
@@ -444,11 +449,11 @@ uint_8bit* malloc_read_encryption(char* input, unsigned long* buffer_size){
  * return NULL: Didn't allocate
  * return others: Allocated the buffer_size byte memory.
  */
-uint_8bit* malloc_write(unsigned long buffer_size){
+uint8_t* malloc_write(uint64_t buffer_size){
     if(buffer_size==0){
         return NULL;
     }
-    uint_8bit* buffer=(uint_8bit*)malloc(buffer_size);
+    uint8_t* buffer=(uint8_t*)malloc(buffer_size);
     return buffer;
 }
 
@@ -458,15 +463,15 @@ uint_8bit* malloc_write(unsigned long buffer_size){
  * CAUTION! Dynamic allocation is here! Do free them after using!!!
  * buffer_size: byte
  */
-uint_8bit* malloc_read_decryption(char* input, unsigned long* buffer_size){
-    long filesize=get_file_size(input);
-    unsigned long buffer_size_temp;
+uint8_t* malloc_read_decryption(char* input, uint64_t* buffer_size){
+    int64_t filesize=get_file_size(input);
+    uint64_t buffer_size_temp;
     if(filesize<1||filesize%16!=0){
         *buffer_size=0;
         return NULL;  /* encrypted file size cannot be 0, and the filesize must be 16x */
     }
-    buffer_size_temp=sizeof(uint_8bit)*(unsigned long)filesize;
-    uint_8bit* buffer=(uint_8bit*)malloc(buffer_size_temp);
+    buffer_size_temp=sizeof(uint8_t)*(uint64_t)filesize;
+    uint8_t* buffer=(uint8_t*)malloc(buffer_size_temp);
     if(buffer==NULL){
         *buffer_size=0;
         return NULL;
@@ -476,7 +481,7 @@ uint_8bit* malloc_read_decryption(char* input, unsigned long* buffer_size){
     return buffer;
 }
 
-uint_8bit char_to_hex(char x){
+uint8_t char_to_hex(char x){
     if(x=='0'||x=='9'){
         return x-='0';
     }
@@ -501,10 +506,13 @@ uint_8bit char_to_hex(char x){
 }
 
 /* convert an MD5(char [32]) to a 128-bit AES key. */
-int md5convert(char* md5string, uint_8bit* key, uint_8bit key_length){
-    int length=strlen(md5string);
-    int i;
-    uint_8bit a,b;
+int md5convert(char* md5string, uint8_t* key, uint8_t key_length){
+    if(md5string==NULL){
+        return -1;
+    }
+    size_t length=strlen(md5string);
+    uint8_t i;
+    uint8_t a,b;
     if(length!=32){
         return -1;
     }
@@ -549,13 +557,13 @@ int md5convert(char* md5string, uint_8bit* key, uint_8bit key_length){
  * return 0: normal exit
  */
 int now_aes_ecb_file_encryption(char* input, char* output, char* md5_string){
-    unsigned long buffer_size;
-    unsigned long i,block_num;    
-    uint_8bit* pt_read;
-    uint_8bit* pt_write;
-    uint_8bit state[4][4]={{0x00}};
-    uint_8bit out[4][4]={{0x00}};
-    uint_8bit key[16]={0x00};
+    uint64_t buffer_size;
+    uint64_t i,block_num;    
+    uint8_t* pt_read;
+    uint8_t* pt_write;
+    uint8_t state[4][4]={{0x00}};
+    uint8_t out[4][4]={{0x00}};
+    uint8_t key[16]={0x00};
     now_aes_key AES_key;
     if(md5convert(md5_string,key,16)!=0){
         return 3;
@@ -572,20 +580,20 @@ int now_aes_ecb_file_encryption(char* input, char* output, char* md5_string){
         fclose(file_p_in);
         return -3;
     }
-    uint_8bit* read_buffer=malloc_read_encryption(input,&buffer_size);
+    uint8_t* read_buffer=malloc_read_encryption(input,&buffer_size);
     if(read_buffer==NULL){
         fclose(file_p_in);
         fclose(file_p_out);
         return -5;
     }
-    uint_8bit* write_buffer=malloc_write(buffer_size);
+    uint8_t* write_buffer=malloc_write(buffer_size);
     if(write_buffer==NULL){
         free(read_buffer);
         fclose(file_p_in);
         fclose(file_p_out);
         return -7; 
     }
-    if(fread(read_buffer,sizeof(uint_8bit),buffer_size,file_p_in)!=buffer_size){}
+    if(fread(read_buffer,sizeof(uint8_t),buffer_size,file_p_in)!=buffer_size){}
     pt_read=read_buffer;
     pt_write=write_buffer;
     block_num=buffer_size>>4; /* Get the block number; */
@@ -604,7 +612,7 @@ int now_aes_ecb_file_encryption(char* input, char* output, char* md5_string){
         pt_write+=16; /* Move to next block */
         i++;
     }
-    if(fwrite(write_buffer,sizeof(uint_8bit),buffer_size,file_p_out)!=buffer_size){
+    if(fwrite(write_buffer,sizeof(uint8_t),buffer_size,file_p_out)!=buffer_size){
         free(read_buffer);
         free(write_buffer);
         fclose(file_p_in);
@@ -633,14 +641,14 @@ int now_aes_ecb_file_encryption(char* input, char* output, char* md5_string){
  * return 0: normal exit
  */
 int now_aes_ecb_file_decryption(char* input, char* output, char* md5_string){
-    unsigned long buffer_size;
-    unsigned long i,block_num;    
-    uint_8bit* pt_read;
-    uint_8bit* pt_write;
-    uint_8bit state[4][4]={{0x00}};
-    uint_8bit out[4][4]={{0x00}};
-    uint_8bit padding_num;   
-    uint_8bit key[16]={0x00};
+    uint64_t buffer_size;
+    uint64_t i,block_num;
+    uint8_t* pt_read;
+    uint8_t* pt_write;
+    uint8_t state[4][4]={{0x00}};
+    uint8_t out[4][4]={{0x00}};
+    uint8_t padding_num;   
+    uint8_t key[16]={0x00};
     now_aes_key AES_key;
     if(md5convert(md5_string,key,16)!=0){
         return 3; /* Not a valid MD5 String */
@@ -657,20 +665,20 @@ int now_aes_ecb_file_decryption(char* input, char* output, char* md5_string){
         fclose(file_p_in);
         return -3;
     }
-    uint_8bit* read_buffer=malloc_read_decryption(input,&buffer_size);
+    uint8_t* read_buffer=malloc_read_decryption(input,&buffer_size);
     if(read_buffer==NULL){
         fclose(file_p_in);
         fclose(file_p_out);
         return -5;
     }
-    uint_8bit* write_buffer=malloc_write(buffer_size);
+    uint8_t* write_buffer=malloc_write(buffer_size);
     if(write_buffer==NULL){
         free(read_buffer);
         fclose(file_p_in);
         fclose(file_p_out);
         return -7; 
     }
-    if(fread(read_buffer,sizeof(uint_8bit),buffer_size,file_p_in)!=buffer_size){
+    if(fread(read_buffer,sizeof(uint8_t),buffer_size,file_p_in)!=buffer_size){
         free(read_buffer);
         free(write_buffer);
         fclose(file_p_in);
@@ -696,7 +704,7 @@ int now_aes_ecb_file_decryption(char* input, char* output, char* md5_string){
         i++;
     }
     padding_num=out[3][3];
-    if(fwrite(write_buffer,sizeof(uint_8bit),buffer_size-padding_num,file_p_out)!=buffer_size-padding_num){
+    if(fwrite(write_buffer,sizeof(uint8_t),buffer_size-padding_num,file_p_out)!=buffer_size-padding_num){
         free(read_buffer);
         free(write_buffer);
         fclose(file_p_in);

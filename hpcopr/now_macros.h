@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0135"
+#define CORE_VERSION_CODE "0.3.1.0137"
 
 #define NULL_PTR_ARG -127
 
@@ -29,10 +29,6 @@ typedef struct{
     char dbg_level[128];
     int max_wait_time;
 } tf_exec_config;
-
-/* As we know, Windows use long long as 8-byte, *nix use long OR long long as 8-byte.
- * But here we chose long long int, not long */
-typedef signed long long int int_64bit;
 
 #define CONFIRM_STRING               "y-e-s"
 #define CONFIRM_STRING_QUICK         "y"

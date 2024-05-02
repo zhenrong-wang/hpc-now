@@ -16,6 +16,8 @@
 #ifndef GENERAL_FUNCS_H
 #define GENERAL_FUNCS_H
 
+#include <stdint.h>
+
 /* A cross-platform sleep function. The time resolution is second. */
 void sleep_func(unsigned int time);
 
@@ -169,7 +171,7 @@ int folder_empty_or_not(char* foldername);
 int delete_file_or_dir(char* file_or_dir);
 
 /* Get the size of a given file. */
-int_64bit get_filesize_byte(FILE* file_p);
+int64_t get_filesize_byte(FILE* file_p);
 
 /* Remove a given file or directory. Return 0 if successfully. */
 int rm_file_or_dir(char* file_or_dir);

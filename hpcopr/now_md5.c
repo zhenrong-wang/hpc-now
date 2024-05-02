@@ -16,22 +16,22 @@
 #include <string.h>
 #include "now_md5.h"
 
-uint_8bit padding[64]={
+uint8_t padding[64]={
     0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 };
 
-void state_init(uint_32bit state[]){
+void state_init(uint32_t state[]){
     state[0]=0x67452301;
     state[1]=0xefcdab89;
     state[2]=0x98badcfe;
     state[3]=0x10325476;
 }
 
-void padding_length(uint_8bit* ptr, uint_64bit length_64bit){
-    for(uint_8bit i=0;i<8;i++){
+void padding_length(uint8_t* ptr, uint64_t length_64bit){
+    for(uint8_t i=0;i<8;i++){
         *(ptr+i)=(length_64bit>>(i*8))&0xFF;
     }
 }
@@ -40,20 +40,20 @@ void padding_length(uint_8bit* ptr, uint_64bit length_64bit){
  * transform 64*8 buffer to 32*16 buffer
  * so that the core function can use the 32bit buffer directly
  */
-void assemb_buffer32(uint_8bit buffer_8bit[], uint_32bit buffer_32bit[]){
-    uint_8bit* ptr=buffer_8bit;
-    for(uint_8bit i=0;i<16;i++){
+void assemb_buffer32(uint8_t buffer_8bit[], uint32_t buffer_32bit[]){
+    uint8_t* ptr=buffer_8bit;
+    for(uint8_t i=0;i<16;i++){
         buffer_32bit[i]=(*(ptr))|((*(ptr+1))<<8)|((*(ptr+2))<<16)|(*(ptr+3)<<24);
         ptr+=4;
     }
 }
 
 /* state[4], buffer[16], 64 rounds of operation */
-int now_md5_core_transform(uint_32bit state[], uint_32bit buffer[]){
-    uint_32bit a=state[0];
-    uint_32bit b=state[1];
-    uint_32bit c=state[2];
-    uint_32bit d=state[3];
+int now_md5_core_transform(uint32_t state[], uint32_t buffer[]){
+    uint32_t a=state[0];
+    uint32_t b=state[1];
+    uint32_t c=state[2];
+    uint32_t d=state[3];
 
     /* Round 1 */
     a=FF(a,b,c,d,buffer[0],7,0xd76aa478);
@@ -135,8 +135,8 @@ int now_md5_core_transform(uint_32bit state[], uint_32bit buffer[]){
     return 0;
 }
 
-void state_to_md5array(uint_32bit state[], uint_8bit md5_array[]){
-    uint_8bit i;
+void state_to_md5array(uint32_t state[], uint8_t md5_array[]){
+    uint8_t i;
     for(i=0;i<4;i++){
         md5_array[i*4]=state[i]&0xFF;
         md5_array[i*4+1]=(state[i]>>8)&0xFF;
@@ -146,7 +146,7 @@ void state_to_md5array(uint_32bit state[], uint_8bit md5_array[]){
 }
 
 /* Convert the lowest 4-bit to a char */
-char hex_4bit_to_char(uint_8bit hex_4bit){
+char hex_4bit_to_char(uint8_t hex_4bit){
     if((hex_4bit&0x0F)>9){
         return hex_4bit-10+'a';
     }
@@ -155,11 +155,11 @@ char hex_4bit_to_char(uint_8bit hex_4bit){
     }
 }
 
-int md5_array_to_string(uint_8bit md5_array[], char md5sum_string[], int md5sum_len){
+int md5_array_to_string(uint8_t md5_array[], char md5sum_string[], int md5sum_len){
     if(md5sum_len<33){ /* There should be a '\0' and the end, so the length should be > 32 */
         return -1;
     }
-    uint_8bit i;
+    uint8_t i;
     for(i=0;i<16;i++){
         md5sum_string[i*2]=hex_4bit_to_char((md5_array[i]>>4)&0x0F);
         md5sum_string[i*2+1]=hex_4bit_to_char((md5_array[i])&0x0F);
@@ -181,17 +181,17 @@ int now_md5_for_file(char* input_file, char md5sum_string[], int md5sum_len){
     if(file_p==NULL){
         return -1;
     }
-    uint_32bit state[4];
-    uint_8bit buffer_8bit[64];
-    uint_32bit buffer_32bit[16];
-    uint_8bit md5_array[16];
-    uint_8bit i;
-    uint_8bit read_byte=0;
-    int_64bit total_length_byte=0;
-    uint_32bit buffer_blocks=0;
-    uint_32bit buffer_block_length=0;
-    uint_8bit* buffer_block_ptr=NULL;
-    uint_32bit buffer_read;
+    uint32_t state[4];
+    uint8_t buffer_8bit[64];
+    uint32_t buffer_32bit[16];
+    uint8_t md5_array[16];
+    uint8_t i;
+    uint8_t read_byte=0;
+    int64_t total_length_byte=0;
+    uint32_t buffer_blocks=0;
+    uint32_t buffer_block_length=0;
+    uint8_t* buffer_block_ptr=NULL;
+    uint32_t buffer_read;
     int final_flag=0;
     int break_flag;
     state_init(state);
@@ -215,7 +215,7 @@ int now_md5_for_file(char* input_file, char md5sum_string[], int md5sum_len){
             final_flag=1;
         }
         buffer_blocks++;
-        buffer_block_ptr=(uint_8bit*)malloc(sizeof(uint_8bit)*buffer_block_length);
+        buffer_block_ptr=(uint8_t*)malloc(sizeof(uint8_t)*buffer_block_length);
         if(buffer_block_ptr==NULL){
             fclose(file_p);
             return -7;
@@ -223,7 +223,7 @@ int now_md5_for_file(char* input_file, char md5sum_string[], int md5sum_len){
         /* Initialize the break_flag to 0 (not final buffer block) or 1 (final buffer block)*/
         break_flag=final_flag; 
         /* Read a block < = 65536 byte */
-        fread(buffer_block_ptr,sizeof(uint_8bit),buffer_block_length,file_p);
+        fread(buffer_block_ptr,sizeof(uint8_t),buffer_block_length,file_p);
         buffer_read=0; /* Reset buffer_read to 0*64 bytes */
         while(buffer_read<buffer_block_length){
             if(final_flag==0){ /* If not the final buffer block, each reay_byte is 64 */

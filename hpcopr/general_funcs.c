@@ -1530,8 +1530,8 @@ int cp_file(char* current_filename, char* new_filename, int force_flag){
 #endif
     char filebase_full[FILENAME_BASE_FULL_LENGTH]="";
     char new_filename_temp[FILENAME_LENGTH]="";
-    uint_8bit* buffer=NULL;
-    int_64bit i,filesize_byte;
+    uint8_t* buffer=NULL;
+    int64_t i,filesize_byte;
 #ifndef _WIN32
     struct stat file_stat;
 #endif
@@ -1613,13 +1613,13 @@ int cp_file(char* current_filename, char* new_filename, int force_flag){
         return -3; /* File I/O failed. */
     }
     for(i=0;i<filesize_byte/FILE_IO_BLOCK;i++){
-        buffer=(uint_8bit*)malloc(sizeof(uint_8bit)*FILE_IO_BLOCK);
+        buffer=(uint8_t*)malloc(sizeof(uint8_t)*FILE_IO_BLOCK);
         if(buffer==NULL){
             fclose(file_p_curr);
             fclose(file_p_new);
             return -7; /* Memory Allocation Failed. */
         }
-        if(fread(buffer,FILE_IO_BLOCK,sizeof(uint_8bit),file_p_curr)==0){
+        if(fread(buffer,FILE_IO_BLOCK,sizeof(uint8_t),file_p_curr)==0){
             free(buffer);
             if(ferror(file_p_curr)){
                 fclose(file_p_curr);
@@ -1628,7 +1628,7 @@ int cp_file(char* current_filename, char* new_filename, int force_flag){
             }
             break;
         }
-        if(fwrite(buffer,FILE_IO_BLOCK,sizeof(uint_8bit),file_p_new)<sizeof(uint_8bit)){
+        if(fwrite(buffer,FILE_IO_BLOCK,sizeof(uint8_t),file_p_new)<sizeof(uint8_t)){
             free(buffer);
             fclose(file_p_curr);
             fclose(file_p_new);
@@ -1636,13 +1636,13 @@ int cp_file(char* current_filename, char* new_filename, int force_flag){
         }
         free(buffer);
     }
-    buffer=(uint_8bit*)malloc(sizeof(uint_8bit)*(filesize_byte%FILE_IO_BLOCK));
+    buffer=(uint8_t*)malloc(sizeof(uint8_t)*(filesize_byte%FILE_IO_BLOCK));
     if(buffer==NULL){
         fclose(file_p_curr);
         fclose(file_p_new);
         return -7; /* Memory Allocation Failed. */
     }
-    if(fread(buffer,sizeof(uint_8bit),filesize_byte%FILE_IO_BLOCK,file_p_curr)==0){
+    if(fread(buffer,sizeof(uint8_t),filesize_byte%FILE_IO_BLOCK,file_p_curr)==0){
         if(ferror(file_p_curr)){
             free(buffer);
             fclose(file_p_curr);
@@ -1650,7 +1650,7 @@ int cp_file(char* current_filename, char* new_filename, int force_flag){
             return 1;
         }
     }
-    if(fwrite(buffer,sizeof(uint_8bit),filesize_byte%FILE_IO_BLOCK,file_p_new)<filesize_byte%FILE_IO_BLOCK){
+    if(fwrite(buffer,sizeof(uint8_t),filesize_byte%FILE_IO_BLOCK,file_p_new)<filesize_byte%FILE_IO_BLOCK){
         free(buffer);
         fclose(file_p_curr);
         fclose(file_p_new);
@@ -2070,8 +2070,8 @@ int delete_file_or_dir(char* file_or_dir){
     return -1;
 }
 
-int_64bit get_filesize_byte(FILE* file_p){
-    int_64bit current,length;
+int64_t get_filesize_byte(FILE* file_p){
+    int64_t current,length;
     if(file_p==NULL){
         return NULL_PTR_ARG;
     }
@@ -2080,14 +2080,9 @@ int_64bit get_filesize_byte(FILE* file_p){
     fseek(file_p,0L,SEEK_END);
     length=_ftelli64(file_p);
     _fseeki64(file_p,current,SEEK_SET);
-#elif __linux__
-    current=ftello64(file_p);
-    fseek(file_p,0L,SEEK_END);
-    length=ftello64(file_p);
-    fseeko64(file_p,current,SEEK_SET);
 #else
     current=ftello(file_p);
-    fseek(file_p,0L,SEEK_END);
+    fseeko(file_p,0L,SEEK_END);
     length=ftello(file_p);
     fseeko(file_p,current,SEEK_SET);
 #endif
