@@ -1,0 +1,14 @@
+name: CI
+on:
+  push:
+jobs:
+  build-test-job:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:24.04
+      options: --cpus 1
+    steps:
+      - name: checkout
+        uses: "actions/checkout@v4"
+      - name: Run Build Test
+        run: ./scripts/run_build_test.sh
