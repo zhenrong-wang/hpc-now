@@ -7,13 +7,15 @@
 
 terraform {
   required_providers {
-    tencentcloud = {
-      source = "tencentcloudstack/tencentcloud"
+    volcengine = {
+      source = "volcengine/volcengine"
+      version = "~> 0.0.146"
     }
   }
 }
-provider "tencentcloud" {
-  secret_id = "BLANK_ACCESS_KEY_ID"
+
+provider "volcengine" {
+  access_key = "BLANK_ACCESS_KEY_ID"
   secret_key = "BLANK_SECRET_KEY"
   region = "DEFAULT_REGION_ID"
 }
@@ -73,98 +75,102 @@ variable "database_acct_passwd" {
 }
 
 #define some data
-data "tencentcloud_instance_types" "a64c128g" {
-  filter {
-    name   = "instance-family"
-    values = ["SA3"]
-  }
-  cpu_core_count = 64
-  memory_size = 128
+variable "a192c384g" {
+  type = string
+  default = "ecs.c3a.48xlarge"
 }
 
-data "tencentcloud_instance_types" "a128c256g" {
-  filter {
-    name = "instance-family"
-    values = ["SA3"]
-  }
-  cpu_core_count = 128
-  memory_size = 256
+variable "a184c368g" {
+  type = string
+  default = "ecs.c3al.46xlarge"
 }
 
-data "tencentcloud_instance_types" "a160c320g" {
-  filter {
-    name = "instance-family"
-    values = ["SA3"]
-  }  
-  cpu_core_count = 160
-  memory_size = 320
+variable "a128c256g" {
+  type = string
+  default = "ecs.c3a.32xlarge"
 }
 
-data "tencentcloud_instance_types" "a232c432g" {
-  filter {
-    name = "instance-family"
-    values = ["SA3"]
-  }  
-  cpu_core_count = 232
-  memory_size = 432
+variable "a96c192g" {
+  type = string
+  default = "ecs.c3a.24xlarge"
 }
 
-data "tencentcloud_instance_types" "a16c32g" {
-  filter {
-    name = "instance-family"
-    values = ["SA3"]
-  }
-  cpu_core_count = 16
-  memory_size = 32
+variable "i96c192g" {
+  type = string
+  default = "ecs.c3i.24xlarge"
 }
 
-data "tencentcloud_instance_types" "a32c64g" {
-  filter {
-    name = "instance-family"
-    values = ["SA3"]
-  }
-  cpu_core_count = 32
-  memory_size = 64
+variable "a64c128g" {
+  type = string
+  default = "ecs.c3a.16xlarge"
 }
 
-data "tencentcloud_instance_types" "a8c16g" {
-  filter {
-    name = "instance-family"
-    values = ["SA3"]
-  }
-  cpu_core_count = 8
-  memory_size = 16
+variable "i64c128g" {
+  type = string
+  default = "ecs.c3i.16xlarge"
 }
 
-data "tencentcloud_instance_types" "a4c8g" {
-  filter {
-    name = "instance-family"
-    values = ["SA3"]
-  }
-  cpu_core_count = 4
-  memory_size = 8
+variable "a32c64g" {
+  type = string
+  default = "ecs.c3a.8xlarge"
 }
 
-data "tencentcloud_instance_types" "a2c4g" {
-  filter {
-    name = "instance-family"
-    values = ["SA3"]
-  }
-  cpu_core_count = 2
-  memory_size = 4
+variable "i32c64g" {
+  type = string
+  default = "ecs.c3i.8xlarge"
 }
 
-data "tencentcloud_images" "centos7" {
-  image_type = ["PUBLIC_IMAGE"]
-  image_name_regex = "^CentOS 7.9 64"
+variable "a16c32g" {
+  type = string
+  default = "ecs.c3a.4xlarge"
 }
 
-data "tencentcloud_images" "centoss9" {
-  image_type = ["PUBLIC_IMAGE"]
-  image_name_regex = "^CentOS Stream 9 64"
+variable "i16c32g" {
+  type = string
+  default = "ecs.c3i.4xlarge"
 }
 
-data "tencentcloud_user_info" "current_user" {}
+variable "a8c16g" {
+  type = string
+  default = "ecs.c3a.2xlarge"
+}
+
+variable "i8c16g" {
+  type = string
+  default = "ecs.c3i.2xlarge"
+}
+
+variable "a4c8g" {
+  type = string
+  default = "ecs.c3a.xlarge"
+}
+
+variable "i4c8g" {
+  type = string
+  default = "ecs.c3i.xlarge"
+}
+
+variable "a2c4g" {
+  type = string
+  default = "ecs.c3a.large"
+}
+
+variable "i2c4g" {
+  type = string
+  default = "ecs.c3i.large"
+}
+
+data "volcengine_images" "centos7" {
+  os_type = "Linux"
+  visibility = "public"
+  name_regex = "^CentOS 7.9 64"
+}
+
+data "volcengine_images" "centoss9" {
+  os_type = "Linux"
+  visibility = "public"
+  name_regex = "^CentOS Stream 9 64"
+}
 
 #create vpc
 resource "tencentcloud_vpc" "hpc_stack" {
