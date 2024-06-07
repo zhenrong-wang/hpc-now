@@ -5,7 +5,7 @@ jobs:
   build-test-job:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:24.04
+      image: ubuntu:22.04
       options: --cpus 1
     steps:
       - name: checkout
