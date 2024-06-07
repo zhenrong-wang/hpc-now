@@ -151,6 +151,7 @@ typedef struct{
 //#define URL_AZCOPY    "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_windows_amd64_10.20.1.zip"
 #define URL_AZCOPY    "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/azcopy_windows_amd64_10.20.1.zip"
 #define URL_GCLOUD    "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-449.0.0-windows-x86_64-bundled-python.zip"
+#define URL_TOSUTIL   "https://tos-tools.tos-cn-beijing.volces.com/windows/tosutil"
 
 #elif __linux__
 #define PATH_SLASH                   "/"
@@ -229,6 +230,7 @@ typedef struct{
 //#define URL_AZCOPY    "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_linux_amd64_10.20.1.tar.gz"
 #define URL_AZCOPY    "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/azcopy_linux_amd64_10.20.1.tar.gz"
 #define URL_GCLOUD    "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-449.0.0-linux-x86_64.tar.gz"
+#define URL_TOSUTIL   "https://tos-tools.tos-cn-beijing.volces.com/linux/tosutil"
 
 #elif __APPLE__
 #define PATH_SLASH                   "/"
@@ -307,6 +309,7 @@ typedef struct{
 // #define URL_AZCOPY    "https://azcopyvnext.azureedge.net/releases/release-10.20.1-20230809/azcopy_darwin_amd64_10.20.1.zip"
 #define URL_AZCOPY    "https://hpc-now-1308065454.cos.ap-guangzhou.myqcloud.com/utils/azcopy_darwin_amd64_10.20.1.zip"
 #define URL_GCLOUD    "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-449.0.0-darwin-x86_64.tar.gz"
+#define URL_TOSUTIL   "https://tos-tools.tos-cn-beijing.volces.com/darwin/amd64/tosutil"
 
 #endif
 
