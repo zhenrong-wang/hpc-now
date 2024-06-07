@@ -1,0 +1,20 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
++-----------+----------+
+| AMD       | INTEL    |
++-----------+----------+
+| a64c128g  |          |
+| a128c256g |          |
+| a160c320g |          |
+| a232c432g |          |
+| a16c32g   |          |
+| a32c64g   |          |
+| a8c16g    |          |
+| a4c8g     |          |
+| a2c4g     |          |
++-----------+----------+

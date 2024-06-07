@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0137"
+#define CORE_VERSION_CODE "0.3.1.0139"
 
 #define NULL_PTR_ARG -127
 
@@ -64,13 +64,14 @@ typedef struct{
 #define DEFAULT_LOCATIONS_COUNT       7
 
 /* Bucket CLI download and installation indicators */
-#define OSSUTIL_1_FAILED             1  /* 0x00000001 */
-#define COSCLI_2_FAILED              2  /* 0x00000010 */
-#define AWSCLI_3_FAILED              4  /* 0x00000100 */
-#define OBSUTIL_4_FAILED             8  /* 0x00001000 */
-#define BCECMD_5_FAILED              16 /* 0x00010000 */
-#define AZCOPY_6_FAILED              32 /* 0x00100000 */
-#define GCLOUD_7_FAILED              64 /* 0x01000000 */
+#define OSSUTIL_1_FAILED             1   /* 0x00000001 */
+#define COSCLI_2_FAILED              2   /* 0x00000010 */
+#define AWSCLI_3_FAILED              4   /* 0x00000100 */
+#define OBSUTIL_4_FAILED             8   /* 0x00001000 */
+#define BCECMD_5_FAILED              16  /* 0x00010000 */
+#define AZCOPY_6_FAILED              32  /* 0x00100000 */
+#define GCLOUD_7_FAILED              64  /* 0x01000000 */
+#define TOSUTIL_8_FAILED             128 /* 0x10000000 */
 #define AWSCLI_INST_WAIT_TIME        360
 
 /* System-related paths and macros */
@@ -122,6 +123,7 @@ typedef struct{
 #define BCECMD_EXEC                  NOW_BINARY_DIR"bcecmd.exe"
 #define AZCOPY_EXEC                  NOW_BINARY_DIR"azcopy.exe"
 #define GCLOUD_CLI                   NOW_BINARY_DIR"google-cloud-sdk\\bin\\gcloud"
+#define TOSUTIL_EXEC                 NOW_BINARY_DIR"tosutil.exe"
 
 #define DELETE_FILE_CMD          "del /f /q /s"
 #define DELETE_FOLDER_CMD        "rd /s /q"
@@ -201,6 +203,7 @@ typedef struct{
 #define BCECMD_EXEC                  NOW_BINARY_DIR"bcecmd.exe"
 #define AZCOPY_EXEC                  NOW_BINARY_DIR"azcopy.exe"
 #define GCLOUD_CLI                   NOW_BINARY_DIR"google-cloud-sdk/bin/gcloud"
+#define TOSUTIL_EXEC                 NOW_BINARY_DIR"tosutil.exe"
 
 #define DELETE_FILE_CMD          "rm -rf"
 #define DELETE_FOLDER_CMD        "rm -rf"
@@ -280,6 +283,7 @@ typedef struct{
 #define BCECMD_EXEC                  NOW_BINARY_DIR"bcecmd.exe"
 #define AZCOPY_EXEC                  NOW_BINARY_DIR"azcopy.exe"
 #define GCLOUD_CLI                   NOW_BINARY_DIR"google-cloud-sdk/bin/gcloud"
+#define TOSUTIL_EXEC                 NOW_BINARY_DIR"tosutil.exe"
 
 #define DELETE_FILE_CMD          "rm -rf"
 #define DELETE_FOLDER_CMD        "rm -rf"
@@ -357,7 +361,7 @@ typedef struct{
 #define CONF_LINE_NUM             11
 #define CMD_FLAG_NUM              30
 #define CMD_KWDS_NUM              49
-#define VERS_SHA_LINES            11
+#define VERS_SHA_LINES            12
 
 /* Internal macros - usually you don't need to modify the macros in this section.*/
 #define URL_LICENSE             "https://gitee.com/zhenrong-wang/hpc-now/raw/master/COPYING"

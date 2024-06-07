@@ -1,0 +1,39 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
+ap-guangzhou-3
+ap-guangzhou-4
+ap-guangzhou-6
+ap-guangzhou-7
+ap-chengdu-1
+ap-chengdu-2
+ap-chongqing-1
+ap-shanghai-2
+ap-shanghai-3
+ap-shanghai-4
+ap-shanghai-5
+ap-nanjing-1
+ap-nanjing-2
+ap-nanjing-3
+ap-beijing-2
+ap-beijing-3
+ap-beijing-5
+ap-beijing-6
+ap-beijing-7
+ap-singapore-1
+ap-singapore-3
+ap-singapore-4
+ap-bangkok-1
+na-siliconvalley-1
+na-ashburn-2
+eu-frankfurt-1
+eu-frankfurt-2
+ap-seoul-1
+ap-mumbai-1
+ap-tokyo-1
+ap-hongkong-1
+na-toronto-1

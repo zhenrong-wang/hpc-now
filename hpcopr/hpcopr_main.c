@@ -63,6 +63,7 @@ char azrm_tf_plugin_version_var[32]="";
 char azad_tf_plugin_version_var[32]="";
 char az_environment[16]="";
 char gcp_tf_plugin_version_var[32]="";
+char volce_tf_plugin_version_var[32]="";
 
 char sha_tf_exec_var[80]="";
 char sha_tf_zip_var[80]="";
@@ -85,6 +86,8 @@ char sha_azad_tf_var[80]="";
 char sha_azad_tf_zip_var[80]="";
 char sha_gcp_tf_var[80]="";
 char sha_gcp_tf_zip_var[80]="";
+char sha_volce_tf_var[80]="";
+char sha_volce_tf_zip_var[80]="";
 
 int batch_flag=1; /* If batch_flag=0: Batch Mode. If batch_flag!=0: interactive mode. use the -b flag */
 char final_command[64]="";
