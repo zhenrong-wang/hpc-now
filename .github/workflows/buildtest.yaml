@@ -4,9 +4,6 @@ on:
 jobs:
   build-test-job:
     runs-on: ubuntu-latest
-    container:
-      image: ubuntu:22.04
-      options: --cpus 1
     steps:
       - name: checkout
         uses: "actions/checkout@v4"
