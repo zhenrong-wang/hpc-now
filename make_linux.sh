@@ -39,6 +39,7 @@ elif [ "$1" = "build" ]; then
     echo -e "[ START: ] Building the binaries now (including hpcmgr and now-server) ..."
     mkdir -p ./build
     rm -rf ./build/*
+    set -e
     ${compiler} ./hpcopr/*.c -Wall -lpthread -o ./build/hpcopr-lin-${hpcopr_version_code}.exe
     ${compiler} -c ./hpcopr/general_funcs.c -Wall -o ./installer/gfuncs.o
     ${compiler} -c ./hpcopr/opr_crypto.c -Wall -o ./installer/ocrypto.o
