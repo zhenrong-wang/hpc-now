@@ -255,13 +255,23 @@ resource "volcengine_security_group_rule" "group_public_rule2" {
 resource "volcengine_security_group_rule" "group_public_rule3" {
   direction = "ingress"
   security_group_id = volcengine_security_group.group.id
+  protocol = "icmp"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
+}
+
+
+resource "volcengine_security_group_rule" "group_public_rule4" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.group.id
   protocol = "all"
   port_start = -1
   port_end = -1
   cidr_ip = "10.0.0.0/12"
 }
 
-resource "volcengine_security_group_rule" "group_public_rule4" {
+resource "volcengine_security_group_rule" "group_public_rule5" {
   direction = "egress"
   security_group_id = volcengine_security_group.group.id
   protocol = "all"
