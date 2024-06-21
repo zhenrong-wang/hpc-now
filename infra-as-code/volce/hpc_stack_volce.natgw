@@ -5,25 +5,37 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
  
-#CREATE_NATGW_NODE
-resource "tencentcloud_instance" "natgw" {
+resource "volcengine_eip_address" "natgw_eip" {
+  name = "natgw_eip-RESOURCETAG"
+  billing_type = "PostPaidByTraffic"
+  bandwidth = MASTER_BANDWIDTH
+}
+
+resource "volcengine_eip_associate" "natgw_eip_attach" {
+  allocation_id = volcengine_eip_address.natgw_eip.id
+  instance_id = volcengine_ecs_instance.natgw.id
+  instance_type = "EcsInstance"
+}
+
+resource "volcengine_ecs_instance_state" "ngw_state" {
+  instance_id = volcengine_ecs_instance.natgw.id
+  action = "Start"
+  stopped_mode = "StopCharging"
+}
+
+resource "volcengine_ecs_instance" "natgw" {
   instance_name = "natgw-RESOURCETAG"
-  availability_zone = "DEFAULT_ZONE_ID"
-  orderly_security_groups = tencentcloud_security_group.natgw_transparent.*.id
-  image_id = data.tencentcloud_images.centos7.images.0.image_id
-  instance_type = data.tencentcloud_instance_types.a2c4g.instance_types.0.instance_type
-  system_disk_type = "CLOUD_SSD"
-  system_disk_size = 60
-  hostname = "natgw"
-  project_id = 0
-  vpc_id = tencentcloud_vpc.hpc_stack.id
-  subnet_id = tencentcloud_subnet.hpc_stack_pub_subnet.id
-  running_flag = "true"
-  internet_charge_type = "TRAFFIC_POSTPAID_BY_HOUR"
-  allocate_public_ip = true
-  internet_max_bandwidth_out = MASTER_BANDWIDTH
-  stopped_mode = "STOP_CHARGING"
-  user_data_raw = <<EOF
+  subnet_id = volcengine_subnet.hpc_stack_pub_subnet.id
+  security_group_ids = [volcengine_security_group.natgw_transparent.id]
+  image_id = data.volcengine_images.centos7.images[0].image_id
+  instance_type = "${var.i2c4g}"
+  system_volume_type = "ESSD_PL0"
+  system_volume_size = 40
+  instance_charge_type = "PostPaid"
+  host_name = "natgw"
+  key_pair_name = volcengine_ecs_key_pair.useless_key.key_pair_name
+
+  user_data = base64encode(<<EOF
 #!/bin/bash
 yum -y install iptables-services
 systemctl stop firewalld
@@ -43,11 +55,12 @@ service iptables save
 systemctl start iptables
 systemctl enable iptables
 EOF
+)
 }
 
-resource "tencentcloud_route_table_entry" "natgw_instance" {
-  route_table_id = tencentcloud_route_table.subnet_rt.id
+resource "volcengine_route_entry" "route_to_natgw" {
+  route_table_id = volcengine_route_table.subnet_rt.id
   destination_cidr_block = "0.0.0.0/0"
-  next_type = "NORMAL_CVM"
-  next_hub = tencentcloud_instance.natgw.private_ip
+  next_hop_type = "Instance"
+  next_hop_id = volcengine_ecs_instance.natgw.id
 }

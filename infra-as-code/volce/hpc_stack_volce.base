@@ -20,6 +20,11 @@ provider "volcengine" {
   region = "DEFAULT_REGION_ID"
 }
 
+variable "shared_storage" {
+  type = number
+  default = DEFAULT_STORAGE_VOLUME #-#-#
+}
+
 #MUST BE CHANGED TO ACTUAL PLAN!
 variable "NODE_NUM" {
   type = number
@@ -173,163 +178,228 @@ data "volcengine_images" "centoss9" {
 }
 
 #create vpc
-resource "tencentcloud_vpc" "hpc_stack" {
-  name = "DEFAULT_VPC_NAME"
+resource "volcengine_vpc" "hpc_stack" {
+  vpc_name = "DEFAULT_VPC_NAME"
   cidr_block = "10.0.0.0/12"
 }
 
-resource "tencentcloud_subnet" "hpc_stack_subnet" {
-  name = "DEFAULT_SUBNET_NAME"
-  availability_zone = "DEFAULT_ZONE_ID"
-  vpc_id = tencentcloud_vpc.hpc_stack.id
-  cidr_block = "10.0.0.0/20"
-  route_table_id = tencentcloud_route_table.subnet_rt.id
+resource "volcengine_route_table" "subnet_rt" {
+  vpc_id = volcengine_vpc.hpc_stack.id
 }
 
-resource "tencentcloud_subnet" "hpc_stack_pub_subnet" {
-  name = "DEFAULT_PUB_SUBNET_NAME"
-  availability_zone = "DEFAULT_ZONE_ID"
-  vpc_id = tencentcloud_vpc.hpc_stack.id
+resource "volcengine_subnet" "hpc_stack_subnet" {
+  subnet_name = "DEFAULT_SUBNET_NAME"
+  zone_id = "DEFAULT_ZONE_ID"
+  vpc_id = volcengine_vpc.hpc_stack.id
+  cidr_block = "10.0.0.0/20"
+}
+
+resource "volcengine_route_table_associate" "subnet_rt_attach" {
+  route_table_id = volcengine_route_table.subnet_rt.id
+  subnet_id = volcengine_subnet.hpc_stack_subnet.id
+}
+
+resource "volcengine_subnet" "hpc_stack_pub_subnet" {
+  subnet_name = "DEFAULT_PUB_SUBNET_NAME"
+  zone_id = "DEFAULT_ZONE_ID"
+  vpc_id = volcengine_vpc.hpc_stack.id
   cidr_block = "10.15.255.0/28"
 }
 
-resource "tencentcloud_route_table" "subnet_rt" {
-  vpc_id = tencentcloud_vpc.hpc_stack.id
-  name = "subnet_rt"
+resource "volcengine_security_group" "natgw_transparent" {
+  security_group_name = "SECURITY_GROUP_NATGW"
+  vpc_id = volcengine_vpc.hpc_stack.id
 }
 
-resource "tencentcloud_security_group" "natgw_transparent" {
-  name = "SECURITY_GROUP_NATGW"
+resource "volcengine_security_group_rule" "natgw_rule1" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.natgw_transparent.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
 }
 
-resource "tencentcloud_security_group_lite_rule" "natgw_rules" {
-  security_group_id = tencentcloud_security_group.natgw_transparent.id
-  ingress = [
-    "ACCEPT#0.0.0.0/0#ALL#TCP",
-    "ACCEPT#0.0.0.0/0#ALL#UDP",
-    "ACCEPT#0.0.0.0/0#ALL#ICMP"
-  ]
-  egress = [
-    "ACCEPT#0.0.0.0/0#ALL#TCP",
-    "ACCEPT#0.0.0.0/0#ALL#UDP",
-    "ACCEPT#0.0.0.0/0#ALL#ICMP"
-  ]
+resource "volcengine_security_group_rule" "natgw_rule2" {
+  direction = "egress"
+  security_group_id = volcengine_security_group.natgw_transparent.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
 }
 
-resource "tencentcloud_security_group" "group" {
-  name = "SECURITY_GROUP_PUBLIC"
+resource "volcengine_security_group" "group" {
+  security_group_name = "SECURITY_GROUP_PUBLIC"
+  vpc_id = volcengine_vpc.hpc_stack.id
 }
 
-resource "tencentcloud_security_group_lite_rule" "group_public_rules" {
-  security_group_id = tencentcloud_security_group.group.id
-  ingress = [
-    "ACCEPT#0.0.0.0/0#22,3389,6817,6818,6819#TCP",
-    "ACCEPT#0.0.0.0/0#ALL#ICMP"
-  ]
-  egress = [
-    "ACCEPT#0.0.0.0/0#ALL#TCP",
-    "ACCEPT#0.0.0.0/0#ALL#UDP",
-    "ACCEPT#0.0.0.0/0#ALL#ICMP"
-  ]
+resource "volcengine_security_group_rule" "group_public_rule1" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.group.id
+  protocol = "tcp"
+  port_start = 22
+  port_end = 22
+  cidr_ip = "0.0.0.0/0"
 }
 
-resource "tencentcloud_security_group" "group_intra" {
-  name = "SECURITY_GROUP_INTRA"
+resource "volcengine_security_group_rule" "group_public_rule2" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.group.id
+  protocol = "tcp"
+  port_start = 3389
+  port_end = 3389
+  cidr_ip = "0.0.0.0/0"
 }
 
-resource "tencentcloud_security_group_lite_rule" "group_intra_rules" {
-  security_group_id = tencentcloud_security_group.group_intra.id
-  ingress = [
-    "ACCEPT#10.0.0.0/20#ALL#TCP",
-    "ACCEPT#10.0.0.0/12#ALL#ICMP"
-  ]
-  egress = [
-    "ACCEPT#0.0.0.0/0#ALL#TCP",
-    "ACCEPT#0.0.0.0/0#ALL#UDP",
-    "ACCEPT#0.0.0.0/0#ALL#ICMP"
-  ]
+resource "volcengine_security_group_rule" "group_public_rule3" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.group.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "10.0.0.0/12"
 }
 
-resource "tencentcloud_security_group" "mysql_intra" {
-  name = "SECURITY_GROUP_MYSQL"
+resource "volcengine_security_group_rule" "group_public_rule4" {
+  direction = "egress"
+  security_group_id = volcengine_security_group.group.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
 }
 
-resource "tencentcloud_security_group_lite_rule" "mysql_intra_rules" {
-  security_group_id = tencentcloud_security_group.mysql_intra.id
-  ingress = [
-    "ACCEPT#10.0.0.0/12#3306#TCP"
-  ]
-  egress = [
-    "ACCEPT#0.0.0.0/0#ALL#TCP",
-    "ACCEPT#0.0.0.0/0#ALL#UDP",
-    "ACCEPT#0.0.0.0/0#ALL#ICMP"
-  ]
+resource "volcengine_security_group" "group_intra" {
+  security_group_name = "SECURITY_GROUP_INTRA"
+  vpc_id = volcengine_vpc.hpc_stack.id
 }
 
-resource "tencentcloud_cfs_access_group" "cfs_intra" {
-  name = "NAS_ACCESS_GROUP_"
+resource "volcengine_security_group_rule" "group_intra_rule1" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.group_intra.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "10.0.0.0/12"
 }
 
-resource "tencentcloud_cfs_access_rule" "cfs_intra_rule" {
-  access_group_id = tencentcloud_cfs_access_group.cfs_intra.id
-  auth_client_ip  = "10.0.0.0/12"
-  priority        = 1
-  rw_permission   = "RW"
-  user_permission = "no_root_squash"
+resource "volcengine_security_group_rule" "group_intra_rule2" {
+  direction = "egress"
+  security_group_id = volcengine_security_group.group_intra.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
 }
 
-resource "tencentcloud_cfs_file_system" "hpc_apps" {
-  name              = "hpc_apps-CFSID"
-  availability_zone = "DEFAULT_NAS_ZONE"
-  access_group_id   = tencentcloud_cfs_access_group.cfs_intra.id
-  protocol          = "NFS"
-  vpc_id            = tencentcloud_vpc.hpc_stack.id
-  subnet_id         = tencentcloud_subnet.hpc_stack_subnet.id
+resource "volcengine_security_group" "mysql_intra" {
+  security_group_name = "SECURITY_GROUP_MYSQL"
+  vpc_id = volcengine_vpc.hpc_stack.id
 }
 
-resource "tencentcloud_cfs_file_system" "hpc_data" {
-  name              = "hpc_data-CFSID"
-  availability_zone = "DEFAULT_NAS_ZONE"
-  access_group_id   = tencentcloud_cfs_access_group.cfs_intra.id
-  protocol          = "NFS"
-  vpc_id            = tencentcloud_vpc.hpc_stack.id
-  subnet_id         = tencentcloud_subnet.hpc_stack_subnet.id
+resource "volcengine_security_group_rule" "mysql_intra_rule1" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.mysql_intra.id
+  protocol = "tcp"
+  port_start = 3306
+  port_end = 3306
+  cidr_ip = "10.0.0.0/12"
+}
+
+resource "volcengine_security_group_rule" "mysql_intra_rule2" {
+  direction = "egress"
+  security_group_id = volcengine_security_group.mysql_intra.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
+}
+
+resource "volcengine_volume" "shared_volume" {
+  volume_name = "CFSID"
+  kind = "data"
+  volume_type = "ESSD_PL0"
+  size = "${var.shared_storage}"
+  zone_id = "DEFAULT_ZONE_ID"
+  volume_charge_type = "PostPaid"
 }
 
 #CREATE a bucket for data storage
-resource "tencentcloud_cos_bucket" "hpc_data_storage" {
-  bucket = "BUCKET_ID-${data.tencentcloud_user_info.current_user.app_id}"
-  force_clean = "true"
-  acl = "private"
+resource "volcengine_tos_bucket" "hpc_data_storage" {
+  bucket_name = "BUCKET_ID"
+  public_acl = "private"
 }
 
 #create an cam user with the policy to only access the bucket, nothing else
-resource "tencentcloud_cam_user" "hpc_user" {
-  name = "BUCKET_USER_ID"
-  force_delete = true
+resource "volcengine_iam_user" "hpc_user" {
+  user_name = "BUCKET_USER_ID"
 }
 
-resource "tencentcloud_cam_policy" "hpc_bucket_access_policy" {
-  name = "BUCKET_ACCESS_POLICY"
-  document = <<EOF
-  {
-    "version": "2.0",
-    "statement": [
-        {
-            "action": [
-                "cos:*"
-            ],
-            "effect": "allow",
-            "resource": [
-                "qcs::cos::uid/${data.tencentcloud_user_info.current_user.app_id}:prefix//${data.tencentcloud_user_info.current_user.app_id}/BUCKET_ID/*"
-            ]
-        }
+resource "volcengine_iam_access_key" "hpc_user_key" {
+  user_name = volcengine_iam_user.hpc_user.user_name
+  secret_file = "./bucket_secrets.txt"
+  status = "active"
+}
+
+resource "volcengine_tos_bucket_policy" "hpc_bucket_access_policy" {
+  bucket_name = volcengine_tos_bucket.hpc_data_storage.bucket_name
+  policy = jsonencode({
+    Statement = [
+      {
+        Sid = "BUCKET_ID"
+        Effect = "Allow"
+        Principal = [
+          "${volcengine_iam_user.hpc_user.account_id}/${volcengine_iam_user.hpc_user.user_name}"
+        ]
+        Action = [
+          "tos:List*",
+          "tos:Get*",
+          "tos:Put*"
+        ]
+        Resource = [
+          "trn:tos:::BUCKET_ID"
+        ]
+      }
     ]
-  }
-  EOF
+  })
 }
 
-resource "tencentcloud_cam_user_policy_attachment" "bucket_access_attach" {
-  user_name = tencentcloud_cam_user.hpc_user.name
-  policy_id = tencentcloud_cam_policy.hpc_bucket_access_policy.id
+resource "volcengine_ecs_key_pair" "useless_key" {
+  key_pair_name = "RESOURCETAG"
 }
+
+/*resource "volcengine_nas_permission_group" "nas_intra" {
+  permission_group_name = "NAS_ACCESS_GROUP_"
+  permission_rules {
+    cidr_ip  = "10.0.0.0/12"
+    rw_mode  = "RW"
+    use_mode = "No_root_squash"
+  }
+}
+
+resource "volcengine_nas_file_system" "hpc_apps" {
+  file_system_name = "hpc_apps-CFSID"
+  zone_id = "DEFAULT_ZONE_ID"
+  capacity = 100
+}
+
+resource "volcengine_nas_mount_point" "hpc_apps_mount" {
+  file_system_id = volcengine_nas_file_system.hpc_apps.id
+  mount_point_name = "hpc_apps_mnt-CFSID"
+  permission_group_id = volcengine_nas_permission_group.nas_intra.id
+  subnet_id = volcengine_subnet.hpc_stack_subnet.id
+}
+
+resource "volcengine_nas_file_system" "hpc_data" {
+  file_system_name = "hpc_data-CFSID"
+  zone_id = "DEFAULT_ZONE_ID"
+  capacity = 100
+}
+
+resource "volcengine_nas_mount_point" "hpc_data_mount" {
+  file_system_id = volcengine_nas_file_system.hpc_data.id
+  mount_point_name = "hpc_data_mnt-CFSID"
+  permission_group_id = volcengine_nas_permission_group.nas_intra.id
+  subnet_id = volcengine_subnet.hpc_stack_subnet.id
+}*/

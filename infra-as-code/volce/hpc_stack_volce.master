@@ -5,34 +5,46 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
-#create master and compute nodes
-resource "tencentcloud_instance" "master" {
+resource "volcengine_eip_address" "master_eip" {
+  name = "master_eip-RESOURCETAG"
+  billing_type = "PostPaidByTraffic"
+  bandwidth = MASTER_BANDWIDTH
+}
+
+resource "volcengine_eip_associate" "master_eip_attach" {
+  allocation_id = volcengine_eip_address.master_eip.id
+  instance_id = volcengine_ecs_instance.master.id
+  instance_type = "EcsInstance"
+}
+
+resource "volcengine_volume_attach" "master_disk_attach" {
+  instance_id = volcengine_ecs_instance.master.id
+  volume_id = volcengine_volume.shared_volume.id
+}
+
+resource "volcengine_ecs_instance_state" "m_state" {
+  instance_id = volcengine_ecs_instance.master.id
+  action = "Start"
+  stopped_mode = "StopCharging"
+}
+
+resource "volcengine_ecs_instance" "master" {
   instance_name = "master-RESOURCETAG"
-  availability_zone = "DEFAULT_ZONE_ID"
-  orderly_security_groups = tencentcloud_security_group.group.*.id
-  image_id = data.tencentcloud_images.OS_IMAGE.images.0.image_id
-  instance_type = data.tencentcloud_instance_types.MASTER_INST.instance_types.0.instance_type
-  system_disk_type = "CLOUD_SSD"
-  system_disk_size = 60
-  hostname = "master"
-  project_id = 0
-  vpc_id = tencentcloud_vpc.hpc_stack.id
-  subnet_id = tencentcloud_subnet.hpc_stack_subnet.id
-  running_flag = "true"
-  internet_charge_type = "TRAFFIC_POSTPAID_BY_HOUR"
-  allocate_public_ip = true
-  internet_max_bandwidth_out = MASTER_BANDWIDTH
-  stopped_mode = "STOP_CHARGING"
+  subnet_id = volcengine_subnet.hpc_stack_pub_subnet.id
+  security_group_ids = [volcengine_security_group.group.id]
+  image_id = data.volcengine_images.OS_IMAGE.images[0].image_id
+  instance_type = "${var.MASTER_INST}"
+  system_volume_type = "ESSD_PL0"
+  system_volume_size = 40
+  instance_charge_type = "PostPaid"
+  host_name = "master"
   password = "${var.master_passwd}"
-  user_data_raw = <<EOF
+
+  user_data = base64encode(<<EOF
 #!/bin/bash
-touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 hostnamectl set-hostname master
 echo '${var.master_passwd}' | passwd root --stdin >> /dev/null 2>&1
-yum -y install at
-systemctl start atd && systemctl enable atd
-mkdir /hpc_apps && mkdir /hpc_data
-mkdir -p /usr/hpc-now/
+touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 rm -rf /root/.ssh/id_rsa.pub
 rm -rf /root/.ssh/id_rsa
 rm -rf /root/.ssh/authorized_keys
@@ -42,21 +54,43 @@ cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 echo -e "\nPUBLIC_KEY" >> /root/.ssh/authorized_keys
 systemctl restart sshd
 echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
-yum -y install nfs-utils
-mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_apps.mount_ip}:/ /hpc_apps
-mount -t nfs -o vers=4.0,noresvport ${tencentcloud_cfs_file_system.hpc_data.mount_ip}:/ /hpc_data
-echo -e "${tencentcloud_cfs_file_system.hpc_apps.mount_ip}:/ /hpc_apps nfs vers=4,minorversion=0,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
-echo -e "${tencentcloud_cfs_file_system.hpc_data.mount_ip}:/ /hpc_data nfs vers=4,minorversion=0,hard,timeo=600,retrans=2,_netdev,noresvport 0 0" >> /etc/fstab
+yum -y install at
+systemctl start atd && systemctl enable atd
+block_name=`lsblk | grep -v NAME | grep -v \`lsblk -P | grep -w '/' | awk '{print substr($1,7,3)}'\` | awk '{print $1}' | head -n 1`
+while [ -z $block_name ]
+do
+  sleep 1
+  block_name=`lsblk | grep -v NAME | grep -v \`lsblk -P | grep -w '/' | awk '{print substr($1,7,3)}'\` | awk '{print $1}' | head -n 1`
+done
+mkfs -t ext4 /dev/$block_name
+mkdir -p /mnt/shared
+block_id=`blkid /dev/$block_name | awk -F"\"" '{print $2}'`
+echo -e "UUID=$block_id /mnt/shared                ext4    defaults        0 2" >> /etc/fstab
+mkdir -p /usr/hpc-now/
+mount -a
+mkdir -p /mnt/shared/hpc_apps
+mkdir -p /mnt/shared/hpc_data
+rm -rf /hpc_apps && rm -rf /hpc_data
+ln -s /mnt/shared/hpc_apps /hpc_apps
+ln -s /mnt/shared/hpc_data /hpc_data
+yum -y install rpcbind nfs-utils
+echo -e "/mnt/shared/hpc_apps/ 10.0.0.0/12(rw,no_root_squash,no_all_squash,sync)" >> /etc/exports
+echo -e "/mnt/shared/hpc_data/ 10.0.0.0/12(rw,no_root_squash,no_all_squash,sync)" >> /etc/exports
+systemctl start rpcbind
+systemctl start nfs-server
+systemctl enable rpcbind
+systemctl enable nfs-server
 master_private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
 if [ ! -f /root/hostfile ]; then
   echo -e "$master_private_ip\tmaster" > /root/hostfile
 fi
 echo -e "export HPC_USER_NUM=${var.HPC_USER_NUM}" >> /etc/profile
-echo -e "${tencentcloud_instance.database.private_ip}\tmariadb" > /root/mariadb_private_ip.txt
+echo -e "${volcengine_ecs_instance.database.primary_ip_address}\tmariadb" > /root/mariadb_private_ip.txt
 echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
 echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
 echo -e "${var.master_passwd}" > /root/master_passwd.txt && echo -e "${var.compute_passwd}" > /root/compute_passwd.txt
 yum -y install sshpass readhat-lsb
 curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.master_init_parameters} > /var/log/cluster_init_master_raw.log 2>&1
 EOF
+)
 }
