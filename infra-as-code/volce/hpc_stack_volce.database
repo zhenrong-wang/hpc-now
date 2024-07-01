@@ -1,0 +1,34 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+
+resource "volcengine_ecs_instance_state" "db_state" {
+  instance_id = volcengine_ecs_instance.database.id
+  action = "Start"
+  stopped_mode = "StopCharging"
+}
+
+resource "volcengine_ecs_instance" "database" {
+  instance_name = "database-RESOURCETAG"
+  subnet_id = volcengine_subnet.hpc_stack_subnet.id
+  security_group_ids = [volcengine_security_group.mysql_intra.id]
+  image_id = data.volcengine_images.centos7.images[0].image_id
+  instance_type = "${var.i2c4g}"
+  system_volume_type = "ESSD_PL0"
+  system_volume_size = 40
+  instance_charge_type = "PostPaid"
+  host_name = "database"
+  key_pair_name = volcengine_ecs_key_pair.useless_key.key_pair_name
+
+  user_data = base64encode(<<EOF
+#!/bin/bash
+echo "${volcengine_ecs_instance.natgw.primary_ip_address}" >> /dev/null
+echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
+echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
+curl ${var.db_init_scripts} | bash
+EOF
+)
+}

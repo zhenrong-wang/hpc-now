@@ -1,0 +1,415 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+
+terraform {
+  required_providers {
+    volcengine = {
+      source = "volcengine/volcengine"
+      version = "~> 0.0.146"
+    }
+  }
+}
+
+provider "volcengine" {
+  access_key = "BLANK_ACCESS_KEY_ID"
+  secret_key = "BLANK_SECRET_KEY"
+  region = "DEFAULT_REGION_ID"
+}
+
+variable "shared_storage" {
+  type = number
+  default = DEFAULT_STORAGE_VOLUME #-#-#
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "NODE_NUM" {
+  type = number
+  default = DEFAULT_NODE_NUM
+}
+
+variable "HPC_USER_NUM" {
+  type = number
+  default = DEFAULT_USER_NUM
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+
+variable "cluster_init_scripts" {
+  type = string
+  default = "BLANK_URL_SHELL_SCRIPTScluster_initv7.sh"
+}
+
+variable "db_init_scripts" {
+  type = string
+  default = "BLANK_URL_SHELL_SCRIPTScluster_db_init.sh"
+}
+
+variable "master_init_parameters" {
+  type = string
+  default = "DEFAULT_MASTERINI"
+}
+
+#MUST BE CHANGED TO ACTUAL PLAN!
+variable "compute_init_parameters" {
+  type = string
+  default = "skip skip"
+}  
+
+variable "master_passwd" {
+  type = string
+  default = "DEFAULT_MASTER_PASSWD"
+}
+
+variable "compute_passwd" {
+  type = string
+  default = "DEFAULT_COMPUTE_PASSWD"
+}
+
+variable "database_root_passwd" {
+  type = string
+  default = "DEFAULT_DB_ROOT_PASSWD"
+}
+
+variable "database_acct_passwd" {
+  type = string
+  default = "DEFAULT_DB_ACCT_PASSWD"
+}
+
+#define some data
+variable "a192c384g" {
+  type = string
+  default = "ecs.c3a.48xlarge"
+}
+
+variable "a184c368g" {
+  type = string
+  default = "ecs.c3al.46xlarge"
+}
+
+variable "a128c256g" {
+  type = string
+  default = "ecs.c3a.32xlarge"
+}
+
+variable "a96c192g" {
+  type = string
+  default = "ecs.c3a.24xlarge"
+}
+
+variable "i96c192g" {
+  type = string
+  default = "ecs.c3i.24xlarge"
+}
+
+variable "a64c128g" {
+  type = string
+  default = "ecs.c3a.16xlarge"
+}
+
+variable "i64c128g" {
+  type = string
+  default = "ecs.c3i.16xlarge"
+}
+
+variable "a32c64g" {
+  type = string
+  default = "ecs.c3a.8xlarge"
+}
+
+variable "i32c64g" {
+  type = string
+  default = "ecs.c3i.8xlarge"
+}
+
+variable "a16c32g" {
+  type = string
+  default = "ecs.c3a.4xlarge"
+}
+
+variable "i16c32g" {
+  type = string
+  default = "ecs.c3i.4xlarge"
+}
+
+variable "a8c16g" {
+  type = string
+  default = "ecs.c3a.2xlarge"
+}
+
+variable "i8c16g" {
+  type = string
+  default = "ecs.c3i.2xlarge"
+}
+
+variable "a4c8g" {
+  type = string
+  default = "ecs.c3a.xlarge"
+}
+
+variable "i4c8g" {
+  type = string
+  default = "ecs.c3i.xlarge"
+}
+
+variable "a2c4g" {
+  type = string
+  default = "ecs.c3a.large"
+}
+
+variable "i2c4g" {
+  type = string
+  default = "ecs.c3i.large"
+}
+
+data "volcengine_images" "centos7" {
+  os_type = "Linux"
+  visibility = "public"
+  name_regex = "^CentOS 7.9 64"
+}
+
+data "volcengine_images" "centoss9" {
+  os_type = "Linux"
+  visibility = "public"
+  name_regex = "^CentOS Stream 9 64"
+}
+
+#create vpc
+resource "volcengine_vpc" "hpc_stack" {
+  vpc_name = "DEFAULT_VPC_NAME"
+  cidr_block = "10.0.0.0/12"
+}
+
+resource "volcengine_route_table" "subnet_rt" {
+  vpc_id = volcengine_vpc.hpc_stack.id
+}
+
+resource "volcengine_subnet" "hpc_stack_subnet" {
+  subnet_name = "DEFAULT_SUBNET_NAME"
+  zone_id = "DEFAULT_ZONE_ID"
+  vpc_id = volcengine_vpc.hpc_stack.id
+  cidr_block = "10.0.0.0/20"
+}
+
+resource "volcengine_route_table_associate" "subnet_rt_attach" {
+  route_table_id = volcengine_route_table.subnet_rt.id
+  subnet_id = volcengine_subnet.hpc_stack_subnet.id
+}
+
+resource "volcengine_subnet" "hpc_stack_pub_subnet" {
+  subnet_name = "DEFAULT_PUB_SUBNET_NAME"
+  zone_id = "DEFAULT_ZONE_ID"
+  vpc_id = volcengine_vpc.hpc_stack.id
+  cidr_block = "10.15.255.0/28"
+}
+
+resource "volcengine_security_group" "natgw_transparent" {
+  security_group_name = "SECURITY_GROUP_NATGW"
+  vpc_id = volcengine_vpc.hpc_stack.id
+}
+
+resource "volcengine_security_group_rule" "natgw_rule1" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.natgw_transparent.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
+}
+
+resource "volcengine_security_group_rule" "natgw_rule2" {
+  direction = "egress"
+  security_group_id = volcengine_security_group.natgw_transparent.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
+}
+
+resource "volcengine_security_group" "group" {
+  security_group_name = "SECURITY_GROUP_PUBLIC"
+  vpc_id = volcengine_vpc.hpc_stack.id
+}
+
+resource "volcengine_security_group_rule" "group_public_rule1" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.group.id
+  protocol = "tcp"
+  port_start = 22
+  port_end = 22
+  cidr_ip = "0.0.0.0/0"
+}
+
+resource "volcengine_security_group_rule" "group_public_rule2" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.group.id
+  protocol = "tcp"
+  port_start = 3389
+  port_end = 3389
+  cidr_ip = "0.0.0.0/0"
+}
+
+resource "volcengine_security_group_rule" "group_public_rule3" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.group.id
+  protocol = "icmp"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
+}
+
+
+resource "volcengine_security_group_rule" "group_public_rule4" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.group.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "10.0.0.0/12"
+}
+
+resource "volcengine_security_group_rule" "group_public_rule5" {
+  direction = "egress"
+  security_group_id = volcengine_security_group.group.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
+}
+
+resource "volcengine_security_group" "group_intra" {
+  security_group_name = "SECURITY_GROUP_INTRA"
+  vpc_id = volcengine_vpc.hpc_stack.id
+}
+
+resource "volcengine_security_group_rule" "group_intra_rule1" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.group_intra.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "10.0.0.0/12"
+}
+
+resource "volcengine_security_group_rule" "group_intra_rule2" {
+  direction = "egress"
+  security_group_id = volcengine_security_group.group_intra.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
+}
+
+resource "volcengine_security_group" "mysql_intra" {
+  security_group_name = "SECURITY_GROUP_MYSQL"
+  vpc_id = volcengine_vpc.hpc_stack.id
+}
+
+resource "volcengine_security_group_rule" "mysql_intra_rule1" {
+  direction = "ingress"
+  security_group_id = volcengine_security_group.mysql_intra.id
+  protocol = "tcp"
+  port_start = 3306
+  port_end = 3306
+  cidr_ip = "10.0.0.0/12"
+}
+
+resource "volcengine_security_group_rule" "mysql_intra_rule2" {
+  direction = "egress"
+  security_group_id = volcengine_security_group.mysql_intra.id
+  protocol = "all"
+  port_start = -1
+  port_end = -1
+  cidr_ip = "0.0.0.0/0"
+}
+
+resource "volcengine_volume" "shared_volume" {
+  volume_name = "CFSID"
+  kind = "data"
+  volume_type = "ESSD_PL0"
+  size = "${var.shared_storage}"
+  zone_id = "DEFAULT_ZONE_ID"
+  volume_charge_type = "PostPaid"
+}
+
+#CREATE a bucket for data storage
+resource "volcengine_tos_bucket" "hpc_data_storage" {
+  bucket_name = "BUCKET_ID"
+  public_acl = "private"
+}
+
+#create an cam user with the policy to only access the bucket, nothing else
+resource "volcengine_iam_user" "hpc_user" {
+  user_name = "BUCKET_USER_ID"
+}
+
+resource "volcengine_iam_access_key" "hpc_user_key" {
+  user_name = volcengine_iam_user.hpc_user.user_name
+  secret_file = "./bucket_secrets.txt"
+  status = "active"
+}
+
+resource "volcengine_tos_bucket_policy" "hpc_bucket_access_policy" {
+  bucket_name = volcengine_tos_bucket.hpc_data_storage.bucket_name
+  policy = jsonencode({
+    Statement = [
+      {
+        Sid = "BUCKET_ID"
+        Effect = "Allow"
+        Principal = [
+          "${volcengine_iam_user.hpc_user.account_id}/${volcengine_iam_user.hpc_user.user_name}"
+        ]
+        Action = [
+          "tos:List*",
+          "tos:Get*",
+          "tos:Put*"
+        ]
+        Resource = [
+          "trn:tos:::BUCKET_ID"
+        ]
+      }
+    ]
+  })
+}
+
+resource "volcengine_ecs_key_pair" "useless_key" {
+  key_pair_name = "RESOURCETAG"
+}
+
+/*resource "volcengine_nas_permission_group" "nas_intra" {
+  permission_group_name = "NAS_ACCESS_GROUP_"
+  permission_rules {
+    cidr_ip  = "10.0.0.0/12"
+    rw_mode  = "RW"
+    use_mode = "No_root_squash"
+  }
+}
+
+resource "volcengine_nas_file_system" "hpc_apps" {
+  file_system_name = "hpc_apps-CFSID"
+  zone_id = "DEFAULT_ZONE_ID"
+  capacity = 100
+}
+
+resource "volcengine_nas_mount_point" "hpc_apps_mount" {
+  file_system_id = volcengine_nas_file_system.hpc_apps.id
+  mount_point_name = "hpc_apps_mnt-CFSID"
+  permission_group_id = volcengine_nas_permission_group.nas_intra.id
+  subnet_id = volcengine_subnet.hpc_stack_subnet.id
+}
+
+resource "volcengine_nas_file_system" "hpc_data" {
+  file_system_name = "hpc_data-CFSID"
+  zone_id = "DEFAULT_ZONE_ID"
+  capacity = 100
+}
+
+resource "volcengine_nas_mount_point" "hpc_data_mount" {
+  file_system_id = volcengine_nas_file_system.hpc_data.id
+  mount_point_name = "hpc_data_mnt-CFSID"
+  permission_group_id = volcengine_nas_permission_group.nas_intra.id
+  subnet_id = volcengine_subnet.hpc_stack_subnet.id
+}*/

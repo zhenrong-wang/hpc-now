@@ -1,0 +1,66 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+ 
+resource "volcengine_eip_address" "natgw_eip" {
+  name = "natgw_eip-RESOURCETAG"
+  billing_type = "PostPaidByTraffic"
+  bandwidth = MASTER_BANDWIDTH
+}
+
+resource "volcengine_eip_associate" "natgw_eip_attach" {
+  allocation_id = volcengine_eip_address.natgw_eip.id
+  instance_id = volcengine_ecs_instance.natgw.id
+  instance_type = "EcsInstance"
+}
+
+resource "volcengine_ecs_instance_state" "ngw_state" {
+  instance_id = volcengine_ecs_instance.natgw.id
+  action = "Start"
+  stopped_mode = "StopCharging"
+}
+
+resource "volcengine_ecs_instance" "natgw" {
+  instance_name = "natgw-RESOURCETAG"
+  subnet_id = volcengine_subnet.hpc_stack_pub_subnet.id
+  security_group_ids = [volcengine_security_group.natgw_transparent.id]
+  image_id = data.volcengine_images.centos7.images[0].image_id
+  instance_type = "${var.i2c4g}"
+  system_volume_type = "ESSD_PL0"
+  system_volume_size = 40
+  instance_charge_type = "PostPaid"
+  host_name = "natgw"
+  key_pair_name = volcengine_ecs_key_pair.useless_key.key_pair_name
+
+  user_data = base64encode(<<EOF
+#!/bin/bash
+yum -y install iptables-services
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl mask firewalld
+private_ip=`ifconfig | grep inet | head -n1 | awk '{print $2}'`
+cat /etc/sysctl.conf | grep net.ipv4.ip_forward
+if [ $? -ne 0 ]; then
+	echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
+else
+	sed -i '/net.ipv4.ip_forward/d' /etc/sysctl.conf
+	echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
+fi
+sysctl -p /etc/sysctl.conf
+iptables -t nat -A POSTROUTING -o eth0 -s 10.0.0.0/20 -j SNAT --to $private_ip
+service iptables save
+systemctl start iptables
+systemctl enable iptables
+EOF
+)
+}
+
+resource "volcengine_route_entry" "route_to_natgw" {
+  route_table_id = volcengine_route_table.subnet_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  next_hop_type = "Instance"
+  next_hop_id = volcengine_ecs_instance.natgw.id
+}

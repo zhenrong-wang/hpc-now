@@ -1,0 +1,15 @@
+[Region:cn-beijing] Beijing [Default]
+[cn-beijing] cn-beijing-a [Default]
+[cn-beijing] cn-beijing-b
+[cn-beijing] cn-beijing-c
+[cn-beijing] cn-beijing-d
+
+[Region:cn-shanghai] Shanghai
+[cn-shanghai] cn-shanghai-a [Default]
+[cn-shanghai] cn-shanghai-b
+[cn-shanghai] cn-shanghai-c
+
+[Region:cn-guangzhou] Guangzhou
+[cn-guangzhou] cn-guangzhou-a [Default]
+[cn-guangzhou] cn-guangzhou-b
+[cn-guangzhou] cn-guangzhou-c

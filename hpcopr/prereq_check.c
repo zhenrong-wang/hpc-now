@@ -44,6 +44,7 @@ extern char bd_tf_plugin_version_var[32];
 extern char azrm_tf_plugin_version_var[32];
 extern char azad_tf_plugin_version_var[32];
 extern char gcp_tf_plugin_version_var[32];
+extern char volce_tf_plugin_version_var[32];
 
 extern char sha_tf_exec_var[80];
 extern char sha_tf_zip_var[80];
@@ -66,6 +67,8 @@ extern char sha_azad_tf_var[80];
 extern char sha_azad_tf_zip_var[80];
 extern char sha_gcp_tf_var[80];
 extern char sha_gcp_tf_zip_var[80];
+extern char sha_volce_tf_var[80];
+extern char sha_volce_tf_zip_var[80];
 
 extern int batch_flag;
 extern char final_command[64];
@@ -176,7 +179,7 @@ int install_bucket_clis(int silent_flag){
     int inst_flag=0;
     
     if(silent_flag!=0){
-        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 1/7 ..." RESET_DISPLAY "\n");
+        printf(RESET_DISPLAY GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 1/8 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sossutil64.exe",NOW_BINARY_DIR,PATH_SLASH);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%soss.zip",TF_LOCAL_PLUGINS,PATH_SLASH);
@@ -190,7 +193,7 @@ int install_bucket_clis(int silent_flag){
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 1/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 1/8." RESET_DISPLAY "\n");
                     rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
                 inst_flag|=OSSUTIL_1_FAILED;
@@ -229,7 +232,7 @@ int install_bucket_clis(int silent_flag){
         }
         else{
             if(silent_flag!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 1/7." RESET_DISPLAY "\n");
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 1/8." RESET_DISPLAY "\n");
             }
             inst_flag|=OSSUTIL_1_FAILED;
             rm_file_or_dir(filename_temp); /* Clear the unreliable file. */
@@ -241,7 +244,7 @@ int install_bucket_clis(int silent_flag){
     }
 coscli:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 2/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 2/8 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%scoscli.exe",NOW_BINARY_DIR,PATH_SLASH);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%scoscli.exe",TF_LOCAL_PLUGINS,PATH_SLASH);
@@ -255,7 +258,7 @@ coscli:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 2/8." RESET_DISPLAY "\n");
                     rm_file_or_dir(filename_temp_zip); /* Clear the failed file (if exists) */
                 }
                 inst_flag|=COSCLI_2_FAILED;
@@ -264,7 +267,7 @@ coscli:
         }
         if(cp_file(filename_temp_zip,filename_temp,0)!=0){
             if(silent_flag!=0){
-                printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 2/7." RESET_DISPLAY "\n");
+                printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 2/8." RESET_DISPLAY "\n");
                 rm_file_or_dir(filename_temp); /* Clear the failed file (if exists) */
             }
             inst_flag|=COSCLI_2_FAILED;
@@ -279,7 +282,7 @@ coscli:
     }
 awscli: 
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 3/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 3/8 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%saws",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef __linux__
@@ -291,7 +294,7 @@ awscli:
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/8." RESET_DISPLAY "\n");
                     rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
                 inst_flag|=AWSCLI_3_FAILED;
@@ -321,7 +324,7 @@ awscli:
             snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_AWSCLI,filename_temp_zip);
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 3/8." RESET_DISPLAY "\n");
                     rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
                 inst_flag|=AWSCLI_3_FAILED;
@@ -383,7 +386,7 @@ awscli:
     }
 obsutil:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 4/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 4/8 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sobsutil.exe",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef _WIN32
@@ -401,7 +404,7 @@ obsutil:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 4/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 4/8." RESET_DISPLAY "\n");
                     rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
                 inst_flag|=OBSUTIL_4_FAILED;
@@ -433,7 +436,7 @@ obsutil:
         }
         else{
             if(silent_flag!=0){
-                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 4/7." RESET_DISPLAY "\n");
+                printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to install dataman component 4/8." RESET_DISPLAY "\n");
             }
             inst_flag|=OBSUTIL_4_FAILED;
             goto bcecmd;
@@ -444,7 +447,7 @@ obsutil:
     }
 bcecmd:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 5/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 5/8 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbcecmd.exe",NOW_BINARY_DIR,PATH_SLASH);
 #ifdef _WIN32
@@ -464,7 +467,7 @@ bcecmd:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 5/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 5/8." RESET_DISPLAY "\n");
                     rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
                 inst_flag|=BCECMD_5_FAILED;
@@ -505,7 +508,7 @@ bcecmd:
     }
 azcopy:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 6/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 6/8 ..." RESET_DISPLAY "\n");
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sazcopy.exe",NOW_BINARY_DIR,PATH_SLASH);
     snprintf(filename_temp_zip,FILENAME_LENGTH-1,"%s%sazcopy_%s_amd64_10.20.1.tar.gz",TF_LOCAL_PLUGINS,PATH_SLASH,FILENAME_SUFFIX_FULL);
@@ -519,7 +522,7 @@ azcopy:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 6/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 6/8." RESET_DISPLAY "\n");
                     rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
                 inst_flag|=AZCOPY_6_FAILED;
@@ -561,13 +564,13 @@ azcopy:
     }
 gcloud_cli:
     if(silent_flag!=0){
-        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 7/7 ..." RESET_DISPLAY "\n");
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 7/8 ..." RESET_DISPLAY "\n");
     }
     if(get_google_connectivity()!=0){
         if(silent_flag!=0){
             printf(WARN_YELLO_BOLD "[ -WARN- ] Failed to connect to GCP. Skip installing the GCP component." RESET_DISPLAY "\n");
         }
-        goto end_return;
+        goto toscli;
     }
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sgoogle-cloud-sdk%sbin%sgcloud",NOW_BINARY_DIR,PATH_SLASH,PATH_SLASH,PATH_SLASH);
 #ifdef _WIN32
@@ -587,11 +590,11 @@ gcloud_cli:
 #endif
             if(system(cmdline)!=0){
                 if(silent_flag!=0){
-                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 7/7." RESET_DISPLAY "\n");
+                    printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 7/8." RESET_DISPLAY "\n");
                     rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
                 }
                 inst_flag|=GCLOUD_7_FAILED;
-                goto end_return;
+                goto toscli;
             }
         }
 #ifdef _WIN32
@@ -602,9 +605,36 @@ gcloud_cli:
         if(system(cmdline)!=0){
             rm_file_or_dir(filename_temp_zip);
             inst_flag|=GCLOUD_7_FAILED;
+            goto toscli;
+        }
+    }
+    if(silent_flag!=0){
+        printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed the component successfully." RESET_DISPLAY "\n");
+    }
+toscli:
+    if(silent_flag!=0){
+        printf(GENERAL_BOLD "[ -INFO- ] Checking & installing the dataman components: 8/8 ..." RESET_DISPLAY "\n");
+    }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%stosutil.exe",NOW_BINARY_DIR,PATH_SLASH);
+    if(file_exist_or_not(filename_temp)!=0){
+        printf(RESET_DISPLAY "[  ****  ] Not found. Downloading and installing now ..." GREY_LIGHT "\n");
+#ifdef _WIN32
+        snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o %s",URL_TOSUTIL,filename_temp);
+#else
+        snprintf(cmdline,CMDLINE_LENGTH-1,"curl %s -o '%s'",URL_TOSUTIL,filename_temp);
+#endif
+        if(system(cmdline)!=0){
+            if(silent_flag!=0){
+                printf(RESET_DISPLAY WARN_YELLO_BOLD "[ -WARN- ] Failed to download dataman component 8/8." RESET_DISPLAY "\n");
+                rm_file_or_dir(filename_temp_zip); /* Clear the failed zip (if exists) */
+            }
+            inst_flag|=TOSUTIL_8_FAILED;
             goto end_return;
         }
     }
+#ifndef _WIN32
+    chmod(filename_temp,S_IRWXU|S_IXGRP|S_IXOTH);
+#endif
     if(silent_flag!=0){
         printf(RESET_DISPLAY HIGH_GREEN_BOLD "[  ****  ] Installed the component successfully." RESET_DISPLAY "\n");
     }
@@ -659,6 +689,12 @@ int repair_provider(char* plugin_root_path, char* cloud_name, char* provider_ver
     }
     else if(strcmp(cloud_name,"huaweicloud")==0){
         strcpy(provider_prefix,"huaweicloud");
+#ifdef _WIN32
+        strcpy(provider_exec_suffix,".exe");
+#endif
+    }
+    else if(strcmp(cloud_name,"volcengine")==0){
+        strcpy(provider_prefix,"volcengine");
 #ifdef _WIN32
         strcpy(provider_exec_suffix,".exe");
 #endif
@@ -1146,28 +1182,31 @@ int check_and_install_prerequisitions(int repair_flag){
 #else
     snprintf(plugin_dir_root,DIR_LENGTH-1,"%s/plugins/",TF_LOCAL_PLUGINS);
 #endif
-    if(repair_provider(plugin_dir_root,"alicloud",ali_tf_plugin_version_var,sha_ali_tf_var,sha_ali_tf_zip_var,force_repair_flag,"1/7")!=0){
+    if(repair_provider(plugin_dir_root,"alicloud",ali_tf_plugin_version_var,sha_ali_tf_var,sha_ali_tf_zip_var,force_repair_flag,"1/8")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"tencentcloud",qcloud_tf_plugin_version_var,sha_qcloud_tf_var,sha_qcloud_tf_zip_var,force_repair_flag,"2/7")!=0){
+    if(repair_provider(plugin_dir_root,"tencentcloud",qcloud_tf_plugin_version_var,sha_qcloud_tf_var,sha_qcloud_tf_zip_var,force_repair_flag,"2/8")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"aws",aws_tf_plugin_version_var,sha_aws_tf_var,sha_aws_tf_zip_var,force_repair_flag,"3/7")!=0){
+    if(repair_provider(plugin_dir_root,"aws",aws_tf_plugin_version_var,sha_aws_tf_var,sha_aws_tf_zip_var,force_repair_flag,"3/8")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"huaweicloud",hw_tf_plugin_version_var,sha_hw_tf_var,sha_hw_tf_zip_var,force_repair_flag,"4/7")!=0){
+    if(repair_provider(plugin_dir_root,"huaweicloud",hw_tf_plugin_version_var,sha_hw_tf_var,sha_hw_tf_zip_var,force_repair_flag,"4/8")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"baiducloud",bd_tf_plugin_version_var,sha_bd_tf_var,sha_bd_tf_zip_var,force_repair_flag,"5/7")!=0){
+    if(repair_provider(plugin_dir_root,"baiducloud",bd_tf_plugin_version_var,sha_bd_tf_var,sha_bd_tf_zip_var,force_repair_flag,"5/8")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"azuread",azad_tf_plugin_version_var,sha_azad_tf_var,sha_azad_tf_zip_var,force_repair_flag,"6a/7")!=0){
+    if(repair_provider(plugin_dir_root,"azuread",azad_tf_plugin_version_var,sha_azad_tf_var,sha_azad_tf_zip_var,force_repair_flag,"6a/8")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"azurerm",azrm_tf_plugin_version_var,sha_azrm_tf_var,sha_azrm_tf_zip_var,force_repair_flag,"6b/7")!=0){
+    if(repair_provider(plugin_dir_root,"azurerm",azrm_tf_plugin_version_var,sha_azrm_tf_var,sha_azrm_tf_zip_var,force_repair_flag,"6b/8")!=0){
         return 3;
     }
-    if(repair_provider(plugin_dir_root,"google",gcp_tf_plugin_version_var,sha_gcp_tf_var,sha_gcp_tf_zip_var,force_repair_flag,"7/7")!=0){
+    if(repair_provider(plugin_dir_root,"google",gcp_tf_plugin_version_var,sha_gcp_tf_var,sha_gcp_tf_zip_var,force_repair_flag,"7/8")!=0){
+        return 3;
+    }
+    if(repair_provider(plugin_dir_root,"volcengine",volce_tf_plugin_version_var,sha_volce_tf_var,sha_volce_tf_zip_var,force_repair_flag,"8/8")!=0){
         return 3;
     }
     if(repair_flag==1){

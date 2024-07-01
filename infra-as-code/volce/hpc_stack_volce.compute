@@ -1,0 +1,47 @@
+/*
+ * Copyright (C) 2022-present Shanghai HPC-NOW Technologies Co., Ltd.
+ * This code is distributed under the license: MIT License
+ * Originally written by Zhenrong WANG
+ * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
+ */
+
+resource "volcengine_ecs_instance_state" "COMPUTE_NODE_N_state" {
+  instance_id = volcengine_ecs_instance.COMPUTE_NODE_N.id
+  action = "Start"
+  stopped_mode = "StopCharging"
+}
+
+resource "volcengine_ecs_instance" "COMPUTE_NODE_N" {
+  instance_name = "COMPUTE_NODE_N-RESOURCETAG"
+  subnet_id = volcengine_subnet.hpc_stack_subnet.id
+  security_group_ids = [volcengine_security_group.group_intra.id]
+  image_id = data.volcengine_images.OS_IMAGE.images[0].image_id
+  instance_type = "${var.COMPUTE_INST}"
+  system_volume_type = "ESSD_PL0"
+  system_volume_size = 40
+  instance_charge_type = "PostPaid"
+  host_name = "COMPUTE_NODE_N"
+  password = "${var.compute_passwd}"
+
+  user_data = base64encode(<<EOF
+#!/bin/bash
+hostnamectl set-hostname COMPUTE_NODE_N
+echo '${var.compute_passwd}' | passwd root --stdin >> /dev/null 2>&1
+touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
+mkdir -p /mnt/shared/hpc_apps
+mkdir -p /mnt/shared/hpc_data
+rm -rf /hpc_apps && rm -rf /hpc_data
+ln -s /mnt/shared/hpc_apps /hpc_apps
+ln -s /mnt/shared/hpc_data /hpc_data
+yum -y install rpcbind nfs-utils
+echo -e "${volcengine_volume_attach.master_disk_attach.id}" >> /dev/null 2>&1
+mount -t nfs -o vers=4.0 ${volcengine_ecs_instance.master.primary_ip_address}:/mnt/shared/hpc_apps /mnt/shared/hpc_apps
+mount -t nfs -o vers=4.0 ${volcengine_ecs_instance.master.primary_ip_address}:/mnt/shared/hpc_data /mnt/shared/hpc_data
+echo -e "${volcengine_ecs_instance.master.primary_ip_address}:/mnt/shared/hpc_apps /mnt/shared/hpc_apps nfs vers=4,minorversion=0,hard,timeo=600,retrans=2 0 0" >> /etc/fstab
+echo -e "${volcengine_ecs_instance.master.primary_ip_address}:/mnt/shared/hpc_data /mnt/shared/hpc_data nfs vers=4,minorversion=0,hard,timeo=600,retrans=2 0 0" >> /etc/fstab
+rm -rf /root/.ssh 
+echo -e "${volcengine_ecs_instance.master.primary_ip_address}" > /root/master_ip.txt
+nohup curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.compute_init_parameters} > /var/log/cluster_COMPUTE_NODE_N_init_raw.log 2>&1 &
+EOF
+)
+}

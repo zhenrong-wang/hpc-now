@@ -37,6 +37,7 @@ extern char bd_tf_plugin_version_var[32];
 extern char azrm_tf_plugin_version_var[32];
 extern char azad_tf_plugin_version_var[32];
 extern char gcp_tf_plugin_version_var[32];
+extern char volce_tf_plugin_version_var[32];
 
 extern char sha_tf_exec_var[80];
 extern char sha_tf_zip_var[80];
@@ -59,6 +60,8 @@ extern char sha_azad_tf_var[80];
 extern char sha_azad_tf_zip_var[80];
 extern char sha_gcp_tf_var[80];
 extern char sha_gcp_tf_zip_var[80];
+extern char sha_volce_tf_var[80];
+extern char sha_volce_tf_zip_var[80];
 
 int valid_sha_or_not(char* sha_input){
     if(strlen(sha_input)!=64){
@@ -215,6 +218,13 @@ int get_vers_sha_vars(void){
                 strncpy(gcp_tf_plugin_version_var,version,31);
                 strncpy(sha_gcp_tf_var,exec_sha,79);
                 strncpy(sha_gcp_tf_zip_var,zip_sha,79);
+            }
+        }
+        else if(strcmp(header,"volce_tf:")==0){
+            if(valid_ver_or_not(version)==0&&valid_sha_or_not(exec_sha)==0&&valid_sha_or_not(zip_sha)==0){
+                strncpy(volce_tf_plugin_version_var,version,31);
+                strncpy(sha_volce_tf_var,exec_sha,79);
+                strncpy(sha_volce_tf_zip_var,zip_sha,79);
             }
         }
         else if(strcmp(header,"now_crypto:")==0){

@@ -6,7 +6,6 @@
 - [2. 核心组件](#2-核心组件)
 - [3. 如何部署、使用、卸载、构建与开发](#3-如何部署使用卸载构建与开发)
 - [4. Bug与技术沟通](#4-bug与技术沟通)
-- [5. 开发路线图](#5-开发路线图)
 
 ### 1. 项目背景
 
@@ -61,23 +60,3 @@
 ### 4. Bug与技术沟通
 
 欢迎向该仓库提交 issues，或者邮箱联系 zhenrongwang@live.com | wangzhenrong@hpc-now.com | info@hpc-now.com
-
-### 5. 开发路线图
-
-HPC-NOW 的开发将遵循以下总体路线（其中的优先级为暂定）：
-
-软件仓库优化：
-
-- HPCMGR 操作逻辑优化（最高优先级）
-- 提供PreBuild 仓库与源代码仓库（高优先级）
-- 本地软件仓库功能（低优先级）
-
-UI/UE：（高优先级）
-
-- hpcopr、installer 的GUI客户端（一般优先级）
-- 基于 Web 的在线平台（高优先级）
-
-平台核心层：（以下皆为最高优先级）
-
-- 日志清理功能（清理 error archive、logtrash、tf_prep.log.archive）
-- 默认 Disable root ssh 和远程桌面连接
