@@ -177,7 +177,7 @@ If everything goes well, the binaries will be built to the `build` folder.
 
 The `hpcopr.exe` is designed to be executed by the dedicated system OS user named `hpc-now`, which has been created by the installer in the last step.
 
-In order to run the `hpcopr.exe`, you'll need to set a password and switch to that user. See the stpes below:
+In order to run the `hpcopr.exe`, you'll need to set a password and switch to that user. See the steps below:
 
 - For **Microsoft Windows**:
 
