@@ -574,7 +574,11 @@ if [ -f /root/hostfile ]; then
   fi
 fi
 
-yum -y update 
+yum -y update
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl mask firewalld
+
 yum -y install gcc-c++ gcc-gfortran 
 yum -y install htop 
 yum -y install python3 python3-devel 
@@ -584,8 +588,6 @@ if [ -f /root/hostfile ]; then
   yum -y install evince # The PDF viewer
   yum -y install eog # The image viewer
 fi
-
-systemctl mask firewalld
 
 if [ $cloud_flag = 'CLOUD_B' ]; then
   echo 1 > /sys/block/sr0/device/delete
