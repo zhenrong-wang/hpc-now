@@ -30,6 +30,7 @@ echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
 systemctl restart sshd
 systemctl enable sshd
 echo '${var.database_root_passwd}' | passwd root --stdin >> /dev/null 2>&1
+systemctl restart NetworkManager
 for i in $(seq 1 180)
 do
   echo -e "[-WAIT---]" >> /tmp/cluster_db_init.log
