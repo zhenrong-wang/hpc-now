@@ -64,7 +64,7 @@ echo -e "${var.database_root_passwd}" > /root/mariadb_root_passwd.txt
 echo -e "${var.database_acct_passwd}" > /root/mariadb_slurm_acct_db_pw.txt
 echo -e "${var.master_passwd}" > /root/master_passwd.txt && echo -e "${var.compute_passwd}" > /root/compute_passwd.txt
 yum -y install sshpass readhat-lsb
-curl nohup ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.master_init_parameters} > /var/log/cluster_init_master_raw.log 2>&1
+curl ${var.cluster_init_scripts} | bash -s ${var.HPC_USER_NUM} ${var.master_init_parameters} > /var/log/cluster_init_master_raw.log 2>&1
 EOF
 }
 
