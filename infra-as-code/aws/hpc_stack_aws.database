@@ -30,8 +30,13 @@ echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
 systemctl restart sshd
 systemctl enable sshd
 echo '${var.database_root_passwd}' | passwd root --stdin >> /dev/null 2>&1
-systemctl restart NetworkManager
-for i in $(seq 1 180)
+grep "CentOS Linux release 7." /etc/redhat-release >> /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  con_name=`nmcli con show | awk 'NR==2 {print $1}'`
+  nmcli con mod $con_name ipv4.dns "8.8.8.8 8.8.4.4"
+  systemctl restart NetworkManager
+fi
+for i in $(seq 1 120)
 do
   echo -e "[-WAIT---]" >> /tmp/cluster_db_init.log
   sleep 1
