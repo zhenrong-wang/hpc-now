@@ -25,17 +25,20 @@ resource "aws_instance" "master" {
 touch /root/CLOUD_FLAG && chmod 600 /root/CLOUD_FLAG
 hostnamectl set-hostname master
 echo '${var.master_passwd}' | passwd root --stdin >> /dev/null 2>&1
-#id ec2-user >> /dev/null 2>&1
-#if [ $? -eq 0 ]; then
-#  userdel -f ec2-user
-#fi
+id ec2-user >> /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  userdel -f ec2-user
+fi
 id openeuler >> /dev/null 2>&1
 if [ $? -eq 0 ]; then
   userdel -f openeuler
 fi
+yum -y update openssh openssl
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config.d/*
 sed -i '/PermitRootLogin no/d' /etc/ssh/sshd_config
 echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
+systemctl restart sshd
 yum -y install at
 systemctl start atd && systemctl enable atd
 rm -rf /root/.ssh/id_rsa.pub
@@ -45,7 +48,6 @@ rm -rf /root/.ssh/known_hosts
 ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa -q
 cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 echo -e "\nPUBLIC_KEY" >> /root/.ssh/authorized_keys
-systemctl restart sshd
 echo -e "\nPUBLIC_KEY" >> /etc/now-pubkey.txt
 mkdir -p /usr/hpc-now/
 mkdir /hpc_apps && mkdir /hpc_data
