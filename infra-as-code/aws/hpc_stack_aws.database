@@ -34,8 +34,8 @@ echo '${var.database_root_passwd}' | passwd root --stdin >> /dev/null 2>&1
 # Check whether it is global regions or China regions
 # If global regions, we should modify the yum repo config file
 
-ping -c 1 -t 1 www.google.com >> /dev/null 2>&1
-if[ $? -eq 0 ]; then
+ping -c 1 www.google.com >> /dev/null 2>&1
+if [ $? -eq 0 ]; then
   /bin/cp -r /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
   sed -i 's/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Base.repo
   sed -i 's@#baseurl=http://mirror.centos.org@baseurl=https://mirror.nsc.liu.se/centos-store@g' /etc/yum.repos.d/CentOS-Base.repo
@@ -44,14 +44,14 @@ fi
 # Wait for 2 minutes
 for i in $(seq 1 120)
 do
-  echo -e "db_init_wait ... ... ... ... ... ... ... ... ... ...$i" >> /tmp/db_init_wait.log
+  echo -e "db_init_wait ... ... ... ... ... ... ... ... ... ..." >> /tmp/db_init_wait.log
   sleep 1
 done
 
 # Check whether NetworkManager is installed. If installed, use it to manage the DNS
 
 nmcli con show >> /dev/null 2>&1
-if[ $? -eq 0 ]; then
+if [ $? -eq 0 ]; then
   con_name=`nmcli con show | awk 'NR==2 {print $1}'`
   nmcli con mod $con_name ipv4.dns "8.8.8.8 8.8.4.4"
   systemctl restart NetworkManager
