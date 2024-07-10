@@ -30,14 +30,35 @@ echo -e "PermitRootLogin yes" >> /etc/ssh/sshd_config
 systemctl restart sshd
 systemctl enable sshd
 echo '${var.database_root_passwd}' | passwd root --stdin >> /dev/null 2>&1
+
+# Check whether it is global regions or China regions
+# If global regions, we should modify the yum repo config file
+
+ping -c 1 -t 1 www.google.com >> /dev/null 2>&1
+if[ $? -eq 0 ]; then
+  /bin/cp -r /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
+  sed -i 's/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Base.repo
+  sed -i 's@#baseurl=http://mirror.centos.org@baseurl=https://mirror.nsc.liu.se/centos-store@g' /etc/yum.repos.d/CentOS-Base.repo
+fi
+
+# Wait for 2 minutes
 for i in $(seq 1 120)
 do
   echo -e "db_init_wait ... ... ... ... ... ... ... ... ... ...$i" >> /tmp/db_init_wait.log
   sleep 1
 done
-con_name=`nmcli con show | awk 'NR==2 {print $1}'`
-nmcli con mod $con_name ipv4.dns "8.8.8.8 8.8.4.4"
-systemctl restart NetworkManager
+
+# Check whether NetworkManager is installed. If installed, use it to manage the DNS
+
+nmcli con show >> /dev/null 2>&1
+if[ $? -eq 0 ]; then
+  con_name=`nmcli con show | awk 'NR==2 {print $1}'`
+  nmcli con mod $con_name ipv4.dns "8.8.8.8 8.8.4.4"
+  systemctl restart NetworkManager
+fi
+
+# Get and run the remote script 
+
 curl ${var.db_init_scripts} -o /opt/db_init.sh > /tmp/db_init_dl.log 2>&1
 bash /opt/db_init.sh
 cp -r /tmp/db*.log /var/log/
