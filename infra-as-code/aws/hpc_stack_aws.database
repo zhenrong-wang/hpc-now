@@ -9,7 +9,7 @@
 resource "aws_instance" "database" {
   availability_zone = "DEFAULT_ZONE_ID"
   subnet_id = aws_subnet.hpc_stack_subnet.id
-  vpc_security_group_ids = [aws_security_group.group_intra.id]
+  vpc_security_group_ids = [aws_security_group.mysql_intra.id]
 #INSERT_AMI_HERE
   instance_type = data.aws_ec2_instance_types.t2c1g.instance_types.0
   root_block_device {

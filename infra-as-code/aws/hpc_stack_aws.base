@@ -520,6 +520,13 @@ resource "aws_security_group" "mysql_intra" {
     protocol = "TCP"
     cidr_blocks = [aws_vpc.hpc_stack.cidr_block]
   }
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "TCP"
+    cidr_blocks = [aws_vpc.hpc_stack.cidr_block]
+  }
   
   egress {
     from_port = 0
