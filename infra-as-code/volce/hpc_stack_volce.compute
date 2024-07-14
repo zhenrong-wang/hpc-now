@@ -34,6 +34,8 @@ rm -rf /hpc_apps && rm -rf /hpc_data
 ln -s /mnt/shared/hpc_apps /hpc_apps
 ln -s /mnt/shared/hpc_data /hpc_data
 yum -y install rpcbind nfs-utils
+yum -y update openssh openssl
+systemctl restart sshd
 echo -e "${volcengine_volume_attach.master_disk_attach.id}" >> /dev/null 2>&1
 mount -t nfs -o vers=4.0 ${volcengine_ecs_instance.master.primary_ip_address}:/mnt/shared/hpc_apps /mnt/shared/hpc_apps
 mount -t nfs -o vers=4.0 ${volcengine_ecs_instance.master.primary_ip_address}:/mnt/shared/hpc_data /mnt/shared/hpc_data
