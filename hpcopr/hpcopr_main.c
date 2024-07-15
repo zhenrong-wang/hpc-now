@@ -1680,6 +1680,12 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"rebuild")==0){
+        if(strcmp(cloud_flag,"CLOUD_H")==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] This operation is currently not valid to volcengine." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FLAG_NOT_APPLICABLE",8);
+            check_and_cleanup(workdir);
+            return 8;
+        }
         if(cluster_state_flag==0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Please wake up the cluster first." RESET_DISPLAY "\n");
             write_operation_log(cluster_name,operation_log,argc,argv,"CLUSTER_ASLEEP",43);
