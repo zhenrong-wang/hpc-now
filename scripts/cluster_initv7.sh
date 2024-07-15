@@ -571,8 +571,13 @@ if [ -f /root/hostfile ]; then
     curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-449.0.0-linux-x86_64.tar.gz -o /tmp/gcloud.tar.gz
     tar zvxf /tmp/gcloud.tar.gz -C /opt/
     echo -e "export PATH=/opt/google-cloud-sdk/bin:\$PATH" >> /etc/profile
+  elif [ $cloud_flag = 'CLOUD_H' ]; then
+    curl https://tos-tools.tos-cn-beijing.volces.com/linux/amd64/tosutil -o /usr/bin/tosutil
+    chmod +x /usr/bin/tosutil
+    chmod 755 /usr/bin/tosutil
   else
-    echo "Developing for volcengine."
+    echo "[ FATAL: ] The cloud flag is incorrect. This is not supposed to happen."
+    exit 1
   fi
 fi
 
