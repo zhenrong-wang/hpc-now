@@ -567,10 +567,12 @@ if [ -f /root/hostfile ]; then
     tar zvxf /tmp/azcopy.tar.gz -C /tmp/
     /bin/cp -r /tmp/azcopy_linux_amd64_10.20.1/azcopy /usr/local/bin/
     chmod 755 /usr/local/bin/azcopy
-  else
+  elif [ $cloud_flag = 'CLOUD_G' ]; then
     curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-449.0.0-linux-x86_64.tar.gz -o /tmp/gcloud.tar.gz
     tar zvxf /tmp/gcloud.tar.gz -C /opt/
     echo -e "export PATH=/opt/google-cloud-sdk/bin:\$PATH" >> /etc/profile
+  else
+    echo "Developing for volcengine."
   fi
 fi
 
