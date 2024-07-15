@@ -212,7 +212,7 @@ int get_cloud_flag(char* workdir, char* crypto_keyfile, char cloud_flag[], unsig
      * Here we guarantee that the cloud_flag equals to CLOUD_A ~ CLOUD_G. In the future if new vendor included, this line needs to be rewritten 
      */
 final_check:
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0&&strcmp(cloud_flag,"CLOUD_H")!=0){
         memset(cloud_flag,'\0',maxlen);
         return 1;
     }
@@ -1457,6 +1457,12 @@ int getstate(char* workdir, char* crypto_filename){
         find_and_nget(compute_template,LINE_LENGTH_SMALL,"machine_type","","",1,"machine_type","","",'.',2,string_temp,64);
         get_seq_nstring(string_temp,'}',1,compute_config,16);
     }
+    else if(strcmp(cloud_flag,"CLOUD_H")==0){
+        find_and_nget(master_tf,LINE_LENGTH_SMALL,"\"volcengine_ecs_instance\" \"master\"","","",20,"instance_type","","",'.',2,string_temp,64);
+        get_seq_nstring(string_temp,'}',1,master_config,16);
+        find_and_nget(compute_template,LINE_LENGTH_SMALL,"instance_type","","",1,"instance_type","","",'.',2,string_temp,64);
+        get_seq_nstring(string_temp,'}',1,compute_config,16);
+    }
     else{
         find_and_nget(master_tf,LINE_LENGTH_SMALL,"instance_type","","",1,"instance_type","","",'.',3,master_config,16);
         find_and_nget(compute_template,LINE_LENGTH_SMALL,"instance_type","","",1,"instance_type","","",'.',3,compute_config,16);
@@ -1621,7 +1627,7 @@ int getstate(char* workdir, char* crypto_filename){
         get_seq_nstring(string_temp2,',',1,string_temp,64);
         fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
         node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH_SHORT,"\"google_compute_instance\"","","","","")-3;
         find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master\",","","",80,"\"nat_ip\":","","",'\"',4,string_temp,64);
         fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
@@ -1657,6 +1663,47 @@ int getstate(char* workdir, char* crypto_filename){
             }
         }
         find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"shared_volume\",","","",30,"\"size\":","","",'\"',3,string_temp,64);
+        get_seq_nstring(string_temp,' ',2,string_temp2,64);
+        get_seq_nstring(string_temp2,',',1,string_temp,64);
+        fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
+    }
+    else{
+        node_num_gs=find_multi_nkeys(tfstate,LINE_LENGTH_SHORT,"\"type\": \"volcengine_ecs_instance\",","","","","")-3;
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master_eip\",","","",20,"\"eip_address\":","","",'\"',4,string_temp,64);
+        fprintf(file_p_statefile,"master_public_ip: %s\n",string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master\",","","",60,"\"primary_ip_address\":","","",'\"',4,string_temp,64);
+        fprintf(file_p_statefile,"master_private_ip: %s\n",string_temp);
+        fprintf(file_p_hostfile,"%s\tmaster\n",string_temp);
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"master_state\",","","",20,"\"status\":","","",'\"',4,string_temp,64);
+        if(strcmp(string_temp,"STOPPED")==0){
+            fprintf(file_p_statefile,"master_status: Stopped\n");
+        }
+        else{
+            fprintf(file_p_statefile,"master_status: Running\n");
+        } 
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"name\": \"database_state\",","","",20,"\"status\":","","",'\"',4,string_temp,64);
+        if(strcmp(string_temp,"STOPPED")==0){
+            fprintf(file_p_statefile,"database_status: Stopped\n");
+        }
+        else{
+            fprintf(file_p_statefile,"database_status: Running\n");
+        }
+        for(i=0;i<node_num_gs;i++){
+            snprintf(string_temp2,63,"\"name\": \"compute%d\",",i+1);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",60,"\"primary_ip_address\":","","",'\"',4,string_temp,64);
+            fprintf(file_p_statefile,"compute%d_private_ip: %s\n",i+1,string_temp);
+            fprintf(file_p_hostfile,"%s\tcompute%d\n",string_temp,i+1);
+            snprintf(string_temp2,63,"\"name\": \"compute%d_state\",",i+1);
+            find_and_nget(tfstate,LINE_LENGTH_SHORT,string_temp2,"","",20,"\"status\":","","",'\"',4,string_temp,64);
+            if(strcmp(string_temp,"STOPPED")==0){
+                fprintf(file_p_statefile,"compute%d_status: Stopped\n",i+1);
+            }
+            else{
+                fprintf(file_p_statefile,"compute%d_status: Running\n",i+1);
+                node_num_on_gs++;
+            }
+        }
+        find_and_nget(tfstate,LINE_LENGTH_SHORT,"\"type\": \"volcengine_volume\",","","",30,"\"size\":","","",'\"',3,string_temp,64);
         get_seq_nstring(string_temp,' ',2,string_temp2,64);
         get_seq_nstring(string_temp2,',',1,string_temp,64);
         fprintf(file_p_statefile,"shared_volume_gb: %s\n",string_temp);
@@ -1925,10 +1972,22 @@ int update_compute_template(char* stackdir, char* cloud_flag){
         return 1;
     }
     single_file_to_running(new_template,cloud_flag);
+    if(strcmp(cloud_flag,"CLOUD_H")==0){
+        delete_nlines_by_kwd(new_template,LINE_LENGTH_SMALL,"ECS_STATE_SEGMENT",1);
+        insert_nlines(new_template,LINE_LENGTH_SHORT,"resource \"volcengine_ecs_instance_state\" ","/* ECS_STATE_SEGMENT");
+        insert_nlines(new_template,LINE_LENGTH_SHORT,"#INSERT_STATE_CONTROL","ECS_STATE_SEGMENT */");
+    }
     return 0;
 }
 
-int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* errorlog, char* errlog_archive, int silent_flag){
+/** 
+ * silent_flag = 0: totally silent, print nothing but only validation error (if).
+ * silent_flag = 1: print everything - warning header, waiting info, waiting error, and tf_exec error.
+ * silent_flag = 2: less verbose     - warning header, waiting info.
+ * silent_flag = 3: error info only  - waiting error, tf_exec error.
+ * silent_flag > 3: least verbose    - only tf_exec error.
+ */
+int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* errorlog, char* errlog_archive, unsigned int silent_flag){
     int i=0;
     int total_minutes=0;
     char* annimation="\\|/-";
@@ -1946,11 +2005,13 @@ int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* e
         total_minutes=3;
     }
     else{
-        printf(FATAL_RED_BOLD "[ FATAL: ] TF_OPTION_NOT_SUPPORTED." RESET_DISPLAY "\n");
+        if(silent_flag==1||silent_flag==3){
+            printf(FATAL_RED_BOLD "[ FATAL: ] TF_OPTION_NOT_SUPPORTED." RESET_DISPLAY "\n");
+        }
         return -7;
     }
     while(find_multi_nkeys(tf_realtime_log,LINE_LENGTH_SMALL,findkey,"","","","")<1&&i<max_time){
-        if(silent_flag!=0){
+        if(silent_flag==1||silent_flag==2){
             printf(GENERAL_BOLD "[ -WAIT- ]" RESET_DISPLAY " This may need %d min(s). %d sec(s) passed ... (%c)\r",total_minutes,i,*(annimation+i%4));
             fflush(stdout);
         }
@@ -1961,21 +2022,21 @@ int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* e
                 archive_log(errlog_archive,errorlog);
             }
             else{
-                if(silent_flag!=0){
-                    printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_ERROR." RESET_DISPLAY "\n");
+                if(silent_flag==1||silent_flag==3){
+                    printf(FATAL_RED_BOLD "[ FATAL: ] TF EXECUTION ERROR.                                " RESET_DISPLAY "\n");
                 }
                 return 7;
             }
         }
     }
     if(i==max_time){
-        if(silent_flag!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] TF_EXEC_TIMEOUT." RESET_DISPLAY "\n");
+        if(silent_flag==1||silent_flag==3){
+            printf(FATAL_RED_BOLD "[ FATAL: ] TF EXECUTION TIMEOUT.                                " RESET_DISPLAY "\n");
         }
         return 1;
     }
     else{
-        if(silent_flag!=0){
+        if(silent_flag==1||silent_flag==2){
             printf("                                                           \r");
         }
         return 0;
@@ -2072,7 +2133,7 @@ int graph(char* workdir, char* crypto_keyfile, int graph_level){
                 printf(GREY_LIGHT "[  ****  ] +-+-+-" RESET_DISPLAY "+-compute%d(%s,%s,%s)\n",i+1,compute_address,compute_status,compute_config);
             }
         }
-        if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0){
+        if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_H")==0){
             printf(GREY_LIGHT "[  ****  ] +-" RESET_DISPLAY "+-shared_storage(%s GB)\n",shared_volume);
         }
         if(decrypt_flag!=0){
@@ -2281,8 +2342,16 @@ int tf_exec_config_validation(tf_exec_config* tf_run){
     return 0;
 }
 
-int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, char* crypto_keyfile, int silent_flag){
+/** 
+ * silent_flag = 0: totally silent, print nothing but only validation error (if).
+ * silent_flag = 1: print everything - warning header, waiting info, waiting error, and tf_exec error.
+ * silent_flag = 2: less verbose     - warning header, waiting info.
+ * silent_flag = 3: error info only  - waiting error, tf_exec error.
+ * silent_flag > 3: least verbose    - tf_exec error.
+ */
+int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, char* crypto_keyfile, unsigned int silent_flag){
     if(tf_exec_config_validation(tf_run)!=0){
+        /* silent_flag doesn't affect this info. */
         printf("[ FATAL:] The tf execution config is invalid or empty. Please report this bug.\n");
         return 1;
     }
@@ -2330,12 +2399,14 @@ int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, ch
     else{
         strncpy(tf_runner_type,"otf",7);
     }
-    if(silent_flag!=0){
+    if(silent_flag==1||silent_flag==2){
         printf(WARN_YELLO_BOLD "[ -WARN- ] Do not terminate this process. TF: %s. Tmax: %d secs.\n",tf_runner_type,tf_run->max_wait_time);
         printf("[  ****  ] CMD: %s. DBG: %s. LOG: hpcopr -b viewlog" RESET_DISPLAY "\n",execution_name,tf_run->dbg_level);
     }
-    if(wait_for_complete(tf_realtime_log,execution_name,tf_run->max_wait_time,tf_error_log,tf_error_log_archive,1)!=0){
-        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
+    if(wait_for_complete(tf_realtime_log,execution_name,tf_run->max_wait_time,tf_error_log,tf_error_log_archive,silent_flag)!=0){
+        if(silent_flag==1||silent_flag>=3){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to operate the cluster. Operation command: %s.\n" RESET_DISPLAY,execution_name);
+        }
         archive_log(tf_error_log_archive,tf_error_log);
         archive_log(tf_dbg_log_archive,tf_dbg_log);
         if(strcmp(cloud_flag,"CLOUD_G")==0){
@@ -2814,6 +2885,10 @@ int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag){
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
         global_nreplace(filename_temp,LINE_LENGTH_SMALL,"\"TERMINATED\"","\"RUNNING\"");
     }
+    else if(strcmp(cloud_flag,"CLOUD_H")==0){
+        delete_nlines_by_kwd(filename_temp,LINE_LENGTH_SMALL,"ECS_STATE_SEGMENT",1);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"\"Stop\"","\"Start\"");
+    }
     else{
         return 1;
     }
@@ -2841,10 +2916,22 @@ int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag){
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
         global_nreplace(filename_temp,LINE_LENGTH_SMALL,"\"RUNNING\"","\"TERMINATED\"");
     }
+    else if(strcmp(cloud_flag,"CLOUD_H")==0){
+        delete_nlines_by_kwd(filename_temp,LINE_LENGTH_SMALL,"ECS_STATE_SEGMENT",1);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"\"Start\"","\"Stop\"");
+    }
     else{
         return 1;
     }
     return 0;
+}
+
+void volce_delete_ecs_state(char* stackdir, char* node_name){
+    char filename_temp[FILENAME_LENGTH]="";
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_%s.tf",stackdir,PATH_SLASH,node_name);
+    delete_nlines_by_kwd(filename_temp,LINE_LENGTH_SMALL,"ECS_STATE_SEGMENT",1);
+    insert_nlines(filename_temp,LINE_LENGTH_SHORT,"resource \"volcengine_ecs_instance_state\" ","/* ECS_STATE_SEGMENT");
+    insert_nlines(filename_temp,LINE_LENGTH_SHORT,"#INSERT_STATE_CONTROL","ECS_STATE_SEGMENT */");
 }
 
 /* 
@@ -3618,7 +3705,7 @@ int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords){
         get_seq_nstring(user_line_buffer,' ',4,user_status_temp,16);
         fprintf(file_p_base,"variable \"%s_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",user_name_temp,user_passwd_temp);
         snprintf(line_temp,LINE_LENGTH_SHORT-1,"echo -e \"username: %s ${var.%s_passwd} %s\" >> /root/user_secrets.txt",user_name_temp,user_name_temp,user_status_temp);
-        insert_lines(master_tf,"master_private_ip",line_temp);
+        insert_nlines(master_tf,LINE_LENGTH_SHORT,"master_private_ip",line_temp);
     }
     fclose(file_p);
     fclose(file_p_base);
@@ -4472,3 +4559,48 @@ int get_default_nzone(char* cluster_name, char* region, char* default_zone, unsi
     }
     return 0;
 }
+
+/* return 1 - running; return 0 - stopped */
+/*
+int check_volce_ecs_state(char* node_name, char* stackdir){
+    char check_key[64]="";
+    char node_state_current[16]="";
+    char current_state[FILENAME_LENGTH]="";
+    if(strcmp(node_name,"natgw")==0){
+        snprintf(check_key,64,"master_status:");
+    }
+    else{
+        snprintf(check_key,64,"%s_status:",node_name);
+    }
+    snprintf(current_state,FILENAME_LENGTH,"%s%scurrentstate",stackdir,PATH_SLASH);
+    get_key_nvalue(current_state,LINE_LENGTH_TINY,check_key,' ',node_state_current,16);
+    if(strcmp(node_state_current,"Running")==0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}*/
+
+/* non zero - Start; 0 - Stop */
+/*
+int generate_volce_ecs_state(char* node_name, char* stackdir, int state){
+    char ecs_state_file[FILENAME_LENGTH]="";
+    snprintf(ecs_state_file,FILENAME_LENGTH,"%s%shpc_stack_%s_state.tf",stackdir,PATH_SLASH,node_name);
+    FILE* file_p=fopen(ecs_state_file,"w+");
+    if(file_p==NULL){
+        return -1;
+    }
+    fprintf(file_p,"resource \"volcengine_ecs_instance_state\" \"%s_state\" {\n",node_name);
+    fprintf(file_p,"  instance_id = volcengine_ecs_instance.%s.id\n",node_name);
+    if(state==0){
+        fprintf(file_p,"  action = \"Stop\"\n");
+    }
+    else{
+        fprintf(file_p,"  action = \"Start\"\n");
+    }
+    fprintf(file_p,"  stopped_mode = \"StopCharging\"\n");
+    fprintf(file_p,"}\n");
+    fclose(file_p);
+    return 0;
+}*/

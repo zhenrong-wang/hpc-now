@@ -5,11 +5,14 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
+/* ECS_STATE_SEGMENT
 resource "volcengine_ecs_instance_state" "COMPUTE_NODE_N_state" {
   instance_id = volcengine_ecs_instance.COMPUTE_NODE_N.id
   action = "Start"
   stopped_mode = "StopCharging"
 }
+ECS_STATE_SEGMENT */
+#INSERT_STATE_CONTROL
 
 resource "volcengine_ecs_instance" "COMPUTE_NODE_N" {
   instance_name = "COMPUTE_NODE_N-RESOURCETAG"

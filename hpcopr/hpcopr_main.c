@@ -1579,6 +1579,9 @@ int main(int argc, char* argv[]){
         else if(strcmp(cloud_flag,"CLOUD_G")==0){
             run_flag=gcp_cluster_init(workdir,crypto_keyfile,batch_flag,&tf_this_run);
         }
+        else if(strcmp(cloud_flag,"CLOUD_H")==0){
+            run_flag=volce_cluster_init(workdir,crypto_keyfile,batch_flag,&tf_this_run);
+        }
         else{
             printf(FATAL_RED_BOLD "[ FATAL: ] Unknown Cloud Service Provider." RESET_DISPLAY "\n");
             check_and_cleanup(workdir);
@@ -1728,8 +1731,8 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"nfsup")==0){
-        if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] This command is only applicable to CLOUD_D, F, and G." RESET_DISPLAY "\n");
+        if(strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0&&strcmp(cloud_flag,"CLOUD_H")!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] This command is only applicable to CLOUD_D, F, G, and H." RESET_DISPLAY "\n");
             printf(FATAL_RED_BOLD "[  ****  ] Current cloud: %s." RESET_DISPLAY "\n",cloud_flag);
             write_operation_log(cluster_name,operation_log,argc,argv,"CLOUD_FLAG_NOT_APPLICABLE",8);
             check_and_cleanup(workdir);

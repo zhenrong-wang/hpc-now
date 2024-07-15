@@ -17,11 +17,14 @@ resource "volcengine_eip_associate" "natgw_eip_attach" {
   instance_type = "EcsInstance"
 }
 
-resource "volcengine_ecs_instance_state" "ngw_state" {
+/* ECS_STATE_SEGMENT
+resource "volcengine_ecs_instance_state" "natgw_state" {
   instance_id = volcengine_ecs_instance.natgw.id
   action = "Start"
   stopped_mode = "StopCharging"
 }
+ECS_STATE_SEGMENT */
+#INSERT_STATE_CONTROL
 
 resource "volcengine_ecs_instance" "natgw" {
   instance_name = "natgw-RESOURCETAG"

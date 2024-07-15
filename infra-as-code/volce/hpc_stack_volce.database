@@ -5,11 +5,14 @@
  * mailto: zhenrongwang@live.com | wangzhenrong@hpc-now.com
  */
 
-resource "volcengine_ecs_instance_state" "db_state" {
+/* ECS_STATE_SEGMENT
+resource "volcengine_ecs_instance_state" "database_state" {
   instance_id = volcengine_ecs_instance.database.id
   action = "Start"
   stopped_mode = "StopCharging"
 }
+ECS_STATE_SEGMENT */
+#INSERT_STATE_CONTROL
 
 resource "volcengine_ecs_instance" "database" {
   instance_name = "database-RESOURCETAG"

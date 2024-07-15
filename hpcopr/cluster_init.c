@@ -58,7 +58,7 @@ int get_static_conf_files(char* confdir, char* cloud_name, int code_loc_flag, ch
     char url_code[DIR_LENGTH_EXT]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
-    if(strcmp(cloud_name,"alicloud")!=0&&strcmp(cloud_name,"aws")!=0&&strcmp(cloud_name,"azure")!=0&&strcmp(cloud_name,"baidu")&&strcmp(cloud_name,"gcp")!=0&&strcmp(cloud_name,"hwcloud")!=0&&strcmp(cloud_name,"qcloud")!=0){
+    if(strcmp(cloud_name,"alicloud")!=0&&strcmp(cloud_name,"aws")!=0&&strcmp(cloud_name,"azure")!=0&&strcmp(cloud_name,"baidu")&&strcmp(cloud_name,"gcp")!=0&&strcmp(cloud_name,"hwcloud")!=0&&strcmp(cloud_name,"qcloud")!=0&&strcmp(cloud_name,"volce")!=0){
         return 1;
     }
     if(valid_loc_format_or_not(url_code_root)!=0){
@@ -120,7 +120,7 @@ int get_tf_templates(char* confdir, char* stackdir, char* cloud_name, int code_l
     char filename_new_temp[FILENAME_LENGTH]="";
     char url_code[DIR_LENGTH_EXT]="";
     char tf_conf[FILENAME_LENGTH]="";
-    if(strcmp(cloud_name,"alicloud")!=0&&strcmp(cloud_name,"aws")!=0&&strcmp(cloud_name,"azure")!=0&&strcmp(cloud_name,"baidu")&&strcmp(cloud_name,"gcp")!=0&&strcmp(cloud_name,"hwcloud")!=0&&strcmp(cloud_name,"qcloud")!=0){
+    if(strcmp(cloud_name,"alicloud")!=0&&strcmp(cloud_name,"aws")!=0&&strcmp(cloud_name,"azure")!=0&&strcmp(cloud_name,"baidu")&&strcmp(cloud_name,"gcp")!=0&&strcmp(cloud_name,"hwcloud")!=0&&strcmp(cloud_name,"qcloud")!=0&&strcmp(cloud_name,"volce")!=0){
         return 1;
     }
     if(valid_loc_format_or_not(url_code_root)!=0){
@@ -303,6 +303,9 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
         strcpy(cloud_name,"gcp");
     }
+    else if(strcmp(cloud_flag,"CLOUD_H")==0){
+        strcpy(cloud_name,"volce");
+    }
     else{
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the cloud flag." RESET_DISPLAY "\n");
         return -1;
@@ -381,10 +384,17 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
         strcpy(default_compute_inst,"i4c8g");
         strcpy(default_os_image,"*Oracle_Linux_9.2*-IMMUTABLE");
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
         strcpy(default_region,"us-central1");
         strcpy(default_zone,"us-central1-a");
         strcpy(default_master_inst,"a4c8g");
+        strcpy(default_compute_inst,"a4c8g");
+        strcpy(default_os_image,"centoss9");
+    }
+    else{
+        strcpy(default_region,"cn-beijing");
+        strcpy(default_zone,"cn-beijing-a");
+        strcpy(default_master_inst,"a8c16g");
         strcpy(default_compute_inst,"a4c8g");
         strcpy(default_os_image,"centoss9");
     }
@@ -588,7 +598,7 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
         printf(WARN_YELLO_BOLD "[ -WARN- ] The ht flag " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY WARN_YELLO_BOLD " is invalid. Using to default " RESET_DISPLAY GENERAL_BOLD "ON" RESET_DISPLAY " .\n",real_ht_flag);
         strcpy(real_ht_flag,"ON");
     }
-    if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0){
+    if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0||strcmp(cloud_flag,"CLOUD_H")==0){
         if(cmd_keyword_ncheck(argc,argv,"--vol",real_nfs_volume,8)!=0){
             if(batch_flag_local!=0){
                 printf(GENERAL_BOLD "[ INPUT: ]" RESET_DISPLAY " Input " WARN_YELLO_BOLD CONFIRM_STRING_QUICK RESET_DISPLAY " to " WARN_YELLO_BOLD "specify" RESET_DISPLAY " NFS initial volume in GB (Default: " GENERAL_BOLD "100" RESET_DISPLAY "): ");
@@ -664,7 +674,7 @@ int cluster_init_conf(char* cluster_name, char* crypto_keyfile, int batch_flag_l
     if(strcmp(cloud_flag,"CLOUD_C")==0){
         fprintf(file_p,"hyperthreading      : %s\n",real_ht_flag);
     }
-    if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0){
+    if(strcmp(cloud_flag,"CLOUD_D")==0||strcmp(cloud_flag,"CLOUD_F")==0||strcmp(cloud_flag,"CLOUD_G")==0||strcmp(cloud_flag,"CLOUD_H")==0){
         fprintf(file_p,"nfs_volume          : %d\n",real_nfs_vol);
     }
     fclose(file_p);
@@ -844,7 +854,7 @@ int save_bucket_info(char* cloud_flag, char* bucket_info_file, char* bucket_id, 
     if(file_p==NULL){
         return -1;
     }
-    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
+    if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0&&strcmp(cloud_flag,"CLOUD_H")!=0){
         fclose(file_p);
         return -3;
     }
@@ -866,7 +876,7 @@ int save_bucket_info(char* cloud_flag, char* bucket_info_file, char* bucket_id, 
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
         fprintf(file_p,"BUCKET: %s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
         FILE* file_p_gcp=fopen(gcp_bucket_key_file,"r");
         if(file_p_gcp==NULL){
             fclose(file_p);
@@ -877,6 +887,9 @@ int save_bucket_info(char* cloud_flag, char* bucket_info_file, char* bucket_id, 
             fprintf(file_p,"%s\n",gcp_key_file_line);
         }
         fclose(file_p_gcp);
+    }
+    else{
+        fprintf(file_p,"BUCKET: tos://%s\nREGION: \"%s\"\nBUCKET_AK: %s\nBUCKET_SK: %s\n",bucket_id,region_id,bucket_ak,bucket_sk);
     }
     fclose(file_p);
     return 0;
@@ -1264,7 +1277,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"aws_iam_access_key","","",15,"\"id\":","","",'\"',4,bucket_ak,256);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"aws_iam_access_key","","",15,"\"secret\":","","",'\"',4,bucket_sk,256);
     if(strcmp(region_flag,"global_regions")==0){
-        printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",AWS_SLEEP_TIME_GLOBAL);
+        printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step.\n",AWS_SLEEP_TIME_GLOBAL);
         for(i=0;i<AWS_SLEEP_TIME_GLOBAL;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",AWS_SLEEP_TIME_GLOBAL-i);
             fflush(stdout);
@@ -1272,7 +1285,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
         }
     }
     else{
-        printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",AWS_SLEEP_TIME_CN);
+        printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step.\n",AWS_SLEEP_TIME_CN);
         for(i=0;i<AWS_SLEEP_TIME_CN;i++){
             printf("[ -WAIT- ] Still need to wait %d seconds ... \r",AWS_SLEEP_TIME_CN-i);
             fflush(stdout);
@@ -1567,7 +1580,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id,32);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"secret_id","","",1,"secret_id","","",'\"',4,bucket_ak,256);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"secret_key","","",1,"secret_key","","",'\"',4,bucket_sk,256);
-    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",QCLOUD_SLEEP_TIME);
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step.\n",QCLOUD_SLEEP_TIME);
     for(i=0;i<QCLOUD_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",QCLOUD_SLEEP_TIME-i);
         fflush(stdout);
@@ -1851,7 +1864,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
     cp_file(filename_temp,filename_temp2,0);
     getstate(workdir,crypto_keyfile);
-    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",ALI_SLEEP_TIME);
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step.\n",ALI_SLEEP_TIME);
     for(i=0;i<ALI_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",ALI_SLEEP_TIME-i);
         fflush(stdout);
@@ -2180,7 +2193,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"bucket\"","","",1,"\"bucket\"","","",'\"',4,bucket_id,32);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"access_key","","",20,"\"id\":","","",'\"',4,bucket_ak,256);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"access_key","","",20,"\"secret\":","","",'\"',4,bucket_sk,256);
-    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step.\n",GENERAL_SLEEP_TIME);
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
         fflush(stdout);
@@ -2479,7 +2492,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"AccessKeySecret","","",1,"AccessKeySecret","","",'\"',4,bucket_sk,256);
     rm_file_or_dir(filename_temp);
 
-    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME);
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step.\n",GENERAL_SLEEP_TIME);
     for(i=0;i<GENERAL_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
         fflush(stdout);
@@ -2736,7 +2749,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"type\": \"azuread_application\",","","",20,"\"application_id\":","","",'\"',4,bucket_ak,256);
     find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"type\": \"azuread_application_password\",","","",20,"\"value\":","","",'\"',4,bucket_sk,256);
     
-    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",2*GENERAL_SLEEP_TIME);
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step.\n",2*GENERAL_SLEEP_TIME);
     for(i=0;i<2*GENERAL_SLEEP_TIME;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",2*GENERAL_SLEEP_TIME-i);
         fflush(stdout);
@@ -3001,7 +3014,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
     cp_file(filename_temp,filename_temp2,0);
     getstate(workdir,crypto_keyfile);
-    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step ...\n",GENERAL_SLEEP_TIME*3);
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step.\n",GENERAL_SLEEP_TIME*3);
     for(i=0;i<GENERAL_SLEEP_TIME*3;i++){
         printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME*3-i);
         fflush(stdout);
@@ -3067,5 +3080,283 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
     gcp_credential_convert(workdir,"delete",0);
+    return 0;
+}
+
+int volce_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run){
+    char cluster_id_from_workdir[CLUSTER_ID_LENGTH_MAX_PLUS]="";
+    if(get_cluster_nname(cluster_id_from_workdir,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+        return -3;
+    }
+    char stackdir[DIR_LENGTH]="";
+    char vaultdir[DIR_LENGTH]="";
+    char logdir[DIR_LENGTH]="";
+    char confdir[DIR_LENGTH]="";
+    char cluster_sshkey_dir[DIR_LENGTH]="";
+    
+    char conf_file[FILENAME_LENGTH]="";
+    char filename_temp[FILENAME_LENGTH]="";
+    char filename_temp2[FILENAME_LENGTH]="";
+    cluster_initinfo init_conf;
+    char user_passwords[FILENAME_LENGTH]="";
+    char access_key[AKSK_LENGTH]="";
+    char secret_key[AKSK_LENGTH]="";
+    char cloud_flag[16]="";
+    int read_conf_flag=0;
+    char unique_cluster_id[64]="";
+    char string_temp[128]="";
+    char randstr[RANDSTR_LENGTH_PLUS]="";
+    
+    char pubkey[1024]="";
+    FILE* file_p=NULL;
+    FILE* file_p_2=NULL;
+    char database_root_passwd[PASSWORD_STRING_LENGTH]="";
+    char database_acct_passwd[PASSWORD_STRING_LENGTH]="";
+    char user_passwd_temp[PASSWORD_STRING_LENGTH]="";
+    char line_temp[LINE_LENGTH]="";
+    char bucket_id[32]="";
+    char bucket_ak[AKSK_LENGTH]="";
+    char bucket_sk[AKSK_LENGTH]="";
+    time_t current_time_long;
+    struct tm* time_p=NULL;
+    char current_date[64]="";
+    char current_time[64]="";
+    char master_cpu_vendor[8]="";
+    char compute_cpu_vendor[8]="";
+    int master_vcpu,database_vcpu,natgw_vcpu,compute_vcpu;
+    char usage_logfile[FILENAME_LENGTH]="";
+    int i;
+
+    printf("[ START: ] Start initializing the cluster ...\n");
+    if(create_init_dirs(workdir,stackdir,vaultdir,logdir,confdir,DIR_LENGTH)!=0){
+        return -1;
+    }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.secrets.key",vaultdir,PATH_SLASH);
+    if(get_ak_sk(filename_temp,crypto_keyfile,access_key,secret_key,cloud_flag)!=0){
+        return -1;
+    }
+    if(get_opr_pubkey(SSHKEY_DIR,pubkey,1023)!=0){
+        return -1;
+    }
+    printf("[ STEP 1 ] Creating initialization files now ...\n");
+    if(get_tf_templates(confdir,stackdir,"volce",code_loc_flag_var,url_code_root_var)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to download/copy necessary file(s)." RESET_DISPLAY "\n");
+        clear_if_failed(stackdir,confdir,vaultdir,1);
+        return 2;
+    }
+    snprintf(conf_file,FILENAME_LENGTH-1,"%s%stf_prep.conf",confdir,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sreconf.list",confdir,PATH_SLASH);
+    read_conf_flag=get_tf_prep_conf(cluster_id_from_workdir,conf_file,filename_temp,&init_conf);
+    if(read_conf_flag!=0){
+        print_read_conf_failed(read_conf_flag);
+        clear_if_failed(stackdir,confdir,vaultdir,2);
+        return 3;
+    }
+    node_user_num_fix(&init_conf.node_num,&init_conf.hpc_user_num);
+    if(contain_or_not(init_conf.zone_id,init_conf.region_id)!=0){
+        printf(FATAL_RED_BOLD "[ FATAL: ] Availability Zone ID doesn't match with Region ID, please double check." RESET_DISPLAY "\n");
+        clear_if_failed(stackdir,confdir,vaultdir,2);
+        return 3;
+    }
+    generate_random_db_passwd(database_root_passwd,PASSWORD_STRING_LENGTH);
+    generate_random_db_passwd(database_acct_passwd,PASSWORD_STRING_LENGTH);
+    if(strcmp(init_conf.master_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.master_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_conf.master_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
+    }
+    if(strcmp(init_conf.compute_passwd,"*AUTOGEN*")==0||password_complexity_check(init_conf.compute_passwd,SPECIAL_PASSWORD_CHARS)!=0){
+        generate_random_npasswd(init_conf.compute_passwd,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
+    }
+    generate_random_nstring(randstr,RANDSTR_LENGTH_PLUS,0);
+    if(print_conf_summary(batch_flag_local,&init_conf,randstr)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,2);
+        return 1; /* user denied. */
+    }
+
+    snprintf(unique_cluster_id,63,"%s-%s",init_conf.cluster_id,randstr);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.base",stackdir,PATH_SLASH);
+    snprintf(string_temp,127,"vpc-%s",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_VPC_NAME",string_temp);
+    snprintf(string_temp,127,"subnet-%s",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_SUBNET_NAME",string_temp);
+    snprintf(string_temp,127,"pubnet-%s",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_PUB_SUBNET_NAME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_ACCESS_KEY_ID",access_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_SECRET_KEY",secret_key);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_USER_ID",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BUCKET_ID",randstr);
+    snprintf(string_temp,127,"%s-public",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_PUBLIC",string_temp);
+    snprintf(string_temp,127,"%s-intra",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_INTRA",string_temp);
+    snprintf(string_temp,127,"%s-mysql",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_MYSQL",string_temp);
+    snprintf(string_temp,127,"%s-natgw",randstr);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"SECURITY_GROUP_NATGW",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_REGION_ID",init_conf.region_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    snprintf(string_temp,127,"%d",init_conf.node_num);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_NODE_NUM",string_temp);
+    snprintf(string_temp,127,"%d",init_conf.hpc_user_num);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_USER_NUM",string_temp);
+    snprintf(string_temp,127,"%d",init_conf.hpc_nfs_volume);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_STORAGE_VOLUME",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTERINI",init_conf.master_init_param);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_MASTER_PASSWD",init_conf.master_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_COMPUTE_PASSWD",init_conf.compute_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ROOT_PASSWD",database_root_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_DB_ACCT_PASSWD",database_acct_passwd);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"BLANK_URL_SHELL_SCRIPTS",url_shell_scripts_var);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+
+    file_p=fopen(filename_temp,"a");
+    snprintf(user_passwords,FILENAME_LENGTH-1,"%s%suser_passwords.txt",vaultdir,PATH_SLASH);
+    file_p_2=fopen(user_passwords,"w+");
+    for(i=0;i<init_conf.hpc_user_num;i++){
+        generate_random_npasswd(user_passwd_temp,PASSWORD_STRING_LENGTH,SPECIAL_PASSWORD_CHARS_SHORT,strlen(SPECIAL_PASSWORD_CHARS_SHORT));
+        fprintf(file_p,"variable \"user%d_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",i+1,user_passwd_temp);
+        fprintf(file_p_2,"username: user%d %s STATUS:ENABLED\n",i+1,user_passwd_temp);
+    }
+    fclose(file_p);
+    fclose(file_p_2);
+
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.master",stackdir,PATH_SLASH);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_INST",init_conf.master_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
+    snprintf(string_temp,127,"%d",init_conf.master_bandwidth);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_BANDWIDTH",string_temp);
+    if(strcmp(init_conf.os_image_raw,"centoss9")==0||strcmp(init_conf.os_image_raw,"centos7")==0){
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_conf.os_image_raw);
+    }
+    else{
+        snprintf(string_temp,127,"\"%s\"",init_conf.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"data.volcengine_images.OS_IMAGE.images[0].image_id",string_temp);
+    }
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"PUBLIC_KEY",pubkey);
+    for(i=0;i<init_conf.hpc_user_num;i++){
+        snprintf(line_temp,LINE_LENGTH-1,"echo -e \"username: user%d ${var.user%d_passwd} STATUS:ENABLED\" >> /root/user_secrets.txt",i+1,i+1);
+        insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
+    }
+    snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
+    snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export APPS_INST_SCRIPTS_URL=%s\\nexport APPS_INST_PKGS_URL=%s\" > /usr/hpc-now/appstore_env.sh",url_app_inst_root_var,url_app_pkgs_root_var);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
+
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"DEFAULT_ZONE_ID",init_conf.zone_id);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"COMPUTE_INST",init_conf.compute_inst);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"CLOUD_FLAG",cloud_flag);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+    if(strcmp(init_conf.os_image_raw,"centoss9")==0||strcmp(init_conf.os_image_raw,"centos7")==0){
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"OS_IMAGE",init_conf.os_image_raw);
+    }
+    else{
+        snprintf(string_temp,127,"\"%s\"",init_conf.os_image_raw);
+        global_nreplace(filename_temp,LINE_LENGTH_SMALL,"data.volcengine_images.OS_IMAGE.images[0].image_id",string_temp);
+    }
+    snprintf(line_temp,LINE_LENGTH-1,"echo -e \"export INITUTILS_REPO_ROOT=%s\" >> /etc/profile",url_initutils_root_var);
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"mount",line_temp);
+
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.database",stackdir,PATH_SLASH);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.natgw",stackdir,PATH_SLASH);
+    snprintf(string_temp,127,"%d",init_conf.master_bandwidth);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"MASTER_BANDWIDTH",string_temp);
+    global_nreplace(filename_temp,LINE_LENGTH_SMALL,"RESOURCETAG",unique_cluster_id);
+
+    for(i=0;i<init_conf.node_num;i++){
+        snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack.compute",stackdir,PATH_SLASH);
+        snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%shpc_stack_compute%d.tf",stackdir,PATH_SLASH,i+1);
+        cp_file(filename_temp,filename_temp2,0);
+        snprintf(string_temp,127,"compute%d",i+1);
+        global_nreplace(filename_temp2,LINE_LENGTH_SMALL,"COMPUTE_NODE_N",string_temp);
+    }
+
+    generate_tf_files(stackdir);
+    if(tf_execution(tf_run,"init",workdir,crypto_keyfile,0)!=0){
+        clear_if_failed(stackdir,confdir,vaultdir,3);
+        return 5;
+    }
+    tf_execution(tf_run,"apply",workdir,crypto_keyfile,2);
+    if(tf_execution(tf_run,"apply",workdir,crypto_keyfile,3)!=0){
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Rolling back and exit now ...\n");
+        if(tf_execution(tf_run,"destroy",workdir,crypto_keyfile,1)==0){
+            delete_decrypted_files(workdir,crypto_keyfile);
+            clear_if_failed(stackdir,confdir,vaultdir,3);
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully rolled back and destroyed the residual resources.\n");
+            printf("[  ****  ] Run " HIGH_GREEN_BOLD "hpcopr -b viewlog --log err --hist --print" RESET_DISPLAY " for details.\n");
+            return 7;
+        }
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Failed to roll back. Please try 'hpcopr destroy' later.\n");
+        delete_decrypted_files(workdir,crypto_keyfile);
+        return 9;
+    }
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_compute1.tf",stackdir,PATH_SLASH);
+    snprintf(filename_temp2,FILENAME_LENGTH-1,"%s%scompute_template",stackdir,PATH_SLASH);
+    cp_file(filename_temp,filename_temp2,0);
+    getstate(workdir,crypto_keyfile);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sterraform.tfstate",stackdir,PATH_SLASH);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"\"volcengine_tos_bucket\"","","",20,"\"bucket_name\"","","",'\"',4,bucket_id,32);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"access_key","","",40,"\"id\":","","",'\"',4,bucket_ak,256);
+    find_and_nget(filename_temp,LINE_LENGTH_SMALL,"access_key","","",40,"\"secret\":","","",'\"',4,bucket_sk,256);
+    printf("[ STEP 3 ] Remote executing now, please wait %d seconds for this step.\n",GENERAL_SLEEP_TIME);
+    for(i=0;i<GENERAL_SLEEP_TIME;i++){
+        printf("[ -WAIT- ] Still need to wait %d seconds ... \r",GENERAL_SLEEP_TIME-i);
+        fflush(stdout);
+        sleep_func(1);
+    }
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Sending commands and sync files ...\n");
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%sbucket_info.txt",vaultdir,PATH_SLASH);
+    save_bucket_info(cloud_flag,filename_temp,bucket_id,init_conf.region_id,bucket_ak,bucket_sk,"");
+    save_cluster_vaults(vaultdir,init_conf.master_passwd,init_conf.compute_passwd,database_root_passwd,database_acct_passwd,randstr,cloud_flag,"","");
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket.info","root","put","",0);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"connect",7);
+    remote_exec(workdir,crypto_keyfile,SSHKEY_DIR,"all",8);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " After the initialization:\n|\n");
+    graph(workdir,crypto_keyfile,0);
+    printf("|\n");
+    time(&current_time_long);
+    time_p=gmtime(&current_time_long);
+    snprintf(current_date,63,"%d-%d-%d",time_p->tm_year+1900,time_p->tm_mon+1,time_p->tm_mday);
+    snprintf(current_time,63,"%d:%d:%d",time_p->tm_hour,time_p->tm_min,time_p->tm_sec);
+    master_vcpu=get_cpu_num(init_conf.master_inst);
+    compute_vcpu=get_cpu_num(init_conf.compute_inst);
+    database_vcpu=1;
+    natgw_vcpu=1;
+    if(*(init_conf.master_inst+0)=='a'){
+        strcpy(master_cpu_vendor,"amd64");
+    }
+    else{
+        strcpy(master_cpu_vendor,"intel64");
+    }
+    if(*(init_conf.compute_inst+0)=='a'){
+        strcpy(compute_cpu_vendor,"amd64");
+    }
+    else{
+        strcpy(compute_cpu_vendor,"intel64");
+    }
+    strcpy(usage_logfile,USAGE_LOG_FILE);
+    file_p=fopen(usage_logfile,"a+");
+    fprintf(file_p,"%s-%s,%s,master,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_conf.cluster_id,randstr,cloud_flag,master_vcpu,current_date,current_time,master_cpu_vendor,init_conf.region_id);
+    fprintf(file_p,"%s-%s,%s,database,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_conf.cluster_id,randstr,cloud_flag,database_vcpu,current_date,current_time,init_conf.region_id);
+    fprintf(file_p,"%s-%s,%s,natgw,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,intel64,%s\n",init_conf.cluster_id,randstr,cloud_flag,natgw_vcpu,current_date,current_time,init_conf.region_id);
+    for(i=0;i<init_conf.node_num;i++){
+        fprintf(file_p,"%s-%s,%s,compute%d,%d,%s,%s,RUNNING_DATE,RUNNING_TIME,NULL1,NULL2,%s,%s\n",init_conf.cluster_id,randstr,cloud_flag,i+1,compute_vcpu,current_date,current_time,compute_cpu_vendor,init_conf.region_id);
+    }
+    fclose(file_p);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shostfile_latest",stackdir,PATH_SLASH);
+    remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/root/hostfile","root","put","",0);
+    sync_statefile(workdir,crypto_keyfile,SSHKEY_DIR);
+    snprintf(cluster_sshkey_dir,DIR_LENGTH-1,"%s%s.%s",SSHKEY_DIR,PATH_SLASH,init_conf.cluster_id);
+    mk_pdir(cluster_sshkey_dir);
+    get_user_sshkey(init_conf.cluster_id,"root","ENABLED",SSHKEY_DIR,crypto_keyfile);
+    for(i=0;i<init_conf.hpc_user_num;i++){
+        snprintf(string_temp,127,"user%d",i+1);
+        get_user_sshkey(init_conf.cluster_id,string_temp,"ENABLED",SSHKEY_DIR,crypto_keyfile);
+    }
+    print_cluster_init_done();
+    create_local_tf_config(tf_run,stackdir);
+    delete_decrypted_files(workdir,crypto_keyfile);
     return 0;
 }

@@ -77,7 +77,7 @@ int get_state_nvalue(char* workdir, char* crypto_keyfile, char* key, char* value
 
 int archive_log(char* logarchive, char* logfile);
 int update_compute_template(char* stackdir, char* cloud_flag);
-int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* errorlog, char* errlog_archive, int silent_flag);
+int wait_for_complete(char* tf_realtime_log, char* option, int max_time, char* errorlog, char* errlog_archive, unsigned int silent_flag);
 int graph(char* workdir, char* crypto_keyfile, int graph_level);
 
 int cluster_empty_or_not(char* workdir,char* crypto_keyfile);
@@ -85,7 +85,7 @@ int cluster_asleep_or_not(char* workdir, char* crypto_keyfile);
 
 int cluster_full_running_or_not(char* workdir, char* crypto_keyfile);
 int tf_exec_config_validation(tf_exec_config* tf_run);
-int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, char* crypto_keyfile, int silent_flag);
+int tf_execution(tf_exec_config* tf_run, char* execution_name, char* workdir, char* crypto_keyfile, unsigned int silent_flag);
 int update_usage_summary(char* workdir, char* crypto_keyfile, char* node_name, char* option);
 int get_vault_info(char* workdir, char* crypto_keyfile, char* username, char* bucket_flag, char* root_flag);
 int check_pslock(char* workdir, int decrypt_flag);
@@ -110,6 +110,7 @@ int cluster_ssh(char* workdir, char* crypto_keyfile, char* username, char* clust
 int node_file_to_running(char* stackdir, char* node_name, char* cloud_flag);
 void single_file_to_running(char* filename, char* cloud_flag);
 int node_file_to_stop(char* stackdir, char* node_name, char* cloud_flag);
+void volce_delete_ecs_state(char* stackdir, char* node_name);
 
 int get_bucket_info(char* workdir, char* crypto_keyfile, char* bucket_address, char* region_id, char* bucket_ak, char* bucket_sk);
 int get_bucket_ninfo(char* workdir, char* crypto_keyfile, unsigned int linelen_max, bucket_info* bucketinfo); /* Newer function */
@@ -181,5 +182,7 @@ int valid_region_zone_or_not(char* cluster_name, char* region, char* zone);
 int get_default_zone(char* cluster_name, char* region, char* default_zone);
 int get_default_nzone(char* cluster_name, char* region, char* default_zone, unsigned int zone_len_max);
 int valid_zone_or_not(char* cluster_name, char* zone);
+/*int check_volce_ecs_state(char* node_name, char* stackdir);
+int generate_volce_ecs_state(char* node_name, char* stackdir, int target_state);*/
 
 #endif

@@ -47,5 +47,6 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
 int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run);
 int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run);
 int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run);
+int volce_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, tf_exec_config* tf_run);
 
 #endif

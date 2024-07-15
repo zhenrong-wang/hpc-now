@@ -327,7 +327,7 @@ resource "volcengine_security_group_rule" "mysql_intra_rule2" {
 }
 
 resource "volcengine_volume" "shared_volume" {
-  volume_name = "CFSID"
+  volume_name = "RESOURCETAG"
   kind = "data"
   volume_type = "ESSD_PL0"
   size = "${var.shared_storage}"
@@ -348,7 +348,6 @@ resource "volcengine_iam_user" "hpc_user" {
 
 resource "volcengine_iam_access_key" "hpc_user_key" {
   user_name = volcengine_iam_user.hpc_user.user_name
-  secret_file = "./bucket_secrets.txt"
   status = "active"
 }
 

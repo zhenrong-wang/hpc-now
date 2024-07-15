@@ -1,8 +1,8 @@
 # This file is generated and maintained by the HPC-NOW services. We do not recommend
 # to edit it manually. If need to do so, please follow the strict format.
 cluster_id          : hpcnow
-region_id           : ap-guangzhou
-zone_id             : ap-guangzhou-7
+region_id           : cn-beijing
+zone_id             : cn-beijing-a
 node_num            : 1
 hpc_user_num        : 3
 master_init_param   : db skip
@@ -12,3 +12,4 @@ master_inst         : a8c16g
 master_bandwidth    : 50
 compute_inst        : a4c8g
 os_image            : centoss9
+nfs_volume          : 300

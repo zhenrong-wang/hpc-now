@@ -22,11 +22,14 @@ resource "volcengine_volume_attach" "master_disk_attach" {
   volume_id = volcengine_volume.shared_volume.id
 }
 
-resource "volcengine_ecs_instance_state" "m_state" {
+/* ECS_STATE_SEGMENT
+resource "volcengine_ecs_instance_state" "master_state" {
   instance_id = volcengine_ecs_instance.master.id
   action = "Start"
   stopped_mode = "StopCharging"
 }
+ECS_STATE_SEGMENT */
+#INSERT_STATE_CONTROL
 
 resource "volcengine_ecs_instance" "master" {
   instance_name = "master-RESOURCETAG"
