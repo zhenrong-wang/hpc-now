@@ -2930,8 +2930,8 @@ void volce_delete_ecs_state(char* stackdir, char* node_name){
     char filename_temp[FILENAME_LENGTH]="";
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_%s.tf",stackdir,PATH_SLASH,node_name);
     delete_nlines_by_kwd(filename_temp,LINE_LENGTH_SMALL,"ECS_STATE_SEGMENT",1);
-    insert_nlines(filename_temp,LINE_LENGTH_SHORT,"resource \"volcengine_ecs_instance_state\" ","/* ECS_STATE_SEGMENT");
-    insert_nlines(filename_temp,LINE_LENGTH_SHORT,"#INSERT_STATE_CONTROL","ECS_STATE_SEGMENT */");
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"resource \"volcengine_ecs_instance_state\" ","/* ECS_STATE_SEGMENT");
+    insert_nlines(filename_temp,LINE_LENGTH_SMALL,"#INSERT_STATE_CONTROL","ECS_STATE_SEGMENT */");
 }
 
 /* 
@@ -3705,7 +3705,7 @@ int update_tf_passwords(char* base_tf, char* master_tf, char* user_passwords){
         get_seq_nstring(user_line_buffer,' ',4,user_status_temp,16);
         fprintf(file_p_base,"variable \"%s_passwd\" {\n  type = string\n  default = \"%s\"\n}\n\n",user_name_temp,user_passwd_temp);
         snprintf(line_temp,LINE_LENGTH_SHORT-1,"echo -e \"username: %s ${var.%s_passwd} %s\" >> /root/user_secrets.txt",user_name_temp,user_name_temp,user_status_temp);
-        insert_nlines(master_tf,LINE_LENGTH_SHORT,"master_private_ip",line_temp);
+        insert_nlines(master_tf,LINE_LENGTH_SMALL,"master_private_ip",line_temp);
     }
     fclose(file_p);
     fclose(file_p_base);
