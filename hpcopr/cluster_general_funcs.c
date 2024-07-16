@@ -4566,11 +4566,11 @@ int volce_bucket_clean(char* workdir, char* crypto_keyfile){
     if(get_bucket_ninfo(workdir,crypto_keyfile,LINE_LENGTH_SHORT,&bucketinfo)!=0){
         return -1;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr %s",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address);
     if(system(cmdline)!=0){
         return 1;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr -m %s",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,SYSTEM_CMD_REDIRECT_NULL);
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr -m",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address);
     if(system(cmdline)!=0){
         return 1;
     }

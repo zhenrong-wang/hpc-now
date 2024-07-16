@@ -1029,8 +1029,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster operation started ...\n");
     if(strcmp(cloud_flag,"CLOUD_H")==0){
-        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Deleting the objects in the TOS bucket ...\r");
-        fflush(stdout);
+        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Deleting the objects in the TOS bucket ...\n");
         if(volce_bucket_clean(workdir,crypto_keyfile)!=0){
             return -9;
         }
