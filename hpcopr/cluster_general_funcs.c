@@ -710,8 +710,11 @@ int display_cloud_info(char* workdir, char* crypto_keyfile){
     else if(strcmp(cloud_flag,"CLOUD_F")==0){
         printf("| Microsoft Azure Cloud | https://azure.microsoft.com\n");
     }
-    else{
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
         printf("| Google Cloud Platform | https://cloud.google.com\n");
+    }
+    else{
+        printf("| Volcengine (ByteDance) | https://www.volcengine.com/\n");
     }
     if(strcmp(cloud_flag,"CLOUD_F")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0){
         printf("Access Key ID   : %s\n",cloud_ak);
