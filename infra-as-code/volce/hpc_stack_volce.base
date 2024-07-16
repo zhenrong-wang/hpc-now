@@ -337,13 +337,13 @@ resource "volcengine_volume" "shared_volume" {
 
 #CREATE a bucket for data storage
 resource "volcengine_tos_bucket" "hpc_data_storage" {
-  bucket_name = "BUCKET_ID"
+  bucket_name = "hpc-now-BUCKET_ID"
   public_acl = "private"
 }
 
 #create an cam user with the policy to only access the bucket, nothing else
 resource "volcengine_iam_user" "hpc_user" {
-  user_name = "BUCKET_USER_ID"
+  user_name = "hpc-now-BUCKET_USER_ID"
 }
 
 resource "volcengine_iam_access_key" "hpc_user_key" {
@@ -356,7 +356,7 @@ resource "volcengine_tos_bucket_policy" "hpc_bucket_access_policy" {
   policy = jsonencode({
     Statement = [
       {
-        Sid = "BUCKET_ID"
+        Sid = "hpc-now-BUCKET_ID"
         Effect = "Allow"
         Principal = [
           "${volcengine_iam_user.hpc_user.account_id}/${volcengine_iam_user.hpc_user.user_name}"
@@ -367,7 +367,8 @@ resource "volcengine_tos_bucket_policy" "hpc_bucket_access_policy" {
           "tos:Put*"
         ]
         Resource = [
-          "trn:tos:::BUCKET_ID"
+          "trn:tos:::hpc-now-BUCKET_ID/*",
+          "trn:tos:::hpc-now-BUCKET_ID"
         ]
       }
     ]
