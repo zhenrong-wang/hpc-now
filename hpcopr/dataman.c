@@ -246,7 +246,6 @@ int bucket_cp(char* workdir, char* crypto_keyfile, char* hpc_user, char* source_
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s cp -re %s -e tos-%s.volces.com -i %s -k %s %s%s %s %s",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,real_source_path,real_target_path,real_rflag);
         }
     }
-    printf("%s\n",cmdline);
     if(system(cmdline)!=0){
         unset_bucket_envs(cloud_flag);
         if(strcmp(cloud_flag,"CLOUD_E")==0){

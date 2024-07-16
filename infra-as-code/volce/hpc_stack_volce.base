@@ -364,7 +364,8 @@ resource "volcengine_tos_bucket_policy" "hpc_bucket_access_policy" {
         Action = [
           "tos:List*",
           "tos:Get*",
-          "tos:Put*"
+          "tos:Put*",
+          "tos:*"
         ]
         Resource = [
           "trn:tos:::hpc-now-BUCKET_ID/*",
