@@ -275,6 +275,7 @@ void print_help(char* cmd_name){
         printf("|                     ~ " HIGH_CYAN_BOLD "    | BaiduBCE     | CLOUD_E | CentOS Stream 9 |" RESET_DISPLAY "\n");
         printf("|                     ~ " HIGH_CYAN_BOLD "    | Azure Cloud  | CLOUD_F | Oracle Linux 9  |" RESET_DISPLAY "\n");
         printf("|                     ~ " HIGH_CYAN_BOLD "    | GCP          | CLOUD_G | CentOS Stream 9 |" RESET_DISPLAY "\n");
+        printf("|                     ~ " HIGH_CYAN_BOLD "    | VolcanoCloud | CLOUD_H | CentOS Stream 9 |" RESET_DISPLAY "\n");
         printf("|                     ~ " HIGH_CYAN_BOLD "    +------------------------------------------+" RESET_DISPLAY "\n");
         printf("|                     ~ " HIGH_CYAN_BOLD "[c] For Huaweicloud, the valid names are: rocky9(Rocky Linux 9), euleros(EulerOS)." RESET_DISPLAY "\n");
         printf("|                     ~ " HIGH_CYAN_BOLD "[d] We *STRONGLY* recommend you to use the default images, unless that your image" RESET_DISPLAY "\n");

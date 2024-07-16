@@ -50,7 +50,7 @@ In order to make it super easy to start and manage HPC workloads in the cloud, w
 - Start HPC workloads in the cloud **NOW**, immediately, in minutes.
 - Manage HPC workloads with (almost) **N**o **O**peration **W**orkload.
 
-Currently, the HPC-NOW platform supports 7 popular cloud platforms, shown as below:
+Currently, the HPC-NOW platform supports 8 popular cloud platforms, shown as below:
 
 - [Alibaba Cloud](https://www.alibabacloud.com/en), HPC-NOW Internal Code: CLOUD_A
 - [Tencent Cloud](https://www.tencentcloud.com/), HPC-NOW Internal Code: CLOUD_B
@@ -59,6 +59,7 @@ Currently, the HPC-NOW platform supports 7 popular cloud platforms, shown as bel
 - [Baidu BCE](https://cloud.baidu.com/), HPC-NOW Internal Code: CLOUD_E
 - [Microsoft Azure](https://azure.microsoft.com/en-us/), HPC-NOW Internal Code: CLOUD_F
 - [Google Cloud Platform](https://cloud.google.com/), HPC-NOW Internal Code: CLOUD_G
+- [Volcano Engine by ByteDance](https://www.volcengine.com/), HPC-NOW Internal Code: CLOUD_H
 
 *DEMO: How easy it is to create a cloud HPC cluster using HPC-NOW?*
 

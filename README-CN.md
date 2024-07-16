@@ -35,6 +35,7 @@
 - 百度云，Baidu BCE，内部代号 CLOUD_E
 - 微软云，Azure，内部代号 CLOUD_F
 - 谷歌云，Google Cloud Platform，内部代号 CLOUD_G
+- 火山引擎，Volcano Engine，内部代号 CLOUD_H
 
 希望与您共同携手打造开源、开放的 Cloud HPC 生态！
 
