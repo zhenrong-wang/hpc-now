@@ -4560,6 +4560,23 @@ int get_default_nzone(char* cluster_name, char* region, char* default_zone, unsi
     return 0;
 }
 
+int volce_bucket_clean(char* workdir, char* crypto_keyfile){
+    bucket_info bucketinfo;
+    char cmdline[CMDLINE_LENGTH]="";
+    if(get_bucket_ninfo(workdir,crypto_keyfile,LINE_LENGTH_SHORT,&bucketinfo)!=0){
+        return -1;
+    }
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr %s",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,SYSTEM_CMD_REDIRECT);
+    if(system(cmdline)!=0){
+        return 1;
+    }
+    snprintf(cmdline,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr -m %s",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,SYSTEM_CMD_REDIRECT);
+    if(system(cmdline)!=0){
+        return 1;
+    }
+    return 0;
+}
+
 /* return 1 - running; return 0 - stopped */
 /*
 int check_volce_ecs_state(char* node_name, char* stackdir){

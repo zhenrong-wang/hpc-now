@@ -1004,6 +1004,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
     char vaultdir[DIR_LENGTH]="";
     char confdir[DIR_LENGTH]="";
     char curr_payment_method[16]="";
+    char cloud_flag[16]="";
     int i;
     int compute_node_num=0;
     get_state_nvalue(workdir,crypto_keyfile,"payment_method:",curr_payment_method,16);
@@ -1011,7 +1012,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
         printf(FATAL_RED_BOLD "[ FATAL: ] Please switch the payment method to " WARN_YELLO_BOLD "od" FATAL_RED_BOLD " first." RESET_DISPLAY "\n");
         return -3;
     }
-    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0){
+    if(get_cluster_nname(cluster_name,CLUSTER_ID_LENGTH_MAX_PLUS,workdir)!=0||get_cloud_flag(workdir,crypto_keyfile,cloud_flag,16)!=0){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get a valid working directory." RESET_DISPLAY "\n");
         return -7;
     }
@@ -1027,6 +1028,14 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
         }
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster operation started ...\n");
+    if(strcmp(cloud_flag,"CLOUD_H")==0){
+        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Deleting the objects in the TOS bucket ...\r");
+        fflush(stdout);
+        if(volce_bucket_clean(workdir,crypto_keyfile)!=0){
+            return -9;
+        }
+        printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "The bucket has been completely cleaned.   \n");
+    }
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
     create_and_get_subdir(workdir,"stack",stackdir,DIR_LENGTH);
     create_and_get_subdir(workdir,"conf",confdir,DIR_LENGTH);
