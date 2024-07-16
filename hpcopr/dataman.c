@@ -724,10 +724,10 @@ int remote_bucket_cp(char* workdir, char* crypto_keyfile, char* hpc_user, char* 
     }
     else{
         if(strcmp(cmd_type,"rget")==0){
-            snprintf(remote_commands,CMDLINE_LENGTH-1,"tosutil -re %s cp -e tos-%s.volces.com -i %s -k %s %s%s %s %s",binfo.region_id,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_source_path,real_dest_path,real_rflag);
+            snprintf(remote_commands,CMDLINE_LENGTH-1,"tosutil cp -re %s -e tos-%s.ivolces.com -i %s -k %s %s%s %s %s",binfo.region_id,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_source_path,real_dest_path,real_rflag);
         }
         else{
-            snprintf(remote_commands,CMDLINE_LENGTH-1,"tosutil -re %s cp -e tos-%s.volces.com -i %s -k %s %s %s%s %s",binfo.region_id,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,real_source_path,binfo.bucket_address,real_dest_path,real_rflag);
+            snprintf(remote_commands,CMDLINE_LENGTH-1,"tosutil cp -re %s -e tos-%s.ivolces.com -i %s -k %s %s %s%s %s",binfo.region_id,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,real_source_path,binfo.bucket_address,real_dest_path,real_rflag);
         }
     }
     run_flag=remote_exec_general(workdir,crypto_keyfile,sshkey_dir,hpc_user,remote_commands,"-n",0,1,"","");
