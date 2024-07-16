@@ -237,13 +237,25 @@ int bucket_cp(char* workdir, char* crypto_keyfile, char* hpc_user, char* source_
     }
     else{
         if(strcmp(cmd_type,"copy")==0){
+#ifdef _WIN32
+            snprintf(cmdline,CMDLINE_LENGTH-1,"set HOMEPATH=%s && %s cp -re %s -e tos-%s.volces.com -i %s -k %s %s%s %s%s %s",NOW_TMP_DIR,TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,real_source_path,bucketinfo.bucket_address,real_target_path,real_rflag);
+#else
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s cp -re %s -e tos-%s.volces.com -i %s -k %s %s%s %s%s %s",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,real_source_path,bucketinfo.bucket_address,real_target_path,real_rflag);
+#endif
         }
         else if(strcmp(cmd_type,"put")==0){
+#ifdef _WIN32
+            snprintf(cmdline,CMDLINE_LENGTH-1,"set HOMEPATH=%s && %s cp -re %s -e tos-%s.volces.com -i %s -k %s %s %s%s %s",NOW_TMP_DIR,TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,real_source_path,bucketinfo.bucket_address,real_target_path,real_rflag);
+#else
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s cp -re %s -e tos-%s.volces.com -i %s -k %s %s %s%s %s",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,real_source_path,bucketinfo.bucket_address,real_target_path,real_rflag);
+#endif
         }
         else{
+#ifdef _WIN32
+            snprintf(cmdline,CMDLINE_LENGTH-1,"set HOMEPATH=%s && %s cp -re %s -e tos-%s.volces.com -i %s -k %s %s%s %s %s",NOW_TMP_DIR,TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,real_source_path,real_target_path,real_rflag);
+#else
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s cp -re %s -e tos-%s.volces.com -i %s -k %s %s%s %s %s",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,real_source_path,real_target_path,real_rflag);
+#endif
         }
     }
     if(system(cmdline)!=0){
@@ -391,14 +403,26 @@ int bucket_rm_ls(char* workdir, char* crypto_keyfile, char* hpc_user, char* remo
     }
     else{
         if(strcmp(cmd_type,"delete")==0){
+#ifdef _WIN32
+            snprintf(cmdline,CMDLINE_LENGTH-1,"set HOMEPATH=%s && %s rm -re %s -e tos-%s.volces.com -i %s -k %s %s%s %s %s",NOW_TMP_DIR,TOSUTIL_EXEC,binfo.region_id,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_remote_path,real_rflag,real_fflag);
+#else
             snprintf(cmdline,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s%s %s %s",TOSUTIL_EXEC,binfo.region_id,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_remote_path,real_rflag,real_fflag);
+#endif
         }
         else{
             if(strlen(real_rflag)==0){
+#ifdef _WIN32
+                snprintf(cmdline,CMDLINE_LENGTH-1,"set HOMEPATH=%s && %s ls -re %s -e tos-%s.volces.com -i %s -k %s %s%s -d",NOW_TMP_DIR,TOSUTIL_EXEC,binfo.region_id,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_remote_path);
+#else
                 snprintf(cmdline,CMDLINE_LENGTH-1,"%s ls -re %s -e tos-%s.volces.com -i %s -k %s %s%s -d",TOSUTIL_EXEC,binfo.region_id,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_remote_path);
+#endif
             }
             else{
+#ifdef _WIN32
+                snprintf(cmdline,CMDLINE_LENGTH-1,"set HOMEPATH=%s && %s ls -re %s -e tos-%s.volces.com -i %s -k %s %s%s",NOW_TMP_DIR,TOSUTIL_EXEC,binfo.region_id,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_remote_path);
+#else
                 snprintf(cmdline,CMDLINE_LENGTH-1,"%s ls -re %s -e tos-%s.volces.com -i %s -k %s %s%s",TOSUTIL_EXEC,binfo.region_id,binfo.region_id,binfo.bucket_ak,binfo.bucket_sk,binfo.bucket_address,real_remote_path);
+#endif
             }
         }
     }

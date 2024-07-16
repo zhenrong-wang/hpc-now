@@ -4576,12 +4576,18 @@ int volce_bucket_clean(char* workdir, char* crypto_keyfile){
         return -1;
     }
     snprintf(log_tmp,FILENAME_LENGTH,"%s%s%s.log",NOW_TMP_DIR,PATH_SLASH,cluster_name);
-    
+
+#ifdef _WIN32
+    snprintf(rm_task_cmd,CMDLINE_LENGTH-1,"set HOMEPATH=%s && %s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr -m",NOW_TMP_DIR,TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address);
+    snprintf(rm_file_cmd,CMDLINE_LENGTH-1,"set HOMEPATH=%s && %s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr",NOW_TMP_DIR,TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address);   
+    snprintf(ls_task_cmd,CMDLINE_LENGTH,"set HOMEPATH=%s && %s ls -re %s -e tos-%s.volces.com -i %s -k %s %s/ -s -m -d >%s 2>&1",NOW_TMP_DIR,TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,log_tmp);
+    snprintf(ls_file_cmd,CMDLINE_LENGTH,"set HOMEPATH=%s && %s ls -re %s -e tos-%s.volces.com -i %s -k %s %s/ -s -d >%s 2>&1",NOW_TMP_DIR,TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,log_tmp);
+#else
     snprintf(rm_task_cmd,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr -m",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address);
-    snprintf(rm_file_cmd,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address);
-    
+    snprintf(rm_file_cmd,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address);   
     snprintf(ls_task_cmd,CMDLINE_LENGTH,"%s ls -re %s -e tos-%s.volces.com -i %s -k %s %s/ -s -m -d >%s 2>&1",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,log_tmp);
     snprintf(ls_file_cmd,CMDLINE_LENGTH,"%s ls -re %s -e tos-%s.volces.com -i %s -k %s %s/ -s -d >%s 2>&1",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,log_tmp);
+#endif
     
     i=0;
     do{
