@@ -4562,18 +4562,43 @@ int get_default_nzone(char* cluster_name, char* region, char* default_zone, unsi
 
 int volce_bucket_clean(char* workdir, char* crypto_keyfile){
     bucket_info bucketinfo;
-    char cmdline[CMDLINE_LENGTH]="";
-    if(get_bucket_ninfo(workdir,crypto_keyfile,LINE_LENGTH_SHORT,&bucketinfo)!=0){
+    char rm_file_cmd[CMDLINE_LENGTH]="";
+    char rm_task_cmd[CMDLINE_LENGTH]="";
+    char ls_file_cmd[CMDLINE_LENGTH]="";
+    char ls_task_cmd[CMDLINE_LENGTH]="";
+    char log_tmp[FILENAME_LENGTH]="";
+    char cluster_name[32]="";
+    unsigned int i=0;
+    if(get_cluster_nname(cluster_name,32,workdir)!=0||get_bucket_ninfo(workdir,crypto_keyfile,LINE_LENGTH_SHORT,&bucketinfo)!=0){
         return -1;
     }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address);
-    if(system(cmdline)!=0){
-        return 1;
-    }
-    snprintf(cmdline,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr -m",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address);
-    if(system(cmdline)!=0){
-        return 1;
-    }
+    snprintf(log_tmp,FILENAME_LENGTH,"%s%s%s.log",NOW_TMP_DIR,PATH_SLASH,cluster_name);
+    
+    snprintf(rm_task_cmd,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr -m",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address);
+    snprintf(rm_file_cmd,CMDLINE_LENGTH-1,"%s rm -re %s -e tos-%s.volces.com -i %s -k %s %s/ -r -f -v -fr",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address);
+    
+    snprintf(ls_task_cmd,CMDLINE_LENGTH,"%s ls -re %s -e tos-%s.volces.com -i %s -k %s %s/ -s -m -d >%s 2>&1",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,log_tmp);
+    snprintf(ls_file_cmd,CMDLINE_LENGTH,"%s ls -re %s -e tos-%s.volces.com -i %s -k %s %s/ -s -d >%s 2>&1",TOSUTIL_EXEC,bucketinfo.region_id,bucketinfo.region_id,bucketinfo.bucket_ak,bucketinfo.bucket_sk,bucketinfo.bucket_address,log_tmp);
+    
+    i=0;
+    do{
+        system(rm_task_cmd);
+        system(ls_task_cmd);
+        i++;
+        if(i>=64){
+            return 1;
+        }
+    }while(find_multi_nkeys(log_tmp,LINE_LENGTH_SHORT,"Folder number is: 0","","","","")==0||find_multi_nkeys(log_tmp,LINE_LENGTH_SHORT,"Upload number is: 0","","","","")==0);
+    
+    i=0;
+    do{
+        system(rm_file_cmd);
+        system(ls_file_cmd);
+        i++;
+        if(i>=64){
+            return 1;
+        }
+    }while(find_multi_nkeys(log_tmp,LINE_LENGTH_SHORT,"Folder number is: 0","","","","")==0||find_multi_nkeys(log_tmp,LINE_LENGTH_SHORT,"File number is: 0","","","","")==0);
     return 0;
 }
 
