@@ -4611,6 +4611,54 @@ int volce_bucket_clean(char* workdir, char* crypto_keyfile){
     return 0;
 }
 
+int create_cluster_lock(char* workdir){
+    char lock_file[FILENAME_LENGTH]="";
+    char logdir[DIR_LENGTH]="";
+    if(create_and_get_subdir(workdir,"log",logdir,DIR_LENGTH)!=0){
+        return -1;
+    }
+    snprintf(lock_file,FILENAME_LENGTH,"%s%slock_timestamp.log",logdir,PATH_SLASH);
+    FILE* file_p=fopen(lock_file,"w+");
+    if(file_p==NULL){
+        return -3;
+    }
+    time_t current_time;
+    time(&current_time);
+#ifdef _WIN32
+    fprintf(file_p,"%lld\n%s\n",current_time,INTERNAL_FILE_HEADER);
+#else
+    fprintf(file_p,"%ld\n%s\n",current_time,INTERNAL_FILE_HEADER);
+#endif
+    fclose(file_p);
+    return 0;
+}
+
+ssize_t check_cluster_lock(char* workdir){
+    char lock_file[FILENAME_LENGTH]="";
+    char logdir[DIR_LENGTH]="";
+    if(create_and_get_subdir(workdir,"log",logdir,DIR_LENGTH)!=0){
+        return -1;
+    }
+    snprintf(lock_file,FILENAME_LENGTH,"%s%slock_timestamp.log",logdir,PATH_SLASH);
+    FILE* file_p=fopen(lock_file,"r");
+    if(file_p==NULL){
+        return 0; /* The file has been deleted. */
+    }
+    time_t init_time,current_time;
+    time(&current_time);
+#ifdef _WIN32
+    fscanf(file_p,"%lld",&init_time);
+#else
+    fscanf(file_p,"%ld",&init_time);
+#endif
+    fclose(file_p);
+    if((current_time-init_time)>=CLUSTER_LOCK_SECS){
+        rm_file_or_dir(lock_file);
+        return 0;
+    }
+    return CLUSTER_LOCK_SECS-(current_time-init_time);
+}
+
 /* return 1 - running; return 0 - stopped */
 /*
 int check_volce_ecs_state(char* node_name, char* stackdir){

@@ -1348,6 +1348,7 @@ int aws_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
+    create_cluster_lock(workdir); /* Create a lock file. */
     return 0;
 }
 
@@ -1642,6 +1643,7 @@ int qcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loca
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
+    create_cluster_lock(workdir); /* Create a lock file. */
     return 0;
 }
 
@@ -1932,6 +1934,7 @@ int alicloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_lo
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
+    create_cluster_lock(workdir); /* Create a lock file. */
     return 0;
 }
 
@@ -2251,6 +2254,7 @@ int hwcloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_loc
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
+    create_cluster_lock(workdir); /* Create a lock file. */
     return 0;
 }
 
@@ -2560,6 +2564,7 @@ int baiducloud_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_
     remote_copy(workdir,crypto_keyfile,SSHKEY_DIR,filename_temp,"/hpc_data/cluster_data/.bucket_creds/config","root","put","",0);
     bceconfig_convert(vaultdir,"delete","","","");
     delete_decrypted_files(workdir,crypto_keyfile);
+    create_cluster_lock(workdir); /* Create a lock file. */
     return 0;
 }
 
@@ -2807,6 +2812,7 @@ int azure_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
+    create_cluster_lock(workdir); /* Create a lock file. */
     return 0;
 }
 
@@ -3080,6 +3086,7 @@ int gcp_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local, 
     create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
     gcp_credential_convert(workdir,"delete",0);
+    create_cluster_lock(workdir); /* Create a lock file. */
     return 0;
 }
 
@@ -3358,5 +3365,6 @@ int volce_cluster_init(char* workdir, char* crypto_keyfile, int batch_flag_local
     print_cluster_init_done();
     create_local_tf_config(tf_run,stackdir);
     delete_decrypted_files(workdir,crypto_keyfile);
+    create_cluster_lock(workdir); /* Create a lock file. */
     return 0;
 }

@@ -183,6 +183,10 @@ int valid_region_zone_or_not(char* cluster_name, char* region, char* zone);
 int get_default_zone(char* cluster_name, char* region, char* default_zone);
 int get_default_nzone(char* cluster_name, char* region, char* default_zone, unsigned int zone_len_max);
 int valid_zone_or_not(char* cluster_name, char* zone);
+
+int create_cluster_lock(char* workdir);
+ssize_t check_cluster_lock(char* workdir);
+
 /*int check_volce_ecs_state(char* node_name, char* stackdir);
 int generate_volce_ecs_state(char* node_name, char* stackdir, int target_state);*/
 

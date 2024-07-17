@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0141"
+#define CORE_VERSION_CODE "0.3.1.0143"
 
 #define NULL_PTR_ARG -127
 
@@ -21,6 +21,8 @@
 #define GREY_LIGHT       "\033[2;37m"
 #define GENERAL_BOLD     "\033[1m"
 #define RESET_DISPLAY    "\033[0m"
+
+#define CLUSTER_LOCK_SECS 420
 
 /* Define the tf configuration */
 typedef struct{

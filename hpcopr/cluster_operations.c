@@ -1278,6 +1278,7 @@ int add_compute_node(char* workdir, char* crypto_keyfile, char* add_number_strin
     }
     printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " Congrats! The specified compute nodes have been added.\n");
     delete_decrypted_files(workdir,crypto_keyfile);
+    create_cluster_lock(workdir);
     return 0;
 }
 
@@ -1300,6 +1301,12 @@ int shutdown_compute_nodes(char* workdir, char* crypto_keyfile, char* param, int
     }
     if(strcmp(cloud_flag,"CLOUD_A")!=0&&strcmp(cloud_flag,"CLOUD_B")!=0&&strcmp(cloud_flag,"CLOUD_C")!=0&&strcmp(cloud_flag,"CLOUD_D")!=0&&strcmp(cloud_flag,"CLOUD_E")!=0&&strcmp(cloud_flag,"CLOUD_G")!=0&&strcmp(cloud_flag,"CLOUD_H")!=0){
         return -1;
+    }
+    ssize_t lock_sec=check_cluster_lock(workdir);
+    if(lock_sec>0){
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The cluster is temporarily locked for this operation.\n");
+        printf("[  ****  ] Please wait for %d seconds." RESET_DISPLAY "\n",(int)lock_sec);
+        return 1;
     }
     decrypt_files(workdir,crypto_keyfile);
     getstate(workdir,crypto_keyfile);
@@ -1564,6 +1571,12 @@ int reconfigure_compute_node(char* workdir, char* crypto_keyfile, char* new_conf
         printf(WARN_YELLO_BOLD "[ -WARN- ] Currently there is no compute nodes in your cluster." RESET_DISPLAY "\n");
         return -3;
     }
+    ssize_t lock_sec=check_cluster_lock(workdir);
+    if(lock_sec>0){
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The cluster is temporarily locked for this operation.\n");
+        printf("[  ****  ] Please wait for %d seconds." RESET_DISPLAY "\n",(int)lock_sec);
+        return -3;
+    }
     decrypt_files(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     snprintf(string_temp,63,"\"%s\"",new_config);
@@ -1731,6 +1744,12 @@ int reconfigure_master_node(char* workdir, char* crypto_keyfile, char* new_confi
     if(get_cloud_flag(workdir,crypto_keyfile,cloud_flag,16)!=0){
         return -5;
     }
+    ssize_t lock_sec=check_cluster_lock(workdir);
+    if(lock_sec>0){
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The cluster is temporarily locked for this operation.\n");
+        printf("[  ****  ] Please wait for %d seconds." RESET_DISPLAY "\n",(int)lock_sec);
+        return 1;
+    }
     decrypt_files(workdir,crypto_keyfile);
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s%shpc_stack_base.tf",stackdir,PATH_SLASH);
     snprintf(string_temp,63,"\"%s\"",new_config);
@@ -1886,6 +1905,12 @@ int cluster_sleep(char* workdir, char* crypto_keyfile, tf_exec_config* tf_run){
     if(cluster_asleep_or_not(workdir,crypto_keyfile)==0){
         printf(FATAL_RED_BOLD "[ FATAL: ] The current cluster is not running. Please wake up first.\n");
         printf("[  ****  ] Command: hpcopr wakeup --all | --min ." RESET_DISPLAY "\n");
+        return 1;
+    }
+    ssize_t lock_sec=check_cluster_lock(workdir);
+    if(lock_sec>0){
+        printf(FATAL_RED_BOLD "\n[ FATAL: ] The cluster is temporarily locked for this operation.\n");
+        printf("[  ****  ] Please wait for %d seconds." RESET_DISPLAY "\n",(int)lock_sec);
         return 1;
     }
     decrypt_files(workdir,crypto_keyfile);
@@ -2453,6 +2478,7 @@ int rebuild_nodes(char* workdir, char* crypto_keyfile, char* option, int batch_f
     printf(WARN_YELLO_BOLD "[ -INFO- ] The rebuild process may need 7 minutes. Please do not operate\n");
     printf("[  ****  ] this cluster during the period." RESET_DISPLAY "\n");
     delete_decrypted_files(workdir,crypto_keyfile);
+    create_cluster_lock(workdir);
     return 0;
 }
 
