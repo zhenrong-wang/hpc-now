@@ -4625,7 +4625,7 @@ int create_cluster_lock(char* workdir){
     time_t current_time;
     time(&current_time);
 #ifdef _WIN32
-    fprintf(file_p,"%lld\n%s\n",current_time,INTERNAL_FILE_HEADER);
+    fprintf(file_p,"%I64d\n%s\n",current_time,INTERNAL_FILE_HEADER);
 #else
     fprintf(file_p,"%ld\n%s\n",current_time,INTERNAL_FILE_HEADER);
 #endif
@@ -4647,7 +4647,7 @@ ssize_t check_cluster_lock(char* workdir){
     time_t init_time,current_time;
     time(&current_time);
 #ifdef _WIN32
-    fscanf(file_p,"%lld",&init_time);
+    fscanf(file_p,"%I64d",&init_time);
 #else
     fscanf(file_p,"%ld",&init_time);
 #endif
