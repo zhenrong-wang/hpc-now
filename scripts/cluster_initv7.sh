@@ -387,6 +387,9 @@ if ! command -v module >/dev/null 2>&1; then
   make -j$num_processors && make install
   ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.sh
   ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.csh
+else
+  #if module is already available, add the /hpc_apps/envmod to system envvar
+  echo -e "export MODULEPATH=/hpc_apps/envmod:\$MODULEPATH" >> /etc/profile
 fi
 time_current=`date "+%Y-%m-%d %H:%M:%S"`  
 echo -e "# $time_current Environment Module has been installed." >> ${logfile}
