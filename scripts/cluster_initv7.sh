@@ -592,8 +592,8 @@ systemctl disable firewalld
 systemctl mask firewalld
 
 yum -y install gcc-c++ gcc-gfortran 
-yum -y install htop 
-yum -y install python3 python3-devel 
+yum -y install htop tree
+yum -y install python3 python3-devel
 yum -y install hostname dos2unix bash-completion
 
 if [ -f /root/hostfile ]; then
