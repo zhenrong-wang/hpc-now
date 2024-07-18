@@ -406,7 +406,8 @@ if [ -f /root/hostfile ]; then
   echo -e "# $time_current Started installing Desktop Environment." >> ${logfile}
   if [ $distro_type != 'CentOS' ] && [ $distro_type != 'Rocky' ] && [ $distro_type != 'Oracle' ]; then
     echo -e "# $time_current GNU/Linux Distro: ${distro_type}. Installing GUI now." >> ${logfile}
-    yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks gnome-terminal-nautilus gnome-classic-session gnome-disk-utility
+    yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks
+    yum -y install gnome-terminal-nautilus gnome-classic-session gnome-disk-utility
     yum -y install gnome-shell-*
     yum -y install firefox
     yum -y install nautilus
@@ -432,7 +433,8 @@ if [ -f /root/hostfile ]; then
 #      else
         # For some reasons, Google Compute Instance fails to restart after installing "Server with GUI". 
         # Therefore, we have to avoid installing "Server with GUI"
-      yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks gnome-terminal-nautilus gnome-classic-session gnome-disk-utility
+      yum -y install gnome-shell gdm gnome-session gnome-terminal gnome-system-monitor gnome-tweaks
+      yum -y install gnome-terminal-nautilus gnome-classic-session gnome-disk-utility
       yum -y install gnome-shell-*
       yum -y install firefox
       yum -y install nautilus
