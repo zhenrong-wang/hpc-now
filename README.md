@@ -1,10 +1,10 @@
-<img src="./img/hpc-now-project-logo.png" alt="HPC-NOW Logo" style="width: 600px;">
+<img src="./img/hpc-now-project-logo.png" alt="HPC-NOW Logo" style="width: 600px;"/>
 
 **HPC-NOW, start your HPC journey in the cloud <u>now</u>, with <u>n</u>o <u>o</u>peration <u>w</u>orkload!**
 
 *<u>A full-stack HPC solution in the cloud, for the HPC community.</u>*
 
-<img src="./img/main_page.png" alt="main_page" style="width: 600px;">
+<img src="./img/main_page.png" alt="main_page" style="width: 600px;"/>
 
 **Contributions are highly welcomed and respected. Please see [CONTRIBUTING](./CONTRIBUTING.md).**
 
@@ -63,11 +63,11 @@ Currently, the HPC-NOW platform supports 8 popular cloud platforms, shown as bel
 
 *DEMO: How easy it is to create a cloud HPC cluster using HPC-NOW?*
 
-<img src="./img/cluster_init.png" alt="cluster_init" style="width: 600px;">
+<img src="./img/cluster_init.png" alt="cluster_init" style="width: 600px;"/>
 
 *Demo: You can easily manage multiple clusters across multiple clouds.*
 
-<img src="./img/multiple_clusters.png" alt="multiple_clusters" style="width: 600px;">
+<img src="./img/multiple_clusters.png" alt="multiple_clusters" style="width: 600px;"/>
 
 # **2. Core Components**
 
@@ -84,7 +84,7 @@ In this project, we are developing several components:
 
 The high-level architecture of this project is:
 
-<img src="./img/arch.png" alt="architecture" style="width: 600px;">
+<img src="./img/arch.png" alt="architecture" style="width: 600px;"/>
 
 # **3. How-To: Build, Install, Run, and Use**
 
@@ -235,7 +235,7 @@ In order to use and manage HPC in the cloud with HPC-NOW, please follow the work
 
 *DEMO: An example of an HPC-NOW cluster running Paraview*
 
-<img src="./img/run_paraview.png" alt="example" style="width: 600px;">
+<img src="./img/run_paraview.png" alt="example" style="width: 600px;"/>
 
 ## **3.5 The Installer Commands**
 
