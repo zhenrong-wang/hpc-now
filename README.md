@@ -8,7 +8,7 @@
 
 **Contributions are highly welcomed and respected. Please see [CONTRIBUTING](./CONTRIBUTING.md).**
 
-**This project is sponsored by the [OpenAtom Foundation](https://openatom.org/).** <img src="./img/openatom-logo-tiny.png" alt="main_page" style="width: 16px;"/>
+**This project is sponsored by the [OpenAtom Foundation](https://openatom.org/).** <img src="./img/openatom-logo-tiny.png" alt="openatom_logo" style="width: 16px;"/>
 
 - [**1. Project Background**](#1-project-background)
 - [**2. Core Components**](#2-core-components)
