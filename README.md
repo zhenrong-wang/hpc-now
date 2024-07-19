@@ -77,7 +77,7 @@ Thanks to [Terraform](http://www.terraform.io) and [openTofu](https://github.com
 
 In this project, we are developing several components:
 
--  **installer**  : HPC-NOW service installer. It requires **temporary** administrator or root privilege to run [why?](#35-the-installer-commands).
+-  **installer**  : HPC-NOW service installer. It requires **temporary** administrator or root privilege to run. [why?](#35-the-installer-commands)
 -  **hpcopr**     : HPC Operator. The main component that manages the HPC clusters, users, jobs, data, monitoring, usage, etc.
 -  **now-crypto** : An independent cryptography module (**AES-128-ECB-PKCS#7**) that encrypts and decrypts the files containing sensitive information.
 -  **hpcmgr**    : A utility running in every cluster's master node to communicate with the operator.
@@ -528,7 +528,7 @@ The hpc-now service manages 2 top-level directories and several subdirectories o
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- **stack/**&emsp;&emsp;*TF running dorectory*\
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- **conf/**&emsp;&emsp;*Cluster configuration*\
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;+- **vault/**&emsp;&emsp;*Cluster's sensitive files*\
-&emsp;&emsp;+- **mon_data/**&emsp;&emsp;*Monitoring data of all clusters*\
+&emsp;&emsp;+- **mon_data/**&emsp;&emsp;*Monitoring data of all clusters*
 
 **NOTE:**
 
