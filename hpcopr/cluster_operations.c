@@ -46,7 +46,7 @@ int switch_to_cluster(char* target_cluster_name){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create current cluster indicator." RESET_DISPLAY "\n");
         return -1;
     }
-    fprintf(file_p,"---GENERATED AND MAINTAINED BY HPC-NOW SERVICES INTERNALLY---\n");
+    fprintf(file_p,"%s\n",INTERNAL_FILE_HEADER);
     fprintf(file_p,"current_cluster: < cluster name: %s >",target_cluster_name);
     fclose(file_p);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Successfully switched to the cluster " RESET_DISPLAY HIGH_CYAN_BOLD "%s" RESET_DISPLAY ".\n",target_cluster_name);

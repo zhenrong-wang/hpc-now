@@ -3979,16 +3979,28 @@ int delete_from_cluster_registry(char* deleted_cluster_name){
     char randstr[7]="";
     char filename_temp[FILENAME_LENGTH]="";
     char registry_line[LINE_LENGTH_SHORT]="";
+    char first_cluster[32]="";
     generate_random_nstring(randstr,7,0);
     file_convert(ALL_CLUSTER_REGISTRY,randstr,"decrypt");
     snprintf(filename_temp,FILENAME_LENGTH-1,"%s.%s",ALL_CLUSTER_REGISTRY,randstr);
     snprintf(registry_line,LINE_LENGTH_SHORT-1,"< cluster name: %s >",deleted_cluster_name);
-    if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,deleted_cluster_name)==0){
-        exit_current_cluster();
-    }
     delete_nlines_by_kwd(filename_temp,LINE_LENGTH_SMALL,registry_line,1);
+    find_and_nget(filename_temp,LINE_LENGTH_SHORT,"< cluster name:","","",1,"< cluster name:","","",' ',4,first_cluster,32);
+    if(current_cluster_or_not(CURRENT_CLUSTER_INDICATOR,deleted_cluster_name)==0){
+        FILE* file_p=fopen(CURRENT_CLUSTER_INDICATOR,"w+");
+        if(file_p==NULL){
+            file_convert(ALL_CLUSTER_REGISTRY,randstr,"encrypt");
+            registry_dec_backup();
+            return 1;
+        }
+        fprintf(file_p,"%s\n",INTERNAL_FILE_HEADER);
+        if(strlen(first_cluster)>0){
+            fprintf(file_p,"current_cluster: < cluster name: %s >",first_cluster);
+        }
+        fclose(file_p);
+    }
     if(file_convert(ALL_CLUSTER_REGISTRY,randstr,"encrypt")!=0){
-        return 1;
+        return 3;
     }
     registry_dec_backup(); /* Update the decrypted backup */
     return 0;
