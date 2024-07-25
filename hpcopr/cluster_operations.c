@@ -587,15 +587,15 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return 1;
     }
     else if(name_check_flag==-7){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " already exists in the registry." RESET_DISPLAY "\n",input_cluster_name);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " already exists." RESET_DISPLAY "\n",input_cluster_name);
         return 1;
     }
     else if(name_check_flag==-3){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The length of " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is out of range %d - %d." RESET_DISPLAY "\n",input_cluster_name,CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The length of " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " is out of range %d - %d." RESET_DISPLAY "\n",input_cluster_name,CLUSTER_ID_LENGTH_MIN,CLUSTER_ID_LENGTH_MAX);
         return 1;
     }
     else if(name_check_flag==-5){
-        printf(FATAL_RED_BOLD "[ FATAL: ] The cluster name " RESET_DISPLAY WARN_YELLO_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " contains illegal characters." RESET_DISPLAY "\n",input_cluster_name);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The cluster name " RESET_DISPLAY GENERAL_BOLD "%s" RESET_DISPLAY FATAL_RED_BOLD " contains invalid chars." RESET_DISPLAY "\n",input_cluster_name);
         return 1;
     }
     else if(name_check_flag==1){
@@ -1079,7 +1079,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
         }
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Cluster operation started ...\n");
-    if(strcmp(cloud_flag,"CLOUD_H")==0){
+    if(strcmp(cloud_flag,"CLOUD_H")==0&&cluster_empty_or_not(workdir,crypto_keyfile)!=0){
         printf(GENERAL_BOLD "[ -INFO- ] " RESET_DISPLAY "Deleting the objects in the TOS bucket ...\n");
         if(volce_bucket_clean(workdir,crypto_keyfile)!=0){
             return -9;
@@ -1119,7 +1119,7 @@ int cluster_destroy(char* workdir, char* crypto_keyfile, char* force_flag, int b
         }
     }
     else{
-        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has " WARN_YELLO_BOLD "not been initialized" RESET_DISPLAY ". No need to destroy.\n");
+        printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The cluster has not been initialized. No need to destroy." RESET_DISPLAY "\n");
     }
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Deleting all the related local files and folders ...\n");
     delete_decrypted_files(workdir,crypto_keyfile);

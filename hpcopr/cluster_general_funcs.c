@@ -4680,7 +4680,7 @@ int tf_test(char* cluster_name, char* cloud_flag, char* cloud_ak, char* cloud_sk
         return -3;
     }
     if(strcmp(cloud_flag,"CLOUD_A")==0){
-        fprintf(file_p,"terraform\n");
+        fprintf(file_p,"terraform {\n");
         fprintf(file_p,"  required_providers {\n");
         fprintf(file_p,"    alicloud = {\n");
         fprintf(file_p,"      source = \"aliyun/alicloud\"\n");
@@ -4699,7 +4699,7 @@ int tf_test(char* cluster_name, char* cloud_flag, char* cloud_ak, char* cloud_sk
         fprintf(file_p,"      source = \"tencentcloudstack/tencentcloud\"\n");
         fprintf(file_p,"    }\n  }\n}\n");
         fprintf(file_p,"provider \"tencentcloud\" {\n");
-        fprintf(file_p,"  access_key = \"%s\"\n",cloud_ak);
+        fprintf(file_p,"  secret_id = \"%s\"\n",cloud_ak);
         fprintf(file_p,"  secret_key = \"%s\"\n",cloud_sk);
         fprintf(file_p,"  region = \"ap-nanjing\"\n");
         fprintf(file_p,"}\n");
@@ -4729,7 +4729,7 @@ int tf_test(char* cluster_name, char* cloud_flag, char* cloud_ak, char* cloud_sk
         fprintf(file_p,"  secret_key = \"%s\"\n",cloud_sk);
         fprintf(file_p,"  region = \"cn-north-4\"\n");
         fprintf(file_p,"}\n");
-        fprintf(file_p,"data \"huaweicloud_account\" \"current\" {}\n");
+        fprintf(file_p,"data \"huaweicloud_availability_zones\" \"zones\" {}\n");
     }
     else if(strcmp(cloud_flag,"CLOUD_E")==0){
         fprintf(file_p,"terraform {\n");
@@ -4760,12 +4760,13 @@ int tf_test(char* cluster_name, char* cloud_flag, char* cloud_ak, char* cloud_sk
         fprintf(file_p,"  client_secret = \"%s\"\n",cloud_sk);
         fprintf(file_p,"  tenant_id = \"%s\"\n",az_tenant);
         fprintf(file_p,"  subscription_id = \"%s\"\n}\n",az_subscription);
-        fprintf(file_p,"provider \"azruread\" {\n");
+        fprintf(file_p,"provider \"azuread\" {\n");
         fprintf(file_p,"  environment = \"public\"\n");
         fprintf(file_p,"  client_id = \"%s\"\n",cloud_ak);
         fprintf(file_p,"  client_secret = \"%s\"\n",cloud_sk);
         fprintf(file_p,"  tenant_id = \"%s\"\n}\n",az_tenant);
-        fprintf(file_p,"data \"azuread_users\" \"users\" {}\n");
+        fprintf(file_p,"data \"azurerm_subscription\" \"current\" {}\n");
+        fprintf(file_p,"data \"azuread_users\" \"users\" {\n  return_all = true\n}\n");
     }
     else if(strcmp(cloud_flag,"CLOUD_G")==0){
         char gcp_project_id[128]="";
@@ -4798,17 +4799,19 @@ int tf_test(char* cluster_name, char* cloud_flag, char* cloud_ak, char* cloud_sk
         return -5;
     }
     fclose(file_p);
-    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Checking the validity of credentials ...\r");
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Validating the provided credentials ...\r");
     fflush(stdout);
     snprintf(cmdline,CMDLINE_LENGTH,"cd %s && echo yes | %s init -upgrade -lock=false %s",testdir,tf_run->tf_runner,SYSTEM_CMD_REDIRECT_NULL);
+    //snprintf(cmdline,CMDLINE_LENGTH,"cd %s && echo yes | %s init -upgrade -lock=false",testdir,tf_run->tf_runner);
     if(system(cmdline)!=0){
         rm_file_or_dir(testdir);
-        printf("                                                    \r");
+        printf("                                                        \r");
         fflush(stdout);
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to init the TF provider. Please report this issue." RESET_DISPLAY "\n");
         return -7;
     }
     snprintf(cmdline,CMDLINE_LENGTH,"cd %s && echo yes | %s plan -lock=false %s",testdir,tf_run->tf_runner,SYSTEM_CMD_REDIRECT_NULL);
+    //snprintf(cmdline,CMDLINE_LENGTH,"cd %s && echo yes | %s plan -lock=false",testdir,tf_run->tf_runner);
     if(system(cmdline)!=0){
         if(strcmp(cloud_flag,"CLOUD_C")==0){
             global_nreplace(testfile,LINE_LENGTH_SMALL,"us-east-1","cn-northwest-1");
@@ -4818,21 +4821,21 @@ int tf_test(char* cluster_name, char* cloud_flag, char* cloud_ak, char* cloud_sk
         }
         else{
             rm_file_or_dir(testdir);
-            printf("                                                    \r");
+            printf("                                                        \r");
             fflush(stdout);
-            printf(FATAL_RED_BOLD "[ FATAL: ] The provided credential is invalid." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to validate the provided credential." RESET_DISPLAY "\n");
             return -9;
         }
         if(system(cmdline)!=0){
             rm_file_or_dir(testdir);
-            printf("                                                    \r");
+            printf("                                                        \r");
             fflush(stdout);
-            printf(FATAL_RED_BOLD "[ FATAL: ] The provided credential is invalid." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to validate the provided credential." RESET_DISPLAY "\n");
             return -9;
         }
     }
     rm_file_or_dir(testdir);
-    printf("                                                    \r");
+    printf("                                                        \r");
     fflush(stdout);
     printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The provided credential has been successfully checked.\n");
     return 0;
