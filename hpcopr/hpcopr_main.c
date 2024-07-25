@@ -685,7 +685,7 @@ int main(int argc, char* argv[]){
         if(run_flag==2||run_flag==0){
             strcpy(gcp_flag,"gcp");
         }
-        run_flag=prompt_to_confirm_args("Skip credential check? (NOT RECOMMENDED) (Default: Check)",CONFIRM_STRING,batch_flag,argc,argv,"--force");
+        run_flag=prompt_to_confirm_args("Skip credential validation? (RISKY) (Default: NOT skip)",CONFIRM_STRING,batch_flag,argc,argv,"--force");
         if(run_flag==2||run_flag==0){
             strcpy(force_flag_string,"force");
         }
