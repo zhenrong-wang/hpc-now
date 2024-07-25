@@ -4659,6 +4659,188 @@ ssize_t check_cluster_lock(char* workdir){
     return CLUSTER_LOCK_SECS-(current_time-init_time);
 }
 
+int tf_test(char* cluster_name, char* cloud_flag, char* cloud_ak, char* cloud_sk, char* az_subscription, char* az_tenant, tf_exec_config* tf_run, char* force_flag){
+    if(cluster_name==NULL){
+        return -1;
+    }
+    if(strcmp(force_flag,"force")==0){
+        printf(WARN_YELLO_BOLD "[ -WARN- ] Credential check skipped! The credentials might be invalid." RESET_DISPLAY "\n");
+        return 0;
+    }
+    char testdir[DIR_LENGTH]="";
+    char testfile[FILENAME_LENGTH]="";
+    char cmdline[CMDLINE_LENGTH]="";
+    snprintf(testdir,DIR_LENGTH,"%s%s%s%s",NOW_TMP_DIR,PATH_SLASH,cluster_name,PATH_SLASH);
+    mk_pdir(testdir);
+    snprintf(testfile,FILENAME_LENGTH,"%s%stest.tf",testdir,PATH_SLASH);
+    FILE* file_p=fopen(testfile,"w+");
+    if(file_p==NULL){
+        printf(FATAL_RED_BOLD "[ FATAL: ] File I/O error: failed to create temp file." RESET_DISPLAY "\n");
+        rm_file_or_dir(testdir);
+        return -3;
+    }
+    if(strcmp(cloud_flag,"CLOUD_A")==0){
+        fprintf(file_p,"terraform {\n");
+        fprintf(file_p,"  required_providers {\n");
+        fprintf(file_p,"    alicloud = {\n");
+        fprintf(file_p,"      source = \"aliyun/alicloud\"\n");
+        fprintf(file_p,"    }\n  }\n}\n");
+        fprintf(file_p,"provider \"alicloud\" {\n");
+        fprintf(file_p,"  access_key = \"%s\"\n",cloud_ak);
+        fprintf(file_p,"  secret_key = \"%s\"\n",cloud_sk);
+        fprintf(file_p,"  region = \"cn-hangzhou\"\n");
+        fprintf(file_p,"}\n");
+        fprintf(file_p,"data \"alicloud_account\" \"current\" {}\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_B")==0){
+        fprintf(file_p,"terraform {\n");
+        fprintf(file_p,"  required_providers {\n");
+        fprintf(file_p,"    tencentcloud = {\n");
+        fprintf(file_p,"      source = \"tencentcloudstack/tencentcloud\"\n");
+        fprintf(file_p,"    }\n  }\n}\n");
+        fprintf(file_p,"provider \"tencentcloud\" {\n");
+        fprintf(file_p,"  secret_id = \"%s\"\n",cloud_ak);
+        fprintf(file_p,"  secret_key = \"%s\"\n",cloud_sk);
+        fprintf(file_p,"  region = \"ap-nanjing\"\n");
+        fprintf(file_p,"}\n");
+        fprintf(file_p,"data \"tencentcloud_user_info\" \"current\" {}\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_C")==0){
+        fprintf(file_p,"terraform {\n");
+        fprintf(file_p,"  required_providers {\n");
+        fprintf(file_p,"    aws = {\n");
+        fprintf(file_p,"      source = \"hashicorp/aws\"\n");
+        fprintf(file_p,"    }\n  }\n}\n");
+        fprintf(file_p,"provider \"aws\" {\n");
+        fprintf(file_p,"  access_key = \"%s\"\n",cloud_ak);
+        fprintf(file_p,"  secret_key = \"%s\"\n",cloud_sk);
+        fprintf(file_p,"  region = \"us-east-1\"\n");
+        fprintf(file_p,"}\n");
+        fprintf(file_p,"data \"aws_iam_users\" \"users\" {}\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_D")==0){
+        fprintf(file_p,"terraform {\n");
+        fprintf(file_p,"  required_providers {\n");
+        fprintf(file_p,"    huaweicloud = {\n");
+        fprintf(file_p,"      source = \"huaweicloud/huaweicloud\"\n");
+        fprintf(file_p,"    }\n  }\n}\n");
+        fprintf(file_p,"provider \"huaweicloud\" {\n");
+        fprintf(file_p,"  access_key = \"%s\"\n",cloud_ak);
+        fprintf(file_p,"  secret_key = \"%s\"\n",cloud_sk);
+        fprintf(file_p,"  region = \"cn-north-4\"\n");
+        fprintf(file_p,"}\n");
+        fprintf(file_p,"data \"huaweicloud_availability_zones\" \"zones\" {}\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_E")==0){
+        fprintf(file_p,"terraform {\n");
+        fprintf(file_p,"  required_providers {\n");
+        fprintf(file_p,"    baiducloud = {\n");
+        fprintf(file_p,"      source = \"baidubce/baiducloud\"\n");
+        fprintf(file_p,"    }\n  }\n}\n");
+        fprintf(file_p,"provider \"baiducloud\" {\n");
+        fprintf(file_p,"  access_key = \"%s\"\n",cloud_ak);
+        fprintf(file_p,"  secret_key = \"%s\"\n",cloud_sk);
+        fprintf(file_p,"  region = \"bj\"\n");
+        fprintf(file_p,"}\n");
+        fprintf(file_p,"data \"baiducloud_zones\" \"default\" {}\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_F")==0){
+        fprintf(file_p,"terraform {\n");
+        fprintf(file_p,"  required_providers {\n");
+        fprintf(file_p,"    azurerm = {\n");
+        fprintf(file_p,"      source = \"hashicorp/azurerm\"\n");
+        fprintf(file_p,"    }\n");
+        fprintf(file_p,"    azuread = {\n");
+        fprintf(file_p,"      source = \"hashicorp/azuread\"\n");
+        fprintf(file_p,"    }\n  }\n}\n");
+        fprintf(file_p,"provider \"azurerm\" {\n  features {\n    resource_group {\n");
+        fprintf(file_p,"    }\n  }\n  skip_provider_registration = true\n");
+        fprintf(file_p,"  environment = \"public\"\n");
+        fprintf(file_p,"  client_id = \"%s\"\n",cloud_ak);
+        fprintf(file_p,"  client_secret = \"%s\"\n",cloud_sk);
+        fprintf(file_p,"  tenant_id = \"%s\"\n",az_tenant);
+        fprintf(file_p,"  subscription_id = \"%s\"\n}\n",az_subscription);
+        fprintf(file_p,"provider \"azuread\" {\n");
+        fprintf(file_p,"  environment = \"public\"\n");
+        fprintf(file_p,"  client_id = \"%s\"\n",cloud_ak);
+        fprintf(file_p,"  client_secret = \"%s\"\n",cloud_sk);
+        fprintf(file_p,"  tenant_id = \"%s\"\n}\n",az_tenant);
+        fprintf(file_p,"data \"azurerm_subscription\" \"current\" {}\n");
+        fprintf(file_p,"data \"azuread_users\" \"users\" {\n  return_all = true\n}\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_G")==0){
+        char gcp_project_id[128]="";
+        find_and_nget(cloud_sk,LINE_LENGTH_SHORT,"\"project_id\":","","",1,"\"project_id\":","","",'\"',4,gcp_project_id,128);
+        fprintf(file_p,"provider \"google\" {\n");
+        fprintf(file_p,"  credentials = \"%s\"\n",cloud_sk);
+        fprintf(file_p,"  project = \"%s\"\n",gcp_project_id);
+        fprintf(file_p,"  region = \"us-west1\"\n");
+        fprintf(file_p,"  zone = \"us-west1-a\"\n");
+        fprintf(file_p,"  user_project_override = true\n}\n");
+        fprintf(file_p,"data \"google_project\" \"project\" {}\n");
+    }
+    else if(strcmp(cloud_flag,"CLOUD_H")==0){
+        fprintf(file_p,"terraform {\n");
+        fprintf(file_p,"  required_providers {\n");
+        fprintf(file_p,"    volcengine = {\n");
+        fprintf(file_p,"      source = \"volcengine/volcengine\"\n");
+        fprintf(file_p,"    }\n  }\n}\n");
+        fprintf(file_p,"provider \"volcengine\" {\n");
+        fprintf(file_p,"  access_key = \"%s\"\n",cloud_ak);
+        fprintf(file_p,"  secret_key = \"%s\"\n",cloud_sk);
+        fprintf(file_p,"  region = \"cn-beijing\"\n");
+        fprintf(file_p,"}\n");
+        fprintf(file_p,"data \"volcengine_iam_users\" \"current\" {}\n");
+    }
+    else{
+        fclose(file_p);
+        rm_file_or_dir(testdir);
+        printf(FATAL_RED_BOLD "[ FATAL: ] The provided credential is invalid." RESET_DISPLAY "\n");
+        return -5;
+    }
+    fclose(file_p);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Validating the provided credentials ...\r");
+    fflush(stdout);
+    snprintf(cmdline,CMDLINE_LENGTH,"cd %s && echo yes | %s init -upgrade -lock=false %s",testdir,tf_run->tf_runner,SYSTEM_CMD_REDIRECT_NULL);
+    //snprintf(cmdline,CMDLINE_LENGTH,"cd %s && echo yes | %s init -upgrade -lock=false",testdir,tf_run->tf_runner);
+    if(system(cmdline)!=0){
+        rm_file_or_dir(testdir);
+        printf("                                                        \r");
+        fflush(stdout);
+        printf(FATAL_RED_BOLD "[ FATAL: ] Failed to init the TF provider. Please report this issue." RESET_DISPLAY "\n");
+        return -7;
+    }
+    snprintf(cmdline,CMDLINE_LENGTH,"cd %s && echo yes | %s plan -lock=false %s",testdir,tf_run->tf_runner,SYSTEM_CMD_REDIRECT_NULL);
+    //snprintf(cmdline,CMDLINE_LENGTH,"cd %s && echo yes | %s plan -lock=false",testdir,tf_run->tf_runner);
+    if(system(cmdline)!=0){
+        if(strcmp(cloud_flag,"CLOUD_C")==0){
+            global_nreplace(testfile,LINE_LENGTH_SMALL,"us-east-1","cn-northwest-1");
+        }
+        else if(strcmp(cloud_flag,"CLOUD_F")==0){
+            global_nreplace(testfile,LINE_LENGTH_SMALL,"public","china");
+        }
+        else{
+            rm_file_or_dir(testdir);
+            printf("                                                        \r");
+            fflush(stdout);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to validate the provided credential." RESET_DISPLAY "\n");
+            return -9;
+        }
+        if(system(cmdline)!=0){
+            rm_file_or_dir(testdir);
+            printf("                                                        \r");
+            fflush(stdout);
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to validate the provided credential." RESET_DISPLAY "\n");
+            return -9;
+        }
+    }
+    rm_file_or_dir(testdir);
+    printf("                                                        \r");
+    fflush(stdout);
+    printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " The provided credential has been successfully checked.\n");
+    return 0;
+}
+
 /* return 1 - running; return 0 - stopped */
 /*
 int check_volce_ecs_state(char* node_name, char* stackdir){
