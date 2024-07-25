@@ -73,8 +73,8 @@ data "google_compute_image" "centoss9" {
 }
 
 data "google_compute_image" "centos7" {
-  family  = "centos-7"
-  project = "centos-cloud"
+  family  = "hpc-centos-7"
+  project = "cloud-hpc-image-public"
 }
 
 variable "i176c352g" {
