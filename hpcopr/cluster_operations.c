@@ -616,10 +616,6 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         else{
             strncpy(gcp_key_file,cloud_sk,FILENAME_LENGTH-1);
         }
-        if(find_multi_nkeys(gcp_key_file,LINE_LENGTH_SHORT,"\"project_id\":","","","","")<1||find_multi_nkeys(gcp_key_file,LINE_LENGTH_SHORT,"\"private_key\":","","","","")<1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid." RESET_DISPLAY "\n",gcp_key_file);
-            return 3;
-        }
         if(tf_test(input_cluster_name,"CLOUD_G","",gcp_key_file,"","",tf_run,force_flag)!=0){
             return 3;
         }
@@ -647,6 +643,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             system(cmdline);
             printf(RESET_DISPLAY );
         }
+        rm_file_or_dir(filename_temp);
         add_to_cluster_registry(input_cluster_name,"");
         switch_to_cluster(input_cluster_name);
         print_new_cluster_done(0);
