@@ -539,12 +539,13 @@ remove_files:
     return 0;
 }
 
-int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* az_subscription, char* az_tenant, char* echo_flag, char* gcp_flag, int batch_flag_local){
+int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak, char* cloud_sk, char* az_subscription, char* az_tenant, char* echo_flag, char* gcp_flag, int batch_flag_local, tf_exec_config* tf_run, char* force_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char input_cluster_name[32]="";
     char filename_temp[FILENAME_LENGTH]="";
     int run_flag,name_check_flag=0;
     FILE* file_p=NULL;
+
     char new_workdir[DIR_LENGTH]="";
     char new_vaultdir[DIR_LENGTH]="";
     char access_key[AKSK_LENGTH]="";
@@ -559,10 +560,11 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
         return -3;
     }
+
     if(strcmp(gcp_flag,"gcp")==0){
         if(get_google_connectivity()!=0){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to " WARN_YELLO_BOLD "api.google.com" FATAL_RED_BOLD " during last check. Please run\n");
-            printf("[  ****  ] the command " WARN_YELLO_BOLD "hpcopr envcheck --gcp" FATAL_RED_BOLD " to re-check and retry." RESET_DISPLAY "\n");
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to GCP during the last check. Please run\n");
+            printf("[  ****  ] " RESET_DISPLAY GENERAL_BOLD "hpcopr envcheck --gcp" FATAL_RED_BOLD " to re-check." RESET_DISPLAY "\n");
             return 3;
         }
     }
@@ -618,6 +620,9 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
             printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid." RESET_DISPLAY "\n",gcp_key_file);
             return 3;
         }
+        if(tf_test(input_cluster_name,"CLOUD_G","",gcp_key_file,"","",tf_run,force_flag)!=0){
+            return 3;
+        }
         snprintf(new_workdir,DIR_LENGTH-1,"%s%sworkdir%s%s%s",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH,input_cluster_name,PATH_SLASH);
         mk_pdir(new_workdir);
         create_and_get_subdir(new_workdir,"vault",new_vaultdir,DIR_LENGTH);
@@ -648,7 +653,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         return 0;
     }
     /* For NON-GCP providers */
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%s.tmp%ssecret.temp.txt",HPC_NOW_ROOT_DIR,PATH_SLASH,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%ssecret.temp.txt",NOW_TMP_DIR,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
         return -1;
@@ -661,13 +666,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         }
         printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Please input/paste your secrets key pair:\n");
         getpass_stdin("[ INPUT: ] Access key ID : ",access_key,AKSK_LENGTH);
-        /*keypair_temp=GETPASS_FUNC("[ INPUT: ] Access key ID  : ");
-        strncpy(access_key,keypair_temp,AKSK_LENGTH-1);
-        reset_string(keypair_temp);*/
         getpass_stdin("[ INPUT: ] Access secrets: ",secret_key,AKSK_LENGTH);
-        /*keypair_temp=GETPASS_FUNC("[ INPUT: ] Access secrets : ");
-        strncpy(secret_key,keypair_temp,AKSK_LENGTH-1);
-        reset_string(keypair_temp);*/
     }
     else{
         strncpy(access_key,cloud_ak,AKSK_LENGTH-1);
@@ -680,20 +679,40 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     ak_length=strlen(access_key);
     sk_length=strlen(secret_key);
     if(ak_length==24&&sk_length==30){
+        if(tf_test(input_cluster_name,"CLOUD_A",access_key,secret_key,"","",tf_run,force_flag)!=0){
+            fclose(file_p);
+            return 3;
+        }
         fprintf(file_p,"%s\n%s\nCLOUD_A\n",access_key,secret_key);
     }
     else if(ak_length==36&&sk_length==32){
+        if(tf_test(input_cluster_name,"CLOUD_B",access_key,secret_key,"","",tf_run,force_flag)!=0){
+            fclose(file_p);
+            return 3;
+        }
         fprintf(file_p,"%s\n%s\nCLOUD_B\n",access_key,secret_key);
     }
     else if(ak_length==20&&sk_length==40){
         if(*(access_key+0)=='A'&&*(access_key+1)=='K'&&*(access_key+2)=='I'&&*(access_key+3)=='A'){
+            if(tf_test(input_cluster_name,"CLOUD_C",access_key,secret_key,"","",tf_run,force_flag)!=0){
+                fclose(file_p);
+                return 3;
+            }
             fprintf(file_p,"%s\n%s\nCLOUD_C\n",access_key,secret_key);
         }
         else{
+            if(tf_test(input_cluster_name,"CLOUD_D",access_key,secret_key,"","",tf_run,force_flag)!=0){
+                fclose(file_p);
+                return 3;
+            }
             fprintf(file_p,"%s\n%s\nCLOUD_D\n",access_key,secret_key);
         }
     }
     else if(ak_length==32&&sk_length==32){
+        if(tf_test(input_cluster_name,"CLOUD_E",access_key,secret_key,"","",tf_run,force_flag)!=0){
+            fclose(file_p);
+            return 3;
+        }
         fprintf(file_p,"%s\n%s\nCLOUD_E\n",access_key,secret_key);
     }
     else if(ak_length==36&&sk_length==40){
@@ -724,9 +743,17 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
         else{
             strncpy(az_tenant_id,az_tenant,AKSK_LENGTH-1);
         }
+        if(tf_test(input_cluster_name,"CLOUD_F",access_key,secret_key,az_subscription_id,az_tenant_id,tf_run,force_flag)!=0){
+            fclose(file_p);
+            return 3;
+        }
         fprintf(file_p,"%s\n%s\nCLOUD_F\nazure_subscription_id: %s\nazure_tenant_id: %s\n",access_key,secret_key,az_subscription_id,az_tenant_id);
     }
     else if(ak_length==47&&sk_length==60){
+        if(tf_test(input_cluster_name,"CLOUD_H",access_key,secret_key,"","",tf_run,force_flag)!=0){
+            fclose(file_p);
+            return 3;
+        }
         fprintf(file_p,"%s\n%s\nCLOUD_H\n",access_key,secret_key);
     }
     else{
@@ -752,7 +779,7 @@ int create_new_cluster(char* crypto_keyfile, char* cluster_name, char* cloud_ak,
     return 0;
 }
 
-int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile, char* echo_flag, int batch_flag_local){
+int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* crypto_keyfile, char* echo_flag, int batch_flag_local, tf_exec_config* tf_run, char* force_flag){
     char cmdline[CMDLINE_LENGTH]="";
     char filename_temp[FILENAME_LENGTH]="";
     char filename_temp2[FILENAME_LENGTH]="";
@@ -769,6 +796,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
     char cloud_flag_prev[32]="";
     char hash_key[33]="";
     FILE* file_p=NULL;
+    char cluster_name[32]="";
     
     printf(WARN_YELLO_BOLD "[ -WARN- ] C A U T I O N !\n");
     printf("[  ****  ] YOU ARE ROTATING THE CLOUD KEY, WHICH MAY DAMAGE THIS CLUSTER.\n");
@@ -788,7 +816,14 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         return 3;
     }
     create_and_get_subdir(workdir,"vault",vaultdir,DIR_LENGTH);
+    get_cluster_nname(cluster_name,32,workdir);
+
     if(strcmp(cloud_flag_prev,"CLOUD_G")==0){
+        if(get_google_connectivity()!=0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to connect to GCP during the last check. Please run\n");
+            printf("[  ****  ] " RESET_DISPLAY GENERAL_BOLD "hpcopr envcheck --gcp" FATAL_RED_BOLD " to re-check." RESET_DISPLAY "\n");
+            return 3;
+        }
         if(strlen(cloud_sk)==0){
             if(batch_flag_local==0){
                 printf(FATAL_RED_BOLD "[ FATAL: ] Key file not specified. Use --sk KEY_FILE_PATH ." RESET_DISPLAY "\n");
@@ -801,17 +836,9 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         else{
             strncpy(secret_key,cloud_sk,AKSK_LENGTH-1);
         }
-        file_p=fopen(secret_key,"r");
-        if(file_p==NULL){
-            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to open the key file %s." RESET_DISPLAY "\n",secret_key);
-            return -1;
+        if(tf_test(cluster_name,"CLOUD_G","",secret_key,"","",tf_run,force_flag)!=0){
+            return 5;
         }
-        if(find_multi_nkeys(secret_key,LINE_LENGTH_SHORT,"\"project_id\":","","","","")<1||find_multi_nkeys(secret_key,LINE_LENGTH_SHORT,"\"private_key\":","","","","")<1){
-            printf(FATAL_RED_BOLD "[ FATAL: ] The provided key file %s is invalid." RESET_DISPLAY "\n",secret_key);
-            fclose(file_p);
-            return -1;
-        }
-        fclose(file_p);
         if(get_file_sha_hash(crypto_keyfile,hash_key,33)!=0){
             printf(FATAL_RED_BOLD "[ FATAL: ] Failed to get the crypto key." RESET_DISPLAY "\n");
             return -3;
@@ -832,7 +859,7 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         printf(GENERAL_BOLD "[ -DONE- ]" RESET_DISPLAY " The new secrets key pair has been encrypted and rotated locally." RESET_DISPLAY "\n");
         return 0;
     }
-    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%ssecret.temp.txt",HPC_NOW_ROOT_DIR,PATH_SLASH);
+    snprintf(filename_temp,FILENAME_LENGTH-1,"%s%ssecret.temp.txt",NOW_TMP_DIR,PATH_SLASH);
     file_p=fopen(filename_temp,"w+");
     if(file_p==NULL){
         printf(FATAL_RED_BOLD "[ FATAL: ] Failed to create a temporary file in your system.\n");
@@ -878,6 +905,10 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("[  ****  ] Please rotate a keypair from an AliCloud account." RESET_DISPLAY "\n");
             return 3;
         }
+        if(tf_test(cluster_name,cloud_flag,access_key,secret_key,"","",tf_run,force_flag)!=0){
+            fclose(file_p);
+            return 5;
+        }
         fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
@@ -890,6 +921,10 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("[  ****  ] Current Vendor: TencentCloud (HPC-NOW code: CLOUD_B).\n");
             printf("[  ****  ] Please rotate a keypair from the a TencentCloud account." RESET_DISPLAY "\n");
             return 3;
+        }
+        if(tf_test(cluster_name,cloud_flag,access_key,secret_key,"","",tf_run,force_flag)!=0){
+            fclose(file_p);
+            return 5;
         }
         fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
         fclose(file_p);
@@ -915,6 +950,10 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             }
             return 3;
         }
+        if(tf_test(cluster_name,cloud_flag,access_key,secret_key,"","",tf_run,force_flag)!=0){
+            fclose(file_p);
+            return 5;
+        }
         fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
@@ -927,6 +966,10 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("[  ****  ] Current Vendor: BaiduCloud (HPC-NOW code: CLOUD_E).\n");
             printf("[  ****  ] Please rotate a keypair from a BaiduCloud account." RESET_DISPLAY "\n");
             return 3;
+        }
+        if(tf_test(cluster_name,cloud_flag,access_key,secret_key,"","",tf_run,force_flag)!=0){
+            fclose(file_p);
+            return 5;
         }
         fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
         fclose(file_p);
@@ -944,6 +987,10 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
         printf("|       -> Current subscription ID: %s\n",az_subscription_id);
         printf("|       -> Current tenant ID      : %s\n",az_tenant_id);
         printf("[ -INFO- ] The new key pair MUST come from the subscription and tenant above.\n");
+        if(tf_test(cluster_name,cloud_flag,access_key,secret_key,az_subscription_id,az_tenant_id,tf_run,force_flag)!=0){
+            fclose(file_p);
+            return 5;
+        }
         fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
         fclose(file_p);
     }
@@ -956,6 +1003,10 @@ int rotate_new_keypair(char* workdir, char* cloud_ak, char* cloud_sk, char* cryp
             printf("[  ****  ] Current Vendor: Volcengine (HPC-NOW code: CLOUD_H).\n");
             printf("[  ****  ] Please rotate a keypair from a Volcengine account." RESET_DISPLAY "\n");
             return 3;
+        }
+        if(tf_test(cluster_name,cloud_flag,access_key,secret_key,"","",tf_run,force_flag)!=0){
+            fclose(file_p);
+            return 5;
         }
         fprintf(file_p,"%s\n%s\n%s",access_key,secret_key,cloud_flag);
         fclose(file_p);

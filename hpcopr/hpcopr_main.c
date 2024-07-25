@@ -677,7 +677,7 @@ int main(int argc, char* argv[]){
         cmd_keyword_ncheck(argc,argv,"--az-sid",string_temp,256);
         cmd_keyword_ncheck(argc,argv,"--az-tid",string_temp2,256);
 
-        run_flag=prompt_to_confirm_args("Echo the input/imported credentials to this window (RISKY)?",CONFIRM_STRING,batch_flag,argc,argv,"--echo");
+        run_flag=prompt_to_confirm_args("Echo the input/imported credentials to this window? (RISKY)",CONFIRM_STRING,batch_flag,argc,argv,"--echo");
         if(run_flag==2||run_flag==0){
             strcpy(key_echo_flag,"echo");
         }
@@ -685,7 +685,11 @@ int main(int argc, char* argv[]){
         if(run_flag==2||run_flag==0){
             strcpy(gcp_flag,"gcp");
         }
-        run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,key_echo_flag,gcp_flag,batch_flag);
+        run_flag=prompt_to_confirm_args("Skip credential check? (NOT RECOMMENDED) (Default: Check)",CONFIRM_STRING,batch_flag,argc,argv,"--force");
+        if(run_flag==2||run_flag==0){
+            strcpy(force_flag_string,"force");
+        }
+        run_flag=create_new_cluster(crypto_keyfile,new_cluster_name,cloud_ak,cloud_sk,string_temp,string_temp2,key_echo_flag,gcp_flag,batch_flag,&tf_this_run,force_flag_string);
         if(run_flag==-1){
             write_operation_log("NULL",operation_log,argc,argv,"FILE_I/O_ERROR",127);
             check_and_cleanup(workdir);
@@ -1229,7 +1233,7 @@ int main(int argc, char* argv[]){
         }
         cmd_keyword_ncheck(argc,argv,"--ak",cloud_ak,256);
         cmd_keyword_ncheck(argc,argv,"--sk",cloud_sk,256);
-        run_flag=prompt_to_confirm_args("Echo the credentials to this window (RISKY)?",CONFIRM_STRING,batch_flag,argc,argv,"--echo");
+        run_flag=prompt_to_confirm_args("Echo the credentials to this window? (RISKY)",CONFIRM_STRING,batch_flag,argc,argv,"--echo");
         if(run_flag==2||run_flag==0){
             strcpy(key_echo_flag,"echo");
         }
@@ -1238,7 +1242,11 @@ int main(int argc, char* argv[]){
             check_and_cleanup(workdir);
             return 3;
         }
-        run_flag=rotate_new_keypair(workdir,cloud_ak,cloud_sk,crypto_keyfile,key_echo_flag,batch_flag);
+        run_flag=prompt_to_confirm_args("Skip credential check? (NOT RECOMMENDED) (Default: Check)",CONFIRM_STRING,batch_flag,argc,argv,"--force");
+        if(run_flag==2||run_flag==0){
+            strcpy(force_flag_string,"force");
+        }
+        run_flag=rotate_new_keypair(workdir,cloud_ak,cloud_sk,crypto_keyfile,key_echo_flag,batch_flag,&tf_this_run,force_flag_string);
         if(run_flag==-1){
             write_operation_log(cluster_name,operation_log,argc,argv,"FILE_I/O_ERROR",127);
             check_and_cleanup(workdir);

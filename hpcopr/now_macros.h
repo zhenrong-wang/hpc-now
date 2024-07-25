@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0143"
+#define CORE_VERSION_CODE "0.3.1.0145"
 
 #define NULL_PTR_ARG -127
 
