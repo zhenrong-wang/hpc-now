@@ -363,7 +363,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 - `wakeup`       Wake up the cluster nodes.
 - `nfsup`        Increase the cluster’s NFS shared volume (in GB, only for Huaweicloud, Google Cloud Platform, and Microsoft Azure).
 - `destroy`      **DESTROY** the whole cluster - including all the resources & data.
-- `payment`      Switch the payment method between on-demand and monthly (not applicable for AWS, Google Cloud Platform, or Microsoft Azure).
+- `payment`      Switch the payment method between on-demand and monthly (not applicable for AWS, Google Cloud Platform, Microsoft Azure, or Volcengine).
 
 ### **Cluster User Management**
 
