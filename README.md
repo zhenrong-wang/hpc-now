@@ -363,7 +363,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 - `wakeup`       Wake up the cluster nodes.
 - `nfsup`        Increase the cluster’s NFS shared volume (in GB, only for Huaweicloud, Google Cloud Platform, and Microsoft Azure).
 - `destroy`      **DESTROY** the whole cluster - including all the resources & data.
-- `payment`      Switch the payment method between on-demand and monthly (not applicable for AWS, Google Cloud Platform, or Microsoft Azure).
+- `payment`      Switch the payment method between on-demand and monthly (not applicable for AWS, Google Cloud Platform, Microsoft Azure, or Volcengine).
 
 ### **Cluster User Management**
 
@@ -384,9 +384,9 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 
 **General Flags:**     -r, -rf, --recursive, --force, -f.
 
-    -s SOURCE_PATH    Source path of the binary operations. i.e. cp
-    -d DEST_PATH      Destination path of binary operations. i.e. cp
-    -t TARGET_PATH    Target path of unary operations. i.e. ls
+    -s SOURCE_PATH    Source path of the binary operations. e.g. cp
+    -d DEST_PATH      Destination path of binary operations. e.g. cp
+    -t TARGET_PATH    Target path of unary operations. e.g. ls
 
 **Bucket Operations** 
 

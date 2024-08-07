@@ -925,9 +925,9 @@ int main(int argc, char* argv[]){
     }
 
     if(strcmp(final_command,"monman")==0){
-        prompt_to_input_optional_args("Specify node list? (Default: all)",CONFIRM_STRING_QUICK,"Specify nodes connected by :, i.e. compute1:compute2:master",string_temp,256,batch_flag,argc,argv,"-n");
-        prompt_to_input_optional_args("Specify start date & time? (Default: The first timestamp)",CONFIRM_STRING_QUICK,"Specify a strictly-formatted start timestamp. i.e. 2023-1-1@12:10",string_temp2,256,batch_flag,argc,argv,"-s");
-        prompt_to_input_optional_args("Specify end date & time? (Default: The last timestamp)",CONFIRM_STRING_QUICK,"Specify a strictly-formatted start timestamp. i.e. 2023-1-1@12:10",string_temp3,256,batch_flag,argc,argv,"-e");
+        prompt_to_input_optional_args("Specify node list? (Default: all)",CONFIRM_STRING_QUICK,"Specify nodes connected by :, e.g. compute1:compute2:master",string_temp,256,batch_flag,argc,argv,"-n");
+        prompt_to_input_optional_args("Specify start date & time? (Default: The first timestamp)",CONFIRM_STRING_QUICK,"Specify a strictly-formatted start timestamp. e.g. 2023-1-1@12:10",string_temp2,256,batch_flag,argc,argv,"-s");
+        prompt_to_input_optional_args("Specify end date & time? (Default: The last timestamp)",CONFIRM_STRING_QUICK,"Specify a strictly-formatted start timestamp. e.g. 2023-1-1@12:10",string_temp3,256,batch_flag,argc,argv,"-e");
         prompt_to_input_optional_args("Specify a time interval? (Default: 5 minutes)",CONFIRM_STRING_QUICK,"Specify a positive number.",string_temp4,8,batch_flag,argc,argv,"--level");
         prompt_to_input_optional_args("Export to a local path?",CONFIRM_STRING_QUICK,"Specify a local path (directory or file).",destination_path,FILENAME_LENGTH,batch_flag,argc,argv,"-d");
         run_flag=prompt_to_confirm_args("Read the monitor data? (Default: Print)",CONFIRM_STRING_QUICK,batch_flag,argc,argv,"--read");
