@@ -213,7 +213,7 @@ void print_help_installer(void){
     printf("|                   : Provide your own location of now-crypto, similar to\n");
     printf("|                     the --hloc parameter above.\n");
     printf("|     --hver VER  * Only valid when " GENERAL_BOLD "--hloc LOC" RESET_DISPLAY " is absent.\n");
-    printf("|                   : Specify the version code of hpcopr, i.e. 0.2.0.0161\n");
+    printf("|                   : Specify the version code of hpcopr, e.g. 0.2.0.0161\n");
     printf("|     --rdp         : Install the RDP client for GNU/Linux or macOS. Default:\n");
     printf("|                     GNU/Linux: Remmina | macOS: Microsoft RDP\n");
     printf("|     --accept      : accept the license terms to " HIGH_GREEN_BOLD "install" RESET_DISPLAY " or " HIGH_GREEN_BOLD "update" RESET_DISPLAY ".\n");

@@ -384,9 +384,9 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 
 **General Flags:**     -r, -rf, --recursive, --force, -f.
 
-    -s SOURCE_PATH    Source path of the binary operations. i.e. cp
-    -d DEST_PATH      Destination path of binary operations. i.e. cp
-    -t TARGET_PATH    Target path of unary operations. i.e. ls
+    -s SOURCE_PATH    Source path of the binary operations. e.g. cp
+    -d DEST_PATH      Destination path of binary operations. e.g. cp
+    -t TARGET_PATH    Target path of unary operations. e.g. ls
 
 **Bucket Operations** 
 
