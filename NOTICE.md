@@ -13,7 +13,7 @@ This project integrates several third-party components at *execution* level. Ple
   - **google cloud platform**: provided by Google Cloud Platform. Version: 4.84.0. License: MPL-2.0
   - **volcengine**: provided by Bytedance Volcano Engine. Version: 0.0.146. License: MPL-2.0
 - **ossutil**: provided by Alibaba Cloud. Version: 1.7.16. License: MIT
-- **coscli**: providded by Tencent Cloud. Version: 0.20.0-beta. License: Apache-2.0
+- **coscli**: provided by Tencent Cloud. Version: 0.20.0-beta. License: Apache-2.0
 - **awscli**: provided by Amazon Web Services. Version: 2.15.24. License: Apache-2.0
 - **bcecmd**: provided by Baidu Cloud. Version: 0.4.0. Not open source but free to use
 - **obsutil**: provided by Huawei Cloud. Version: 5.5.12. Not open source but free to use
