@@ -88,6 +88,8 @@ The high-level architecture of this project is:
 
 <img src="./img/arch.png" alt="architecture" style="width: 600px;"/>
 
+**NOTICE:** This project integrates several third-party components at *execution* level. Please see the [NOTICE](./NOTICE.md).
+
 # **3. How-To: Build, Install, Run, and Use**
 
 The HPC-NOW platform is very easy to build, run, and use. It is also cross-platform, which means you can run the HPC-NOW on Microsoft Windows, GNU/Linux (with APT, DNF or YUM), and macOS (Darwin). 
