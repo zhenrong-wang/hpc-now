@@ -61,6 +61,13 @@ echo -e "LogLevel QUIET" >> /etc/ssh/ssh_config
 sed -i '/ClientAliveInterval/,+0d' /etc/ssh/sshd_config
 sed -i '/ClientAliveCountMax/,+0d' /etc/ssh/sshd_config
 echo -e "ClientAliveInterval 60\nClientAliveCountMax 3" >> /etc/ssh/sshd_config
+
+sed -i 's/#   StrictHostKeyChecking ask/StrictHostKeyChecking no/g' /usr/local/etc/ssh_config
+echo -e "LogLevel QUIET" >> /usr/local/etc/ssh_config
+sed -i '/ClientAliveInterval/,+0d' /usr/local/etc/sshd_config
+sed -i '/ClientAliveCountMax/,+0d' /usr/local/etc/sshd_config
+echo -e "ClientAliveInterval 60\nClientAliveCountMax 3" >> /usr/local/etc/sshd_config
+
 systemctl restart sshd
 systemctl start atd
 systemctl enable atd
