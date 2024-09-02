@@ -36,7 +36,7 @@ if [ $1 = 'remove' ]; then
   if [ $current_user = 'root' ]; then
     sed -i '/< hdf5 >/d' $public_app_registry
   else
-    sed -e gcc-12.1.0"/< hdf5 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
+    sed -e "/< hdf5 > < ${current_user} >/d" $private_app_registry > /tmp/sed_${current_user}.tmp
     cat /tmp/sed_${current_user}.tmp > $private_app_registry
     rm -rf /tmp/sed_${current_user}.tmp
   fi
