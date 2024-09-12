@@ -381,26 +381,26 @@ if [ -f /root/hostfile ]; then
 fi
 
 # install environment-module
-cd /root
-if ! command -v module >/dev/null 2>&1; then
-  yum install tcl-devel -y
-  if [ ! -f modules-5.1.0.tar.gz ]; then
-    /bin/cp -r ${utils_path}modules-5.1.0.tar.gz .
-  fi
-  tar zvxf modules-5.1.0.tar.gz
-  cd modules-5.1.0
-  mkdir -p /etc/modulefiles
-  ./configure --prefix=/opt/environment-modules --modulefilesdir=/hpc_apps/envmod
-  make -j$num_processors && make install
-  ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.sh
-  ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.csh
-else
-  #if module is already available, add the /hpc_apps/envmod to system envvar
-  echo -e "export MODULEPATH=/hpc_apps/envmod:\$MODULEPATH" >> /etc/profile
-fi
-time_current=`date "+%Y-%m-%d %H:%M:%S"`  
-echo -e "# $time_current Environment Module has been installed." >> ${logfile}
 if [ -f /root/hostfile ]; then
+  cd /root
+  if ! command -v module >/dev/null 2>&1; then
+    yum install tcl-devel -y
+    if [ ! -f modules-5.1.0.tar.gz ]; then
+      /bin/cp -r ${utils_path}modules-5.1.0.tar.gz .
+    fi
+    tar zvxf modules-5.1.0.tar.gz
+    cd modules-5.1.0
+    mkdir -p /etc/modulefiles
+    ./configure --prefix=/opt/environment-modules --modulefilesdir=/hpc_apps/envmod
+    make -j$num_processors && make install
+    ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.sh
+    ln -s /opt/environment-modules/init/profile.sh /etc/profile.d/modules.csh
+  else
+    #if module is already available, add the /hpc_apps/envmod to system envvar
+    echo -e "export MODULEPATH=/hpc_apps/envmod:\$MODULEPATH" >> /etc/profile
+  fi
+  time_current=`date "+%Y-%m-%d %H:%M:%S"`  
+  echo -e "# $time_current Environment Module has been installed." >> ${logfile}
   grep "< envmod >" $public_app_registry
   if [ $? -ne 0 ]; then
     echo -e "< envmod >" >> $public_app_registry
