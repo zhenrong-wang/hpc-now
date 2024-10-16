@@ -4856,14 +4856,24 @@ int tf_test(char* cluster_name, char* cloud_flag, char* cloud_ak, char* cloud_sk
 int64_t delete_logs(char* cluster_name){
     int64_t file_size=0;
     if(cluster_name==NULL||strlen(cluster_name)==0){
+        printf(GENERAL_BOLD "\n[ -INFO- ]" RESET_DISPLAY " Deleting the log trashbin under %s ...\n", NOW_LOG_DIR);
         char logfile[FILENAME_LENGTH]="";
         snprintf(logfile,FILENAME_LENGTH,"%s%slog_trashbin.txt",NOW_LOG_DIR,PATH_SLASH);
         file_size=get_filesize_byte_byname(logfile);
         if(file_size<0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Log file doesn't exist, nothing to delete.\n");
             return -5;
         }
         rm_file_or_dir(logfile);
-        return (file_exist_or_not(logfile))?file_size:(-1);
+        if(file_exist_or_not(logfile)==0){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the log trashbin." RESET_DISPLAY "\n");
+            return -1;
+        }
+        else{
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removed the log trashbin under %s.\n", NOW_LOG_DIR);
+            printf("[  ****  ] %ld bytes of disk storage freed.\n", file_size);
+            return file_size;
+        }
     }
     else{
         char workdir[DIR_LENGTH]="";
@@ -4872,8 +4882,10 @@ int64_t delete_logs(char* cluster_name){
         char logfile_err[FILENAME_LENGTH]="";
         char logfile_std[FILENAME_LENGTH]="";
         if(cluster_name_check(cluster_name)!=-7){
+            printf(FATAL_RED_BOLD "\n[ FATAL: ] The specified cluster name %s is not in the registry." RESET_DISPLAY "\n",cluster_name);
             return -3; // Invalid cluster name.
         }
+        printf(GENERAL_BOLD "\n[ -INFO- ]" RESET_DISPLAY " Deleting the archived logs of %s ...\n", cluster_name);
         get_nworkdir(workdir,DIR_LENGTH,cluster_name);
         create_and_get_subdir(workdir,"log",logdir,DIR_LENGTH);
         snprintf(logfile_dbg,FILENAME_LENGTH,"%s%stf_dbg.log.archive",logdir,PATH_SLASH);
@@ -4885,6 +4897,7 @@ int64_t delete_logs(char* cluster_name){
         int64_t size_err=get_filesize_byte_byname(logfile_err);
 
         if(size_dbg<0&&size_std<0&&size_err<0){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Log files not exist, nothing to delete.\n");
             return -5;
         }
         if(size_dbg>=0){
@@ -4899,7 +4912,15 @@ int64_t delete_logs(char* cluster_name){
             file_size+=size_err;
             rm_file_or_dir(logfile_err);
         }
-        return (file_exist_or_not(logfile_dbg)&file_exist_or_not(logfile_err)&file_exist_or_not(logfile_std))?file_size:(-1);
+        if(file_exist_or_not(logfile_dbg)&file_exist_or_not(logfile_err)&file_exist_or_not(logfile_std)){
+            printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removed the archived logs (debug, standard, error) of %s.\n", cluster_name);
+            printf("[  ****  ] %ld bytes of disk storage freed.\n", file_size);
+            return file_size;
+        }
+        else{
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the log files." RESET_DISPLAY "\n");
+            return -1;
+        }
     }
 }
 

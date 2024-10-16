@@ -361,7 +361,7 @@ typedef struct{
 #define COMMAND_STRING_LENGTH_MAX 64
 #define SUBCMD_STRING_LENGTH_MAX  32
 #define CONF_LINE_NUM             11
-#define CMD_FLAG_NUM              30
+#define CMD_FLAG_NUM              31
 #define CMD_KWDS_NUM              49
 #define VERS_SHA_LINES            12
 

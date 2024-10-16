@@ -115,7 +115,8 @@ char command_flags[CMD_FLAG_NUM][16]={
     "--month",
     "--gcp",
     "--rdp",
-    "--copypass"
+    "--copypass",
+    "--trash"
 };
 
 char command_keywords[CMD_KWDS_NUM][32]={
