@@ -4871,7 +4871,7 @@ int64_t delete_logs(char* cluster_name){
         }
         else{
             printf(GENERAL_BOLD "[ -INFO- ]" RESET_DISPLAY " Removed the log trashbin under %s.\n", NOW_LOG_DIR);
-            printf("[  ****  ] %ld bytes of disk storage freed.\n", file_size);
+            printf(GENERAL_BOLD "[  ****  ] %ld bytes of disk storage freed." RESET_DISPLAY "\n", file_size);
             return file_size;
         }
     }
