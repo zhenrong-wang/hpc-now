@@ -324,6 +324,7 @@ The **`hpcopr`** is a very powerful Command Line Interface (CLI) for you to use.
 - `monman`       Get, filter, and extract cluster monitoring data.
 - `history`      View and/or export the operation log.
 - `syserr`       View and/or export the system cmd errors.
+- `del-logs`     Delete the log trashbin or archived logs of a cluster.
 - `ssh`          SSH to the master node of a cluster.
 - `rdp`          Connect to the cluster's desktop environment.
 
