@@ -8,7 +8,7 @@
 #ifndef NOW_MACROS_H
 #define NOW_MACROS_H
 
-#define CORE_VERSION_CODE "0.3.1.0145"
+#define CORE_VERSION_CODE "0.3.1.0147"
 
 #define NULL_PTR_ARG -127
 
@@ -356,7 +356,7 @@ typedef struct{
 
 #define AKSK_LENGTH               256
 #define CONF_STRING_LENTH         64
-#define COMMAND_NUM               55
+#define COMMAND_NUM               56
 #define DATAMAN_COMMAND_NUM       17
 #define COMMAND_STRING_LENGTH_MAX 64
 #define SUBCMD_STRING_LENGTH_MAX  32

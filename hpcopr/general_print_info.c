@@ -181,6 +181,9 @@ void print_help(char* cmd_name){
         printf("|   --print(Default)      ~ Print out the usage data.\n");
         printf("|    -d      DEST_PATH    ~ Export the usage data to a destination file.\n");
     }
+    if(strcmp(cmd_name,"del-logs")==0||strcmp(cmd_name,"all")==0){
+        printf("|  " HIGH_GREEN_BOLD "del-logs" RESET_DISPLAY "    :~ Delete archived logs or log trashbin.\n");
+    }
     if(strcmp(cmd_name,"ssh")==0||strcmp(cmd_name,"all")==0){
         printf("|  " HIGH_GREEN_BOLD "ssh" RESET_DISPLAY "         :~ SSH to the master node of a cluster.\n");
         printf("|   -u       USER_NAME    ~ SSH to the cluster as a valid user.\n");

@@ -172,6 +172,7 @@ int delete_file_or_dir(char* file_or_dir);
 
 /* Get the size of a given file. */
 int64_t get_filesize_byte(FILE* file_p);
+int64_t get_filesize_byte_byname(char* filename);
 
 /* Remove a given file or directory. Return 0 if successfully. */
 int rm_file_or_dir(char* file_or_dir);

@@ -4853,6 +4853,56 @@ int tf_test(char* cluster_name, char* cloud_flag, char* cloud_ak, char* cloud_sk
     return 0;
 }
 
+int64_t delete_logs(char* cluster_name){
+    int64_t file_size=0;
+    if(cluster_name==NULL||strlen(cluster_name)==0){
+        char logfile[FILENAME_LENGTH]="";
+        snprintf(logfile,FILENAME_LENGTH,"%s%slog_trashbin.txt",NOW_LOG_DIR,PATH_SLASH);
+        file_size=get_filesize_byte_byname(logfile);
+        if(file_size<0){
+            return -5;
+        }
+        rm_file_or_dir(logfile);
+        return (file_exist_or_not(logfile))?file_size:(-1);
+    }
+    else{
+        char workdir[DIR_LENGTH]="";
+        char logdir[DIR_LENGTH]="";
+        char logfile_dbg[FILENAME_LENGTH]="";
+        char logfile_err[FILENAME_LENGTH]="";
+        char logfile_std[FILENAME_LENGTH]="";
+        if(cluster_name_check(cluster_name)!=-7){
+            return -3; // Invalid cluster name.
+        }
+        get_nworkdir(workdir,DIR_LENGTH,cluster_name);
+        create_and_get_subdir(workdir,"log",logdir,DIR_LENGTH);
+        snprintf(logfile_dbg,FILENAME_LENGTH,"%s%stf_dbg.log.archive",logdir,PATH_SLASH);
+        snprintf(logfile_std,FILENAME_LENGTH,"%s%stf_prep.log.archive",logdir,PATH_SLASH);
+        snprintf(logfile_err,FILENAME_LENGTH,"%s%stf_prep.err.log.archive",logdir,PATH_SLASH);
+        
+        int64_t size_dbg=get_filesize_byte_byname(logfile_dbg);
+        int64_t size_std=get_filesize_byte_byname(logfile_std);
+        int64_t size_err=get_filesize_byte_byname(logfile_err);
+
+        if(size_dbg<0&&size_std<0&&size_err<0){
+            return -5;
+        }
+        if(size_dbg>=0){
+            file_size+=size_dbg;
+            rm_file_or_dir(logfile_dbg);
+        }
+        if(size_std>=0){
+            file_size+=size_std;
+            rm_file_or_dir(logfile_std);
+        }
+        if(size_err>=0){
+            file_size+=size_err;
+            rm_file_or_dir(logfile_err);
+        }
+        return (file_exist_or_not(logfile_dbg)&file_exist_or_not(logfile_err)&file_exist_or_not(logfile_std))?file_size:(-1);
+    }
+}
+
 /* return 1 - running; return 0 - stopped */
 /*
 int check_volce_ecs_state(char* node_name, char* stackdir){

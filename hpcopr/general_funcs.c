@@ -2089,6 +2089,16 @@ int64_t get_filesize_byte(FILE* file_p){
     return length;
 }
 
+int64_t get_filesize_byte_byname(char* filename){
+    FILE *file_p=fopen(filename,"rb");
+    if(file_p){
+        int64_t size=get_filesize_byte(file_p);
+        fclose(file_p);
+        return size;
+    }
+    return NULL_PTR_ARG;
+}
+
 /* 
  * This function is to replace the delete_file_or_dir function 
  */

@@ -188,6 +188,7 @@ int create_cluster_lock(char* workdir);
 ssize_t check_cluster_lock(char* workdir);
 
 int tf_test(char* cluster_name, char* cloud_flag, char* cloud_ak, char* cloud_sk, char* az_subscription, char* az_tenant, tf_exec_config* tf_run, char* force_flag);
+int64_t delete_logs(char* cluster_name);
 
 /*int check_volce_ecs_state(char* node_name, char* stackdir);
 int generate_volce_ecs_state(char* node_name, char* stackdir, int target_state);*/

@@ -118,6 +118,7 @@ char commands[COMMAND_NUM][COMMAND_STRING_LENGTH_MAX]={
     "usage,gen,NULL",
     "history,gen,NULL",
     "syserr,gen,NULL",
+    "del-logs,gen,NULL",
     "ssh,gen,UNAME",
     "rdp,gen,UNAME",
     "set-tf,gen,NULL",
@@ -240,6 +241,7 @@ char jobman_commands[3][SUBCMD_STRING_LENGTH_MAX]={
 47 GRAPH_NOT_UPDATED
 48 RDP_CONNECTION_FAILED
 49 CLUSTER_EMPTY
+50 FAILED_TO_DELETE_LOGS
 51 CLUSTER_NOT_EMPTY
 53 PROCESS_LOCKED
 55 NO_CONF_FILE
@@ -905,6 +907,40 @@ int main(int argc, char* argv[]){
         }
         write_operation_log("NULL",operation_log,argc,argv,"SUCCEEDED",0);
         check_and_cleanup("");
+        return 0;
+    }
+
+    if(strcmp(final_command,"del-logs")==0){
+        cmd_keyword_ncheck(argc,argv,"-c",cluster_name,32);
+        int64_t delete_flag=delete_logs(cluster_name);
+        if(delete_flag==-3){
+            printf(FATAL_RED_BOLD "[ FATAL: ] The specified cluster name %s is not in the registry." RESET_DISPLAY "\n",cluster_name);
+            write_operation_log(cluster_name,operation_log,argc,argv,"NOT_IN_THE_CLUSTER_REGISTRY",39);
+            check_and_cleanup(workdir);
+            return 39;
+        }
+        else if(delete_flag==-1){
+            printf(FATAL_RED_BOLD "[ FATAL: ] Failed to delete the log(s)." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"FAILED_TO_DELETE_LOGS",50);
+            check_and_cleanup(workdir);
+            return 50;
+        }
+        else if(delete_flag==-5){
+            printf(WARN_YELLO_BOLD "[ -WARN- ] Log file(s) not exist, there is nothing to delete." RESET_DISPLAY "\n");
+            write_operation_log(cluster_name,operation_log,argc,argv,"NO_LOGS_TO_DELETE",50);
+            check_and_cleanup(workdir);
+            return 50;
+        }
+        if(strlen(cluster_name)==0){
+            printf(GENERAL_BOLD "\n[ -INFO- ]" RESET_DISPLAY " Deleted the log trashbin under %s.\n", NOW_LOG_DIR);
+            printf("[  ****  ] %ld bytes of disk storage freed.\n", delete_flag);
+        }
+        else{
+            printf(GENERAL_BOLD "\n[ -INFO- ]" RESET_DISPLAY " Deleted the log archives of %s.\n", cluster_name);
+            printf("[  ****  ] %ld bytes of disk storage freed.\n", delete_flag);
+        }
+        write_operation_log(cluster_name,operation_log,argc,argv,"SUCCEEDED",0);
+        check_and_cleanup(workdir);
         return 0;
     }
 

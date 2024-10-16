@@ -8,7 +8,7 @@
 #ifndef INSTALLER_H
 #define INSTALLER_H
 
-#define INSTALLER_VERSION_CODE    "0.3.1.0145"
+#define INSTALLER_VERSION_CODE    "0.3.1.0147"
 #define DEFAULT_URL_HPCOPR_LATEST "https://hpc-now-1308065454.cos.accelerate.myqcloud.com/hpcopr-0.3.x/"
 #define URL_MSRDP_FOR_MAC         "https://hpc-now-1308065454.cos.accelerate.myqcloud.com/packages/rdp_for_mac.zip"
 
