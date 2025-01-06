@@ -606,6 +606,9 @@ yum -y install hostname dos2unix bash-completion
 if [ -f /root/hostfile ]; then
   yum -y install evince # The PDF viewer
   yum -y install eog # The image viewer
+  if [ $cloud_flag = 'CLOUD_H' ]; then
+    yum -y install xdg-utils  # For volcengine, this is needed.
+  fi
 fi
 
 if [ $cloud_flag = 'CLOUD_B' ]; then
